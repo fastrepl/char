@@ -29,6 +29,7 @@ fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
             commands::run_batch::<tauri::Wry>,
             commands::parse_subtitle::<tauri::Wry>,
             commands::export_to_vtt::<tauri::Wry>,
+            commands::diarize_session::<tauri::Wry>,
             commands::is_supported_languages_batch::<tauri::Wry>,
             commands::suggest_providers_for_languages_batch::<tauri::Wry>,
             commands::list_documented_language_codes_batch::<tauri::Wry>,

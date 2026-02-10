@@ -14,6 +14,7 @@ import {
 import type { EditorView } from "../../../../../../store/zustand/tabs/schema";
 import { useHasTranscript } from "../../shared";
 import { DeleteNote, DeleteRecording } from "./delete";
+import { Diarize } from "./diarize";
 import { ExportPDF } from "./export-pdf";
 import { ExportTranscript } from "./export-transcript";
 import { Listening } from "./listening";
@@ -55,6 +56,7 @@ export function OverflowButton({
         <Folder sessionId={sessionId} setOpen={setOpen} />
         <ExportPDF sessionId={sessionId} currentView={currentView} />
         {hasTranscript && <ExportTranscript sessionId={sessionId} />}
+        {audioExists.data && hasTranscript && <Diarize sessionId={sessionId} />}
         <DropdownMenuSeparator />
         <Listening sessionId={sessionId} hasTranscript={hasTranscript} />
         <DropdownMenuSeparator />

@@ -95,6 +95,74 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Listener2<'a, R, M> {
         }
     }
 
+    pub async fn diarize_session(
+        &self,
+        session_id: String,
+        max_speakers: usize,
+    ) -> Result<Vec<hypr_pyannote_local::diarize::DiarizationSegment>, crate::Error> {
+        use dasp::sample::Sample;
+        use rodio::Source;
+        use tauri_plugin_settings::SettingsPluginExt;
+
+        let base = self
+            .manager
+            .settings()
+            .cached_vault_base()
+            .map_err(|e| crate::Error::DiarizeFailed(e.to_string()))?;
+
+        let session_dir = base.join("sessions").join(&session_id);
+
+        let audio_path = if session_dir.join("audio.wav").exists() {
+            session_dir.join("audio.wav")
+        } else if session_dir.join("audio.ogg").exists() {
+            session_dir.join("audio.ogg")
+        } else {
+            return Err(crate::Error::DiarizeFailed(
+                "no audio file found".to_string(),
+            ));
+        };
+
+        let segments = tokio::task::spawn_blocking(move || {
+            let decoder = hypr_audio_utils::source_from_path(&audio_path)
+                .map_err(|e| crate::Error::DiarizeFailed(e.to_string()))?;
+
+            let channels = decoder.channels() as usize;
+            let sample_rate = decoder.sample_rate();
+            let f32_samples: Vec<f32> = decoder.collect();
+
+            let mono: Vec<f32> = if channels > 1 {
+                f32_samples
+                    .chunks_exact(channels)
+                    .map(|frame| frame.iter().sum::<f32>() / channels as f32)
+                    .collect()
+            } else {
+                f32_samples
+            };
+
+            let resampled = if sample_rate != 16000 {
+                let source = rodio::buffer::SamplesBuffer::new(1, sample_rate, mono);
+                hypr_audio_utils::resample_audio(source, 16000)
+                    .map_err(|e| crate::Error::DiarizeFailed(e.to_string()))?
+            } else {
+                mono
+            };
+
+            let i16_samples: Vec<i16> = resampled.iter().map(|s| s.to_sample()).collect();
+
+            let opts = hypr_pyannote_local::diarize::DiarizeOptions {
+                max_speakers,
+                ..Default::default()
+            };
+
+            hypr_pyannote_local::diarize::diarize(&i16_samples, 16000, Some(opts))
+                .map_err(|e| crate::Error::DiarizeFailed(e.to_string()))
+        })
+        .await
+        .map_err(|e| crate::Error::DiarizeFailed(format!("join error: {e}")))?;
+
+        segments
+    }
+
     pub fn parse_subtitle(&self, path: String) -> Result<crate::Subtitle, String> {
         use aspasia::TimedSubtitleFile;
         let sub = TimedSubtitleFile::new(&path).unwrap();

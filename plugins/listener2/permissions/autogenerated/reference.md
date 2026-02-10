@@ -7,6 +7,7 @@ Default permissions for the plugin
 - `allow-run-batch`
 - `allow-parse-subtitle`
 - `allow-export-to-vtt`
+- `allow-diarize-session`
 - `allow-is-supported-languages-batch`
 - `allow-suggest-providers-for-languages-batch`
 - `allow-list-documented-language-codes-batch`
@@ -19,6 +20,32 @@ Default permissions for the plugin
 <th>Description</th>
 </tr>
 
+
+<tr>
+<td>
+
+`listener2:allow-diarize-session`
+
+</td>
+<td>
+
+Enables the diarize_session command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`listener2:deny-diarize-session`
+
+</td>
+<td>
+
+Denies the diarize_session command without any pre-configured scope.
+
+</td>
+</tr>
 
 <tr>
 <td>
