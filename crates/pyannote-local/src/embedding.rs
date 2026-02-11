@@ -47,7 +47,6 @@ impl EmbeddingExtractor {
         let embeddings = ort_out.iter().copied().collect::<Vec<_>>();
         Ok(embeddings)
     }
-
 }
 
 #[cfg(test)]
