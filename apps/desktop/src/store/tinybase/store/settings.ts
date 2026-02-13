@@ -73,6 +73,10 @@ export const SETTINGS_MAPPING = {
       type: "string",
       path: ["general", "week_start"],
     },
+    app_icon: {
+      type: "string",
+      path: ["general", "app_icon"],
+    },
   },
   tables: {
     ai_providers: {

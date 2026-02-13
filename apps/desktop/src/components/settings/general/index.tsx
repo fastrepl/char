@@ -10,6 +10,7 @@ import { useConfigValues } from "../../../config/use-config";
 import * as settings from "../../../store/tinybase/store/settings";
 import { Data } from "../data";
 import { AccountSettings } from "./account";
+import { AppIconSettings } from "./app-icon";
 import { AppSettingsView } from "./app-settings";
 import { Audio } from "./audio";
 import { MainLanguageView } from "./main-language";
@@ -29,6 +30,7 @@ function useSettingsForm() {
     "ai_language",
     "spoken_languages",
     "current_stt_provider",
+    "app_icon",
   ] as const);
 
   const setPartialValues = settings.UI.useSetPartialValuesCallback(
@@ -60,6 +62,7 @@ function useSettingsForm() {
       telemetry_consent: value.telemetry_consent,
       ai_language: value.ai_language,
       spoken_languages: value.spoken_languages,
+      app_icon: value.app_icon,
     },
     listeners: {
       onChange: ({ formApi }) => {
@@ -210,6 +213,15 @@ export function SettingsApp() {
           </form.Field>
         </div>
       </div>
+
+      <form.Field name="app_icon">
+        {(field) => (
+          <AppIconSettings
+            value={field.state.value}
+            onChange={(val) => field.handleChange(val)}
+          />
+        )}
+      </form.Field>
 
       <StorageSettingsView />
 
