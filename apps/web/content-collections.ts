@@ -148,8 +148,8 @@ const articles = defineCollection({
   exclude: "AGENTS.md",
   schema: z.object({
     display_title: z.string().optional(),
-    meta_title: z.string().optional(),
-    meta_description: z.string().optional(),
+    meta_title: z.string().default(""),
+    meta_description: z.string().default(""),
     author: z.union([z.string(), z.array(z.string())]),
     date: z.string(),
     coverImage: z.string().optional(),
