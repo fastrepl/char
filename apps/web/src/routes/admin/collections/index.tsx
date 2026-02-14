@@ -42,8 +42,6 @@ import React, {
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-import BlogEditor from "@hypr/tiptap/blog-editor";
-import "@hypr/tiptap/styles.css";
 import {
   Dialog,
   DialogContent,
@@ -63,6 +61,7 @@ import { Spinner } from "@hypr/ui/components/ui/spinner";
 import { sonnerToast } from "@hypr/ui/components/ui/toast";
 import { cn } from "@hypr/utils";
 
+import BlogEditor from "@/components/admin/blog-editor";
 import { MediaSelectorModal } from "@/components/admin/media-selector-modal";
 import { defaultMDXComponents } from "@/components/mdx";
 import { fetchGitHubCredentials } from "@/functions/admin";

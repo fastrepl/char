@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./blog-editor": "./src/blog-editor/index.tsx",
     "./chat": "./src/chat/index.tsx",
     "./editor": "./src/editor/index.tsx",
     "./prompt": "./src/prompt/index.tsx",
