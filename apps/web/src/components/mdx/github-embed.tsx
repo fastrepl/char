@@ -29,7 +29,7 @@ export function GithubEmbed({
   const highlightedLines = useMemo(() => {
     if (!highlightedHtml) return null;
     const lineMatches = [
-      ...highlightedHtml.matchAll(/<span class="line">(.*?)<\/span>/g),
+      ...highlightedHtml.matchAll(/<span class="line">(.*)<\/span>/g),
     ];
     return lineMatches.map((m) => m[1]);
   }, [highlightedHtml]);
@@ -39,6 +39,22 @@ export function GithubEmbed({
   if (lines[lines.length - 1] === "") {
     lines.pop();
   }
+
+  const indentSize = useMemo(() => {
+    for (const line of lines) {
+      const match = line.match(/^( +)\S/);
+      if (match) return match[1].length <= 4 ? match[1].length : 4;
+    }
+    return 4;
+  }, [lines]);
+
+  const indentLevels = useMemo(() => {
+    return lines.map((line) => {
+      const match = line.match(/^( *)/);
+      const spaces = match ? match[1].length : 0;
+      return Math.floor(spaces / indentSize);
+    });
+  }, [lines, indentSize]);
 
   const rawUrl = url
     ?.replace("github.com", "raw.githubusercontent.com")
@@ -118,22 +134,29 @@ export function GithubEmbed({
           <table className="w-full border-collapse my-0!">
             <tbody>
               {lines.map((line, index) => (
-                <tr key={index} className="leading-5 hover:bg-stone-100/50">
+                <tr key={index} className="leading-5">
                   <td className="select-none text-right pr-4 pl-4 py-0.5 text-stone-400 text-sm font-mono bg-stone-50 w-[1%] whitespace-nowrap border-r border-neutral-200">
                     {startLine + index}
                   </td>
-                  {highlightedLines?.[index] != null ? (
-                    <td
-                      className="pl-4 pr-4 py-0.5 text-sm font-mono whitespace-pre"
-                      dangerouslySetInnerHTML={{
-                        __html: highlightedLines[index] || " ",
-                      }}
-                    />
-                  ) : (
-                    <td className="pl-4 pr-4 py-0.5 text-sm font-mono text-stone-700 whitespace-pre">
-                      {line || " "}
-                    </td>
-                  )}
+                  <td className="pr-4 py-0.5 text-sm font-mono whitespace-pre relative">
+                    {Array.from({ length: indentLevels[index] }, (_, i) => (
+                      <span
+                        key={i}
+                        className="absolute top-0 bottom-0 border-l border-neutral-200"
+                        style={{ left: `${i * indentSize * 0.55 + 1}em` }}
+                      />
+                    ))}
+                    {highlightedLines?.[index] != null ? (
+                      <span
+                        className="pl-4"
+                        dangerouslySetInnerHTML={{
+                          __html: highlightedLines[index] || " ",
+                        }}
+                      />
+                    ) : (
+                      <span className="pl-4 text-stone-700">{line || " "}</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
