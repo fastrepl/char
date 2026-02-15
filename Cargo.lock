@@ -20575,6 +20575,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "transcribe-apple"
+version = "0.1.0"
+dependencies = [
+ "audio-utils",
+ "axum 0.8.8",
+ "futures-util",
+ "owhisper-interface",
+ "serde",
+ "serde_json",
+ "serde_qs",
+ "swift-rs 1.0.7 (git+https://github.com/yujonglee/swift-rs?rev=41a1605)",
+ "thiserror 2.0.18",
+ "tokio",
+ "tower 0.5.3",
+ "tracing",
+ "vad-ext",
+ "ws-utils",
+]
+
+[[package]]
 name = "transcribe-aws"
 version = "0.1.0"
 dependencies = [

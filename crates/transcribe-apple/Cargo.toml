@@ -1,0 +1,27 @@
+[package]
+name = "transcribe-apple"
+version = "0.1.0"
+edition = "2024"
+
+[target.'cfg(target_os = "macos")'.build-dependencies]
+swift-rs = { workspace = true, features = ["build"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+swift-rs = { workspace = true }
+
+[dependencies]
+owhisper-interface = { workspace = true }
+hypr-audio-utils = { workspace = true }
+hypr-vad-ext = { workspace = true }
+hypr-ws-utils = { workspace = true }
+
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+serde_qs = { workspace = true }
+thiserror = { workspace = true }
+
+axum = { workspace = true, features = ["ws"] }
+futures-util = { workspace = true }
+tokio = { workspace = true, features = ["rt", "macros", "time"] }
+tower = { workspace = true }
+tracing = { workspace = true }
