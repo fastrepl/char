@@ -3,9 +3,10 @@ use std::ffi::OsString;
 use std::os::windows::ffi::OsStringExt;
 use windows::Win32::Devices::FunctionDiscovery::PKEY_Device_FriendlyName;
 use windows::Win32::Media::Audio::{
-    DEVICE_STATE_ACTIVE, Endpoints, IAudioEndpointVolume, IMMDevice, IMMDeviceEnumerator,
+    DEVICE_STATE_ACTIVE, IMMDevice, IMMDeviceEnumerator,
     MMDeviceEnumerator, eAll, eCapture, eConsole, eRender,
 };
+use windows::Win32::Media::Audio::Endpoints::IAudioEndpointVolume;
 use windows::Win32::System::Com::{
     CLSCTX_ALL, COINIT_MULTITHREADED, CoCreateInstance, CoInitializeEx, CoUninitialize, STGM_READ,
 };
@@ -254,7 +255,7 @@ impl AudioDeviceBackend for WindowsBackend {
                             audio_device.volume = Some(volume);
                         }
                         if let Ok(muted) = volume_control.GetMute() {
-                            audio_device.is_muted = Some(muted.as_bool());
+                            audio_device.is_muted = Some(muted);
                         }
                     }
                 }
@@ -329,7 +330,7 @@ impl AudioDeviceBackend for WindowsBackend {
                     audio_device.volume = Some(volume);
                 }
                 if let Ok(muted) = volume_control.GetMute() {
-                    audio_device.is_muted = Some(muted.as_bool());
+                    audio_device.is_muted = Some(muted);
                 }
             }
 
@@ -469,7 +470,7 @@ impl AudioDeviceBackend for WindowsBackend {
                 .GetMute()
                 .map_err(|e| Error::AudioSystemError(format!("Failed to get mute state: {}", e)))?;
 
-            Ok(muted.as_bool())
+            Ok(muted)
         }
     }
 
@@ -498,7 +499,7 @@ impl AudioDeviceBackend for WindowsBackend {
                 })?;
 
             volume_control
-                .SetMute(muted.into(), std::ptr::null())
+                .SetMute(muted, std::ptr::null())
                 .map_err(|e| Error::AudioSystemError(format!("Failed to set mute state: {}", e)))?;
 
             Ok(())
