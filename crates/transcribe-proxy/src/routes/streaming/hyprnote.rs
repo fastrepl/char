@@ -9,7 +9,7 @@ use owhisper_interface::ListenParams;
 
 use crate::config::SttProxyConfig;
 use crate::provider_selector::SelectedProvider;
-use crate::query_params::{QueryParams, QueryValue};
+use crate::query_params::QueryParams;
 use crate::relay::WebSocketProxy;
 use crate::routes::AppState;
 
@@ -18,26 +18,12 @@ use super::common::{ProxyBuildError, build_proxy_with_url, finalize_proxy_builde
 use super::session::init_session;
 
 fn build_listen_params(params: &QueryParams) -> ListenParams {
-    let model = params.get_first("model").map(|s| s.to_string());
-    let languages = params.get_languages();
-    let sample_rate: u32 = parse_param(params, "sample_rate", 16000);
-    let channels: u8 = parse_param(params, "channels", 1);
-
-    let keywords: Vec<String> = params
-        .get("keyword")
-        .or_else(|| params.get("keywords"))
-        .map(|v| match v {
-            QueryValue::Single(s) => s.split(',').map(|k| k.trim().to_string()).collect(),
-            QueryValue::Multi(vec) => vec.iter().map(|k| k.trim().to_string()).collect(),
-        })
-        .unwrap_or_default();
-
     ListenParams {
-        model,
-        languages,
-        sample_rate,
-        channels,
-        keywords,
+        model: params.get_first("model").map(|s| s.to_string()),
+        languages: params.get_languages(),
+        sample_rate: parse_param(params, "sample_rate", 16000),
+        channels: parse_param(params, "channels", 1),
+        keywords: params.parse_keywords(),
         ..Default::default()
     }
 }

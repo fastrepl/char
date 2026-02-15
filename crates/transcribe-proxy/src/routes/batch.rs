@@ -19,7 +19,7 @@ use owhisper_interface::batch::Response as BatchResponse;
 
 use crate::hyprnote_routing::{RetryConfig, is_retryable_error, should_use_hyprnote_routing};
 use crate::provider_selector::SelectedProvider;
-use crate::query_params::{QueryParams, QueryValue};
+use crate::query_params::QueryParams;
 
 use super::AppState;
 
@@ -204,22 +204,10 @@ async fn transcribe_with_retry(
 }
 
 fn build_listen_params(params: &QueryParams) -> ListenParams {
-    let model = params.get_first("model").map(|s| s.to_string());
-    let languages = params.get_languages();
-
-    let keywords: Vec<String> = params
-        .get("keyword")
-        .or_else(|| params.get("keywords"))
-        .map(|v| match v {
-            QueryValue::Single(s) => s.split(',').map(|k| k.trim().to_string()).collect(),
-            QueryValue::Multi(vec) => vec.iter().map(|k| k.trim().to_string()).collect(),
-        })
-        .unwrap_or_default();
-
     ListenParams {
-        model,
-        languages,
-        keywords,
+        model: params.get_first("model").map(|s| s.to_string()),
+        languages: params.get_languages(),
+        keywords: params.parse_keywords(),
         ..Default::default()
     }
 }

@@ -8,7 +8,7 @@ use serde::Deserialize;
 use hypr_supabase_storage::SupabaseStorage;
 
 use super::{AppState, RouteError, parse_async_provider};
-use crate::supabase::SupabaseClient;
+use crate::supabase::{PipelineStatus, SupabaseClient};
 
 #[derive(Deserialize)]
 pub(crate) struct CallbackQuery {
@@ -69,12 +69,12 @@ pub async fn handler(
 
     let update = match &outcome {
         CallbackResult::Done(raw_result) => serde_json::json!({
-            "status": "done",
+            "status": PipelineStatus::Done,
             "raw_result": raw_result,
             "updated_at": chrono::Utc::now().to_rfc3339(),
         }),
         CallbackResult::ProviderError(message) => serde_json::json!({
-            "status": "error",
+            "status": PipelineStatus::Error,
             "error": message,
             "updated_at": chrono::Utc::now().to_rfc3339(),
         }),
