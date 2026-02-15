@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use hypr_supabase_storage::SupabaseStorage;
 
 use super::{AppState, RouteError, parse_async_provider};
-use crate::supabase::{SupabaseClient, TranscriptionJob};
+use crate::supabase::{PipelineStatus, SupabaseClient, TranscriptionJob};
 
 #[derive(Deserialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
@@ -110,7 +110,7 @@ pub async fn handler(
         user_id,
         file_id: body.file_id,
         provider: provider_str.to_string(),
-        status: "processing".to_string(),
+        status: PipelineStatus::Processing,
         provider_request_id: Some(provider_request_id),
         raw_result: None,
         error: None,

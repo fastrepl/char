@@ -2,12 +2,12 @@ use axum::{Json, extract::Path};
 use serde::Serialize;
 
 use super::RouteError;
-use crate::supabase::SupabaseClient;
+use crate::supabase::{PipelineStatus, SupabaseClient};
 
 #[derive(Debug, Clone, Serialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct SttStatusResponse {
-    pub status: String,
+    pub status: PipelineStatus,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]

@@ -2,13 +2,21 @@ use serde::{Deserialize, Serialize};
 
 type BoxError = Box<dyn std::error::Error + Send + Sync>;
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, utoipa::ToSchema)]
+#[serde(rename_all = "lowercase")]
+pub enum PipelineStatus {
+    Processing,
+    Done,
+    Error,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TranscriptionJob {
     pub id: String,
     pub user_id: String,
     pub file_id: String,
     pub provider: String,
-    pub status: String,
+    pub status: PipelineStatus,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider_request_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
