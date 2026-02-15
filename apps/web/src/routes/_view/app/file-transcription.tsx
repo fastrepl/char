@@ -162,6 +162,9 @@ function Component() {
     if (uppyStatus === "uploading") {
       return "uploading" as const;
     }
+    if (uppyStatus === "error") {
+      return "error" as const;
+    }
     if (uppyStatus === "done" && uppyFileId) {
       return "uploaded" as const;
     }
