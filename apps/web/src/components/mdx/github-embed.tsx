@@ -183,8 +183,8 @@ export function GithubEmbed({
                 const isCollapsed = collapsedLines.has(index);
 
                 return (
-                  <tr key={index} className="leading-5">
-                    <td className="select-none pr-2 pl-2 py-0.5 text-stone-400 text-sm font-mono bg-stone-50 w-[1%] whitespace-nowrap border-r border-neutral-200">
+                  <tr key={index} className="leading-5 border-0">
+                    <td className="select-none pr-2 pl-2 py-0.5 text-stone-400 text-sm font-mono bg-stone-50 w-[1%] whitespace-nowrap border-r border-neutral-200 border-y-0">
                       <div className="flex items-center justify-end">
                         <span className="w-4 flex items-center justify-center shrink-0 text-xs">
                           {isFoldable && (
@@ -200,7 +200,7 @@ export function GithubEmbed({
                         <span className="text-right">{startLine + index}</span>
                       </div>
                     </td>
-                    <td className="pr-4 py-0.5 text-sm font-mono whitespace-pre relative">
+                    <td className="pr-4 py-0.5 text-sm font-mono whitespace-pre relative border-0">
                       {Array.from({ length: indentLevels[index] }, (_, i) => (
                         <span
                           key={i}
