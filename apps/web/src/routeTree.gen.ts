@@ -129,7 +129,6 @@ import { Route as ApiAdminMediaMoveRouteImport } from './routes/api/admin/media/
 import { Route as ApiAdminMediaListRouteImport } from './routes/api/admin/media/list'
 import { Route as ApiAdminMediaDeleteRouteImport } from './routes/api/admin/media/delete'
 import { Route as ApiAdminMediaCreateFolderRouteImport } from './routes/api/admin/media/create-folder'
-import { Route as ApiAdminImportSaveRouteImport } from './routes/api/admin/import/save'
 import { Route as ApiAdminImportGoogleDocsRouteImport } from './routes/api/admin/import/google-docs'
 import { Route as ApiAdminContentSaveRouteImport } from './routes/api/admin/content/save'
 import { Route as ApiAdminContentRenameRouteImport } from './routes/api/admin/content/rename'
@@ -757,11 +756,6 @@ const ApiAdminMediaCreateFolderRoute =
     path: '/api/admin/media/create-folder',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiAdminImportSaveRoute = ApiAdminImportSaveRouteImport.update({
-  id: '/api/admin/import/save',
-  path: '/api/admin/import/save',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiAdminImportGoogleDocsRoute =
   ApiAdminImportGoogleDocsRouteImport.update({
     id: '/api/admin/import/google-docs',
@@ -971,7 +965,6 @@ export interface FileRoutesByFullPath {
   '/api/admin/content/rename': typeof ApiAdminContentRenameRoute
   '/api/admin/content/save': typeof ApiAdminContentSaveRoute
   '/api/admin/import/google-docs': typeof ApiAdminImportGoogleDocsRoute
-  '/api/admin/import/save': typeof ApiAdminImportSaveRoute
   '/api/admin/media/create-folder': typeof ApiAdminMediaCreateFolderRoute
   '/api/admin/media/delete': typeof ApiAdminMediaDeleteRoute
   '/api/admin/media/list': typeof ApiAdminMediaListRoute
@@ -1104,7 +1097,6 @@ export interface FileRoutesByTo {
   '/api/admin/content/rename': typeof ApiAdminContentRenameRoute
   '/api/admin/content/save': typeof ApiAdminContentSaveRoute
   '/api/admin/import/google-docs': typeof ApiAdminImportGoogleDocsRoute
-  '/api/admin/import/save': typeof ApiAdminImportSaveRoute
   '/api/admin/media/create-folder': typeof ApiAdminMediaCreateFolderRoute
   '/api/admin/media/delete': typeof ApiAdminMediaDeleteRoute
   '/api/admin/media/list': typeof ApiAdminMediaListRoute
@@ -1243,7 +1235,6 @@ export interface FileRoutesById {
   '/api/admin/content/rename': typeof ApiAdminContentRenameRoute
   '/api/admin/content/save': typeof ApiAdminContentSaveRoute
   '/api/admin/import/google-docs': typeof ApiAdminImportGoogleDocsRoute
-  '/api/admin/import/save': typeof ApiAdminImportSaveRoute
   '/api/admin/media/create-folder': typeof ApiAdminMediaCreateFolderRoute
   '/api/admin/media/delete': typeof ApiAdminMediaDeleteRoute
   '/api/admin/media/list': typeof ApiAdminMediaListRoute
@@ -1382,7 +1373,6 @@ export interface FileRouteTypes {
     | '/api/admin/content/rename'
     | '/api/admin/content/save'
     | '/api/admin/import/google-docs'
-    | '/api/admin/import/save'
     | '/api/admin/media/create-folder'
     | '/api/admin/media/delete'
     | '/api/admin/media/list'
@@ -1515,7 +1505,6 @@ export interface FileRouteTypes {
     | '/api/admin/content/rename'
     | '/api/admin/content/save'
     | '/api/admin/import/google-docs'
-    | '/api/admin/import/save'
     | '/api/admin/media/create-folder'
     | '/api/admin/media/delete'
     | '/api/admin/media/list'
@@ -1653,7 +1642,6 @@ export interface FileRouteTypes {
     | '/api/admin/content/rename'
     | '/api/admin/content/save'
     | '/api/admin/import/google-docs'
-    | '/api/admin/import/save'
     | '/api/admin/media/create-folder'
     | '/api/admin/media/delete'
     | '/api/admin/media/list'
@@ -1701,7 +1689,6 @@ export interface RootRouteChildren {
   ApiAdminContentRenameRoute: typeof ApiAdminContentRenameRoute
   ApiAdminContentSaveRoute: typeof ApiAdminContentSaveRoute
   ApiAdminImportGoogleDocsRoute: typeof ApiAdminImportGoogleDocsRoute
-  ApiAdminImportSaveRoute: typeof ApiAdminImportSaveRoute
   ApiAdminMediaCreateFolderRoute: typeof ApiAdminMediaCreateFolderRoute
   ApiAdminMediaDeleteRoute: typeof ApiAdminMediaDeleteRoute
   ApiAdminMediaListRoute: typeof ApiAdminMediaListRoute
@@ -2554,13 +2541,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminMediaCreateFolderRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/admin/import/save': {
-      id: '/api/admin/import/save'
-      path: '/api/admin/import/save'
-      fullPath: '/api/admin/import/save'
-      preLoaderRoute: typeof ApiAdminImportSaveRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/admin/import/google-docs': {
       id: '/api/admin/import/google-docs'
       path: '/api/admin/import/google-docs'
@@ -2940,7 +2920,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminContentRenameRoute: ApiAdminContentRenameRoute,
   ApiAdminContentSaveRoute: ApiAdminContentSaveRoute,
   ApiAdminImportGoogleDocsRoute: ApiAdminImportGoogleDocsRoute,
-  ApiAdminImportSaveRoute: ApiAdminImportSaveRoute,
   ApiAdminMediaCreateFolderRoute: ApiAdminMediaCreateFolderRoute,
   ApiAdminMediaDeleteRoute: ApiAdminMediaDeleteRoute,
   ApiAdminMediaListRoute: ApiAdminMediaListRoute,
