@@ -70,13 +70,15 @@ pub async fn start_server_with_upstream_url(provider: Provider, upstream_url: &s
 pub fn env_with_provider(provider: Provider, api_key: String) -> transcribe_proxy::Env {
     let mut env = transcribe_proxy::Env::default();
     match provider {
-        Provider::Deepgram => env.deepgram_api_key = Some(api_key),
-        Provider::AssemblyAI => env.assemblyai_api_key = Some(api_key),
-        Provider::Soniox => env.soniox_api_key = Some(api_key),
-        Provider::Fireworks => env.fireworks_api_key = Some(api_key),
-        Provider::OpenAI => env.openai_api_key = Some(api_key),
-        Provider::Gladia => env.gladia_api_key = Some(api_key),
-        Provider::ElevenLabs => env.elevenlabs_api_key = Some(api_key),
+        Provider::Deepgram => env.stt.deepgram_api_key = Some(api_key),
+        Provider::AssemblyAI => env.stt.assemblyai_api_key = Some(api_key),
+        Provider::Soniox => env.stt.soniox_api_key = Some(api_key),
+        Provider::Fireworks => env.stt.fireworks_api_key = Some(api_key),
+        Provider::OpenAI => env.stt.openai_api_key = Some(api_key),
+        Provider::Gladia => env.stt.gladia_api_key = Some(api_key),
+        Provider::ElevenLabs => env.stt.elevenlabs_api_key = Some(api_key),
+        Provider::DashScope => env.stt.dashscope_api_key = Some(api_key),
+        Provider::Mistral => env.stt.mistral_api_key = Some(api_key),
     }
     env
 }

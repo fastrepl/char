@@ -6,22 +6,34 @@ use restate_sdk::serde::Json;
 use serde::{Deserialize, Serialize};
 
 use crate::config::Config;
+use crate::deepgram;
 use crate::soniox;
 use crate::supabase;
-use hypr_restate_rate_limit::{AllowRequest, RateLimiterClient};
-pub use hypr_restate_stt_types::{PipelineStatus, SttStatusResponse, TranscriptToken};
+pub use hypr_restate_stt_types::{PipelineStatus, SttStatusResponse};
+
+fn default_provider() -> String {
+    "soniox".to_string()
+}
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct SttFileInput {
     pub user_id: String,
     pub file_id: String,
+    #[serde(default = "default_provider")]
+    pub provider: String,
+    #[serde(default)]
+    pub provider_options: Option<serde_json::Value>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct SttFileOutput {
     pub status: PipelineStatus,
-    pub transcript: String,
+    pub provider: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub provider_request_id: Option<String>,
+    pub raw_result: serde_json::Value,
 }
 
 #[restate_sdk::workflow]
@@ -62,17 +74,17 @@ impl SttFileImpl {
             return Err(TerminalError::new("user_id cannot be empty").into());
         }
 
+        let provider = input.provider.as_str();
+        match provider {
+            "soniox" | "deepgram" => {}
+            other => {
+                return Err(TerminalError::new(format!("unsupported provider: {other}")).into());
+            }
+        }
+
         ctx.set("status", Json(PipelineStatus::Queued));
         ctx.set("fileId", Json(input.file_id.clone()));
-
-        ctx.object_client::<RateLimiterClient>(&input.user_id)
-            .allow(Json(AllowRequest {
-                n: 1,
-                limit: 5.0 / 60.0,
-                burst: 5,
-            }))
-            .call()
-            .await?;
+        ctx.set("provider", Json(input.provider.clone()));
 
         ctx.set("status", Json(PipelineStatus::Transcribing));
 
@@ -95,23 +107,46 @@ impl SttFileImpl {
         let encoded_key = urlencoding::encode(key);
         let callback_url = format!("{ingress_url}/SttFile/{encoded_key}/onTranscript");
 
-        let soniox_retry_policy = RunRetryPolicy::default()
+        let retry_policy = RunRetryPolicy::default()
             .initial_delay(Duration::from_millis(500))
             .exponentiation_factor(2.0)
             .max_delay(Duration::from_secs(30))
             .max_attempts(5);
 
+        match provider {
+            "soniox" => {
+                self.run_soniox(ctx, &audio_url, &callback_url, input, &retry_policy)
+                    .await
+            }
+            "deepgram" => {
+                self.run_deepgram(ctx, &audio_url, &callback_url, input, &retry_policy)
+                    .await
+            }
+            _ => unreachable!(),
+        }
+    }
+
+    async fn run_soniox(
+        &self,
+        ctx: &WorkflowContext<'_>,
+        audio_url: &str,
+        callback_url: &str,
+        input: &SttFileInput,
+        retry_policy: &RunRetryPolicy,
+    ) -> Result<SttFileOutput, HandlerError> {
         let client = self.client.clone();
         let api_key = self.config.soniox_api_key.clone();
-        let audio_url_clone = audio_url.clone();
-        let callback_url_clone = callback_url.clone();
+        let audio_url = audio_url.to_string();
+        let callback_url = callback_url.to_string();
+        let options = input.provider_options.clone();
         let request_id: String = ctx
             .run(|| async move {
                 match soniox::transcribe_with_callback(
                     &client,
-                    &audio_url_clone,
-                    &callback_url_clone,
+                    &audio_url,
+                    &callback_url,
                     &api_key,
+                    options.as_ref(),
                 )
                 .await
                 {
@@ -121,7 +156,7 @@ impl SttFileImpl {
                 }
             })
             .name("submit-soniox-transcription")
-            .retry_policy(soniox_retry_policy.clone())
+            .retry_policy(retry_policy.clone())
             .await?;
 
         ctx.set("providerRequestId", Json(request_id));
@@ -139,31 +174,100 @@ impl SttFileImpl {
 
         let client = self.client.clone();
         let api_key = self.config.soniox_api_key.clone();
-        let result: Json<soniox::TranscriptResult> = ctx
+        let raw: Json<serde_json::Value> = ctx
             .run(|| async move {
-                soniox::fetch_transcript(&client, &transcription_id, &api_key)
+                soniox::fetch_transcript_raw(&client, &transcription_id, &api_key)
                     .await
                     .map(Json)
-                    .map_err(|e| {
-                        if e.is_retryable {
-                            e.into()
-                        } else {
-                            TerminalError::new(e.message).into()
-                        }
-                    })
+                    .map_err(|e| TerminalError::new(e.message).into())
             })
             .name("fetch-soniox-transcript")
-            .retry_policy(soniox_retry_policy)
+            .retry_policy(retry_policy.clone())
             .await?;
-        let result = result.into_inner();
+        let raw = raw.into_inner();
 
-        ctx.set("transcript", Json(result.text.clone()));
-        ctx.set("tokens", Json(result.tokens));
+        ctx.set("rawResult", Json(raw.clone()));
         ctx.set("status", Json(PipelineStatus::Done));
+
+        let provider_request_id = ctx
+            .get::<Json<String>>("providerRequestId")
+            .await?
+            .map(|j| j.into_inner());
 
         Ok(SttFileOutput {
             status: PipelineStatus::Done,
-            transcript: result.text,
+            provider: "soniox".to_string(),
+            provider_request_id,
+            raw_result: raw,
+        })
+    }
+
+    async fn run_deepgram(
+        &self,
+        ctx: &WorkflowContext<'_>,
+        audio_url: &str,
+        callback_url: &str,
+        input: &SttFileInput,
+        retry_policy: &RunRetryPolicy,
+    ) -> Result<SttFileOutput, HandlerError> {
+        let api_key = self
+            .config
+            .deepgram_api_key
+            .as_deref()
+            .ok_or_else(|| TerminalError::new("deepgram_api_key not configured"))?
+            .to_string();
+
+        let client = self.client.clone();
+        let audio_url = audio_url.to_string();
+        let callback_url = callback_url.to_string();
+        let options = input.provider_options.clone();
+        let request_id: String = ctx
+            .run(|| async move {
+                match deepgram::transcribe_with_callback(
+                    &client,
+                    &audio_url,
+                    &callback_url,
+                    &api_key,
+                    options.as_ref(),
+                )
+                .await
+                {
+                    Ok(id) => Ok(id),
+                    Err(e) if !e.is_retryable => Err(TerminalError::new(e.message).into()),
+                    Err(e) => Err(e.into()),
+                }
+            })
+            .name("submit-deepgram-transcription")
+            .retry_policy(retry_policy.clone())
+            .await?;
+
+        ctx.set("providerRequestId", Json(request_id));
+
+        // Deepgram posts full transcript payload to callback; no fetch step needed
+        let callback_timeout = ctx.sleep(Duration::from_secs(600));
+        let promise = ctx.promise::<Json<serde_json::Value>>("callback_result");
+
+        let raw: serde_json::Value = tokio::select! {
+            result = promise => result?.into_inner(),
+            result = callback_timeout => {
+                result?;
+                return Err(TerminalError::new("Timed out waiting for Deepgram callback").into());
+            }
+        };
+
+        ctx.set("rawResult", Json(raw.clone()));
+        ctx.set("status", Json(PipelineStatus::Done));
+
+        let provider_request_id = ctx
+            .get::<Json<String>>("providerRequestId")
+            .await?
+            .map(|j| j.into_inner());
+
+        Ok(SttFileOutput {
+            status: PipelineStatus::Done,
+            provider: "deepgram".to_string(),
+            provider_request_id,
+            raw_result: raw,
         })
     }
 }
@@ -175,7 +279,12 @@ impl SttFile for SttFileImpl {
         input: Json<SttFileInput>,
     ) -> Result<Json<SttFileOutput>, HandlerError> {
         let input = input.into_inner();
-        tracing::info!(file_id = %input.file_id, user_id = %input.user_id, "stt workflow started");
+        tracing::info!(
+            file_id = %input.file_id,
+            user_id = %input.user_id,
+            provider = %input.provider,
+            "stt workflow started"
+        );
 
         let file_id = input.file_id.clone();
         let result = self.run_inner(&ctx, &input).await;
@@ -209,23 +318,44 @@ impl SttFile for SttFileImpl {
         payload: Json<serde_json::Value>,
     ) -> Result<(), HandlerError> {
         let payload = payload.into_inner();
-        let existing = ctx.get::<Json<String>>("transcript").await?;
+        let existing = ctx.get::<Json<serde_json::Value>>("rawResult").await?;
         if existing.is_some() {
             return Ok(());
         }
 
-        let callback: soniox::SonioxCallback =
-            serde_json::from_value(payload).map_err(|e| TerminalError::new(e.to_string()))?;
+        let provider = ctx
+            .get::<Json<String>>("provider")
+            .await?
+            .map(|j| j.into_inner())
+            .unwrap_or_else(|| "soniox".to_string());
 
-        if callback.status == "error" {
-            ctx.reject_promise(
-                "transcription_id",
-                TerminalError::new("Soniox transcription failed"),
-            );
-            return Ok(());
+        match provider.as_str() {
+            "soniox" => {
+                let callback: soniox::SonioxCallback = serde_json::from_value(payload)
+                    .map_err(|e| TerminalError::new(e.to_string()))?;
+
+                if callback.status == "error" {
+                    ctx.reject_promise(
+                        "transcription_id",
+                        TerminalError::new("Soniox transcription failed"),
+                    );
+                    return Ok(());
+                }
+
+                ctx.resolve_promise("transcription_id", callback.id);
+            }
+            "deepgram" => {
+                // Deepgram posts the full result payload directly
+                ctx.resolve_promise("callback_result", Json(payload));
+            }
+            _ => {
+                return Err(TerminalError::new(format!(
+                    "unknown provider in callback: {provider}"
+                ))
+                .into());
+            }
         }
 
-        ctx.resolve_promise("transcription_id", callback.id);
         Ok(())
     }
 
@@ -238,12 +368,16 @@ impl SttFile for SttFileImpl {
             .await?
             .map(|j| j.into_inner())
             .unwrap_or(PipelineStatus::Queued);
-        let transcript = ctx
-            .get::<Json<String>>("transcript")
+        let provider = ctx
+            .get::<Json<String>>("provider")
             .await?
             .map(|j| j.into_inner());
-        let tokens = ctx
-            .get::<Json<Vec<TranscriptToken>>>("tokens")
+        let provider_request_id = ctx
+            .get::<Json<String>>("providerRequestId")
+            .await?
+            .map(|j| j.into_inner());
+        let raw_result = ctx
+            .get::<Json<serde_json::Value>>("rawResult")
             .await?
             .map(|j| j.into_inner());
         let error = ctx
@@ -253,8 +387,9 @@ impl SttFile for SttFileImpl {
 
         Ok(Json(SttStatusResponse {
             status,
-            transcript,
-            tokens,
+            provider,
+            provider_request_id,
+            raw_result,
             error,
         }))
     }

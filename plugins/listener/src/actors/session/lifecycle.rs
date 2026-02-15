@@ -70,13 +70,6 @@ pub(crate) fn emit_session_ended(
     clear_sentry_session_context();
 }
 
-pub(crate) async fn stop_actor_by_name_and_wait(actor_name: ractor::ActorName, reason: &str) {
-    if let Some(cell) = ractor::registry::where_is(actor_name.clone()) {
-        cell.stop(Some(reason.to_string()));
-        wait_for_actor_shutdown(actor_name).await;
-    }
-}
-
 pub(crate) async fn wait_for_actor_shutdown(actor_name: ractor::ActorName) {
     for _ in 0..50 {
         if ractor::registry::where_is(actor_name.clone()).is_none() {

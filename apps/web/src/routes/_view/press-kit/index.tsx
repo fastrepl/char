@@ -113,7 +113,7 @@ function Component() {
                       label="Contact"
                     />
                     <FinderAction
-                      href="https://github.com/fastrepl/hyprnote"
+                      href="https://github.com/fastrepl/char"
                       iconImage="/api/images/icons/github.webp"
                       label="GitHub"
                       external

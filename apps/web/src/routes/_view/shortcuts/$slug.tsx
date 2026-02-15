@@ -220,7 +220,7 @@ function ShortcutFooter() {
 }
 
 function RightSidebar({ shortcut }: { shortcut: (typeof allShortcuts)[0] }) {
-  const rawMdxUrl = `https://github.com/fastrepl/hyprnote/blob/main/apps/web/content/shortcuts/${shortcut.slug}.mdx?plain=1`;
+  const rawMdxUrl = `https://github.com/fastrepl/char/blob/main/apps/web/content/shortcuts/${shortcut.slug}.mdx?plain=1`;
 
   return (
     <aside className="hidden sm:block w-80 shrink-0">
@@ -257,7 +257,7 @@ function RightSidebar({ shortcut }: { shortcut: (typeof allShortcuts)[0] }) {
             Have a shortcut idea? Submit a PR and help the community.
           </p>
           <a
-            href="https://github.com/fastrepl/hyprnote/tree/main/apps/web/content/shortcuts"
+            href="https://github.com/fastrepl/char/tree/main/apps/web/content/shortcuts"
             target="_blank"
             rel="noopener noreferrer"
             className={cn([

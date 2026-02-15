@@ -56,13 +56,7 @@ impl RealtimeSttAdapter for SonioxAdapter {
     ) -> Option<Message> {
         let api_key = api_key.unwrap_or("");
 
-        let default = crate::providers::Provider::Soniox.default_live_model();
-        let model = match params.model.as_deref() {
-            Some(m) if crate::providers::is_meta_model(m) => default,
-            Some("stt-v3") => default,
-            Some(m) => m,
-            None => default,
-        };
+        let model = SonioxAdapter::resolve_model(params.model.as_deref()).live_model();
 
         let context = if params.keywords.is_empty() {
             None

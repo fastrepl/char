@@ -347,7 +347,7 @@ function OpenSourceSection() {
             </p>
             <div className="flex flex-wrap gap-4">
               <a
-                href="https://github.com/fastrepl/hyprnote"
+                href="https://github.com/fastrepl/char"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn([

@@ -4,8 +4,7 @@ use utoipa::OpenApi;
 #[openapi(
     paths(crate::routes::status::handler),
     components(schemas(
-        hypr_restate_stt_types::PipelineStatus,
-        hypr_restate_stt_types::SttStatusResponse,
+        crate::routes::status::SttStatusResponse,
     )),
     tags((name = "stt", description = "Speech-to-text transcription proxy"))
 )]

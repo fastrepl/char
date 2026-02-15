@@ -37,13 +37,16 @@ export function ChatView() {
   );
 
   return (
-    <div className="flex flex-col h-full gap-1">
+    <div className="flex flex-col h-full">
       <ChatHeader
         currentChatGroupId={groupId}
         onNewChat={handleNewChat}
         onSelectChat={handleSelectChat}
         handleClose={() => chat.sendEvent({ type: "CLOSE" })}
       />
+      <div className="bg-sky-100 text-neutral-900 text-[11px] px-3 py-1.5">
+        Chat is Experimental and under active development
+      </div>
       <ChatSession
         key={stableSessionId}
         sessionId={stableSessionId}

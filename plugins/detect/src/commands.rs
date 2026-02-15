@@ -44,6 +44,16 @@ pub(crate) async fn set_respect_do_not_disturb<R: tauri::Runtime>(
     Ok(())
 }
 
+#[tauri::command]
+#[specta::specta]
+pub(crate) async fn set_mic_active_threshold<R: tauri::Runtime>(
+    app: tauri::AppHandle<R>,
+    secs: u64,
+) -> Result<(), String> {
+    app.detect().set_mic_active_threshold(secs);
+    Ok(())
+}
+
 #[cfg(target_os = "macos")]
 #[tauri::command]
 #[specta::specta]

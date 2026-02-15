@@ -141,7 +141,7 @@ function ProductLinks() {
         </li>
         <li>
           <a
-            href="https://github.com/fastrepl/hyprnote"
+            href="https://github.com/fastrepl/char"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-neutral-600 hover:text-stone-600 transition-colors inline-flex items-center gap-1 no-underline hover:underline hover:decoration-dotted"
@@ -249,7 +249,7 @@ function ResourcesLinks() {
         </li>
         <li>
           <a
-            href="https://github.com/fastrepl/hyprnote/discussions"
+            href="https://github.com/fastrepl/char/discussions"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-neutral-600 hover:text-stone-600 transition-colors inline-flex items-center gap-1 no-underline hover:underline hover:decoration-dotted"

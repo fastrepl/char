@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_view/changelog/$slug")({
     const beforeVersion = changelog.beforeVersion;
     const diffUrl =
       beforeVersion != null
-        ? `https://github.com/fastrepl/hyprnote/compare/desktop_v${beforeVersion}...desktop_v${changelog.version}`
+        ? `https://github.com/fastrepl/char/compare/desktop_v${beforeVersion}...desktop_v${changelog.version}`
         : null;
 
     return {
@@ -62,8 +62,8 @@ export const Route = createFileRoute("/_view/changelog/$slug")({
         { property: "og:image:width", content: "1200" },
         { property: "og:image:height", content: "630" },
         { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:site", content: "@tryhyprnote" },
-        { name: "twitter:creator", content: "@tryhyprnote" },
+        { name: "twitter:site", content: "@getcharnotes" },
+        { name: "twitter:creator", content: "@getcharnotes" },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
         { name: "twitter:url", content: url },
@@ -324,7 +324,7 @@ function RelatedReleases({
         <p className="text-neutral-600">Explore more versions of Char</p>
       </div>
 
-      <div className="grid gap-4 grid-cols-5">
+      <div className="flex overflow-x-auto gap-4 sm:grid sm:grid-cols-5 sm:overflow-visible">
         {relatedChangelogs.map((release) => {
           const version = semver.parse(release.version);
           const isPrerelease = version && version.prerelease.length > 0;
@@ -346,7 +346,7 @@ function RelatedReleases({
             >
               <article
                 className={cn([
-                  "flex flex-col items-center gap-2 p-4 rounded-lg transition-all duration-300",
+                  "flex flex-col items-center gap-2 p-4 rounded-lg transition-all duration-300 shrink-0",
                   isCurrent ? "bg-stone-100" : "hover:bg-stone-50",
                 ])}
               >

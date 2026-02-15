@@ -92,7 +92,7 @@ export async function fetchGitHubStargazers(): Promise<{
 
   while (true) {
     const response = await fetch(
-      `https://api.github.com/repos/fastrepl/hyprnote/stargazers?per_page=${perPage}&page=${page}`,
+      `https://api.github.com/repos/fastrepl/char/stargazers?per_page=${perPage}&page=${page}`,
       {
         headers: getGitHubHeaders("application/vnd.github.star+json"),
       },
@@ -109,7 +109,7 @@ export async function fetchGitHubStargazers(): Promise<{
 
       const result = await sql`
         INSERT INTO public.github_star_leads (github_username, github_id, avatar_url, profile_url, event_type, repo_name, event_at)
-        VALUES (${s.user.login}, ${s.user.id}, ${s.user.avatar_url}, ${s.user.html_url}, 'star', 'fastrepl/hyprnote', ${s.starred_at})
+        VALUES (${s.user.login}, ${s.user.id}, ${s.user.avatar_url}, ${s.user.html_url}, 'star', 'fastrepl/char', ${s.starred_at})
         ON CONFLICT (github_username) DO UPDATE SET
           avatar_url = EXCLUDED.avatar_url,
           github_id = EXCLUDED.github_id

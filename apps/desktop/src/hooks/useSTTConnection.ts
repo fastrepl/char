@@ -9,6 +9,7 @@ import type { AIProviderStorage } from "@hypr/store";
 
 import { useAuth } from "../auth";
 import { useBillingAccess } from "../billing";
+import { providerRowId } from "../components/settings/ai/shared";
 import { ProviderId } from "../components/settings/ai/stt/shared";
 import { env } from "../env";
 import * as settings from "../store/tinybase/store/settings";
@@ -25,7 +26,7 @@ export const useSTTConnection = () => {
 
   const providerConfig = settings.UI.useRow(
     "ai_providers",
-    current_stt_provider ?? "",
+    current_stt_provider ? providerRowId("stt", current_stt_provider) : "",
     settings.STORE_ID,
   ) as AIProviderStorage | undefined;
 

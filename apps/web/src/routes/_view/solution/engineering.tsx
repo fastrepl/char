@@ -294,7 +294,7 @@ function HeroSection() {
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="https://github.com/fastrepl/hyprnote"
+              href="https://github.com/fastrepl/char"
               target="_blank"
               rel="noopener noreferrer"
               className={cn([
@@ -545,7 +545,7 @@ function CTASection() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a
-            href="https://github.com/fastrepl/hyprnote"
+            href="https://github.com/fastrepl/char"
             target="_blank"
             rel="noopener noreferrer"
             className={cn([

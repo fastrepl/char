@@ -5,11 +5,7 @@ import { arch, platform } from "@tauri-apps/plugin-os";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 import { commands as windowsCommands } from "@hypr/plugin-windows";
 import { Button } from "@hypr/ui/components/ui/button";
-import { Switch } from "@hypr/ui/components/ui/switch";
 import { cn } from "@hypr/utils";
-
-import { useConfigValue } from "../../../config/use-config";
-import * as settings from "../../../store/tinybase/store/settings";
 
 export function SettingsLab() {
   const handleOpenControlWindow = async () => {
@@ -38,36 +34,7 @@ export function SettingsLab() {
         </Button>
       </div>
 
-      <MeetingReminderToggle />
-
       <DownloadButtons />
-    </div>
-  );
-}
-
-function MeetingReminderToggle() {
-  const value = useConfigValue("notification_in_meeting_reminder");
-  const setValue = settings.UI.useSetValueCallback(
-    "notification_in_meeting_reminder",
-    (value: boolean) => value,
-    [],
-    settings.STORE_ID,
-  );
-
-  return (
-    <div data-settings-item className="flex items-center justify-between gap-4">
-      <div className="flex-1">
-        <h3 className="text-sm font-medium mb-1">In-Meeting Reminder</h3>
-        <p className="text-xs text-neutral-600">
-          Get nudged when a meeting app is using your mic without Hyprnote
-          recording.
-        </p>
-      </div>
-      <Switch
-        data-settings-activate
-        checked={value}
-        onCheckedChange={(checked) => setValue(checked)}
-      />
     </div>
   );
 }
@@ -137,7 +104,7 @@ function DownloadButtons() {
             <Button
               size="sm"
               className={cn([
-                "text-white bg-gradient-to-br border",
+                "text-white bg-linear-to-br border",
                 channel === "nightly"
                   ? "from-[#03BCF1] to-[#127FE5]"
                   : "from-[#535353] to-[#000000]",

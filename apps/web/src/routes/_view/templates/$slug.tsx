@@ -272,7 +272,7 @@ function RightSidebar() {
             Have a template idea? Submit a PR and help the community.
           </p>
           <a
-            href="https://github.com/fastrepl/hyprnote/tree/main/apps/web/content/templates"
+            href="https://github.com/fastrepl/char/tree/main/apps/web/content/templates"
             target="_blank"
             rel="noopener noreferrer"
             className={cn([

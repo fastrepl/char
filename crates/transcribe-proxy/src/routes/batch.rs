@@ -12,7 +12,7 @@ use backon::{ExponentialBuilder, Retryable};
 
 use owhisper_client::{
     AssemblyAIAdapter, BatchClient, DeepgramAdapter, ElevenLabsAdapter, GladiaAdapter,
-    OpenAIAdapter, Provider, SonioxAdapter,
+    MistralAdapter, OpenAIAdapter, Provider, SonioxAdapter,
 };
 use owhisper_interface::ListenParams;
 use owhisper_interface::batch::Response as BatchResponse;
@@ -293,11 +293,20 @@ async fn transcribe_with_provider(
                 .transcribe_file(file_path)
                 .await
         }
-        Provider::Fireworks => {
+        Provider::Fireworks | Provider::DashScope => {
             return Err(format!(
                 "{:?} does not support batch transcription",
                 provider
             ));
+        }
+        Provider::Mistral => {
+            BatchClient::<MistralAdapter>::builder()
+                .api_base(api_base)
+                .api_key(api_key)
+                .params(params)
+                .build()
+                .transcribe_file(file_path)
+                .await
         }
     };
 

@@ -63,8 +63,8 @@ uuid = { workspace = true, features = ["v4"] }
 hound = { workspace = true }
 vorbis_rs = { workspace = true }
 
-ractor = { workspace = true }
-ractor-supervisor = { workspace = true }
+hypr-supervisor = { workspace = true }
+ractor = { workspace = true, features = ["async-trait"] }
 
 futures-util = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }

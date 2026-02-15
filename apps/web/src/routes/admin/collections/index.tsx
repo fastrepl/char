@@ -1976,7 +1976,7 @@ function AuthorSelect({
 
 const CATEGORIES = [
   "Case Study",
-  "Hyprnote Weekly",
+  "Char Weekly",
   "Productivity Hack",
   "Engineering",
 ];
@@ -2200,7 +2200,7 @@ function MetadataPanel({
           >
             <option value="">Select category</option>
             <option value="Case Study">Case Study</option>
-            <option value="Hyprnote Weekly">Hyprnote Weekly</option>
+            <option value="Char Weekly">Char Weekly</option>
             <option value="Productivity Hack">Productivity Hack</option>
             <option value="Engineering">Engineering</option>
           </select>
@@ -3210,7 +3210,7 @@ function FileItem({
         </span>
       </div>
       <a
-        href={`https://github.com/fastrepl/hyprnote/blob/main/apps/web/content/${item.path}`}
+        href={`https://github.com/fastrepl/char/blob/main/apps/web/content/${item.path}`}
         target="_blank"
         rel="noopener noreferrer"
         className="text-xs text-neutral-500 hover:text-neutral-700"

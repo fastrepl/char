@@ -53,13 +53,7 @@ impl SonioxAdapter {
         params: &ListenParams,
         file_id: &str,
     ) -> Result<BatchResponse, Error> {
-        let default = crate::providers::Provider::Soniox.default_batch_model();
-        let model = match params.model.as_deref() {
-            Some(m) if crate::providers::is_meta_model(m) => default,
-            Some("stt-v3") | Some("stt-async-preview") => default,
-            Some(m) => m,
-            None => default,
-        };
+        let model = SonioxAdapter::resolve_model(params.model.as_deref()).batch_model();
 
         let mut body = serde_json::json!({
             "model": model,

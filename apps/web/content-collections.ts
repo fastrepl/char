@@ -19,10 +19,10 @@ async function embedGithubCode(content: string): Promise<string> {
     const [fullMatch, url] = match;
 
     const repoMatch = url.match(
-      /github\.com\/fastrepl\/hyprnote\/blob\/[^/]+\/(.+)/,
+      /github\.com\/fastrepl\/(hyprnote|char)\/blob\/[^/]+\/(.+)/,
     );
     if (repoMatch) {
-      const filePath = repoMatch[1];
+      const filePath = repoMatch[2];
       const fileName = path.basename(filePath);
       const localPath = path.resolve(process.cwd(), "..", "..", filePath);
 
@@ -162,7 +162,7 @@ const changelog = defineCollection({
     });
 
     const version = document._meta.path.replace(/\.mdx$/, "");
-    const baseUrl = `https://github.com/fastrepl/hyprnote/releases/download/desktop_v${version}`;
+    const baseUrl = `https://github.com/fastrepl/char/releases/download/desktop_v${version}`;
     const downloads: Record<VersionPlatform, string> = {
       "dmg-aarch64": `${baseUrl}/hyprnote-macos-aarch64.dmg`,
       "appimage-x86_64": `${baseUrl}/hyprnote-linux-x86_64.AppImage`,

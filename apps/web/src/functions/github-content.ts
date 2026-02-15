@@ -4,7 +4,7 @@ import * as path from "path";
 
 import { getSupabaseServerClient } from "@/functions/supabase";
 
-const GITHUB_REPO = "fastrepl/hyprnote";
+const GITHUB_REPO = "fastrepl/char";
 const GITHUB_BRANCH = "main";
 const CONTENT_PATH = "apps/web/content";
 

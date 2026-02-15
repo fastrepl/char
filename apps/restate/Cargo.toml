@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-hypr-restate-rate-limit = { workspace = true }
 hypr-restate-stt = { workspace = true }
 restate-sdk = "0.7.0"
 

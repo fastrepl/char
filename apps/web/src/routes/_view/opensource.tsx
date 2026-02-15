@@ -154,7 +154,7 @@ function HeroSection() {
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="https://github.com/fastrepl/hyprnote"
+              href="https://github.com/fastrepl/char"
               target="_blank"
               rel="noopener noreferrer"
               className={cn([
@@ -792,28 +792,28 @@ const contributions = [
     title: "Star Repository",
     description: "Show your support and help others discover Char",
     icon: "mdi:star",
-    link: "https://github.com/fastrepl/hyprnote",
+    link: "https://github.com/fastrepl/char",
     linkText: "Star on GitHub",
   },
   {
     title: "Contribute Code",
     description: "Fix bugs, add features, or improve documentation",
     icon: "mdi:code-braces",
-    link: "https://github.com/fastrepl/hyprnote/contribute",
+    link: "https://github.com/fastrepl/char/contribute",
     linkText: "View Issues",
   },
   {
     title: "Report Issues",
     description: "Help us improve by reporting bugs and suggesting features",
     icon: "mdi:bug",
-    link: "https://github.com/fastrepl/hyprnote/issues",
+    link: "https://github.com/fastrepl/char/issues",
     linkText: "Open Issue",
   },
   {
     title: "Help Translate",
     description: "Make Char accessible in your language",
     icon: "mdi:translate",
-    link: "https://github.com/fastrepl/hyprnote",
+    link: "https://github.com/fastrepl/char",
     linkText: "Contribute Translations",
   },
   {

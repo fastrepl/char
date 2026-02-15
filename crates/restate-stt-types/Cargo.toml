@@ -8,5 +8,6 @@ utoipa = ["dep:utoipa"]
 
 [dependencies]
 serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
 
 utoipa = { workspace = true, optional = true }

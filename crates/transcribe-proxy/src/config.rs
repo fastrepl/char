@@ -19,19 +19,25 @@ pub struct SttProxyConfig {
     pub analytics: Option<Arc<dyn SttAnalyticsReporter>>,
     pub upstream_urls: HashMap<Provider, String>,
     pub hyprnote_routing: Option<HyprnoteRoutingConfig>,
-    pub restate_ingress_url: Option<String>,
+    pub supabase_url: Option<String>,
+    pub supabase_service_role_key: Option<String>,
+    pub api_base_url: Option<String>,
+    pub callback_secret: Option<String>,
 }
 
 impl SttProxyConfig {
     pub fn new(env: &Env) -> Self {
         Self {
-            api_keys: ApiKeys::from(env).0,
+            api_keys: ApiKeys::from(&env.stt).0,
             default_provider: Provider::Deepgram,
             connect_timeout: Duration::from_millis(DEFAULT_CONNECT_TIMEOUT_MS),
             analytics: None,
             upstream_urls: HashMap::new(),
             hyprnote_routing: None,
-            restate_ingress_url: env.restate_ingress_url.clone(),
+            supabase_url: env.supabase.supabase_url.clone(),
+            supabase_service_role_key: env.supabase.supabase_service_role_key.clone(),
+            api_base_url: env.callback.api_base_url.clone(),
+            callback_secret: env.callback.callback_secret.clone(),
         }
     }
 

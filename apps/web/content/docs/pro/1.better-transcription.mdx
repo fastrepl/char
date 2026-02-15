@@ -21,6 +21,9 @@ If you want to use a specific transcription provider, you can bring your own API
 | Gladia | Code switching, multi-channel audio | 90+ |
 | OpenAI | Batch transcription, Whisper API | 50+ |
 | Soniox | High accuracy, enterprise features | 70+ |
+| ElevenLabs | High-quality real-time transcription | 30+ |
+| DashScope | Qwen3-ASR real-time speech recognition | 10+ |
+| Mistral | Voxtral audio transcription | 10+ |
 
 To use BYOK, go to Settings > Transcription and enter your API key for your preferred provider.
 
@@ -34,9 +37,71 @@ To use BYOK, go to Settings > Transcription and enter your API key for your pref
 
 Char checks if your selected provider supports your configured languages. If there's a mismatch, you'll see a warning with suggestions for compatible providers. Configure your languages in Settings > Language & Vocabulary.
 
+## How Your Audio Data Is Handled
+
+When using cloud transcription, your recorded audio is sent to the selected provider for processing:
+
+- **Pro curated models:** Your audio is proxied through `pro.hyprnote.com` and forwarded to a curated STT provider. The proxy does not store your audio.
+- **BYOK:** Your audio is sent directly from your device to the provider you selected. Char acts only as the client.
+
+Here is how Char selects the correct adapter for your configured provider — each provider has its own adapter that handles the audio stream:
+
+```rust
+// plugins/listener/src/actors/listener/adapters.rs
+let adapter_kind = AdapterKind::from_url_and_languages(
+    &args.base_url,
+    &args.languages,
+    Some(&args.model),
+);
+
+let result = match (adapter_kind, is_dual) {
+    (AdapterKind::Argmax, false) =>
+        spawn_rx_task_single_with_adapter::<ArgmaxAdapter>(args, myself).await,
+    (AdapterKind::Soniox, false) =>
+        spawn_rx_task_single_with_adapter::<SonioxAdapter>(args, myself).await,
+    (AdapterKind::Deepgram, false) =>
+        spawn_rx_task_single_with_adapter::<DeepgramAdapter>(args, myself).await,
+    (AdapterKind::AssemblyAI, false) =>
+        spawn_rx_task_single_with_adapter::<AssemblyAIAdapter>(args, myself).await,
+    (AdapterKind::OpenAI, false) =>
+        spawn_rx_task_single_with_adapter::<OpenAIAdapter>(args, myself).await,
+    (AdapterKind::Gladia, false) =>
+        spawn_rx_task_single_with_adapter::<GladiaAdapter>(args, myself).await,
+    (AdapterKind::ElevenLabs, false) =>
+        spawn_rx_task_single_with_adapter::<ElevenLabsAdapter>(args, myself).await,
+    (AdapterKind::DashScope, false) =>
+        spawn_rx_task_single_with_adapter::<DashScopeAdapter>(args, myself).await,
+    (AdapterKind::Mistral, false) =>
+        spawn_rx_task_single_with_adapter::<MistralAdapter>(args, myself).await,
+    (AdapterKind::Fireworks, false) =>
+        spawn_rx_task_single_with_adapter::<FireworksAdapter>(args, myself).await,
+    // ...dual-channel variants also exist for each provider
+}?;
+```
+
+The data sent to the STT provider alongside your audio stream:
+
+```rust
+// plugins/listener/src/actors/session/supervisor.rs
+ListenerArgs {
+    languages: state.ctx.params.languages.clone(),
+    model: state.ctx.params.model.clone(),
+    base_url: state.ctx.params.base_url.clone(),
+    api_key: state.ctx.params.api_key.clone(),
+    keywords: state.ctx.params.keywords.clone(),
+    mode, // MicOnly, SpeakerOnly, or MicAndSpeaker
+    session_id: state.ctx.params.session_id.clone(),
+    // ...
+}
+```
+
+Your audio files and transcripts are always stored locally on your device regardless of which transcription method you use. Cloud providers only receive the audio stream for processing and return the transcript.
+
+For the full details on every data flow, see [AI Models & Data Privacy](/docs/faq/ai-models-and-privacy).
+
 ## When to Use Cloud vs Local
 
 Use cloud transcription when you need maximum accuracy and have internet access. Use local transcription (Whisper models) when privacy is paramount or you're offline. Local models support 50+ languages and run entirely on your device.
 
-For local STT model details and manual download instructions, see [Local Models](/docs/developers/local-models). To understand how your data is handled, see [AI Models & Data Privacy](/docs/faq/ai-models-and-privacy).
+For local STT model details and manual download instructions, see [Local Models](/docs/developers/local-models).
 

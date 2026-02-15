@@ -1,4 +1,5 @@
 mod config;
+mod deepgram;
 mod services;
 mod soniox;
 mod supabase;

@@ -1,70 +1,52 @@
-use axum::{
-    Json,
-    extract::{Path, State},
-    http::StatusCode,
-    response::{IntoResponse, Response},
-};
-use hypr_restate_stt_types::SttStatusResponse;
+use axum::{Json, extract::Path};
+use serde::Serialize;
 
-use super::AppState;
+use super::RouteError;
+use crate::supabase::SupabaseClient;
+
+#[derive(Debug, Clone, Serialize, utoipa::ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct SttStatusResponse {
+    pub status: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub provider: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[schema(value_type = Option<Object>)]
+    pub raw_result: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+}
 
 #[utoipa::path(
     get,
     path = "/stt/status/{pipeline_id}",
     params(
-        ("pipeline_id" = String, Path, description = "Pipeline ID (Restate workflow key)")
+        ("pipeline_id" = String, Path, description = "Pipeline ID")
     ),
     responses(
         (status = 200, description = "Pipeline status", body = SttStatusResponse),
-        (status = 502, description = "Restate service unavailable"),
+        (status = 404, description = "Job not found"),
+        (status = 500, description = "Internal error"),
     ),
     tag = "stt",
 )]
 pub async fn handler(
-    State(state): State<AppState>,
+    supabase: SupabaseClient,
     Path(pipeline_id): Path<String>,
-) -> Result<Json<SttStatusResponse>, Response> {
-    let ingress_url = state
-        .config
-        .restate_ingress_url
-        .as_deref()
-        .ok_or_else(|| {
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "restate_ingress_url not configured",
-            )
-                .into_response()
+) -> Result<Json<SttStatusResponse>, RouteError> {
+    let job = supabase
+        .get_job(&pipeline_id)
+        .await
+        .map_err(|e| {
+            tracing::error!(error = %e, "failed to query job");
+            RouteError::Internal(format!("failed to query job: {e}"))
         })?
-        .trim_end_matches('/');
+        .ok_or(RouteError::NotFound("job not found"))?;
 
-    let encoded_id = urlencoding::encode(&pipeline_id);
-    let url = format!("{ingress_url}/SttFile/{encoded_id}/getStatus");
-
-    let resp = state.client.get(&url).send().await.map_err(|e| {
-        (
-            StatusCode::BAD_GATEWAY,
-            format!("restate request failed: {e}"),
-        )
-            .into_response()
-    })?;
-
-    if !resp.status().is_success() {
-        let status = resp.status().as_u16();
-        let body = resp.text().await.unwrap_or_default();
-        return Err((
-            StatusCode::BAD_GATEWAY,
-            format!("restate returned {status}: {body}"),
-        )
-            .into_response());
-    }
-
-    let status_response: SttStatusResponse = resp.json().await.map_err(|e| {
-        (
-            StatusCode::BAD_GATEWAY,
-            format!("invalid response from restate: {e}"),
-        )
-            .into_response()
-    })?;
-
-    Ok(Json(status_response))
+    Ok(Json(SttStatusResponse {
+        status: job.status,
+        provider: Some(job.provider),
+        raw_result: job.raw_result,
+        error: job.error,
+    }))
 }

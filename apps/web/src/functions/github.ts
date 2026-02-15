@@ -3,7 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 
 import { env } from "../env";
 
-const GITHUB_ORG_REPO = "fastrepl/hyprnote";
+const GITHUB_ORG_REPO = "fastrepl/char";
 const CACHE_TTL = HOUR;
 
 function getGitHubHeaders(): Record<string, string> {

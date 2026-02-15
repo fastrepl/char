@@ -15,6 +15,7 @@ import {
   type ProviderId,
   PROVIDERS,
 } from "../components/settings/ai/llm/shared";
+import { providerRowId } from "../components/settings/ai/shared";
 import {
   getProviderSelectionBlockers,
   type ProviderEligibilityContext,
@@ -65,7 +66,7 @@ export const useLLMConnection = (): LLMConnectionResult => {
   );
   const providerConfig = settings.UI.useRow(
     "ai_providers",
-    current_llm_provider ?? "",
+    current_llm_provider ? providerRowId("llm", current_llm_provider) : "",
     settings.STORE_ID,
   ) as AIProviderStorage | undefined;
 
