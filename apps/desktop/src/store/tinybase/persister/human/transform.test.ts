@@ -67,6 +67,7 @@ describe("frontmatterToHuman", () => {
       linkedin_username: "johndoe",
       memo: "Notes",
       pinned: false,
+      pin_order: undefined,
     });
   });
 });
@@ -175,6 +176,7 @@ describe("humanToFrontmatter", () => {
         job_title: "Engineer",
         linkedin_username: "johndoe",
         pinned: false,
+        pin_order: 0,
       },
       body: "Notes",
     });

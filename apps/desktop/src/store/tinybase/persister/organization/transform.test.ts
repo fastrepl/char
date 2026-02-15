@@ -20,6 +20,7 @@ describe("frontmatterToOrganization", () => {
       created_at: "2024-01-01T00:00:00Z",
       name: "Acme Corp",
       pinned: false,
+      pin_order: undefined,
     });
   });
 
@@ -30,6 +31,7 @@ describe("frontmatterToOrganization", () => {
       created_at: undefined,
       name: "",
       pinned: false,
+      pin_order: undefined,
     });
   });
 
@@ -47,6 +49,7 @@ describe("frontmatterToOrganization", () => {
       created_at: undefined,
       name: "Acme Corp",
       pinned: true,
+      pin_order: undefined,
     });
   });
 });
@@ -65,6 +68,7 @@ describe("organizationToFrontmatter", () => {
         created_at: "2024-01-01T00:00:00Z",
         name: "Acme Corp",
         pinned: false,
+        pin_order: 0,
       },
       body: "",
     });
@@ -82,6 +86,7 @@ describe("organizationToFrontmatter", () => {
         created_at: "",
         name: "Acme Corp",
         pinned: true,
+        pin_order: 0,
       },
       body: "",
     });
