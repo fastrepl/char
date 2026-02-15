@@ -9,7 +9,6 @@ import { usePermission } from "../../../../../hooks/usePermissions";
 
 export function ApplePermissions() {
   const calendar = usePermission("calendar");
-  const contacts = usePermission("contacts");
 
   return (
     <div className="flex flex-col gap-1">
@@ -20,14 +19,6 @@ export function ApplePermissions() {
         onOpen={calendar.open}
         onRequest={calendar.request}
         onReset={calendar.reset}
-      />
-      <AccessPermissionRow
-        title="Contacts"
-        status={contacts.status}
-        isPending={contacts.isPending}
-        onOpen={contacts.open}
-        onRequest={contacts.request}
-        onReset={contacts.reset}
       />
     </div>
   );
