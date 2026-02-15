@@ -81,56 +81,13 @@ When using cloud transcription, your recorded audio is sent to the selected prov
 
 Here is how Char selects the correct adapter for your configured provider — each provider has its own adapter that handles the audio stream:
 
-```rust
-// plugins/listener/src/actors/listener/adapters.rs
-let adapter_kind = AdapterKind::from_url_and_languages(
-    &args.base_url,
-    &args.languages,
-    Some(&args.model),
-);
-
-let result = match (adapter_kind, is_dual) {
-    (AdapterKind::Argmax, false) =>
-        spawn_rx_task_single_with_adapter::<ArgmaxAdapter>(args, myself).await,
-    (AdapterKind::Soniox, false) =>
-        spawn_rx_task_single_with_adapter::<SonioxAdapter>(args, myself).await,
-    (AdapterKind::Deepgram, false) =>
-        spawn_rx_task_single_with_adapter::<DeepgramAdapter>(args, myself).await,
-    (AdapterKind::AssemblyAI, false) =>
-        spawn_rx_task_single_with_adapter::<AssemblyAIAdapter>(args, myself).await,
-    (AdapterKind::OpenAI, false) =>
-        spawn_rx_task_single_with_adapter::<OpenAIAdapter>(args, myself).await,
-    (AdapterKind::Gladia, false) =>
-        spawn_rx_task_single_with_adapter::<GladiaAdapter>(args, myself).await,
-    (AdapterKind::ElevenLabs, false) =>
-        spawn_rx_task_single_with_adapter::<ElevenLabsAdapter>(args, myself).await,
-    (AdapterKind::DashScope, false) =>
-        spawn_rx_task_single_with_adapter::<DashScopeAdapter>(args, myself).await,
-    (AdapterKind::Mistral, false) =>
-        spawn_rx_task_single_with_adapter::<MistralAdapter>(args, myself).await,
-    (AdapterKind::Fireworks, false) =>
-        spawn_rx_task_single_with_adapter::<FireworksAdapter>(args, myself).await,
-    // ...dual-channel variants also exist for each provider
-}?;
-```
+<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/listener/src/actors/listener/adapters.rs#L22-L102" />
 
 ### What Data Is Sent to the Provider
 
 **Sent alongside your audio stream:**
 
-```rust
-// plugins/listener/src/actors/session/supervisor.rs
-ListenerArgs {
-    languages: state.ctx.params.languages.clone(),
-    model: state.ctx.params.model.clone(),
-    base_url: state.ctx.params.base_url.clone(),
-    api_key: state.ctx.params.api_key.clone(),
-    keywords: state.ctx.params.keywords.clone(),
-    mode, // MicOnly, SpeakerOnly, or MicAndSpeaker
-    session_id: state.ctx.params.session_id.clone(),
-    // ...
-}
-```
+<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/listener/src/actors/session/supervisor.rs#L122-L134" />
 
 - Raw audio (Linear PCM, 16kHz sample rate, mono or stereo)
 - Configuration: model name, language codes, optional keyword boost list, sample rate, channel count

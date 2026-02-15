@@ -41,55 +41,11 @@ The `store.json` keys are defined by this enum — nothing else is persisted thr
 
 Each session gets its own subdirectory. Here is how Char loads session content from disk — this shows exactly what files exist per session:
 
-```rust
-// plugins/fs-sync/src/session_content.rs
-pub fn load_session_content(
-    session_id: &str,
-    session_dir: &std::path::Path,
-) -> SessionContentData {
-    let mut content = SessionContentData {
-        session_id: session_id.to_string(),
-        meta: None,                  // from _meta.json
-        raw_memo_tiptap_json: None,  // from memo.md
-        transcript: None,            // from transcript.json
-        notes: vec![],               // from *.md enhanced notes
-    };
-
-    // ...reads every file in the session directory:
-    // - _meta.json -> SessionMetaData (title, created date, participants)
-    // - transcript.json -> TranscriptData (words with timestamps)
-    // - *.md -> AI-generated enhanced notes (parsed from Markdown
-    //          with YAML frontmatter)
-}
-```
+<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/fs-sync/src/session_content.rs#L10-L110" />
 
 Transcript data uses this structure — word-level timestamps, speaker channels, and optional speaker hints:
 
-```rust
-// plugins/fs-sync/src/types.rs
-pub struct TranscriptWord {
-    pub id: Option<String>,
-    pub text: String,
-    pub start_ms: i64,
-    pub end_ms: i64,
-    pub channel: i64,
-}
-
-pub struct TranscriptEntry {
-    pub id: String,
-    pub user_id: Option<String>,
-    pub created_at: Option<String>,
-    pub session_id: String,
-    pub started_at: Option<i64>,
-    pub ended_at: Option<i64>,
-    pub words: Vec<TranscriptWord>,
-    pub speaker_hints: Vec<TranscriptSpeakerHint>,
-}
-
-pub struct TranscriptData {
-    pub transcripts: Vec<TranscriptEntry>,
-}
-```
+<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/fs-sync/src/types.rs#L83-L119" />
 
 ### Is My Data Encrypted at Rest?
 
@@ -105,89 +61,11 @@ When you start a recording session, Char spawns three actors in parallel:
 
 Here is the session supervisor that orchestrates these actors:
 
-```rust
-// plugins/listener/src/actors/session/supervisor.rs
-async fn pre_start(
-    &self,
-    myself: ActorRef<Self::Msg>,
-    ctx: Self::Arguments,
-) -> Result<Self::State, ActorProcessingErr> {
-    // 1. Always spawn the audio source
-    let (source_ref, _) = Actor::spawn_linked(
-        Some(SourceActor::name()),
-        SourceActor,
-        SourceArgs {
-            mic_device: None,
-            onboarding: ctx.params.onboarding,
-            app: ctx.app.clone(),
-            session_id: ctx.params.session_id.clone(),
-        },
-        myself.get_cell(),
-    )
-    .await?;
-
-    // 2. Only spawn the recorder if recording is enabled
-    let recorder_cell = if ctx.params.record_enabled {
-        let (recorder_ref, _) = Actor::spawn_linked(
-            Some(RecorderActor::name()),
-            RecorderActor,
-            RecArgs {
-                app_dir: ctx.app_dir.clone(),
-                session_id: ctx.params.session_id.clone(),
-            },
-            myself.get_cell(),
-        )
-        .await?;
-        Some(recorder_ref.get_cell())
-    } else {
-        None
-    };
-
-    // ...
-}
-```
+<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/listener/src/actors/session/supervisor.rs#L56-L106" />
 
 Audio is written to WAV files on your local disk. Here is the recorder handling incoming audio samples:
 
-```rust
-// plugins/listener/src/actors/recorder.rs
-async fn handle(
-    &self,
-    _myself: ActorRef<Self::Msg>,
-    msg: Self::Msg,
-    st: &mut Self::State,
-) -> Result<(), ActorProcessingErr> {
-    match msg {
-        RecMsg::AudioSingle(samples) => {
-            if let Some(ref mut writer) = st.writer {
-                if st.is_stereo {
-                    write_mono_as_stereo(writer, &samples)?;
-                } else {
-                    write_mono_samples(writer, &samples)?;
-                }
-            }
-        }
-        RecMsg::AudioDual(mic, spk) => {
-            if let Some(ref mut writer) = st.writer {
-                if st.is_stereo {
-                    write_interleaved_stereo(writer, &mic, &spk)?;
-                } else {
-                    let mixed = mix_audio_f32(&mic, &spk);
-                    write_mono_samples(writer, &mixed)?;
-                }
-            }
-            if let Some(ref mut writer_mic) = st.writer_mic {
-                write_mono_samples(writer_mic, &mic)?;
-            }
-            if let Some(ref mut writer_spk) = st.writer_spk {
-                write_mono_samples(writer_spk, &spk)?;
-            }
-        }
-    }
-    flush_if_due(st)?;
-    Ok(())
-}
-```
+<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/listener/src/actors/recorder.rs#L130-L168" />
 
 Audio files are stored at `{vault}/sessions/{session_id}/audio.wav` — they never leave your device unless you explicitly use cloud transcription.
 
@@ -201,54 +79,11 @@ Char collects anonymous usage analytics by default to help improve the product. 
 
 Here is the opt-out check — when disabled, the function returns immediately without sending anything:
 
-```rust
-// plugins/analytics/src/ext.rs
-pub async fn event(
-    &self,
-    mut payload: hypr_analytics::AnalyticsPayload,
-) -> Result<(), crate::Error> {
-    Self::enrich_payload(self.manager, &mut payload);
-
-    if self.is_disabled().unwrap_or(true) {
-        return Ok(());
-    }
-
-    let machine_id = hypr_host::fingerprint();
-    let client = self.manager.state::<crate::ManagedState>();
-    client
-        .event(machine_id, payload)
-        .await
-        .map_err(crate::Error::HyprAnalytics)?;
-    Ok(())
-}
-```
+<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/analytics/src/ext.rs#L10-L28" />
 
 **What is attached to every analytics event** — this is the complete enrichment logic:
 
-```rust
-// plugins/analytics/src/ext.rs
-fn enrich_payload(
-    manager: &M,
-    payload: &mut hypr_analytics::AnalyticsPayload,
-) {
-    let app_version = env!("APP_VERSION");
-    let app_identifier = manager.config().identifier.clone();
-    let git_hash = manager.misc().get_git_hash();
-    let bundle_id = manager.config().identifier.clone();
-
-    payload.props.entry("app_version".into())
-        .or_insert(app_version.into());
-    payload.props.entry("app_identifier".into())
-        .or_insert(app_identifier.into());
-    payload.props.entry("git_hash".into())
-        .or_insert(git_hash.into());
-    payload.props.entry("bundle_id".into())
-        .or_insert(bundle_id.into());
-    payload.props.entry("$set".into()).or_insert_with(|| {
-        serde_json::json!({ "app_version": app_version })
-    });
-}
-```
+<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/analytics/src/ext.rs#L45-L76" />
 
 **What is sent:**
 - Event names (e.g. "session_started", "transcription_completed")
@@ -262,28 +97,7 @@ fn enrich_payload(
 
 The analytics client sends events to both services:
 
-```rust
-// crates/analytics/src/lib.rs
-pub async fn event(
-    &self,
-    distinct_id: impl Into<String>,
-    payload: AnalyticsPayload,
-) -> Result<(), Error> {
-    let distinct_id = distinct_id.into();
-
-    if let Some(posthog) = &self.posthog {
-        posthog
-            .event(&distinct_id, &payload.event, &payload.props)
-            .await?;
-    }
-
-    if let Some(outlit) = &self.outlit {
-        outlit.event(&distinct_id, &payload).await;
-    }
-
-    Ok(())
-}
-```
+<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/crates/analytics/src/lib.rs#L48-L69" />
 
 **How to disable:** Go to Settings and turn off analytics. When disabled, no analytics events are sent — the `is_disabled()` check short-circuits the entire flow.
 
@@ -291,39 +105,7 @@ pub async fn event(
 
 Char uses Sentry for crash reporting and error tracking in release builds. Here is the complete initialization:
 
-```rust
-// apps/desktop/src-tauri/src/lib.rs
-let sentry_client = {
-    let dsn = option_env!("SENTRY_DSN");
-
-    if let Some(dsn) = dsn {
-        let release = option_env!("APP_VERSION")
-            .map(|v| format!("hyprnote-desktop@{}", v).into());
-
-        let client = sentry::init((
-            dsn,
-            sentry::ClientOptions {
-                release,
-                traces_sample_rate: 1.0,
-                auto_session_tracking: false,
-                ..Default::default()
-            },
-        ));
-
-        sentry::configure_scope(|scope| {
-            scope.set_tag("service", "hyprnote-desktop");
-            scope.set_user(Some(sentry::User {
-                id: Some(hypr_host::fingerprint()),
-                ..Default::default()
-            }));
-        });
-
-        Some(client)
-    } else {
-        None
-    }
-};
-```
+<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/apps/desktop/src-tauri/src/lib.rs#L26-L55" />
 
 **What is sent:**
 - Error messages, stack traces, and crash dumps
@@ -341,64 +123,11 @@ When you use cloud-based transcription, your audio is sent to the selected provi
 
 Here is how the listener actor connects to your configured STT provider — audio is streamed via the adapter matching your settings:
 
-```rust
-// plugins/listener/src/actors/listener/adapters.rs
-pub(super) async fn spawn_rx_task(
-    args: ListenerArgs,
-    myself: ActorRef<ListenerMsg>,
-) -> Result<(ChannelSender, JoinHandle<()>, oneshot::Sender<()>, String), ActorProcessingErr> {
-    let adapter_kind = AdapterKind::from_url_and_languages(
-        &args.base_url,
-        &args.languages,
-        Some(&args.model),
-    );
-
-    let result = match (adapter_kind, is_dual) {
-        (AdapterKind::Argmax, false) =>
-            spawn_rx_task_single_with_adapter::<ArgmaxAdapter>(args, myself).await,
-        (AdapterKind::Soniox, false) =>
-            spawn_rx_task_single_with_adapter::<SonioxAdapter>(args, myself).await,
-        (AdapterKind::Deepgram, false) =>
-            spawn_rx_task_single_with_adapter::<DeepgramAdapter>(args, myself).await,
-        (AdapterKind::AssemblyAI, false) =>
-            spawn_rx_task_single_with_adapter::<AssemblyAIAdapter>(args, myself).await,
-        (AdapterKind::OpenAI, false) =>
-            spawn_rx_task_single_with_adapter::<OpenAIAdapter>(args, myself).await,
-        (AdapterKind::Gladia, false) =>
-            spawn_rx_task_single_with_adapter::<GladiaAdapter>(args, myself).await,
-        (AdapterKind::ElevenLabs, false) =>
-            spawn_rx_task_single_with_adapter::<ElevenLabsAdapter>(args, myself).await,
-        (AdapterKind::DashScope, false) =>
-            spawn_rx_task_single_with_adapter::<DashScopeAdapter>(args, myself).await,
-        (AdapterKind::Mistral, false) =>
-            spawn_rx_task_single_with_adapter::<MistralAdapter>(args, myself).await,
-        (AdapterKind::Fireworks, false) =>
-            spawn_rx_task_single_with_adapter::<FireworksAdapter>(args, myself).await,
-        // ...dual-channel variants also exist for each provider
-    }?;
-
-    Ok((result.0, result.1, result.2, adapter_kind.to_string()))
-}
-```
+<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/listener/src/actors/listener/adapters.rs#L22-L102" />
 
 The `ListenerArgs` passed to the STT adapter contain the following — this is all the data sent to the provider along with your audio stream:
 
-```rust
-// plugins/listener/src/actors/session/supervisor.rs
-ListenerArgs {
-    app: state.ctx.app.clone(),
-    languages: state.ctx.params.languages.clone(),
-    onboarding: state.ctx.params.onboarding,
-    model: state.ctx.params.model.clone(),
-    base_url: state.ctx.params.base_url.clone(),
-    api_key: state.ctx.params.api_key.clone(),
-    keywords: state.ctx.params.keywords.clone(),
-    mode, // MicOnly, SpeakerOnly, or MicAndSpeaker
-    session_started_at: state.ctx.started_at_instant,
-    session_started_at_unix: state.ctx.started_at_system,
-    session_id: state.ctx.params.session_id.clone(),
-}
-```
+<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/listener/src/actors/session/supervisor.rs#L122-L134" />
 
 **What is sent:**
 - Your recorded audio (streamed in real-time or sent as a file for batch transcription)
@@ -430,75 +159,11 @@ When you use cloud-based AI features (summaries, enhanced notes, chat), your ses
 
 Here is how the language model client is created — each provider connects directly to its own API:
 
-```typescript
-// apps/desktop/src/hooks/useLLMConnection.ts
-const createLanguageModel = (conn: LLMConnectionInfo): LanguageModelV3 => {
-  switch (conn.providerId) {
-    case "hyprnote": {
-      const provider = createOpenRouter({
-        fetch: tracedFetch,
-        baseURL: conn.baseUrl,
-        apiKey: conn.apiKey,
-      });
-      return wrapWithThinkingMiddleware(provider.chat(conn.modelId));
-    }
-    case "anthropic": {
-      const provider = createAnthropic({
-        fetch: tauriFetch,
-        apiKey: conn.apiKey,
-        headers: {
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true",
-        },
-      });
-      return wrapWithThinkingMiddleware(provider(conn.modelId));
-    }
-    case "google_generative_ai": {
-      const provider = createGoogleGenerativeAI({
-        fetch: tauriFetch,
-        baseURL: conn.baseUrl,
-        apiKey: conn.apiKey,
-      });
-      return wrapWithThinkingMiddleware(provider(conn.modelId));
-    }
-    case "openai": {
-      const provider = createOpenAI({
-        fetch: tauriFetch,
-        baseURL: conn.baseUrl,
-        apiKey: conn.apiKey,
-      });
-      return wrapWithThinkingMiddleware(provider(conn.modelId));
-    }
-    case "ollama": {
-      const provider = createOpenAICompatible({
-        fetch: ollamaFetch,
-        name: conn.providerId,
-        baseURL: conn.baseUrl,
-      });
-      return wrapWithThinkingMiddleware(
-        provider.chatModel(conn.modelId),
-      );
-    }
-  }
-};
-```
+<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/apps/desktop/src/hooks/useLLMConnection.ts#L230-L310" />
 
 When auto-enhance runs after a session ends, the enhanced result is stored locally:
 
-```typescript
-// apps/desktop/src/hooks/autoEnhance/runner.ts
-const handleEnhanceSuccess = useCallback(
-  (text: string) => {
-    const noteId = currentNoteIdRef.current;
-    if (!text || !store || !noteId) return;
-    const jsonContent = md2json(text);
-    store.setPartialRow("enhanced_notes", noteId, {
-      content: JSON.stringify(jsonContent),
-    });
-  },
-  [store, sessionId, model, titleTask.start],
-);
-```
+<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/apps/desktop/src/hooks/autoEnhance/runner.ts#L82-L105" />
 
 An analytics event is also fired when auto-enhance runs — it includes only the provider and model name, not the content:
 
@@ -531,29 +196,9 @@ Pro users have access to MCP tools for web search and URL reading during AI-assi
 
 Char periodically checks if your device is online. Here is the complete implementation:
 
-```rust
-// plugins/network/src/actor.rs
-const CHECK_INTERVAL: Duration = Duration::from_secs(2);
-const CHECK_URL: &str = "https://www.google.com/generate_204";
-const REQUEST_TIMEOUT: Duration = Duration::from_secs(5);
+<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/network/src/actor.rs#L7-L9" />
 
-async fn check_network() -> bool {
-    let client = reqwest::Client::builder()
-        .timeout(REQUEST_TIMEOUT)
-        .build();
-    let client = match client {
-        Ok(c) => c,
-        Err(_) => return false,
-    };
-    match client.head(CHECK_URL).send().await {
-        Ok(response) => {
-            response.status().is_success()
-                || response.status().as_u16() == 204
-        }
-        Err(_) => false,
-    }
-}
-```
+<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/network/src/actor.rs#L83-L95" />
 
 **What happens:**
 - A HEAD request to `https://www.google.com/generate_204` every 2 seconds
