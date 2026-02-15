@@ -79,7 +79,7 @@ struct ComGuard;
 impl ComGuard {
     fn new() -> Result<Self, Error> {
         unsafe {
-            CoInitializeEx(None, COINIT_MULTITHREADED).map_err(|e| {
+            CoInitializeEx(None, COINIT_MULTITHREADED).ok().map_err(|e| {
                 Error::AudioSystemError(format!("COM initialization failed: {}", e))
             })?;
         }
@@ -128,8 +128,8 @@ fn get_device_name(device: &IMMDevice) -> Result<String, Error> {
             return Err(Error::EnumerationFailed("Device name is null".into()));
         }
 
-        let len = (0..).take_while(|&i| *name.add(i) != 0).count();
-        let slice = std::slice::from_raw_parts(name, len);
+        let len = (0..).take_while(|&i| *name.0.add(i) != 0).count();
+        let slice = std::slice::from_raw_parts(name.0, len);
         let os_string = OsString::from_wide(slice);
 
         os_string
@@ -255,7 +255,7 @@ impl AudioDeviceBackend for WindowsBackend {
                             audio_device.volume = Some(volume);
                         }
                         if let Ok(muted) = volume_control.GetMute() {
-                            audio_device.is_muted = Some(muted);
+                            audio_device.is_muted = Some(muted.as_bool());
                         }
                     }
                 }
@@ -330,7 +330,7 @@ impl AudioDeviceBackend for WindowsBackend {
                     audio_device.volume = Some(volume);
                 }
                 if let Ok(muted) = volume_control.GetMute() {
-                    audio_device.is_muted = Some(muted);
+                    audio_device.is_muted = Some(muted.as_bool());
                 }
             }
 
@@ -356,6 +356,7 @@ impl AudioDeviceBackend for WindowsBackend {
             for role in 0..3u32 {
                 policy_config
                     .SetDefaultEndpoint(PCWSTR(device_id_wide.as_ptr()), role)
+                    .ok()
                     .map_err(|e| {
                         Error::SetDefaultFailed(format!("Failed to set default endpoint: {}", e))
                     })?;
@@ -470,7 +471,7 @@ impl AudioDeviceBackend for WindowsBackend {
                 .GetMute()
                 .map_err(|e| Error::AudioSystemError(format!("Failed to get mute state: {}", e)))?;
 
-            Ok(muted)
+            Ok(muted.as_bool())
         }
     }
 
