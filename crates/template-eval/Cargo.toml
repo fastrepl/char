@@ -6,8 +6,6 @@ edition = "2024"
 [dependencies]
 askama = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
-specta = { workspace = true, features = ["derive"] }
-thiserror = { workspace = true }
 
 [dev-dependencies]
 hypr-askama-utils = { workspace = true }

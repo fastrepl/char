@@ -12,4 +12,3 @@ thiserror = { workspace = true }
 urlencoding = { workspace = true }
 
 [dev-dependencies]
-tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }

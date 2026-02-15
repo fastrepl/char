@@ -14,4 +14,3 @@ serde_json = { workspace = true }
 thiserror = { workspace = true }
 
 futures-util = { workspace = true }
-tokio = { workspace = true }

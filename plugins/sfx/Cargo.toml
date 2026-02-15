@@ -21,4 +21,3 @@ rodio = { workspace = true }
 
 serde = { workspace = true }
 specta = { workspace = true }
-strum = { workspace = true, features = ["derive"] }

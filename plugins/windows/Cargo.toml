@@ -14,9 +14,6 @@ tauri-plugin = { workspace = true, features = ["build"] }
 specta-typescript = { workspace = true }
 
 [target.'cfg(target_os = "macos")'.dependencies]
-objc2 = { workspace = true }
-objc2-app-kit = { workspace = true }
-objc2-foundation = { workspace = true }
 
 [dependencies]
 serde = { workspace = true }
@@ -24,7 +21,6 @@ serde_json = { workspace = true }
 
 strum = { workspace = true, features = ["derive"] }
 url = { workspace = true, features = ["serde"] }
-uuid = { workspace = true, features = ["v4"] }
 
 specta = { workspace = true }
 tauri = { workspace = true, features = ["test", "macos-private-api"] }
@@ -32,7 +28,6 @@ tauri-specta = { workspace = true, features = ["derive", "typescript"] }
 
 tauri-plugin-analytics = { workspace = true }
 tauri-plugin-os = { workspace = true }
-tauri-plugin-sfx = { workspace = true }
 tauri-plugin-window-state = { workspace = true }
 
 thiserror = { workspace = true }

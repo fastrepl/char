@@ -17,13 +17,8 @@ vulkan = ["actual", "whisper-rs/vulkan"]
 openmp = ["actual", "whisper-rs/openmp"]
 
 [dependencies]
-hypr-audio-utils = { workspace = true }
-hypr-whisper = { workspace = true }
-
-dasp = { workspace = true }
 hound = { workspace = true }
-
-hypr-audio-interface = { workspace = true }
+hypr-whisper = { workspace = true }
 rodio = { workspace = true }
 whisper-rs = { git = "https://codeberg.org/tazz4843/whisper-rs", rev = "a23990c", features = ["raw-api", "tracing_backend"], optional = true }
 
@@ -40,8 +35,5 @@ regex = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }
 
 [dev-dependencies]
-hypr-data = { workspace = true }
-
-dirs = { workspace = true }
 futures-util = { workspace = true }
-tokio = { workspace = true }
+hypr-data = { workspace = true }

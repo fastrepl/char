@@ -15,7 +15,6 @@ assert_fs = "1"
 hypr-data = { workspace = true }
 predicates = "3"
 specta-typescript = { workspace = true }
-tempfile = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
 
 [dependencies]
@@ -25,7 +24,6 @@ hypr-tiptap = { workspace = true }
 
 tauri = { workspace = true, features = ["test"] }
 tauri-plugin-notify = { workspace = true }
-tauri-plugin-opener = { workspace = true }
 tauri-plugin-settings = { workspace = true }
 tauri-specta = { workspace = true, features = ["derive", "typescript"] }
 

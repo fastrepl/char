@@ -4,6 +4,5 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-dasp = { workspace = true }
 futures-util = { workspace = true }
 rodio = { workspace = true }

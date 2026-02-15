@@ -14,5 +14,4 @@ specta = { workspace = true, features = ["derive"] }
 hypr-data = { workspace = true }
 
 reqwest = { workspace = true, features = ["json"] }
-rodio = { workspace = true }
 tokio = { workspace = true, features = ["rt", "macros"] }

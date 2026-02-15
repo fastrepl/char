@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-hypr-buffer = { workspace = true }
 hypr-data = { workspace = true }
 hypr-db-core = { workspace = true }
 hypr-language = { workspace = true }
@@ -21,5 +20,4 @@ schemars = { workspace = true, features = ["chrono04"] }
 specta = { workspace = true, features = ["derive", "chrono", "serde_json"] }
 
 chrono = { workspace = true, features = ["serde"] }
-indoc = { workspace = true }
 uuid = { workspace = true, features = ["v4", "serde"] }

@@ -23,12 +23,9 @@ hypr-db-core = { workspace = true, features = ["encryption"] }
 tokio-postgres = { version = "0.7.14", features = ["with-serde_json-1"] }
 
 futures-util = { workspace = true }
-tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
-tracing = { workspace = true }
-
-dirs = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 specta = { workspace = true, features = ["serde_json"] }
-strum = { workspace = true, features = ["derive"] }
 thiserror = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+tracing = { workspace = true }

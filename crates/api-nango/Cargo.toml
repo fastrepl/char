@@ -11,9 +11,7 @@ hypr-nango = { workspace = true }
 utoipa = { workspace = true }
 
 axum = { workspace = true }
-reqwest = { workspace = true, features = ["json"] }
 sentry = { workspace = true }
-tokio = { workspace = true }
 tracing = { workspace = true }
 
 serde = { workspace = true, features = ["derive"] }

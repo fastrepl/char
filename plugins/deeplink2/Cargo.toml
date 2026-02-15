@@ -12,7 +12,6 @@ tauri-plugin = { workspace = true, features = ["build"] }
 
 [dev-dependencies]
 specta-typescript = { workspace = true }
-tokio = { workspace = true, features = ["macros"] }
 
 hypr-docs = { workspace = true }
 serde_yaml = { workspace = true }
@@ -24,7 +23,6 @@ tauri-specta = { workspace = true, features = ["derive", "typescript"] }
 
 serde = { workspace = true }
 specta = { workspace = true }
-strum = { workspace = true, features = ["derive"] }
 
 thiserror = { workspace = true }
 tracing = { workspace = true }

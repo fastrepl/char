@@ -18,4 +18,3 @@ uuid = { workspace = true, features = ["v4", "v5"] }
 
 [dev-dependencies]
 tempfile = { workspace = true }
-tokio = { workspace = true, features = ["rt", "macros"] }

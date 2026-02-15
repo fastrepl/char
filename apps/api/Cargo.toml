@@ -14,24 +14,19 @@ hypr-api-subscription = { workspace = true }
 hypr-api-support = { workspace = true }
 hypr-llm-proxy = { workspace = true }
 hypr-transcribe-proxy = { workspace = true }
-owhisper-client = { workspace = true }
 
 axum = { workspace = true, features = ["ws"] }
 rustls = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros", "signal"] }
 tower-http = { workspace = true, features = ["trace", "cors"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter"] }
 
-reqwest = { workspace = true, features = ["json"] }
-serde = { workspace = true, features = ["derive"] }
-serde_json = { workspace = true }
-url = { workspace = true }
-
 dotenvy = { workspace = true }
 envy = { workspace = true }
 governor = { workspace = true }
-jsonwebtoken = { workspace = true }
 sentry = { workspace = true, features = ["tower", "tower-axum-matched-path", "tracing"] }
 tower = { workspace = true }
 utoipa = { workspace = true }

@@ -31,4 +31,3 @@ chrono = { workspace = true }
 dirs = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
-uuid = { workspace = true, features = ["v4", "v5"] }

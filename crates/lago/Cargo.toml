@@ -13,4 +13,3 @@ strum = { workspace = true, features = ["derive"] }
 url = { workspace = true }
 
 [dev-dependencies]
-tokio = { workspace = true, features = ["rt", "macros"] }

@@ -12,15 +12,10 @@ tauri-plugin = { workspace = true, features = ["build"] }
 
 [dev-dependencies]
 specta-typescript = { workspace = true }
-tokio = { workspace = true, features = ["macros"] }
 
 [dependencies]
+specta = { workspace = true }
 tauri = { workspace = true, features = ["test"] }
 tauri-specta = { workspace = true, features = ["derive", "typescript"] }
-
-serde = { workspace = true }
-serde_json = { workspace = true }
-specta = { workspace = true }
-thiserror = { workspace = true }
 
 sanitize-filename = "0.6"

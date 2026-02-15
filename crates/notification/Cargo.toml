@@ -8,7 +8,6 @@ default = ["legacy"]
 legacy = ["dep:hypr-notification-macos", "dep:hypr-notification-linux"]
 
 [dependencies]
-serde = { workspace = true, features = ["derive"] }
 tracing = { workspace = true }
 
 hypr-notification-interface = { workspace = true }

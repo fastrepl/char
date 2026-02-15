@@ -36,10 +36,8 @@ serde_json = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]
-hypr-buffer = { workspace = true }
 hypr-data = { workspace = true }
 hypr-gbnf = { workspace = true }
-hypr-template-app-legacy = { workspace = true }
 
 dirs = { workspace = true }
 rand = "0.9.0"

@@ -9,4 +9,3 @@ hypr-supabase-auth = { workspace = true }
 axum = { workspace = true }
 
 [dev-dependencies]
-tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }

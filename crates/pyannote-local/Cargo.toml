@@ -19,10 +19,7 @@ simsimd = { version = "6" }
 thiserror = { workspace = true }
 
 serde = { workspace = true, features = ["derive"] }
-specta = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
 hypr-data = { workspace = true }
-
-approx = { workspace = true }
 rodio = { workspace = true }

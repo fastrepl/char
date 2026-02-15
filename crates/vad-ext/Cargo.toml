@@ -12,7 +12,6 @@ hypr-data = { workspace = true }
 rodio = { workspace = true }
 
 [dependencies]
-serde = { workspace = true }
 thiserror = { workspace = true }
 
 hypr-audio-interface = { workspace = true }
@@ -23,4 +22,3 @@ silero-rs = { workspace = true }
 
 futures-util = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
-tracing = { workspace = true }
