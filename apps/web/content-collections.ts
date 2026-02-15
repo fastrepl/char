@@ -10,6 +10,27 @@ import { z } from "zod";
 
 import { VersionPlatform } from "@/scripts/versioning";
 
+function parseLineRange(url: string): { startLine?: number; endLine?: number } {
+  const lineMatch = url.match(/#L(\d+)(?:-L(\d+))?$/);
+  if (!lineMatch) return {};
+  return {
+    startLine: parseInt(lineMatch[1], 10),
+    endLine: lineMatch[2] ? parseInt(lineMatch[2], 10) : undefined,
+  };
+}
+
+function extractLines(
+  content: string,
+  startLine?: number,
+  endLine?: number,
+): string {
+  if (!startLine) return content;
+  const lines = content.split("\n");
+  const start = startLine - 1;
+  const end = endLine ?? lines.length;
+  return lines.slice(start, end).join("\n");
+}
+
 async function embedGithubCode(content: string): Promise<string> {
   const githubCodeRegex = /<GithubCode\s+url="([^"]+)"\s*\/>/g;
   let result = content;
@@ -19,31 +40,30 @@ async function embedGithubCode(content: string): Promise<string> {
     const [fullMatch, url] = match;
 
     const repoMatch = url.match(
-      /github\.com\/fastrepl\/(hyprnote|char)\/blob\/[^/]+\/(.+)/,
+      /github\.com\/fastrepl\/(hyprnote|char)\/blob\/[^/]+\/(.+?)(?:#L\d+(?:-L\d+)?)?$/,
     );
     if (repoMatch) {
       const filePath = repoMatch[2];
       const fileName = path.basename(filePath);
       const localPath = path.resolve(process.cwd(), "..", "..", filePath);
+      const { startLine, endLine } = parseLineRange(url);
 
       try {
         const fileContent = fs.readFileSync(localPath, "utf-8");
 
         const codeBlockMatch = fileContent.match(/```(\w+)\n([\s\S]*?)```/);
-        if (codeBlockMatch) {
-          const [, lang, code] = codeBlockMatch;
-          const escapedCode = JSON.stringify(code.trimEnd());
-          result = result.replace(
-            fullMatch,
-            `<GithubEmbed code={${escapedCode}} fileName="${fileName}" language="${lang}" />`,
-          );
-        } else {
-          const escapedCode = JSON.stringify(fileContent.trimEnd());
-          result = result.replace(
-            fullMatch,
-            `<GithubEmbed code={${escapedCode}} fileName="${fileName}" />`,
-          );
-        }
+        const rawCode = codeBlockMatch ? codeBlockMatch[2] : fileContent;
+        const lang = codeBlockMatch ? codeBlockMatch[1] : undefined;
+
+        const slicedCode = extractLines(rawCode.trimEnd(), startLine, endLine);
+        const escapedCode = JSON.stringify(slicedCode);
+        const lineNum = startLine ?? 1;
+
+        const langAttr = lang ? ` language="${lang}"` : "";
+        result = result.replace(
+          fullMatch,
+          `<GithubEmbed code={${escapedCode}} fileName="${fileName}" url="${url}" startLine={${lineNum}}${langAttr} />`,
+        );
       } catch {
         console.warn(`Failed to read local file: ${localPath}`);
       }
