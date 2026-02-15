@@ -39,6 +39,7 @@ export function useAudioUppy() {
 
   const uppyRef = useRef<Uppy | null>(null);
   const generationRef = useRef(0);
+  const activeGenerationRef = useRef(0);
 
   const uppy = useMemo(() => {
     const instance = new Uppy({
@@ -103,6 +104,8 @@ export function useAudioUppy() {
         cacheControl: "3600",
       });
 
+      activeGenerationRef.current = generationRef.current;
+
       setState({
         status: "uploading",
         progress: 0,
@@ -114,12 +117,14 @@ export function useAudioUppy() {
     };
 
     const onProgress = (progress: number) => {
+      if (generationRef.current !== activeGenerationRef.current) return;
       setState((prev) => ({ ...prev, progress }));
     };
 
     const onComplete = (
       result: UploadResult<Record<string, unknown>, Record<string, never>>,
     ) => {
+      if (generationRef.current !== activeGenerationRef.current) return;
       if (result.failed && result.failed.length > 0) {
         setState((prev) => ({
           ...prev,
@@ -132,10 +137,12 @@ export function useAudioUppy() {
     };
 
     const onUploadError = (_file: unknown, error: Error) => {
+      if (generationRef.current !== activeGenerationRef.current) return;
       setState((prev) => ({ ...prev, status: "error", error: error.message }));
     };
 
     const onError = (error: Error) => {
+      if (generationRef.current !== activeGenerationRef.current) return;
       setState((prev) => ({
         ...prev,
         status: "error",
