@@ -40,6 +40,61 @@ Contents:
 - `prompts/` — custom prompt templates
 - `settings.json` — app settings
 
+Here is how Char loads session content from disk — this shows exactly what files are read per session:
+
+```rust
+// plugins/fs-sync/src/session_content.rs
+pub fn load_session_content(
+    session_id: &str,
+    session_dir: &std::path::Path,
+) -> SessionContentData {
+    let mut content = SessionContentData {
+        session_id: session_id.to_string(),
+        meta: None,                  // from _meta.json
+        raw_memo_tiptap_json: None,  // from memo.md
+        transcript: None,            // from transcript.json
+        notes: vec![],               // from *.md enhanced notes
+    };
+
+    // ...reads every file in the session directory:
+    // - _meta.json -> SessionMetaData (title, created date, participants)
+    // - transcript.json -> TranscriptData (words with timestamps)
+    // - *.md -> AI-generated enhanced notes (parsed from Markdown
+    //          with YAML frontmatter)
+}
+```
+
+The transcript data structure stores word-level timestamps and speaker information:
+
+```rust
+// plugins/fs-sync/src/types.rs
+pub struct TranscriptWord {
+    pub id: Option<String>,
+    pub text: String,
+    pub start_ms: i64,
+    pub end_ms: i64,
+    pub channel: i64,
+}
+
+pub struct TranscriptData {
+    pub transcripts: Vec<TranscriptEntry>,
+}
+```
+
+The app state persisted in `store.json` is defined by this enum — nothing else is stored there:
+
+```rust
+// apps/desktop/src-tauri/src/store.rs
+pub enum StoreKey {
+    OnboardingNeeded2,
+    DismissedToasts,
+    OnboardingLocal,
+    TinybaseValues,
+    PinnedTabs,
+    RecentlyOpenedSessions,
+}
+```
+
 ### Logs
 
 Application logs are stored in the system app log directory as rotating files (`app.log`, `app.log.1`, etc.).
