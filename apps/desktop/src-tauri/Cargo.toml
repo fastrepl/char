@@ -50,6 +50,7 @@ tauri-plugin-js = { workspace = true }
 tauri-plugin-listener = { workspace = true }
 tauri-plugin-listener2 = { workspace = true }
 tauri-plugin-local-stt = { workspace = true }
+tauri-plugin-mcp = { workspace = true }
 tauri-plugin-misc = { workspace = true }
 tauri-plugin-network = { workspace = true }
 tauri-plugin-notification = { workspace = true }
@@ -93,8 +94,8 @@ tracing = { workspace = true }
 
 hypr-host = { workspace = true }
 
+hypr-supervisor = { workspace = true }
 ractor = { workspace = true }
-ractor-supervisor = { workspace = true }
 
 pico-args = "0.5"
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }

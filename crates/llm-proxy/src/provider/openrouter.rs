@@ -1,3 +1,4 @@
+use hypr_openrouter::{Client as OpenRouterClient, Error as OpenRouterError};
 use reqwest::Client;
 use serde::Deserialize;
 
@@ -130,39 +131,38 @@ impl Provider for OpenRouterProvider {
         let generation_id = generation_id.to_string();
 
         Box::pin(async move {
-            #[derive(Deserialize)]
-            struct OpenRouterGenerationResponse {
-                data: OpenRouterGenerationData,
-            }
+            let openrouter = OpenRouterClient::new(api_key).with_http_client(client);
 
-            #[derive(Deserialize)]
-            struct OpenRouterGenerationData {
-                total_cost: f64,
-            }
-
-            let url = format!(
-                "https://openrouter.ai/api/v1/generation?id={}",
-                generation_id
-            );
-
-            let response = client
-                .get(&url)
-                .header("Authorization", format!("Bearer {}", api_key))
-                .send()
+            match openrouter
+                .generation_total_cost_with_retry(&generation_id, 3)
                 .await
-                .ok()?;
-
-            if !response.status().is_success() {
-                tracing::warn!(
-                    http_status = %response.status().as_u16(),
-                    generation_id = %generation_id,
-                    "generation_metadata_fetch_failed"
-                );
-                return None;
+            {
+                Ok(cost) => cost,
+                Err(OpenRouterError::Api { status, .. }) if status == 404 => {
+                    tracing::debug!(
+                        http_status = %status,
+                        generation_id = %generation_id,
+                        "generation_metadata_unavailable"
+                    );
+                    None
+                }
+                Err(OpenRouterError::Api { status, .. }) => {
+                    tracing::warn!(
+                        http_status = %status,
+                        generation_id = %generation_id,
+                        "generation_metadata_fetch_failed"
+                    );
+                    None
+                }
+                Err(err) => {
+                    tracing::warn!(
+                        error = %err,
+                        generation_id = %generation_id,
+                        "generation_metadata_fetch_failed"
+                    );
+                    None
+                }
             }
-
-            let data: OpenRouterGenerationResponse = response.json().await.ok()?;
-            Some(data.data.total_cost)
         })
     }
 }

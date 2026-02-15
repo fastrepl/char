@@ -13,7 +13,7 @@ export function GoogleDocsImport({
 }: GoogleDocsImportProps) {
   const [url, setUrl] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (url.trim() && !isLoading) {

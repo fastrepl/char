@@ -4,6 +4,7 @@ const COMMANDS: &[&str] = &[
     "is_model_downloading",
     "download_model",
     "cancel_download",
+    "delete_model",
     "start_server",
     "stop_server",
     "get_servers",

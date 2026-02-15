@@ -192,7 +192,6 @@ export const createEvent = (calendar_id: string) => {
       meeting_link,
       description,
       note,
-      ignored: undefined,
       is_all_day: undefined,
     } satisfies EventStorage,
   };

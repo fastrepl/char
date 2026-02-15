@@ -43,7 +43,10 @@ export function WeekStartSelector() {
   };
 
   return (
-    <div className="flex flex-row items-center justify-between">
+    <div
+      data-settings-item
+      className="flex flex-row items-center justify-between"
+    >
       <div>
         <h3 className="text-sm font-medium mb-1">Week starts on</h3>
         <p className="text-xs text-neutral-600">

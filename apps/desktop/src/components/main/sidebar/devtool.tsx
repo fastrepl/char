@@ -247,13 +247,8 @@ function NavigationCard() {
   }, []);
 
   const handleShowOnboarding = useCallback(() => {
-    void windowsCommands.windowShow({ type: "onboarding" }).then(() => {
-      void windowsCommands.windowEmitNavigate(
-        { type: "onboarding" },
-        { path: "/app/onboarding", search: {} },
-      );
-    });
-  }, []);
+    openNew({ type: "onboarding" });
+  }, [openNew]);
 
   const handleShowControl = useCallback(() => {
     void windowsCommands.windowShow({ type: "control" });

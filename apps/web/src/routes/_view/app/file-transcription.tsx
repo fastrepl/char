@@ -3,6 +3,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Play } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import { sttListenBatch, sttStatus } from "@hypr/api-client";
+import type {
+  ListenCallbackResponse,
+  PipelineStatus,
+  SttStatusResponse,
+} from "@hypr/api-client";
+import { createClient } from "@hypr/api-client/client";
 import NoteEditor, { type JSONContent } from "@hypr/tiptap/editor";
 import { EMPTY_TIPTAP_DOC } from "@hypr/tiptap/shared";
 import "@hypr/tiptap/styles.css";
@@ -13,12 +20,46 @@ import {
   TranscriptDisplay,
 } from "@/components/transcription/transcript-display";
 import { UploadArea } from "@/components/transcription/upload-area";
-import {
-  getAudioPipelineStatus,
-  startAudioPipeline,
-  type StatusStateType,
-} from "@/functions/transcription";
-import { uploadAudioFile } from "@/functions/upload";
+import { env } from "@/env";
+import { getSupabaseBrowserClient } from "@/functions/supabase";
+import { useAudioUppy } from "@/hooks/use-audio-uppy";
+
+function createAuthClient(accessToken: string) {
+  return createClient({
+    baseUrl: env.VITE_API_URL,
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+}
+
+async function getAccessToken(): Promise<string> {
+  const supabase = getSupabaseBrowserClient();
+  const { data } = await supabase.auth.getSession();
+  const token = data?.session?.access_token;
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+  return token;
+}
+
+function extractTranscript(response: SttStatusResponse): string | null {
+  if (response.status !== "done" || !response.rawResult) return null;
+
+  // Soniox: { text: "...", tokens: [...] }
+  if (typeof response.rawResult.text === "string") {
+    return response.rawResult.text;
+  }
+
+  // Deepgram: { results: { channels: [{ alternatives: [{ transcript: "..." }] }] } }
+  const results = response.rawResult.results as
+    | { channels?: Array<{ alternatives?: Array<{ transcript?: string }> }> }
+    | undefined;
+  const transcript = results?.channels?.[0]?.alternatives?.[0]?.transcript;
+  if (typeof transcript === "string") {
+    return transcript;
+  }
+
+  return null;
+}
 
 export const Route = createFileRoute("/_view/app/file-transcription")({
   component: Component,
@@ -28,181 +69,145 @@ export const Route = createFileRoute("/_view/app/file-transcription")({
 });
 
 function Component() {
+  const { id: searchId } = Route.useSearch();
+
   const [file, setFile] = useState<File | null>(null);
-  const [fileId, setFileId] = useState<string | null>(null);
-  const [pipelineId, setPipelineId] = useState<string | null>(null);
+  const [pipelineId, setPipelineId] = useState<string | null>(searchId ?? null);
   const [transcript, setTranscript] = useState<string | null>(null);
   const [noteContent, setNoteContent] = useState<JSONContent>(EMPTY_TIPTAP_DOC);
   const [isMounted, setIsMounted] = useState(false);
+
+  const {
+    addFile: uppyAddFile,
+    reset: uppyReset,
+    status: uppyStatus,
+    progress: uppyProgress,
+    fileId: uppyFileId,
+    error: uppyError,
+  } = useAudioUppy();
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  const uploadMutation = useMutation({
-    mutationFn: async (selectedFile: File) => {
-      const base64Data = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const result = reader.result?.toString().split(",")[1];
-          if (!result) {
-            reject(new Error("Failed to read file"));
-          } else {
-            resolve(result);
-          }
-        };
-        reader.onerror = () => reject(new Error("Failed to read file"));
-        reader.readAsDataURL(selectedFile);
-      });
-
-      const uploadResult = await uploadAudioFile({
-        data: {
-          fileName: selectedFile.name,
-          fileType: selectedFile.type,
-          fileData: base64Data,
-        },
-      });
-
-      if ("error" in uploadResult && uploadResult.error) {
-        throw new Error(uploadResult.message || "Failed to upload file");
-      }
-      if (!("fileId" in uploadResult)) {
-        throw new Error("Failed to get file ID");
-      }
-
-      return uploadResult.fileId;
-    },
-    onSuccess: (newFileId) => {
-      setFileId(newFileId);
-    },
-  });
-
   const startPipelineMutation = useMutation({
-    mutationFn: async (fileIdArg: string) => {
-      const pipelineResult = await startAudioPipeline({
-        data: { fileId: fileIdArg },
+    mutationFn: async (fileId: string) => {
+      const token = await getAccessToken();
+      const client = createAuthClient(token);
+      const { data, error } = await sttListenBatch({
+        client,
+        body: { url: fileId },
+        query: { callback: "true", provider: "deepgram" },
       });
-
-      if ("error" in pipelineResult && pipelineResult.error) {
-        throw new Error(pipelineResult.message || "Failed to start pipeline");
+      if (error || !data) {
+        throw new Error("Failed to start transcription");
       }
-      if (!("pipelineId" in pipelineResult)) {
-        throw new Error("Failed to get pipeline ID");
-      }
-
-      return pipelineResult.pipelineId;
+      // callback mode returns ListenCallbackResponse, not BatchResponse
+      return (data as unknown as ListenCallbackResponse).request_id;
     },
     onSuccess: (newPipelineId) => {
       setPipelineId(newPipelineId);
+      const url = new URL(window.location.href);
+      url.searchParams.set("id", newPipelineId);
+      window.history.replaceState({}, "", url.toString());
     },
   });
 
   const pipelineStatusQuery = useQuery({
     queryKey: ["audioPipelineStatus", pipelineId],
-    queryFn: async (): Promise<StatusStateType> => {
+    queryFn: async (): Promise<SttStatusResponse> => {
       if (!pipelineId) {
         throw new Error("Missing pipelineId");
       }
-      const res = (await getAudioPipelineStatus({
-        data: { pipelineId },
-      })) as
-        | { success: true; status: StatusStateType }
-        | { error: true; message?: string };
-      if ("error" in res && res.error) {
-        throw new Error(res.message ?? "Failed to get pipeline status");
+      const token = await getAccessToken();
+      const client = createAuthClient(token);
+      const { data, error } = await sttStatus({
+        client,
+        path: { pipeline_id: pipelineId },
+      });
+      if (error) {
+        throw new Error("Failed to get status");
       }
-      if (!("status" in res) || !res.status) {
-        throw new Error("Invalid response from pipeline status");
-      }
-      return res.status;
+      return data!;
     },
     enabled: !!pipelineId,
     refetchInterval: (query) => {
-      const status = query.state.data?.status;
-      const isTerminal = status === "DONE" || status === "ERROR";
-      return isTerminal ? false : 2000;
+      const s = query.state.data?.status;
+      return s === "done" || s === "error" ? false : 2000;
     },
   });
 
   useEffect(() => {
     const data = pipelineStatusQuery.data;
-    if (data?.status === "DONE" && data.transcript) {
-      setTranscript(data.transcript);
+    if (data) {
+      const text = extractTranscript(data);
+      if (text) {
+        setTranscript(text);
+      }
     }
   }, [pipelineStatusQuery.data]);
 
   const isProcessing =
     (!!pipelineId &&
-      !["DONE", "ERROR"].includes(pipelineStatusQuery.data?.status ?? "")) ||
+      !satisfies(pipelineStatusQuery.data?.status, ["done", "error"])) ||
     startPipelineMutation.isPending;
 
   const pipelineStatus = pipelineStatusQuery.data?.status;
 
   const status = (() => {
-    if (pipelineStatusQuery.data?.status === "ERROR") {
+    if (pipelineStatus === "error") {
       return "error" as const;
     }
-    if (pipelineStatusQuery.data?.status === "DONE" || transcript) {
+    if (pipelineStatus === "done" || transcript) {
       return "done" as const;
     }
-    if (pipelineStatus === "LLM_RUNNING") {
-      return "summarizing" as const;
-    }
-    if (pipelineStatus === "TRANSCRIBED") {
-      return "summarizing" as const;
-    }
-    if (pipelineStatus === "TRANSCRIBING") {
+    if (pipelineStatus === "processing" || pipelineId) {
       return "transcribing" as const;
     }
-    if (pipelineStatus === "QUEUED" || pipelineId) {
-      return "queued" as const;
-    }
-    if (uploadMutation.isPending) {
+    if (uppyStatus === "uploading") {
       return "uploading" as const;
     }
-    if (fileId) {
+    if (uppyStatus === "error") {
+      return "error" as const;
+    }
+    if (uppyStatus === "done" && uppyFileId) {
       return "uploaded" as const;
     }
     return "idle" as const;
   })();
 
   const errorMessage =
-    (uploadMutation.error instanceof Error
-      ? uploadMutation.error.message
-      : null) ??
+    uppyError ??
     (startPipelineMutation.error instanceof Error
       ? startPipelineMutation.error.message
       : null) ??
     (pipelineStatusQuery.isError && pipelineStatusQuery.error instanceof Error
       ? pipelineStatusQuery.error.message
       : null) ??
-    (pipelineStatusQuery.data?.status === "ERROR"
-      ? (pipelineStatusQuery.data.error ?? null)
+    (pipelineStatus === "error"
+      ? (pipelineStatusQuery.data?.error ?? null)
       : null);
 
   const handleFileSelect = (selectedFile: File) => {
     setFile(selectedFile);
-    setFileId(null);
     setPipelineId(null);
     setTranscript(null);
-    uploadMutation.reset();
     startPipelineMutation.reset();
-    uploadMutation.mutate(selectedFile);
+    uppyAddFile(selectedFile);
   };
 
   const handleStartTranscription = () => {
-    if (!fileId) return;
-    startPipelineMutation.mutate(fileId);
+    if (!uppyFileId) return;
+    startPipelineMutation.mutate(uppyFileId);
   };
 
   const handleRemoveFile = () => {
     setFile(null);
-    setFileId(null);
     setPipelineId(null);
     setTranscript(null);
     setNoteContent(EMPTY_TIPTAP_DOC);
-    uploadMutation.reset();
     startPipelineMutation.reset();
+    uppyReset();
   };
 
   const mentionConfig = useMemo(
@@ -272,8 +277,9 @@ function Component() {
                         fileName={file.name}
                         fileSize={file.size}
                         onRemove={handleRemoveFile}
-                        isUploading={uploadMutation.isPending}
+                        isUploading={uppyStatus === "uploading"}
                         isProcessing={isProcessing}
+                        uploadProgress={uppyProgress}
                       />
                       {status === "uploaded" && (
                         <button
@@ -345,4 +351,11 @@ function Component() {
       </div>
     </div>
   );
+}
+
+function satisfies(
+  value: PipelineStatus | undefined,
+  targets: PipelineStatus[],
+): boolean {
+  return value != null && targets.includes(value);
 }

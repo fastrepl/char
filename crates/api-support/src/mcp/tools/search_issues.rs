@@ -10,11 +10,17 @@ use crate::state::AppState;
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub(crate) struct SearchIssuesParams {
-    #[schemars(description = "Search query string (e.g. keywords, error messages)")]
+    #[schemars(
+        description = "Search query: use keywords from the user's problem description, error messages, or feature area (e.g. 'transcription audio', 'calendar sync')"
+    )]
     pub query: String,
-    #[schemars(description = "Filter by state: 'open' or 'closed'")]
+    #[schemars(
+        description = "Filter by state: 'open' or 'closed'. Defaults to 'open' if omitted."
+    )]
     pub state: Option<String>,
-    #[schemars(description = "Maximum number of results to return (default: 20, max: 100)")]
+    #[schemars(
+        description = "Maximum number of results (default: 20, max: 100). Use a small limit like 5-10 for quick checks."
+    )]
     pub limit: Option<u8>,
 }
 

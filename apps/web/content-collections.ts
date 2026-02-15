@@ -6,10 +6,62 @@ import * as path from "path";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
+import { createHighlighter, type Highlighter } from "shiki";
 import { z } from "zod";
 
-import { AUTHOR_NAMES } from "@/lib/team";
 import { VersionPlatform } from "@/scripts/versioning";
+
+const EXT_TO_LANG: Record<string, string> = {
+  ".rs": "rust",
+  ".ts": "typescript",
+  ".tsx": "tsx",
+  ".js": "javascript",
+  ".jsx": "jsx",
+  ".json": "json",
+  ".toml": "toml",
+  ".yaml": "yaml",
+  ".yml": "yaml",
+  ".py": "python",
+  ".go": "go",
+  ".css": "css",
+  ".html": "html",
+  ".md": "markdown",
+  ".sh": "bash",
+  ".sql": "sql",
+  ".swift": "swift",
+};
+
+let highlighterPromise: Promise<Highlighter> | null = null;
+function getHighlighter(): Promise<Highlighter> {
+  if (!highlighterPromise) {
+    highlighterPromise = createHighlighter({
+      themes: ["github-light"],
+      langs: Object.values(EXT_TO_LANG),
+    });
+  }
+  return highlighterPromise;
+}
+
+function parseLineRange(url: string): { startLine?: number; endLine?: number } {
+  const lineMatch = url.match(/#L(\d+)(?:-L(\d+))?$/);
+  if (!lineMatch) return {};
+  return {
+    startLine: parseInt(lineMatch[1], 10),
+    endLine: lineMatch[2] ? parseInt(lineMatch[2], 10) : undefined,
+  };
+}
+
+function extractLines(
+  content: string,
+  startLine?: number,
+  endLine?: number,
+): string {
+  if (!startLine) return content;
+  const lines = content.split("\n");
+  const start = startLine - 1;
+  const end = endLine ?? lines.length;
+  return lines.slice(start, end).join("\n");
+}
 
 async function embedGithubCode(content: string): Promise<string> {
   const githubCodeRegex = /<GithubCode\s+url="([^"]+)"\s*\/>/g;
@@ -20,31 +72,42 @@ async function embedGithubCode(content: string): Promise<string> {
     const [fullMatch, url] = match;
 
     const repoMatch = url.match(
-      /github\.com\/fastrepl\/hyprnote\/blob\/[^/]+\/(.+)/,
+      /github\.com\/fastrepl\/(hyprnote|char)\/blob\/[^/]+\/(.+?)(?:#L\d+(?:-L\d+)?)?$/,
     );
     if (repoMatch) {
-      const filePath = repoMatch[1];
+      const filePath = repoMatch[2];
       const fileName = path.basename(filePath);
       const localPath = path.resolve(process.cwd(), "..", "..", filePath);
+      const { startLine, endLine } = parseLineRange(url);
 
       try {
         const fileContent = fs.readFileSync(localPath, "utf-8");
 
         const codeBlockMatch = fileContent.match(/```(\w+)\n([\s\S]*?)```/);
-        if (codeBlockMatch) {
-          const [, lang, code] = codeBlockMatch;
-          const escapedCode = JSON.stringify(code.trimEnd());
-          result = result.replace(
-            fullMatch,
-            `<GithubEmbed code={${escapedCode}} fileName="${fileName}" language="${lang}" />`,
-          );
-        } else {
-          const escapedCode = JSON.stringify(fileContent.trimEnd());
-          result = result.replace(
-            fullMatch,
-            `<GithubEmbed code={${escapedCode}} fileName="${fileName}" />`,
-          );
+        const rawCode = codeBlockMatch ? codeBlockMatch[2] : fileContent;
+        const lang = codeBlockMatch
+          ? codeBlockMatch[1]
+          : EXT_TO_LANG[path.extname(fileName)];
+
+        const slicedCode = extractLines(rawCode.trimEnd(), startLine, endLine);
+        const escapedCode = JSON.stringify(slicedCode);
+        const lineNum = startLine ?? 1;
+
+        let highlightedAttr = "";
+        if (lang) {
+          const highlighter = await getHighlighter();
+          const html = highlighter.codeToHtml(slicedCode, {
+            lang,
+            theme: "github-light",
+          });
+          highlightedAttr = ` highlightedHtml={${JSON.stringify(html)}}`;
         }
+
+        const langAttr = lang ? ` language="${lang}"` : "";
+        result = result.replace(
+          fullMatch,
+          `<GithubEmbed code={${escapedCode}} fileName="${fileName}" url="${url}" startLine={${lineNum}}${langAttr}${highlightedAttr} />`,
+        );
       } catch {
         console.warn(`Failed to read local file: ${localPath}`);
       }
@@ -85,19 +148,18 @@ const articles = defineCollection({
   exclude: "AGENTS.md",
   schema: z.object({
     display_title: z.string().optional(),
-    meta_title: z.string(),
-    meta_description: z.string(),
-    author: z.enum(AUTHOR_NAMES as [string, ...string[]]),
+    meta_title: z.string().optional(),
+    meta_description: z.string().optional(),
+    author: z.union([z.string(), z.array(z.string())]),
     date: z.string(),
     coverImage: z.string().optional(),
     featured: z.boolean().optional(),
-    published: z.boolean().default(false),
     ready_for_review: z.boolean().default(false),
     category: z
       .enum([
         "Case Study",
         "Products In-depth",
-        "Hyprnote Weekly",
+        "Char Weekly",
         "Productivity Hack",
         "Engineering",
       ])
@@ -124,7 +186,8 @@ const articles = defineCollection({
 
     const slug = document._meta.path.replace(/\.mdx$/, "");
 
-    const author = document.author || "Hyprnote Team";
+    const rawAuthor = document.author || "Char Team";
+    const author = Array.isArray(rawAuthor) ? rawAuthor : [rawAuthor];
     const title = document.display_title || document.meta_title;
 
     return {
@@ -164,7 +227,7 @@ const changelog = defineCollection({
     });
 
     const version = document._meta.path.replace(/\.mdx$/, "");
-    const baseUrl = `https://github.com/fastrepl/hyprnote/releases/download/desktop_v${version}`;
+    const baseUrl = `https://github.com/fastrepl/char/releases/download/desktop_v${version}`;
     const downloads: Record<VersionPlatform, string> = {
       "dmg-aarch64": `${baseUrl}/hyprnote-macos-aarch64.dmg`,
       "appimage-x86_64": `${baseUrl}/hyprnote-linux-x86_64.AppImage`,

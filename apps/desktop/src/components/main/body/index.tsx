@@ -52,6 +52,7 @@ import {
 import { loadExtensionPanels } from "./extensions/registry";
 import { TabContentFolder, TabItemFolder } from "./folders";
 import { TabContentHuman, TabItemHuman } from "./humans";
+import { TabContentOnboarding, TabItemOnboarding } from "./onboarding";
 import { Search } from "./search";
 import { TabContentNote, TabItemNote } from "./sessions";
 import { useCaretPosition } from "./sessions/caret-position-context";
@@ -89,6 +90,9 @@ function Header({ tabs }: { tabs: Tab[] }) {
   const { leftsidebar } = useShell();
   const isLinux = platform() === "linux";
   const notifications = useNotifications();
+  const currentTab = useTabs((state) => state.currentTab);
+  const isOnboarding = currentTab?.type === "onboarding";
+  const isSidebarHidden = isOnboarding || !leftsidebar.expanded;
   const {
     select,
     close,
@@ -168,11 +172,11 @@ function Header({ tabs }: { tabs: Tab[] }) {
       data-tauri-drag-region
       className={cn([
         "w-full h-9 flex items-center",
-        !leftsidebar.expanded && (isLinux ? "pl-3" : "pl-18"),
+        isSidebarHidden && (isLinux ? "pl-3" : "pl-20"),
       ])}
     >
-      {!leftsidebar.expanded && isLinux && <TrafficLights className="mr-2" />}
-      {!leftsidebar.expanded && (
+      {isSidebarHidden && isLinux && <TrafficLights className="mr-2" />}
+      {!leftsidebar.expanded && !isOnboarding && (
         <div className="relative">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -197,24 +201,26 @@ function Header({ tabs }: { tabs: Tab[] }) {
         </div>
       )}
 
-      <div className="flex items-center h-full shrink-0">
-        <Button
-          onClick={goBack}
-          disabled={!canGoBack}
-          variant="ghost"
-          size="icon"
-        >
-          <ArrowLeftIcon size={16} />
-        </Button>
-        <Button
-          onClick={goNext}
-          disabled={!canGoNext}
-          variant="ghost"
-          size="icon"
-        >
-          <ArrowRightIcon size={16} />
-        </Button>
-      </div>
+      {!isOnboarding && (
+        <div className="flex items-center h-full shrink-0">
+          <Button
+            onClick={goBack}
+            disabled={!canGoBack}
+            variant="ghost"
+            size="icon"
+          >
+            <ArrowLeftIcon size={16} />
+          </Button>
+          <Button
+            onClick={goNext}
+            disabled={!canGoNext}
+            variant="ghost"
+            size="icon"
+          >
+            <ArrowRightIcon size={16} />
+          </Button>
+        </div>
+      )}
 
       {listeningTab && (
         <div className="flex items-center h-full shrink-0 mr-1">
@@ -307,11 +313,15 @@ function Header({ tabs }: { tabs: Tab[] }) {
       >
         {!isSearchManuallyExpanded && (
           <Button
-            onClick={handleNewEmptyTab}
-            onContextMenu={showNewTabMenu}
+            onClick={isOnboarding ? undefined : handleNewEmptyTab}
+            onContextMenu={isOnboarding ? undefined : showNewTabMenu}
+            disabled={isOnboarding}
             variant="ghost"
             size="icon"
-            className="text-neutral-600"
+            className={cn([
+              "text-neutral-600",
+              isOnboarding && "opacity-40 cursor-not-allowed",
+            ])}
           >
             <PlusIcon size={16} />
           </Button>
@@ -319,7 +329,9 @@ function Header({ tabs }: { tabs: Tab[] }) {
 
         <div className="flex items-center gap-1 h-full ml-auto">
           <Update />
-          <Search onManualExpandChange={setIsSearchManuallyExpanded} />
+          {!isOnboarding && (
+            <Search onManualExpandChange={setIsSearchManuallyExpanded} />
+          )}
         </div>
       </div>
     </div>
@@ -552,9 +564,23 @@ function TabItem({
       />
     );
   }
-  if (tab.type === "chat") {
+  if (tab.type === "chat_support") {
     return (
       <TabItemChat
+        tab={tab}
+        tabIndex={tabIndex}
+        handleCloseThis={handleClose}
+        handleSelectThis={handleSelect}
+        handleCloseOthers={handleCloseOthers}
+        handleCloseAll={handleCloseAll}
+        handlePinThis={handlePinThis}
+        handleUnpinThis={handleUnpinThis}
+      />
+    );
+  }
+  if (tab.type === "onboarding") {
+    return (
+      <TabItemOnboarding
         tab={tab}
         tabIndex={tabIndex}
         handleCloseThis={handleClose}
@@ -613,8 +639,11 @@ function ContentWrapper({ tab }: { tab: Tab }) {
   if (tab.type === "search") {
     return <TabContentSearch tab={tab} />;
   }
-  if (tab.type === "chat") {
+  if (tab.type === "chat_support") {
     return <TabContentChat tab={tab} />;
+  }
+  if (tab.type === "onboarding") {
+    return <TabContentOnboarding tab={tab} />;
   }
   return null;
 }
@@ -652,7 +681,8 @@ function TabChatButton({
   if (
     currentTab?.type === "ai" ||
     currentTab?.type === "settings" ||
-    currentTab?.type === "chat"
+    currentTab?.type === "chat_support" ||
+    currentTab?.type === "onboarding"
   ) {
     return null;
   }
@@ -718,9 +748,10 @@ function useScrollState(
     if (!container) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = container;
+    const hasOverflow = scrollWidth > clientWidth + 1;
     const newState = {
-      atStart: scrollLeft <= 1,
-      atEnd: scrollLeft + clientWidth >= scrollWidth - 1,
+      atStart: !hasOverflow || scrollLeft <= 1,
+      atEnd: !hasOverflow || scrollLeft + clientWidth >= scrollWidth - 1,
     };
     setScrollState((prev) => {
       if (prev.atStart === newState.atStart && prev.atEnd === newState.atEnd) {
@@ -740,6 +771,7 @@ function useScrollState(
     if (!container) return;
 
     updateScrollState();
+    requestAnimationFrame(updateScrollState);
     container.addEventListener("scroll", updateScrollState);
 
     return () => {
@@ -856,7 +888,7 @@ function useTabsShortcuts() {
         } else if (currentTab.pinned) {
           unpin(currentTab);
         } else {
-          if (currentTab.type === "chat") {
+          if (currentTab.type === "chat_support") {
             chat.sendEvent({ type: "CLOSE" });
           }
           close(currentTab);
@@ -999,20 +1031,6 @@ function useTabsShortcuts() {
       enableOnContentEditable: true,
     },
     [newNoteAndListen],
-  );
-
-  useHotkeys(
-    "mod+shift+j",
-    () => {
-      openNew({ type: "chat" });
-      chat.sendEvent({ type: "OPEN_TAB" });
-    },
-    {
-      preventDefault: true,
-      enableOnFormTags: true,
-      enableOnContentEditable: true,
-    },
-    [openNew, chat],
   );
 
   return {};

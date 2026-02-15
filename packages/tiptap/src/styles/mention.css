@@ -81,3 +81,12 @@
   color: #10b981;
   background-color: rgba(16, 185, 129, 0.08);
 }
+
+.mention-type-chat-shortcut {
+  color: #f59e0b;
+}
+
+.mention[data-type="chat_shortcut"] {
+  color: #f59e0b;
+  background-color: rgba(245, 158, 11, 0.08);
+}

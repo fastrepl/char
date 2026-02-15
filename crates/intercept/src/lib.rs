@@ -14,6 +14,9 @@ swift!(fn _setup_force_quit_handler());
 swift!(fn _show_quit_overlay());
 
 #[cfg(target_os = "macos")]
+swift!(fn _demo_quit_progress());
+
+#[cfg(target_os = "macos")]
 static HANDLER_INITIALIZED: AtomicBool = AtomicBool::new(false);
 
 #[cfg(target_os = "macos")]
@@ -50,6 +53,13 @@ pub fn set_force_quit() {
 pub fn show_quit_overlay() {
     unsafe {
         _show_quit_overlay();
+    }
+}
+
+#[cfg(target_os = "macos")]
+pub fn demo_quit_progress() {
+    unsafe {
+        _demo_quit_progress();
     }
 }
 

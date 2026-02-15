@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 hypr-exa = { workspace = true }
+hypr-jina = { workspace = true }
 hypr-mcp = { workspace = true }
 
 axum = { workspace = true }

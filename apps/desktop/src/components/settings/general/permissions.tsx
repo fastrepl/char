@@ -61,7 +61,7 @@ function PermissionRow({
   };
 
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div data-settings-item className="flex items-center justify-between gap-4">
       <div className="flex-1">
         <div
           className={cn([
@@ -103,6 +103,7 @@ function PermissionRow({
         </div>
       </div>
       <Button
+        data-settings-activate
         variant={isAuthorized ? "outline" : "default"}
         size="icon"
         onClick={handleButtonClick}

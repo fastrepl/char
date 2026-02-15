@@ -1,9 +1,10 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { fetchAdminUser } from "@/functions/admin";
 import { getSupabaseServerClient } from "@/functions/supabase";
 import { uploadMediaFile } from "@/functions/supabase-media";
+
+import { extractBase64Images, getExtensionFromMimeType } from "../content/save";
 
 interface ImportRequest {
   url: string;
@@ -12,11 +13,6 @@ interface ImportRequest {
   description?: string;
   coverImage?: string;
   slug?: string;
-}
-
-interface ImageUploadResult {
-  originalUrl: string;
-  newUrl: string;
 }
 
 interface ImportResponse {
@@ -245,111 +241,10 @@ meta_description: "${options.description}"
 author: "${options.author}"
 coverImage: "${options.coverImage}"
 featured: false
-published: false
 date: "${today}"
 ---`;
 
   return `${frontmatter}\n\n${content}`;
-}
-
-function extractImageUrls(html: string): string[] {
-  const imgRegex = /<img[^>]*src=["']([^"']+)["'][^>]*\/?>/gi;
-  const urls: string[] = [];
-  let match;
-
-  while ((match = imgRegex.exec(html)) !== null) {
-    const url = match[1];
-    if (url && !url.startsWith("data:")) {
-      urls.push(url);
-    }
-  }
-
-  return [...new Set(urls)];
-}
-
-async function downloadImage(
-  url: string,
-): Promise<{ buffer: Buffer; mimeType: string; extension: string } | null> {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      console.error(`Failed to download image: ${url}`);
-      return null;
-    }
-
-    const contentType = response.headers.get("content-type") || "image/png";
-    const buffer = Buffer.from(await response.arrayBuffer());
-
-    const extensionMap: Record<string, string> = {
-      "image/jpeg": "jpg",
-      "image/jpg": "jpg",
-      "image/png": "png",
-      "image/gif": "gif",
-      "image/webp": "webp",
-      "image/svg+xml": "svg",
-      "image/avif": "avif",
-    };
-
-    const extension = extensionMap[contentType] || "png";
-
-    return { buffer, mimeType: contentType, extension };
-  } catch (error) {
-    console.error(`Error downloading image: ${url}`, error);
-    return null;
-  }
-}
-
-async function uploadImagesToSupabase(
-  supabase: SupabaseClient,
-  imageUrls: string[],
-  slug: string,
-): Promise<ImageUploadResult[]> {
-  const results: ImageUploadResult[] = [];
-  const folder = `articles/${slug}`;
-
-  for (let i = 0; i < imageUrls.length; i++) {
-    const url = imageUrls[i];
-    const imageData = await downloadImage(url);
-
-    if (!imageData) continue;
-
-    const filename = `image-${i + 1}.${imageData.extension}`;
-    const base64Content = imageData.buffer.toString("base64");
-
-    const uploadResult = await uploadMediaFile(
-      supabase,
-      filename,
-      base64Content,
-      folder,
-    );
-
-    if (uploadResult.success && uploadResult.publicUrl) {
-      results.push({
-        originalUrl: url,
-        newUrl: uploadResult.publicUrl,
-      });
-    }
-  }
-
-  return results;
-}
-
-function replaceImageUrls(
-  markdown: string,
-  imageReplacements: ImageUploadResult[],
-): string {
-  let result = markdown;
-
-  for (const replacement of imageReplacements) {
-    const escapedOriginal = replacement.originalUrl.replace(
-      /[.*+?^${}()|[\]\\]/g,
-      "\\$&",
-    );
-    const regex = new RegExp(escapedOriginal, "g");
-    result = result.replace(regex, replacement.newUrl);
-  }
-
-  return result;
 }
 
 export const Route = createFileRoute("/api/admin/import/google-docs")({
@@ -430,8 +325,8 @@ export const Route = createFileRoute("/api/admin/import/google-docs")({
 
           let markdown = htmlToMarkdown(bodyContent);
 
-          const imageUrls = extractImageUrls(bodyContent);
-          if (imageUrls.length > 0) {
+          const base64Images = extractBase64Images(markdown);
+          if (base64Images.length > 0) {
             if (!slug) {
               return new Response(
                 JSON.stringify({
@@ -442,12 +337,24 @@ export const Route = createFileRoute("/api/admin/import/google-docs")({
               );
             }
 
-            const imageReplacements = await uploadImagesToSupabase(
-              supabase,
-              imageUrls,
-              slug,
-            );
-            markdown = replaceImageUrls(markdown, imageReplacements);
+            const folder = `articles/${slug}`;
+            for (let i = 0; i < base64Images.length; i++) {
+              const image = base64Images[i];
+              const extension = getExtensionFromMimeType(image.mimeType);
+              const filename = `image-${i + 1}.${extension}`;
+              const uploadResult = await uploadMediaFile(
+                supabase,
+                filename,
+                image.base64Data,
+                folder,
+              );
+              if (uploadResult.success && uploadResult.publicUrl) {
+                markdown = markdown.replace(
+                  image.fullMatch,
+                  `![](${uploadResult.publicUrl})`,
+                );
+              }
+            }
           }
 
           const today = new Date().toISOString().split("T")[0];
@@ -468,7 +375,6 @@ export const Route = createFileRoute("/api/admin/import/google-docs")({
             author: finalAuthor,
             coverImage: coverImage || "",
             featured: false,
-            published: false,
             date: today,
           };
 

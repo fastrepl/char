@@ -1,20 +1,10 @@
 import { useEffect, useState } from "react";
 
-import * as main from "../store/tinybase/store/main";
+import { useSessionEvent } from "./tinybase";
 
 export function useEventCountdown(sessionId: string): string | null {
-  const eventId = main.UI.useCell(
-    "sessions",
-    sessionId,
-    "event_id",
-    main.STORE_ID,
-  );
-  const startedAt = main.UI.useCell(
-    "events",
-    eventId ?? "",
-    "started_at",
-    main.STORE_ID,
-  );
+  const sessionEvent = useSessionEvent(sessionId);
+  const startedAt = sessionEvent?.started_at;
 
   const [countdown, setCountdown] = useState<string | null>(null);
 

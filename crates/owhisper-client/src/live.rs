@@ -427,7 +427,7 @@ mod tests {
     use crate::{AssemblyAIAdapter, DeepgramAdapter, ListenClient, SonioxAdapter};
 
     fn proxy_base() -> String {
-        std::env::var("PROXY_URL").unwrap_or_else(|_| "localhost:8787".to_string())
+        std::env::var("PROXY_URL").unwrap_or_else(|_| "localhost:3001".to_string())
     }
 
     #[tokio::test]

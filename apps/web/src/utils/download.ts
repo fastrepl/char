@@ -11,7 +11,7 @@ export interface DownloadLink {
 }
 
 export function getDownloadLinks(version: string): DownloadLink[] {
-  const baseUrl = `https://github.com/fastrepl/hyprnote/releases/download/desktop_v${version}`;
+  const baseUrl = `https://github.com/fastrepl/char/releases/download/desktop_v${version}`;
 
   return [
     {

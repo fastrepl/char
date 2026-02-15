@@ -11,10 +11,10 @@ export const Route = createFileRoute("/_view/jobs/")({
   component: JobsPage,
   head: () => ({
     meta: [
-      { title: "Jobs - Hyprnote" },
+      { title: "Jobs - Char" },
       {
         name: "description",
-        content: "Join the Hyprnote team. View open positions and apply.",
+        content: "Join the Char team. View open positions and apply.",
       },
     ],
   }),
@@ -127,7 +127,7 @@ function CTASection() {
         <div className="mb-4 size-40 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[48px] bg-transparent">
           <Image
             src="/api/images/hyprnote/icon.png"
-            alt="Hyprnote"
+            alt="Char"
             width={144}
             height={144}
             className="size-36 mx-auto rounded-[40px] border border-neutral-100"

@@ -42,7 +42,7 @@ jobs:
                - `apps/web/content/legal/dpa.mdx` - Data Processing Agreement
 
             3. **Create Review Report**
-               If potential issues are found, create a PR with a summary of:
+               If potential issues are found, create a PR titled "legal(monthly): [brief description]" with a summary of:
                - **Changes Detected**: List product changes with potential legal impact
                - **Current Documentation Status**: What the legal docs currently state
                - **Recommended Updates**: Specific sections that may need updates

@@ -1,6 +1,8 @@
 use axum::{
     Extension, Json,
     extract::{Query, State},
+    http::StatusCode,
+    response::{IntoResponse, Response},
 };
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
@@ -16,7 +18,7 @@ use utoipa::{IntoParams, ToSchema};
 
 use hypr_api_auth::AuthContext;
 
-use crate::error::{Result, SubscriptionError};
+use crate::error::{ErrorResponse, Result, SubscriptionError};
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize, IntoParams)]
@@ -38,9 +40,19 @@ pub enum Interval {
 }
 
 #[derive(Debug, Serialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum StartTrialReason {
+    Started,
+    NotEligible,
+    Error,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
 pub struct StartTrialResponse {
     #[schema(example = true)]
     pub started: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reason: Option<StartTrialReason>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -63,31 +75,84 @@ pub async fn start_trial(
     State(state): State<AppState>,
     Query(query): Query<StartTrialQuery>,
     Extension(auth): Extension<AuthContext>,
-) -> Result<Json<StartTrialResponse>> {
+) -> Response {
     let user_id = &auth.claims.sub;
 
-    let can_start: bool = state
+    let can_start_result: std::result::Result<bool, _> = state
         .supabase
         .rpc("can_start_trial", &auth.token, None)
-        .await?;
+        .await;
+
+    let can_start = match can_start_result {
+        Ok(v) => v,
+        Err(e) => {
+            tracing::error!(error = %e, "can_start_trial RPC failed in start-trial");
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(StartTrialResponse {
+                    started: false,
+                    reason: Some(StartTrialReason::Error),
+                }),
+            )
+                .into_response();
+        }
+    };
 
     if !can_start {
-        return Ok(Json(StartTrialResponse { started: false }));
+        return Json(StartTrialResponse {
+            started: false,
+            reason: Some(StartTrialReason::NotEligible),
+        })
+        .into_response();
     }
 
-    let customer_id = get_or_create_customer(&state, &auth.token, user_id).await?;
-
-    let customer_id = customer_id
-        .ok_or_else(|| SubscriptionError::Internal("stripe_customer_id_missing".to_string()))?;
+    let customer_id = match get_or_create_customer(&state, &auth.token, user_id).await {
+        Ok(Some(id)) => id,
+        Ok(None) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ErrorResponse {
+                    error: "stripe_customer_id_missing".to_string(),
+                }),
+            )
+                .into_response();
+        }
+        Err(e) => {
+            tracing::error!(error = %e, "get_or_create_customer failed");
+            sentry::capture_message(&e.to_string(), sentry::Level::Error);
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ErrorResponse {
+                    error: "failed_to_create_customer".to_string(),
+                }),
+            )
+                .into_response();
+        }
+    };
 
     let price_id = match query.interval {
         Interval::Monthly => &state.config.stripe.stripe_monthly_price_id,
         Interval::Yearly => &state.config.stripe.stripe_yearly_price_id,
     };
 
-    create_trial_subscription(&state.stripe, &customer_id, price_id, user_id).await?;
+    if let Err(e) = create_trial_subscription(&state.stripe, &customer_id, price_id, user_id).await
+    {
+        tracing::error!(error = %e, "failed to create Stripe subscription");
+        sentry::capture_message(&e.to_string(), sentry::Level::Error);
+        return (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ErrorResponse {
+                error: "failed_to_create_subscription".to_string(),
+            }),
+        )
+            .into_response();
+    }
 
-    Ok(Json(StartTrialResponse { started: true }))
+    Json(StartTrialResponse {
+        started: true,
+        reason: Some(StartTrialReason::Started),
+    })
+    .into_response()
 }
 
 async fn get_or_create_customer(

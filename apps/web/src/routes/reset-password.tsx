@@ -58,7 +58,7 @@ function Component() {
           >
             <Image
               src="/api/images/hyprnote/icon.png"
-              alt="Hyprnote"
+              alt="Char"
               width={96}
               height={96}
               className={cn([

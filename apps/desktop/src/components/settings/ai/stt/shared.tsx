@@ -1,5 +1,11 @@
 import { Icon } from "@iconify-icon/react";
-import { AssemblyAI, ElevenLabs, Fireworks, OpenAI } from "@lobehub/icons";
+import {
+  AssemblyAI,
+  ElevenLabs,
+  Fireworks,
+  Mistral,
+  OpenAI,
+} from "@lobehub/icons";
 import type { ReactNode } from "react";
 
 import type { AmModel, SupportedSttModel } from "@hypr/plugin-local-stt";
@@ -30,7 +36,11 @@ export const displayModelId = (model: string) => {
     return "Cloud";
   }
 
-  if (model === "stt-v3") {
+  if (model === "stt-v4" || model === "stt-rt-v4" || model === "stt-async-v4") {
+    return "Soniox v4";
+  }
+
+  if (model === "stt-v3" || model === "stt-rt-v3" || model === "stt-async-v3") {
     return "Soniox v3";
   }
 
@@ -58,6 +68,10 @@ export const displayModelId = (model: string) => {
     return "GPT-4o mini Transcribe";
   }
 
+  if (model === "voxtral-mini-2602") {
+    return "Voxtral Mini Transcribe 2";
+  }
+
   if (model.startsWith("am-")) {
     const am = model as AmModel;
     if (am == "am-parakeet-v2") {
@@ -81,7 +95,7 @@ const _PROVIDERS = [
     displayName: "Hyprnote",
     badge: "Recommended",
     icon: <img src="/assets/icon.png" alt="Hyprnote" className="size-5" />,
-    baseUrl: new URL("/stt", env.VITE_AI_URL).toString(),
+    baseUrl: new URL("/stt", env.VITE_API_URL).toString(),
     models: [
       "cloud",
       "am-parakeet-v2",
@@ -163,7 +177,7 @@ const _PROVIDERS = [
       />
     ),
     baseUrl: "https://api.soniox.com",
-    models: ["stt-v3"],
+    models: ["stt-v4", "stt-v3"],
     requirements: [{ kind: "requires_config", fields: ["api_key"] }],
   },
   {
@@ -174,6 +188,16 @@ const _PROVIDERS = [
     icon: <ElevenLabs size={16} />,
     baseUrl: "https://api.elevenlabs.io",
     models: ["scribe_v2"],
+    requirements: [{ kind: "requires_config", fields: ["api_key"] }],
+  },
+  {
+    disabled: false,
+    id: "mistral",
+    displayName: "Mistral",
+    badge: "Beta",
+    icon: <Mistral size={16} />,
+    baseUrl: "https://api.mistral.ai/v1",
+    models: ["voxtral-mini-2602"],
     requirements: [{ kind: "requires_config", fields: ["api_key"] }],
   },
   {

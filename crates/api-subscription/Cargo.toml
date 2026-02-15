@@ -19,8 +19,8 @@ chrono = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
-urlencoding = "2.1"
+urlencoding = { workspace = true }
 
-async-stripe = { version = "1.0.0-rc.0" }
-async-stripe-billing = { version = "1.0.0-rc.0", default-features = false, features = ["subscription"] }
-async-stripe-core = { version = "1.0.0-rc.0", default-features = false, features = ["customer"] }
+async-stripe = { workspace = true }
+async-stripe-billing = { workspace = true, features = ["subscription"] }
+async-stripe-core = { workspace = true, features = ["customer"] }

@@ -128,13 +128,12 @@ export function ProfileSection({ onExpandChange }: ProfileSectionProps = {}) {
     const state = {
       groupId: null,
       initialMessage: "I need help.",
-      chatType: "support" as const,
     };
-    openNew({ type: "chat", state });
-    const { tabs, updateChatTabState } = useTabs.getState();
-    const existingChatTab = tabs.find((t) => t.type === "chat");
+    openNew({ type: "chat_support", state });
+    const { tabs, updateChatSupportTabState } = useTabs.getState();
+    const existingChatTab = tabs.find((t) => t.type === "chat_support");
     if (existingChatTab) {
-      updateChatTabState(existingChatTab, state);
+      updateChatSupportTabState(existingChatTab, state);
     }
     transitionChatMode({ type: "OPEN_TAB" });
     closeMenu();

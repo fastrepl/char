@@ -98,7 +98,7 @@ pub async fn list_calendars(
         .nango
         .integration("google-calendar")
         .connection(&payload.connection_id);
-    let http = crate::nango_http::NangoHttpClient::new(proxy);
+    let http = hypr_nango::NangoHttpClient::new(proxy);
     let client = hypr_google_calendar::GoogleCalendarClient::new(http);
 
     let response = client
@@ -134,7 +134,7 @@ pub async fn list_events(
         .nango
         .integration("google-calendar")
         .connection(&payload.connection_id);
-    let http = crate::nango_http::NangoHttpClient::new(proxy);
+    let http = hypr_nango::NangoHttpClient::new(proxy);
     let client = hypr_google_calendar::GoogleCalendarClient::new(http);
 
     let time_min = payload
@@ -203,7 +203,7 @@ pub async fn create_event(
         .nango
         .integration("google-calendar")
         .connection(&payload.connection_id);
-    let http = crate::nango_http::NangoHttpClient::new(proxy);
+    let http = hypr_nango::NangoHttpClient::new(proxy);
     let client = hypr_google_calendar::GoogleCalendarClient::new(http);
 
     let req = hypr_google_calendar::CreateEventRequest {

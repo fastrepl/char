@@ -1,3 +1,4 @@
+import { Extension } from "@tiptap/core";
 import {
   EditorContent,
   type JSONContent,
@@ -7,7 +8,11 @@ import {
 import { forwardRef, useEffect, useMemo, useRef } from "react";
 
 import "../../styles.css";
-import { mention, type MentionConfig } from "../editor/mention";
+import {
+  isMentionActive,
+  mention,
+  type MentionConfig,
+} from "../editor/mention";
 import * as shared from "../shared";
 import type { PlaceholderFunction } from "../shared/extensions/placeholder";
 
@@ -26,6 +31,7 @@ interface ChatEditorProps {
   placeholderComponent?: PlaceholderFunction;
   slashCommandConfig?: SlashCommandConfig;
   onUpdate?: (json: JSONContent) => void;
+  onSubmit?: () => void;
 }
 
 const ChatEditor = forwardRef<{ editor: TiptapEditor | null }, ChatEditorProps>(
@@ -36,6 +42,7 @@ const ChatEditor = forwardRef<{ editor: TiptapEditor | null }, ChatEditorProps>(
       placeholderComponent,
       slashCommandConfig,
       onUpdate,
+      onSubmit,
     },
     ref,
   ) => {
@@ -44,6 +51,8 @@ const ChatEditor = forwardRef<{ editor: TiptapEditor | null }, ChatEditorProps>(
     slashCommandConfigRef.current = slashCommandConfig;
     const onUpdateRef = useRef(onUpdate);
     onUpdateRef.current = onUpdate;
+    const onSubmitRef = useRef(onSubmit);
+    onSubmitRef.current = onSubmit;
 
     const mentionConfigs = useMemo(() => {
       const configs: MentionConfig[] = [];
@@ -59,12 +68,32 @@ const ChatEditor = forwardRef<{ editor: TiptapEditor | null }, ChatEditorProps>(
       return configs;
     }, []);
 
+    const submitOnEnter = useMemo(
+      () =>
+        Extension.create({
+          name: "submitOnEnter",
+          addKeyboardShortcuts() {
+            return {
+              Enter: ({ editor }) => {
+                if (isMentionActive(editor.state)) {
+                  return false;
+                }
+                onSubmitRef.current?.();
+                return true;
+              },
+            };
+          },
+        }),
+      [],
+    );
+
     const extensions = useMemo(
       () => [
         ...shared.getExtensions(placeholderComponent),
         ...mentionConfigs.map((config) => mention(config)),
+        submitOnEnter,
       ],
-      [mentionConfigs, placeholderComponent],
+      [mentionConfigs, placeholderComponent, submitOnEnter],
     );
 
     const editor = useEditor(

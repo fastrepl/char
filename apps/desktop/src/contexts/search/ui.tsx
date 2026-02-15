@@ -58,7 +58,7 @@ interface SearchUIContextValue {
   setSelectedIndex: (index: number) => void;
 }
 
-const SCORE_PERCENTILE_THRESHOLD = 0.1;
+const SCORE_PERCENTILE_THRESHOLD = 0.2;
 
 const GROUP_TITLES: Record<SearchEntityType, string> = {
   session: "Sessions",
@@ -67,7 +67,7 @@ const GROUP_TITLES: Record<SearchEntityType, string> = {
 };
 
 function calculateDynamicThreshold(scores: number[]): number {
-  if (scores.length === 0) {
+  if (scores.length < 100) {
     return 0;
   }
 

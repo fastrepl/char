@@ -9,10 +9,11 @@ macro_rules! common_event_derives {
 common_event_derives! {
     #[serde(tag = "type")]
     pub enum DetectEvent {
-        #[serde(rename = "micStarted")]
-        MicStarted {
+        #[serde(rename = "micDetected")]
+        MicDetected {
             key: String,
             apps: Vec<hypr_detect::InstalledApp>,
+            duration_secs: u64,
         },
         #[serde(rename = "micStopped")]
         MicStopped {
@@ -22,11 +23,5 @@ common_event_derives! {
         MicMuteStateChanged { value: bool },
         #[serde(rename = "sleepStateChanged")]
         SleepStateChanged { value: bool },
-        #[serde(rename = "micProlongedUsage")]
-        MicProlongedUsage {
-            key: String,
-            app: hypr_detect::InstalledApp,
-            duration_secs: u64,
-        },
     }
 }

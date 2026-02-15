@@ -90,12 +90,14 @@ export function FileInfo({
   onRemove,
   isUploading,
   isProcessing,
+  uploadProgress,
 }: {
   fileName: string;
   fileSize: number;
   onRemove: () => void;
   isUploading?: boolean;
   isProcessing?: boolean;
+  uploadProgress?: number;
 }) {
   const formatSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`;
@@ -122,7 +124,9 @@ export function FileInfo({
             {fileName}
           </p>
           <p className="text-xs text-neutral-500">
-            {isUploading ? "Uploading..." : formatSize(fileSize)}
+            {isUploading
+              ? `Uploading... ${uploadProgress != null ? `${Math.round(uploadProgress)}%` : ""}`
+              : formatSize(fileSize)}
           </p>
         </div>
       </div>

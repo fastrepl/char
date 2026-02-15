@@ -21,13 +21,13 @@ export const Route = createFileRoute("/_view/opensource")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "Open Source - Hyprnote" },
+      { title: "Open Source - Char" },
       {
         name: "description",
         content:
-          "Hyprnote is fully open source under GPL-3.0. Inspect every line of code, contribute to development, and build on a transparent foundation. No black boxes, no hidden data collection.",
+          "Char is fully open source under GPL-3.0. Inspect every line of code, contribute to development, and build on a transparent foundation. No black boxes, no hidden data collection.",
       },
-      { property: "og:title", content: "Open Source - Hyprnote" },
+      { property: "og:title", content: "Open Source - Char" },
       {
         property: "og:description",
         content:
@@ -39,7 +39,7 @@ export const Route = createFileRoute("/_view/opensource")({
         content: "https://hyprnote.com/opensource",
       },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Open Source - Hyprnote" },
+      { name: "twitter:title", content: "Open Source - Char" },
       {
         name: "twitter:description",
         content:
@@ -148,13 +148,13 @@ function HeroSection() {
             for everyone
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 leading-relaxed max-w-3xl mx-auto">
-            Hyprnote is fully open source under GPL-3.0. Every line of code is
+            Char is fully open source under GPL-3.0. Every line of code is
             auditable, every decision is transparent, and every user has the
             freedom to inspect, modify, and contribute.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="https://github.com/fastrepl/hyprnote"
+              href="https://github.com/fastrepl/char"
               target="_blank"
               rel="noopener noreferrer"
               className={cn([
@@ -232,7 +232,7 @@ function LetterSection() {
               <li>The product outlives the company that built it.</li>
             </ul>
 
-            <p>That's why we built Hyprnote in the open.</p>
+            <p>That's why we built Char in the open.</p>
 
             <p>
               We don't want you to trust us more. We want you to need to trust
@@ -288,7 +288,7 @@ function LetterSection() {
                 <div>
                   <Image
                     src="/api/images/hyprnote/signature-dark.svg"
-                    alt="Hyprnote Signature"
+                    alt="Char Signature"
                     width={124}
                     height={60}
                     layout="constrained"
@@ -522,8 +522,8 @@ function SponsorsSection() {
             Paying It Forward
           </h2>
           <p className="text-neutral-600 text-center max-w-2xl mx-auto">
-            We love giving back to the community that makes Hyprnote possible.
-            As we grow, we hope to sponsor even more projects and creators.
+            We love giving back to the community that makes Char possible. As we
+            grow, we hope to sponsor even more projects and creators.
           </p>
         </div>
 
@@ -580,8 +580,8 @@ function SponsorsSection() {
                 We Appreciate Your Support
               </h3>
               <p className="text-sm text-neutral-600 mt-2">
-                Your sponsorship keeps Hyprnote free, open source, and
-                independent for everyone.
+                Your sponsorship keeps Char free, open source, and independent
+                for everyone.
               </p>
             </div>
             <a
@@ -790,35 +790,35 @@ function ProgressSection() {
 const contributions = [
   {
     title: "Star Repository",
-    description: "Show your support and help others discover Hyprnote",
+    description: "Show your support and help others discover Char",
     icon: "mdi:star",
-    link: "https://github.com/fastrepl/hyprnote",
+    link: "https://github.com/fastrepl/char",
     linkText: "Star on GitHub",
   },
   {
     title: "Contribute Code",
     description: "Fix bugs, add features, or improve documentation",
     icon: "mdi:code-braces",
-    link: "https://github.com/fastrepl/hyprnote/contribute",
+    link: "https://github.com/fastrepl/char/contribute",
     linkText: "View Issues",
   },
   {
     title: "Report Issues",
     description: "Help us improve by reporting bugs and suggesting features",
     icon: "mdi:bug",
-    link: "https://github.com/fastrepl/hyprnote/issues",
+    link: "https://github.com/fastrepl/char/issues",
     linkText: "Open Issue",
   },
   {
     title: "Help Translate",
-    description: "Make Hyprnote accessible in your language",
+    description: "Make Char accessible in your language",
     icon: "mdi:translate",
-    link: "https://github.com/fastrepl/hyprnote",
+    link: "https://github.com/fastrepl/char",
     linkText: "Contribute Translations",
   },
   {
     title: "Spread the Word",
-    description: "Share Hyprnote with your network and community",
+    description: "Share Char with your network and community",
     icon: "mdi:share-variant",
     link: "https://twitter.com/intent/tweet?text=Check%20out%20Hyprnote%20-%20open%20source%20AI%20meeting%20notes%20that%20run%20locally!%20https://hyprnote.com",
     linkText: "Share on X",

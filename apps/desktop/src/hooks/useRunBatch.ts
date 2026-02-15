@@ -67,8 +67,9 @@ export const useRunBatch = (sessionId: string) => {
   return useCallback(
     async (filePath: string, options?: RunOptions) => {
       if (!store || !conn || !runBatch) {
-        console.error("no_batch_connection");
-        return;
+        throw new Error(
+          "STT connection is not available. Please configure your speech-to-text provider.",
+        );
       }
 
       const provider = getBatchProvider(conn.provider, conn.model);
