@@ -14,7 +14,6 @@ members = [
   "apps/desktop/src-tauri",
   "apps/eval-cli",
   "apps/granola",
-  "apps/restate",
   "apps/tools",
   "crates/*",
   "plugins/*",
@@ -91,8 +90,6 @@ hypr-porkbun = { path = "crates/porkbun", package = "porkbun" }
 hypr-posthog = { path = "crates/posthog", package = "posthog" }
 hypr-pyannote-cloud = { path = "crates/pyannote-cloud", package = "pyannote-cloud" }
 hypr-pyannote-local = { path = "crates/pyannote-local", package = "pyannote-local" }
-hypr-restate-stt = { path = "crates/restate-stt", package = "restate-stt" }
-hypr-restate-stt-types = { path = "crates/restate-stt-types", package = "restate-stt-types" }
 hypr-s3 = { path = "crates/s3", package = "s3" }
 hypr-slack = { path = "crates/slack", package = "slack" }
 hypr-supabase-auth = { path = "crates/supabase-auth", package = "supabase-auth" }
