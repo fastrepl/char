@@ -45,7 +45,7 @@ export function useAudioUppy() {
         maxNumberOfFiles: 1,
         allowedFileTypes: ["audio/*"],
       },
-      autoProceed: true,
+      autoProceed: false,
     });
 
     instance.use(Tus, {
@@ -101,6 +101,8 @@ export function useAudioUppy() {
         fileId: objectName,
         error: null,
       });
+
+      uppy.upload();
     };
 
     const onProgress = (progress: number) => {

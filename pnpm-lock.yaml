@@ -820,9 +820,6 @@ importers:
       '@uppy/core':
         specifier: ^5.2.0
         version: 5.2.0
-      '@uppy/drag-drop':
-        specifier: ^5.1.0
-        version: 5.1.0(@uppy/core@5.2.0)
       '@uppy/react':
         specifier: ^5.2.0
         version: 5.2.0(@uppy/core@5.2.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -8485,11 +8482,6 @@ packages:
 
   '@uppy/core@5.2.0':
     resolution: {integrity: sha512-uvfNyz4cnaplt7LYJmEZHuqOuav0tKp4a9WKJIaH6iIj7XiqYvS2J5SEByexAlUFlzefOAyjzj4Ja2dd/8aMrw==}
-
-  '@uppy/drag-drop@5.1.0':
-    resolution: {integrity: sha512-P36E6bBc/U8wxooV9IerPpEbrl8i2N3P+twmm5nPywcKHfjS7BtyHUEs2JmWgyRRibI75c2Ge5wWchKtQclEvw==}
-    peerDependencies:
-      '@uppy/core': ^5.2.0
 
   '@uppy/react@5.2.0':
     resolution: {integrity: sha512-6lzPutg2XGavs7P6ALmqOBPitd/Jqi3r1jCJQD5nx8xtNlBRwvlBR6hrZgo8XOI9cR+OaNDrJ0vEFxXDWb04Ag==}
@@ -24251,12 +24243,6 @@ snapshots:
       mime-match: 1.0.2
       namespace-emitter: 2.0.1
       nanoid: 5.1.6
-      preact: 10.28.3
-
-  '@uppy/drag-drop@5.1.0(@uppy/core@5.2.0)':
-    dependencies:
-      '@uppy/core': 5.2.0
-      '@uppy/utils': 7.1.5
       preact: 10.28.3
 
   '@uppy/react@5.2.0(@uppy/core@5.2.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
