@@ -154,14 +154,14 @@ function Header() {
       >
         <Image
           src="/api/images/hyprnote/icon.png"
-          alt="Hyprnote"
+          alt="Char"
           width={96}
           height={96}
           className={cn(["size-24", "rounded-3xl border border-neutral-200"])}
         />
       </div>
       <h1 className="text-3xl font-serif text-stone-800 mb-2">
-        Welcome to Hyprnote
+        Welcome to Char
       </h1>
     </div>
   );

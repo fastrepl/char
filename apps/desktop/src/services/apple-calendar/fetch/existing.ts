@@ -45,7 +45,6 @@ export function fetchExistingEvents(ctx: Ctx): ExistingEvent[] {
         note: event.note as string | undefined,
         recurrence_series_id: event.recurrence_series_id as string | undefined,
         has_recurrence_rules: event.has_recurrence_rules as boolean | undefined,
-        ignored: event.ignored as boolean | undefined,
       });
     }
   });

@@ -34,6 +34,9 @@ jobs:
   desktop_ci:
     needs: optimize_ci
     if: needs.optimize_ci.outputs.skip == 'false'
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
@@ -42,6 +45,8 @@ jobs:
             runner: "depot-macos-14"
           - platform: "linux"
             runner: "depot-ubuntu-22.04-8"
+          - platform: "windows"
+            runner: "windows-latest"
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4

@@ -15,13 +15,11 @@ import * as main from "../../../../../../store/tinybase/store/main";
 import { useTabs } from "../../../../../../store/zustand/tabs";
 import { useUndoDelete } from "../../../../../../store/zustand/undo-delete";
 
-const UNDO_TIMEOUT_MS = 5000;
-
 export function DeleteNote({ sessionId }: { sessionId: string }) {
   const store = main.UI.useStore(main.STORE_ID);
   const indexes = main.UI.useIndexes(main.STORE_ID);
   const invalidateResource = useTabs((state) => state.invalidateResource);
-  const { setDeletedSession, setTimeoutId, clear } = useUndoDelete();
+  const addDeletion = useUndoDelete((state) => state.addDeletion);
 
   const handleDeleteNote = useCallback(() => {
     if (!store) {
@@ -31,30 +29,21 @@ export function DeleteNote({ sessionId }: { sessionId: string }) {
     const capturedData = captureSessionData(store, indexes, sessionId);
 
     invalidateResource("sessions", sessionId);
-    void deleteSessionCascade(store, indexes, sessionId);
+    void deleteSessionCascade(store, indexes, sessionId, {
+      skipAudio: true,
+    });
 
     if (capturedData) {
-      setDeletedSession(capturedData);
-
-      const timeoutId = setTimeout(() => {
-        clear();
-      }, UNDO_TIMEOUT_MS);
-      setTimeoutId(timeoutId);
+      addDeletion(capturedData, () => {
+        void fsSyncCommands.audioDelete(sessionId);
+      });
     }
 
     void analyticsCommands.event({
       event: "session_deleted",
       includes_recording: true,
     });
-  }, [
-    store,
-    indexes,
-    sessionId,
-    invalidateResource,
-    setDeletedSession,
-    setTimeoutId,
-    clear,
-  ]);
+  }, [store, indexes, sessionId, invalidateResource, addDeletion]);
 
   return (
     <DropdownMenuItem

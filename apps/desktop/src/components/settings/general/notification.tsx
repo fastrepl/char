@@ -11,6 +11,13 @@ import {
 import { commands as notificationCommands } from "@hypr/plugin-notification";
 import { Badge } from "@hypr/ui/components/ui/badge";
 import { Button } from "@hypr/ui/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@hypr/ui/components/ui/select";
 import { Switch } from "@hypr/ui/components/ui/switch";
 import { cn } from "@hypr/utils";
 
@@ -29,6 +36,7 @@ export function NotificationSettingsView() {
     "notification_detect",
     "respect_dnd",
     "ignored_platforms",
+    "mic_active_threshold",
   ] as const);
 
   useEffect(() => {
@@ -101,12 +109,20 @@ export function NotificationSettingsView() {
     settings.STORE_ID,
   );
 
+  const handleSetMicActiveThreshold = settings.UI.useSetValueCallback(
+    "mic_active_threshold",
+    (value: number) => value,
+    [],
+    settings.STORE_ID,
+  );
+
   const form = useForm({
     defaultValues: {
       notification_event: configs.notification_event,
       notification_detect: configs.notification_detect,
       respect_dnd: configs.respect_dnd,
       ignored_platforms: configs.ignored_platforms.map(bundleIdToName),
+      mic_active_threshold: configs.mic_active_threshold,
     },
     listeners: {
       onChange: async ({ formApi }) => {
@@ -120,6 +136,7 @@ export function NotificationSettingsView() {
       handleSetIgnoredPlatforms(
         JSON.stringify(value.ignored_platforms.map(nameToBundleId)),
       );
+      handleSetMicActiveThreshold(value.mic_active_threshold);
     },
   });
 
@@ -220,7 +237,10 @@ export function NotificationSettingsView() {
     <div className="flex flex-col gap-6">
       <form.Field name="notification_event">
         {(field) => (
-          <div className="flex items-start justify-between gap-4">
+          <div
+            data-settings-item
+            className="flex items-start justify-between gap-4"
+          >
             <div className="flex-1">
               <h3 className="mb-1 text-sm font-medium">Event notifications</h3>
               <p className="text-xs text-neutral-600">
@@ -228,6 +248,7 @@ export function NotificationSettingsView() {
               </p>
             </div>
             <Switch
+              data-settings-activate
               checked={field.state.value}
               onCheckedChange={field.handleChange}
             />
@@ -238,7 +259,10 @@ export function NotificationSettingsView() {
       <form.Field name="notification_detect">
         {(field) => (
           <div className="flex flex-col gap-4">
-            <div className="flex items-start justify-between gap-4">
+            <div
+              data-settings-item
+              className="flex items-start justify-between gap-4"
+            >
               <div className="flex-1">
                 <h3 className="mb-1 text-sm font-medium">
                   Microphone detection
@@ -249,6 +273,7 @@ export function NotificationSettingsView() {
                 </p>
               </div>
               <Switch
+                data-settings-activate
                 checked={field.state.value}
                 onCheckedChange={field.handleChange}
               />
@@ -256,6 +281,37 @@ export function NotificationSettingsView() {
 
             {field.state.value && (
               <div className={cn(["ml-6 border-l-2 border-muted pl-6 pt-2"])}>
+                <form.Field name="mic_active_threshold">
+                  {(thresholdField) => (
+                    <div className="mb-4 flex items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <h4 className="text-sm font-medium">Detection delay</h4>
+                        <p className="text-xs text-neutral-600">
+                          How long the mic must be active before triggering
+                        </p>
+                      </div>
+                      <Select
+                        value={String(thresholdField.state.value)}
+                        onValueChange={(v) =>
+                          thresholdField.handleChange(Number(v))
+                        }
+                      >
+                        <SelectTrigger className="w-[100px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="5">5 sec</SelectItem>
+                          <SelectItem value="10">10 sec</SelectItem>
+                          <SelectItem value="15">15 sec</SelectItem>
+                          <SelectItem value="30">30 sec</SelectItem>
+                          <SelectItem value="60">60 sec</SelectItem>
+                          <SelectItem value="120">120 sec</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </form.Field>
+
                 <div className="mb-3 flex flex-col gap-1">
                   <h4 className="text-sm font-medium">
                     Exclude apps from detection
@@ -367,7 +423,10 @@ export function NotificationSettingsView() {
 
         <form.Field name="respect_dnd">
           {(field) => (
-            <div className="flex items-start justify-between gap-4">
+            <div
+              data-settings-item
+              className="flex items-start justify-between gap-4"
+            >
               <div className="flex-1">
                 <h3 className="mb-1 text-sm font-medium">
                   Respect Do-Not-Disturb mode
@@ -378,6 +437,7 @@ export function NotificationSettingsView() {
                 </p>
               </div>
               <Switch
+                data-settings-activate
                 checked={field.state.value}
                 onCheckedChange={field.handleChange}
                 disabled={!anyNotificationEnabled}

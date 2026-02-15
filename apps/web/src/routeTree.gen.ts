@@ -47,6 +47,8 @@ import { Route as ViewCompanyHandbookRouteRouteImport } from './routes/_view/com
 import { Route as ViewAppRouteRouteImport } from './routes/_view/app/route'
 import { Route as AdminStarsIndexRouteImport } from './routes/admin/stars/index'
 import { Route as AdminMediaIndexRouteImport } from './routes/admin/media/index'
+import { Route as AdminLeadFinderIndexRouteImport } from './routes/admin/lead-finder/index'
+import { Route as AdminCrmIndexRouteImport } from './routes/admin/crm/index'
 import { Route as AdminCollectionsIndexRouteImport } from './routes/admin/collections/index'
 import { Route as ViewTemplatesIndexRouteImport } from './routes/_view/templates/index'
 import { Route as ViewShortcutsIndexRouteImport } from './routes/_view/shortcuts/index'
@@ -129,7 +131,6 @@ import { Route as ApiAdminMediaDeleteRouteImport } from './routes/api/admin/medi
 import { Route as ApiAdminMediaCreateFolderRouteImport } from './routes/api/admin/media/create-folder'
 import { Route as ApiAdminImportSaveRouteImport } from './routes/api/admin/import/save'
 import { Route as ApiAdminImportGoogleDocsRouteImport } from './routes/api/admin/import/google-docs'
-import { Route as ApiAdminContentSubmitForReviewRouteImport } from './routes/api/admin/content/submit-for-review'
 import { Route as ApiAdminContentSaveRouteImport } from './routes/api/admin/content/save'
 import { Route as ApiAdminContentRenameRouteImport } from './routes/api/admin/content/rename'
 import { Route as ApiAdminContentPublishRouteImport } from './routes/api/admin/content/publish'
@@ -333,6 +334,16 @@ const AdminStarsIndexRoute = AdminStarsIndexRouteImport.update({
 const AdminMediaIndexRoute = AdminMediaIndexRouteImport.update({
   id: '/media/',
   path: '/media/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminLeadFinderIndexRoute = AdminLeadFinderIndexRouteImport.update({
+  id: '/lead-finder/',
+  path: '/lead-finder/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminCrmIndexRoute = AdminCrmIndexRouteImport.update({
+  id: '/crm/',
+  path: '/crm/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminCollectionsIndexRoute = AdminCollectionsIndexRouteImport.update({
@@ -757,12 +768,6 @@ const ApiAdminImportGoogleDocsRoute =
     path: '/api/admin/import/google-docs',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiAdminContentSubmitForReviewRoute =
-  ApiAdminContentSubmitForReviewRouteImport.update({
-    id: '/api/admin/content/submit-for-review',
-    path: '/api/admin/content/submit-for-review',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiAdminContentSaveRoute = ApiAdminContentSaveRouteImport.update({
   id: '/api/admin/content/save',
   path: '/api/admin/content/save',
@@ -947,6 +952,8 @@ export interface FileRoutesByFullPath {
   '/shortcuts/': typeof ViewShortcutsIndexRoute
   '/templates/': typeof ViewTemplatesIndexRoute
   '/admin/collections/': typeof AdminCollectionsIndexRoute
+  '/admin/crm/': typeof AdminCrmIndexRoute
+  '/admin/lead-finder/': typeof AdminLeadFinderIndexRoute
   '/admin/media/': typeof AdminMediaIndexRoute
   '/admin/stars/': typeof AdminStarsIndexRoute
   '/gallery/$type/$slug': typeof ViewGalleryTypeSlugRoute
@@ -963,7 +970,6 @@ export interface FileRoutesByFullPath {
   '/api/admin/content/publish': typeof ApiAdminContentPublishRoute
   '/api/admin/content/rename': typeof ApiAdminContentRenameRoute
   '/api/admin/content/save': typeof ApiAdminContentSaveRoute
-  '/api/admin/content/submit-for-review': typeof ApiAdminContentSubmitForReviewRoute
   '/api/admin/import/google-docs': typeof ApiAdminImportGoogleDocsRoute
   '/api/admin/import/save': typeof ApiAdminImportSaveRoute
   '/api/admin/media/create-folder': typeof ApiAdminMediaCreateFolderRoute
@@ -1079,6 +1085,8 @@ export interface FileRoutesByTo {
   '/shortcuts': typeof ViewShortcutsIndexRoute
   '/templates': typeof ViewTemplatesIndexRoute
   '/admin/collections': typeof AdminCollectionsIndexRoute
+  '/admin/crm': typeof AdminCrmIndexRoute
+  '/admin/lead-finder': typeof AdminLeadFinderIndexRoute
   '/admin/media': typeof AdminMediaIndexRoute
   '/admin/stars': typeof AdminStarsIndexRoute
   '/gallery/$type/$slug': typeof ViewGalleryTypeSlugRoute
@@ -1095,7 +1103,6 @@ export interface FileRoutesByTo {
   '/api/admin/content/publish': typeof ApiAdminContentPublishRoute
   '/api/admin/content/rename': typeof ApiAdminContentRenameRoute
   '/api/admin/content/save': typeof ApiAdminContentSaveRoute
-  '/api/admin/content/submit-for-review': typeof ApiAdminContentSubmitForReviewRoute
   '/api/admin/import/google-docs': typeof ApiAdminImportGoogleDocsRoute
   '/api/admin/import/save': typeof ApiAdminImportSaveRoute
   '/api/admin/media/create-folder': typeof ApiAdminMediaCreateFolderRoute
@@ -1217,6 +1224,8 @@ export interface FileRoutesById {
   '/_view/shortcuts/': typeof ViewShortcutsIndexRoute
   '/_view/templates/': typeof ViewTemplatesIndexRoute
   '/admin/collections/': typeof AdminCollectionsIndexRoute
+  '/admin/crm/': typeof AdminCrmIndexRoute
+  '/admin/lead-finder/': typeof AdminLeadFinderIndexRoute
   '/admin/media/': typeof AdminMediaIndexRoute
   '/admin/stars/': typeof AdminStarsIndexRoute
   '/_view/gallery/$type/$slug': typeof ViewGalleryTypeSlugRoute
@@ -1233,7 +1242,6 @@ export interface FileRoutesById {
   '/api/admin/content/publish': typeof ApiAdminContentPublishRoute
   '/api/admin/content/rename': typeof ApiAdminContentRenameRoute
   '/api/admin/content/save': typeof ApiAdminContentSaveRoute
-  '/api/admin/content/submit-for-review': typeof ApiAdminContentSubmitForReviewRoute
   '/api/admin/import/google-docs': typeof ApiAdminImportGoogleDocsRoute
   '/api/admin/import/save': typeof ApiAdminImportSaveRoute
   '/api/admin/media/create-folder': typeof ApiAdminMediaCreateFolderRoute
@@ -1355,6 +1363,8 @@ export interface FileRouteTypes {
     | '/shortcuts/'
     | '/templates/'
     | '/admin/collections/'
+    | '/admin/crm/'
+    | '/admin/lead-finder/'
     | '/admin/media/'
     | '/admin/stars/'
     | '/gallery/$type/$slug'
@@ -1371,7 +1381,6 @@ export interface FileRouteTypes {
     | '/api/admin/content/publish'
     | '/api/admin/content/rename'
     | '/api/admin/content/save'
-    | '/api/admin/content/submit-for-review'
     | '/api/admin/import/google-docs'
     | '/api/admin/import/save'
     | '/api/admin/media/create-folder'
@@ -1487,6 +1496,8 @@ export interface FileRouteTypes {
     | '/shortcuts'
     | '/templates'
     | '/admin/collections'
+    | '/admin/crm'
+    | '/admin/lead-finder'
     | '/admin/media'
     | '/admin/stars'
     | '/gallery/$type/$slug'
@@ -1503,7 +1514,6 @@ export interface FileRouteTypes {
     | '/api/admin/content/publish'
     | '/api/admin/content/rename'
     | '/api/admin/content/save'
-    | '/api/admin/content/submit-for-review'
     | '/api/admin/import/google-docs'
     | '/api/admin/import/save'
     | '/api/admin/media/create-folder'
@@ -1624,6 +1634,8 @@ export interface FileRouteTypes {
     | '/_view/shortcuts/'
     | '/_view/templates/'
     | '/admin/collections/'
+    | '/admin/crm/'
+    | '/admin/lead-finder/'
     | '/admin/media/'
     | '/admin/stars/'
     | '/_view/gallery/$type/$slug'
@@ -1640,7 +1652,6 @@ export interface FileRouteTypes {
     | '/api/admin/content/publish'
     | '/api/admin/content/rename'
     | '/api/admin/content/save'
-    | '/api/admin/content/submit-for-review'
     | '/api/admin/import/google-docs'
     | '/api/admin/import/save'
     | '/api/admin/media/create-folder'
@@ -1689,7 +1700,6 @@ export interface RootRouteChildren {
   ApiAdminContentPublishRoute: typeof ApiAdminContentPublishRoute
   ApiAdminContentRenameRoute: typeof ApiAdminContentRenameRoute
   ApiAdminContentSaveRoute: typeof ApiAdminContentSaveRoute
-  ApiAdminContentSubmitForReviewRoute: typeof ApiAdminContentSubmitForReviewRoute
   ApiAdminImportGoogleDocsRoute: typeof ApiAdminImportGoogleDocsRoute
   ApiAdminImportSaveRoute: typeof ApiAdminImportSaveRoute
   ApiAdminMediaCreateFolderRoute: typeof ApiAdminMediaCreateFolderRoute
@@ -1968,6 +1978,20 @@ declare module '@tanstack/react-router' {
       path: '/media'
       fullPath: '/admin/media/'
       preLoaderRoute: typeof AdminMediaIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/lead-finder/': {
+      id: '/admin/lead-finder/'
+      path: '/lead-finder'
+      fullPath: '/admin/lead-finder/'
+      preLoaderRoute: typeof AdminLeadFinderIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/crm/': {
+      id: '/admin/crm/'
+      path: '/crm'
+      fullPath: '/admin/crm/'
+      preLoaderRoute: typeof AdminCrmIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/collections/': {
@@ -2544,13 +2568,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminImportGoogleDocsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/admin/content/submit-for-review': {
-      id: '/api/admin/content/submit-for-review'
-      path: '/api/admin/content/submit-for-review'
-      fullPath: '/api/admin/content/submit-for-review'
-      preLoaderRoute: typeof ApiAdminContentSubmitForReviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/admin/content/save': {
       id: '/api/admin/content/save'
       path: '/api/admin/content/save'
@@ -2867,6 +2884,8 @@ const ViewRouteRouteWithChildren = ViewRouteRoute._addFileChildren(
 interface AdminRouteRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   AdminCollectionsIndexRoute: typeof AdminCollectionsIndexRoute
+  AdminCrmIndexRoute: typeof AdminCrmIndexRoute
+  AdminLeadFinderIndexRoute: typeof AdminLeadFinderIndexRoute
   AdminMediaIndexRoute: typeof AdminMediaIndexRoute
   AdminStarsIndexRoute: typeof AdminStarsIndexRoute
 }
@@ -2874,6 +2893,8 @@ interface AdminRouteRouteChildren {
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   AdminCollectionsIndexRoute: AdminCollectionsIndexRoute,
+  AdminCrmIndexRoute: AdminCrmIndexRoute,
+  AdminLeadFinderIndexRoute: AdminLeadFinderIndexRoute,
   AdminMediaIndexRoute: AdminMediaIndexRoute,
   AdminStarsIndexRoute: AdminStarsIndexRoute,
 }
@@ -2918,7 +2939,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminContentPublishRoute: ApiAdminContentPublishRoute,
   ApiAdminContentRenameRoute: ApiAdminContentRenameRoute,
   ApiAdminContentSaveRoute: ApiAdminContentSaveRoute,
-  ApiAdminContentSubmitForReviewRoute: ApiAdminContentSubmitForReviewRoute,
   ApiAdminImportGoogleDocsRoute: ApiAdminImportGoogleDocsRoute,
   ApiAdminImportSaveRoute: ApiAdminImportSaveRoute,
   ApiAdminMediaCreateFolderRoute: ApiAdminMediaCreateFolderRoute,

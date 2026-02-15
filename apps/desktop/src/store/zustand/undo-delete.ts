@@ -5,7 +5,7 @@ type SessionRow = {
   user_id: string;
   created_at: string;
   folder_id: string;
-  event_id: string;
+  event_json: string;
   title: string;
   raw_md: string;
 };
@@ -57,87 +57,171 @@ export type DeletedSessionData = {
 
 export const UNDO_TIMEOUT_MS = 5000;
 
-interface UndoDeleteState {
-  deletedSession: DeletedSessionData | null;
+export type PendingDeletion = {
+  data: DeletedSessionData;
   timeoutId: ReturnType<typeof setTimeout> | null;
-  isPaused: boolean;
-  remainingTime: number;
   onDeleteConfirm: (() => void) | null;
-  setDeletedSession: (
-    data: DeletedSessionData | null,
+  addedAt: number;
+  batchId: string | null;
+  paused: boolean;
+  pausedAt: number | null;
+};
+
+interface UndoDeleteState {
+  pendingDeletions: Record<string, PendingDeletion>;
+  addDeletion: (
+    data: DeletedSessionData,
     onConfirm?: () => void,
+    batchId?: string,
   ) => void;
-  setTimeoutId: (id: ReturnType<typeof setTimeout> | null) => void;
-  pause: () => void;
-  resume: () => void;
-  clear: () => void;
-  confirmDelete: () => void;
+  clearDeletion: (sessionId: string) => void;
+  confirmDeletion: (sessionId: string) => void;
+  clearBatch: (batchId: string) => void;
+  confirmBatch: (batchId: string) => void;
+  pauseSession: (sessionId: string) => void;
+  resumeSession: (sessionId: string) => void;
+  pauseGroup: (sessionIds: string[]) => void;
+  resumeGroup: (sessionIds: string[]) => void;
 }
 
 export const useUndoDelete = create<UndoDeleteState>((set, get) => ({
-  deletedSession: null,
-  timeoutId: null,
-  isPaused: false,
-  remainingTime: UNDO_TIMEOUT_MS,
-  onDeleteConfirm: null,
-  setDeletedSession: (data, onConfirm) =>
-    set({
-      deletedSession: data,
-      remainingTime: UNDO_TIMEOUT_MS,
-      onDeleteConfirm: onConfirm ?? null,
-    }),
-  setTimeoutId: (id) => {
-    const currentId = get().timeoutId;
-    if (currentId) {
-      clearTimeout(currentId);
+  pendingDeletions: {},
+
+  addDeletion: (data, onConfirm, batchId) => {
+    const sessionId = data.session.id;
+
+    const existing = get().pendingDeletions[sessionId];
+    if (existing?.timeoutId) {
+      clearTimeout(existing.timeoutId);
     }
-    set({ timeoutId: id });
-  },
-  pause: () => {
-    const { timeoutId, deletedSession, isPaused } = get();
-    if (isPaused || !deletedSession) return;
-
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-
-    const elapsed = Date.now() - deletedSession.deletedAt;
-    const remaining = Math.max(0, UNDO_TIMEOUT_MS - elapsed);
-    set({ isPaused: true, remainingTime: remaining, timeoutId: null });
-  },
-  resume: () => {
-    const { isPaused, remainingTime, deletedSession, confirmDelete } = get();
-    if (!isPaused || !deletedSession) return;
-
-    const newDeletedAt = Date.now() - (UNDO_TIMEOUT_MS - remainingTime);
-    set({
-      isPaused: false,
-      deletedSession: { ...deletedSession, deletedAt: newDeletedAt },
-    });
 
     const timeoutId = setTimeout(() => {
-      confirmDelete();
-    }, remainingTime);
-    set({ timeoutId });
+      get().confirmDeletion(sessionId);
+    }, UNDO_TIMEOUT_MS);
+
+    set((state) => ({
+      pendingDeletions: {
+        ...state.pendingDeletions,
+        [sessionId]: {
+          data,
+          timeoutId,
+          onDeleteConfirm: onConfirm ?? null,
+          addedAt: Date.now(),
+          batchId: batchId ?? null,
+          paused: false,
+          pausedAt: null,
+        },
+      },
+    }));
   },
-  clear: () => {
-    const currentId = get().timeoutId;
-    if (currentId) {
-      clearTimeout(currentId);
+
+  clearDeletion: (sessionId) => {
+    const pending = get().pendingDeletions[sessionId];
+    if (!pending) return;
+
+    if (pending.timeoutId) {
+      clearTimeout(pending.timeoutId);
     }
-    set({
-      deletedSession: null,
-      timeoutId: null,
-      isPaused: false,
-      remainingTime: UNDO_TIMEOUT_MS,
-      onDeleteConfirm: null,
+
+    set((state) => {
+      const { [sessionId]: _, ...rest } = state.pendingDeletions;
+      return { pendingDeletions: rest };
     });
   },
-  confirmDelete: () => {
-    const { onDeleteConfirm, clear } = get();
-    if (onDeleteConfirm) {
-      onDeleteConfirm();
+
+  confirmDeletion: (sessionId) => {
+    const pending = get().pendingDeletions[sessionId];
+    if (!pending) return;
+
+    if (pending.onDeleteConfirm) {
+      pending.onDeleteConfirm();
     }
-    clear();
+    get().clearDeletion(sessionId);
+  },
+
+  clearBatch: (batchId) => {
+    const entries = Object.entries(get().pendingDeletions).filter(
+      ([_, p]) => p.batchId === batchId,
+    );
+    for (const [sessionId] of entries) {
+      get().clearDeletion(sessionId);
+    }
+  },
+
+  confirmBatch: (batchId) => {
+    const entries = Object.entries(get().pendingDeletions).filter(
+      ([_, p]) => p.batchId === batchId,
+    );
+    for (const [sessionId] of entries) {
+      get().confirmDeletion(sessionId);
+    }
+  },
+
+  pauseSession: (sessionId) => {
+    const pending = get().pendingDeletions[sessionId];
+    if (!pending || pending.paused) return;
+
+    if (pending.timeoutId) {
+      clearTimeout(pending.timeoutId);
+    }
+
+    set((state) => {
+      const current = state.pendingDeletions[sessionId];
+      if (!current) return state;
+      return {
+        pendingDeletions: {
+          ...state.pendingDeletions,
+          [sessionId]: {
+            ...current,
+            timeoutId: null,
+            paused: true,
+            pausedAt: Date.now(),
+          },
+        },
+      };
+    });
+  },
+
+  resumeSession: (sessionId) => {
+    const pending = get().pendingDeletions[sessionId];
+    if (!pending || !pending.paused || !pending.pausedAt) return;
+
+    const pauseDuration = Date.now() - pending.pausedAt;
+    const newDeletedAt = pending.data.deletedAt + pauseDuration;
+    const elapsed = Date.now() - newDeletedAt;
+    const remaining = Math.max(0, UNDO_TIMEOUT_MS - elapsed);
+
+    const timeoutId = setTimeout(() => {
+      get().confirmDeletion(sessionId);
+    }, remaining);
+
+    set((state) => {
+      const current = state.pendingDeletions[sessionId];
+      if (!current) return state;
+      return {
+        pendingDeletions: {
+          ...state.pendingDeletions,
+          [sessionId]: {
+            ...current,
+            timeoutId,
+            paused: false,
+            pausedAt: null,
+            data: { ...current.data, deletedAt: newDeletedAt },
+          },
+        },
+      };
+    });
+  },
+
+  pauseGroup: (sessionIds) => {
+    for (const id of sessionIds) {
+      get().pauseSession(id);
+    }
+  },
+
+  resumeGroup: (sessionIds) => {
+    for (const id of sessionIds) {
+      get().resumeSession(id);
+    }
   },
 }));

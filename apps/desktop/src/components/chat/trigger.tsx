@@ -42,6 +42,7 @@ export function ChatTrigger({
   return createPortal(
     <button
       ref={buttonRef}
+      data-chat-trigger
       onClick={onClick}
       className={cn([
         "fixed right-4 z-40",

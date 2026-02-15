@@ -9,8 +9,8 @@ use axum::{
 use crate::config::SubscriptionConfig;
 use crate::state::AppState;
 
-pub use billing::{Interval, StartTrialResponse};
-pub use rpc::CanStartTrialResponse;
+pub use billing::{Interval, StartTrialReason, StartTrialResponse};
+pub use rpc::{CanStartTrialReason, CanStartTrialResponse};
 
 pub fn router(config: SubscriptionConfig) -> Router {
     let state = AppState::new(config);

@@ -11,7 +11,12 @@ import Mention from "@tiptap/extension-mention";
 import { type EditorState, PluginKey } from "@tiptap/pm/state";
 import { ReactRenderer } from "@tiptap/react";
 import { type SuggestionOptions } from "@tiptap/suggestion";
-import { Building2Icon, StickyNoteIcon, UserIcon } from "lucide-react";
+import {
+  Building2Icon,
+  MessageSquareIcon,
+  StickyNoteIcon,
+  UserIcon,
+} from "lucide-react";
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 
 const GLOBAL_NAVIGATE_FUNCTION = "__HYPR_NAVIGATE__";
@@ -125,6 +130,8 @@ const Component = forwardRef<
               <UserIcon className="mention-type-icon mention-type-human" />
             ) : item.type === "organization" ? (
               <Building2Icon className="mention-type-icon mention-type-organization" />
+            ) : item.type === "chat_shortcut" ? (
+              <MessageSquareIcon className="mention-type-icon mention-type-chat-shortcut" />
             ) : null}
             <span className="mention-label">{item.label}</span>
           </button>

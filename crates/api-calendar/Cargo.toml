@@ -6,7 +6,6 @@ edition = "2024"
 [dependencies]
 hypr-api-env = { workspace = true }
 hypr-google-calendar = { workspace = true }
-hypr-http = { workspace = true }
 hypr-nango = { workspace = true }
 
 chrono = { workspace = true, features = ["serde"] }

@@ -135,7 +135,7 @@ export const createBasicSlice = <
     }
 
     const shouldResetChatMode =
-      tabToClose.type === "chat" && get().chatMode === "FullTab";
+      tabToClose.type === "chat_support" && get().chatMode === "FullTab";
     const remainingTabs = tabs.filter((t) => !isSameTab(t, tab));
 
     if (remainingTabs.length === 0) {
@@ -181,7 +181,8 @@ export const createBasicSlice = <
     }
 
     const isRemovingChatTab =
-      tabToKeep.type !== "chat" && tabs.some((t) => t.type === "chat");
+      tabToKeep.type !== "chat_support" &&
+      tabs.some((t) => t.type === "chat_support");
     const shouldResetChatMode =
       isRemovingChatTab && get().chatMode === "FullTab";
 

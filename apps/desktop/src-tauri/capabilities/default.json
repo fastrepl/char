@@ -73,6 +73,7 @@
     "git:default",
     "os:default",
     "opener2:default",
+    "mcp:default",
     "detect:default",
     "dock:default",
     "permissions:default",

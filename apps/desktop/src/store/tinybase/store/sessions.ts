@@ -1,8 +1,10 @@
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
+import type { Event, SessionEvent } from "@hypr/store";
 import { json2md } from "@hypr/tiptap/shared";
 
 import { DEFAULT_USER_ID } from "../../../utils";
 import { id } from "../../../utils";
+import { findSessionByEventId } from "../../../utils/session-event";
 import * as main from "./main";
 
 type Store = NonNullable<ReturnType<typeof main.UI.useStore>>;
@@ -26,23 +28,40 @@ export function getOrCreateSessionForEventId(
   store: Store,
   eventId: string,
   title?: string,
+  timezone?: string,
 ): string {
-  const sessions = store.getTable("sessions");
-  let existingSessionId: string | null = null;
+  if (!store.hasRow("events", eventId)) {
+    console.trace(
+      `[getOrCreateSessionForEventId] event that corresponds to the provided eventId ${eventId} does not exist`,
+    );
+    return createSession(store, title);
+  }
 
-  Object.entries(sessions).forEach(([sessionId, session]) => {
-    if (session.event_id === eventId) {
-      existingSessionId = sessionId;
-    }
-  });
-
+  const existingSessionId = findSessionByEventId(store, eventId, timezone);
   if (existingSessionId) {
     return existingSessionId;
   }
 
+  const event = store.getRow("events", eventId) as Event;
+
+  let sessionEvent: SessionEvent = {
+    tracking_id: event.tracking_id_event,
+    calendar_id: event.calendar_id,
+    title: event.title,
+    started_at: event.started_at,
+    ended_at: event.ended_at,
+    // TODO: fix this
+    is_all_day: !!event.is_all_day,
+    has_recurrence_rules: !!event.has_recurrence_rules,
+    location: event.location,
+    meeting_link: event.meeting_link,
+    description: event.description,
+    recurrence_series_id: event.recurrence_series_id,
+  };
+
   const sessionId = id();
   store.setRow("sessions", sessionId, {
-    event_id: eventId,
+    event_json: JSON.stringify(sessionEvent),
     title: title ?? "",
     created_at: new Date().toISOString(),
     raw_md: "",
@@ -63,7 +82,7 @@ export function isSessionEmpty(store: Store, sessionId: string): boolean {
 
   // event sessions automatically have a title
   // only consider titles if it does not have an event
-  if (session.title && session.title.trim() && !session.event_id) {
+  if (session.title && session.title.trim() && !session.event_json) {
     return false;
   }
 

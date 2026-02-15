@@ -17,6 +17,9 @@ const validateSearch = z.object({
   redirect: z.string().optional(),
   access_token: z.string().optional(),
   refresh_token: z.string().optional(),
+  error: z.string().optional(),
+  error_code: z.string().optional(),
+  error_description: z.string().optional(),
 });
 
 export const Route = createFileRoute("/_view/callback/auth")({
@@ -169,10 +172,39 @@ function Component() {
   };
 
   useEffect(() => {
-    if (search.flow === "web") {
+    if (search.flow === "web" && !search.error) {
       navigate({ to: search.redirect || "/app/account/" });
     }
   }, [search, navigate]);
+
+  if (search.error) {
+    return (
+      <div className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white flex items-center justify-center p-6">
+        <div className="max-w-md w-full text-center flex flex-col gap-8">
+          <div className="flex flex-col gap-3">
+            <h1 className="text-3xl font-serif tracking-tight text-stone-600">
+              Sign-in failed
+            </h1>
+            <p className="text-neutral-600">
+              {search.error_description
+                ? search.error_description.replaceAll("+", " ")
+                : "Something went wrong during sign-in"}
+            </p>
+          </div>
+
+          <a
+            href={`/auth?flow=${search.flow}&scheme=${search.scheme}`}
+            className={cn([
+              "w-full h-12 flex items-center justify-center text-base font-medium transition-all cursor-pointer",
+              "bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
+            ])}
+          >
+            Try again
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   if (search.flow === "desktop") {
     const hasTokens = search.access_token && search.refresh_token;
@@ -200,7 +232,7 @@ function Component() {
                   "bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
                 ])}
               >
-                Open Hyprnote
+                Open Char
               </button>
 
               <button

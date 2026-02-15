@@ -29,10 +29,10 @@ export const Route = createFileRoute("/_view/press-kit/app")({
   },
   head: () => ({
     meta: [
-      { title: "App Screenshots - Hyprnote Press Kit" },
+      { title: "App Screenshots - Char Press Kit" },
       {
         name: "description",
-        content: "Download Hyprnote app screenshots and UI assets.",
+        content: "Download Char app screenshots and UI assets.",
       },
     ],
   }),
@@ -149,7 +149,7 @@ function HeroSection() {
           App Screenshots
         </h1>
         <p className="text-lg sm:text-xl text-neutral-600">
-          Download high-quality screenshots of Hyprnote for press and marketing
+          Download high-quality screenshots of Char for press and marketing
           materials.
         </p>
       </div>

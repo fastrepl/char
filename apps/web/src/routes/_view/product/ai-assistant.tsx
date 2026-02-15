@@ -10,7 +10,7 @@ export const Route = createFileRoute("/_view/product/ai-assistant")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "AI Chat - Hyprnote" },
+      { title: "AI Chat - Char" },
       {
         name: "description",
         content:
@@ -546,7 +546,7 @@ function CTASection() {
         <div className="mb-4 size-40 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[48px] bg-transparent">
           <img
             src="/api/images/hyprnote/icon.png"
-            alt="Hyprnote"
+            alt="Char"
             width={144}
             height={144}
             className="size-36 mx-auto rounded-[40px] border border-neutral-100"
@@ -556,8 +556,7 @@ function CTASection() {
           Start using your AI assistant
         </h2>
         <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-          Get AI-powered help before, during, and after every meeting with
-          Hyprnote
+          Get AI-powered help before, during, and after every meeting with Char
         </p>
         <div className="pt-6 flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Link

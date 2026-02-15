@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { GetFileTranscriptionResultByPipelineIdData, GetFileTranscriptionResultByPipelineIdErrors, GetFileTranscriptionResultByPipelineIdResponses, GetFileTranscriptionStatusByPipelineIdData, GetFileTranscriptionStatusByPipelineIdErrors, GetFileTranscriptionStatusByPipelineIdResponses, GetRpcCanStartTrialData, GetRpcCanStartTrialResponses, PostBillingStartTrialData, PostBillingStartTrialResponses, PostFileTranscriptionStartData, PostFileTranscriptionStartErrors, PostFileTranscriptionStartResponses } from './types.gen';
+import type { CanStartTrialData, CanStartTrialErrors, CanStartTrialResponses, CreateConnectSessionData, CreateConnectSessionErrors, CreateConnectSessionResponses, CreateEventData, CreateEventErrors, CreateEventResponses, ListCalendarsData, ListCalendarsErrors, ListCalendarsResponses, ListEventsData, ListEventsErrors, ListEventsResponses, NangoWebhookData, NangoWebhookErrors, NangoWebhookResponses, StartTrialData, StartTrialErrors, StartTrialResponses, SttListenBatchData, SttListenBatchErrors, SttListenBatchResponses, SttListenStreamData, SttListenStreamErrors, SttStatusData, SttStatusErrors, SttStatusResponses, SubmitData, SubmitErrors, SubmitResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -18,28 +18,74 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
     meta?: Record<string, unknown>;
 };
 
-export const postBillingStartTrial = <ThrowOnError extends boolean = false>(options: Options<PostBillingStartTrialData, ThrowOnError>) => (options.client ?? client).post<PostBillingStartTrialResponses, unknown, ThrowOnError>({ url: '/billing/start-trial', ...options });
-
-export const postFileTranscriptionStart = <ThrowOnError extends boolean = false>(options?: Options<PostFileTranscriptionStartData, ThrowOnError>) => (options?.client ?? client).post<PostFileTranscriptionStartResponses, PostFileTranscriptionStartErrors, ThrowOnError>({
+export const listCalendars = <ThrowOnError extends boolean = false>(options: Options<ListCalendarsData, ThrowOnError>) => (options.client ?? client).post<ListCalendarsResponses, ListCalendarsErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/file-transcription/start',
+    url: '/calendar/calendars',
     ...options,
     headers: {
         'Content-Type': 'application/json',
-        ...options?.headers
+        ...options.headers
     }
 });
 
-export const getFileTranscriptionStatusByPipelineId = <ThrowOnError extends boolean = false>(options: Options<GetFileTranscriptionStatusByPipelineIdData, ThrowOnError>) => (options.client ?? client).get<GetFileTranscriptionStatusByPipelineIdResponses, GetFileTranscriptionStatusByPipelineIdErrors, ThrowOnError>({
+export const listEvents = <ThrowOnError extends boolean = false>(options: Options<ListEventsData, ThrowOnError>) => (options.client ?? client).post<ListEventsResponses, ListEventsErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/file-transcription/status/{pipelineId}',
+    url: '/calendar/events',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const createEvent = <ThrowOnError extends boolean = false>(options: Options<CreateEventData, ThrowOnError>) => (options.client ?? client).post<CreateEventResponses, CreateEventErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/calendar/events/create',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const submit = <ThrowOnError extends boolean = false>(options: Options<SubmitData, ThrowOnError>) => (options.client ?? client).post<SubmitResponses, SubmitErrors, ThrowOnError>({
+    url: '/feedback/submit',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const createConnectSession = <ThrowOnError extends boolean = false>(options?: Options<CreateConnectSessionData, ThrowOnError>) => (options?.client ?? client).post<CreateConnectSessionResponses, CreateConnectSessionErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/nango/connect-session',
     ...options
 });
 
-export const getFileTranscriptionResultByPipelineId = <ThrowOnError extends boolean = false>(options: Options<GetFileTranscriptionResultByPipelineIdData, ThrowOnError>) => (options.client ?? client).get<GetFileTranscriptionResultByPipelineIdResponses, GetFileTranscriptionResultByPipelineIdErrors, ThrowOnError>({
+export const nangoWebhook = <ThrowOnError extends boolean = false>(options?: Options<NangoWebhookData, ThrowOnError>) => (options?.client ?? client).post<NangoWebhookResponses, NangoWebhookErrors, ThrowOnError>({ url: '/nango/webhook', ...options });
+
+export const sttListenStream = <ThrowOnError extends boolean = false>(options?: Options<SttListenStreamData, ThrowOnError>) => (options?.client ?? client).get<unknown, SttListenStreamErrors, ThrowOnError>({ url: '/stt/listen', ...options });
+
+export const sttListenBatch = <ThrowOnError extends boolean = false>(options: Options<SttListenBatchData, ThrowOnError>) => (options.client ?? client).post<SttListenBatchResponses, SttListenBatchErrors, ThrowOnError>({
+    url: '/stt/listen',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const sttStatus = <ThrowOnError extends boolean = false>(options: Options<SttStatusData, ThrowOnError>) => (options.client ?? client).get<SttStatusResponses, SttStatusErrors, ThrowOnError>({ url: '/stt/status/{pipeline_id}', ...options });
+
+export const canStartTrial = <ThrowOnError extends boolean = false>(options?: Options<CanStartTrialData, ThrowOnError>) => (options?.client ?? client).get<CanStartTrialResponses, CanStartTrialErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/file-transcription/result/{pipelineId}',
+    url: '/subscription/can-start-trial',
     ...options
 });
 
-export const getRpcCanStartTrial = <ThrowOnError extends boolean = false>(options?: Options<GetRpcCanStartTrialData, ThrowOnError>) => (options?.client ?? client).get<GetRpcCanStartTrialResponses, unknown, ThrowOnError>({ url: '/rpc/can-start-trial', ...options });
+export const startTrial = <ThrowOnError extends boolean = false>(options?: Options<StartTrialData, ThrowOnError>) => (options?.client ?? client).post<StartTrialResponses, StartTrialErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/subscription/start-trial',
+    ...options
+});

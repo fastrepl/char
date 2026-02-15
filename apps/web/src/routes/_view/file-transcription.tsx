@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_view/file-transcription")({
   },
   head: () => ({
     meta: [
-      { title: "Free Audio Transcription Tool - Hyprnote" },
+      { title: "Free Audio Transcription Tool - Char" },
       {
         name: "description",
         content:
@@ -37,7 +37,7 @@ export const Route = createFileRoute("/_view/file-transcription")({
       },
       {
         property: "og:title",
-        content: "Free Audio Transcription Tool - Hyprnote",
+        content: "Free Audio Transcription Tool - Char",
       },
       {
         property: "og:description",
@@ -197,7 +197,7 @@ function Component() {
         <div className="px-6 py-12 bg-stone-50/50 border-t border-neutral-100">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl font-serif text-stone-600 mb-8 text-center">
-              Why Use Hyprnote for Transcription?
+              Why Use Char for Transcription?
             </h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="p-5 bg-white border border-neutral-200 rounded-lg">
@@ -264,14 +264,14 @@ function Component() {
             Want Real-Time Transcription?
           </h2>
           <p className="text-neutral-600 mb-6 max-w-xl mx-auto">
-            Download Hyprnote for live meeting transcription with local AI
+            Download Char for live meeting transcription with local AI
             processing, automatic summaries, and complete privacy.
           </p>
           <Link
             to="/download/"
             className="inline-block px-6 py-2.5 text-sm font-medium rounded-full bg-linear-to-t from-stone-600 to-stone-500 text-white hover:scale-105 active:scale-95 transition-transform"
           >
-            Download Hyprnote Free
+            Download Char Free
           </Link>
         </div>
       </div>

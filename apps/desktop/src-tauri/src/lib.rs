@@ -8,6 +8,7 @@ mod supervisor;
 use ext::*;
 use store::*;
 
+#[cfg(target_os = "macos")]
 use tauri::Manager;
 use tauri_plugin_permissions::{Permission, PermissionsPluginExt};
 use tauri_plugin_windows::{AppWindow, WindowsPluginExt};
@@ -99,6 +100,7 @@ pub async fn main() {
         .plugin(tauri_plugin_path2::init())
         .plugin(tauri_plugin_pdf::init())
         .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_mcp::init())
         .plugin(tauri_plugin_misc::init())
         .plugin(tauri_plugin_template::init())
         .plugin(tauri_plugin_http::init())
@@ -120,6 +122,7 @@ pub async fn main() {
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .plugin(tauri_plugin_listener::init())
         .plugin(tauri_plugin_listener2::init())
+        .plugin(tauri_plugin_tantivy::init())
         .plugin(tauri_plugin_audio_priority::init())
         .plugin(tauri_plugin_local_stt::init(
             tauri_plugin_local_stt::InitOptions {
@@ -239,13 +242,7 @@ pub async fn main() {
 
     {
         let app_handle = app.handle().clone();
-        if app.get_onboarding_needed().unwrap_or(true) {
-            AppWindow::Main.hide(&app_handle).unwrap();
-            AppWindow::Onboarding.show(&app_handle).unwrap();
-        } else {
-            AppWindow::Onboarding.destroy(&app_handle).unwrap();
-            AppWindow::Main.show(&app_handle).unwrap();
-        }
+        AppWindow::Main.show(&app_handle).unwrap();
     }
 
     #[cfg(target_os = "macos")]
@@ -266,13 +263,7 @@ pub async fn main() {
     app.run(move |app, event| match event {
         #[cfg(target_os = "macos")]
         tauri::RunEvent::Reopen { .. } => {
-            if app.get_onboarding_needed().unwrap_or(true) {
-                AppWindow::Main.hide(&app).unwrap();
-                AppWindow::Onboarding.show(&app).unwrap();
-            } else {
-                AppWindow::Onboarding.destroy(&app).unwrap();
-                AppWindow::Main.show(&app).unwrap();
-            }
+            AppWindow::Main.show(&app).unwrap();
         }
         #[cfg(target_os = "macos")]
         tauri::RunEvent::ExitRequested { api, .. } => {

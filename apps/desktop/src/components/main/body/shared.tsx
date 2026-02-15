@@ -26,6 +26,42 @@ type TabItemProps<T extends Tab = Tab> = { tab: T; tabIndex?: number } & {
   setPendingCloseConfirmationTab?: (tab: Tab | null) => void;
 };
 
+type TabAccent = "neutral" | "red" | "blue";
+
+const accentColors: Record<
+  TabAccent,
+  {
+    selected: string[];
+    unselected: string[];
+    hover: { selected: string; unselected: string };
+  }
+> = {
+  neutral: {
+    selected: ["bg-neutral-50", "text-black", "border-stone-400"],
+    unselected: ["bg-neutral-50", "text-neutral-500", "border-transparent"],
+    hover: {
+      selected: "text-neutral-700 hover:text-neutral-900",
+      unselected: "text-neutral-500 hover:text-neutral-700",
+    },
+  },
+  red: {
+    selected: ["bg-red-50", "text-red-600", "border-red-400"],
+    unselected: ["bg-red-50", "text-red-500", "border-transparent"],
+    hover: {
+      selected: "text-red-600 hover:text-red-700",
+      unselected: "text-red-600 hover:text-red-700",
+    },
+  },
+  blue: {
+    selected: ["bg-sky-50", "text-sky-700", "border-sky-400"],
+    unselected: ["bg-sky-50", "text-sky-500", "border-transparent"],
+    hover: {
+      selected: "text-sky-500 hover:text-sky-700",
+      unselected: "text-sky-400 hover:text-sky-600",
+    },
+  },
+};
+
 type TabItemBaseProps = {
   icon: React.ReactNode;
   title: React.ReactNode;
@@ -34,8 +70,10 @@ type TabItemBaseProps = {
   finalizing?: boolean;
   pinned?: boolean;
   allowPin?: boolean;
+  allowClose?: boolean;
   isEmptyTab?: boolean;
   tabIndex?: number;
+  accent?: TabAccent;
   showCloseConfirmation?: boolean;
   onCloseConfirmationChange?: (show: boolean) => void;
 } & {
@@ -59,8 +97,10 @@ export function TabItemBase({
   finalizing = false,
   pinned = false,
   allowPin = true,
+  allowClose = true,
   isEmptyTab = false,
   tabIndex,
+  accent = "neutral",
   showCloseConfirmation = false,
   onCloseConfirmationChange,
   handleCloseThis,
@@ -70,6 +110,7 @@ export function TabItemBase({
   handlePinThis,
   handleUnpinThis,
 }: TabItemBaseProps) {
+  const colors = accentColors[accent];
   const isCmdPressed = useCmdKeyPressed();
   const [isHovered, setIsHovered] = useState(false);
   const [localShowConfirmation, setLocalShowConfirmation] = useState(false);
@@ -119,15 +160,15 @@ export function TabItemBase({
   }, [isConfirmationOpen, handleConfirmClose]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button === 1 && !active) {
+    if (e.button === 1 && !active && allowClose) {
       e.preventDefault();
       e.stopPropagation();
       handleCloseThis();
     }
   };
 
-  const contextMenu =
-    active || (selected && !isEmptyTab)
+  const contextMenu = allowClose
+    ? active || (selected && !isEmptyTab)
       ? [
           { id: "close-tab", text: "Close", action: handleAttemptClose },
           ...(allowPin
@@ -163,7 +204,8 @@ export function TabItemBase({
                   : { id: "pin-tab", text: "Pin tab", action: handlePinThis },
               ]
             : []),
-        ];
+        ]
+    : [];
 
   const showShortcut = isCmdPressed && tabIndex !== undefined;
 
@@ -180,21 +222,11 @@ export function TabItemBase({
         onMouseDown={handleMouseDown}
         className={cn([
           "flex items-center gap-1 relative",
-          "w-48 h-full px-2",
+          "w-[160px] h-full px-2",
           "rounded-xl border",
           "cursor-pointer group",
           "transition-colors duration-200",
-          active && selected && ["bg-red-50", "text-red-600", "border-red-400"],
-          active &&
-            !selected && ["bg-red-50", "text-red-500", "border-transparent"],
-          !active &&
-            selected && ["bg-neutral-50", "text-black", "border-stone-400"],
-          !active &&
-            !selected && [
-              "bg-neutral-50",
-              "text-neutral-500",
-              "border-transparent",
-            ],
+          selected ? colors.selected : colors.unselected,
         ])}
       >
         <div className="flex items-center gap-2 text-sm flex-1 min-w-0">
@@ -220,8 +252,7 @@ export function TabItemBase({
                   }}
                   className={cn([
                     "flex items-center justify-center transition-colors",
-                    selected && "text-neutral-700 hover:text-neutral-900",
-                    !selected && "text-neutral-500 hover:text-neutral-700",
+                    colors.hover[selected ? "selected" : "unselected"],
                   ])}
                 >
                   <Pin size={14} />
@@ -230,31 +261,27 @@ export function TabItemBase({
                 icon
               )}
             </div>
-            <div
-              className={cn([
-                "absolute inset-0 flex items-center justify-center transition-opacity duration-200",
-                isHovered || isConfirmationOpen ? "opacity-100" : "opacity-0",
-              ])}
-            >
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleAttemptClose();
-                }}
+            {allowClose && (
+              <div
                 className={cn([
-                  "flex items-center justify-center transition-colors",
-                  active && "text-red-600 hover:text-red-700",
-                  !active &&
-                    selected &&
-                    "text-neutral-700 hover:text-neutral-900",
-                  !active &&
-                    !selected &&
-                    "text-neutral-500 hover:text-neutral-700",
+                  "absolute inset-0 flex items-center justify-center transition-opacity duration-200",
+                  isHovered || isConfirmationOpen ? "opacity-100" : "opacity-0",
                 ])}
               >
-                <X size={16} />
-              </button>
-            </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAttemptClose();
+                  }}
+                  className={cn([
+                    "flex items-center justify-center transition-colors",
+                    colors.hover[selected ? "selected" : "unselected"],
+                  ])}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
           </div>
           <span className="truncate">{title}</span>
         </div>
@@ -274,7 +301,7 @@ export function TabItemBase({
         <PopoverContent
           side="bottom"
           align="start"
-          className="w-48 p-3 rounded-xl"
+          className="w-[240px] p-3 rounded-xl"
           sideOffset={2}
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
@@ -285,8 +312,7 @@ export function TabItemBase({
             </p>
             <Button
               variant="destructive"
-              size="sm"
-              className="w-full rounded-lg flex items-center justify-center relative group"
+              className="w-full h-9 rounded-lg flex items-center justify-center relative group"
               onClick={(e) => {
                 e.stopPropagation();
                 handleConfirmClose();

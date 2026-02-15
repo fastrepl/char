@@ -1,5 +1,12 @@
 import { CalendarOffIcon, CheckIcon } from "lucide-react";
+import { useMemo } from "react";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@hypr/ui/components/ui/accordion";
 import { cn } from "@hypr/utils";
 
 export interface CalendarItem {
@@ -17,15 +24,30 @@ export interface CalendarGroup {
 interface CalendarSelectionProps {
   groups: CalendarGroup[];
   onToggle: (calendar: CalendarItem, enabled: boolean) => void;
+  className?: string;
 }
 
 export function CalendarSelection({
   groups,
   onToggle,
+  className,
 }: CalendarSelectionProps) {
+  const defaultOpen = useMemo(
+    () =>
+      groups
+        .filter((g) => g.calendars.some((c) => c.enabled))
+        .map((g) => g.sourceName),
+    [groups],
+  );
+
   if (groups.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-6 px-4 border border-dashed border-neutral-200 rounded-lg bg-neutral-50/50">
+      <div
+        className={cn([
+          "flex flex-col items-center justify-center py-6 px-4",
+          className,
+        ])}
+      >
         <CalendarOffIcon className="size-6 text-neutral-300 mb-2" />
         <p className="text-xs text-neutral-500">No calendars found</p>
       </div>
@@ -33,25 +55,51 @@ export function CalendarSelection({
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      {groups.map((group) => (
-        <div key={group.sourceName}>
-          <h5 className="text-xs font-medium text-neutral-500 mb-2">
-            {group.sourceName}
-          </h5>
-          <div className="flex flex-col gap-1">
-            {group.calendars.map((cal) => (
-              <CalendarToggleRow
-                key={cal.id}
-                calendar={cal}
-                enabled={cal.enabled}
-                onToggle={(enabled) => onToggle(cal, enabled)}
-              />
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
+    <Accordion
+      type="multiple"
+      defaultValue={defaultOpen}
+      className={cn(["divide-y", className])}
+    >
+      {groups.map((group) => {
+        const enabledCount = group.calendars.filter((c) => c.enabled).length;
+
+        return (
+          <AccordionItem
+            key={group.sourceName}
+            value={group.sourceName}
+            className="border-none px-2"
+          >
+            <AccordionTrigger
+              className={cn([
+                "py-2 cursor-pointer hover:no-underline",
+                "hover:bg-neutral-50 -mx-2 px-2 rounded-md",
+              ])}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-neutral-600">
+                  {group.sourceName}
+                </span>
+                <span className="text-[10px] tabular-nums text-neutral-400">
+                  {enabledCount}/{group.calendars.length}
+                </span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pb-2">
+              <div className="flex flex-col gap-1">
+                {group.calendars.map((cal) => (
+                  <CalendarToggleRow
+                    key={cal.id}
+                    calendar={cal}
+                    enabled={cal.enabled}
+                    onToggle={(enabled) => onToggle(cal, enabled)}
+                  />
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        );
+      })}
+    </Accordion>
   );
 }
 

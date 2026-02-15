@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { getRpcCanStartTrial } from "@hypr/api-client";
+import { canStartTrial as canStartTrialApi } from "@hypr/api-client";
 import { createClient } from "@hypr/api-client/client";
 
 import { env, requireEnv } from "@/env";
@@ -234,7 +234,7 @@ export const canStartTrial = createServerFn({ method: "POST" }).handler(
       },
     });
 
-    const { data, error } = await getRpcCanStartTrial({ client });
+    const { data, error } = await canStartTrialApi({ client });
 
     if (error) {
       console.error("can_start_trial error:", error);

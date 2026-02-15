@@ -45,6 +45,14 @@ async clear() : Promise<Result<null, string>> {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+async getAccountInfo() : Promise<Result<AccountInfo | null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:auth|get_account_info") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -58,6 +66,7 @@ async clear() : Promise<Result<null, string>> {
 
 /** user-defined types **/
 
+export type AccountInfo = { userId: string; email: string | null; fullName: string | null; avatarUrl: string | null; stripeCustomerId: string | null }
 export type Claims = { sub: string; email?: string | null; entitlements?: string[]; subscription_status?: SubscriptionStatus | null; trial_end?: number | null }
 export type SubscriptionStatus = "incomplete" | "incomplete_expired" | "trialing" | "active" | "past_due" | "canceled" | "unpaid" | "paused"
 

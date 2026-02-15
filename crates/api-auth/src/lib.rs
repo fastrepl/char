@@ -32,6 +32,14 @@ impl AuthState {
         self.required_entitlement = Some(entitlement.into());
         self
     }
+
+    pub fn extract_token(auth_header: &str) -> Option<&str> {
+        SupabaseAuth::extract_token(auth_header)
+    }
+
+    pub async fn verify_token(&self, token: &str) -> Result<Claims, AuthError> {
+        self.inner.verify_token(token).await.map_err(AuthError)
+    }
 }
 
 pub struct AuthError(SupabaseAuthError);
@@ -88,6 +96,27 @@ pub async fn require_auth(
         .insert(AuthContext { token, claims });
 
     Ok(next.run(request).await)
+}
+
+pub async fn optional_auth(
+    State(state): State<AuthState>,
+    mut request: Request,
+    next: Next,
+) -> Response {
+    if let Some(auth_header) = request
+        .headers()
+        .get("Authorization")
+        .and_then(|h| h.to_str().ok())
+        && let Some(token) = SupabaseAuth::extract_token(auth_header)
+    {
+        let token = token.to_owned();
+        if let Ok(claims) = state.inner.verify_token(&token).await {
+            request
+                .extensions_mut()
+                .insert(AuthContext { token, claims });
+        }
+    }
+    next.run(request).await
 }
 
 #[cfg(test)]

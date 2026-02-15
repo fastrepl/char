@@ -10,22 +10,22 @@ export const Route = createFileRoute("/_view/why-hyprnote")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "Why Hyprnote - AI Meeting Notes You Actually Own" },
+      { title: "Why Char - AI Meeting Notes You Actually Own" },
       {
         name: "description",
         content:
           "Your meeting notes should be files on your computer, not rows in someone else's database. Plain Markdown files, AI providers you can switch, no bots, no lock-in.",
       },
-      { property: "og:title", content: "Why Hyprnote" },
+      { property: "og:title", content: "Why Char" },
       {
         property: "og:description",
         content:
-          "Most AI note-takers lock your data in their database. We thought that was bullshit. So we built Hyprnote differently.",
+          "Most AI note-takers lock your data in their database. We thought that was bullshit. So we built Char differently.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://hyprnote.com/why-hyprnote" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Why Hyprnote" },
+      { name: "twitter:title", content: "Why Char" },
       {
         name: "twitter:description",
         content:
@@ -66,7 +66,7 @@ function HeroSection() {
       <div className="px-6 py-16 lg:py-24">
         <div className="text-center max-w-3xl mx-auto">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif tracking-tight text-stone-600 mb-8">
-            Why Hyprnote exists
+            Why Char exists
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 leading-relaxed mb-6">
             Most AI note-takers lock your data in their database, force you to
@@ -117,7 +117,7 @@ function WhyWereDifferentSection() {
     <section className="px-6 py-16 lg:py-24 bg-stone-50/30">
       <div className="max-w-4xl mx-auto">
         <h2 className="text-3xl sm:text-4xl font-serif text-stone-600 mb-12 text-center">
-          So we built Hyprnote to give you back control.
+          So we built Char to give you back control.
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -188,13 +188,13 @@ const audiences = [
   {
     title: "You're an open-source advocate who self-hosts everything",
     description:
-      "You run Nextcloud, care about FOSS, and need to verify no data leaves your infrastructure. Hyprnote lets you audit the code and run everything locally.",
+      "You run Nextcloud, care about FOSS, and need to verify no data leaves your infrastructure. Char lets you audit the code and run everything locally.",
     icon: "mdi:server-outline",
   },
   {
     title: "You just want a simple notepad that works",
     description:
-      "You don't care about the philosophy. You want to take notes during calls without thinking about it. Hyprnote does that.",
+      "You don't care about the philosophy. You want to take notes during calls without thinking about it. Char does that.",
     icon: "mdi:notebook-outline",
   },
 ];
@@ -204,7 +204,7 @@ function WhoThisIsForSection() {
     <section className="px-6 py-16 lg:py-24">
       <div className="max-w-4xl mx-auto">
         <h2 className="text-3xl sm:text-4xl font-serif text-stone-600 mb-4 text-center">
-          Hyprnote's for you, if
+          Char's for you, if
         </h2>
 
         <div className="flex flex-col gap-8">
@@ -295,7 +295,7 @@ function WhatWereBuildingTowardSection() {
             <div className="flex flex-col gap-4">
               <div>
                 <p className="text-base text-neutral-600 font-medium italic font-serif">
-                  Hyprnote
+                  Char
                 </p>
                 <p className="text-sm text-neutral-500">
                   John Jeong, Yujong Lee
@@ -305,7 +305,7 @@ function WhatWereBuildingTowardSection() {
               <div>
                 <Image
                   src="/api/images/hyprnote/signature-dark.svg"
-                  alt="Hyprnote Signature"
+                  alt="Char Signature"
                   width={124}
                   height={60}
                   layout="constrained"
@@ -369,7 +369,7 @@ function HereForTheLongHaulSection() {
               hash="hero"
               className="font-semibold text-stone-700 hover:underline decoration-dotted"
             >
-              download Hyprnote and try it
+              download Char and try it
             </Link>
             .
           </p>

@@ -1,22 +1,16 @@
 use axum::{Json, extract::State};
 use serde::{Deserialize, Serialize};
 
+pub use hypr_template_support::DeviceInfo;
+
 use crate::error::SupportError;
 use crate::github::{self, BugReportInput, FeatureRequestInput};
 use crate::state::AppState;
 
-#[derive(Debug, Deserialize, utoipa::ToSchema)]
-#[serde(rename_all = "camelCase")]
-pub struct DeviceInfo {
-    pub platform: String,
-    pub arch: String,
-    pub os_version: String,
-    pub app_version: String,
-}
-
-#[derive(Debug, Deserialize, utoipa::ToSchema)]
+#[derive(Debug, Default, Deserialize, utoipa::ToSchema)]
 #[serde(rename_all = "lowercase")]
 pub enum FeedbackType {
+    #[default]
     Bug,
     Feature,
 }
@@ -24,6 +18,7 @@ pub enum FeedbackType {
 #[derive(Debug, Deserialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct FeedbackRequest {
+    #[serde(default)]
     pub r#type: FeedbackType,
     pub description: String,
     pub logs: Option<String>,
@@ -44,19 +39,24 @@ const SOURCE: &str = "from the Hyprnote desktop app";
 
 #[utoipa::path(
     post,
-    path = "/submit",
+    path = "/feedback/submit",
     request_body = FeedbackRequest,
     responses(
         (status = 200, description = "Feedback submitted successfully", body = FeedbackResponse),
         (status = 400, description = "Invalid request", body = FeedbackResponse),
         (status = 500, description = "Server error", body = FeedbackResponse),
     ),
-    tag = "support",
+    tag = "feedback",
 )]
 pub async fn submit(
     State(state): State<AppState>,
     Json(payload): Json<FeedbackRequest>,
 ) -> std::result::Result<Json<FeedbackResponse>, SupportError> {
+    if payload.description.trim().len() < 10 {
+        return Err(SupportError::InvalidRequest(
+            "description must be at least 10 characters".into(),
+        ));
+    }
     let di = &payload.device_info;
 
     let url = match payload.r#type {

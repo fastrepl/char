@@ -9,14 +9,8 @@ use thiserror::Error;
 pub type Result<T> = std::result::Result<T, SubscriptionError>;
 
 #[derive(Debug, Serialize)]
-pub struct ErrorDetails {
-    pub code: String,
-    pub message: String,
-}
-
-#[derive(Debug, Serialize)]
 pub struct ErrorResponse {
-    pub error: ErrorDetails,
+    pub error: String,
 }
 
 #[derive(Debug, Error)]
@@ -39,45 +33,28 @@ impl From<stripe::StripeError> for SubscriptionError {
 
 impl IntoResponse for SubscriptionError {
     fn into_response(self) -> Response {
-        let internal_message = "Internal server error".to_string();
-
-        let (status, code, message) = match self {
-            Self::SupabaseRequest(message) => {
-                tracing::error!(error = %message, "supabase_error");
-                sentry::capture_message(&message, sentry::Level::Error);
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "supabase_error",
-                    internal_message,
-                )
+        let error_code = match &self {
+            Self::SupabaseRequest(msg) => {
+                tracing::error!(error = %msg, "supabase_error");
+                sentry::capture_message(msg, sentry::Level::Error);
+                "supabase_error"
             }
-            Self::Stripe(message) => {
-                tracing::error!(error = %message, "stripe_error");
-                sentry::capture_message(&message, sentry::Level::Error);
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "stripe_error",
-                    internal_message,
-                )
+            Self::Stripe(msg) => {
+                tracing::error!(error = %msg, "stripe_error");
+                sentry::capture_message(msg, sentry::Level::Error);
+                "stripe_error"
             }
-            Self::Internal(message) => {
-                tracing::error!(error = %message, "internal_error");
-                sentry::capture_message(&message, sentry::Level::Error);
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "internal_server_error",
-                    internal_message,
-                )
+            Self::Internal(msg) => {
+                tracing::error!(error = %msg, "internal_error");
+                sentry::capture_message(msg, sentry::Level::Error);
+                "internal_server_error"
             }
         };
 
         let body = Json(ErrorResponse {
-            error: ErrorDetails {
-                code: code.to_string(),
-                message,
-            },
+            error: error_code.to_string(),
         });
 
-        (status, body).into_response()
+        (StatusCode::INTERNAL_SERVER_ERROR, body).into_response()
     }
 }

@@ -3,24 +3,15 @@ use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
-use serde::Serialize;
 use thiserror::Error;
 
 pub type Result<T> = std::result::Result<T, SupportError>;
 
-#[derive(Debug, Serialize)]
-pub struct ErrorDetails {
-    pub code: String,
-    pub message: String,
-}
-
-#[derive(Debug, Serialize)]
-pub struct ErrorResponse {
-    pub error: ErrorDetails,
-}
-
 #[derive(Debug, Error)]
 pub enum SupportError {
+    #[error("Invalid request: {0}")]
+    InvalidRequest(String),
+
     #[error("GitHub API error: {0}")]
     GitHub(String),
 
@@ -38,34 +29,42 @@ impl IntoResponse for SupportError {
     fn into_response(self) -> Response {
         let internal_message = "Internal server error".to_string();
 
-        let (status, code, message) = match self {
+        match self {
+            Self::InvalidRequest(message) => (
+                StatusCode::BAD_REQUEST,
+                Json(crate::routes::FeedbackResponse {
+                    success: false,
+                    issue_url: None,
+                    error: Some(message),
+                }),
+            )
+                .into_response(),
             Self::GitHub(message) => {
                 tracing::error!(error = %message, "github_error");
                 sentry::capture_message(&message, sentry::Level::Error);
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
-                    "github_error",
-                    internal_message,
+                    Json(crate::routes::FeedbackResponse {
+                        success: false,
+                        issue_url: None,
+                        error: Some(internal_message),
+                    }),
                 )
+                    .into_response()
             }
             Self::Internal(message) => {
                 tracing::error!(error = %message, "internal_error");
                 sentry::capture_message(&message, sentry::Level::Error);
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
-                    "internal_server_error",
-                    internal_message,
+                    Json(crate::routes::FeedbackResponse {
+                        success: false,
+                        issue_url: None,
+                        error: Some(internal_message),
+                    }),
                 )
+                    .into_response()
             }
-        };
-
-        let body = Json(ErrorResponse {
-            error: ErrorDetails {
-                code: code.to_string(),
-                message,
-            },
-        });
-
-        (status, body).into_response()
+        }
     }
 }

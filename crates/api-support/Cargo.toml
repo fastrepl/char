@@ -6,8 +6,12 @@ edition = "2024"
 [dependencies]
 hypr-api-auth = { workspace = true }
 hypr-api-env = { workspace = true }
+hypr-llm-proxy = { workspace = true }
 hypr-mcp = { workspace = true }
 hypr-openrouter = { workspace = true }
+hypr-template-support = { workspace = true }
+reqwest = { workspace = true }
+urlencoding = { workspace = true }
 
 utoipa = { workspace = true }
 
@@ -19,13 +23,15 @@ jsonwebtoken = { workspace = true }
 octocrab = "0.49"
 sqlx = { workspace = true, features = ["runtime-tokio", "tls-rustls", "postgres", "json"] }
 
-askama = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
 
-rmcp = { workspace = true, features = ["server"] }
+rmcp = { workspace = true, features = ["server", "elicitation", "schemars"] }
 tokio-util = { workspace = true }
+
+async-stripe = { workspace = true }
+async-stripe-billing = { workspace = true, features = ["billing_portal_session", "subscription"] }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }

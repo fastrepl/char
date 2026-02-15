@@ -1,6 +1,8 @@
 use utoipa::OpenApi;
 
-use crate::routes::{CanStartTrialResponse, Interval, StartTrialResponse};
+use crate::routes::{
+    CanStartTrialReason, CanStartTrialResponse, Interval, StartTrialReason, StartTrialResponse,
+};
 
 #[derive(OpenApi)]
 #[openapi(
@@ -11,7 +13,9 @@ use crate::routes::{CanStartTrialResponse, Interval, StartTrialResponse};
     components(
         schemas(
             CanStartTrialResponse,
+            CanStartTrialReason,
             StartTrialResponse,
+            StartTrialReason,
             Interval,
         )
     ),

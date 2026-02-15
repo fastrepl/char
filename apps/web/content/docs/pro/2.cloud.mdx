@@ -14,10 +14,72 @@ Pro users get access to managed cloud services that work out of the box:
 
 | Service | Description | Status |
 |---------|-------------|--------|
-| `/chat/completions` | LLM endpoint for AI features (summaries, notes) | Available |
+| `/chat/completions` | LLM endpoint for AI features (summaries, notes, chat) | Available |
 | `/mcp` | MCP server with web search and URL reading tools | Available |
 
 Pro includes curated AI models that work out of the box. Your requests are proxied through our servers with automatic API key management. If you want to use a specific LLM provider, you can bring your own API key (BYOK) in Settings > Intelligence.
+
+### Which LLM Models Are Used
+
+When you use Pro's curated intelligence, Char's server selects from these models automatically. You don't choose a specific model — the server picks the best available one based on latency and whether your request requires tool calling (e.g., web search during note generation).
+
+**Default models** (summaries, notes, chat):
+
+| Model | Provider |
+|-------|----------|
+| `moonshotai/kimi-k2-0905` | Moonshot AI (via OpenRouter) |
+| `openai/gpt-5.2-chat` | OpenAI (via OpenRouter) |
+
+**Tool-calling models** (when AI needs to call functions like web search):
+
+| Model | Provider |
+|-------|----------|
+| `moonshotai/kimi-k2-0905:exacto` | Moonshot AI (via OpenRouter) |
+| `anthropic/claude-haiku-4.5` | Anthropic (via OpenRouter) |
+| `openai/gpt-oss-120b:exacto` | OpenAI (via OpenRouter) |
+
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/llm-proxy/src/config.rs#L43-L51" />
+
+The server selects between tool-calling and default model lists based on whether your request includes tool definitions:
+
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/llm-proxy/src/handler/mod.rs#L177-L184" />
+
+### How the Request Flows
+
+```
+Your Device ──HTTPS──▶ Char API Server ──HTTPS──▶ OpenRouter ──▶ Model Provider
+                       (pro.hyprnote.com)          (openrouter.ai)   (OpenAI/Anthropic/Moonshot)
+```
+
+1. **Your device** sends a chat completion request to the Char API server, authenticated with your Supabase JWT token.
+2. **Char API server** validates your Pro subscription, then forwards the request to [OpenRouter](https://openrouter.ai).
+3. **OpenRouter** routes to the fastest available model from the configured list (sorted by latency).
+4. **The model provider** processes your request and streams the response back through the same chain.
+
+The server sends your request to OpenRouter with `provider.sort = "latency"` to pick the fastest available model:
+
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/llm-proxy/src/provider/openrouter.rs#L47-L65" />
+
+### What Data Is Sent
+
+**Sent to OpenRouter / model provider:**
+- Your conversation messages (system prompt, user messages, assistant responses)
+- Tool definitions and tool call results (if applicable)
+- Parameters: `temperature`, `max_tokens`, `stream`
+
+**NOT sent to OpenRouter / model provider:**
+- Your user ID, email, or name
+- Your device fingerprint
+- Your JWT token (used only for Char API authentication — not forwarded)
+
+### What Char Logs (Analytics)
+
+Char logs metadata about each LLM request to PostHog for usage tracking and billing. **No message content is ever logged.**
+
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/llm-proxy/src/analytics.rs#L31-L39" />
+
+**Logged:** provider name, model name, token counts, latency, cost, HTTP status.
+**Not logged:** message content, conversation history, user prompts.
 
 ## MCP Tools
 
@@ -29,7 +91,7 @@ The MCP server provides two built-in tools:
 
 ## Why Use Cloud Services?
 
-While Hyprnote aims to be fully transparent and controllable, cloud services help in two ways:
+While Char aims to be fully transparent and controllable, cloud services help in two ways:
 
 1. **Faster time-to-value** - Start using AI features immediately without configuring API keys or running local models.
 2. **Managed complexity** - Get the benefits of multiple AI providers without managing each one yourself.
@@ -39,8 +101,28 @@ While Hyprnote aims to be fully transparent and controllable, cloud services hel
 The cloud server (`pro.hyprnote.com`) is [open-source](https://github.com/fastrepl/hyprnote/tree/main/apps/pro) and deployed in our Kubernetes cluster on AWS via GitHub Actions.
 
 **Data handling:**
-- Nothing is stored by us
-- Only required data is sent to third-party services
-- Current providers: Curated LLM models, Exa (web search), Jina AI (URL reading)
+- Nothing is stored by us — the server proxies requests and discards them
+- Your user identity (email, name) is never sent to external AI providers
+- Only the content needed for processing (messages, tools, parameters) is forwarded
+- Current providers: OpenRouter (LLM routing), Exa (web search), Jina AI (URL reading)
 
 All requests are rate-limited and authenticated using your Pro subscription.
+
+### OpenRouter Privacy Policy
+
+All Pro LLM requests go through [OpenRouter](https://openrouter.ai), which routes to the actual model provider (OpenAI, Anthropic, Moonshot AI).
+
+| Policy | Details |
+|--------|---------|
+| **Data retention** | Zero by default — prompts and completions are not stored unless you opt in on your OpenRouter account |
+| **Training** | Does not train on API data |
+| **Compliance** | SOC 2 |
+| **Data location** | US (default) |
+
+> "OpenRouter does not store your prompts or responses, unless you have explicitly opted in to prompt logging in your account settings."
+>
+> — [OpenRouter Data Collection Policy](https://openrouter.ai/docs/guides/privacy/data-collection)
+
+Official docs: [Privacy Policy](https://openrouter.ai/privacy) · [Data Collection](https://openrouter.ai/docs/guides/privacy/data-collection) · [Logging Policies](https://openrouter.ai/docs/guides/privacy/logging) · [Zero Data Retention Guide](https://openrouter.ai/docs/guides/features/zdr)
+
+If you prefer to run AI locally instead, see [Local LLM Setup](/docs/faq/local-llm-setup) for LLMs and [Local Models](/docs/developers/local-models) for speech-to-text.

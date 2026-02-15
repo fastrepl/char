@@ -42,9 +42,9 @@ export function FloatingButton({
     <Button
       size="lg"
       className={cn([
-        "border-2 rounded-full transition-[border-color,opacity] duration-200",
+        "border-2 rounded-full transition-[border-color,opacity] duration-200 focus-visible:ring-0",
         error && "border-red-500",
-        !error && "border-neutral-200 focus-within:border-stone-500",
+        !error && "border-neutral-200",
         subtle && "opacity-40 hover:opacity-100",
         className,
       ])}

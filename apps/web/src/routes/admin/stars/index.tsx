@@ -10,7 +10,7 @@ import {
   SparklesIcon,
   StarIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Spinner } from "@hypr/ui/components/ui/spinner";
 import { cn } from "@hypr/utils";
@@ -77,6 +77,20 @@ function StarsPage() {
     },
   });
 
+  const autoFetchedRef = useRef(false);
+  useEffect(() => {
+    if (
+      !autoFetchedRef.current &&
+      !isLoading &&
+      data &&
+      data.total === 0 &&
+      filter === "all"
+    ) {
+      autoFetchedRef.current = true;
+      fetchMutation.mutate("stargazers");
+    }
+  }, [isLoading, data, filter]);
+
   const leads = data?.leads ?? [];
   const total = data?.total ?? 0;
 
@@ -112,7 +126,7 @@ function StarsPage() {
               GitHub Stars
             </h1>
             <p className="text-sm text-neutral-500 mt-0.5">
-              Track and qualify leads from GitHub activity on fastrepl/hyprnote
+              Track and qualify leads from GitHub activity on fastrepl/char
             </p>
           </div>
           <div className="flex items-center gap-2">

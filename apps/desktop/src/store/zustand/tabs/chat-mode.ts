@@ -80,7 +80,7 @@ export const createChatModeSlice = <
     set({ chatMode: nextMode } as Partial<T>);
 
     if (currentMode === "FullTab" && nextMode !== "FullTab") {
-      const chatTab = get().tabs.find((t) => t.type === "chat");
+      const chatTab = get().tabs.find((t) => t.type === "chat_support");
       if (chatTab) {
         get().close(chatTab);
       }

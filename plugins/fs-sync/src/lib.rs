@@ -12,6 +12,7 @@ mod json;
 mod path;
 mod scan;
 mod session;
+mod session_content;
 mod types;
 
 pub use types::*;
@@ -42,6 +43,7 @@ fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
             commands::audio_import::<tauri::Wry>,
             commands::audio_path::<tauri::Wry>,
             commands::session_dir::<tauri::Wry>,
+            commands::load_session_content::<tauri::Wry>,
             commands::delete_session_folder::<tauri::Wry>,
             commands::scan_and_read::<tauri::Wry>,
             commands::chat_dir::<tauri::Wry>,

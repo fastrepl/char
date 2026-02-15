@@ -6,11 +6,11 @@ export const Route = createFileRoute("/_view/product/flexible-ai")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "Flexible AI - Hyprnote" },
+      { title: "Flexible AI - Char" },
       {
         name: "description",
         content:
-          "Choose your AI provider or bring your own. Hyprnote works with OpenAI, Anthropic, local models, and more.",
+          "Choose your AI provider or bring your own. Char works with OpenAI, Anthropic, local models, and more.",
       },
       { name: "robots", content: "noindex, nofollow" },
     ],
@@ -30,8 +30,8 @@ function Component() {
               Flexible AI
             </h1>
             <p className="text-lg sm:text-xl text-neutral-600 mb-8 max-w-2xl mx-auto">
-              Choose your AI provider or bring your own. Hyprnote works with
-              OpenAI, Anthropic, local models, and more. You're in control.
+              Choose your AI provider or bring your own. Char works with OpenAI,
+              Anthropic, local models, and more. You're in control.
             </p>
 
             <div className="mt-8">

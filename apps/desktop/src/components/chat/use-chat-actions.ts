@@ -1,6 +1,7 @@
 import { useCallback, useRef } from "react";
 
 import type { HyprUIMessage } from "../../chat/types";
+import { useCreateChatMessage } from "../../hooks/useCreateChatMessage";
 import * as main from "../../store/tinybase/store/main";
 import { id } from "../../utils";
 
@@ -25,40 +26,12 @@ export function useChatActions({
     main.STORE_ID,
   );
 
-  const createChatMessage = main.UI.useSetRowCallback(
-    "chat_messages",
-    (p: {
-      id: string;
-      chat_group_id: string;
-      content: string;
-      role: string;
-      parts: any;
-      metadata: any;
-    }) => p.id,
-    (p: {
-      id: string;
-      chat_group_id: string;
-      content: string;
-      role: string;
-      parts: any;
-      metadata: any;
-    }) => ({
-      user_id,
-      chat_group_id: p.chat_group_id,
-      content: p.content,
-      created_at: new Date().toISOString(),
-      role: p.role,
-      metadata: JSON.stringify(p.metadata),
-      parts: JSON.stringify(p.parts),
-    }),
-    [user_id],
-    main.STORE_ID,
-  );
+  const createChatMessage = useCreateChatMessage();
 
   const handleSendMessage = useCallback(
     (
       content: string,
-      parts: any[],
+      parts: HyprUIMessage["parts"],
       sendMessage: (message: HyprUIMessage) => void,
     ) => {
       const messageId = id();
@@ -95,18 +68,15 @@ export function useChatActions({
 }
 
 export function useStableSessionId(groupId: string | undefined) {
-  const sessionIdRef = useRef<string | null>(null);
+  const sessionIdRef = useRef<string>(groupId ?? id());
   const lastGroupIdRef = useRef<string | undefined>(groupId);
 
-  if (sessionIdRef.current === null) {
-    sessionIdRef.current = groupId ?? id();
-  }
-
   if (groupId !== lastGroupIdRef.current) {
-    const prev = lastGroupIdRef.current;
+    const isFirstGroupCreation =
+      lastGroupIdRef.current === undefined && groupId !== undefined;
     lastGroupIdRef.current = groupId;
 
-    if (prev !== undefined || groupId === undefined) {
+    if (!isFirstGroupCreation) {
       sessionIdRef.current = groupId ?? id();
     }
   }

@@ -17,3 +17,5 @@ pub struct SupportDatabaseEnv {
 }
 
 pub use hypr_api_env::OpenRouterEnv;
+pub use hypr_api_env::StripeEnv;
+pub use hypr_api_env::SupabaseEnv;

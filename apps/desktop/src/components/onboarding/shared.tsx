@@ -1,81 +1,103 @@
-import { ArrowRightIcon, CheckIcon, ChevronLeftIcon } from "lucide-react";
+import { CheckIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import type { ReactNode } from "react";
 
-import { Button } from "@hypr/ui/components/ui/button";
+import { cn } from "@hypr/utils";
 
-export function OnboardingContainer({
+export type SectionStatus = "completed" | "active" | "upcoming";
+
+export function OnboardingSection({
   title,
   description,
-  children,
+  status,
   onBack,
+  onNext,
+  children,
 }: {
   title: string;
   description?: string;
-  children: ReactNode;
+  status: SectionStatus | null;
   onBack?: () => void;
+  onNext?: () => void;
+  children: ReactNode;
 }) {
-  return (
-    <>
-      {onBack && (
-        <button
-          onClick={onBack}
-          className="fixed top-10 left-1 flex items-center gap-1 px-2 py-1 text-sm text-neutral-400 hover:text-neutral-600 transition-colors"
-        >
-          <ChevronLeftIcon size={16} />
-          Back
-        </button>
-      )}
+  if (!status) return null;
 
-      <div className="flex flex-col gap-3 text-center mb-8">
-        <h1 className="text-xl font-semibold text-neutral-900 font-serif">
-          {title}
-        </h1>
-        {description && (
-          <p className="text-base text-neutral-500">{description}</p>
-        )}
+  const isActive = status === "active";
+  const isCompleted = status === "completed";
+
+  return (
+    <section>
+      <div
+        className={cn([
+          "flex items-center gap-2 mb-4 transition-opacity duration-300",
+          status === "upcoming" && "opacity-40",
+          isCompleted && "opacity-60",
+        ])}
+      >
+        <div className="flex min-w-0 flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-neutral-900 font-serif">
+              {title}
+            </h2>
+            {isCompleted && (
+              <CheckIcon className="size-3.5 text-neutral-400" aria-hidden />
+            )}
+            {import.meta.env.DEV && isActive && (onBack || onNext) && (
+              <div className="flex items-center gap-2">
+                {onBack && (
+                  <button
+                    onClick={onBack}
+                    aria-label="Go to previous section"
+                    className="rounded p-0.5 text-neutral-400 transition-colors hover:text-neutral-600"
+                  >
+                    <ChevronLeftIcon className="size-3" />
+                  </button>
+                )}
+                {onNext && (
+                  <button
+                    onClick={onNext}
+                    aria-label="Go to next section"
+                    className="rounded p-0.5 text-neutral-400 transition-colors hover:text-neutral-600"
+                  >
+                    <ChevronRightIcon className="size-3" />
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+          {description && (
+            <p className="text-sm text-neutral-500">{description}</p>
+          )}
+        </div>
       </div>
 
-      <div className="flex flex-col gap-6 w-full max-w-md">{children}</div>
-    </>
+      <AnimatePresence initial={false}>
+        {isActive && (
+          <motion.div
+            key="content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
   );
 }
 
-type IntegrationRowProps = {
-  icon: ReactNode;
-  name: string;
-  onConnect?: () => void;
-  connected?: boolean;
-  disabled?: boolean;
-};
-
-export function IntegrationRow({
-  icon,
-  name,
-  onConnect,
-  connected = false,
-  disabled = false,
-}: IntegrationRowProps) {
+export function OnboardingButton(
+  props: React.ButtonHTMLAttributes<HTMLButtonElement>,
+) {
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <span className="text-lg">{icon}</span>
-        <span className="text-base font-medium text-neutral-900">{name}</span>
-      </div>
-
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onConnect}
-        disabled={disabled || connected}
-        className="h-8 w-8"
-      >
-        {connected ? (
-          <CheckIcon className="h-5 w-5" />
-        ) : (
-          <ArrowRightIcon className="h-5 w-5" />
-        )}
-      </Button>
-    </div>
+    <button
+      {...props}
+      className="w-full py-3 rounded-full bg-linear-to-t from-stone-600 to-stone-500 text-white text-sm font-medium duration-150 hover:scale-[1.01] active:scale-[0.99]"
+    />
   );
 }
 

@@ -40,6 +40,10 @@ type ProviderConfig = {
   requirements: ProviderRequirement[];
 };
 
+export function providerRowId(providerType: ProviderType, providerId: string) {
+  return `${providerType}:${providerId}`;
+}
+
 function useIsProviderConfigured(
   providerId: string,
   providerType: ProviderType,
@@ -56,7 +60,7 @@ function useIsProviderConfigured(
     settings.STORE_ID,
   );
   const providerDef = providers.find((p) => p.id === providerId);
-  const config = configuredProviders[providerId];
+  const config = configuredProviders[providerRowId(providerType, providerId)];
 
   if (!providerDef) {
     return false;
@@ -86,7 +90,7 @@ export function NonHyprProviderCard({
   providerContext?: ReactNode;
 }) {
   const billing = useBillingAccess();
-  const [provider, setProvider] = useProvider(config.id);
+  const [provider, setProvider] = useProvider(providerType, config.id);
   const locked =
     requiresEntitlement(config.requirements, "pro") && !billing.isPro;
   const isConfigured = useIsProviderConfigured(
@@ -245,13 +249,18 @@ export function StyledStreamdown({
   );
 }
 
-function useProvider(id: string) {
-  const providerRow = settings.UI.useRow("ai_providers", id, settings.STORE_ID);
+function useProvider(providerType: ProviderType, id: string) {
+  const rowId = providerRowId(providerType, id);
+  const providerRow = settings.UI.useRow(
+    "ai_providers",
+    rowId,
+    settings.STORE_ID,
+  );
   const setProvider = settings.UI.useSetPartialRowCallback(
     "ai_providers",
-    id,
+    rowId,
     (row: Partial<AIProvider>) => row,
-    [id],
+    [rowId],
     settings.STORE_ID,
   ) as (row: Partial<AIProvider>) => void;
 

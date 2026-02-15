@@ -441,9 +441,11 @@ function ProviderContext({ providerId }: { providerId: ProviderId }) {
                 ? `Use [OpenAI](https://openai.com) for transcriptions.`
                 : providerId === "fireworks"
                   ? `Use [Fireworks AI](https://fireworks.ai) for transcriptions.`
-                  : providerId === "custom"
-                    ? `We only support **Deepgram compatible** endpoints for now.`
-                    : "";
+                  : providerId === "mistral"
+                    ? `Use [Mistral](https://mistral.ai) for transcriptions.`
+                    : providerId === "custom"
+                      ? `We only support **Deepgram compatible** endpoints for now.`
+                      : "";
 
   if (!content.trim()) {
     return null;

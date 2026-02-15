@@ -10,7 +10,8 @@ use tauri_plugin_settings::SettingsPluginExt;
 use crate::FsSyncPluginExt;
 use crate::frontmatter::ParsedDocument;
 use crate::session::find_session_dir;
-use crate::types::{CleanupTarget, ListFoldersResult, ScanResult};
+use crate::session_content::load_session_content as load_session_content_from_fs;
+use crate::types::{CleanupTarget, ListFoldersResult, ScanResult, SessionContentData};
 
 macro_rules! spawn_blocking {
     ($body:expr) => {
@@ -244,6 +245,16 @@ pub(crate) async fn session_dir<R: tauri::Runtime>(
     session_id: String,
 ) -> Result<String, String> {
     resolve_session_dir(&app, &session_id).map(|p| p.to_string_lossy().to_string())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub(crate) async fn load_session_content<R: tauri::Runtime>(
+    app: tauri::AppHandle<R>,
+    session_id: String,
+) -> Result<SessionContentData, String> {
+    let session_dir = resolve_session_dir(&app, &session_id)?;
+    spawn_blocking!({ Ok(load_session_content_from_fs(&session_id, &session_dir)) })
 }
 
 #[tauri::command]

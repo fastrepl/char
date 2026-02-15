@@ -72,7 +72,7 @@ export const Route = createFileRoute("/api/admin/import/save")({
           }
 
           const owner = "fastrepl";
-          const repo = "hyprnote";
+          const repo = "char";
           const path = `apps/web/content/${folder}/${safeFilename}`;
           const branch = "main";
 

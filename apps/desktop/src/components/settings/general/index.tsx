@@ -44,6 +44,9 @@ function useSettingsForm() {
         ignored_recurring_series: row.ignored_recurring_series
           ? JSON.stringify(row.ignored_recurring_series)
           : undefined,
+        ignored_events: row.ignored_events
+          ? JSON.stringify(row.ignored_events)
+          : undefined,
       }) satisfies Partial<GeneralStorage>,
     [],
     settings.STORE_ID,

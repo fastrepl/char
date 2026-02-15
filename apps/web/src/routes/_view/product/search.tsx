@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_view/product/search")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "Search - Hyprnote" },
+      { title: "Search - Char" },
       {
         name: "description",
         content:
@@ -183,7 +183,7 @@ function FlexibilitySection() {
     <section className="bg-stone-50/30">
       <div className="p-8">
         <h2 className="text-3xl font-serif text-stone-600 mb-4 text-center">
-          You're not restricted to Hyprnote's built-in search
+          You're not restricted to Char's built-in search
         </h2>
         <p className="text-lg text-neutral-600 text-center max-w-3xl mx-auto">
           Since every note is a .md file on your device, search them however you

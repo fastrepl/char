@@ -10,11 +10,15 @@ use crate::state::AppState;
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub(crate) struct CreateIssueParams {
-    #[schemars(description = "Title of the issue")]
+    #[schemars(description = "Concise issue title, e.g. 'Transcription stops after 30 minutes'")]
     pub title: String,
-    #[schemars(description = "Body/description of the issue in markdown")]
+    #[schemars(
+        description = "Issue body in markdown. For bugs: include steps to reproduce, expected vs actual behavior, and environment info. For features: describe the use case and desired behavior."
+    )]
     pub body: String,
-    #[schemars(description = "Labels to apply to the issue")]
+    #[schemars(
+        description = "Labels to categorize the issue. Use 'bug' for bugs, 'enhancement' for feature requests, 'question' for user questions."
+    )]
     pub labels: Option<Vec<String>>,
 }
 

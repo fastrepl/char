@@ -10,9 +10,11 @@ use crate::state::AppState;
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub(crate) struct AddCommentParams {
-    #[schemars(description = "The issue number to comment on")]
+    #[schemars(description = "The GitHub issue number (from search_issues results)")]
     pub issue_number: u64,
-    #[schemars(description = "The comment body in markdown")]
+    #[schemars(
+        description = "Comment body in markdown. Include any new details: reproduction steps, environment info, or user-reported symptoms that add context to the existing issue."
+    )]
     pub body: String,
 }
 

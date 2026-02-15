@@ -96,20 +96,8 @@ crate::common_derives! {
 
 crate::common_derives! {
     #[derive(Default)]
-    pub enum ChatType {
-        #[default]
-        #[serde(rename = "regular")]
-        Regular,
-        #[serde(rename = "support")]
-        Support,
-    }
-}
-
-crate::common_derives! {
-    #[derive(Default)]
     pub struct ChatState {
         pub group_id: Option<String>,
         pub initial_message: Option<String>,
-        pub chat_type: Option<ChatType>,
     }
 }

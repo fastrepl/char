@@ -29,8 +29,6 @@ export const env = createEnv({
 
     LOOPS_KEY: requiredInProd(z.string().min(1)),
 
-    DEEPGRAM_API_KEY: requiredInProd(z.string().min(1)),
-
     GITHUB_TOKEN: z.string().optional(),
   },
 
