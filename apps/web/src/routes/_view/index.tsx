@@ -1736,7 +1736,7 @@ function BlogSection() {
         {sortedArticles.map((article) => {
           const ogImage =
             article.coverImage ||
-            `https://hyprnote.com/og?type=blog&title=${encodeURIComponent(article.title ?? "")}${article.author ? `&author=${encodeURIComponent(article.author)}` : ""}${article.date ? `&date=${encodeURIComponent(new Date(article.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }))}` : ""}&v=1`;
+            `https://hyprnote.com/og?type=blog&title=${encodeURIComponent(article.title ?? "")}${article.author.length > 0 ? `&author=${encodeURIComponent(article.author.join(", "))}` : ""}${article.date ? `&date=${encodeURIComponent(new Date(article.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }))}` : ""}&v=1`;
 
           return (
             <Link

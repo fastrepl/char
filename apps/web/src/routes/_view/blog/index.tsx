@@ -361,7 +361,10 @@ function MostRecentFeaturedCard({ article }: { article: Article }) {
   const [coverImageLoaded, setCoverImageLoaded] = useState(false);
   const hasCoverImage = !coverImageError;
   const displayDate = article.date;
-  const avatarUrl = AUTHOR_AVATARS[article.author];
+  const avatarUrl =
+    Array.isArray(article.author) && article.author.length > 0
+      ? AUTHOR_AVATARS[article.author[0]]
+      : undefined;
 
   return (
     <Link
@@ -410,11 +413,19 @@ function MostRecentFeaturedCard({ article }: { article: Article }) {
             {avatarUrl && (
               <img
                 src={avatarUrl}
-                alt={article.author}
+                alt={
+                  Array.isArray(article.author)
+                    ? article.author.join(", ")
+                    : article.author
+                }
                 className="w-6 h-6 rounded-full object-cover"
               />
             )}
-            <span>{article.author}</span>
+            <span>
+              {Array.isArray(article.author)
+                ? article.author.join(", ")
+                : article.author}
+            </span>
             <span>·</span>
             <time dateTime={displayDate}>
               {new Date(displayDate).toLocaleDateString("en-US", {
@@ -441,7 +452,10 @@ function OtherFeaturedCard({
   const [coverImageLoaded, setCoverImageLoaded] = useState(false);
   const hasCoverImage = !coverImageError;
   const displayDate = article.date;
-  const avatarUrl = AUTHOR_AVATARS[article.author];
+  const avatarUrl =
+    Array.isArray(article.author) && article.author.length > 0
+      ? AUTHOR_AVATARS[article.author[0]]
+      : undefined;
 
   return (
     <Link
@@ -507,11 +521,19 @@ function OtherFeaturedCard({
             {avatarUrl && (
               <img
                 src={avatarUrl}
-                alt={article.author}
+                alt={
+                  Array.isArray(article.author)
+                    ? article.author.join(", ")
+                    : article.author
+                }
                 className="w-5 h-5 rounded-full object-cover"
               />
             )}
-            <span className="truncate">{article.author}</span>
+            <span className="truncate">
+              {Array.isArray(article.author)
+                ? article.author.join(", ")
+                : article.author}
+            </span>
             <span>·</span>
             <time dateTime={displayDate} className="shrink-0">
               {new Date(displayDate).toLocaleDateString("en-US", {
@@ -528,7 +550,10 @@ function OtherFeaturedCard({
 
 function ArticleListItem({ article }: { article: Article }) {
   const displayDate = article.date;
-  const avatarUrl = AUTHOR_AVATARS[article.author];
+  const avatarUrl =
+    Array.isArray(article.author) && article.author.length > 0
+      ? AUTHOR_AVATARS[article.author[0]]
+      : undefined;
 
   return (
     <Link
@@ -551,12 +576,18 @@ function ArticleListItem({ article }: { article: Article }) {
               {avatarUrl && (
                 <img
                   src={avatarUrl}
-                  alt={article.author}
+                  alt={
+                    Array.isArray(article.author)
+                      ? article.author.join(", ")
+                      : article.author
+                  }
                   className="w-5 h-5 rounded-full object-cover"
                 />
               )}
               <span className="text-sm text-neutral-500 whitespace-nowrap">
-                {article.author}
+                {Array.isArray(article.author)
+                  ? article.author.join(", ")
+                  : article.author}
               </span>
             </div>
           </div>
@@ -570,7 +601,11 @@ function ArticleListItem({ article }: { article: Article }) {
               {avatarUrl && (
                 <img
                   src={avatarUrl}
-                  alt={article.author}
+                  alt={
+                    Array.isArray(article.author)
+                      ? article.author.join(", ")
+                      : article.author
+                  }
                   className="w-5 h-5 rounded-full object-cover"
                 />
               )}
