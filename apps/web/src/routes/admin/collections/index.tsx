@@ -1,6 +1,7 @@
 import { MDXContent } from "@content-collections/mdx/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import type { JSONContent } from "@tiptap/react";
 import { allArticles } from "content-collections";
 import {
   AlertTriangleIcon,
@@ -2706,11 +2707,8 @@ const FileEditor = React.forwardRef<
       return response.json() as Promise<ImportResult>;
     },
     onSuccess: (data) => {
-      if (data.mdx) {
-        const mdxWithoutFrontmatter = data.mdx
-          .replace(/^---[\s\S]*?---\n*/, "")
-          .trim();
-        setContent(mdxWithoutFrontmatter);
+      if (data.json) {
+        editorRef.current?.editor?.commands.setContent(data.json);
         setHasUnsavedChanges(true);
       }
       if (data.frontmatter) {
@@ -3252,7 +3250,7 @@ function FileItem({
 
 interface ImportResult {
   success: boolean;
-  mdx?: string;
+  json?: JSONContent;
   frontmatter?: {
     meta_title: string;
     display_title: string;
