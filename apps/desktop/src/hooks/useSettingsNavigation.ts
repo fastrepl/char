@@ -114,6 +114,7 @@ export function useSettingsNavigation(
   useHotkeys(
     "down",
     (e) => {
+      if (isEditableTarget(document.activeElement) || hasOpenPopover()) return;
       e.preventDefault();
       navigate("down");
     },
@@ -124,6 +125,7 @@ export function useSettingsNavigation(
   useHotkeys(
     "up",
     (e) => {
+      if (isEditableTarget(document.activeElement) || hasOpenPopover()) return;
       e.preventDefault();
       navigate("up");
     },

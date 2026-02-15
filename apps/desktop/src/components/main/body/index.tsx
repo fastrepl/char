@@ -931,7 +931,7 @@ function useTabsShortcuts() {
   );
 
   useHotkeys(
-    "meta+alt+left",
+    "mod+alt+left",
     () => selectPrev(),
     {
       preventDefault: true,
@@ -942,7 +942,7 @@ function useTabsShortcuts() {
   );
 
   useHotkeys(
-    "meta+alt+right",
+    "mod+alt+right",
     () => selectNext(),
     {
       preventDefault: true,
