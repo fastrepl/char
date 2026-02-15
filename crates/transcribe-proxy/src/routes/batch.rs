@@ -230,13 +230,21 @@ async fn transcribe_with_provider(
     let api_key = selected.api_key();
 
     let result = match provider {
-        Provider::Deepgram => batch_transcribe!(DeepgramAdapter, api_base, api_key, params, file_path),
-        Provider::AssemblyAI => batch_transcribe!(AssemblyAIAdapter, api_base, api_key, params, file_path),
+        Provider::Deepgram => {
+            batch_transcribe!(DeepgramAdapter, api_base, api_key, params, file_path)
+        }
+        Provider::AssemblyAI => {
+            batch_transcribe!(AssemblyAIAdapter, api_base, api_key, params, file_path)
+        }
         Provider::Soniox => batch_transcribe!(SonioxAdapter, api_base, api_key, params, file_path),
         Provider::OpenAI => batch_transcribe!(OpenAIAdapter, api_base, api_key, params, file_path),
         Provider::Gladia => batch_transcribe!(GladiaAdapter, api_base, api_key, params, file_path),
-        Provider::ElevenLabs => batch_transcribe!(ElevenLabsAdapter, api_base, api_key, params, file_path),
-        Provider::Mistral => batch_transcribe!(MistralAdapter, api_base, api_key, params, file_path),
+        Provider::ElevenLabs => {
+            batch_transcribe!(ElevenLabsAdapter, api_base, api_key, params, file_path)
+        }
+        Provider::Mistral => {
+            batch_transcribe!(MistralAdapter, api_base, api_key, params, file_path)
+        }
         Provider::Fireworks | Provider::DashScope => {
             return Err(format!(
                 "{:?} does not support batch transcription",
