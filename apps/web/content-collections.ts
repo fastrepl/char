@@ -6,9 +6,41 @@ import * as path from "path";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
+import { createHighlighter, type Highlighter } from "shiki";
 import { z } from "zod";
 
 import { VersionPlatform } from "@/scripts/versioning";
+
+const EXT_TO_LANG: Record<string, string> = {
+  ".rs": "rust",
+  ".ts": "typescript",
+  ".tsx": "tsx",
+  ".js": "javascript",
+  ".jsx": "jsx",
+  ".json": "json",
+  ".toml": "toml",
+  ".yaml": "yaml",
+  ".yml": "yaml",
+  ".py": "python",
+  ".go": "go",
+  ".css": "css",
+  ".html": "html",
+  ".md": "markdown",
+  ".sh": "bash",
+  ".sql": "sql",
+  ".swift": "swift",
+};
+
+let highlighterPromise: Promise<Highlighter> | null = null;
+function getHighlighter(): Promise<Highlighter> {
+  if (!highlighterPromise) {
+    highlighterPromise = createHighlighter({
+      themes: ["github-light"],
+      langs: Object.values(EXT_TO_LANG),
+    });
+  }
+  return highlighterPromise;
+}
 
 function parseLineRange(url: string): { startLine?: number; endLine?: number } {
   const lineMatch = url.match(/#L(\d+)(?:-L(\d+))?$/);
@@ -53,16 +85,28 @@ async function embedGithubCode(content: string): Promise<string> {
 
         const codeBlockMatch = fileContent.match(/```(\w+)\n([\s\S]*?)```/);
         const rawCode = codeBlockMatch ? codeBlockMatch[2] : fileContent;
-        const lang = codeBlockMatch ? codeBlockMatch[1] : undefined;
+        const lang = codeBlockMatch
+          ? codeBlockMatch[1]
+          : EXT_TO_LANG[path.extname(fileName)];
 
         const slicedCode = extractLines(rawCode.trimEnd(), startLine, endLine);
         const escapedCode = JSON.stringify(slicedCode);
         const lineNum = startLine ?? 1;
 
+        let highlightedAttr = "";
+        if (lang) {
+          const highlighter = await getHighlighter();
+          const html = highlighter.codeToHtml(slicedCode, {
+            lang,
+            theme: "github-light",
+          });
+          highlightedAttr = ` highlightedHtml={${JSON.stringify(html)}}`;
+        }
+
         const langAttr = lang ? ` language="${lang}"` : "";
         result = result.replace(
           fullMatch,
-          `<GithubEmbed code={${escapedCode}} fileName="${fileName}" url="${url}" startLine={${lineNum}}${langAttr} />`,
+          `<GithubEmbed code={${escapedCode}} fileName="${fileName}" url="${url}" startLine={${lineNum}}${langAttr}${highlightedAttr} />`,
         );
       } catch {
         console.warn(`Failed to read local file: ${localPath}`);

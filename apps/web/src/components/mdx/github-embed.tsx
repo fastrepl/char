@@ -1,5 +1,5 @@
 import { Check, Code2, Copy } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   Tooltip,
@@ -14,15 +14,25 @@ export function GithubEmbed({
   url,
   startLine = 1,
   language: _language = "bash",
+  highlightedHtml,
 }: {
   code: string;
   fileName: string;
   url?: string;
   startLine?: number;
   language?: string;
+  highlightedHtml?: string;
 }) {
   const [copied, setCopied] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
+
+  const highlightedLines = useMemo(() => {
+    if (!highlightedHtml) return null;
+    const lineMatches = [
+      ...highlightedHtml.matchAll(/<span class="line">(.*?)<\/span>/g),
+    ];
+    return lineMatches.map((m) => m[1]);
+  }, [highlightedHtml]);
 
   const lines = code.split("\n");
 
@@ -112,9 +122,18 @@ export function GithubEmbed({
                   <td className="select-none text-right pr-4 pl-4 py-0.5 text-stone-400 text-sm font-mono bg-stone-50 w-[1%] whitespace-nowrap border-r border-neutral-200">
                     {startLine + index}
                   </td>
-                  <td className="pl-4 pr-4 py-0.5 text-sm font-mono text-stone-700 whitespace-pre">
-                    {line || " "}
-                  </td>
+                  {highlightedLines?.[index] != null ? (
+                    <td
+                      className="pl-4 pr-4 py-0.5 text-sm font-mono whitespace-pre"
+                      dangerouslySetInnerHTML={{
+                        __html: highlightedLines[index] || " ",
+                      }}
+                    />
+                  ) : (
+                    <td className="pl-4 pr-4 py-0.5 text-sm font-mono text-stone-700 whitespace-pre">
+                      {line || " "}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
