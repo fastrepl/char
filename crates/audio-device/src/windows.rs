@@ -79,9 +79,11 @@ struct ComGuard;
 impl ComGuard {
     fn new() -> Result<Self, Error> {
         unsafe {
-            CoInitializeEx(None, COINIT_MULTITHREADED).ok().map_err(|e| {
-                Error::AudioSystemError(format!("COM initialization failed: {}", e))
-            })?;
+            CoInitializeEx(None, COINIT_MULTITHREADED)
+                .ok()
+                .map_err(|e| {
+                    Error::AudioSystemError(format!("COM initialization failed: {}", e))
+                })?;
         }
         Ok(Self)
     }
