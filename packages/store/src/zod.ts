@@ -4,6 +4,7 @@ import { jsonObject, type ToStorageType } from "./shared";
 
 export const humanSchema = z.object({
   user_id: z.string(),
+  created_at: z.preprocess((val) => val ?? undefined, z.string().optional()),
   name: z.string(),
   email: z.string(),
   org_id: z.string(),
@@ -89,7 +90,10 @@ export const calendarSchema = z.object({
 
 export const organizationSchema = z.object({
   user_id: z.string(),
+  created_at: z.preprocess((val) => val ?? undefined, z.string().optional()),
   name: z.string(),
+  pinned: z.preprocess((val) => val ?? false, z.boolean()),
+  pin_order: z.preprocess((val) => val ?? undefined, z.number().optional()),
 });
 
 export const sessionSchema = z.object({

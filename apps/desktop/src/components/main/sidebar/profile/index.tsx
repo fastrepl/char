@@ -106,8 +106,7 @@ export function ProfileSection({ onExpandChange }: ProfileSectionProps = {}) {
     openNew({
       type: "contacts",
       state: {
-        selectedOrganization: null,
-        selectedPerson: null,
+        selected: null,
       },
     });
     closeMenu();

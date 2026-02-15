@@ -105,6 +105,9 @@ export function PeopleColumn({
               ))}
             </Reorder.Group>
           )}
+          {filteredPinnedIds.length > 0 && filteredUnpinnedIds.length > 0 && (
+            <div className="h-px bg-neutral-200 mx-3 my-1" />
+          )}
           {filteredUnpinnedIds.map((humanId) => (
             <PersonItem
               key={humanId}

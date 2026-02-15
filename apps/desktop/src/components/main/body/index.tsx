@@ -979,7 +979,7 @@ function useTabsShortcuts() {
     () =>
       openNew({
         type: "contacts",
-        state: { selectedOrganization: null, selectedPerson: null },
+        state: { selected: null },
       }),
     {
       preventDefault: true,

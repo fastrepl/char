@@ -1,5 +1,6 @@
 import { AppWindowIcon } from "lucide-react";
-import { useCallback, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useCallback, useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import { Kbd } from "@hypr/ui/components/ui/kbd";
@@ -51,6 +52,57 @@ export function TabContentEmpty({
   );
 }
 
+const TIPS = [
+  { text: "Press ⌘⇧N to create a new note and start listening immediately" },
+  { text: "Use ⌘K to quickly search across all your notes" },
+  {
+    text: "Hyprnote works fully offline — set up Ollama or LM Studio in AI Settings",
+  },
+  {
+    text: "Press ⌘⇧J to open AI Chat and ask follow-up questions about your notes",
+  },
+  {
+    text: "Use templates to get structured summaries tailored to your meeting type",
+  },
+  { text: "Press ⌘⇧T to reopen the last tab you closed" },
+  {
+    text: "Connect your Apple Calendar to automatically see upcoming meetings",
+  },
+];
+
+function RotatingTip() {
+  const [index, setIndex] = useState(() =>
+    Math.floor(Math.random() * TIPS.length),
+  );
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % TIPS.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center gap-1 text-xs text-neutral-400">
+      <span>Did you know?</span>
+      <div className="h-5 overflow-hidden">
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={index}
+            className="block"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            {TIPS[index].text}
+          </motion.span>
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+
 function EmptyView() {
   const newNote = useNewNote({ behavior: "current" });
   const openCurrent = useTabs((state) => state.openCurrent);
@@ -85,7 +137,7 @@ function EmptyView() {
   );
 
   return (
-    <div className="flex flex-col items-center justify-center h-full gap-6 mb-12 text-neutral-600">
+    <div className="relative flex flex-col items-center justify-center h-full text-neutral-600">
       <div className="flex flex-col gap-1 text-center min-w-[280px]">
         <ActionItem label="New Note" shortcut={["⌘", "N"]} onClick={newNote} />
         <ActionItem
@@ -120,6 +172,9 @@ function EmptyView() {
           shortcut={["⌘", ","]}
           onClick={openSettings}
         />
+      </div>
+      <div className="absolute bottom-2 left-0 right-0">
+        <RotatingTip />
       </div>
       <OpenNoteDialog
         open={openNoteDialogOpen}
