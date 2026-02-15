@@ -10,7 +10,7 @@ import {
   StarIcon,
   XIcon,
 } from "lucide-react";
-import React, { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { Spinner } from "@hypr/ui/components/ui/spinner";
 import { cn } from "@hypr/utils";
