@@ -1,10 +1,10 @@
+#[cfg(target_os = "macos")]
+use std::time::Duration;
 use std::{
     future::Future,
     pin::Pin,
     task::{Context, Poll},
 };
-#[cfg(target_os = "macos")]
-use std::time::Duration;
 
 use axum::{
     extract::{
@@ -17,11 +17,11 @@ use axum::{
 use futures_util::{SinkExt, StreamExt};
 use tower::Service;
 
+use owhisper_interface::ListenParams;
 #[cfg(not(target_os = "macos"))]
 use owhisper_interface::stream::StreamResponse;
 #[cfg(target_os = "macos")]
 use owhisper_interface::stream::{Alternatives, Channel, Metadata, StreamResponse, Word};
-use owhisper_interface::ListenParams;
 
 #[derive(Clone)]
 pub struct TranscribeService {
@@ -201,7 +201,9 @@ async fn process_audio_stream<S>(
         }
 
         while let Some(result_json) = crate::bridge::poll_result(session_id) {
-            if let Some(response) = parse_result_to_stream_response(&result_json, &mut global_time, speaker) {
+            if let Some(response) =
+                parse_result_to_stream_response(&result_json, &mut global_time, speaker)
+            {
                 let msg = Message::Text(serde_json::to_string(&response).unwrap().into());
                 if let Err(e) = ws_sender.send(msg).await {
                     tracing::warn!("websocket_send_error: {}", e);
@@ -219,7 +221,9 @@ async fn process_audio_stream<S>(
     for _ in 0..50 {
         if crate::bridge::is_finished(session_id) {
             while let Some(result_json) = crate::bridge::poll_result(session_id) {
-                if let Some(response) = parse_result_to_stream_response(&result_json, &mut global_time, speaker) {
+                if let Some(response) =
+                    parse_result_to_stream_response(&result_json, &mut global_time, speaker)
+                {
                     let msg = Message::Text(serde_json::to_string(&response).unwrap().into());
                     let _ = ws_sender.send(msg).await;
                 }
