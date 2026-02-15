@@ -14,10 +14,133 @@ Pro users get access to managed cloud services that work out of the box:
 
 | Service | Description | Status |
 |---------|-------------|--------|
-| `/chat/completions` | LLM endpoint for AI features (summaries, notes) | Available |
+| `/chat/completions` | LLM endpoint for AI features (summaries, notes, chat) | Available |
 | `/mcp` | MCP server with web search and URL reading tools | Available |
 
 Pro includes curated AI models that work out of the box. Your requests are proxied through our servers with automatic API key management. If you want to use a specific LLM provider, you can bring your own API key (BYOK) in Settings > Intelligence.
+
+### Which LLM Models Are Used
+
+When you use Pro's curated intelligence, Char's server selects from these models automatically. You don't choose a specific model — the server picks the best available one based on latency and whether your request requires tool calling (e.g., web search during note generation).
+
+**Default models** (summaries, notes, chat):
+
+| Model | Provider |
+|-------|----------|
+| `moonshotai/kimi-k2-0905` | Moonshot AI (via OpenRouter) |
+| `openai/gpt-5.2-chat` | OpenAI (via OpenRouter) |
+
+**Tool-calling models** (when AI needs to call functions like web search):
+
+| Model | Provider |
+|-------|----------|
+| `moonshotai/kimi-k2-0905:exacto` | Moonshot AI (via OpenRouter) |
+| `anthropic/claude-haiku-4.5` | Anthropic (via OpenRouter) |
+| `openai/gpt-oss-120b:exacto` | OpenAI (via OpenRouter) |
+
+Source: [`crates/llm-proxy/src/config.rs` lines 43–51](https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/crates/llm-proxy/src/config.rs#L43-L51)
+
+```rust
+// crates/llm-proxy/src/config.rs
+models_tool_calling: vec![
+    "moonshotai/kimi-k2-0905:exacto".into(),
+    "anthropic/claude-haiku-4.5".into(),
+    "openai/gpt-oss-120b:exacto".into(),
+],
+models_default: vec![
+    "moonshotai/kimi-k2-0905".into(),
+    "openai/gpt-5.2-chat".into(),
+],
+```
+
+The server selects between tool-calling and default model lists based on whether your request includes tool definitions:
+
+Source: [`crates/llm-proxy/src/handler/mod.rs` lines 177–184](https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/crates/llm-proxy/src/handler/mod.rs#L177-L184)
+
+```rust
+// crates/llm-proxy/src/handler/mod.rs
+let needs_tool_calling = request.tools.as_ref().is_some_and(|t| !t.is_empty())
+    && !matches!(&request.tool_choice, Some(ToolChoice::String(s)) if s == "none");
+
+let models = if needs_tool_calling {
+    state.config.models_tool_calling.clone()
+} else {
+    state.config.models_default.clone()
+};
+```
+
+### How the Request Flows
+
+```
+Your Device ──HTTPS──▶ Char API Server ──HTTPS──▶ OpenRouter ──▶ Model Provider
+                       (pro.hyprnote.com)          (openrouter.ai)   (OpenAI/Anthropic/Moonshot)
+```
+
+1. **Your device** sends a chat completion request to the Char API server, authenticated with your Supabase JWT token.
+2. **Char API server** validates your Pro subscription, then forwards the request to [OpenRouter](https://openrouter.ai).
+3. **OpenRouter** routes to the fastest available model from the configured list (sorted by latency).
+4. **The model provider** processes your request and streams the response back through the same chain.
+
+The server sends your request to OpenRouter with `provider.sort = "latency"` to pick the fastest available model:
+
+Source: [`crates/llm-proxy/src/provider/openrouter.rs` lines 47–65](https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/crates/llm-proxy/src/provider/openrouter.rs#L47-L65)
+
+```rust
+// crates/llm-proxy/src/provider/openrouter.rs
+fn build_request(
+    &self,
+    request: &ChatCompletionRequest,
+    models: Vec<String>,
+    stream: bool,
+) -> Result<serde_json::Value, ProviderError> {
+    let mut body = serde_json::to_value(request)?;
+    let obj = body.as_object_mut().unwrap();
+
+    obj.remove("model");
+    obj.insert("models".to_string(), serde_json::to_value(models)?);
+    obj.insert("stream".to_string(), serde_json::Value::Bool(stream));
+    obj.insert(
+        "provider".to_string(),
+        serde_json::json!({"sort": "latency"}),
+    );
+
+    Ok(body)
+}
+```
+
+### What Data Is Sent
+
+**Sent to OpenRouter / model provider:**
+- Your conversation messages (system prompt, user messages, assistant responses)
+- Tool definitions and tool call results (if applicable)
+- Parameters: `temperature`, `max_tokens`, `stream`
+
+**NOT sent to OpenRouter / model provider:**
+- Your user ID, email, or name
+- Your device fingerprint
+- Your JWT token (used only for Char API authentication — not forwarded)
+
+### What Char Logs (Analytics)
+
+Char logs metadata about each LLM request to PostHog for usage tracking and billing. **No message content is ever logged.**
+
+Source: [`crates/llm-proxy/src/analytics.rs` lines 25–63](https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/crates/llm-proxy/src/analytics.rs#L25-L63)
+
+```rust
+// crates/llm-proxy/src/analytics.rs
+let payload = AnalyticsPayload::builder("$ai_generation")
+    .with("$ai_provider", event.provider_name.clone())
+    .with("$ai_model", event.model.clone())
+    .with("$ai_input_tokens", event.input_tokens)
+    .with("$ai_output_tokens", event.output_tokens)
+    .with("$ai_latency", event.latency)
+    .with("$ai_trace_id", event.generation_id.clone())
+    .with("$ai_http_status", event.http_status)
+    .with("$ai_base_url", event.base_url.clone());
+```
+
+**Logged:** provider name, model name, token counts, latency, cost, HTTP status.
+**Not logged:** message content, conversation history, user prompts.
 
 ## MCP Tools
 
@@ -36,13 +159,31 @@ While Char aims to be fully transparent and controllable, cloud services help in
 
 ## Privacy & Security
 
-The cloud server (`pro.hyprnote.com`) is [open-source](https://github.com/fastrepl/char/tree/main/apps/pro) and deployed in our Kubernetes cluster on AWS via GitHub Actions.
+The cloud server (`pro.hyprnote.com`) is [open-source](https://github.com/fastrepl/hyprnote/tree/main/apps/pro) and deployed in our Kubernetes cluster on AWS via GitHub Actions.
 
 **Data handling:**
-- Nothing is stored by us
-- Only required data is sent to third-party services
-- Current providers: Curated LLM models, Exa (web search), Jina AI (URL reading)
+- Nothing is stored by us — the server proxies requests and discards them
+- Your user identity (email, name) is never sent to external AI providers
+- Only the content needed for processing (messages, tools, parameters) is forwarded
+- Current providers: OpenRouter (LLM routing), Exa (web search), Jina AI (URL reading)
 
 All requests are rate-limited and authenticated using your Pro subscription.
+
+### OpenRouter Privacy Policy
+
+All Pro LLM requests go through [OpenRouter](https://openrouter.ai), which routes to the actual model provider (OpenAI, Anthropic, Moonshot AI).
+
+| Policy | Details |
+|--------|---------|
+| **Data retention** | Zero by default — prompts and completions are not stored unless you opt in on your OpenRouter account |
+| **Training** | Does not train on API data |
+| **Compliance** | SOC 2 |
+| **Data location** | US (default) |
+
+> "OpenRouter does not store your prompts or responses, unless you have explicitly opted in to prompt logging in your account settings."
+>
+> — [OpenRouter Data Collection Policy](https://openrouter.ai/docs/guides/privacy/data-collection)
+
+Official docs: [Privacy Policy](https://openrouter.ai/privacy) · [Data Collection](https://openrouter.ai/docs/guides/privacy/data-collection) · [Logging Policies](https://openrouter.ai/docs/guides/privacy/logging) · [Zero Data Retention Guide](https://openrouter.ai/docs/guides/features/zdr)
 
 If you prefer to run AI locally instead, see [Local LLM Setup](/docs/faq/local-llm-setup) for LLMs and [Local Models](/docs/developers/local-models) for speech-to-text.
