@@ -1,5 +1,5 @@
 import { Check, Code2, Copy } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import {
   Tooltip,
@@ -25,6 +25,7 @@ export function GithubEmbed({
 }) {
   const [copied, setCopied] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
+  const [collapsedLines, setCollapsedLines] = useState<Set<number>>(new Set());
 
   const highlightedLines = useMemo(() => {
     if (!highlightedHtml) return null;
@@ -49,12 +50,55 @@ export function GithubEmbed({
   }, [lines]);
 
   const indentLevels = useMemo(() => {
-    return lines.map((line) => {
+    const levels = lines.map((line) => {
+      if (line.trim() === "") return -1;
       const match = line.match(/^( *)/);
       const spaces = match ? match[1].length : 0;
       return Math.floor(spaces / indentSize);
     });
+    for (let i = 0; i < levels.length; i++) {
+      if (levels[i] === -1) {
+        levels[i] = i > 0 ? levels[i - 1] : 0;
+      }
+    }
+    return levels;
   }, [lines, indentSize]);
+
+  const foldRegions = useMemo(() => {
+    const regions = new Map<number, number>();
+    for (let i = 0; i < lines.length; i++) {
+      if (i + 1 < lines.length && indentLevels[i + 1] > indentLevels[i]) {
+        const baseLevel = indentLevels[i];
+        let end = i + 1;
+        while (end + 1 < lines.length && indentLevels[end + 1] > baseLevel) {
+          end++;
+        }
+        regions.set(i, end);
+      }
+    }
+    return regions;
+  }, [lines, indentLevels]);
+
+  const isLineVisible = useCallback(
+    (index: number): boolean => {
+      for (const [start, end] of foldRegions) {
+        if (collapsedLines.has(start) && index > start && index <= end) {
+          return false;
+        }
+      }
+      return true;
+    },
+    [foldRegions, collapsedLines],
+  );
+
+  const toggleFold = useCallback((lineIndex: number) => {
+    setCollapsedLines((prev) => {
+      const next = new Set(prev);
+      if (next.has(lineIndex)) next.delete(lineIndex);
+      else next.add(lineIndex);
+      return next;
+    });
+  }, []);
 
   const rawUrl = url
     ?.replace("github.com", "raw.githubusercontent.com")
@@ -133,32 +177,60 @@ export function GithubEmbed({
         <div className="overflow-x-auto bg-white">
           <table className="w-full border-collapse my-0!">
             <tbody>
-              {lines.map((line, index) => (
-                <tr key={index} className="leading-5">
-                  <td className="select-none text-right pr-4 pl-4 py-0.5 text-stone-400 text-sm font-mono bg-stone-50 w-[1%] whitespace-nowrap border-r border-neutral-200">
-                    {startLine + index}
-                  </td>
-                  <td className="pr-4 py-0.5 text-sm font-mono whitespace-pre relative">
-                    {Array.from({ length: indentLevels[index] }, (_, i) => (
-                      <span
-                        key={i}
-                        className="absolute top-0 bottom-0 border-l border-neutral-200"
-                        style={{ left: `${i * indentSize * 0.55 + 1}em` }}
-                      />
-                    ))}
-                    {highlightedLines?.[index] != null ? (
-                      <span
-                        className="pl-4"
-                        dangerouslySetInnerHTML={{
-                          __html: highlightedLines[index] || " ",
-                        }}
-                      />
-                    ) : (
-                      <span className="pl-4 text-stone-700">{line || " "}</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
+              {lines.map((line, index) => {
+                if (!isLineVisible(index)) return null;
+                const isFoldable = foldRegions.has(index);
+                const isCollapsed = collapsedLines.has(index);
+
+                return (
+                  <tr key={index} className="leading-5">
+                    <td className="select-none pr-2 pl-2 py-0.5 text-stone-400 text-sm font-mono bg-stone-50 w-[1%] whitespace-nowrap border-r border-neutral-200">
+                      <div className="flex items-center justify-end">
+                        <span className="w-4 flex items-center justify-center shrink-0 text-xs">
+                          {isFoldable && (
+                            <button
+                              type="button"
+                              onClick={() => toggleFold(index)}
+                              className="text-stone-400 hover:text-stone-600 cursor-pointer leading-none"
+                            >
+                              {isCollapsed ? "▸" : "▾"}
+                            </button>
+                          )}
+                        </span>
+                        <span className="text-right">{startLine + index}</span>
+                      </div>
+                    </td>
+                    <td className="pr-4 py-0.5 text-sm font-mono whitespace-pre relative">
+                      {Array.from({ length: indentLevels[index] }, (_, i) => (
+                        <span
+                          key={i}
+                          className="absolute top-0 bottom-0 border-l border-neutral-200"
+                          style={{
+                            left: `calc(1rem + ${i * indentSize}ch + 1ch)`,
+                          }}
+                        />
+                      ))}
+                      {highlightedLines?.[index] != null ? (
+                        <span
+                          className="pl-4"
+                          dangerouslySetInnerHTML={{
+                            __html: highlightedLines[index] || " ",
+                          }}
+                        />
+                      ) : (
+                        <span className="pl-4 text-stone-700">
+                          {line || " "}
+                        </span>
+                      )}
+                      {isCollapsed && (
+                        <span className="ml-2 text-xs bg-stone-100 text-stone-400 px-1.5 py-0.5 rounded border border-stone-200 align-middle">
+                          ⋯
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
