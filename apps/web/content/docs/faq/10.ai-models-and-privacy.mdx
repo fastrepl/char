@@ -8,14 +8,15 @@ This page documents every way Char stores and processes your data. Nothing is hi
 
 ## Local Data Storage
 
-All core data is stored locally on your device by default. Nothing leaves your machine unless you explicitly enable a cloud feature.
+All core data is stored locally on your device as plain Markdown and JSON files — not in a database. This is a deliberate choice. Files are portable, inspectable, and yours. You can open them in any text editor, back them up however you want, or drop them into an existing vault alongside tools like Obsidian. There is no proprietary format or opaque data layer between you and your data. For more on why we believe in this approach, see [The Filesystem Is the Cortex](/articles/filesystem-is-coretex).
+
+Nothing leaves your machine unless you explicitly enable a cloud feature.
 
 ### Where Files Live
 
 Char uses two base directories. See [Data](/docs/guides/data) for the full directory layout.
 
 **Global base** (shared across stable and nightly builds):
-- `db.sqlite` — SQLite database (sessions, contacts, calendar events, tags)
 - `models/stt/` — downloaded speech-to-text model files (Whisper GGUF, Argmax tarballs)
 - `store.json` — app state (onboarding status, pinned tabs, recently opened sessions, dismissed toasts, analytics preference, auth tokens)
 - `hyprnote.json` — vault configuration (custom vault path if set)
@@ -25,7 +26,7 @@ On macOS, this is typically `~/Library/Application Support/hyprnote/`. On Linux,
 
 The `store.json` keys are defined by this enum — nothing else is persisted through the Tauri store:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/apps/desktop/src-tauri/src/store.rs#L4-L11" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/apps/desktop/src-tauri/src/store.rs#L4-L11" />
 
 **Vault base** (customizable, defaults to the global base):
 - `sessions/` — one subdirectory per session containing recorded audio, transcripts, notes, and attachments
@@ -41,15 +42,15 @@ The `store.json` keys are defined by this enum — nothing else is persisted thr
 
 Each session gets its own subdirectory. Here is how Char loads session content from disk — this shows exactly what files exist per session:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/fs-sync/src/session_content.rs#L10-L110" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/fs-sync/src/session_content.rs#L10-L110" />
 
 Transcript data uses this structure — word-level timestamps, speaker channels, and optional speaker hints:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/fs-sync/src/types.rs#L83-L119" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/fs-sync/src/types.rs#L83-L119" />
 
 ### Is My Data Encrypted at Rest?
 
-Char stores data as plain SQLite, JSON, and Markdown files on disk. Char does not add its own encryption layer. Your data is protected by your operating system's file permissions and any full-disk encryption you have enabled (such as FileVault on macOS or LUKS on Linux).
+Char stores data as plain Markdown and JSON files on disk — formats you can read, move, and version-control yourself. Char does not add its own encryption layer. Your data is protected by your operating system's file permissions and any full-disk encryption you have enabled (such as FileVault on macOS or LUKS on Linux).
 
 ## How Audio Recording Works
 
@@ -61,11 +62,11 @@ When you start a recording session, Char spawns three actors in parallel:
 
 Here is the session supervisor that orchestrates these actors:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/listener/src/actors/session/supervisor.rs#L56-L106" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/listener/src/actors/session/supervisor.rs#L56-L106" />
 
 Audio is written to WAV files on your local disk. Here is the recorder handling incoming audio samples:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/listener/src/actors/recorder.rs#L130-L168" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/listener/src/actors/recorder.rs#L130-L168" />
 
 Audio files are stored at `{vault}/sessions/{session_id}/audio.wav` — they never leave your device unless you explicitly use cloud transcription.
 
@@ -79,11 +80,11 @@ Char collects anonymous usage analytics by default to help improve the product. 
 
 Here is the opt-out check — when disabled, the function returns immediately without sending anything:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/analytics/src/ext.rs#L10-L28" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/analytics/src/ext.rs#L10-L28" />
 
 **What is attached to every analytics event** — this is the complete enrichment logic:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/analytics/src/ext.rs#L45-L76" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/analytics/src/ext.rs#L45-L76" />
 
 **What is sent:**
 - Event names (e.g. "session_started", "transcription_completed")
@@ -97,7 +98,7 @@ Here is the opt-out check — when disabled, the function returns immediately wi
 
 The analytics client sends events to both services:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/crates/analytics/src/lib.rs#L48-L69" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/analytics/src/lib.rs#L48-L69" />
 
 **How to disable:** Go to Settings and turn off analytics. When disabled, no analytics events are sent — the `is_disabled()` check short-circuits the entire flow.
 
@@ -105,7 +106,7 @@ The analytics client sends events to both services:
 
 Char uses Sentry for crash reporting and error tracking in release builds. Here is the complete initialization:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/apps/desktop/src-tauri/src/lib.rs#L26-L55" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/apps/desktop/src-tauri/src/lib.rs#L26-L55" />
 
 **What is sent:**
 - Error messages, stack traces, and crash dumps
@@ -123,11 +124,11 @@ When you use cloud-based transcription, your audio is sent to the selected provi
 
 Here is how the listener actor connects to your configured STT provider — audio is streamed via the adapter matching your settings:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/listener/src/actors/listener/adapters.rs#L22-L102" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/listener/src/actors/listener/adapters.rs#L22-L102" />
 
 The `ListenerArgs` passed to the STT adapter contain the following — this is all the data sent to the provider along with your audio stream:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/listener/src/actors/session/supervisor.rs#L122-L134" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/listener/src/actors/session/supervisor.rs#L122-L134" />
 
 **What is sent:**
 - Your recorded audio (streamed in real-time or sent as a file for batch transcription)
@@ -159,15 +160,15 @@ When you use cloud-based AI features (summaries, enhanced notes, chat), your ses
 
 Here is how the language model client is created — each provider connects directly to its own API:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/apps/desktop/src/hooks/useLLMConnection.ts#L230-L310" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/apps/desktop/src/hooks/useLLMConnection.ts#L230-L310" />
 
 When auto-enhance runs after a session ends, the enhanced result is stored locally:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/apps/desktop/src/hooks/autoEnhance/runner.ts#L82-L105" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/apps/desktop/src/hooks/autoEnhance/runner.ts#L82-L105" />
 
 An analytics event is also fired when auto-enhance runs — it includes only the provider and model name, not the content:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/apps/desktop/src/hooks/autoEnhance/runner.ts#L161-L166" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/apps/desktop/src/hooks/autoEnhance/runner.ts#L161-L166" />
 
 **What is sent:**
 - Transcript text, raw notes, and prompt templates
@@ -196,9 +197,9 @@ Pro users have access to MCP tools for web search and URL reading during AI-assi
 
 Char periodically checks if your device is online. Here is the complete implementation:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/network/src/actor.rs#L7-L9" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/network/src/actor.rs#L7-L9" />
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/network/src/actor.rs#L83-L95" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/network/src/actor.rs#L83-L95" />
 
 **What happens:**
 - A HEAD request to `https://www.google.com/generate_204` every 2 seconds
@@ -211,7 +212,7 @@ When you download a local STT model, Char fetches the model file from a hosting 
 
 These are the supported local models:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/local-stt/src/model.rs#L4-L15" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/local-stt/src/model.rs#L4-L15" />
 
 **What happens:**
 - Standard HTTP download requests to S3 (Whisper models) or Argmax hosting servers
@@ -246,7 +247,7 @@ Char supports optional cloud database sync.
 
 **When enabled:** Your session data can be synced to a remote database. This is only active if you explicitly configure a cloud database connection.
 
-**When not configured:** All data stays in the local SQLite database.
+**When not configured:** All data stays in local Markdown and JSON files on disk.
 
 ## What AI Models Does Char Use?
 
@@ -282,6 +283,7 @@ No. Char does not use your recordings, transcripts, or notes to train AI models.
 - Does **not** sell your data to third parties
 - Does **not** collect your audio, transcripts, or notes for any purpose other than the features you explicitly use
 - Does **not** send your meeting content in analytics — analytics only includes event names and app metadata
+- Does **not** lock your data in a proprietary database — everything is plain Markdown and JSON files you can open, move, and use with other tools
 
 ## Can I Use Char Completely Offline?
 
