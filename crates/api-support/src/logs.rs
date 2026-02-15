@@ -3,7 +3,10 @@ fn strip_code_fences(s: &str) -> String {
     let stripped = trimmed
         .strip_prefix("```")
         .and_then(|s| {
-            let s = s.strip_prefix('\n').unwrap_or(s);
+            let s = match s.find('\n') {
+                Some(pos) => &s[pos + 1..],
+                None => return None,
+            };
             s.strip_suffix("```")
         })
         .map(|s| s.trim())
