@@ -205,3 +205,12 @@
   border-radius: 2px;
   padding: 1px 0;
 }
+
+/* Settings keyboard navigation highlight */
+[data-settings-item][data-active="true"] {
+  background-color: rgb(245 245 245);
+  border-radius: 8px;
+  box-shadow: 0 0 0 2px rgb(163 163 163);
+  padding: 8px;
+  margin: -8px;
+}

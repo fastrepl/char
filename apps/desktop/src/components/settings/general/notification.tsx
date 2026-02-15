@@ -237,7 +237,10 @@ export function NotificationSettingsView() {
     <div className="flex flex-col gap-6">
       <form.Field name="notification_event">
         {(field) => (
-          <div className="flex items-start justify-between gap-4">
+          <div
+            data-settings-item
+            className="flex items-start justify-between gap-4"
+          >
             <div className="flex-1">
               <h3 className="mb-1 text-sm font-medium">Event notifications</h3>
               <p className="text-xs text-neutral-600">
@@ -245,6 +248,7 @@ export function NotificationSettingsView() {
               </p>
             </div>
             <Switch
+              data-settings-activate
               checked={field.state.value}
               onCheckedChange={field.handleChange}
             />
@@ -255,7 +259,10 @@ export function NotificationSettingsView() {
       <form.Field name="notification_detect">
         {(field) => (
           <div className="flex flex-col gap-4">
-            <div className="flex items-start justify-between gap-4">
+            <div
+              data-settings-item
+              className="flex items-start justify-between gap-4"
+            >
               <div className="flex-1">
                 <h3 className="mb-1 text-sm font-medium">
                   Microphone detection
@@ -266,6 +273,7 @@ export function NotificationSettingsView() {
                 </p>
               </div>
               <Switch
+                data-settings-activate
                 checked={field.state.value}
                 onCheckedChange={field.handleChange}
               />
@@ -415,7 +423,10 @@ export function NotificationSettingsView() {
 
         <form.Field name="respect_dnd">
           {(field) => (
-            <div className="flex items-start justify-between gap-4">
+            <div
+              data-settings-item
+              className="flex items-start justify-between gap-4"
+            >
               <div className="flex-1">
                 <h3 className="mb-1 text-sm font-medium">
                   Respect Do-Not-Disturb mode
@@ -426,6 +437,7 @@ export function NotificationSettingsView() {
                 </p>
               </div>
               <Switch
+                data-settings-activate
                 checked={field.state.value}
                 onCheckedChange={field.handleChange}
                 disabled={!anyNotificationEnabled}
