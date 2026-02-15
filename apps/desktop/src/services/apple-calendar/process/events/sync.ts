@@ -1,9 +1,8 @@
 import type { Ctx } from "../../ctx";
 import type { IncomingEvent } from "../../fetch/types";
-import { getSessionForEvent, isSessionEmpty } from "../utils";
 import type { EventsSyncInput, EventsSyncOutput } from "./types";
 
-function getEventKey(
+export function getEventKey(
   trackingId: string,
   startedAt: string | undefined,
   hasRecurrenceRules: boolean,
@@ -20,7 +19,6 @@ export function syncEvents(
 ): EventsSyncOutput {
   const out: EventsSyncOutput = {
     toDelete: [],
-    toDeleteSessions: [],
     toUpdate: [],
     toAdd: [],
   };
@@ -34,18 +32,8 @@ export function syncEvents(
   const handledEventKeys = new Set<string>();
 
   for (const storeEvent of existing) {
-    const sessionId = getSessionForEvent(ctx.store, storeEvent.id);
-    const hasNonEmptySession = sessionId
-      ? !isSessionEmpty(ctx.store, sessionId)
-      : false;
-
     if (!ctx.calendarIds.has(storeEvent.calendar_id!)) {
-      if (!hasNonEmptySession) {
-        out.toDelete.push(storeEvent.id);
-        if (sessionId) {
-          out.toDeleteSessions.push(sessionId);
-        }
-      }
+      out.toDelete.push(storeEvent.id);
       continue;
     }
 
@@ -56,8 +44,6 @@ export function syncEvents(
       eventKey = undefined;
       matchingIncomingEvent = undefined;
     } else if (storeEvent.has_recurrence_rules === undefined) {
-      // if a stored event does not have a has_recurrence_rules field,
-      // we check for both non-recurrent events and recurrent events.
       eventKey = getEventKey(trackingId, storeEvent.started_at, false);
       matchingIncomingEvent = incomingEventMap.get(eventKey);
       if (!matchingIncomingEvent) {
@@ -88,14 +74,7 @@ export function syncEvents(
       continue;
     }
 
-    if (hasNonEmptySession) {
-      continue;
-    }
-
     out.toDelete.push(storeEvent.id);
-    if (sessionId) {
-      out.toDeleteSessions.push(sessionId);
-    }
   }
 
   for (const incomingEvent of incoming) {

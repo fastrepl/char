@@ -126,7 +126,7 @@ function StarsPage() {
               GitHub Stars
             </h1>
             <p className="text-sm text-neutral-500 mt-0.5">
-              Track and qualify leads from GitHub activity on fastrepl/hyprnote
+              Track and qualify leads from GitHub activity on fastrepl/char
             </p>
           </div>
           <div className="flex items-center gap-2">

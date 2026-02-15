@@ -1,25 +1,19 @@
-import type { EventStorage } from "@hypr/store";
+import type { EventStorage, SessionEvent } from "@hypr/store";
 
 import { id } from "../../../../utils";
+import {
+  eventMatchingKey,
+  getSessionEventById,
+  sessionEventMatchingKey,
+} from "../../../../utils/session-event";
 import type { Ctx } from "../../ctx";
+import type { IncomingEvent } from "../../fetch/types";
+import { getEventKey } from "./sync";
 import type { EventsSyncOutput } from "./types";
 
 export type EventsSyncResult = {
-  trackingIdToEventId: Map<string, string>;
+  eventKeyToEventId: Map<string, string>;
 };
-
-function getIgnoredRecurringSeries(ctx: Ctx): Set<string> {
-  const raw = ctx.store.getValue("ignored_recurring_series");
-  if (!raw) {
-    return new Set();
-  }
-  try {
-    const parsed = JSON.parse(String(raw));
-    return new Set(Array.isArray(parsed) ? parsed : []);
-  } catch {
-    return new Set();
-  }
-}
 
 export function executeForEventsSync(
   ctx: Ctx,
@@ -31,16 +25,11 @@ export function executeForEventsSync(
   }
 
   const now = new Date().toISOString();
-  const trackingIdToEventId = new Map<string, string>();
-  const ignoredSeries = getIgnoredRecurringSeries(ctx);
+  const eventKeyToEventId = new Map<string, string>();
 
   ctx.store.transaction(() => {
     for (const eventId of out.toDelete) {
       ctx.store.delRow("events", eventId);
-    }
-
-    for (const sessionId of out.toDeleteSessions) {
-      ctx.store.delRow("sessions", sessionId);
     }
 
     for (const event of out.toUpdate) {
@@ -54,11 +43,15 @@ export function executeForEventsSync(
         meeting_link: event.meeting_link,
         description: event.description,
         recurrence_series_id: event.recurrence_series_id,
-        ignored: event.ignored,
         has_recurrence_rules: event.has_recurrence_rules,
         is_all_day: event.is_all_day,
       });
-      trackingIdToEventId.set(event.tracking_id_event!, event.id);
+      const key = getEventKey(
+        event.tracking_id_event!,
+        event.started_at,
+        event.has_recurrence_rules ?? false,
+      );
+      eventKeyToEventId.set(key, event.id);
     }
 
     for (const incomingEvent of out.toAdd) {
@@ -70,11 +63,12 @@ export function executeForEventsSync(
       }
 
       const eventId = id();
-      trackingIdToEventId.set(incomingEvent.tracking_id_event, eventId);
-
-      const shouldIgnore =
-        incomingEvent.recurrence_series_id &&
-        ignoredSeries.has(incomingEvent.recurrence_series_id);
+      const key = getEventKey(
+        incomingEvent.tracking_id_event,
+        incomingEvent.started_at,
+        incomingEvent.has_recurrence_rules,
+      );
+      eventKeyToEventId.set(key, eventId);
 
       ctx.store.setRow("events", eventId, {
         user_id: userId,
@@ -88,12 +82,55 @@ export function executeForEventsSync(
         meeting_link: incomingEvent.meeting_link,
         description: incomingEvent.description,
         recurrence_series_id: incomingEvent.recurrence_series_id,
-        ignored: shouldIgnore || undefined,
         has_recurrence_rules: incomingEvent.has_recurrence_rules,
         is_all_day: incomingEvent.is_all_day,
       } satisfies EventStorage);
     }
   });
 
-  return { trackingIdToEventId };
+  return { eventKeyToEventId };
+}
+
+export function syncSessionEmbeddedEvents(
+  ctx: Ctx,
+  incoming: IncomingEvent[],
+  timezone?: string,
+): void {
+  const incomingByKey = new Map<string, IncomingEvent>();
+  for (const event of incoming) {
+    incomingByKey.set(eventMatchingKey(event, timezone), event);
+  }
+
+  ctx.store.transaction(() => {
+    ctx.store.forEachRow("sessions", (sessionId, _forEachCell) => {
+      const sessionEvent = getSessionEventById(ctx.store, sessionId);
+      if (!sessionEvent) return;
+      const key = sessionEventMatchingKey(sessionEvent, timezone);
+
+      const incomingEvent = incomingByKey.get(key);
+      if (!incomingEvent) return;
+
+      const calendarId =
+        ctx.calendarTrackingIdToId.get(incomingEvent.tracking_id_calendar) ??
+        "";
+
+      const updated: SessionEvent = {
+        tracking_id: incomingEvent.tracking_id_event,
+        calendar_id: calendarId,
+        title: incomingEvent.title ?? "",
+        started_at: incomingEvent.started_at ?? "",
+        ended_at: incomingEvent.ended_at ?? "",
+        is_all_day: incomingEvent.is_all_day,
+        has_recurrence_rules: incomingEvent.has_recurrence_rules,
+        location: incomingEvent.location,
+        meeting_link: incomingEvent.meeting_link,
+        description: incomingEvent.description,
+        recurrence_series_id: incomingEvent.recurrence_series_id,
+      };
+
+      ctx.store.setPartialRow("sessions", sessionId, {
+        event_json: JSON.stringify(updated),
+      });
+    });
+  });
 }

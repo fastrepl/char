@@ -242,13 +242,7 @@ pub async fn main() {
 
     {
         let app_handle = app.handle().clone();
-        if app.get_onboarding_needed().unwrap_or(true) {
-            AppWindow::Main.hide(&app_handle).unwrap();
-            AppWindow::Onboarding.show(&app_handle).unwrap();
-        } else {
-            AppWindow::Onboarding.destroy(&app_handle).unwrap();
-            AppWindow::Main.show(&app_handle).unwrap();
-        }
+        AppWindow::Main.show(&app_handle).unwrap();
     }
 
     #[cfg(target_os = "macos")]
@@ -269,13 +263,7 @@ pub async fn main() {
     app.run(move |app, event| match event {
         #[cfg(target_os = "macos")]
         tauri::RunEvent::Reopen { .. } => {
-            if app.get_onboarding_needed().unwrap_or(true) {
-                AppWindow::Main.hide(&app).unwrap();
-                AppWindow::Onboarding.show(&app).unwrap();
-            } else {
-                AppWindow::Onboarding.destroy(&app).unwrap();
-                AppWindow::Main.show(&app).unwrap();
-            }
+            AppWindow::Main.show(&app).unwrap();
         }
         #[cfg(target_os = "macos")]
         tauri::RunEvent::ExitRequested { api, .. } => {

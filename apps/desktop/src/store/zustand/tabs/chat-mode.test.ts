@@ -4,7 +4,7 @@ import { useTabs } from ".";
 import { createSessionTab, resetTabsStore } from "./test-utils";
 
 const openChatTab = () => {
-  useTabs.getState().openNew({ type: "chat" });
+  useTabs.getState().openNew({ type: "chat_support" });
 };
 
 describe("Chat Mode", () => {
@@ -53,11 +53,15 @@ describe("Chat Mode + Tab Sync", () => {
     openChatTab();
     useTabs.getState().transitionChatMode({ type: "OPEN_TAB" });
     expect(useTabs.getState().chatMode).toBe("FullTab");
-    expect(useTabs.getState().tabs.some((t) => t.type === "chat")).toBe(true);
+    expect(useTabs.getState().tabs.some((t) => t.type === "chat_support")).toBe(
+      true,
+    );
 
     useTabs.getState().transitionChatMode({ type: "TOGGLE" });
     expect(useTabs.getState().chatMode).toBe("FloatingClosed");
-    expect(useTabs.getState().tabs.some((t) => t.type === "chat")).toBe(false);
+    expect(useTabs.getState().tabs.some((t) => t.type === "chat_support")).toBe(
+      false,
+    );
   });
 
   test("leaving FullTab via CLOSE closes the chat tab", () => {
@@ -66,14 +70,18 @@ describe("Chat Mode + Tab Sync", () => {
 
     useTabs.getState().transitionChatMode({ type: "CLOSE" });
     expect(useTabs.getState().chatMode).toBe("FloatingClosed");
-    expect(useTabs.getState().tabs.some((t) => t.type === "chat")).toBe(false);
+    expect(useTabs.getState().tabs.some((t) => t.type === "chat_support")).toBe(
+      false,
+    );
   });
 
   test("closing chat tab directly resets mode from FullTab", () => {
     openChatTab();
     useTabs.getState().transitionChatMode({ type: "OPEN_TAB" });
 
-    const chatTab = useTabs.getState().tabs.find((t) => t.type === "chat")!;
+    const chatTab = useTabs
+      .getState()
+      .tabs.find((t) => t.type === "chat_support")!;
     useTabs.getState().close(chatTab);
     expect(useTabs.getState().chatMode).toBe("FloatingClosed");
   });
@@ -89,7 +97,9 @@ describe("Chat Mode + Tab Sync", () => {
       .tabs.find((t) => t.type === "sessions")!;
     useTabs.getState().closeOthers(sessionTab);
     expect(useTabs.getState().chatMode).toBe("FloatingClosed");
-    expect(useTabs.getState().tabs.some((t) => t.type === "chat")).toBe(false);
+    expect(useTabs.getState().tabs.some((t) => t.type === "chat_support")).toBe(
+      false,
+    );
   });
 
   test("closeAll resets mode from FullTab", () => {

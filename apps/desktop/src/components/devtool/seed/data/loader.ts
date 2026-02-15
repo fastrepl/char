@@ -109,16 +109,31 @@ export const loadCuratedData = (data: CuratedData): Tables<Schemas[0]> => {
   data.sessions.forEach((session) => {
     const sessionId = id();
     sessionTitleToId.set(session.title, sessionId);
-    const eventId = session.event
-      ? eventNameToId.get(session.event)
-      : undefined;
+    let eventJson: string | undefined;
+    if (session.event) {
+      const eventId = eventNameToId.get(session.event);
+      if (eventId) {
+        const eventData = events[eventId];
+        if (eventData) {
+          eventJson = JSON.stringify({
+            tracking_id: eventData.tracking_id_event ?? eventId,
+            calendar_id: eventData.calendar_id ?? "",
+            title: eventData.title ?? "",
+            started_at: eventData.started_at ?? "",
+            ended_at: eventData.ended_at ?? "",
+            is_all_day: false,
+            has_recurrence_rules: false,
+          });
+        }
+      }
+    }
 
     sessions[sessionId] = {
       user_id: DEFAULT_USER_ID,
       title: session.title,
       raw_md: JSON.stringify(md2json(session.raw_md)),
       created_at: new Date().toISOString(),
-      event_id: eventId,
+      event_json: eventJson,
       folder_id: session.folder ?? undefined,
     };
 

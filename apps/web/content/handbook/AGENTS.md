@@ -4,9 +4,9 @@
 
 This handbook serves two audiences. Every page should be aware of which audience it primarily speaks to, though most pages will be read by both.
 
-**Audience 1: People considering joining Hyprnote.** They want to understand how we think, what we value, and whether this is the right place for them. Sections that primarily serve this audience: About, Who We Want.
+**Audience 1: People considering joining Char.** They want to understand how we think, what we value, and whether this is the right place for them. Sections that primarily serve this audience: About, Who We Want.
 
-**Audience 2: People who just joined Hyprnote.** They need to know how we communicate, do work practically, and where we're heading. Sections that primarily serve this audience: How We Work (including team-specific mindset pages), Communication.
+**Audience 2: People who just joined Char.** They need to know how we communicate, do work practically, and where we're heading. Sections that primarily serve this audience: How We Work (including team-specific mindset pages), Communication.
 
 **Go To Market** is a shared section — it tells prospective teammates what our strategy looks like and gives new teammates the playbook they need to execute.
 

@@ -1,8 +1,11 @@
-use ractor::{ActorCell, ActorProcessingErr, ActorRef, concurrency::Duration, registry};
-use ractor_supervisor::{
-    core::{ChildBackoffFn, ChildSpec, Restart, SpawnFn, SupervisorError},
-    dynamic::{DynamicSupervisor, DynamicSupervisorMsg, DynamicSupervisorOptions},
+use hypr_supervisor::{
+    RestartPolicy,
+    dynamic::{
+        ChildBackoffFn, DynChildSpec, DynSpawnFn, DynamicSupervisor, DynamicSupervisorMsg,
+        DynamicSupervisorOptions, SupervisorError,
+    },
 };
+use ractor::{ActorCell, ActorProcessingErr, ActorRef, concurrency::Duration, registry};
 
 #[cfg(feature = "whisper-cpp")]
 use super::internal::{InternalSTTActor, InternalSTTArgs};
@@ -59,8 +62,8 @@ pub async fn start_external_stt(
 }
 
 #[cfg(feature = "whisper-cpp")]
-fn create_internal_child_spec_with_args(args: InternalSTTArgs) -> ChildSpec {
-    let spawn_fn = SpawnFn::new(move |supervisor: ActorCell, child_id: String| {
+fn create_internal_child_spec_with_args(args: InternalSTTArgs) -> DynChildSpec {
+    let spawn_fn = DynSpawnFn::new(move |supervisor: ActorCell, child_id: String| {
         let args = args.clone();
         async move {
             let (actor_ref, _handle) =
@@ -70,10 +73,10 @@ fn create_internal_child_spec_with_args(args: InternalSTTArgs) -> ChildSpec {
         }
     });
 
-    ChildSpec {
+    DynChildSpec {
         id: INTERNAL_STT_ACTOR_NAME.to_string(),
         spawn_fn,
-        restart: Restart::Transient,
+        restart: RestartPolicy::Transient,
         backoff_fn: Some(ChildBackoffFn::new(|_, _, _, _| {
             Some(Duration::from_millis(500))
         })),
@@ -81,8 +84,8 @@ fn create_internal_child_spec_with_args(args: InternalSTTArgs) -> ChildSpec {
     }
 }
 
-fn create_external_child_spec_with_args(args: ExternalSTTArgs) -> ChildSpec {
-    let spawn_fn = SpawnFn::new(move |supervisor: ActorCell, child_id: String| {
+fn create_external_child_spec_with_args(args: ExternalSTTArgs) -> DynChildSpec {
+    let spawn_fn = DynSpawnFn::new(move |supervisor: ActorCell, child_id: String| {
         let args = args.clone();
         async move {
             let (actor_ref, _handle) =
@@ -92,10 +95,10 @@ fn create_external_child_spec_with_args(args: ExternalSTTArgs) -> ChildSpec {
         }
     });
 
-    ChildSpec {
+    DynChildSpec {
         id: EXTERNAL_STT_ACTOR_NAME.to_string(),
         spawn_fn,
-        restart: Restart::Transient,
+        restart: RestartPolicy::Transient,
         backoff_fn: Some(ChildBackoffFn::new(|_, _, _, _| {
             Some(Duration::from_secs(1))
         })),

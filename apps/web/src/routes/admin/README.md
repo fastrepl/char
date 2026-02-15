@@ -1,6 +1,6 @@
 # Admin Interface
 
-The admin interface at `/admin` provides content management capabilities for the Hyprnote website.
+The admin interface at `/admin` provides content management capabilities for the Char website.
 
 ## Authentication
 

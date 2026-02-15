@@ -5,6 +5,7 @@ import {
 } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef } from "react";
 
+import { hydrateSessionContextFromFs } from "../../../chat/session-context-hydrator";
 import { buildChatTools } from "../../../chat/tools";
 import { AITaskProvider } from "../../../contexts/ai-task";
 import { NotificationProvider } from "../../../contexts/notifications";
@@ -18,11 +19,13 @@ import { useDeeplinkHandler } from "../../../hooks/useDeeplinkHandler";
 import { deleteSessionCascade } from "../../../store/tinybase/store/deleteSession";
 import * as main from "../../../store/tinybase/store/main";
 import { isSessionEmpty } from "../../../store/tinybase/store/sessions";
+import { listenerStore } from "../../../store/zustand/listener/instance";
 import {
   restorePinnedTabsToStore,
   restoreRecentlyOpenedToStore,
   useTabs,
 } from "../../../store/zustand/tabs";
+import { commands } from "../../../types/tauri.gen";
 
 export const Route = createFileRoute("/app/main/_layout")({
   component: Component,
@@ -64,7 +67,12 @@ function Component() {
         });
         const currentTabs = useTabs.getState().tabs;
         if (currentTabs.length === 0) {
-          openDefaultEmptyTab();
+          const result = await commands.getOnboardingNeeded();
+          if (result.status === "ok" && result.data) {
+            openNew({ type: "onboarding" });
+          } else {
+            openDefaultEmptyTab();
+          }
         }
       }
     };
@@ -84,7 +92,10 @@ function Component() {
     registerOnClose((tab) => {
       if (tab.type === "sessions") {
         const sessionId = tab.id;
-        if (isSessionEmpty(store, sessionId)) {
+        const isBatchRunning =
+          listenerStore.getState().getSessionMode(sessionId) ===
+          "running_batch";
+        if (!isBatchRunning && isSessionEmpty(store, sessionId)) {
           invalidateResource("sessions", sessionId);
           void deleteSessionCascade(store, indexes, sessionId);
         }
@@ -116,8 +127,18 @@ function Component() {
 
 function ToolRegistration() {
   const { search } = useSearchEngine();
+  const store = main.UI.useStore(main.STORE_ID);
 
-  useRegisterTools("chat-general", () => buildChatTools({ search }), [search]);
+  useRegisterTools(
+    "chat-general",
+    () =>
+      buildChatTools({
+        search,
+        resolveSessionContext: (sessionId) =>
+          hydrateSessionContextFromFs(store, sessionId),
+      }),
+    [search, store],
+  );
 
   return null;
 }

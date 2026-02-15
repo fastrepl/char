@@ -86,7 +86,6 @@ interface DraftArticle {
   meta_title?: string;
   author?: string;
   date?: string;
-  published?: boolean;
 }
 
 interface CollectionInfo {
@@ -130,10 +129,9 @@ interface FileContent {
   meta_title?: string;
   display_title?: string;
   meta_description?: string;
-  author?: string;
+  author?: string[];
   date?: string;
   coverImage?: string;
-  published?: boolean;
   featured?: boolean;
   category?: string;
 }
@@ -142,10 +140,9 @@ interface ArticleMetadata {
   meta_title: string;
   display_title: string;
   meta_description: string;
-  author: string;
+  author: string[];
   date: string;
   coverImage: string;
-  published: boolean;
   featured: boolean;
   category: string;
 }
@@ -176,7 +173,6 @@ function getFileContent(path: string): FileContent | undefined {
     author: a.author,
     date: a.date,
     coverImage: a.coverImage,
-    published: a.published,
     featured: a.featured,
     category: a.category,
   };
@@ -275,6 +271,18 @@ function CollectionsPage() {
   const [deleteConfirmation, setDeleteConfirmation] =
     useState<DeleteConfirmation | null>(null);
 
+  const draftSyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const scheduleDraftSync = useCallback(() => {
+    if (draftSyncTimerRef.current) {
+      clearTimeout(draftSyncTimerRef.current);
+    }
+    draftSyncTimerRef.current = setTimeout(() => {
+      draftSyncTimerRef.current = null;
+      queryClient.invalidateQueries({ queryKey: ["draftArticles"] });
+    }, 5000);
+  }, [queryClient]);
+
   const createMutation = useMutation({
     mutationFn: async (params: {
       folder: string;
@@ -308,6 +316,7 @@ function CollectionsPage() {
             },
           ],
         );
+        scheduleDraftSync();
       } else {
         queryClient.invalidateQueries({ queryKey: ["draftArticles"] });
       }
@@ -1263,12 +1272,6 @@ function ContentPanel({
     [currentTab, editorData, saveContent],
   );
 
-  const currentFileContent = useMemo(
-    () =>
-      currentTab?.type === "file" ? getFileContent(currentTab.path) : undefined,
-    [currentTab?.type, currentTab?.path],
-  );
-
   const { data: pendingPRData } = useQuery({
     queryKey: ["pendingPR", currentTab?.path],
     queryFn: async () => {
@@ -1410,7 +1413,6 @@ function ContentPanel({
             onTogglePreview={() => setIsPreviewMode(!isPreviewMode)}
             onSave={handleSave}
             isSaving={isSaving}
-            isPublished={currentFileContent?.published}
             onPublish={handlePublish}
             isPublishing={isPublishing}
             hasPendingPR={pendingPRData?.hasPendingPR}
@@ -1463,7 +1465,6 @@ function EditorHeader({
   onTogglePreview,
   onSave,
   isSaving,
-  isPublished,
   onPublish,
   isPublishing,
   hasPendingPR,
@@ -1483,7 +1484,6 @@ function EditorHeader({
   onTogglePreview: () => void;
   onSave: () => void;
   isSaving: boolean;
-  isPublished?: boolean;
   onPublish?: () => void;
   isPublishing?: boolean;
   hasPendingPR?: boolean;
@@ -1557,22 +1557,11 @@ function EditorHeader({
                     className="text-neutral-700 font-medium bg-transparent outline-none"
                   />
                 ) : (
-                  <span className="flex items-center gap-2">
-                    <span
-                      onClick={handleSlugClick}
-                      className="text-neutral-700 font-medium hover:text-neutral-900 cursor-text"
-                    >
-                      {crumb.replace(/\.mdx$/, "")}
-                    </span>
-                    {isPublished ? (
-                      <span className="px-1.5 py-0.5 text-[10px] font-medium font-mono rounded bg-green-100 text-green-700">
-                        Published
-                      </span>
-                    ) : (
-                      <span className="px-1.5 py-0.5 text-[10px] font-medium font-mono rounded bg-neutral-100 text-neutral-500">
-                        Draft
-                      </span>
-                    )}
+                  <span
+                    onClick={handleSlugClick}
+                    className="text-neutral-700 font-medium hover:text-neutral-900 cursor-text"
+                  >
+                    {crumb.replace(/\.mdx$/, "")}
                   </span>
                 )
               ) : (
@@ -1638,7 +1627,7 @@ function EditorHeader({
                   </span>
                 )}
             </button>
-            {onPublish && isPublished && (
+            {onPublish && (
               <button
                 onClick={onPublish}
                 disabled={isPublishing}
@@ -1906,8 +1895,8 @@ function AuthorSelect({
   onChange,
   withBorder,
 }: {
-  value: string;
-  onChange: (value: string) => void;
+  value: string[];
+  onChange: (value: string[]) => void;
   withBorder?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -1923,7 +1912,15 @@ function AuthorSelect({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const selectedAuthor = AUTHORS.find((a) => a.name === value);
+  const selectedAuthors = AUTHORS.filter((a) => value.includes(a.name));
+
+  const toggleAuthor = (name: string) => {
+    if (value.includes(name)) {
+      onChange(value.filter((v) => v !== name));
+    } else {
+      onChange([...value, name]);
+    }
+  };
 
   return (
     <div ref={ref} className="relative flex-1">
@@ -1936,17 +1933,36 @@ function AuthorSelect({
             "px-2 py-1.5 border border-neutral-200 rounded focus:border-neutral-400",
         ])}
       >
-        {selectedAuthor ? (
-          <>
-            <img
-              src={selectedAuthor.avatar}
-              alt={selectedAuthor.name}
-              className="size-5 rounded-full object-cover"
-            />
-            {selectedAuthor.name}
-          </>
+        {selectedAuthors.length > 0 ? (
+          <div className="flex items-center gap-1 flex-wrap">
+            {selectedAuthors.map((a) => (
+              <span
+                key={a.name}
+                className="inline-flex items-center gap-1 text-sm"
+              >
+                <img
+                  src={a.avatar}
+                  alt={a.name}
+                  className="size-5 rounded-full object-cover"
+                />
+                {a.name}
+                {selectedAuthors.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onChange(value.filter((v) => v !== a.name));
+                    }}
+                    className="text-neutral-400 hover:text-neutral-600"
+                  >
+                    ×
+                  </button>
+                )}
+              </span>
+            ))}
+          </div>
         ) : (
-          <span className="text-neutral-400">Select author</span>
+          <span className="text-neutral-400">Select authors</span>
         )}
         <ChevronDownIcon
           className={cn([
@@ -1961,14 +1977,11 @@ function AuthorSelect({
             <button
               key={author.name}
               type="button"
-              onClick={() => {
-                onChange(author.name);
-                setIsOpen(false);
-              }}
+              onClick={() => toggleAuthor(author.name)}
               className={cn([
                 "w-full flex items-center gap-2 px-3 py-2 text-sm text-left cursor-pointer",
                 "hover:bg-neutral-100 transition-colors",
-                value === author.name && "bg-neutral-50",
+                value.includes(author.name) && "bg-neutral-50",
               ])}
             >
               <img
@@ -1977,6 +1990,9 @@ function AuthorSelect({
                 className="size-5 rounded-full object-cover"
               />
               {author.name}
+              {value.includes(author.name) && (
+                <span className="ml-auto text-neutral-500">✓</span>
+              )}
             </button>
           ))}
         </div>
@@ -1987,7 +2003,7 @@ function AuthorSelect({
 
 const CATEGORIES = [
   "Case Study",
-  "Hyprnote Weekly",
+  "Char Weekly",
   "Productivity Hack",
   "Engineering",
 ];
@@ -2091,14 +2107,12 @@ interface MetadataHandlers {
   onDisplayTitleChange: (value: string) => void;
   metaDescription: string;
   onMetaDescriptionChange: (value: string) => void;
-  author: string;
-  onAuthorChange: (value: string) => void;
+  author: string[];
+  onAuthorChange: (value: string[]) => void;
   date: string;
   onDateChange: (value: string) => void;
   coverImage: string;
   onCoverImageChange: (value: string) => void;
-  published: boolean;
-  onPublishedChange: (value: boolean) => void;
   featured: boolean;
   onFeaturedChange: (value: boolean) => void;
   category: string;
@@ -2213,7 +2227,7 @@ function MetadataPanel({
           >
             <option value="">Select category</option>
             <option value="Case Study">Case Study</option>
-            <option value="Hyprnote Weekly">Hyprnote Weekly</option>
+            <option value="Char Weekly">Char Weekly</option>
             <option value="Productivity Hack">Productivity Hack</option>
             <option value="Engineering">Engineering</option>
           </select>
@@ -2229,22 +2243,12 @@ function MetadataPanel({
             />
           </div>
         </MetadataRow>
-        <MetadataRow label="Featured">
+        <MetadataRow label="Featured" noBorder>
           <div className="flex-1 flex items-center px-2 py-2">
             <input
               type="checkbox"
               checked={handlers.featured}
               onChange={(e) => handlers.onFeaturedChange(e.target.checked)}
-              className="rounded"
-            />
-          </div>
-        </MetadataRow>
-        <MetadataRow label="Published" noBorder>
-          <div className="flex-1 flex items-center px-2 py-2">
-            <input
-              type="checkbox"
-              checked={handlers.published}
-              onChange={(e) => handlers.onPublishedChange(e.target.checked)}
               className="rounded"
             />
           </div>
@@ -2477,22 +2481,12 @@ function MetadataSidePanel({
           <ImageIcon className="size-4 text-neutral-400 shrink-0" />
         </button>
       </MetadataRow>
-      <MetadataRow label="Featured">
+      <MetadataRow label="Featured" noBorder>
         <div className="flex-1 flex items-center px-2 py-2">
           <input
             type="checkbox"
             checked={handlers.featured}
             onChange={(e) => handlers.onFeaturedChange(e.target.checked)}
-            className="rounded"
-          />
-        </div>
-      </MetadataRow>
-      <MetadataRow label="Published" noBorder>
-        <div className="flex-1 flex items-center px-2 py-2">
-          <input
-            type="checkbox"
-            checked={handlers.published}
-            onChange={(e) => handlers.onPublishedChange(e.target.checked)}
             className="rounded"
           />
         </div>
@@ -2519,10 +2513,9 @@ interface BranchFileResponse {
     meta_title?: string;
     display_title?: string;
     meta_description?: string;
-    author?: string;
+    author?: string | string[];
     date?: string;
     coverImage?: string;
-    published?: boolean;
     featured?: boolean;
     category?: string;
   };
@@ -2620,10 +2613,13 @@ const FileEditor = React.forwardRef<
         meta_title: branchFileData.frontmatter.meta_title,
         display_title: branchFileData.frontmatter.display_title,
         meta_description: branchFileData.frontmatter.meta_description,
-        author: branchFileData.frontmatter.author,
+        author: Array.isArray(branchFileData.frontmatter.author)
+          ? branchFileData.frontmatter.author
+          : branchFileData.frontmatter.author
+            ? [branchFileData.frontmatter.author]
+            : undefined,
         date: branchFileData.frontmatter.date,
         coverImage: branchFileData.frontmatter.coverImage,
-        published: branchFileData.frontmatter.published,
         featured: branchFileData.frontmatter.featured,
         category: branchFileData.frontmatter.category,
       };
@@ -2637,10 +2633,13 @@ const FileEditor = React.forwardRef<
         meta_title: pendingPRFileData.frontmatter.meta_title,
         display_title: pendingPRFileData.frontmatter.display_title,
         meta_description: pendingPRFileData.frontmatter.meta_description,
-        author: pendingPRFileData.frontmatter.author,
+        author: Array.isArray(pendingPRFileData.frontmatter.author)
+          ? pendingPRFileData.frontmatter.author
+          : pendingPRFileData.frontmatter.author
+            ? [pendingPRFileData.frontmatter.author]
+            : undefined,
         date: pendingPRFileData.frontmatter.date,
         coverImage: pendingPRFileData.frontmatter.coverImage,
-        published: pendingPRFileData.frontmatter.published,
         featured: pendingPRFileData.frontmatter.featured,
         category: pendingPRFileData.frontmatter.category,
       };
@@ -2663,10 +2662,9 @@ const FileEditor = React.forwardRef<
   const [metaDescription, setMetaDescription] = useState(
     fileContent?.meta_description || "",
   );
-  const [author, setAuthor] = useState(fileContent?.author || "");
+  const [author, setAuthor] = useState<string[]>(fileContent?.author || []);
   const [date, setDate] = useState(fileContent?.date || "");
   const [coverImage, setCoverImage] = useState(fileContent?.coverImage || "");
-  const [published, setPublished] = useState(fileContent?.published || false);
   const [featured, setFeatured] = useState(fileContent?.featured || false);
   const [category, setCategory] = useState(fileContent?.category || "");
 
@@ -2681,10 +2679,9 @@ const FileEditor = React.forwardRef<
     meta_title: fileContent?.meta_title || "",
     display_title: fileContent?.display_title || "",
     meta_description: fileContent?.meta_description || "",
-    author: fileContent?.author || "",
+    author: fileContent?.author || [],
     date: fileContent?.date || "",
     coverImage: fileContent?.coverImage || "",
-    published: fileContent?.published || false,
     featured: fileContent?.featured || false,
     category: fileContent?.category || "",
   });
@@ -2694,12 +2691,21 @@ const FileEditor = React.forwardRef<
   const contentRef = useRef(content);
   const metadataRef = useRef<ArticleMetadata>(lastSavedMetadataRef.current);
 
+  const slug = filePath.replace(/\.mdx$/, "").replace(/^articles\//, "");
+
   const { mutate: importFromDocs, isPending: isImporting } = useMutation({
-    mutationFn: async (url: string) => {
+    mutationFn: async (params: {
+      url: string;
+      title?: string;
+      author?: string | string[];
+      description?: string;
+      coverImage?: string;
+      slug?: string;
+    }) => {
       const response = await fetch("/api/admin/import/google-docs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify(params),
       });
       if (!response.ok) {
         const error = await response.json();
@@ -2722,7 +2728,7 @@ const FileEditor = React.forwardRef<
           setDisplayTitle(data.frontmatter.display_title);
         if (data.frontmatter.meta_description)
           setMetaDescription(data.frontmatter.meta_description);
-        if (data.frontmatter.author) setAuthor(data.frontmatter.author);
+        if (data.frontmatter.author) setAuthor([data.frontmatter.author]);
         if (data.frontmatter.date) setDate(data.frontmatter.date);
         if (data.frontmatter.coverImage)
           setCoverImage(data.frontmatter.coverImage);
@@ -2732,9 +2738,16 @@ const FileEditor = React.forwardRef<
 
   const handleGoogleDocsImport = useCallback(
     (url: string) => {
-      importFromDocs(url);
+      importFromDocs({
+        url,
+        slug,
+        title: metaTitle,
+        author,
+        description: metaDescription,
+        coverImage,
+      });
     },
-    [importFromDocs],
+    [importFromDocs, slug, metaTitle, author, metaDescription, coverImage],
   );
 
   const handleImageUpload = useCallback(
@@ -2796,7 +2809,6 @@ const FileEditor = React.forwardRef<
       author,
       date,
       coverImage,
-      published,
       featured,
       category,
     }),
@@ -2807,7 +2819,6 @@ const FileEditor = React.forwardRef<
       author,
       date,
       coverImage,
-      published,
       featured,
       category,
     ],
@@ -2818,10 +2829,9 @@ const FileEditor = React.forwardRef<
     setMetaTitle(fileContent?.meta_title || "");
     setDisplayTitle(fileContent?.display_title || "");
     setMetaDescription(fileContent?.meta_description || "");
-    setAuthor(fileContent?.author || "");
+    setAuthor(fileContent?.author || []);
     setDate(fileContent?.date || "");
     setCoverImage(fileContent?.coverImage || "");
-    setPublished(fileContent?.published || false);
     setFeatured(fileContent?.featured || false);
     setCategory(fileContent?.category || "");
     lastSavedContentRef.current = fileContent?.content || "";
@@ -2829,10 +2839,9 @@ const FileEditor = React.forwardRef<
       meta_title: fileContent?.meta_title || "",
       display_title: fileContent?.display_title || "",
       meta_description: fileContent?.meta_description || "",
-      author: fileContent?.author || "",
+      author: fileContent?.author || [],
       date: fileContent?.date || "",
       coverImage: fileContent?.coverImage || "",
-      published: fileContent?.published || false,
       featured: fileContent?.featured || false,
       category: fileContent?.category || "",
     };
@@ -2854,7 +2863,6 @@ const FileEditor = React.forwardRef<
     author,
     date,
     coverImage,
-    published,
     featured,
     category,
     onDataChange,
@@ -2869,10 +2877,9 @@ const FileEditor = React.forwardRef<
       currentMetadata.meta_title !== saved.meta_title ||
       currentMetadata.display_title !== saved.display_title ||
       currentMetadata.meta_description !== saved.meta_description ||
-      currentMetadata.author !== saved.author ||
+      JSON.stringify(currentMetadata.author) !== JSON.stringify(saved.author) ||
       currentMetadata.date !== saved.date ||
       currentMetadata.coverImage !== saved.coverImage ||
-      currentMetadata.published !== saved.published ||
       currentMetadata.featured !== saved.featured ||
       currentMetadata.category !== saved.category
     );
@@ -2901,7 +2908,6 @@ const FileEditor = React.forwardRef<
     author,
     date,
     coverImage,
-    published,
     featured,
     category,
     getMetadata,
@@ -3029,8 +3035,7 @@ const FileEditor = React.forwardRef<
     );
   }
 
-  const selectedAuthor = AUTHORS.find((a) => a.name === author);
-  const avatarUrl = selectedAuthor?.avatar;
+  const selectedAuthors = AUTHORS.filter((a) => author.includes(a.name));
 
   const metadataHandlers: MetadataHandlers = {
     metaTitle,
@@ -3045,8 +3050,6 @@ const FileEditor = React.forwardRef<
     onDateChange: setDate,
     coverImage,
     onCoverImageChange: setCoverImage,
-    published,
-    onPublishedChange: setPublished,
     featured,
     onFeaturedChange: setFeatured,
     category,
@@ -3059,16 +3062,18 @@ const FileEditor = React.forwardRef<
         <h1 className="text-3xl font-serif text-stone-600 mb-6">
           {fileContent.display_title || fileContent.meta_title || "Untitled"}
         </h1>
-        {author && (
+        {author.length > 0 && (
           <div className="flex items-center justify-center gap-3 mb-2">
-            {avatarUrl && (
-              <img
-                src={avatarUrl}
-                alt={author}
-                className="w-8 h-8 rounded-full object-cover"
-              />
-            )}
-            <p className="text-base text-neutral-600">{author}</p>
+            {selectedAuthors.map((a) => (
+              <div key={a.name} className="flex items-center gap-2">
+                <img
+                  src={a.avatar}
+                  alt={a.name}
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+                <p className="text-base text-neutral-600">{a.name}</p>
+              </div>
+            ))}
           </div>
         )}
         {fileContent.date && (
@@ -3241,7 +3246,7 @@ function FileItem({
         </span>
       </div>
       <a
-        href={`https://github.com/fastrepl/hyprnote/blob/main/apps/web/content/${item.path}`}
+        href={`https://github.com/fastrepl/char/blob/main/apps/web/content/${item.path}`}
         target="_blank"
         rel="noopener noreferrer"
         className="text-xs text-neutral-500 hover:text-neutral-700"
@@ -3265,7 +3270,6 @@ interface ImportResult {
     author: string;
     coverImage: string;
     featured: boolean;
-    published: boolean;
     date: string;
   };
   error?: string;

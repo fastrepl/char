@@ -159,7 +159,7 @@ describe("syncEvents", () => {
       expect(result.toDelete).toHaveLength(2);
     });
 
-    test("preserves events with non-empty sessions when calendar removed", () => {
+    test("deletes events regardless of non-empty sessions when calendar removed", () => {
       const ctx = createMockCtx({
         calendarIds: new Set(["cal-1"]),
         eventToSession: new Map([["event-1", "session-1"]]),
@@ -174,7 +174,7 @@ describe("syncEvents", () => {
         ],
       });
 
-      expect(result.toDelete).not.toContain("event-1");
+      expect(result.toDelete).toContain("event-1");
       expect(result.toDelete).toContain("event-2");
     });
 
@@ -230,11 +230,9 @@ describe("syncEvents", () => {
   });
 
   describe("disabled calendar cleanup", () => {
-    test("preserves events with non-empty sessions when calendar disabled", () => {
+    test("deletes events regardless of non-empty sessions when calendar disabled", () => {
       const ctx = createMockCtx({
         calendarIds: new Set(["cal-2"]),
-        eventToSession: new Map([["event-1", "session-1"]]),
-        nonEmptySessions: new Set(["session-1"]),
       });
 
       const result = syncEvents(ctx, {
@@ -244,7 +242,7 @@ describe("syncEvents", () => {
         ],
       });
 
-      expect(result.toDelete).not.toContain("event-1");
+      expect(result.toDelete).toContain("event-1");
     });
 
     test("deletes events from disabled calendar without sessions", () => {

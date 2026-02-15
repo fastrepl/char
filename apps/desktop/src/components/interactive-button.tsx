@@ -9,6 +9,7 @@ interface InteractiveButtonProps {
   children: ReactNode;
   onClick?: () => void;
   onCmdClick?: () => void;
+  onShiftClick?: () => void;
   onMouseDown?: (e: MouseEvent<HTMLElement>) => void;
   contextMenu?: MenuItemDef[];
   className?: string;
@@ -20,6 +21,7 @@ export function InteractiveButton({
   children,
   onClick,
   onCmdClick,
+  onShiftClick,
   onMouseDown,
   contextMenu,
   className,
@@ -34,14 +36,17 @@ export function InteractiveButton({
         return;
       }
 
-      if (e.metaKey || e.ctrlKey) {
+      if (e.shiftKey) {
+        e.preventDefault();
+        onShiftClick?.();
+      } else if (e.metaKey || e.ctrlKey) {
         e.preventDefault();
         onCmdClick?.();
       } else {
         onClick?.();
       }
     },
-    [onClick, onCmdClick, disabled],
+    [onClick, onCmdClick, onShiftClick, disabled],
   );
 
   const Element = asChild ? "div" : "button";

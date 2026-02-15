@@ -9,6 +9,7 @@ hypr-api-env = { workspace = true }
 hypr-llm-proxy = { workspace = true }
 hypr-mcp = { workspace = true }
 hypr-openrouter = { workspace = true }
+hypr-template-support = { workspace = true }
 reqwest = { workspace = true }
 urlencoding = { workspace = true }
 
@@ -22,7 +23,6 @@ jsonwebtoken = { workspace = true }
 octocrab = "0.49"
 sqlx = { workspace = true, features = ["runtime-tokio", "tls-rustls", "postgres", "json"] }
 
-askama = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 thiserror = { workspace = true }

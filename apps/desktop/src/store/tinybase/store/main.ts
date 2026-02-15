@@ -13,6 +13,7 @@ import {
 import { SCHEMA, type Schemas } from "@hypr/store";
 import { format } from "@hypr/utils";
 
+import { getSessionEvent } from "../../../utils/session-event";
 import { useMainPersisters } from "./persisters";
 
 export const STORE_ID = "main";
@@ -77,19 +78,12 @@ export const StoreComponent = () => {
   const relationships = useCreateRelationships(
     store,
     (store) =>
-      createRelationships(store)
-        .setRelationshipDefinition(
-          RELATIONSHIPS.sessionToEvent,
-          "sessions",
-          "events",
-          "event_id",
-        )
-        .setRelationshipDefinition(
-          RELATIONSHIPS.enhancedNoteToSession,
-          "enhanced_notes",
-          "sessions",
-          "session_id",
-        ),
+      createRelationships(store).setRelationshipDefinition(
+        RELATIONSHIPS.enhancedNoteToSession,
+        "enhanced_notes",
+        "sessions",
+        "session_id",
+      ),
     [],
   )!;
 
@@ -102,21 +96,19 @@ export const StoreComponent = () => {
           select("started_at");
           select("ended_at");
           select("calendar_id");
+          select("tracking_id_event");
+          select("has_recurrence_rules");
           select("recurrence_series_id");
-          select("ignored");
           select("is_all_day");
         })
         .setQueryDefinition(
           QUERIES.timelineSessions,
           "sessions",
-          ({ select, join }) => {
+          ({ select }) => {
             select("title");
             select("created_at");
-            select("event_id");
+            select("event_json");
             select("folder_id");
-
-            join("events", "event_id").as("event");
-            select("event", "started_at").as("event_started_at");
           },
         )
         .setQueryDefinition(QUERIES.visibleHumans, "humans", ({ select }) => {
@@ -259,7 +251,7 @@ export const StoreComponent = () => {
         INDEXES.sessionByDateWithoutEvent,
         "sessions",
         (getCell) => {
-          if (getCell("event_id")) {
+          if (getCell("event_json")) {
             return "";
           }
 
@@ -280,10 +272,13 @@ export const StoreComponent = () => {
         (a, b) => String(a).localeCompare(String(b)),
       )
       .setIndexDefinition(
-        INDEXES.sessionsByEvent,
+        INDEXES.sessionsByEventTrackingId,
         "sessions",
-        "event_id",
-        "created_at",
+        (getCell) => {
+          const eventJson = getCell("event_json") as string | undefined;
+          if (!eventJson) return "";
+          return getSessionEvent({ event_json: eventJson })?.tracking_id || "";
+        },
       )
       .setIndexDefinition(
         INDEXES.tagSessionsBySession,
@@ -374,7 +369,7 @@ export const INDEXES = {
   transcriptBySession: "transcriptBySession",
   eventsByDate: "eventsByDate",
   sessionByDateWithoutEvent: "sessionByDateWithoutEvent",
-  sessionsByEvent: "sessionsByEvent",
+  sessionsByEventTrackingId: "sessionsByEventTrackingId",
   tagSessionsBySession: "tagSessionsBySession",
   chatMessagesByGroup: "chatMessagesByGroup",
   sessionsByHuman: "sessionsByHuman",
@@ -385,7 +380,6 @@ export const INDEXES = {
 } as const;
 
 export const RELATIONSHIPS = {
-  sessionToEvent: "sessionToEvent",
   enhancedNoteToSession: "enhancedNoteToSession",
 } as const;
 
@@ -397,16 +391,16 @@ interface _QueryResultRows {
     started_at: string;
     ended_at: string;
     calendar_id: string;
+    tracking_id_event: string;
+    has_recurrence_rules: boolean;
     recurrence_series_id: string;
-    ignored: boolean;
     is_all_day: boolean;
   };
   timelineSessions: {
     title: string;
     created_at: string;
-    event_id: string;
+    event_json: string;
     folder_id: string;
-    event_started_at?: string;
   };
   visibleHumans: {
     name: string;

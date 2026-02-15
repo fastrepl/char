@@ -5,7 +5,7 @@ type SessionRow = {
   user_id: string;
   created_at: string;
   folder_id: string;
-  event_id: string;
+  event_json: string;
   title: string;
   raw_md: string;
 };
@@ -60,26 +60,40 @@ export const UNDO_TIMEOUT_MS = 5000;
 export type PendingDeletion = {
   data: DeletedSessionData;
   timeoutId: ReturnType<typeof setTimeout> | null;
-  isPaused: boolean;
-  remainingTime: number;
   onDeleteConfirm: (() => void) | null;
   addedAt: number;
+  batchId: string | null;
+  paused: boolean;
+  pausedAt: number | null;
 };
 
 interface UndoDeleteState {
   pendingDeletions: Record<string, PendingDeletion>;
-  addDeletion: (data: DeletedSessionData, onConfirm?: () => void) => void;
-  pause: (sessionId: string) => void;
-  resume: (sessionId: string) => void;
+  addDeletion: (
+    data: DeletedSessionData,
+    onConfirm?: () => void,
+    batchId?: string,
+  ) => void;
   clearDeletion: (sessionId: string) => void;
   confirmDeletion: (sessionId: string) => void;
+  clearBatch: (batchId: string) => void;
+  confirmBatch: (batchId: string) => void;
+  pauseSession: (sessionId: string) => void;
+  resumeSession: (sessionId: string) => void;
+  pauseGroup: (sessionIds: string[]) => void;
+  resumeGroup: (sessionIds: string[]) => void;
 }
 
 export const useUndoDelete = create<UndoDeleteState>((set, get) => ({
   pendingDeletions: {},
 
-  addDeletion: (data, onConfirm) => {
+  addDeletion: (data, onConfirm, batchId) => {
     const sessionId = data.session.id;
+
+    const existing = get().pendingDeletions[sessionId];
+    if (existing?.timeoutId) {
+      clearTimeout(existing.timeoutId);
+    }
 
     const timeoutId = setTimeout(() => {
       get().confirmDeletion(sessionId);
@@ -91,68 +105,14 @@ export const useUndoDelete = create<UndoDeleteState>((set, get) => ({
         [sessionId]: {
           data,
           timeoutId,
-          isPaused: false,
-          remainingTime: UNDO_TIMEOUT_MS,
           onDeleteConfirm: onConfirm ?? null,
           addedAt: Date.now(),
+          batchId: batchId ?? null,
+          paused: false,
+          pausedAt: null,
         },
       },
     }));
-  },
-
-  pause: (sessionId) => {
-    const pending = get().pendingDeletions[sessionId];
-    if (!pending || pending.isPaused) return;
-
-    if (pending.timeoutId) {
-      clearTimeout(pending.timeoutId);
-    }
-
-    const elapsed = Date.now() - pending.data.deletedAt;
-    const remaining = Math.max(0, UNDO_TIMEOUT_MS - elapsed);
-
-    set((state) => {
-      const current = state.pendingDeletions[sessionId];
-      if (!current) return state;
-      return {
-        pendingDeletions: {
-          ...state.pendingDeletions,
-          [sessionId]: {
-            ...current,
-            isPaused: true,
-            remainingTime: remaining,
-            timeoutId: null,
-          },
-        },
-      };
-    });
-  },
-
-  resume: (sessionId) => {
-    const pending = get().pendingDeletions[sessionId];
-    if (!pending || !pending.isPaused) return;
-
-    const newDeletedAt = Date.now() - (UNDO_TIMEOUT_MS - pending.remainingTime);
-
-    const timeoutId = setTimeout(() => {
-      get().confirmDeletion(sessionId);
-    }, pending.remainingTime);
-
-    set((state) => {
-      const current = state.pendingDeletions[sessionId];
-      if (!current) return state;
-      return {
-        pendingDeletions: {
-          ...state.pendingDeletions,
-          [sessionId]: {
-            ...current,
-            isPaused: false,
-            data: { ...current.data, deletedAt: newDeletedAt },
-            timeoutId,
-          },
-        },
-      };
-    });
   },
 
   clearDeletion: (sessionId) => {
@@ -177,5 +137,91 @@ export const useUndoDelete = create<UndoDeleteState>((set, get) => ({
       pending.onDeleteConfirm();
     }
     get().clearDeletion(sessionId);
+  },
+
+  clearBatch: (batchId) => {
+    const entries = Object.entries(get().pendingDeletions).filter(
+      ([_, p]) => p.batchId === batchId,
+    );
+    for (const [sessionId] of entries) {
+      get().clearDeletion(sessionId);
+    }
+  },
+
+  confirmBatch: (batchId) => {
+    const entries = Object.entries(get().pendingDeletions).filter(
+      ([_, p]) => p.batchId === batchId,
+    );
+    for (const [sessionId] of entries) {
+      get().confirmDeletion(sessionId);
+    }
+  },
+
+  pauseSession: (sessionId) => {
+    const pending = get().pendingDeletions[sessionId];
+    if (!pending || pending.paused) return;
+
+    if (pending.timeoutId) {
+      clearTimeout(pending.timeoutId);
+    }
+
+    set((state) => {
+      const current = state.pendingDeletions[sessionId];
+      if (!current) return state;
+      return {
+        pendingDeletions: {
+          ...state.pendingDeletions,
+          [sessionId]: {
+            ...current,
+            timeoutId: null,
+            paused: true,
+            pausedAt: Date.now(),
+          },
+        },
+      };
+    });
+  },
+
+  resumeSession: (sessionId) => {
+    const pending = get().pendingDeletions[sessionId];
+    if (!pending || !pending.paused || !pending.pausedAt) return;
+
+    const pauseDuration = Date.now() - pending.pausedAt;
+    const newDeletedAt = pending.data.deletedAt + pauseDuration;
+    const elapsed = Date.now() - newDeletedAt;
+    const remaining = Math.max(0, UNDO_TIMEOUT_MS - elapsed);
+
+    const timeoutId = setTimeout(() => {
+      get().confirmDeletion(sessionId);
+    }, remaining);
+
+    set((state) => {
+      const current = state.pendingDeletions[sessionId];
+      if (!current) return state;
+      return {
+        pendingDeletions: {
+          ...state.pendingDeletions,
+          [sessionId]: {
+            ...current,
+            timeoutId,
+            paused: false,
+            pausedAt: null,
+            data: { ...current.data, deletedAt: newDeletedAt },
+          },
+        },
+      };
+    });
+  },
+
+  pauseGroup: (sessionIds) => {
+    for (const id of sessionIds) {
+      get().pauseSession(id);
+    }
+  },
+
+  resumeGroup: (sessionIds) => {
+    for (const id of sessionIds) {
+      get().resumeSession(id);
+    }
   },
 }));

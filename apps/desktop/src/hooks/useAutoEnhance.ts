@@ -22,6 +22,7 @@ export function useAutoEnhance(tab: Extract<Tab, { type: "sessions" }>) {
   const [skipReason, setSkipReason] = useState<string | null>(null);
 
   const sessionMode = useListener((state) => state.getSessionMode(sessionId));
+  const loading = useListener((state) => state.live.loading);
   const prevSessionModeRef = useRef(sessionMode);
   const prevTranscriptCountRef = useRef(transcriptIds?.length ?? 0);
   const isInitialRenderRef = useRef(true);
@@ -42,6 +43,7 @@ export function useAutoEnhance(tab: Extract<Tab, { type: "sessions" }>) {
       isInitialRenderRef.current = false;
       prevSessionModeRef.current = sessionMode;
       prevTranscriptCountRef.current = transcriptIds?.length ?? 0;
+
       return;
     }
 
@@ -58,7 +60,8 @@ export function useAutoEnhance(tab: Extract<Tab, { type: "sessions" }>) {
       prevCount === 0 &&
       currentCount > 0 &&
       prevMode === "inactive" &&
-      sessionMode === "inactive";
+      sessionMode === "inactive" &&
+      !loading;
 
     if (batchJustCompleted || transcriptJustUploaded) {
       const result = runner.run();
@@ -67,7 +70,7 @@ export function useAutoEnhance(tab: Extract<Tab, { type: "sessions" }>) {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionMode, transcriptIds?.length]);
+  }, [sessionMode, transcriptIds?.length, loading]);
 
   useEffect(() => {
     if (skipReason) {

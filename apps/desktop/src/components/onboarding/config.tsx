@@ -1,64 +1,55 @@
-import type { ComponentType } from "react";
+import { platform } from "@tauri-apps/plugin-os";
 
-import type { Search } from "../../routes/app/onboarding/_layout.index";
-import { Final, STEP_ID_FINAL } from "./final";
-import { Login, STEP_ID_LOGIN } from "./login";
-import { Permissions, STEP_ID_PERMISSIONS } from "./permissions";
-import { STEP_ID_WELCOME, Welcome } from "./welcome";
+import type { SectionStatus } from "./shared";
 
-export type NavigateTarget = Search;
+export type OnboardingStep =
+  | "permissions"
+  | "login"
+  | "calendar"
+  | "folder-location"
+  | "final";
 
-export type StepProps = {
-  onNavigate: (ctx: NavigateTarget) => void;
-};
-
-export function getNext(ctx: Search): Search["step"] | null {
-  switch (ctx.step) {
-    case STEP_ID_WELCOME:
-      if (ctx.skipLogin) {
-        return ctx.platform === "macos" ? STEP_ID_PERMISSIONS : STEP_ID_FINAL;
-      }
-      return STEP_ID_LOGIN;
-    case STEP_ID_LOGIN:
-      return ctx.platform === "macos" ? STEP_ID_PERMISSIONS : STEP_ID_FINAL;
-    case STEP_ID_PERMISSIONS:
-      return STEP_ID_FINAL;
-    case STEP_ID_FINAL:
-      return null;
-  }
-}
-
-export function getBack(ctx: Search): Search["step"] | null {
-  switch (ctx.step) {
-    case STEP_ID_WELCOME:
-      return null;
-    case STEP_ID_LOGIN:
-      return STEP_ID_WELCOME;
-    case STEP_ID_PERMISSIONS:
-      return ctx.skipLogin ? STEP_ID_WELCOME : STEP_ID_LOGIN;
-    case STEP_ID_FINAL:
-      if (ctx.platform === "macos") {
-        return STEP_ID_PERMISSIONS;
-      }
-      return ctx.skipLogin ? STEP_ID_WELCOME : STEP_ID_LOGIN;
-  }
-}
-
-type StepConfig = {
-  id: Search["step"];
-  component: ComponentType<StepProps>;
-};
-
-export const STEP_IDS = [
-  STEP_ID_WELCOME,
-  STEP_ID_LOGIN,
-  STEP_ID_PERMISSIONS,
-  STEP_ID_FINAL,
-] as const;
-
-export const STEP_CONFIGS: StepConfig[] = [
-  { id: STEP_ID_WELCOME, component: Welcome },
-  { id: STEP_ID_LOGIN, component: Login },
-  { id: STEP_ID_PERMISSIONS, component: Permissions },
-  { id: STEP_ID_FINAL, component: Final },
+const STEPS_MACOS: OnboardingStep[] = [
+  "permissions",
+  "login",
+  "calendar",
+  "final",
 ];
+const STEPS_OTHER: OnboardingStep[] = ["login", "final"];
+
+export function getOnboardingSteps(): OnboardingStep[] {
+  return platform() === "macos" ? STEPS_MACOS : STEPS_OTHER;
+}
+
+export function getInitialStep(): OnboardingStep {
+  return getOnboardingSteps()[0];
+}
+
+export function getNextStep(
+  currentStep: OnboardingStep,
+): OnboardingStep | null {
+  const steps = getOnboardingSteps();
+  const idx = steps.indexOf(currentStep);
+  return idx < steps.length - 1 ? steps[idx + 1] : null;
+}
+
+export function getPrevStep(
+  currentStep: OnboardingStep,
+): OnboardingStep | null {
+  const steps = getOnboardingSteps();
+  const idx = steps.indexOf(currentStep);
+  return idx > 0 ? steps[idx - 1] : null;
+}
+
+export function getStepStatus(
+  step: OnboardingStep,
+  currentStep: OnboardingStep,
+): SectionStatus | null {
+  const steps = getOnboardingSteps();
+  const stepIdx = steps.indexOf(step);
+  if (stepIdx === -1) return null;
+  const currentIdx = steps.indexOf(currentStep);
+  if (stepIdx < currentIdx) return "completed";
+  if (stepIdx === currentIdx) return "active";
+  return "upcoming";
+}

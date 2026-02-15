@@ -12,6 +12,7 @@ import type {
   MappingSessionParticipant,
   MappingTagSession,
   Organization,
+  SessionEvent,
   SessionStorage,
   Tag,
   TemplateStorage,
@@ -164,26 +165,44 @@ export const buildTemplates = (
   return templates;
 };
 
+export const toSessionEvent = ([eventId, event]: [
+  string,
+  EventStorage,
+]): SessionEvent => ({
+  tracking_id: event.tracking_id_event ?? `mock-${eventId}`,
+  calendar_id: event.calendar_id ?? "",
+  title: event.title ?? "",
+  started_at: event.started_at ?? "",
+  ended_at: event.ended_at ?? "",
+  is_all_day: event.is_all_day ?? false,
+  has_recurrence_rules: event.has_recurrence_rules ?? false,
+  location: event.location,
+  meeting_link: event.meeting_link,
+  description: event.description,
+  recurrence_series_id: event.recurrence_series_id,
+});
+
 export const buildSessions = (
   count: number,
   options: {
-    eventIds?: string[];
+    events?: Record<string, EventStorage>;
     eventLinkProbability?: number;
   } = {},
 ): Record<string, SessionStorage> => {
   const sessions: Record<string, SessionStorage> = {};
-  const { eventIds = [], eventLinkProbability = 0.6 } = options;
+  const { events = {}, eventLinkProbability = 0.6 } = options;
+  const eventEntries = Object.entries(events);
 
   for (let i = 0; i < count; i++) {
     const shouldLinkToEvent =
-      eventIds.length > 0 &&
+      eventEntries.length > 0 &&
       faker.datatype.boolean({ probability: eventLinkProbability });
 
-    const eventId = shouldLinkToEvent
-      ? faker.helpers.arrayElement(eventIds)
+    const sessionEvent = shouldLinkToEvent
+      ? toSessionEvent(faker.helpers.arrayElement(eventEntries))
       : undefined;
 
-    const session = createSession(eventId, undefined);
+    const session = createSession(sessionEvent, undefined);
     sessions[session.id] = session.data;
   }
 
@@ -194,12 +213,17 @@ export const buildSessionsPerHuman = (
   humanIds: string[],
   sessionsPerHuman: { min: number; max: number },
   options: {
+    events?: Record<string, EventStorage>;
     eventsByHuman?: Record<string, string[]>;
     eventLinkProbability?: number;
   } = {},
 ): Record<string, SessionStorage> => {
   const sessions: Record<string, SessionStorage> = {};
-  const { eventsByHuman = {}, eventLinkProbability = 0.6 } = options;
+  const {
+    events = {},
+    eventsByHuman = {},
+    eventLinkProbability = 0.6,
+  } = options;
 
   humanIds.forEach((humanId) => {
     const sessionCount = faker.number.int(sessionsPerHuman);
@@ -214,7 +238,12 @@ export const buildSessionsPerHuman = (
         ? faker.helpers.arrayElement(humanEventIds)
         : undefined;
 
-      const session = createSession(eventId, undefined);
+      const sessionEvent =
+        eventId && events[eventId]
+          ? toSessionEvent([eventId, events[eventId]])
+          : undefined;
+
+      const session = createSession(sessionEvent, undefined);
       sessions[session.id] = session.data;
     }
   });

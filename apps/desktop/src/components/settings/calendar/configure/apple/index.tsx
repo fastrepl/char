@@ -10,7 +10,7 @@ import { StyledStreamdown } from "../../../ai/shared";
 import { PROVIDERS } from "../../shared";
 import { AppleCalendarSelection } from "./calendar-selection";
 import { SyncProvider } from "./context";
-import { AccessPermissionRow } from "./permission";
+import { ApplePermissions } from "./permission";
 
 export function Section({
   title,
@@ -36,9 +36,7 @@ export function Section({
 
 export function AppleCalendarProviderCard() {
   const config = PROVIDERS.find((p) => p.id === "apple")!;
-
   const calendar = usePermission("calendar");
-  const contacts = usePermission("contacts");
 
   return (
     <AccordionItem
@@ -71,29 +69,12 @@ export function AppleCalendarProviderCard() {
         </div>
 
         <Section title="Permissions">
-          <div className="flex flex-col gap-1">
-            <AccessPermissionRow
-              title="Calendar"
-              status={calendar.status}
-              isPending={calendar.isPending}
-              onOpen={calendar.open}
-              onRequest={calendar.request}
-              onReset={calendar.reset}
-            />
-            <AccessPermissionRow
-              title="Contacts"
-              status={contacts.status}
-              isPending={contacts.isPending}
-              onOpen={contacts.open}
-              onRequest={contacts.request}
-              onReset={contacts.reset}
-            />
-          </div>
+          <ApplePermissions />
         </Section>
 
         {calendar.status === "authorized" && (
           <SyncProvider>
-            <AppleCalendarSelection />
+            <AppleCalendarSelection calendarClassName="border rounded-lg" />
           </SyncProvider>
         )}
       </AccordionContent>

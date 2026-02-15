@@ -47,6 +47,8 @@ import { Route as ViewCompanyHandbookRouteRouteImport } from './routes/_view/com
 import { Route as ViewAppRouteRouteImport } from './routes/_view/app/route'
 import { Route as AdminStarsIndexRouteImport } from './routes/admin/stars/index'
 import { Route as AdminMediaIndexRouteImport } from './routes/admin/media/index'
+import { Route as AdminLeadFinderIndexRouteImport } from './routes/admin/lead-finder/index'
+import { Route as AdminCrmIndexRouteImport } from './routes/admin/crm/index'
 import { Route as AdminCollectionsIndexRouteImport } from './routes/admin/collections/index'
 import { Route as ViewTemplatesIndexRouteImport } from './routes/_view/templates/index'
 import { Route as ViewShortcutsIndexRouteImport } from './routes/_view/shortcuts/index'
@@ -332,6 +334,16 @@ const AdminStarsIndexRoute = AdminStarsIndexRouteImport.update({
 const AdminMediaIndexRoute = AdminMediaIndexRouteImport.update({
   id: '/media/',
   path: '/media/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminLeadFinderIndexRoute = AdminLeadFinderIndexRouteImport.update({
+  id: '/lead-finder/',
+  path: '/lead-finder/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminCrmIndexRoute = AdminCrmIndexRouteImport.update({
+  id: '/crm/',
+  path: '/crm/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminCollectionsIndexRoute = AdminCollectionsIndexRouteImport.update({
@@ -940,6 +952,8 @@ export interface FileRoutesByFullPath {
   '/shortcuts/': typeof ViewShortcutsIndexRoute
   '/templates/': typeof ViewTemplatesIndexRoute
   '/admin/collections/': typeof AdminCollectionsIndexRoute
+  '/admin/crm/': typeof AdminCrmIndexRoute
+  '/admin/lead-finder/': typeof AdminLeadFinderIndexRoute
   '/admin/media/': typeof AdminMediaIndexRoute
   '/admin/stars/': typeof AdminStarsIndexRoute
   '/gallery/$type/$slug': typeof ViewGalleryTypeSlugRoute
@@ -1071,6 +1085,8 @@ export interface FileRoutesByTo {
   '/shortcuts': typeof ViewShortcutsIndexRoute
   '/templates': typeof ViewTemplatesIndexRoute
   '/admin/collections': typeof AdminCollectionsIndexRoute
+  '/admin/crm': typeof AdminCrmIndexRoute
+  '/admin/lead-finder': typeof AdminLeadFinderIndexRoute
   '/admin/media': typeof AdminMediaIndexRoute
   '/admin/stars': typeof AdminStarsIndexRoute
   '/gallery/$type/$slug': typeof ViewGalleryTypeSlugRoute
@@ -1208,6 +1224,8 @@ export interface FileRoutesById {
   '/_view/shortcuts/': typeof ViewShortcutsIndexRoute
   '/_view/templates/': typeof ViewTemplatesIndexRoute
   '/admin/collections/': typeof AdminCollectionsIndexRoute
+  '/admin/crm/': typeof AdminCrmIndexRoute
+  '/admin/lead-finder/': typeof AdminLeadFinderIndexRoute
   '/admin/media/': typeof AdminMediaIndexRoute
   '/admin/stars/': typeof AdminStarsIndexRoute
   '/_view/gallery/$type/$slug': typeof ViewGalleryTypeSlugRoute
@@ -1345,6 +1363,8 @@ export interface FileRouteTypes {
     | '/shortcuts/'
     | '/templates/'
     | '/admin/collections/'
+    | '/admin/crm/'
+    | '/admin/lead-finder/'
     | '/admin/media/'
     | '/admin/stars/'
     | '/gallery/$type/$slug'
@@ -1476,6 +1496,8 @@ export interface FileRouteTypes {
     | '/shortcuts'
     | '/templates'
     | '/admin/collections'
+    | '/admin/crm'
+    | '/admin/lead-finder'
     | '/admin/media'
     | '/admin/stars'
     | '/gallery/$type/$slug'
@@ -1612,6 +1634,8 @@ export interface FileRouteTypes {
     | '/_view/shortcuts/'
     | '/_view/templates/'
     | '/admin/collections/'
+    | '/admin/crm/'
+    | '/admin/lead-finder/'
     | '/admin/media/'
     | '/admin/stars/'
     | '/_view/gallery/$type/$slug'
@@ -1954,6 +1978,20 @@ declare module '@tanstack/react-router' {
       path: '/media'
       fullPath: '/admin/media/'
       preLoaderRoute: typeof AdminMediaIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/lead-finder/': {
+      id: '/admin/lead-finder/'
+      path: '/lead-finder'
+      fullPath: '/admin/lead-finder/'
+      preLoaderRoute: typeof AdminLeadFinderIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/crm/': {
+      id: '/admin/crm/'
+      path: '/crm'
+      fullPath: '/admin/crm/'
+      preLoaderRoute: typeof AdminCrmIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/collections/': {
@@ -2846,6 +2884,8 @@ const ViewRouteRouteWithChildren = ViewRouteRoute._addFileChildren(
 interface AdminRouteRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   AdminCollectionsIndexRoute: typeof AdminCollectionsIndexRoute
+  AdminCrmIndexRoute: typeof AdminCrmIndexRoute
+  AdminLeadFinderIndexRoute: typeof AdminLeadFinderIndexRoute
   AdminMediaIndexRoute: typeof AdminMediaIndexRoute
   AdminStarsIndexRoute: typeof AdminStarsIndexRoute
 }
@@ -2853,6 +2893,8 @@ interface AdminRouteRouteChildren {
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   AdminCollectionsIndexRoute: AdminCollectionsIndexRoute,
+  AdminCrmIndexRoute: AdminCrmIndexRoute,
+  AdminLeadFinderIndexRoute: AdminLeadFinderIndexRoute,
   AdminMediaIndexRoute: AdminMediaIndexRoute,
   AdminStarsIndexRoute: AdminStarsIndexRoute,
 }

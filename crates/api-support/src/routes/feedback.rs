@@ -1,18 +1,11 @@
 use axum::{Json, extract::State};
 use serde::{Deserialize, Serialize};
 
+pub use hypr_template_support::DeviceInfo;
+
 use crate::error::SupportError;
 use crate::github::{self, BugReportInput, FeatureRequestInput};
 use crate::state::AppState;
-
-#[derive(Debug, Deserialize, utoipa::ToSchema)]
-#[serde(rename_all = "camelCase")]
-pub struct DeviceInfo {
-    pub platform: String,
-    pub arch: String,
-    pub os_version: String,
-    pub app_version: String,
-}
 
 #[derive(Debug, Default, Deserialize, utoipa::ToSchema)]
 #[serde(rename_all = "lowercase")]

@@ -13,6 +13,7 @@ import {
 import { json2md } from "@hypr/tiptap/shared";
 import { DropdownMenuItem } from "@hypr/ui/components/ui/dropdown-menu";
 
+import { useSessionEvent } from "../../../../../../hooks/tinybase";
 import * as main from "../../../../../../store/tinybase/store/main";
 import {
   parseTranscriptHints,
@@ -74,19 +75,8 @@ export function ExportPDF({
     main.STORE_ID,
   ) as string | undefined;
 
-  const eventId = main.UI.useCell(
-    "sessions",
-    sessionId,
-    "event_id",
-    main.STORE_ID,
-  ) as string | undefined;
-
-  const eventTitle = main.UI.useCell(
-    "events",
-    eventId ?? "",
-    "title",
-    main.STORE_ID,
-  ) as string | undefined;
+  const event = useSessionEvent(sessionId);
+  const eventTitle = event?.title;
 
   const rawMd = main.UI.useCell(
     "sessions",

@@ -25,6 +25,8 @@ import { cn } from "@hypr/utils";
 import { useAuth } from "../../../auth";
 import { useBillingAccess } from "../../../billing";
 import { env } from "../../../env";
+import * as settings from "../../../store/tinybase/store/settings";
+import { configureProSettings } from "../../../utils";
 
 const WEB_APP_BASE_URL = env.VITE_APP_URL ?? "http://localhost:3000";
 
@@ -209,7 +211,7 @@ export function AccountSettings() {
 
         <button
           onClick={handleSignIn}
-          className="px-6 h-[42px] rounded-full bg-linear-to-t from-stone-600 to-stone-500 text-white text-sm font-mono text-center transition-opacity duration-150 hover:opacity-90"
+          className="px-6 h-10 rounded-full bg-linear-to-b from-stone-700 to-stone-800 hover:from-stone-600 hover:to-stone-700 text-white text-sm font-medium border-2 border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)] transition-all duration-200"
         >
           Get Started
         </button>
@@ -301,6 +303,7 @@ export function AccountSettings() {
 function BillingButton() {
   const auth = useAuth();
   const { isPro } = useBillingAccess();
+  const store = settings.UI.useStore(settings.STORE_ID);
 
   const canTrialQuery = useQuery({
     enabled: !!auth?.session && !isPro,
@@ -352,6 +355,9 @@ function BillingButton() {
           trial_end_date: trialEndDate.toISOString(),
         },
       });
+      if (store) {
+        configureProSettings(store);
+      }
       await auth?.refreshSession();
     },
   });
@@ -416,7 +422,10 @@ function Container({
   children?: ReactNode;
 }) {
   return (
-    <section className="bg-neutral-50 p-4 rounded-lg flex flex-col gap-4">
+    <section
+      data-settings-item
+      className="bg-neutral-50 p-4 rounded-lg flex flex-col gap-4"
+    >
       <div className="flex flex-col gap-2">
         <h1 className="text-md font-semibold font-serif">{title}</h1>
         {description && (

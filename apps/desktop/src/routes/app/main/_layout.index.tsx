@@ -13,6 +13,7 @@ import { Body } from "../../../components/main/body";
 import { LeftSidebar } from "../../../components/main/sidebar";
 import { useSearch } from "../../../contexts/search/ui";
 import { useShell } from "../../../contexts/shell";
+import { useTabs } from "../../../store/zustand/tabs";
 import { commands } from "../../../types/tauri.gen";
 
 export const Route = createFileRoute("/app/main/_layout/")({
@@ -24,11 +25,19 @@ const CHAT_MIN_WIDTH_PX = 280;
 function Component() {
   const { leftsidebar, chat } = useShell();
   const { query } = useSearch();
+  const currentTab = useTabs((state) => state.currentTab);
+  const isOnboarding = currentTab?.type === "onboarding";
   const previousModeRef = useRef(chat.mode);
   const previousQueryRef = useRef(query);
   const bodyPanelRef = useRef<ComponentRef<typeof ResizablePanel>>(null);
 
   const isChatOpen = chat.mode === "RightPanelOpen";
+
+  useEffect(() => {
+    if (isOnboarding && leftsidebar.expanded) {
+      leftsidebar.setExpanded(false);
+    }
+  }, [isOnboarding, leftsidebar]);
 
   useEffect(() => {
     const isOpeningRightPanel =
@@ -48,7 +57,7 @@ function Component() {
     const isStartingSearch =
       query.trim() !== "" && previousQueryRef.current.trim() === "";
 
-    if (isStartingSearch && !leftsidebar.expanded) {
+    if (isStartingSearch && !leftsidebar.expanded && !isOnboarding) {
       leftsidebar.setExpanded(true);
       commands.resizeWindowForSidebar().catch(console.error);
     }
@@ -61,7 +70,7 @@ function Component() {
       className="flex h-full overflow-hidden gap-1 p-1"
       data-testid="main-app-shell"
     >
-      {leftsidebar.expanded && <LeftSidebar />}
+      {leftsidebar.expanded && !isOnboarding && <LeftSidebar />}
 
       <ResizablePanelGroup
         direction="horizontal"

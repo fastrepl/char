@@ -14,16 +14,16 @@ export const Route = createFileRoute("/_view/solution/meeting")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "All Your Meeting Notes in One Place - Hyprnote" },
+      { title: "All Your Meeting Notes in One Place - Char" },
       {
         name: "description",
         content:
-          "Zoom, Teams, Meet, Discord, or in-person, Hyprnote records it all and generates searchable meeting summaries that never leave your device.",
+          "Zoom, Teams, Meet, Discord, or in-person, Char records it all and generates searchable meeting summaries that never leave your device.",
       },
       { name: "robots", content: "noindex, nofollow" },
       {
         property: "og:title",
-        content: "All Your Meeting Notes in One Place - Hyprnote",
+        content: "All Your Meeting Notes in One Place - Char",
       },
       {
         property: "og:description",
@@ -79,7 +79,7 @@ const detailedFeatures = [
     description:
       "Every word transcribed is searchable. Find that product decision from three months ago or the exact moment someone mentioned a deadline.",
     details:
-      "Search by keyword, speaker, or date across all your meeting notes. Hyprnote indexes every word, making it instant to find specific conversations, decisions, or action items no matter how long ago they occurred.",
+      "Search by keyword, speaker, or date across all your meeting notes. Char indexes every word, making it instant to find specific conversations, decisions, or action items no matter how long ago they occurred.",
   },
   {
     id: "ai-chat",
@@ -105,24 +105,24 @@ const detailedFeatures = [
 
 const faqs = [
   {
-    question: "Does Hyprnote work with Zoom, Teams, and Google Meet?",
+    question: "Does Char work with Zoom, Teams, and Google Meet?",
     answer:
-      "Yes. Hyprnote works with any application on your computer—Zoom, Teams, Meet, Slack, Discord, and more. It captures system audio directly, so no integrations needed.",
+      "Yes. Char works with any application on your computer—Zoom, Teams, Meet, Slack, Discord, and more. It captures system audio directly, so no integrations needed.",
   },
   {
     question: "Do participants know they're being recorded?",
     answer:
-      "Hyprnote captures audio at the system level on your device—it doesn't join meetings as a bot. Whether participants are notified depends on your meeting platform's settings and your local recording laws. You're responsible for following consent requirements in your jurisdiction.",
+      "Char captures audio at the system level on your device—it doesn't join meetings as a bot. Whether participants are notified depends on your meeting platform's settings and your local recording laws. You're responsible for following consent requirements in your jurisdiction.",
   },
   {
-    question: "Can I use Hyprnote completely offline?",
+    question: "Can I use Char completely offline?",
     answer:
-      "Hyprnote records audio offline. Cloud transcription requires internet, but you can generate AI summaries offline using local LLM servers like LM Studio or Ollama.",
+      "Char records audio offline. Cloud transcription requires internet, but you can generate AI summaries offline using local LLM servers like LM Studio or Ollama.",
   },
   {
     question: "Where is my data stored?",
     answer:
-      "All recordings and notes are stored locally on your device. Hyprnote doesn't send your audio or transcripts to external servers unless you choose cloud transcription.",
+      "All recordings and notes are stored locally on your device. Char doesn't send your audio or transcripts to external servers unless you choose cloud transcription.",
   },
   {
     question: "How do I ensure maximum privacy?",
@@ -164,9 +164,8 @@ function HeroSection() {
             in One Place
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto">
-            Zoom, Teams, Meet, Discord, or in-person, Hyprnote records it all
-            and generates searchable meeting summaries that never leave your
-            device.
+            Zoom, Teams, Meet, Discord, or in-person, Char records it all and
+            generates searchable meeting summaries that never leave your device.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -328,7 +327,7 @@ function FAQSection() {
           Frequently Asked Questions
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
-          Common questions about using Hyprnote for meeting notes.
+          Common questions about using Char for meeting notes.
         </p>
         <Accordion type="single" collapsible className="space-y-2">
           {faqs.map((faq, index) => (

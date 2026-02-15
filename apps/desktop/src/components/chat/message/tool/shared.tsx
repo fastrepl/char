@@ -10,7 +10,7 @@ import { Streamdown } from "streamdown";
 
 import { cn } from "@hypr/utils";
 
-import { extractMcpOutputText } from "../../../../chat/support-mcp-tools";
+import { extractMcpOutputText } from "../../../../chat/mcp-utils";
 import { useElicitation } from "../../../../contexts/elicitation";
 
 export function ToolCard({

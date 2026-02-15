@@ -77,6 +77,7 @@
     "@hypr/plugin-updater2": "workspace:*",
     "@hypr/plugin-windows": "workspace:*",
     "@hypr/store": "workspace:*",
+    "@hypr/supabase": "workspace:*",
     "@hypr/tinybase-utils": "workspace:*",
     "@hypr/tiptap": "workspace:^",
     "@hypr/ui": "workspace:^",

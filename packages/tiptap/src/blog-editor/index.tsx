@@ -39,7 +39,6 @@ const BlogEditor = forwardRef<{ editor: TiptapEditor | null }, BlogEditorProps>(
       onImageUpload,
       onAddImageFromLibrary,
     } = props;
-    const [isEmpty, setIsEmpty] = useState(!content || content.trim() === "");
     const [showSearch, setShowSearch] = useState(false);
     const [showReplace, setShowReplace] = useState(false);
 
@@ -49,9 +48,10 @@ const BlogEditor = forwardRef<{ editor: TiptapEditor | null }, BlogEditorProps>(
           return;
         }
         const json = editor.getJSON();
-        const markdown = (editor as any).markdown.serialize(json);
-        onChange(markdown);
-        setIsEmpty(editor.isEmpty);
+        const markdown = editor.markdown?.serialize(json);
+        if (markdown) {
+          onChange(markdown);
+        }
       },
       300,
     );
@@ -85,7 +85,6 @@ const BlogEditor = forwardRef<{ editor: TiptapEditor | null }, BlogEditorProps>(
         contentType: "markdown",
         onCreate: ({ editor }) => {
           editor.view.dom.setAttribute("spellcheck", "false");
-          setIsEmpty(editor.isEmpty);
         },
         onUpdate,
         immediatelyRender: false,
@@ -103,10 +102,11 @@ const BlogEditor = forwardRef<{ editor: TiptapEditor | null }, BlogEditorProps>(
     useEffect(() => {
       if (editor && !editor.isFocused && content !== undefined) {
         const json = editor.getJSON();
-        const currentMarkdown = (editor as any).markdown?.serialize(json) || "";
+        const currentMarkdown = editor.markdown?.serialize(json) || "";
         if (currentMarkdown !== content) {
-          editor.commands.setContent(content, { contentType: "markdown" });
-          setIsEmpty(!content || content.trim() === "");
+          queueMicrotask(() => {
+            editor.commands.setContent(content, { contentType: "markdown" });
+          });
         }
       }
     }, [editor, content]);
@@ -147,7 +147,7 @@ const BlogEditor = forwardRef<{ editor: TiptapEditor | null }, BlogEditorProps>(
       return () => document.removeEventListener("keydown", handleKeyDown);
     }, [handleKeyDown]);
 
-    const showImportOverlay = isEmpty && onGoogleDocsImport && editable;
+    const showImportOverlay = editor?.isEmpty && onGoogleDocsImport && editable;
 
     useEffect(() => {
       const platform = navigator.platform.toLowerCase();

@@ -1,22 +1,27 @@
-mod batch;
+pub mod batch;
+pub mod callback;
+mod error;
+pub mod status;
 pub mod streaming;
 
 use std::sync::Arc;
 
 use axum::{
     Router,
-    extract::DefaultBodyLimit,
-    http::StatusCode,
+    extract::{DefaultBodyLimit, FromRequestParts},
+    http::{StatusCode, request::Parts},
     response::{IntoResponse, Response},
     routing::{get, post},
 };
-
 use owhisper_client::Provider;
 
 use crate::config::SttProxyConfig;
 use crate::hyprnote_routing::{HyprnoteRouter, should_use_hyprnote_routing};
 use crate::provider_selector::{ProviderSelector, SelectedProvider};
 use crate::query_params::QueryParams;
+use crate::supabase::SupabaseClient;
+
+pub(crate) use error::{RouteError, parse_async_provider};
 
 #[derive(Clone)]
 pub(crate) struct AppState {
@@ -24,6 +29,28 @@ pub(crate) struct AppState {
     pub selector: ProviderSelector,
     pub router: Option<Arc<HyprnoteRouter>>,
     pub client: reqwest::Client,
+}
+
+impl FromRequestParts<AppState> for SupabaseClient {
+    type Rejection = RouteError;
+
+    async fn from_request_parts(
+        _parts: &mut Parts,
+        state: &AppState,
+    ) -> Result<Self, Self::Rejection> {
+        Ok(Self {
+            client: state.client.clone(),
+            url: state
+                .config
+                .supabase
+                .url
+                .clone()
+                .ok_or(RouteError::MissingConfig("supabase_url not configured"))?,
+            service_role_key: state.config.supabase.service_role_key.clone().ok_or(
+                RouteError::MissingConfig("supabase_service_role_key not configured"),
+            )?,
+        })
+    }
 }
 
 impl AppState {
@@ -117,6 +144,7 @@ impl AppState {
 fn make_state(config: SttProxyConfig) -> AppState {
     let selector = config.provider_selector();
     let router = config.hyprnote_router().map(Arc::new);
+
     AppState {
         config,
         selector,
@@ -138,6 +166,7 @@ pub fn router(config: SttProxyConfig) -> Router {
             .route("/", post(batch::handler))
             .route("/listen", get(streaming::handler))
             .route("/listen", post(batch::handler))
+            .route("/status/{pipeline_id}", get(status::handler))
             .with_state(state),
     )
 }
@@ -151,4 +180,12 @@ pub fn listen_router(config: SttProxyConfig) -> Router {
             .route("/listen", post(batch::handler))
             .with_state(state),
     )
+}
+
+pub fn callback_router(config: SttProxyConfig) -> Router {
+    let state = make_state(config);
+
+    Router::new()
+        .route("/callback/{provider}/{id}", post(callback::handler))
+        .with_state(state)
 }

@@ -21,10 +21,7 @@ pub enum Feature {
 impl Feature {
     pub fn strategy(&self) -> FlagStrategy {
         match self {
-            Feature::Chat => match option_env!("CHAT") {
-                Some(_) => FlagStrategy::Hardcoded(true),
-                None => FlagStrategy::Debug,
-            },
+            Feature::Chat => FlagStrategy::Hardcoded(true),
         }
     }
 }

@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { CanStartTrialData, CanStartTrialErrors, CanStartTrialResponses, CreateConnectSessionData, CreateConnectSessionErrors, CreateConnectSessionResponses, CreateEventData, CreateEventErrors, CreateEventResponses, ListCalendarsData, ListCalendarsErrors, ListCalendarsResponses, ListEventsData, ListEventsErrors, ListEventsResponses, NangoWebhookData, NangoWebhookErrors, NangoWebhookResponses, StartTrialData, StartTrialErrors, StartTrialResponses, SubmitData, SubmitErrors, SubmitResponses } from './types.gen';
+import type { CanStartTrialData, CanStartTrialErrors, CanStartTrialResponses, CreateConnectSessionData, CreateConnectSessionErrors, CreateConnectSessionResponses, CreateEventData, CreateEventErrors, CreateEventResponses, ListCalendarsData, ListCalendarsErrors, ListCalendarsResponses, ListEventsData, ListEventsErrors, ListEventsResponses, NangoWebhookData, NangoWebhookErrors, NangoWebhookResponses, StartTrialData, StartTrialErrors, StartTrialResponses, SttListenBatchData, SttListenBatchErrors, SttListenBatchResponses, SttListenStreamData, SttListenStreamErrors, SttStatusData, SttStatusErrors, SttStatusResponses, SubmitData, SubmitErrors, SubmitResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -64,6 +64,19 @@ export const createConnectSession = <ThrowOnError extends boolean = false>(optio
 });
 
 export const nangoWebhook = <ThrowOnError extends boolean = false>(options?: Options<NangoWebhookData, ThrowOnError>) => (options?.client ?? client).post<NangoWebhookResponses, NangoWebhookErrors, ThrowOnError>({ url: '/nango/webhook', ...options });
+
+export const sttListenStream = <ThrowOnError extends boolean = false>(options?: Options<SttListenStreamData, ThrowOnError>) => (options?.client ?? client).get<unknown, SttListenStreamErrors, ThrowOnError>({ url: '/stt/listen', ...options });
+
+export const sttListenBatch = <ThrowOnError extends boolean = false>(options: Options<SttListenBatchData, ThrowOnError>) => (options.client ?? client).post<SttListenBatchResponses, SttListenBatchErrors, ThrowOnError>({
+    url: '/stt/listen',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const sttStatus = <ThrowOnError extends boolean = false>(options: Options<SttStatusData, ThrowOnError>) => (options.client ?? client).get<SttStatusResponses, SttStatusErrors, ThrowOnError>({ url: '/stt/status/{pipeline_id}', ...options });
 
 export const canStartTrial = <ThrowOnError extends boolean = false>(options?: Options<CanStartTrialData, ThrowOnError>) => (options?.client ?? client).get<CanStartTrialResponses, CanStartTrialErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],

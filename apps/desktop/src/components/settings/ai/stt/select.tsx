@@ -20,6 +20,7 @@ import { useBillingAccess } from "../../../../billing";
 import { useConfigValues } from "../../../../config/use-config";
 import { useNotifications } from "../../../../contexts/notifications";
 import * as settings from "../../../../store/tinybase/store/settings";
+import { providerRowId } from "../shared";
 import {
   getProviderSelectionBlockers,
   requiresEntitlement,
@@ -311,7 +312,7 @@ function useConfiguredMapping(): Record<
 
   return Object.fromEntries(
     PROVIDERS.map((provider) => {
-      const config = configuredProviders[provider.id] as
+      const config = configuredProviders[providerRowId("stt", provider.id)] as
         | AIProviderStorage
         | undefined;
       const baseUrl = String(config?.base_url || provider.baseUrl || "").trim();

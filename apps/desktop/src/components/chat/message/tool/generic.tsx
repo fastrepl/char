@@ -1,5 +1,6 @@
 import { WrenchIcon } from "lucide-react";
 
+import { extractMcpOutputText } from "../../../../chat/mcp-utils";
 import { Disclosure } from "../shared";
 import {
   ToolCard,
@@ -14,22 +15,25 @@ function formatToolName(name: string): string {
   return name.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
 }
 
-function extractOutputText(output: unknown): string | null {
-  if (!output || typeof output !== "object") return null;
-  const obj = output as Record<string, unknown>;
-  if (Array.isArray(obj.content)) {
-    const texts = obj.content
-      .filter(
-        (c: unknown) =>
-          typeof c === "object" &&
-          c !== null &&
-          (c as Record<string, unknown>).type === "text" &&
-          (c as Record<string, unknown>).text,
-      )
-      .map((c: unknown) => (c as { text: string }).text);
-    if (texts.length > 0) return texts.join("\n");
+function formatOutputText(output: unknown): string | null {
+  const mcpText = extractMcpOutputText(output);
+  if (mcpText) {
+    return mcpText;
   }
-  return null;
+
+  if (typeof output === "string") {
+    return output;
+  }
+
+  if (output === null || output === undefined) {
+    return null;
+  }
+
+  try {
+    return JSON.stringify(output, null, 2);
+  } catch {
+    return String(output);
+  }
 }
 
 export function ToolGeneric({ part }: { part: Record<string, unknown> }) {
@@ -63,8 +67,7 @@ export function ToolGeneric({ part }: { part: Record<string, unknown> }) {
   }
 
   if (done || failed) {
-    const outputText =
-      done && part.output ? extractOutputText(part.output) : null;
+    const outputText = done ? formatOutputText(part.output) : null;
 
     return (
       <Disclosure
