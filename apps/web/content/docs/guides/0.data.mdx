@@ -83,17 +83,7 @@ pub struct TranscriptData {
 
 The app state persisted in `store.json` is defined by this enum — nothing else is stored there:
 
-```rust
-// apps/desktop/src-tauri/src/store.rs
-pub enum StoreKey {
-    OnboardingNeeded2,
-    DismissedToasts,
-    OnboardingLocal,
-    TinybaseValues,
-    PinnedTabs,
-    RecentlyOpenedSessions,
-}
-```
+<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/apps/desktop/src-tauri/src/store.rs#L4-L11" />
 
 ### Logs
 

@@ -25,17 +25,7 @@ On macOS, this is typically `~/Library/Application Support/hyprnote/`. On Linux,
 
 The `store.json` keys are defined by this enum — nothing else is persisted through the Tauri store:
 
-```rust
-// apps/desktop/src-tauri/src/store.rs
-pub enum StoreKey {
-    OnboardingNeeded2,
-    DismissedToasts,
-    OnboardingLocal,
-    TinybaseValues,
-    PinnedTabs,
-    RecentlyOpenedSessions,
-}
-```
+<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/apps/desktop/src-tauri/src/store.rs#L4-L11" />
 
 **Vault base** (customizable, defaults to the global base):
 - `sessions/` — one subdirectory per session containing recorded audio, transcripts, notes, and attachments
@@ -512,15 +502,7 @@ const handleEnhanceSuccess = useCallback(
 
 An analytics event is also fired when auto-enhance runs — it includes only the provider and model name, not the content:
 
-```typescript
-// apps/desktop/src/hooks/autoEnhance/runner.ts
-void analyticsCommands.event({
-  event: "note_enhanced",
-  is_auto: true,
-  llm_provider: llmConn?.providerId,
-  llm_model: llmConn?.modelId,
-});
-```
+<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/apps/desktop/src/hooks/autoEnhance/runner.ts#L161-L166" />
 
 **What is sent:**
 - Transcript text, raw notes, and prompt templates
@@ -584,21 +566,7 @@ When you download a local STT model, Char fetches the model file from a hosting 
 
 These are the supported local models:
 
-```rust
-// plugins/local-stt/src/model.rs
-pub static SUPPORTED_MODELS: [SupportedSttModel; 10] = [
-    SupportedSttModel::Whisper(WhisperModel::QuantizedTiny),
-    SupportedSttModel::Whisper(WhisperModel::QuantizedTinyEn),
-    SupportedSttModel::Whisper(WhisperModel::QuantizedBase),
-    SupportedSttModel::Whisper(WhisperModel::QuantizedBaseEn),
-    SupportedSttModel::Whisper(WhisperModel::QuantizedSmall),
-    SupportedSttModel::Whisper(WhisperModel::QuantizedSmallEn),
-    SupportedSttModel::Whisper(WhisperModel::QuantizedLargeTurbo),
-    SupportedSttModel::Am(AmModel::ParakeetV2),
-    SupportedSttModel::Am(AmModel::ParakeetV3),
-    SupportedSttModel::Am(AmModel::WhisperLargeV3),
-];
-```
+<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/local-stt/src/model.rs#L4-L15" />
 
 **What happens:**
 - Standard HTTP download requests to S3 (Whisper models) or Argmax hosting servers
