@@ -26,11 +26,11 @@ When you use Pro's curated transcription, you don't pick a specific provider —
 | 6 | Fireworks | `whisper-v3-turbo` | Whisper-based |
 | 7 | OpenAI | `gpt-4o-transcribe` | Final fallback |
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/crates/transcribe-proxy/src/hyprnote_routing.rs#L33-L41" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/transcribe-proxy/src/hyprnote_routing.rs#L33-L41" />
 
 For example, when transcribing Korean + English, Soniox is selected over Deepgram because it has better multilingual support — even though Deepgram has higher base priority. The router sorts by language quality first, then falls back to priority order:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/crates/transcribe-proxy/src/hyprnote_routing.rs#L70-L111" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/transcribe-proxy/src/hyprnote_routing.rs#L70-L111" />
 
 ### How Audio Flows
 
@@ -81,13 +81,13 @@ When using cloud transcription, your recorded audio is sent to the selected prov
 
 Here is how Char selects the correct adapter for your configured provider — each provider has its own adapter that handles the audio stream:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/listener/src/actors/listener/adapters.rs#L22-L102" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/listener/src/actors/listener/adapters.rs#L22-L102" />
 
 ### What Data Is Sent to the Provider
 
 **Sent alongside your audio stream:**
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/listener/src/actors/session/supervisor.rs#L122-L134" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/listener/src/actors/session/supervisor.rs#L122-L134" />
 
 - Raw audio (Linear PCM, 16kHz sample rate, mono or stereo)
 - Configuration: model name, language codes, optional keyword boost list, sample rate, channel count
@@ -103,7 +103,7 @@ Your audio files and transcripts are always stored locally on your device regard
 
 Char logs metadata about each STT session to PostHog for usage tracking. **No audio or transcription text is ever logged.**
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/crates/transcribe-proxy/src/analytics.rs#L26-L28" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/transcribe-proxy/src/analytics.rs#L26-L28" />
 
 **Logged:** provider name, session duration.
 **Not logged:** audio content, transcription text, meeting content.

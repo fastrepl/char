@@ -15,7 +15,6 @@ There are two types of base directories: `global` and `vault`.
 - On Linux: `~/.local/share/hyprnote/`
 
 Contents:
-- `db.sqlite` — local SQLite database (sessions, contacts, calendar events, tags)
 - `models/stt/` — downloaded speech-to-text model files
 - `store.json` — app state (onboarding status, pinned tabs, recently opened sessions, dismissed toasts, analytics preference, auth tokens)
 - `hyprnote.json` — vault configuration (custom vault path if set)
@@ -42,15 +41,15 @@ Contents:
 
 Here is how Char loads session content from disk — this shows exactly what files are read per session:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/fs-sync/src/session_content.rs#L10-L110" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/fs-sync/src/session_content.rs#L10-L110" />
 
 The transcript data structure stores word-level timestamps and speaker information:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/plugins/fs-sync/src/types.rs#L83-L119" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/fs-sync/src/types.rs#L83-L119" />
 
 The app state persisted in `store.json` is defined by this enum — nothing else is stored there:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/apps/desktop/src-tauri/src/store.rs#L4-L11" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/apps/desktop/src-tauri/src/store.rs#L4-L11" />
 
 ### Logs
 

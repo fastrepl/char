@@ -38,11 +38,11 @@ When you use Pro's curated intelligence, Char's server selects from these models
 | `anthropic/claude-haiku-4.5` | Anthropic (via OpenRouter) |
 | `openai/gpt-oss-120b:exacto` | OpenAI (via OpenRouter) |
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/crates/llm-proxy/src/config.rs#L43-L51" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/llm-proxy/src/config.rs#L43-L51" />
 
 The server selects between tool-calling and default model lists based on whether your request includes tool definitions:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/crates/llm-proxy/src/handler/mod.rs#L177-L184" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/llm-proxy/src/handler/mod.rs#L177-L184" />
 
 ### How the Request Flows
 
@@ -58,7 +58,7 @@ Your Device ──HTTPS──▶ Char API Server ──HTTPS──▶ OpenRouter
 
 The server sends your request to OpenRouter with `provider.sort = "latency"` to pick the fastest available model:
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/crates/llm-proxy/src/provider/openrouter.rs#L47-L65" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/llm-proxy/src/provider/openrouter.rs#L47-L65" />
 
 ### What Data Is Sent
 
@@ -76,7 +76,7 @@ The server sends your request to OpenRouter with `provider.sort = "latency"` to 
 
 Char logs metadata about each LLM request to PostHog for usage tracking and billing. **No message content is ever logged.**
 
-<GithubCode url="https://github.com/fastrepl/hyprnote/blob/41276ff31358007a4c7332dc5ee69038df219574/crates/llm-proxy/src/analytics.rs#L31-L39" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/llm-proxy/src/analytics.rs#L31-L39" />
 
 **Logged:** provider name, model name, token counts, latency, cost, HTTP status.
 **Not logged:** message content, conversation history, user prompts.
