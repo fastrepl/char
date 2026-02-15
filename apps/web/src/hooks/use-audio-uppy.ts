@@ -176,6 +176,7 @@ export function useAudioUppy() {
   };
 
   const reset = () => {
+    generationRef.current++;
     uppy.cancelAll();
     setState({ status: "idle", progress: 0, fileId: null, error: null });
   };
