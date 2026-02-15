@@ -4,7 +4,6 @@ import { Play } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import type { SttStatusResponse } from "@hypr/api-client";
-import { uploadAudio } from "@hypr/supabase/storage";
 import NoteEditor, { type JSONContent } from "@hypr/tiptap/editor";
 import { EMPTY_TIPTAP_DOC } from "@hypr/tiptap/shared";
 import "@hypr/tiptap/styles.css";
@@ -17,6 +16,7 @@ import {
 import { UploadArea } from "@/components/transcription/upload-area";
 import { env } from "@/env";
 import { getSupabaseBrowserClient } from "@/functions/supabase";
+import { useAudioUppy } from "@/hooks/use-audio-uppy";
 
 const API_URL = env.VITE_API_URL;
 
@@ -74,11 +74,19 @@ function Component() {
   const { id: searchId } = Route.useSearch();
 
   const [file, setFile] = useState<File | null>(null);
-  const [fileId, setFileId] = useState<string | null>(null);
   const [pipelineId, setPipelineId] = useState<string | null>(searchId ?? null);
   const [transcript, setTranscript] = useState<string | null>(null);
   const [noteContent, setNoteContent] = useState<JSONContent>(EMPTY_TIPTAP_DOC);
   const [isMounted, setIsMounted] = useState(false);
+
+  const {
+    addFile: uppyAddFile,
+    reset: uppyReset,
+    status: uppyStatus,
+    progress: uppyProgress,
+    fileId: uppyFileId,
+    error: uppyError,
+  } = useAudioUppy();
 
   useEffect(() => {
     setIsMounted(true);
@@ -93,26 +101,6 @@ function Component() {
     }
     return session;
   };
-
-  const uploadMutation = useMutation({
-    mutationFn: async (selectedFile: File) => {
-      const session = await getAccessToken();
-
-      const { promise } = uploadAudio({
-        file: selectedFile,
-        fileName: selectedFile.name,
-        contentType: selectedFile.type,
-        supabaseUrl: env.VITE_SUPABASE_URL!,
-        accessToken: session.access_token,
-        userId: session.user.id,
-      });
-
-      return promise;
-    },
-    onSuccess: (newFileId) => {
-      setFileId(newFileId);
-    },
-  });
 
   const startPipelineMutation = useMutation({
     mutationFn: async (fileIdArg: string) => {
@@ -171,19 +159,17 @@ function Component() {
     if (pipelineStatus === "QUEUED" || pipelineId) {
       return "queued" as const;
     }
-    if (uploadMutation.isPending) {
+    if (uppyStatus === "uploading") {
       return "uploading" as const;
     }
-    if (fileId) {
+    if (uppyStatus === "done" && uppyFileId) {
       return "uploaded" as const;
     }
     return "idle" as const;
   })();
 
   const errorMessage =
-    (uploadMutation.error instanceof Error
-      ? uploadMutation.error.message
-      : null) ??
+    uppyError ??
     (startPipelineMutation.error instanceof Error
       ? startPipelineMutation.error.message
       : null) ??
@@ -196,27 +182,24 @@ function Component() {
 
   const handleFileSelect = (selectedFile: File) => {
     setFile(selectedFile);
-    setFileId(null);
     setPipelineId(null);
     setTranscript(null);
-    uploadMutation.reset();
     startPipelineMutation.reset();
-    uploadMutation.mutate(selectedFile);
+    uppyAddFile(selectedFile);
   };
 
   const handleStartTranscription = () => {
-    if (!fileId) return;
-    startPipelineMutation.mutate(fileId);
+    if (!uppyFileId) return;
+    startPipelineMutation.mutate(uppyFileId);
   };
 
   const handleRemoveFile = () => {
     setFile(null);
-    setFileId(null);
     setPipelineId(null);
     setTranscript(null);
     setNoteContent(EMPTY_TIPTAP_DOC);
-    uploadMutation.reset();
     startPipelineMutation.reset();
+    uppyReset();
   };
 
   const mentionConfig = useMemo(
@@ -286,8 +269,9 @@ function Component() {
                         fileName={file.name}
                         fileSize={file.size}
                         onRemove={handleRemoveFile}
-                        isUploading={uploadMutation.isPending}
+                        isUploading={uppyStatus === "uploading"}
                         isProcessing={isProcessing}
+                        uploadProgress={uppyProgress}
                       />
                       {status === "uploaded" && (
                         <button
