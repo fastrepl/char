@@ -43,10 +43,11 @@ function CRMPage() {
   );
 
   const filteredContacts = contacts.filter((c) => {
-    const matchesSearch = !searchQuery
-      || c.name.toLowerCase().includes(searchQuery.toLowerCase())
-      || c.email.toLowerCase().includes(searchQuery.toLowerCase())
-      || c.company.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch =
+      !searchQuery ||
+      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.company.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || c.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -67,10 +68,10 @@ function CRMPage() {
   const handleUpdateContact = useCallback(
     (id: string, updates: Partial<Contact>) => {
       setContacts((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, ...updates } : c))
+        prev.map((c) => (c.id === id ? { ...c, ...updates } : c)),
       );
       setSelectedContact((prev) =>
-        prev?.id === id ? { ...prev, ...updates } : prev
+        prev?.id === id ? { ...prev, ...updates } : prev,
       );
     },
     [],
@@ -137,8 +138,8 @@ function CRMPage() {
                   {status !== "all" && statusCounts[status]
                     ? ` (${statusCounts[status]})`
                     : status === "all" && contacts.length > 0
-                    ? ` (${contacts.length})`
-                    : ""}
+                      ? ` (${contacts.length})`
+                      : ""}
                 </button>
               ))}
             </div>
@@ -156,123 +157,118 @@ function CRMPage() {
 
       <div className="flex-1 min-h-0 flex">
         <div className="flex-1 min-w-0 overflow-auto">
-          {contacts.length === 0 && !isAddingContact
-            ? (
-              <div className="flex flex-col items-center justify-center h-64 text-neutral-500">
-                <UserIcon className="w-10 h-10 mb-3 text-neutral-300" />
-                <p className="text-sm font-medium">No contacts yet</p>
-                <p className="text-xs mt-1">
-                  Add your first contact to get started
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setIsAddingContact(true)}
-                  className="mt-4 h-8 px-4 text-sm flex items-center gap-1.5 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors"
-                >
-                  <PlusIcon className="w-3.5 h-3.5" />
-                  Add Contact
-                </button>
-              </div>
-            )
-            : (
-              <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-neutral-50 border-b border-neutral-200">
-                  <tr>
-                    <th className="text-left px-4 py-2 font-medium text-neutral-600">
-                      Name
-                    </th>
-                    <th className="text-left px-4 py-2 font-medium text-neutral-600">
-                      Email
-                    </th>
-                    <th className="text-left px-4 py-2 font-medium text-neutral-600">
-                      Company
-                    </th>
-                    <th className="text-left px-4 py-2 font-medium text-neutral-600">
-                      Role
-                    </th>
-                    <th className="text-center px-4 py-2 font-medium text-neutral-600">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredContacts.map((contact) => (
-                    <tr
-                      key={contact.id}
-                      onClick={() => setSelectedContact(contact)}
-                      className={cn(
-                        "border-b border-neutral-100 cursor-pointer transition-colors",
-                        selectedContact?.id === contact.id
-                          ? "bg-blue-50"
-                          : "hover:bg-neutral-50",
-                      )}
-                    >
-                      <td className="px-4 py-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-neutral-200 flex items-center justify-center">
-                            <UserIcon className="w-3.5 h-3.5 text-neutral-500" />
-                          </div>
-                          <span className="font-medium text-neutral-900">
-                            {contact.name}
-                          </span>
+          {contacts.length === 0 && !isAddingContact ? (
+            <div className="flex flex-col items-center justify-center h-64 text-neutral-500">
+              <UserIcon className="w-10 h-10 mb-3 text-neutral-300" />
+              <p className="text-sm font-medium">No contacts yet</p>
+              <p className="text-xs mt-1">
+                Add your first contact to get started
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsAddingContact(true)}
+                className="mt-4 h-8 px-4 text-sm flex items-center gap-1.5 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors"
+              >
+                <PlusIcon className="w-3.5 h-3.5" />
+                Add Contact
+              </button>
+            </div>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="sticky top-0 bg-neutral-50 border-b border-neutral-200">
+                <tr>
+                  <th className="text-left px-4 py-2 font-medium text-neutral-600">
+                    Name
+                  </th>
+                  <th className="text-left px-4 py-2 font-medium text-neutral-600">
+                    Email
+                  </th>
+                  <th className="text-left px-4 py-2 font-medium text-neutral-600">
+                    Company
+                  </th>
+                  <th className="text-left px-4 py-2 font-medium text-neutral-600">
+                    Role
+                  </th>
+                  <th className="text-center px-4 py-2 font-medium text-neutral-600">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredContacts.map((contact) => (
+                  <tr
+                    key={contact.id}
+                    onClick={() => setSelectedContact(contact)}
+                    className={cn(
+                      "border-b border-neutral-100 cursor-pointer transition-colors",
+                      selectedContact?.id === contact.id
+                        ? "bg-blue-50"
+                        : "hover:bg-neutral-50",
+                    )}
+                  >
+                    <td className="px-4 py-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-neutral-200 flex items-center justify-center">
+                          <UserIcon className="w-3.5 h-3.5 text-neutral-500" />
                         </div>
-                      </td>
-                      <td className="px-4 py-2 text-neutral-600">
-                        {contact.email}
-                      </td>
-                      <td className="px-4 py-2 text-neutral-600">
-                        {contact.company}
-                      </td>
-                      <td className="px-4 py-2 text-neutral-600">
-                        {contact.role}
-                      </td>
-                      <td className="px-4 py-2 text-center">
-                        <span
-                          className={cn(
-                            "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium capitalize",
-                            STATUS_COLORS[contact.status],
-                          )}
-                        >
-                          {contact.status}
+                        <span className="font-medium text-neutral-900">
+                          {contact.name}
                         </span>
-                      </td>
-                    </tr>
-                  ))}
-                  {filteredContacts.length === 0 && contacts.length > 0 && (
-                    <tr>
-                      <td
-                        colSpan={5}
-                        className="text-center py-12 text-neutral-500"
+                      </div>
+                    </td>
+                    <td className="px-4 py-2 text-neutral-600">
+                      {contact.email}
+                    </td>
+                    <td className="px-4 py-2 text-neutral-600">
+                      {contact.company}
+                    </td>
+                    <td className="px-4 py-2 text-neutral-600">
+                      {contact.role}
+                    </td>
+                    <td className="px-4 py-2 text-center">
+                      <span
+                        className={cn(
+                          "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium capitalize",
+                          STATUS_COLORS[contact.status],
+                        )}
                       >
-                        No contacts match your search
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            )}
+                        {contact.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+                {filteredContacts.length === 0 && contacts.length > 0 && (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="text-center py-12 text-neutral-500"
+                    >
+                      No contacts match your search
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
 
         {(selectedContact || isAddingContact) && (
           <div className="w-96 border-l border-neutral-200 bg-white overflow-auto">
-            {isAddingContact
-              ? (
-                <AddContactForm
-                  onAdd={handleAddContact}
-                  onCancel={() => setIsAddingContact(false)}
-                />
-              )
-              : selectedContact
-              ? (
-                <ContactDetail
-                  contact={selectedContact}
-                  onClose={() => setSelectedContact(null)}
-                  onUpdate={(updates) =>
-                    handleUpdateContact(selectedContact.id, updates)}
-                  onDelete={() => handleDeleteContact(selectedContact.id)}
-                />
-              )
-              : null}
+            {isAddingContact ? (
+              <AddContactForm
+                onAdd={handleAddContact}
+                onCancel={() => setIsAddingContact(false)}
+              />
+            ) : selectedContact ? (
+              <ContactDetail
+                contact={selectedContact}
+                onClose={() => setSelectedContact(null)}
+                onUpdate={(updates) =>
+                  handleUpdateContact(selectedContact.id, updates)
+                }
+                onDelete={() => handleDeleteContact(selectedContact.id)}
+              />
+            ) : null}
           </div>
         )}
       </div>
@@ -314,7 +310,10 @@ function AddContactForm({
           <XIcon className="w-4 h-4" />
         </button>
       </div>
-      <form onSubmit={handleSubmit} className="flex-1 overflow-auto p-4 space-y-3">
+      <form
+        onSubmit={handleSubmit}
+        className="flex-1 overflow-auto p-4 space-y-3"
+      >
         <FormField label="Name" required>
           <input
             type="text"
@@ -453,7 +452,8 @@ function ContactDetail({
           <select
             value={contact.status}
             onChange={(e) =>
-              onUpdate({ status: e.target.value as Contact["status"] })}
+              onUpdate({ status: e.target.value as Contact["status"] })
+            }
             className="h-8 px-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-300"
           >
             <option value="lead">Lead</option>
@@ -479,41 +479,39 @@ function ContactDetail({
               </button>
             )}
           </div>
-          {isEditing
-            ? (
-              <div className="space-y-2">
-                <textarea
-                  value={editNotes}
-                  onChange={(e) => setEditNotes(e.target.value)}
-                  rows={4}
-                  className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-300 resize-none"
-                />
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onUpdate({ notes: editNotes });
-                      setIsEditing(false);
-                    }}
-                    className="h-7 px-3 text-xs bg-neutral-900 text-white rounded hover:bg-neutral-800"
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsEditing(false)}
-                    className="h-7 px-3 text-xs text-neutral-600 hover:bg-neutral-100 rounded"
-                  >
-                    Cancel
-                  </button>
-                </div>
+          {isEditing ? (
+            <div className="space-y-2">
+              <textarea
+                value={editNotes}
+                onChange={(e) => setEditNotes(e.target.value)}
+                rows={4}
+                className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-300 resize-none"
+              />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onUpdate({ notes: editNotes });
+                    setIsEditing(false);
+                  }}
+                  className="h-7 px-3 text-xs bg-neutral-900 text-white rounded hover:bg-neutral-800"
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(false)}
+                  className="h-7 px-3 text-xs text-neutral-600 hover:bg-neutral-100 rounded"
+                >
+                  Cancel
+                </button>
               </div>
-            )
-            : (
-              <p className="text-sm text-neutral-700 whitespace-pre-wrap">
-                {contact.notes || "No notes"}
-              </p>
-            )}
+            </div>
+          ) : (
+            <p className="text-sm text-neutral-700 whitespace-pre-wrap">
+              {contact.notes || "No notes"}
+            </p>
+          )}
         </div>
 
         <div className="text-xs text-neutral-400">

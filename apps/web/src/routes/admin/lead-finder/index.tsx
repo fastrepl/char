@@ -150,9 +150,11 @@ function LeadFinderPage() {
               disabled={fetchMutation.isPending}
               className="h-8 px-3 text-sm flex items-center gap-1.5 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors disabled:opacity-50"
             >
-              {fetchMutation.isPending
-                ? <Spinner size={14} />
-                : <StarIcon className="w-3.5 h-3.5" />}
+              {fetchMutation.isPending ? (
+                <Spinner size={14} />
+              ) : (
+                <StarIcon className="w-3.5 h-3.5" />
+              )}
               Fetch Stars
             </button>
             <button
@@ -161,9 +163,11 @@ function LeadFinderPage() {
               disabled={fetchMutation.isPending}
               className="h-8 px-3 text-sm flex items-center gap-1.5 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors disabled:opacity-50"
             >
-              {fetchMutation.isPending
-                ? <Spinner size={14} />
-                : <RefreshCwIcon className="w-3.5 h-3.5" />}
+              {fetchMutation.isPending ? (
+                <Spinner size={14} />
+              ) : (
+                <RefreshCwIcon className="w-3.5 h-3.5" />
+              )}
               Fetch Activity
             </button>
             <button
@@ -172,9 +176,11 @@ function LeadFinderPage() {
               disabled={researchMutation.isPending}
               className="h-8 px-3 text-sm flex items-center gap-1.5 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50"
             >
-              {researchMutation.isPending
-                ? <Spinner size={14} color="white" />
-                : <SparklesIcon className="w-3.5 h-3.5" />}
+              {researchMutation.isPending ? (
+                <Spinner size={14} color="white" />
+              ) : (
+                <SparklesIcon className="w-3.5 h-3.5" />
+              )}
               Research Top 10
             </button>
           </div>
@@ -183,64 +189,65 @@ function LeadFinderPage() {
 
       <div className="flex-1 min-h-0 flex">
         <div className="flex-1 min-w-0 overflow-auto">
-          {isLoading
-            ? (
-              <div className="flex items-center justify-center h-64">
-                <Spinner size={24} />
-              </div>
-            )
-            : (
-              <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-neutral-50 border-b border-neutral-200">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <Spinner size={24} />
+            </div>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="sticky top-0 bg-neutral-50 border-b border-neutral-200">
+                <tr>
+                  <th className="text-left px-4 py-2 font-medium text-neutral-600">
+                    User
+                  </th>
+                  <th className="text-left px-4 py-2 font-medium text-neutral-600">
+                    Event
+                  </th>
+                  <th className="text-left px-4 py-2 font-medium text-neutral-600">
+                    Company
+                  </th>
+                  <th className="text-center px-4 py-2 font-medium text-neutral-600">
+                    Score
+                  </th>
+                  <th className="text-center px-4 py-2 font-medium text-neutral-600">
+                    Match
+                  </th>
+                  <th className="text-right px-4 py-2 font-medium text-neutral-600">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredLeads.map((lead) => (
+                  <LeadRow
+                    key={lead.id}
+                    lead={lead}
+                    isSelected={selectedLead?.id === lead.id}
+                    onSelect={() => setSelectedLead(lead)}
+                    onResearch={() =>
+                      researchMutation.mutate(lead.github_username)
+                    }
+                    isResearching={
+                      researchMutation.isPending &&
+                      researchMutation.variables === lead.github_username
+                    }
+                  />
+                ))}
+                {filteredLeads.length === 0 && (
                   <tr>
-                    <th className="text-left px-4 py-2 font-medium text-neutral-600">
-                      User
-                    </th>
-                    <th className="text-left px-4 py-2 font-medium text-neutral-600">
-                      Event
-                    </th>
-                    <th className="text-left px-4 py-2 font-medium text-neutral-600">
-                      Company
-                    </th>
-                    <th className="text-center px-4 py-2 font-medium text-neutral-600">
-                      Score
-                    </th>
-                    <th className="text-center px-4 py-2 font-medium text-neutral-600">
-                      Match
-                    </th>
-                    <th className="text-right px-4 py-2 font-medium text-neutral-600">
-                      Actions
-                    </th>
+                    <td
+                      colSpan={6}
+                      className="text-center py-12 text-neutral-500"
+                    >
+                      {searchQuery
+                        ? "No leads match your search"
+                        : "No leads found. Click 'Fetch Stars' to import stargazers."}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredLeads.map((lead) => (
-                    <LeadRow
-                      key={lead.id}
-                      lead={lead}
-                      isSelected={selectedLead?.id === lead.id}
-                      onSelect={() => setSelectedLead(lead)}
-                      onResearch={() =>
-                        researchMutation.mutate(lead.github_username)}
-                      isResearching={researchMutation.isPending
-                        && researchMutation.variables === lead.github_username}
-                    />
-                  ))}
-                  {filteredLeads.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={6}
-                        className="text-center py-12 text-neutral-500"
-                      >
-                        {searchQuery
-                          ? "No leads match your search"
-                          : "No leads found. Click 'Fetch Stars' to import stargazers."}
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            )}
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
 
         {selectedLead && (
@@ -249,7 +256,8 @@ function LeadFinderPage() {
               lead={selectedLead}
               onClose={() => setSelectedLead(null)}
               onResearch={() =>
-                researchMutation.mutate(selectedLead.github_username)}
+                researchMutation.mutate(selectedLead.github_username)
+              }
               isResearching={researchMutation.isPending}
             />
           </div>
@@ -334,8 +342,8 @@ function LeadRow({
             lead.event_type === "star"
               ? "bg-yellow-50 text-yellow-700"
               : lead.event_type === "fork"
-              ? "bg-blue-50 text-blue-700"
-              : "bg-neutral-100 text-neutral-600",
+                ? "bg-blue-50 text-blue-700"
+                : "bg-neutral-100 text-neutral-600",
           )}
         >
           {lead.event_type}
@@ -345,29 +353,31 @@ function LeadRow({
         {lead.company || "-"}
       </td>
       <td className="px-4 py-2 text-center">
-        {lead.score !== null
-          ? (
-            <span
-              className={cn(
-                "inline-flex items-center justify-center w-8 h-6 rounded text-xs font-medium",
-                lead.score >= 70
-                  ? "bg-green-50 text-green-700"
-                  : lead.score >= 40
+        {lead.score !== null ? (
+          <span
+            className={cn(
+              "inline-flex items-center justify-center w-8 h-6 rounded text-xs font-medium",
+              lead.score >= 70
+                ? "bg-green-50 text-green-700"
+                : lead.score >= 40
                   ? "bg-yellow-50 text-yellow-700"
                   : "bg-neutral-100 text-neutral-500",
-              )}
-            >
-              {lead.score}
-            </span>
-          )
-          : <span className="text-neutral-300">-</span>}
+            )}
+          >
+            {lead.score}
+          </span>
+        ) : (
+          <span className="text-neutral-300">-</span>
+        )}
       </td>
       <td className="px-4 py-2 text-center">
-        {lead.is_match === true
-          ? <span className="text-green-600 text-xs font-medium">Yes</span>
-          : lead.is_match === false
-          ? <span className="text-neutral-400 text-xs">No</span>
-          : <span className="text-neutral-300">-</span>}
+        {lead.is_match === true ? (
+          <span className="text-green-600 text-xs font-medium">Yes</span>
+        ) : lead.is_match === false ? (
+          <span className="text-neutral-400 text-xs">No</span>
+        ) : (
+          <span className="text-neutral-300">-</span>
+        )}
       </td>
       <td className="px-4 py-2 text-right">
         <div className="flex items-center justify-end gap-1">
@@ -381,14 +391,18 @@ function LeadRow({
               disabled={isResearching}
               className="h-6 px-2 text-xs flex items-center gap-1 border border-neutral-200 rounded hover:bg-neutral-50 disabled:opacity-50"
             >
-              {isResearching
-                ? <Spinner size={10} />
-                : <SparklesIcon className="w-3 h-3" />}
+              {isResearching ? (
+                <Spinner size={10} />
+              ) : (
+                <SparklesIcon className="w-3 h-3" />
+              )}
               Research
             </button>
           )}
           <a
-            href={lead.profile_url || `https://github.com/${lead.github_username}`}
+            href={
+              lead.profile_url || `https://github.com/${lead.github_username}`
+            }
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
@@ -440,7 +454,9 @@ function LeadDetail({
               {lead.name || lead.github_username}
             </div>
             <a
-              href={lead.profile_url || `https://github.com/${lead.github_username}`}
+              href={
+                lead.profile_url || `https://github.com/${lead.github_username}`
+              }
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-blue-600 hover:underline"
@@ -498,8 +514,8 @@ function LeadDetail({
                   lead.score >= 70
                     ? "bg-green-50 text-green-700"
                     : lead.score >= 40
-                    ? "bg-yellow-50 text-yellow-700"
-                    : "bg-neutral-100 text-neutral-500",
+                      ? "bg-yellow-50 text-yellow-700"
+                      : "bg-neutral-100 text-neutral-500",
                 )}
               >
                 {lead.score}/100
@@ -536,9 +552,11 @@ function LeadDetail({
             disabled={isResearching}
             className="w-full h-9 text-sm flex items-center justify-center gap-1.5 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50"
           >
-            {isResearching
-              ? <Spinner size={14} color="white" />
-              : <SparklesIcon className="w-3.5 h-3.5" />}
+            {isResearching ? (
+              <Spinner size={14} color="white" />
+            ) : (
+              <SparklesIcon className="w-3.5 h-3.5" />
+            )}
             {isResearching ? "Researching..." : "Research This Lead"}
           </button>
         )}
