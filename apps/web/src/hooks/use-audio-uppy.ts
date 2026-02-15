@@ -1,4 +1,4 @@
-import Uppy from "@uppy/core";
+import Uppy, { type UploadResult } from "@uppy/core";
 import Tus from "@uppy/tus";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -38,6 +38,7 @@ export function useAudioUppy() {
   });
 
   const uppyRef = useRef<Uppy | null>(null);
+  const generationRef = useRef(0);
 
   const uppy = useMemo(() => {
     const instance = new Uppy({
@@ -74,9 +75,16 @@ export function useAudioUppy() {
   }, []);
 
   useEffect(() => {
-    const onFileAdded = async (file: { id: string; name: string; type?: string }) => {
+    const onFileAdded = async (file: {
+      id: string;
+      name: string;
+      type?: string;
+    }) => {
+      const generation = generationRef.current;
       const supabase = getSupabaseBrowserClient();
       const { data } = await supabase.auth.getSession();
+      if (generation !== generationRef.current) return;
+
       const userId = data?.session?.user?.id;
       if (!userId) {
         setState((prev) => ({
@@ -109,8 +117,22 @@ export function useAudioUppy() {
       setState((prev) => ({ ...prev, progress }));
     };
 
-    const onComplete = () => {
-      setState((prev) => ({ ...prev, status: "done", progress: 100 }));
+    const onComplete = (
+      result: UploadResult<Record<string, unknown>, Record<string, never>>,
+    ) => {
+      if (result.failed && result.failed.length > 0) {
+        setState((prev) => ({
+          ...prev,
+          status: "error",
+          error: "Upload failed",
+        }));
+      } else {
+        setState((prev) => ({ ...prev, status: "done", progress: 100 }));
+      }
+    };
+
+    const onUploadError = (_file: unknown, error: Error) => {
+      setState((prev) => ({ ...prev, status: "error", error: error.message }));
     };
 
     const onError = (error: Error) => {
@@ -125,12 +147,14 @@ export function useAudioUppy() {
     uppy.on("progress", onProgress);
     uppy.on("complete", onComplete);
     uppy.on("error", onError);
+    uppy.on("upload-error", onUploadError);
 
     return () => {
       uppy.off("file-added", onFileAdded);
       uppy.off("progress", onProgress);
       uppy.off("complete", onComplete);
       uppy.off("error", onError);
+      uppy.off("upload-error", onUploadError);
     };
   }, [uppy]);
 
@@ -141,6 +165,7 @@ export function useAudioUppy() {
   }, []);
 
   const addFile = (file: File) => {
+    generationRef.current++;
     uppy.cancelAll();
     setState({ status: "idle", progress: 0, fileId: null, error: null });
     uppy.addFile({

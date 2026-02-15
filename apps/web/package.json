@@ -44,7 +44,6 @@
     "@tanstack/router-plugin": "^1.159.5",
     "@unpic/react": "^1.0.2",
     "@uppy/core": "^5.2.0",
-    "@uppy/react": "^5.2.0",
     "@uppy/tus": "^5.1.1",
     "chart.js": "^4.5.1",
     "dayjs": "^1.11.19",
