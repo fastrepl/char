@@ -5,7 +5,6 @@ import { useMemo } from "react";
 
 import { cn } from "@hypr/utils";
 
-import { SidebarDownloadCard } from "@/components/cta-card";
 import { defaultMDXComponents } from "@/components/mdx";
 
 import { handbookStructure } from "./-structure";
@@ -19,13 +18,13 @@ export function HandbookLayout({
 }) {
   return (
     <>
-      <main className="flex-1 min-w-0 px-4 py-6">
+      <main className="max-w-200 mx-auto px-4 py-6">
         <ArticleHeader doc={doc} showSectionTitle={showSectionTitle} />
         <ArticleContent doc={doc} />
         <PageNavigation currentSlug={doc.slug} />
       </main>
 
-      <RightSidebar toc={doc.toc} />
+      <RightSideToc toc={doc.toc} />
     </>
   );
 }
@@ -163,39 +162,42 @@ function PageNavigation({ currentSlug }: { currentSlug: string }) {
   );
 }
 
-function RightSidebar({
+function RightSideToc({
   toc,
 }: {
   toc: Array<{ id: string; text: string; level: number }>;
 }) {
-  return (
-    <aside className="hidden lg:block w-64 shrink-0">
-      <div className="sticky top-17.25 max-h-[calc(100vh-69px)] overflow-y-auto flex flex-col gap-6 px-4 py-6">
-        {toc.length > 0 && (
-          <nav className="flex flex-col gap-1">
-            <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-3">
-              On this page
-            </p>
-            {toc.map((item) => (
-              <a
-                key={item.id}
-                href={`#${item.id}`}
-                className={cn([
-                  "block text-sm py-1 transition-colors border-l-2",
-                  item.level === 4 && "pl-6",
-                  item.level === 3 && "pl-4",
-                  item.level === 2 && "pl-2",
-                  "border-transparent text-neutral-600 hover:text-stone-600 hover:border-neutral-300",
-                ])}
-              >
-                {item.text}
-              </a>
-            ))}
-          </nav>
-        )}
+  if (toc.length === 0) return null;
 
-        <SidebarDownloadCard />
-      </div>
+  return (
+    <aside
+      className={cn([
+        "hidden xl:flex fixed right-0 top-0 h-screen z-10",
+        "w-64 items-center",
+      ])}
+    >
+      <nav className="w-full px-6">
+        <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-3">
+          On this page
+        </p>
+        <div className="flex flex-col gap-0.5">
+          {toc.map((item) => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              className={cn([
+                "block text-sm py-1 transition-colors border-l-2",
+                item.level === 4 && "pl-6",
+                item.level === 3 && "pl-4",
+                item.level === 2 && "pl-2",
+                "border-transparent text-neutral-600 hover:text-stone-600 hover:border-neutral-300",
+              ])}
+            >
+              {item.text}
+            </a>
+          ))}
+        </div>
+      </nav>
     </aside>
   );
 }

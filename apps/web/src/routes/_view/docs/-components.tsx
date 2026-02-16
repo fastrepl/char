@@ -3,6 +3,8 @@ import { Link } from "@tanstack/react-router";
 import { allDocs } from "content-collections";
 import { useMemo } from "react";
 
+import { cn } from "@hypr/utils";
+
 import { defaultMDXComponents } from "@/components/mdx";
 
 import { docsStructure } from "./-structure";
@@ -16,11 +18,12 @@ export function DocLayout({
 }) {
   return (
     <>
-      <main className="flex-1 min-w-0 px-4 py-6">
+      <main className="max-w-200 mx-auto px-4 py-6">
         <ArticleHeader doc={doc} showSectionTitle={showSectionTitle} />
         <ArticleContent doc={doc} />
         <PageNavigation currentSlug={doc.slug} />
       </main>
+      <RightSideToc toc={doc.toc} />
     </>
   );
 }
@@ -158,5 +161,45 @@ function PageNavigation({ currentSlug }: { currentSlug: string }) {
         <div />
       )}
     </nav>
+  );
+}
+
+function RightSideToc({
+  toc,
+}: {
+  toc: Array<{ id: string; text: string; level: number }>;
+}) {
+  if (toc.length === 0) return null;
+
+  return (
+    <aside
+      className={cn([
+        "hidden xl:flex fixed right-0 top-0 h-screen z-10",
+        "w-64 items-center",
+      ])}
+    >
+      <nav className="w-full px-6">
+        <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-3">
+          On this page
+        </p>
+        <div className="flex flex-col gap-0.5">
+          {toc.map((item) => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              className={cn([
+                "block text-sm py-1 transition-colors border-l-2",
+                item.level === 4 && "pl-6",
+                item.level === 3 && "pl-4",
+                item.level === 2 && "pl-2",
+                "border-transparent text-neutral-600 hover:text-stone-600 hover:border-neutral-300",
+              ])}
+            >
+              {item.text}
+            </a>
+          ))}
+        </div>
+      </nav>
+    </aside>
   );
 }
