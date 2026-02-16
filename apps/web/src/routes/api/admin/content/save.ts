@@ -12,7 +12,7 @@ interface ArticleMetadata {
   meta_title?: string;
   display_title?: string;
   meta_description?: string;
-  author?: string;
+  author?: string[];
   date?: string;
   coverImage?: string;
   featured?: boolean;
@@ -43,8 +43,11 @@ function buildFrontmatter(metadata: ArticleMetadata): string {
       `meta_description: ${JSON.stringify(metadata.meta_description)}`,
     );
   }
-  if (metadata.author) {
-    lines.push(`author: ${JSON.stringify(metadata.author)}`);
+  if (metadata.author && metadata.author.length > 0) {
+    lines.push(`author:`);
+    for (const name of metadata.author) {
+      lines.push(`  - ${JSON.stringify(name)}`);
+    }
   }
   if (metadata.coverImage) {
     lines.push(`coverImage: ${JSON.stringify(metadata.coverImage)}`);

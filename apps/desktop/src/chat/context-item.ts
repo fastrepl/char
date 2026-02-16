@@ -5,6 +5,8 @@ import type { SessionContext } from "@hypr/plugin-template";
 import type { HyprUIMessage } from "./types";
 import { isRecord } from "./utils";
 
+export const CURRENT_SESSION_CONTEXT_KEY = "session:current";
+
 export type ContextEntitySource = "tool";
 
 export type ContextEntity =
@@ -58,15 +60,16 @@ function parseSearchSessionsOutput(output: unknown): ContextEntity[] {
       return [];
     }
 
+    const parsedSessionContext = parseSessionContext(item.sessionContext);
     const title = typeof item.title === "string" ? item.title : null;
-    const content = typeof item.content === "string" ? item.content : null;
+    const content = typeof item.excerpt === "string" ? item.excerpt : null;
 
     return [
       {
         kind: "session",
         key: `session:search:${item.id}`,
         source: "tool",
-        sessionContext: {
+        sessionContext: parsedSessionContext ?? {
           title,
           date: null,
           rawContent: content,
@@ -79,6 +82,76 @@ function parseSearchSessionsOutput(output: unknown): ContextEntity[] {
       },
     ];
   });
+}
+
+function parseSessionContext(value: unknown): SessionContext | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const title = typeof value.title === "string" ? value.title : null;
+  const date = typeof value.date === "string" ? value.date : null;
+  const rawContent =
+    typeof value.rawContent === "string" ? value.rawContent : null;
+  const enhancedContent =
+    typeof value.enhancedContent === "string" ? value.enhancedContent : null;
+
+  const participants = Array.isArray(value.participants)
+    ? value.participants.flatMap((participant) => {
+        if (!isRecord(participant) || typeof participant.name !== "string") {
+          return [];
+        }
+        return [
+          {
+            name: participant.name,
+            jobTitle:
+              typeof participant.jobTitle === "string"
+                ? participant.jobTitle
+                : null,
+          },
+        ];
+      })
+    : [];
+
+  const event =
+    isRecord(value.event) && typeof value.event.name === "string"
+      ? { name: value.event.name }
+      : null;
+
+  const transcript = isRecord(value.transcript)
+    ? {
+        segments: Array.isArray(value.transcript.segments)
+          ? value.transcript.segments.flatMap((segment) => {
+              if (
+                !isRecord(segment) ||
+                typeof segment.speaker !== "string" ||
+                typeof segment.text !== "string"
+              ) {
+                return [];
+              }
+              return [{ speaker: segment.speaker, text: segment.text }];
+            })
+          : [],
+        startedAt:
+          typeof value.transcript.startedAt === "number"
+            ? value.transcript.startedAt
+            : null,
+        endedAt:
+          typeof value.transcript.endedAt === "number"
+            ? value.transcript.endedAt
+            : null,
+      }
+    : null;
+
+  return {
+    title,
+    date,
+    rawContent,
+    enhancedContent,
+    transcript,
+    participants,
+    event,
+  };
 }
 
 const toolEntityExtractors: Record<

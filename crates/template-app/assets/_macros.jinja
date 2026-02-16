@@ -67,28 +67,6 @@ Session: {{ title }}
 {%- endif -%}
 {%- endmacro -%}
 
-{%- macro session_context_brief(ctx) -%}
-{%- if let Some(title) = ctx.title %}
-
-- {{ title }}
-  {%- endif -%}
-  {%- if let Some(enhanced_content) = ctx.enhanced_content %}
-  {{ enhanced_content }}
-  {%- else if let Some(raw_content) = ctx.raw_content %}
-  {{ raw_content }}
-  {%- endif -%}
-  {%- if !ctx.participants.is_empty() -%}
-  {%- for p in ctx.participants %}
-- {{ p.name }}{%- match p.job_title -%}{%- when Some with (job_title) %} ({{ job_title }}){%- when None -%}{%- endmatch -%}
-  {%- endfor -%}
-  {%- endif -%}
-  {%- if let Some(transcript) = ctx.transcript -%}
-  {%- for segment in transcript.segments %}
-  {{ segment.speaker }}: {{ segment.text }}
-  {%- endfor -%}
-  {%- endif -%}
-  {%- endmacro -%}
-
 {%- macro template_context(template) -%}
 {%- match template -%}
 {%- when Some with (tpl) %}
@@ -147,3 +125,36 @@ Sections:
 2. Generate a well-formatted markdown summary.
    {% endmatch -%}
    {%- endmacro -%}
+
+{%- macro session_context_details(ctx) -%}
+{%- if let Some(title) = ctx.title %}
+
+Title: {{ title }}
+{%- endif -%}
+{%- if let Some(date) = ctx.date %}
+
+Date: {{ date }}
+{%- endif -%}
+{%- if let Some(event) = ctx.event %}
+
+Event: {{ event.name }}
+{%- endif -%}
+{%- if !ctx.participants.is_empty() %}
+
+Participants:{{ participants(participants=ctx.participants) }}
+{%- endif -%}
+{%- if let Some(enhanced_content) = ctx.enhanced_content %}
+
+Enhanced Meeting Summary:
+{{ enhanced_content }}
+{%- else if let Some(raw_content) = ctx.raw_content %}
+
+User written note:
+{{ raw_content }}
+{%- endif -%}
+{%- if let Some(transcript) = ctx.transcript %}
+
+Full Meeting Transcript:
+{{ transcript(transcript) }}
+{%- endif -%}
+{%- endmacro -%}

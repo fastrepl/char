@@ -1,6 +1,8 @@
 use hypr_api_auth::AuthState;
 
-use crate::env::{GitHubAppEnv, OpenRouterEnv, StripeEnv, SupabaseEnv, SupportDatabaseEnv};
+use crate::env::{
+    ChatwootEnv, GitHubAppEnv, OpenRouterEnv, StripeEnv, SupabaseEnv, SupportDatabaseEnv,
+};
 
 #[derive(Clone)]
 pub struct SupportConfig {
@@ -9,6 +11,7 @@ pub struct SupportConfig {
     pub support_database: SupportDatabaseEnv,
     pub stripe: StripeEnv,
     pub supabase: SupabaseEnv,
+    pub chatwoot: ChatwootEnv,
     pub auth: AuthState,
 }
 
@@ -19,6 +22,7 @@ impl SupportConfig {
         support_database: &SupportDatabaseEnv,
         stripe: &StripeEnv,
         supabase: &SupabaseEnv,
+        chatwoot: &ChatwootEnv,
         auth: AuthState,
     ) -> Self {
         Self {
@@ -27,6 +31,7 @@ impl SupportConfig {
             support_database: support_database.clone(),
             stripe: stripe.clone(),
             supabase: supabase.clone(),
+            chatwoot: chatwoot.clone(),
             auth,
         }
     }

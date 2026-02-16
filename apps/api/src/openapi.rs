@@ -160,3 +160,11 @@ fn with_each_operation(item: &mut PathItem, mut f: impl FnMut(&mut Operation)) {
         f(op);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn gen_openapi_json() {
+        super::write_openapi_json().unwrap();
+    }
+}

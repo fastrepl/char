@@ -25,8 +25,16 @@ export const Route = createFileRoute("/_view/blog/$slug")({
     const relatedArticles = allArticles
       .filter((a) => a.slug !== article.slug)
       .sort((a, b) => {
-        const aScore = a.author === article.author ? 1 : 0;
-        const bScore = b.author === article.author ? 1 : 0;
+        const aScore = a.author.some((name: string) =>
+          article.author.includes(name),
+        )
+          ? 1
+          : 0;
+        const bScore = b.author.some((name: string) =>
+          article.author.includes(name),
+        )
+          ? 1
+          : 0;
         if (aScore !== bScore) {
           return bScore - aScore;
         }
@@ -49,7 +57,7 @@ export const Route = createFileRoute("/_view/blog/$slug")({
     const metaDescription = article.meta_description ?? "";
     const ogImage =
       article.coverImage ||
-      `https://hyprnote.com/og?type=blog&title=${encodeURIComponent(title)}${article.author ? `&author=${encodeURIComponent(article.author)}` : ""}${article.date ? `&date=${encodeURIComponent(new Date(article.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }))}` : ""}&v=1`;
+      `https://hyprnote.com/og?type=blog&title=${encodeURIComponent(title)}${article.author.length > 0 ? `&author=${encodeURIComponent(article.author.join(", "))}` : ""}${article.date ? `&date=${encodeURIComponent(new Date(article.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }))}` : ""}&v=1`;
 
     return {
       meta: [
@@ -77,8 +85,8 @@ export const Route = createFileRoute("/_view/blog/$slug")({
           content: metaDescription,
         },
         { name: "twitter:image", content: ogImage },
-        ...(article.author
-          ? [{ name: "author", content: article.author }]
+        ...(article.author.length > 0
+          ? [{ name: "author", content: article.author.join(", ") }]
           : []),
         {
           property: "article:published_time",
@@ -114,8 +122,6 @@ function Component() {
 }
 
 function HeroSection({ article }: { article: any }) {
-  const avatarUrl = AUTHOR_AVATARS[article.author];
-
   return (
     <header className="py-12 lg:py-16 text-center px-4">
       <Link
@@ -136,16 +142,23 @@ function HeroSection({ article }: { article: any }) {
         {article.title}
       </h1>
 
-      {article.author && (
+      {article.author.length > 0 && (
         <div className="flex items-center justify-center gap-3 mb-2">
-          {avatarUrl && (
-            <img
-              src={avatarUrl}
-              alt={article.author}
-              className="w-8 h-8 rounded-full object-cover"
-            />
-          )}
-          <p className="text-base text-neutral-600">{article.author}</p>
+          {article.author.map((name: string) => {
+            const avatarUrl = AUTHOR_AVATARS[name];
+            return (
+              <div key={name} className="flex items-center gap-2">
+                {avatarUrl && (
+                  <img
+                    src={avatarUrl}
+                    alt={name}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                )}
+                <p className="text-base text-neutral-600">{name}</p>
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -380,7 +393,7 @@ function TableOfContents({
   return (
     <aside
       className={cn([
-        "hidden xl:flex fixed left-0 top-0 h-screen z-10",
+        "hidden xl:flex fixed right-0 top-0 h-screen z-10",
         "w-64 items-center",
       ])}
     >

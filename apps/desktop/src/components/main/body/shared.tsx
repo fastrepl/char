@@ -9,9 +9,9 @@ import {
   PopoverTrigger,
 } from "@hypr/ui/components/ui/popover";
 import { Spinner } from "@hypr/ui/components/ui/spinner";
+import { useCmdKeyPressed } from "@hypr/ui/hooks/use-cmd-key-pressed";
 import { cn } from "@hypr/utils";
 
-import { useCmdKeyPressed } from "../../../hooks/useCmdKeyPressed";
 import { type Tab } from "../../../store/zustand/tabs";
 import { InteractiveButton } from "../../interactive-button";
 

@@ -1,15 +1,8 @@
 import { Icon } from "@iconify-icon/react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { allShortcuts, allTemplates } from "content-collections";
-import { CircleHelp } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@hypr/ui/components/ui/tooltip";
 import { cn } from "@hypr/utils";
 
 import { DownloadButton } from "@/components/download-button";
@@ -198,7 +191,7 @@ function Component() {
 function ContributeBanner() {
   return (
     <a
-      href="https://github.com/fastrepl/hyprnote/issues/new?title=Suggest%20New%20Template%2FShortcut&body=Type:%20template%0ATitle:%20Sprint%20Planning%0ACategory:%20Engineering%0ADescription:%20A%20template%20for%20capturing%20sprint%20planning%20discussions%0A%0AStructure%20(list%20of%20sections%2C%20each%20with%20a%20title%20and%20what%20to%20include):%0A-%20Sprint%20Goals:%20Key%20objectives%20for%20the%20sprint%0A-%20User%20Stories:%20Stories%20discussed%20and%20committed%0A-%20Action%20Items:%20Tasks%20assigned%20to%20team%20members"
+      href="https://github.com/fastrepl/char/issues/new?title=Suggest%20New%20Template%2FShortcut&body=Type:%20template%0ATitle:%20Sprint%20Planning%0ACategory:%20Engineering%0ADescription:%20A%20template%20for%20capturing%20sprint%20planning%20discussions%0A%0AStructure%20(list%20of%20sections%2C%20each%20with%20a%20title%20and%20what%20to%20include):%0A-%20Sprint%20Goals:%20Key%20objectives%20for%20the%20sprint%0A-%20User%20Stories:%20Stories%20discussed%20and%20committed%0A-%20Action%20Items:%20Tasks%20assigned%20to%20team%20members"
       target="_blank"
       rel="noopener noreferrer"
       className={cn([
@@ -240,41 +233,7 @@ function HeroSection({
             Gallery
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600">
-            Browse and discover{" "}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    to="/templates/"
-                    className="underline decoration-dotted underline-offset-2 cursor-pointer inline-flex items-center gap-0.5 hover:text-stone-800 transition-colors"
-                  >
-                    templates
-                    <CircleHelp className="size-3.5" />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent className="bg-black text-white rounded-md">
-                  AI instructions for summarizing meetings
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>{" "}
-            and{" "}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    to="/shortcuts/"
-                    className="underline decoration-dotted underline-offset-2 cursor-pointer inline-flex items-center gap-0.5 hover:text-stone-800 transition-colors"
-                  >
-                    shortcuts
-                    <CircleHelp className="size-3.5" />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent className="bg-black text-white rounded-md">
-                  Quick commands for the AI chat assistant
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>{" "}
-            for your workflow
+            Browse and discover templates and shortcuts for your workflow
           </p>
         </div>
 
@@ -544,7 +503,7 @@ function ContributeCard() {
         Have an idea? Submit a PR and help the community.
       </p>
       <a
-        href="https://github.com/fastrepl/hyprnote/issues/new?title=Suggest%20New%20Template%2FShortcut&body=Type:%20template%0ATitle:%20Sprint%20Planning%0ACategory:%20Engineering%0ADescription:%20A%20template%20for%20capturing%20sprint%20planning%20discussions%0A%0AStructure%20(list%20of%20sections%2C%20each%20with%20a%20title%20and%20what%20to%20include):%0A-%20Sprint%20Goals:%20Key%20objectives%20for%20the%20sprint%0A-%20User%20Stories:%20Stories%20discussed%20and%20committed%0A-%20Action%20Items:%20Tasks%20assigned%20to%20team%20members"
+        href="https://github.com/fastrepl/char/issues/new?title=Suggest%20New%20Template%2FShortcut&body=Type:%20template%0ATitle:%20Sprint%20Planning%0ACategory:%20Engineering%0ADescription:%20A%20template%20for%20capturing%20sprint%20planning%20discussions%0A%0AStructure%20(list%20of%20sections%2C%20each%20with%20a%20title%20and%20what%20to%20include):%0A-%20Sprint%20Goals:%20Key%20objectives%20for%20the%20sprint%0A-%20User%20Stories:%20Stories%20discussed%20and%20committed%0A-%20Action%20Items:%20Tasks%20assigned%20to%20team%20members"
         target="_blank"
         rel="noopener noreferrer"
         className={cn([

@@ -224,7 +224,7 @@ function JoinSection() {
           featured on this page, we'd love to hear from you.
         </p>
         <a
-          href="https://github.com/fastrepl/hyprnote/issues/new?title=OSS%20Friends%20Request&body=Project%20Name:%0AProject%20URL:%0ADescription:"
+          href="https://github.com/fastrepl/char/issues/new?title=OSS%20Friends%20Request&body=Project%20Name:%0AProject%20URL:%0ADescription:"
           target="_blank"
           rel="noopener noreferrer"
           className={cn([

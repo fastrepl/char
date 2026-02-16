@@ -141,7 +141,7 @@ function ProductLinks() {
         </li>
         <li>
           <a
-            href="https://github.com/fastrepl/hyprnote"
+            href="https://github.com/fastrepl/char"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-neutral-600 hover:text-stone-600 transition-colors inline-flex items-center gap-1 no-underline hover:underline hover:decoration-dotted"
@@ -167,12 +167,14 @@ function ProductLinks() {
 }
 
 function useRotatingIndex(listLength: number, interval: number) {
-  const [index, setIndex] = useState(() =>
-    Math.floor(Math.random() * listLength),
-  );
+  const [index, setIndex] = useState(0);
   const [fading, setFading] = useState(false);
   const pausedRef = useRef(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setIndex(Math.floor(Math.random() * listLength));
+  }, [listLength]);
 
   const advance = useCallback(() => {
     if (pausedRef.current) return;
@@ -249,7 +251,7 @@ function ResourcesLinks() {
         </li>
         <li>
           <a
-            href="https://github.com/fastrepl/hyprnote/discussions"
+            href="https://github.com/fastrepl/char/discussions"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-neutral-600 hover:text-stone-600 transition-colors inline-flex items-center gap-1 no-underline hover:underline hover:decoration-dotted"

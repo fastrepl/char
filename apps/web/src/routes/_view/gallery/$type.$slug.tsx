@@ -346,7 +346,7 @@ function RightSidebar({
 }) {
   const isTemplate = type === "template";
   const contentDir = isTemplate ? "templates" : "shortcuts";
-  const rawMdxUrl = `https://github.com/fastrepl/hyprnote/blob/main/apps/web/content/${contentDir}/${item.slug}.mdx?plain=1`;
+  const rawMdxUrl = `https://github.com/fastrepl/char/blob/main/apps/web/content/${contentDir}/${item.slug}.mdx?plain=1`;
 
   return (
     <aside className="hidden sm:block w-80 shrink-0">
@@ -381,7 +381,7 @@ function RightSidebar({
             Have an idea? Submit a PR and help the community.
           </p>
           <a
-            href={`https://github.com/fastrepl/hyprnote/tree/main/apps/web/content/${contentDir}`}
+            href={`https://github.com/fastrepl/char/tree/main/apps/web/content/${contentDir}`}
             target="_blank"
             rel="noopener noreferrer"
             className={cn([

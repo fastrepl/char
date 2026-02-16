@@ -54,7 +54,7 @@ export async function collectSupportContextBlock(): Promise<{
   }
 
   const result = await templateCommands.renderSupport({
-    supportSystem: { account: accountInfo, device: deviceInfo },
+    supportContext: { account: accountInfo, device: deviceInfo },
   });
 
   return {

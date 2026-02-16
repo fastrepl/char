@@ -1,7 +1,6 @@
 mod argmax;
 pub(crate) mod assemblyai;
-#[cfg(feature = "argmax")]
-pub mod audio;
+mod dashscope;
 pub mod deepgram;
 mod deepgram_compat;
 pub(crate) mod elevenlabs;
@@ -10,6 +9,7 @@ mod gladia;
 pub mod http;
 mod hyprnote;
 mod language;
+mod mistral;
 mod openai;
 mod owhisper;
 pub mod parsing;
@@ -18,12 +18,14 @@ mod url_builder;
 
 pub use argmax::*;
 pub use assemblyai::*;
+pub use dashscope::*;
 pub use deepgram::*;
 pub use elevenlabs::*;
 pub use fireworks::*;
 pub use gladia::*;
 pub use hyprnote::*;
 pub use language::{LanguageQuality, LanguageSupport};
+pub use mistral::*;
 pub use openai::*;
 pub use soniox::*;
 
@@ -136,6 +138,56 @@ pub trait BatchSttAdapter: Clone + Default + Send + Sync + 'static {
     ) -> BatchFuture<'a>;
 }
 
+pub enum CallbackResult {
+    Done(serde_json::Value),
+    ProviderError(String),
+}
+
+pub type CallbackSubmitFuture<'a> =
+    Pin<Box<dyn Future<Output = Result<String, Error>> + Send + 'a>>;
+pub type CallbackProcessFuture<'a> =
+    Pin<Box<dyn Future<Output = Result<CallbackResult, Error>> + Send + 'a>>;
+
+pub trait CallbackSttAdapter: Clone + Default + Send + Sync + 'static {
+    fn submit_callback<'a>(
+        &'a self,
+        client: &'a reqwest::Client,
+        api_key: &'a str,
+        audio_url: &'a str,
+        callback_url: &'a str,
+    ) -> CallbackSubmitFuture<'a>;
+
+    fn process_callback<'a>(
+        &'a self,
+        client: &'a reqwest::Client,
+        api_key: &'a str,
+        payload: serde_json::Value,
+    ) -> CallbackProcessFuture<'a>;
+}
+
+pub(crate) fn build_url_with_scheme(
+    parsed: &url::Url,
+    default_host: &str,
+    path: &str,
+    use_ws: bool,
+) -> url::Url {
+    let host = parsed.host_str().unwrap_or(default_host);
+    let is_local = is_local_host(host);
+    let scheme = match (use_ws, is_local) {
+        (true, true) => "ws",
+        (true, false) => "wss",
+        (false, true) => "http",
+        (false, false) => "https",
+    };
+    let host_with_port = match parsed.port() {
+        Some(port) => format!("{host}:{port}"),
+        None => host.to_string(),
+    };
+    format!("{scheme}://{host_with_port}{path}")
+        .parse()
+        .expect("invalid_url")
+}
+
 pub fn set_scheme_from_host(url: &mut url::Url) {
     if let Some(host) = url.host_str() {
         if is_local_host(host) {
@@ -212,6 +264,37 @@ fn is_local_argmax(base_url: &str) -> bool {
     host_matches(base_url, is_local_host) && !is_hyprnote_local_proxy(base_url)
 }
 
+pub(crate) fn build_ws_url_from_base_with(
+    provider: crate::providers::Provider,
+    api_base: &str,
+    make_url: impl FnOnce(&url::Url) -> url::Url,
+) -> (url::Url, Vec<(String, String)>) {
+    let default_url = || -> (url::Url, Vec<(String, String)>) {
+        (
+            provider
+                .default_ws_url()
+                .parse()
+                .expect("invalid_default_ws_url"),
+            Vec::new(),
+        )
+    };
+
+    if api_base.is_empty() {
+        return default_url();
+    }
+
+    if let Some(proxy_result) = build_proxy_ws_url(api_base) {
+        return proxy_result;
+    }
+
+    let parsed: url::Url = match api_base.parse() {
+        Ok(u) => u,
+        Err(_) => return default_url(),
+    };
+    let existing_params = extract_query_params(&parsed);
+    (make_url(&parsed), existing_params)
+}
+
 pub fn build_proxy_ws_url(api_base: &str) -> Option<(url::Url, Vec<(String, String)>)> {
     if api_base.is_empty() {
         return None;
@@ -260,6 +343,10 @@ pub enum AdapterKind {
     Gladia,
     #[strum(serialize = "elevenlabs")]
     ElevenLabs,
+    #[strum(serialize = "dashscope")]
+    DashScope,
+    #[strum(serialize = "mistral")]
+    Mistral,
 }
 
 impl AdapterKind {
@@ -303,7 +390,9 @@ impl AdapterKind {
             Self::OpenAI => OpenAIAdapter::language_support_live(languages),
             Self::Fireworks => FireworksAdapter::language_support_live(languages),
             Self::ElevenLabs => ElevenLabsAdapter::language_support_live(languages),
+            Self::DashScope => DashScopeAdapter::language_support_live(languages),
             Self::Argmax => ArgmaxAdapter::language_support_live(languages, model),
+            Self::Mistral => MistralAdapter::language_support_live(languages),
         }
     }
 
@@ -323,7 +412,9 @@ impl AdapterKind {
             Self::OpenAI => OpenAIAdapter::language_support_batch(languages),
             Self::Fireworks => FireworksAdapter::language_support_batch(languages),
             Self::ElevenLabs => ElevenLabsAdapter::language_support_batch(languages),
+            Self::DashScope => DashScopeAdapter::language_support_batch(languages),
             Self::Argmax => ArgmaxAdapter::language_support_batch(languages, model),
+            Self::Mistral => MistralAdapter::language_support_batch(languages),
         }
     }
 
@@ -365,6 +456,8 @@ impl From<crate::providers::Provider> for AdapterKind {
             Provider::OpenAI => Self::OpenAI,
             Provider::Gladia => Self::Gladia,
             Provider::ElevenLabs => Self::ElevenLabs,
+            Provider::DashScope => Self::DashScope,
+            Provider::Mistral => Self::Mistral,
         }
     }
 }

@@ -7,7 +7,10 @@ import {
 } from "@hypr/plugin-template";
 import { isValidTiptapContent, json2md } from "@hypr/tiptap/shared";
 
-import type { ContextEntity } from "../../chat/context-item";
+import {
+  type ContextEntity,
+  CURRENT_SESSION_CONTEXT_KEY,
+} from "../../chat/context-item";
 import { useSession } from "../../hooks/tinybase";
 import * as main from "../../store/tinybase/store/main";
 import { buildSegments, SegmentKey, type WordLike } from "../../utils/segment";
@@ -35,55 +38,21 @@ function tiptapJsonToMarkdown(
   }
 }
 
-export function useSessionContextEntity(
-  attachedSessionId?: string,
-): Extract<ContextEntity, { kind: "session" }> | null {
+function useSessionTranscript(sessionId: string): {
+  transcript: Transcript | null;
+  wordCount: number;
+} {
   const store = main.UI.useStore(main.STORE_ID);
-  const { title, rawMd, createdAt, event } = useSession(
-    attachedSessionId ?? "",
-  );
-
-  const participantIds = main.UI.useSliceRowIds(
-    main.INDEXES.sessionParticipantsBySession,
-    attachedSessionId ?? "",
-    main.STORE_ID,
-  );
-
-  const enhancedNoteIds = main.UI.useSliceRowIds(
-    main.INDEXES.enhancedNotesBySession,
-    attachedSessionId ?? "",
-    main.STORE_ID,
-  );
-
-  const enhancedContent = useMemo((): string | undefined => {
-    if (!store || !enhancedNoteIds || enhancedNoteIds.length === 0) {
-      return undefined;
-    }
-
-    const parts: string[] = [];
-    for (const noteId of enhancedNoteIds) {
-      const content = store.getCell("enhanced_notes", noteId, "content") as
-        | string
-        | undefined;
-      const md = tiptapJsonToMarkdown(content);
-      if (md) {
-        parts.push(md);
-      }
-    }
-
-    return parts.length > 0 ? parts.join("\n\n---\n\n") : undefined;
-  }, [store, enhancedNoteIds]);
 
   const transcriptIds = main.UI.useSliceRowIds(
     main.INDEXES.transcriptBySession,
-    attachedSessionId ?? "",
+    sessionId,
     main.STORE_ID,
   );
-  const firstTranscriptId = transcriptIds?.[0];
 
   const wordsJson = main.UI.useCell(
     "transcripts",
-    firstTranscriptId ?? "",
+    transcriptIds?.[0] ?? "",
     "words",
     main.STORE_ID,
   ) as string | undefined;
@@ -94,14 +63,14 @@ export function useSessionContextEntity(
     }
 
     try {
-      const parsedWords = JSON.parse(wordsJson) as Array<{
+      const parsed = JSON.parse(wordsJson) as Array<{
         text: string;
         start_ms: number;
         end_ms: number;
         channel: number;
       }>;
 
-      return parsedWords
+      return parsed
         .map((w) => ({
           text: w.text,
           start_ms: w.start_ms,
@@ -133,12 +102,19 @@ export function useSessionContextEntity(
     };
   }, [words, store]);
 
-  const rawContentMd = useMemo(
-    () => tiptapJsonToMarkdown(rawMd as string | undefined),
-    [rawMd],
+  return { transcript, wordCount: words.length };
+}
+
+function useSessionParticipants(sessionId: string): Participant[] {
+  const store = main.UI.useStore(main.STORE_ID);
+
+  const participantIds = main.UI.useSliceRowIds(
+    main.INDEXES.sessionParticipantsBySession,
+    sessionId,
+    main.STORE_ID,
   );
 
-  const participants = useMemo((): Participant[] => {
+  return useMemo((): Participant[] => {
     if (!store || participantIds.length === 0) {
       return [];
     }
@@ -176,51 +152,97 @@ export function useSessionContextEntity(
 
     return result;
   }, [store, participantIds]);
+}
+
+function useSessionEnhancedContent(sessionId: string): string | undefined {
+  const store = main.UI.useStore(main.STORE_ID);
+
+  const enhancedNoteIds = main.UI.useSliceRowIds(
+    main.INDEXES.enhancedNotesBySession,
+    sessionId,
+    main.STORE_ID,
+  );
+
+  return useMemo((): string | undefined => {
+    if (!store || !enhancedNoteIds || enhancedNoteIds.length === 0) {
+      return undefined;
+    }
+
+    const parts: string[] = [];
+    for (const noteId of enhancedNoteIds) {
+      const content = store.getCell("enhanced_notes", noteId, "content") as
+        | string
+        | undefined;
+      const md = tiptapJsonToMarkdown(content);
+      if (md) {
+        parts.push(md);
+      }
+    }
+
+    return parts.length > 0 ? parts.join("\n\n---\n\n") : undefined;
+  }, [store, enhancedNoteIds]);
+}
+
+export function useSessionContextEntity(
+  currentSessionId?: string,
+): Extract<ContextEntity, { kind: "session" }> | null {
+  const sessionId = currentSessionId ?? "";
+  const { title, rawMd, createdAt, event } = useSession(sessionId);
+
+  const { transcript, wordCount } = useSessionTranscript(sessionId);
+  const participants = useSessionParticipants(sessionId);
+  const enhancedContent = useSessionEnhancedContent(sessionId);
+
+  const rawContentMd = useMemo(
+    () => tiptapJsonToMarkdown(rawMd as string | undefined),
+    [rawMd],
+  );
 
   return useMemo((): Extract<ContextEntity, { kind: "session" }> | null => {
-    if (!attachedSessionId) {
+    if (!currentSessionId) {
       return null;
     }
 
     const titleStr = (title as string) || undefined;
     const dateStr = (createdAt as string) || undefined;
+
+    const isEmpty =
+      !titleStr &&
+      !dateStr &&
+      wordCount === 0 &&
+      !rawContentMd &&
+      !enhancedContent &&
+      participants.length === 0 &&
+      !event?.title;
+
+    if (isEmpty) {
+      return null;
+    }
+
     const sc: SessionContext = {
       title: titleStr ?? null,
       date: dateStr ?? null,
       rawContent: rawContentMd ?? null,
       enhancedContent: enhancedContent ?? null,
-      transcript: transcript ?? null,
+      transcript,
       participants,
       event: event?.title ? { name: event.title } : null,
     };
 
-    if (
-      !titleStr &&
-      !dateStr &&
-      words.length === 0 &&
-      !rawContentMd &&
-      !enhancedContent &&
-      participantIds.length === 0 &&
-      !event?.title
-    ) {
-      return null;
-    }
-
     return {
       kind: "session",
-      key: "session:info",
+      key: CURRENT_SESSION_CONTEXT_KEY,
       sessionContext: sc,
     };
   }, [
-    attachedSessionId,
+    currentSessionId,
     title,
     createdAt,
     rawContentMd,
     enhancedContent,
-    words.length,
+    wordCount,
     participants,
     event,
     transcript,
-    participantIds.length,
   ]);
 }

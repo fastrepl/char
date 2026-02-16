@@ -6,10 +6,11 @@ edition = "2024"
 [dependencies]
 hypr-analytics = { workspace = true }
 hypr-api-auth = { workspace = true }
+hypr-api-env = { workspace = true }
 hypr-language = { workspace = true }
-hypr-restate-stt-types = { workspace = true, features = ["utoipa"] }
+hypr-supabase-storage = { workspace = true }
 owhisper-client = { workspace = true }
-owhisper-interface = { workspace = true }
+owhisper-interface = { workspace = true, features = ["openapi"] }
 
 axum = { workspace = true, features = ["ws"] }
 futures-util = { workspace = true }
@@ -38,7 +39,7 @@ utoipa = { workspace = true }
 hypr-audio-utils = { workspace = true }
 hypr-data = { workspace = true }
 hypr-language = { workspace = true }
-owhisper-interface = { workspace = true }
+owhisper-interface = { workspace = true, features = ["openapi"] }
 
 rodio = { workspace = true }
 tokio-stream = { workspace = true }

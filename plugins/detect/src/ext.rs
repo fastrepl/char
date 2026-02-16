@@ -30,6 +30,12 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Detect<'a, R, M> {
         let mut state_guard = state.lock().unwrap_or_else(|e| e.into_inner());
         state_guard.policy.respect_dnd = enabled;
     }
+
+    pub fn set_mic_active_threshold(&self, secs: u64) {
+        let state = self.manager.state::<crate::ProcessorState>();
+        let mut state_guard = state.lock().unwrap_or_else(|e| e.into_inner());
+        state_guard.mic_active_threshold_secs = secs;
+    }
 }
 
 pub trait DetectPluginExt<R: tauri::Runtime> {

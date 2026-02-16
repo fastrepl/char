@@ -14,7 +14,6 @@ members = [
   "apps/desktop/src-tauri",
   "apps/eval-cli",
   "apps/granola",
-  "apps/restate",
   "apps/tools",
   "crates/*",
   "plugins/*",
@@ -45,6 +44,7 @@ hypr-audio-interface = { path = "crates/audio-interface", package = "audio-inter
 hypr-audio-utils = { path = "crates/audio-utils", package = "audio-utils" }
 hypr-buffer = { path = "crates/buffer", package = "buffer" }
 hypr-bundle = { path = "crates/bundle", package = "bundle" }
+hypr-chatwoot = { path = "crates/chatwoot", package = "chatwoot" }
 hypr-data = { path = "crates/data", package = "data" }
 hypr-db-core = { path = "crates/db-core", package = "db-core" }
 hypr-db-parser = { path = "crates/db-parser", package = "db-parser" }
@@ -91,12 +91,10 @@ hypr-porkbun = { path = "crates/porkbun", package = "porkbun" }
 hypr-posthog = { path = "crates/posthog", package = "posthog" }
 hypr-pyannote-cloud = { path = "crates/pyannote-cloud", package = "pyannote-cloud" }
 hypr-pyannote-local = { path = "crates/pyannote-local", package = "pyannote-local" }
-hypr-restate-rate-limit = { path = "crates/restate-rate-limit", package = "restate-rate-limit" }
-hypr-restate-stt = { path = "crates/restate-stt", package = "restate-stt" }
-hypr-restate-stt-types = { path = "crates/restate-stt-types", package = "restate-stt-types" }
 hypr-s3 = { path = "crates/s3", package = "s3" }
 hypr-slack = { path = "crates/slack", package = "slack" }
 hypr-supabase-auth = { path = "crates/supabase-auth", package = "supabase-auth" }
+hypr-supabase-storage = { path = "crates/supabase-storage", package = "supabase-storage" }
 hypr-tcc = { path = "crates/tcc", package = "tcc" }
 hypr-template-app = { path = "crates/template-app", package = "template-app" }
 hypr-template-app-legacy = { path = "crates/template-app-legacy", package = "template-app-legacy" }
@@ -181,6 +179,7 @@ tauri-plugin-overlay = { path = "plugins/overlay" }
 tauri-plugin-path2 = { path = "plugins/path2" }
 tauri-plugin-pdf = { path = "plugins/pdf" }
 tauri-plugin-permissions = { path = "plugins/permissions" }
+tauri-plugin-relay = { path = "plugins/relay" }
 tauri-plugin-screen = { path = "plugins/screen" }
 tauri-plugin-settings = { path = "plugins/settings" }
 tauri-plugin-sfx = { path = "plugins/sfx" }
@@ -198,8 +197,8 @@ async-stream = "0.3.6"
 futures-channel = "0.3.31"
 futures-core = "0.3.31"
 futures-util = "0.3.31"
-ractor = "0.14"
-ractor-supervisor = "0.1.9"
+hypr-supervisor = { path = "crates/supervisor", package = "supervisor" }
+ractor = "0.15.10"
 rayon = "1.11"
 reqwest = "0.13"
 reqwest-middleware = "0.5"
@@ -223,6 +222,7 @@ codes-iso-639 = "0.1.5"
 dirs = "6.0.0"
 dotenvy = "0.15.7"
 envy = "0.4"
+governor = "0.10.4"
 include_url_macro = "0.1.0"
 indoc = "2"
 isolang = "2.4"

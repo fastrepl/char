@@ -19,7 +19,11 @@ common_event_derives! {
             error: Option<String>,
         },
         #[serde(rename = "active")]
-        Active { session_id: String },
+        Active {
+            session_id: String,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            error: Option<crate::DegradedError>,
+        },
         #[serde(rename = "finalizing")]
         Finalizing { session_id: String },
     }

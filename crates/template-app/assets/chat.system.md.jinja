@@ -19,50 +19,13 @@ Current date: {{ ""|current_date }}
 {%- if let Some(ctx) = context %}
 
 Context: You are helping the user with their meeting notes. Here is the current context:
-{%- if let Some(title) = ctx.title %}
-
-Title: {{ title }}
-{%- endif -%}
-{%- if let Some(date) = ctx.date %}
-
-Date: {{ date }}
-{%- endif -%}
-{%- if let Some(event) = ctx.event %}
-
-Event: {{ event.name }}
-{%- endif -%}
-{%- if !ctx.participants.is_empty() %}
-
-Participants:{{ macros::participants(participants=ctx.participants) }}
-{%- endif -%}
-{%- if let Some(enhanced_content) = ctx.enhanced_content %}
-
-Enhanced Meeting Summary:
-{{ enhanced_content }}
-{%- else if let Some(raw_content) = ctx.raw_content %}
-
-User written note:
-{{ raw_content }}
-{%- endif -%}
-{%- if let Some(transcript) = ctx.transcript %}
-
-Full Meeting Transcript:
-{{ macros::transcript(transcript) }}
-{%- endif -%}
+{{ macros::session_context_details(ctx=ctx) }}
 {%- endif %}
-{%- if !related_sessions.is_empty() %}
+{%- if let Some(_ctx) = context %}
 
-Related Sessions:
-{%- for rs in related_sessions %}
-
----
-
-{{ macros::session_context_brief(ctx=rs) }}
-{%- endfor -%}
-{%- endif %}
-
-If there is no meeting transcript (blank after the "Full Meeting Transcript:"), it means that the meeting did not happen yet. In this case, you should understand that the user is asking for general information, ideas, or suggestions about preparing for the meeting.
+If there is no meeting transcript section, or if it is blank after "Full Meeting Transcript:", it means that the meeting did not happen yet. In this case, you should understand that the user is asking for general information, ideas, or suggestions about preparing for the meeting.
 
 If there is a meeting transcript and an enhanced meeting summary, it means that the meeting has happened and the user is asking for a new version of the meeting note or the intelligence from the meeting.
 
 You should treat meeting transcript and enhanced meeting summary as the information with more weight than the original (manually written) note.
+{%- endif %}

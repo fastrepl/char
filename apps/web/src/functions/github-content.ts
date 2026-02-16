@@ -4,7 +4,7 @@ import * as path from "path";
 
 import { getSupabaseServerClient } from "@/functions/supabase";
 
-const GITHUB_REPO = "fastrepl/hyprnote";
+const GITHUB_REPO = "fastrepl/char";
 const GITHUB_BRANCH = "main";
 const CONTENT_PATH = "apps/web/content";
 
@@ -110,7 +110,8 @@ function getDefaultFrontmatter(folder: string): string {
 meta_title: ""
 display_title: ""
 meta_description: ""
-author: "John Jeong"
+author:
+- "John Jeong"
 featured: false
 category: "Case Study"
 date: "${today}"
@@ -1299,7 +1300,7 @@ export async function savePublishedArticleToBranch(
   _metadata: {
     meta_title?: string;
     display_title?: string;
-    author?: string;
+    author?: string | string[];
   },
 ): Promise<{
   success: boolean;
@@ -1417,7 +1418,7 @@ export async function publishArticle(
   branchName: string,
   metadata: {
     meta_title?: string;
-    author?: string;
+    author?: string | string[];
     date?: string;
     category?: string;
   },
@@ -1435,7 +1436,7 @@ export async function publishArticle(
   const body = `## Article ${statusText}
 
 **Title:** ${metadata.meta_title || "Untitled"}
-**Author:** ${metadata.author || "Unknown"}
+**Author:** ${Array.isArray(metadata.author) ? metadata.author.join(", ") : metadata.author || "Unknown"}
 **Date:** ${metadata.date || "Not set"}
 **Category:** ${metadata.category || "Uncategorized"}
 

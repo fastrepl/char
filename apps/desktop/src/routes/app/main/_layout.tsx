@@ -3,8 +3,10 @@ import {
   Outlet,
   useRouteContext,
 } from "@tanstack/react-router";
+import { isTauri } from "@tauri-apps/api/core";
 import { useCallback, useEffect, useRef } from "react";
 
+import { hydrateSessionContextFromFs } from "../../../chat/session-context-hydrator";
 import { buildChatTools } from "../../../chat/tools";
 import { AITaskProvider } from "../../../contexts/ai-task";
 import { NotificationProvider } from "../../../contexts/notifications";
@@ -56,6 +58,10 @@ function Component() {
     const initializeTabs = async () => {
       if (!hasOpenedInitialTab.current) {
         hasOpenedInitialTab.current = true;
+        if (!isTauri()) {
+          openDefaultEmptyTab();
+          return;
+        }
         await restorePinnedTabsToStore(
           openNew,
           pin,
@@ -126,8 +132,18 @@ function Component() {
 
 function ToolRegistration() {
   const { search } = useSearchEngine();
+  const store = main.UI.useStore(main.STORE_ID);
 
-  useRegisterTools("chat-general", () => buildChatTools({ search }), [search]);
+  useRegisterTools(
+    "chat-general",
+    () =>
+      buildChatTools({
+        search,
+        resolveSessionContext: (sessionId) =>
+          hydrateSessionContextFromFs(store, sessionId),
+      }),
+    [search, store],
+  );
 
   return null;
 }

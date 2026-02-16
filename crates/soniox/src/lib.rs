@@ -178,6 +178,38 @@ pub async fn fetch_transcript(
     })
 }
 
+pub async fn fetch_transcript_raw(
+    client: &reqwest::Client,
+    transcription_id: &str,
+    api_key: &str,
+) -> Result<serde_json::Value, Error> {
+    let response = client
+        .get(format!(
+            "{API_HOST}/v1/transcriptions/{transcription_id}/transcript"
+        ))
+        .header("Authorization", format!("Bearer {api_key}"))
+        .send()
+        .await
+        .map_err(|e| Error {
+            message: format!("fetch transcript failed: {e}"),
+            is_retryable: true,
+        })?;
+
+    let status = response.status().as_u16();
+    if !response.status().is_success() {
+        let error_text = response.text().await.unwrap_or_default();
+        return Err(Error {
+            message: format!("fetch transcript: {status} - {error_text}"),
+            is_retryable: is_retryable_status(status),
+        });
+    }
+
+    response.json().await.map_err(|e| Error {
+        message: format!("failed to parse transcript response: {e}"),
+        is_retryable: false,
+    })
+}
+
 pub async fn upload_file(
     client: &reqwest::Client,
     file_name: &str,
@@ -218,6 +250,33 @@ pub async fn upload_file(
     })?;
 
     Ok(result.id)
+}
+
+pub async fn delete_transcription(
+    client: &reqwest::Client,
+    transcription_id: &str,
+    api_key: &str,
+) -> Result<(), Error> {
+    let response = client
+        .delete(format!("{API_HOST}/v1/transcriptions/{transcription_id}"))
+        .header("Authorization", format!("Bearer {api_key}"))
+        .send()
+        .await
+        .map_err(|e| Error {
+            message: format!("delete transcription failed: {e}"),
+            is_retryable: true,
+        })?;
+
+    let status = response.status().as_u16();
+    if !response.status().is_success() {
+        let error_text = response.text().await.unwrap_or_default();
+        return Err(Error {
+            message: format!("delete transcription: {status} - {error_text}"),
+            is_retryable: is_retryable_status(status),
+        });
+    }
+
+    Ok(())
 }
 
 pub async fn delete_file(

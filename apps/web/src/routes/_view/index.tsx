@@ -161,10 +161,9 @@ function Component() {
 
 function YCombinatorBanner() {
   return (
-    <a
-      href="https://www.ycombinator.com/companies/hyprnote"
-      target="_blank"
-      rel="noopener noreferrer"
+    <Link
+      to="/blog/$slug/"
+      params={{ slug: "hyprnote-is-now-char" }}
       className="group"
     >
       <div
@@ -176,17 +175,9 @@ function YCombinatorBanner() {
           "hover:bg-stone-50 transition-all",
         ])}
       >
-        <span className="group-hover:font-medium">Backed by</span>
-        <Image
-          src="/icons/yc_stone.svg"
-          alt="Y Combinator"
-          width={16}
-          height={16}
-          className="h-4 w-4 inline-block group-hover:scale-105"
-        />
-        <span className="group-hover:font-medium">Y Combinator</span>
+        <span className="group-hover:font-medium">Hyprnote is now Char.</span>
       </div>
-    </a>
+    </Link>
   );
 }
 
@@ -1497,7 +1488,8 @@ export function TemplatesSection() {
 
       <div className="text-center py-8 border-t border-neutral-100">
         <Link
-          to="/templates/"
+          to="/gallery/"
+          search={{ type: "template" }}
           className={cn([
             "inline-flex items-center gap-2",
             "text-stone-600 hover:text-stone-800",
@@ -1745,7 +1737,7 @@ function BlogSection() {
         {sortedArticles.map((article) => {
           const ogImage =
             article.coverImage ||
-            `https://hyprnote.com/og?type=blog&title=${encodeURIComponent(article.title ?? "")}${article.author ? `&author=${encodeURIComponent(article.author)}` : ""}${article.date ? `&date=${encodeURIComponent(new Date(article.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }))}` : ""}&v=1`;
+            `https://hyprnote.com/og?type=blog&title=${encodeURIComponent(article.title ?? "")}${article.author.length > 0 ? `&author=${encodeURIComponent(article.author.join(", "))}` : ""}${article.date ? `&date=${encodeURIComponent(new Date(article.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }))}` : ""}&v=1`;
 
           return (
             <Link

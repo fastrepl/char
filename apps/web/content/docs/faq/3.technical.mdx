@@ -16,6 +16,10 @@ The app itself is about 200MB. Recording storage depends on your usage - a 1-hou
 
 Yes! Since Char uses local AI, it works completely offline. You don't need an internet connection to record, transcribe, or generate summaries. See [Local Models](/docs/developers/local-models) for available local STT models and [Local LLM Setup](/docs/faq/local-llm-setup) for configuring local AI.
 
+## What cloud STT providers does Char support?
+
+Char supports 9 cloud speech-to-text providers: Deepgram, AssemblyAI, Soniox, Fireworks, OpenAI, Gladia, ElevenLabs, DashScope (Alibaba Cloud's Qwen3-ASR), and Mistral (Voxtral). Each provider can be used via BYOK (Bring Your Own Key) in Settings > Transcription. See [Better Transcription](/docs/pro/better-transcription) for details.
+
 ## How does Char route cloud LLM requests?
 
 When using cloud AI (Char Pro), LLM requests are routed through [OpenRouter](https://openrouter.ai). OpenRouter acts as a unified gateway to multiple model providers (OpenAI, Anthropic, Google, and others), so Char can switch between models without requiring separate API keys for each provider. A single `OPENROUTER_API_KEY` is all that's needed for cloud LLM access.

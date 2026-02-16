@@ -3,10 +3,10 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@hypr/ui/components/ui/button";
 import { Kbd } from "@hypr/ui/components/ui/kbd";
+import { useCmdKeyPressed } from "@hypr/ui/hooks/use-cmd-key-pressed";
 import { cn } from "@hypr/utils";
 
 import { useSearch } from "../../../contexts/search/ui";
-import { useCmdKeyPressed } from "../../../hooks/useCmdKeyPressed";
 import { useTabs } from "../../../store/zustand/tabs";
 
 export function Search({

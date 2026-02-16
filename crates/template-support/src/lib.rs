@@ -64,7 +64,7 @@ struct SupportContextBlock<'a> {
 #[derive(Clone, serde::Deserialize, serde::Serialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
 pub enum SupportTemplate {
-    SupportSystem(SupportSystem),
+    SupportContext(SupportContext),
     BugReport(BugReport),
     FeatureRequest(FeatureRequest),
     LogAnalysis(LogAnalysis),
@@ -72,7 +72,7 @@ pub enum SupportTemplate {
 
 #[derive(Clone, serde::Deserialize, serde::Serialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
-pub struct SupportSystem {
+pub struct SupportContext {
     pub account: Option<AccountInfo>,
     pub device: DeviceInfo,
 }
@@ -108,7 +108,7 @@ pub struct LogAnalysis {
 
 pub fn render(t: SupportTemplate) -> Result<String, askama::Error> {
     match t {
-        SupportTemplate::SupportSystem(t) => askama::Template::render(&SupportContextBlock {
+        SupportTemplate::SupportContext(t) => askama::Template::render(&SupportContextBlock {
             account: t.account.as_ref(),
             device: &t.device,
         }),

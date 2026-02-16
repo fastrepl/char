@@ -354,7 +354,7 @@ function OpenSourceSecuritySection() {
 
         <div className="mt-8 text-center">
           <a
-            href="https://github.com/fastrepl/hyprnote"
+            href="https://github.com/fastrepl/char"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-stone-600 hover:text-stone-800 font-medium"

@@ -1,12 +1,14 @@
 mod chat;
 mod enhance;
 mod title;
+mod tool;
 mod types;
 mod validate;
 
 pub use chat::*;
 pub use enhance::*;
 pub use title::*;
+pub use tool::*;
 pub use types::*;
 pub use validate::*;
 
@@ -26,6 +28,7 @@ common_derives! {
         TitleSystem(TitleSystem),
         TitleUser(TitleUser),
         ChatSystem(ChatSystem),
+        ToolSearchSessions(ToolSearchSessions),
     }
 }
 
@@ -46,6 +49,7 @@ pub fn render(t: Template) -> Result<String, Error> {
         Template::TitleSystem(t) => askama::Template::render(&t),
         Template::TitleUser(t) => askama::Template::render(&t),
         Template::ChatSystem(t) => askama::Template::render(&t),
+        Template::ToolSearchSessions(t) => askama::Template::render(&t),
     }?;
 
     Ok(value)
