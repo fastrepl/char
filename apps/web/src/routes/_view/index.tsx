@@ -4,8 +4,24 @@ import { useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { allArticles } from "content-collections";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { CheckIcon } from "lucide-react";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValue,
+  useMotionValueEvent,
+  useScroll,
+  useTransform,
+} from "motion/react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
+import { DancingSticks } from "@hypr/ui/components/ui/dancing-sticks";
 import { cn } from "@hypr/utils";
 
 import { DownloadButton } from "@/components/download-button";
@@ -14,6 +30,7 @@ import { GithubStars } from "@/components/github-stars";
 import { Image } from "@/components/image";
 import { LogoCloud } from "@/components/logo-cloud";
 import { FAQ, FAQItem } from "@/components/mdx-jobs";
+import { MockChatInput } from "@/components/mock-chat-input";
 import { MockWindow } from "@/components/mock-window";
 import { SlashSeparator } from "@/components/slash-separator";
 import { SocialCard } from "@/components/social-card";
@@ -120,31 +137,26 @@ function Component() {
     >
       <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
         <YCombinatorBanner />
-        <HeroSection
+        {/* <HeroSection
           onVideoExpand={setExpandedVideo}
           heroInputRef={heroInputRef}
-        />
+        /> */}
+        {/* <SlashSeparator /> */}
+        <HeroParagraphSection onVideoExpand={setExpandedVideo} />
         <SlashSeparator />
         <HowItWorksSection />
         <SlashSeparator />
-        <CoolStuffSection />
+        <AISection />
+        <SlashSeparator />
+        <GrowsWithYouSection />
         <SlashSeparator />
         <TestimonialsSection />
-        <SlashSeparator />
-        <MainFeaturesSection
-          featuresScrollRef={featuresScrollRef}
-          selectedFeature={selectedFeature}
-          setSelectedFeature={setSelectedFeature}
-          scrollToFeature={scrollToFeature}
-        />
         <SlashSeparator />
         <TemplatesSection />
         <SlashSeparator />
         <GitHubOpenSource />
         <SlashSeparator />
         <FAQSection />
-        <SlashSeparator />
-        <ManifestoSection />
         <SlashSeparator />
         <BlogSection />
         <SlashSeparator />
@@ -396,6 +408,330 @@ function HeroSection({
   );
 }
 
+type ScrollEffect = "opacity" | "blur" | "blurUp";
+
+interface ScrollRevealWordProps {
+  progress: ReturnType<typeof useMotionValue<number>>;
+  range: [number, number];
+  effect: ScrollEffect;
+  children: React.ReactNode;
+}
+
+function ScrollRevealWord({
+  progress,
+  range,
+  effect,
+  children,
+}: ScrollRevealWordProps) {
+  const [rangeStart, rangeEnd] = range;
+  const adjustedStart = Math.max(0, rangeStart - 0.05);
+
+  const opacity = useTransform(progress, [adjustedStart, rangeEnd], [0.15, 1]);
+  const filter = useTransform(
+    progress,
+    [adjustedStart, rangeEnd],
+    ["blur(4px)", "blur(0px)"],
+  );
+  const y = useTransform(progress, [adjustedStart, rangeEnd], [5, 0]);
+
+  const style = useMemo(() => {
+    if (effect === "opacity") {
+      return { opacity };
+    }
+    if (effect === "blur") {
+      return { opacity, filter };
+    }
+    if (effect === "blurUp") {
+      return { opacity, filter, y, display: "inline-block" as const };
+    }
+    return {};
+  }, [effect, opacity, filter, y]);
+
+  if (effect === "opacity" || effect === "blur" || effect === "blurUp") {
+    return <motion.span style={style}>{children}</motion.span>;
+  }
+
+  return <span>{children}</span>;
+}
+
+interface ScrollRevealParagraphProps {
+  children: React.ReactNode;
+  effect?: ScrollEffect;
+  className?: string;
+}
+
+function ScrollRevealParagraph({
+  children,
+  effect = "blur",
+  className,
+}: ScrollRevealParagraphProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start 0.5", "end 0.3"],
+  });
+
+  const ratchetedProgress = useMotionValue(0);
+
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (latest > ratchetedProgress.get()) {
+      ratchetedProgress.set(latest);
+    }
+  });
+
+  const extractText = (node: React.ReactNode): string => {
+    if (typeof node === "string") return node;
+    if (typeof node === "number") return String(node);
+    if (Array.isArray(node)) return node.map(extractText).join(" ");
+    if (React.isValidElement(node)) {
+      const element = node as React.ReactElement<any>;
+      if (element.props.children) {
+        return extractText(element.props.children);
+      }
+    }
+    return "";
+  };
+
+  const allText = extractText(children);
+  const allWords = allText.split(/\s+/).filter((w) => w.length > 0);
+  const wordCount = allWords.length;
+
+  let globalWordIndex = 0;
+
+  const processNode = (node: React.ReactNode): React.ReactNode => {
+    if (typeof node === "string") {
+      const words = node.split(/(\s+)/);
+      return words.map((segment, i) => {
+        if (segment.trim().length === 0) {
+          return segment;
+        }
+
+        const currentWordIndex = globalWordIndex;
+        globalWordIndex++;
+
+        const start = currentWordIndex / wordCount;
+        const end = (currentWordIndex + 1) / wordCount;
+
+        return (
+          <ScrollRevealWord
+            key={`word-${currentWordIndex}-${i}`}
+            progress={ratchetedProgress}
+            range={[start, end]}
+            effect={effect}
+          >
+            {segment}
+          </ScrollRevealWord>
+        );
+      });
+    }
+
+    if (React.isValidElement(node)) {
+      const element = node as React.ReactElement<any>;
+
+      if (element.type === "img") {
+        const neighborIndex = Math.max(0, globalWordIndex - 1);
+        const start = neighborIndex / wordCount;
+        const end = (neighborIndex + 1) / wordCount;
+
+        return (
+          <ScrollRevealWord
+            key={`img-${neighborIndex}`}
+            progress={ratchetedProgress}
+            range={[start, end]}
+            effect={effect}
+          >
+            {element}
+          </ScrollRevealWord>
+        );
+      }
+
+      if (element.props.style?.backgroundImage) {
+        const innerText = extractText(element);
+        const innerWords = innerText.split(/\s+/).filter((w) => w.length > 0);
+        const startIndex = globalWordIndex;
+        globalWordIndex += innerWords.length;
+        const start = startIndex / wordCount;
+        const end = (startIndex + innerWords.length) / wordCount;
+
+        return (
+          <ScrollRevealWord
+            key={`bg-${startIndex}`}
+            progress={ratchetedProgress}
+            range={[start, end]}
+            effect={effect}
+          >
+            {element}
+          </ScrollRevealWord>
+        );
+      }
+
+      return React.cloneElement(element, {
+        ...element.props,
+        children: React.Children.map(element.props.children, processNode),
+      });
+    }
+
+    if (Array.isArray(node)) {
+      return node.map((child, i) => (
+        <React.Fragment key={i}>{processNode(child)}</React.Fragment>
+      ));
+    }
+
+    return node;
+  };
+
+  return (
+    <div ref={containerRef} className={className}>
+      {processNode(children)}
+    </div>
+  );
+}
+
+function HeroParagraphSection({
+  onVideoExpand,
+}: {
+  onVideoExpand: (id: string) => void;
+}) {
+  return (
+    <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
+      <section className="flex flex-col items-center text-left lg:pt-32 lg:pb-32 md:pt-24 md:pb-24 pt-16 pb-16 px-4 laptop:px-8">
+        <p className="font-serif text-2xl lg:text-[3rem] md:text-3xl text-stone-600 leading-relaxed w-full">
+          We believe in the power of notetaking, not notetakers. Meetings should
+          be moments of presence, not passive attendance.{" "}
+          <img
+            src="/handdrawing/sleeping.svg"
+            alt="Presence"
+            className="lg:size-12 md:size-10 size-8 inline-block"
+          />
+        </p>
+        <ScrollRevealParagraph
+          effect="blur"
+          className="font-serif text-2xl lg:text-[3rem] md:text-3xl text-stone-600 leading-relaxed w-full"
+        >
+          <p className="lg:mt-18 md:mt-12 mt-8">
+            AI changes it. Instead of{" "}
+            <span
+              style={{
+                backgroundImage: "url(/handdrawing/scribbling.svg)",
+                backgroundSize: "contain",
+                backgroundPosition: "bottom",
+                backgroundRepeat: "no-repeat",
+              }}
+            >
+              {" "}
+              scribbling{" "}
+            </span>{" "}
+            notes, it gives us the power to be present.
+          </p>
+          <p className="lg:mt-18 md:mt-12 mt-8">
+            But we give it control over our meetings. What happens with all our
+            calls and chats then? Services sunset{" "}
+            <span>
+              <img
+                src="/handdrawing/sunset.svg"
+                alt="Sunset"
+                className="lg:size-12 md:size-10 size-8 inline-block"
+              />
+            </span>{" "}
+            constantly, models change, progress is unstoppable.
+          </p>
+          <p className="lg:mt-18 md:mt-12 mt-8">
+            We believe in owning your data, doesn't matter where it lives. More
+            <span
+              style={{
+                backgroundImage: "url(/handdrawing/important.svg)",
+                backgroundSize: "contain",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+              }}
+            >
+              {" "}
+              important{" "}
+            </span>{" "}
+            is what you bring from every meeting, every call, every chat.
+          </p>
+          <p className="lg:mt-18 md:mt-12 mt-8">
+            <span>
+              <img
+                src="/handdrawing/bracket-left.svg"
+                alt="bracket left"
+                className="lg:h-12 md:h-10 size-8 inline-block"
+              />
+              Char
+              <img
+                src="/handdrawing/bracket-right.svg"
+                alt="bracket right"
+                className="lg:h-12 md:h-10 size-8 inline-block"
+              />
+            </span>{" "}
+            exists to preserve what makes us human: conversations that spark
+            ideas, collaborations that move work forward. We build tools that
+            amplify human agency, not replace it.
+          </p>
+          <p className="lg:mt-18 md:mt-12 mt-8">
+            No ghost bots. No silent note lurkers. Just people,{" "}
+            <span>
+              thinking{" "}
+              <img
+                src="/handdrawing/thinking.svg"
+                alt="thinking"
+                className="lg:size-12 md:size-10 size-8 inline-block"
+              />{" "}
+            </span>
+            together.
+          </p>
+        </ScrollRevealParagraph>
+
+        <div className="flex flex-col sm:flex-row w-full justify-between items-start sm:items-end gap-8 mt-12">
+          <div className="flex flex-col gap-4">
+            <div className="flex gap-2 mb-4">
+              <Image
+                src="/api/images/team/john.png"
+                alt="John Jeong"
+                width={32}
+                height={32}
+                className="rounded-full object-cover border border-neutral-200"
+              />
+              <Image
+                src="/api/images/team/yujong.png"
+                alt="Yujong Lee"
+                width={32}
+                height={32}
+                className="rounded-full object-cover border border-neutral-200"
+              />
+            </div>
+
+            <div>
+              <p className="text-base text-neutral-600 font-medium italic font-serif">
+                Hyprnote
+              </p>
+              <p className="text-sm text-neutral-500">John Jeong, Yujong Lee</p>
+            </div>
+
+            <div>
+              <Image
+                src="/handdrawing/char-signature.svg"
+                alt="Hyprnote Signature"
+                width={124}
+                height={60}
+                layout="constrained"
+                className="opacity-80 object-contain"
+              />
+            </div>
+          </div>
+
+          <div className="relative aspect-video w-full md:w-auto md:min-w-32 md:max-w-64 rounded-lg overflow-hidden border border-neutral-200 shrink-0">
+            <VideoThumbnail
+              playbackId={MUX_PLAYBACK_ID}
+              onPlay={() => onVideoExpand(MUX_PLAYBACK_ID)}
+            />
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function ValuePropsGrid({
   valueProps,
 }: {
@@ -431,7 +767,7 @@ function TestimonialsSection() {
   return (
     <section>
       <div className="text-center">
-        <p className="font-medium text-neutral-600 uppercase tracking-wide py-6 font-serif">
+        <p className="font-medium text-neutral-600 uppercase tracking-wide py-12 font-serif">
           Loved by professionals at
         </p>
 
@@ -712,6 +1048,9 @@ export function HowItWorksSection() {
   const [typedText1, setTypedText1] = useState("");
   const [typedText2, setTypedText2] = useState("");
   const [enhancedLines, setEnhancedLines] = useState(0);
+  const [activeTab, setActiveTab] = useState<
+    "notes" | "summary" | "transcription"
+  >("notes");
 
   const text1 = "metrisc w/ john";
   const text2 = "stakehlder mtg";
@@ -721,6 +1060,7 @@ export function HowItWorksSection() {
       setTypedText1("");
       setTypedText2("");
       setEnhancedLines(0);
+      setActiveTab("notes");
 
       let currentIndex1 = 0;
       setTimeout(() => {
@@ -740,27 +1080,31 @@ export function HowItWorksSection() {
                 clearInterval(interval2);
 
                 setTimeout(() => {
-                  setEnhancedLines(1);
+                  setActiveTab("summary");
+
                   setTimeout(() => {
-                    setEnhancedLines(2);
+                    setEnhancedLines(1);
                     setTimeout(() => {
-                      setEnhancedLines(3);
+                      setEnhancedLines(2);
                       setTimeout(() => {
-                        setEnhancedLines(4);
+                        setEnhancedLines(3);
                         setTimeout(() => {
-                          setEnhancedLines(5);
+                          setEnhancedLines(4);
                           setTimeout(() => {
-                            setEnhancedLines(6);
+                            setEnhancedLines(5);
                             setTimeout(() => {
-                              setEnhancedLines(7);
-                              setTimeout(() => runAnimation(), 1000);
+                              setEnhancedLines(6);
+                              setTimeout(() => {
+                                setEnhancedLines(7);
+                                setTimeout(() => runAnimation(), 2000);
+                              }, 800);
                             }, 800);
                           }, 800);
                         }, 800);
                       }, 800);
                     }, 800);
-                  }, 800);
-                }, 500);
+                  }, 300);
+                }, 800);
               }
             }, 50);
           }
@@ -773,23 +1117,48 @@ export function HowItWorksSection() {
 
   return (
     <section>
-      <div className="text-center border-b border-neutral-100">
-        <p className="font-medium text-neutral-600 uppercase tracking-wide py-6 font-serif">
-          How it works
+      <div className="flex flex-col items-center gap-4 pt-16 pb-8 text-center">
+        <h2 className="text-4xl text-neutral-600 tracking-wide font-serif">
+          All your meetings stay yours.
+        </h2>
+        <p className="text-md text-neutral-600 mx-auto pb-4">
+          We believe that file is more important than software. <br />
+          All saves locally, in plain markdown
+          <span className="text-neutral-400">.md</span>
         </p>
+        <DownloadButton />
       </div>
-      <div className="hidden sm:grid sm:grid-cols-2">
-        <div className="border-r border-neutral-100 flex flex-col overflow-clip">
-          <div className="p-8 flex flex-col gap-4">
-            <p className="text-lg font-serif text-neutral-600 leading-relaxed">
-              <span className="font-semibold">While you take notes,</span> Char
-              listens and keeps track of everything that happens during the
-              meeting.
-            </p>
+      <div className="flex justify-center pt-16 sm:pt-24 px-4 sm:px-8 overflow-hidden">
+        <MockWindow
+          showAudioIndicator={activeTab === "notes"}
+          audioIndicatorColor="#ef4444"
+          audioIndicatorWidth={120}
+          headerClassName={activeTab === "notes" ? "bg-red-100" : undefined}
+        >
+          <div className="flex border-b border-neutral-200 text-sm">
+            {(["notes", "summary", "transcription"] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={cn([
+                  "px-4 py-2 transition-colors",
+                  activeTab === tab
+                    ? "text-neutral-900 border-b-2 border-neutral-900"
+                    : "text-neutral-400 hover:text-neutral-600",
+                ])}
+              >
+                {tab === "notes"
+                  ? "Your Notes"
+                  : tab === "summary"
+                    ? "Summary"
+                    : "Transcription"}
+              </button>
+            ))}
           </div>
-          <div className="flex-1 flex items-end justify-center px-8 pb-0 bg-stone-50/30">
-            <MockWindow showAudioIndicator={enhancedLines === 0}>
-              <div className="p-6 h-75 overflow-hidden">
+
+          <div className="p-6 h-75 overflow-hidden">
+            {activeTab === "notes" && (
+              <div>
                 <div className="text-neutral-700">ui update - moble</div>
                 <div className="text-neutral-700">api</div>
                 <div className="text-neutral-700 mt-4">new dash - urgnet</div>
@@ -807,21 +1176,10 @@ export function HowItWorksSection() {
                   )}
                 </div>
               </div>
-            </MockWindow>
-          </div>
-        </div>
+            )}
 
-        <div className="flex flex-col overflow-clip">
-          <div className="p-8 flex flex-col gap-4">
-            <p className="text-lg font-serif text-neutral-600 leading-relaxed">
-              <span className="font-semibold">After the meeting is over,</span>{" "}
-              Char combines your notes with transcripts to create a perfect
-              summary.
-            </p>
-          </div>
-          <div className="flex-1 flex items-end justify-center px-8 pb-0 bg-stone-50/30">
-            <MockWindow>
-              <div className="p-6 flex flex-col gap-4 h-75 overflow-hidden">
+            {activeTab === "summary" && (
+              <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-2">
                   <h4
                     className={cn([
@@ -833,10 +1191,10 @@ export function HowItWorksSection() {
                   </h4>
                   <ul className="flex flex-col gap-2 text-neutral-700 list-disc pl-5">
                     <li
-                      className={cn(
+                      className={cn([
                         "transition-opacity duration-500",
                         enhancedLines >= 2 ? "opacity-100" : "opacity-0",
-                      )}
+                      ])}
                     >
                       Sarah presented the new mobile UI update, which includes a
                       streamlined navigation bar and improved button placements
@@ -895,149 +1253,400 @@ export function HowItWorksSection() {
                   </ul>
                 </div>
               </div>
-            </MockWindow>
+            )}
+
+            {activeTab === "transcription" && (
+              <div className="flex flex-col gap-3 text-sm">
+                <div className="text-neutral-700">
+                  <span className="font-medium text-neutral-900">Sarah:</span>{" "}
+                  So the mobile UI update is looking good. We've streamlined the
+                  nav bar and improved button placements.
+                </div>
+                <div className="text-neutral-700">
+                  <span className="font-medium text-neutral-900">Ben:</span>{" "}
+                  I'll need to adjust the API to support dynamic UI changes,
+                  especially for personalized user data.
+                </div>
+                <div className="text-neutral-700">
+                  <span className="font-medium text-neutral-900">Alice:</span>{" "}
+                  The new dashboard is urgent. Stakeholders have been asking
+                  about it every day.
+                </div>
+                <div className="text-neutral-700">
+                  <span className="font-medium text-neutral-900">Mark:</span> We
+                  should align the dashboard launch with our marketing push next
+                  quarter.
+                </div>
+              </div>
+            )}
+          </div>
+        </MockWindow>
+      </div>
+
+      <div className="flex flex-col md:flex-row md:h-80 border-t border-neutral-200 divide-y md:divide-x divide-neutral-200 md:*:w-1/3 *:w-full *:px-8 *:lg:pt-16 *:pt-8 *:pb-8">
+        <div className="flex flex-col justify-between ">
+          <div className="flex h-20 items-center justify-left gap-6">
+            <Icon icon="mdi:wifi-off" className="text-2xl text-stone-600" />
+            <div className="flex item-center py-2 px-2  bg-red-100 rounded-md border border-red-300">
+              <DancingSticks
+                amplitude={1}
+                height={24}
+                width={120}
+                color="#ef4444"
+              />
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 md:gap-4">
+            <h4 className="text-lg font-serif text-stone-700">
+              Use local models or use Your Own key
+            </h4>
+            <p className="text-md text-neutral-500">
+              Hyprnote work with various transcription models right on your
+              device, even without internet.
+            </p>
+          </div>
+        </div>
+
+        <div className="group flex flex-col gap-8 sm:gap-4 justify-between">
+          <div className="flex md:min-h-20 items-center justify-left gap-6">
+            <div className="relative flex w-full lg:h-full h-16 items-center justify-center py-2 px-2 rounded-md border-2 border-dashed border-green-300">
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-gray-100">
+                <Icon
+                  icon="mdi:file-upload"
+                  className="text-2xl text-stone-600"
+                />
+              </div>
+
+              <div className="absolute lg:bottom-1/4 lg:right-1/4 lg:translate-x-[5%] lg:-translate-y-[5%] rotate-8 group-hover:translate-x-[10%] group-hover:translate-y-[10%]  group-hover:-translate-y-[50%] group-hover:rotate-6 transition-all duration-500 ease-out flex flex-row items-center gap-2 pl-2 pr-4 py-2 rounded-md bg-gray-100 border border-gray-300 shadow-lg text-nowrap">
+                <img
+                  src="/icons/grabbed-cursor.svg"
+                  className="absolute top-1/2 left-1/2 w-8 h-8"
+                  alt=""
+                />
+                <Icon
+                  icon="mdi:file-outline"
+                  className="text-2xl text-stone-600"
+                />
+                <div className="flex flex-col">
+                  <p className="text-md text-neutral-600">
+                    Meeting.12.03.26-11.32.wav
+                  </p>
+                  <p className="text-sm text-neutral-300">14:30:25</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 md:gap-4">
+            <h4 className="text-lg font-serif text-stone-700">
+              Upload records or existing transcripts
+            </h4>
+            <p className="text-md text-neutral-500">
+              Hyprnote work with various transcription models right on your
+              device, even without internet
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col justify-between gap-8 sm:gap-4 px-8 pt-16 pb-8">
+          <div className="flex items-center">
+            <div className="flex items-center justify-between gap-2 md:gap-3 rounded-xl bg-gradient-to-t from-white to-stone-100 border border-neutral-200 shadow-lg px-4 py-3 text-nowrap w-full">
+              <div className="flex items-center gap-2 md:gap-3">
+                <Icon
+                  icon="mdi:video"
+                  className="text-xl text-stone-500 shrink-0"
+                />
+                <div className="flex flex-col gap-0.5">
+                  <p className="text-xs text-neutral-400">1-1 with Joanna</p>
+                  <p className="text-sm font-medium text-neutral-500">
+                    AI Notetaker joined the call.
+                  </p>
+                </div>
+              </div>
+              <button className="ml-2 shrink-0 text-neutral-300 hover:text-neutral-500 transition-colors">
+                <Icon icon="mdi:close" className="text-base" />
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2 md:gap-4">
+            <h4 className="text-lg font-serif text-stone-700">
+              No bot on calls
+            </h4>
+            <p className="text-md text-neutral-500">
+              Char is connecting right to your system audio and get every word
+              perfectly, no faceless bots join your meetings.
+            </p>
           </div>
         </div>
       </div>
+    </section>
+  );
+}
 
-      <div className="sm:hidden">
-        <div className="border-b border-neutral-100">
-          <div className="p-6 pb-2">
-            <p className="text-base font-serif text-neutral-600 leading-relaxed mb-4">
-              <span className="font-semibold">While you take notes,</span> Char
-              listens and keeps track of everything that happens during the
-              meeting.
-            </p>
-          </div>
-          <div className="px-6 pb-0 bg-stone-50/30 overflow-clip">
-            <MockWindow
-              variant="mobile"
-              showAudioIndicator={enhancedLines === 0}
-            >
-              <div className="p-6 h-50 overflow-hidden">
-                <div className="text-neutral-700">ui update - moble</div>
-                <div className="text-neutral-700">api</div>
-                <div className="text-neutral-700 mt-3">new dash - urgnet</div>
-                <div className="text-neutral-700">a/b tst next wk</div>
-                <div className="text-neutral-700 mt-3">
-                  {typedText1}
-                  {typedText1 && typedText1.length < text1.length && (
-                    <span className="animate-pulse">|</span>
-                  )}
-                </div>
-                <div className="text-neutral-700">
-                  {typedText2}
-                  {typedText2 && typedText2.length < text2.length && (
-                    <span className="animate-pulse">|</span>
-                  )}
-                </div>
+export function AISection() {
+  const researchStatuses = [
+    "Exploring meetings",
+    "Analysing",
+    "Generating summary",
+  ];
+  const [statusIndex, setStatusIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setStatusIndex((prev) => (prev + 1) % researchStatuses.length);
+    }, 1200);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <section>
+      <div className="flex flex-col items-center gap-4 pt-16 pb-8 px-4 text-center">
+        <h2 className="md:text-4xl text-2xl text-neutral-700 tracking-wide font-serif">
+          Get more from every note with AI assistant
+        </h2>
+        <p className="text-md text-neutral-500 mx-auto pb-4">
+          Ask, give tasks to execute and grow your team knowledge base.
+        </p>
+        <a
+          href="/product/ai-assistant/"
+          className="text-md underline text-neutral-600 hover:text-neutral-800"
+        >
+          More about AI
+        </a>
+      </div>
+      <div className="flex justify-center px-4 sm:px-8 pb-16 overflow-hidden">
+        <MockChatInput />
+      </div>
+
+      <div className="flex flex-col md:flex-row md:h-80 border-t border-neutral-200 divide-y md:divide-x divide-neutral-200 md:*:w-1/3 *:w-full">
+        <div className="flex flex-col justify-between px-8 pt-16 pb-8">
+          <div className="flex h-16 items-center gap-4">
+            {[
+              { name: "Slack", image: "slack.jpg" },
+              { name: "Linear", image: "linear.jpg" },
+              { name: "Notion", image: "notion.jpg" },
+            ].map((integration) => (
+              <div
+                key={integration.name}
+                className="size-12 rounded-xl overflow-hidden border border-neutral-100/50 bg-white shrink-0 shadow-md hover:scale-110 transition-all duration-500"
+              >
+                <Image
+                  src={`/api/images/icons/${integration.image}`}
+                  alt={integration.name}
+                  width={56}
+                  height={56}
+                  className="w-full h-full object-cover"
+                />
               </div>
-            </MockWindow>
+            ))}
+          </div>
+          <div className="flex flex-col gap-2 md:gap-4">
+            <h4 className="text-lg font-serif text-stone-700">
+              Workflows and integrations
+            </h4>
+            <p className="text-md text-neutral-500">
+              Automate follow-up tasks across your tools without manual data
+              entry.
+            </p>
           </div>
         </div>
 
-        <div>
-          <div className="p-6 pb-2">
-            <p className="text-base font-serif text-neutral-600 leading-relaxed mb-4">
-              <span className="font-semibold">After the meeting is over,</span>{" "}
-              Char combines your notes with transcripts to create a perfect
-              summary.
-            </p>
-          </div>
-          <div className="px-6 pb-0 bg-stone-50/30 overflow-clip">
-            <MockWindow variant="mobile">
-              <div className="p-6 flex flex-col gap-4 h-50 overflow-hidden">
-                <div className="flex flex-col gap-2">
-                  <h4 className="text-lg font-semibold text-stone-700">
-                    Mobile UI Update and API Adjustments
-                  </h4>
-                  <ul className="flex flex-col gap-2 text-neutral-700 list-disc pl-4">
-                    <li
-                      className={cn([
-                        "transition-opacity duration-500",
-                        enhancedLines >= 1 ? "opacity-100" : "opacity-0",
-                      ])}
-                    >
-                      Sarah presented the new mobile UI update, which includes a
-                      streamlined navigation bar and improved button placements
-                      for better accessibility.
-                    </li>
-                    <li
-                      className={cn([
-                        "transition-opacity duration-500",
-                        enhancedLines >= 2 ? "opacity-100" : "opacity-0",
-                      ])}
-                    >
-                      Ben confirmed that API adjustments are needed to support
-                      dynamic UI changes, particularly for fetching personalized
-                      user data more efficiently.
-                    </li>
-                    <li
-                      className={cn([
-                        "transition-opacity duration-500",
-                        enhancedLines >= 3 ? "opacity-100" : "opacity-0",
-                      ])}
-                    >
-                      The UI update will be implemented in phases, starting with
-                      core navigation improvements. Ben will ensure API
-                      modifications are completed before development begins.
-                    </li>
-                  </ul>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <h4 className="text-lg font-semibold text-stone-700">
-                    New Dashboard – Urgent Priority
-                  </h4>
-                  <ul className="flex flex-col gap-2 text-neutral-700 list-disc pl-4">
-                    <li
-                      className={cn([
-                        "transition-opacity duration-500",
-                        enhancedLines >= 4 ? "opacity-100" : "opacity-0",
-                      ])}
-                    >
-                      Alice emphasized that the new analytics dashboard must be
-                      prioritized due to increasing stakeholder demand.
-                    </li>
-                    <li
-                      className={cn([
-                        "transition-opacity duration-500",
-                        enhancedLines >= 5 ? "opacity-100" : "opacity-0",
-                      ])}
-                    >
-                      The new dashboard will feature real-time user engagement
-                      metrics and a customizable reporting system.
-                    </li>
-                    <li
-                      className={cn([
-                        "transition-opacity duration-500",
-                        enhancedLines >= 6 ? "opacity-100" : "opacity-0",
-                      ])}
-                    >
-                      Ben mentioned that backend infrastructure needs
-                      optimization to handle real-time data processing.
-                    </li>
-                    <li
-                      className={cn([
-                        "transition-opacity duration-500",
-                        enhancedLines >= 6 ? "opacity-100" : "opacity-0",
-                      ])}
-                    >
-                      Mark stressed that the dashboard launch should align with
-                      marketing efforts to maximize user adoption.
-                    </li>
-                    <li
-                      className={cn([
-                        "transition-opacity duration-500",
-                        enhancedLines >= 6 ? "opacity-100" : "opacity-0",
-                      ])}
-                    >
-                      Development will start immediately, and a basic prototype
-                      must be ready for stakeholder review next week.
-                    </li>
-                  </ul>
+        <div className="flex flex-col justify-between px-6 pb-8">
+          <div className="flex items-center justify-center pb-4 relative">
+            <div className="flex flex-col w-2/3 rounded-b-xl border-r border-b border-l border-neutral-200 pt-24 overflow-hidden">
+              <div className="flex items-center absolute top-6 left-1/2 -translate-x-1/2 bg-linear-to-t from-stone-100 to-white w-full gap-2 px-2 pl-2 py-2 rounded-lg shadow-lg border border-neutral-200">
+                <span className="flex-1 text-sm text-stone-500">
+                  What was John's tasks from previous call?
+                </span>
+                <div className="flex items-center justify-center size-7 rounded-lg shrink-0 transition-colors bg-stone-600 text-white">
+                  <Icon icon="mdi:arrow-up" className="text-base" />
                 </div>
               </div>
-            </MockWindow>
+
+              <div className="flex items-center justify-center gap-2 px-3 pb-3 *:hover:scale-110 *:transition-all *:duration-500">
+                <div className="flex items-center justify-center size-10 rounded-full bg-neutral-600 text-white">
+                  <Icon icon="mdi:monitor-share" className="text-base" />
+                </div>
+                <div className="flex items-center justify-center size-10 rounded-full bg-neutral-600 text-white">
+                  <Icon icon="mdi:dots-vertical" className="text-lg" />
+                </div>
+                <div className="flex items-center justify-center h-10 px-5 rounded-full bg-red-500 text-white">
+                  <Icon icon="mdi:phone-hangup" className="text-lg" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 md:gap-4 px-2">
+            <h4 className="text-lg font-serif text-stone-700">
+              Ask questions in realtime
+            </h4>
+            <p className="text-md text-neutral-500">
+              Get instant answers from your current calls and previous meetings.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col justify-between px-8 pt-16 pb-8">
+          <div className="flex h-20 items-center">
+            <div className="flex items-center gap-3 rounded-xl border border-neutral-200 shadow-lg px-4 py-3 w-full">
+              <div className="flex items-center justify-center size-8 rounded-full bg-violet-100 text-violet-600 text-xs font-semibold shrink-0">
+                JJ
+              </div>
+              <div className="flex flex-col gap-0.5 min-w-0 overflow-hidden">
+                <p className="text-xs text-neutral-400">John Jeong's progress</p>
+                <div className="relative h-5">
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key={statusIndex}
+                      initial={{ y: -8, opacity: 0, filter: "blur(12px)" }}
+                      animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                      exit={{ y: 8, opacity: 0, filter: "blur(12px)" }}
+                      transition={{ duration: 0.5, ease: "easeInOut" }}
+                      className="text-sm font-medium text-neutral-500 absolute inset-0 text-shimmer"
+                    >
+                      {researchStatuses[statusIndex]}
+                    </motion.p>
+                  </AnimatePresence>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 md:gap-4">
+            <h4 className="text-lg font-serif text-stone-700">
+              Deep research of your chats
+            </h4>
+            <p className="text-md text-neutral-500">
+              Chat with your AI assistant to learn more about the people you're
+              meeting with.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function GrowsWithYouSection() {
+  return (
+    <section>
+      <div className="flex flex-col items-center gap-4 pt-16 pb-8 text-center px-4">
+        <h2 className="md:text-4xl text-2xl text-neutral-700 tracking-wide font-serif">
+          Char grows with you
+        </h2>
+        <p className="text-md text-neutral-500 mx-auto max-w-xl pb-4">
+          Add people from meetings in contacts, grow knowledge about your chats
+          and context of previous meetings
+        </p>
+        <Link
+          to="/product/mini-apps/"
+          className="text-md underline text-neutral-600 hover:text-neutral-800 flex items-center gap-1"
+        >
+          Explore all features
+          <Icon icon="mdi:arrow-top-right" className="text-sm" />
+        </Link>
+      </div>
+
+      <div className="grid md:grid-cols-2 border-t border-neutral-200">
+        <div className="flex flex-col border-b md:border-b-0 md:border-r border-neutral-200">
+          <div className="p-8">
+            <h3 className="text-2xl font-serif text-stone-600 mb-3">
+              Your contacts in one place
+            </h3>
+            <p className="text-md text-neutral-600 leading-relaxed mb-4">
+              Import contacts and watch them come alive with context once you
+              actually meet.
+            </p>
+            <ul className="flex flex-col gap-3">
+              <li className="flex items-start gap-3">
+                <CheckIcon className="text-green-600 shrink-0 mt-0.5 size-5" />
+                <span className="text-md text-neutral-600">
+                  All your chats linked
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <CheckIcon className="text-green-600 shrink-0 mt-0.5 size-5" />
+                <span className="text-md text-neutral-600">
+                  Generated summary from meetings
+                </span>
+              </li>
+            </ul>
+          </div>
+          <div className="overflow-hidden mt-auto bg-gradient-to-b from-white to-stone-100">
+            <img
+              src="/contact_human.webp"
+              alt="Contacts interface"
+              className="w-full h-auto object-contain"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col">
+          <div className="p-8">
+            <h3 className="text-2xl font-serif text-stone-600 mb-3">
+              Calendar
+            </h3>
+            <p className="text-md text-neutral-600 leading-relaxed mb-4">
+              Connect your calendar for intelligent meeting preparation and
+              automatic note organization.
+            </p>
+            <ul className="flex flex-col gap-3">
+              <li className="flex items-start gap-3">
+                <CheckIcon className="text-green-600 shrink-0 mt-0.5 size-5" />
+                <span className="text-md text-neutral-600">
+                  Automatic meeting linking
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <CheckIcon className="text-green-600 shrink-0 mt-0.5 size-5" />
+                <span className="text-md text-neutral-600">
+                  Pre-meeting context and preparation
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <CheckIcon className="text-green-600 shrink-0 mt-0.5 size-5" />
+                <span className="text-md text-neutral-600">
+                  Timeline view with notes
+                </span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="flex items-center justify-center px-8 py-8 overflow-hidden mt-auto bg-gradient-to-b from-white to-stone-100">
+            <div className="max-w-lg w-full bg-white border-2 border-stone-200 rounded-lg p-6 shadow-lg">
+              <div className="flex items-start gap-4 mb-4">
+                <Icon
+                  icon="mdi:calendar"
+                  className="text-2xl text-stone-700 shrink-0 mt-1"
+                />
+                <div className="flex-1">
+                  <h4 className="text-lg font-serif text-stone-600 mb-1">
+                    Weekly Team Sync
+                  </h4>
+                  <p className="text-sm text-neutral-600">
+                    Today at 10:00 AM · 30 minutes
+                  </p>
+                </div>
+                <button className="px-3 py-1 text-xs bg-stone-600 text-white rounded-full">
+                  Start Recording
+                </button>
+              </div>
+              <div className="flex flex-col gap-3">
+                <div>
+                  <h5 className="text-sm font-medium text-stone-600 mb-2">
+                    Last meeting context
+                  </h5>
+                  <div className="p-3 bg-stone-50 border border-stone-300 rounded text-xs">
+                    <div className="font-medium text-stone-900 mb-1">
+                      Jan 8, 2025 - Weekly Team Sync
+                    </div>
+                    <p className="text-stone-800">
+                      Discussed Q1 roadmap, decided to prioritize mobile app.
+                      Sarah to review designs by Jan 15.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

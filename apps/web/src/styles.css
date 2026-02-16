@@ -262,6 +262,30 @@
   .animate-fade-in-out {
     animation: fade-in-out 3s ease-in-out infinite;
   }
+
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  .text-shimmer {
+    background: linear-gradient(
+      90deg,
+      #a3a3a3 0%,
+      #525252 50%,
+      #a3a3a3 100%
+    );
+    background-size: 200% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 2s ease-in-out infinite;
+  }
 }
 
 @layer base {
