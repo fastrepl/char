@@ -21,7 +21,6 @@ export function ContactsListColumn({
   setSelected: (value: ContactsSelection | null) => void;
 }) {
   const [showNewPerson, setShowNewPerson] = useState(false);
-  const [showNewOrg, setShowNewOrg] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("alphabetical");
   const [showSearch, setShowSearch] = useState(false);
@@ -252,13 +251,7 @@ export function ContactsListColumn({
               onCancel={() => setShowNewPerson(false)}
             />
           )}
-          {showNewOrg && (
-            <NewOrgForm
-              onSave={() => setShowNewOrg(false)}
-              onCancel={() => setShowNewOrg(false)}
-            />
-          )}
-          {pinnedItems.length > 0 && (
+          {pinnedItems.length > 0 && !searchValue.trim() && (
             <Reorder.Group
               axis="y"
               values={pinnedItems.map((i) => i.id)}
@@ -287,6 +280,31 @@ export function ContactsListColumn({
                 </Reorder.Item>
               ))}
             </Reorder.Group>
+          )}
+          {pinnedItems.length > 0 && searchValue.trim() && (
+            <div className="flex flex-col">
+              {pinnedItems.map((item) =>
+                item.kind === "person" ? (
+                  <PersonItem
+                    key={`pinned-person-${item.id}`}
+                    active={isActive(item)}
+                    humanId={item.id}
+                    onClick={() =>
+                      setSelected({ type: "person", id: item.id })
+                    }
+                  />
+                ) : (
+                  <OrganizationItem
+                    key={`pinned-org-${item.id}`}
+                    active={isActive(item)}
+                    organizationId={item.id}
+                    onClick={() =>
+                      setSelected({ type: "organization", id: item.id })
+                    }
+                  />
+                ),
+              )}
+            </div>
           )}
           {pinnedItems.length > 0 && nonPinnedItems.length > 0 && (
             <div className="h-px bg-neutral-200 mx-3 my-1" />
@@ -574,78 +592,6 @@ function NewPersonForm({
               type="submit"
               className="text-neutral-500 hover:text-neutral-700 transition-colors shrink-0"
               aria-label="Add person"
-            >
-              <CornerDownLeft className="size-4" />
-            </button>
-          )}
-        </div>
-      </form>
-    </div>
-  );
-}
-
-function NewOrgForm({
-  onSave,
-  onCancel,
-}: {
-  onSave: () => void;
-  onCancel: () => void;
-}) {
-  const [name, setName] = useState("");
-  const userId = main.UI.useValue("user_id", main.STORE_ID);
-
-  const handleAdd = main.UI.useAddRowCallback(
-    "organizations",
-    () => ({
-      user_id: userId || "",
-      name: name.trim(),
-      created_at: new Date().toISOString(),
-    }),
-    [name, userId],
-    main.STORE_ID,
-    () => {
-      setName("");
-      onSave();
-    },
-  );
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (name.trim()) {
-      handleAdd();
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (name.trim()) {
-        handleAdd();
-      }
-    }
-    if (e.key === "Escape") {
-      onCancel();
-    }
-  };
-
-  return (
-    <div className="p-2">
-      <form onSubmit={handleSubmit}>
-        <div className="flex items-center w-full px-2 py-1.5 gap-2 rounded-xs bg-neutral-50 border border-neutral-200">
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Add organization"
-            className="w-full bg-transparent text-sm focus:outline-hidden placeholder:text-neutral-400"
-            autoFocus
-          />
-          {name.trim() && (
-            <button
-              type="submit"
-              className="text-neutral-500 hover:text-neutral-700 transition-colors shrink-0"
-              aria-label="Add organization"
             >
               <CornerDownLeft className="size-4" />
             </button>
