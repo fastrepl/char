@@ -1,3 +1,4 @@
+pub(crate) mod chatwoot;
 pub(crate) mod feedback;
 
 use axum::{Router, routing::post};
@@ -23,12 +24,24 @@ pub async fn router(config: SupportConfig) -> Router {
     let state = AppState::new(config).await;
     let mcp = mcp_service(state.clone());
 
+    let chatwoot_routes = Router::new()
+        .route("/contact", post(chatwoot::create_contact))
+        .route(
+            "/conversations",
+            post(chatwoot::create_conversation).get(chatwoot::list_conversations),
+        )
+        .route(
+            "/conversations/{conversation_id}/messages",
+            post(chatwoot::send_message).get(chatwoot::get_messages),
+        );
+
     Router::new()
         .nest(
             "/feedback",
             Router::new().route("/submit", post(feedback::submit)),
         )
         .nest("/support", Router::new().nest_service("/mcp", mcp))
+        .nest("/support/chatwoot", chatwoot_routes)
         .nest_service("/support/llm", llm_router)
         .with_state(state)
 }

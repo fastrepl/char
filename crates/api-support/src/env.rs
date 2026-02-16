@@ -19,3 +19,12 @@ pub struct SupportDatabaseEnv {
 pub use hypr_api_env::OpenRouterEnv;
 pub use hypr_api_env::StripeEnv;
 pub use hypr_api_env::SupabaseEnv;
+
+#[derive(Clone, Deserialize)]
+pub struct ChatwootEnv {
+    pub chatwoot_base_url: String,
+    pub chatwoot_api_token: String,
+    #[serde(deserialize_with = "hypr_api_env::string_to_u64")]
+    pub chatwoot_account_id: u64,
+    pub chatwoot_inbox_identifier: String,
+}

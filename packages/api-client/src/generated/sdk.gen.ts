@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { CanStartTrialData, CanStartTrialErrors, CanStartTrialResponses, CreateConnectSessionData, CreateConnectSessionErrors, CreateConnectSessionResponses, CreateEventData, CreateEventErrors, CreateEventResponses, ListCalendarsData, ListCalendarsErrors, ListCalendarsResponses, ListEventsData, ListEventsErrors, ListEventsResponses, NangoWebhookData, NangoWebhookErrors, NangoWebhookResponses, StartTrialData, StartTrialErrors, StartTrialResponses, SttListenBatchData, SttListenBatchErrors, SttListenBatchResponses, SttListenStreamData, SttListenStreamErrors, SttStatusData, SttStatusErrors, SttStatusResponses, SubmitData, SubmitErrors, SubmitResponses } from './types.gen';
+import type { CanStartTrialData, CanStartTrialErrors, CanStartTrialResponses, CreateConnectSessionData, CreateConnectSessionErrors, CreateConnectSessionResponses, CreateContactData, CreateContactErrors, CreateContactResponses, CreateConversationData, CreateConversationErrors, CreateConversationResponses, CreateEventData, CreateEventErrors, CreateEventResponses, GetMessagesData, GetMessagesErrors, GetMessagesResponses, ListCalendarsData, ListCalendarsErrors, ListCalendarsResponses, ListConversationsData, ListConversationsErrors, ListConversationsResponses, ListEventsData, ListEventsErrors, ListEventsResponses, NangoWebhookData, NangoWebhookErrors, NangoWebhookResponses, SendMessageData, SendMessageErrors, SendMessageResponses, StartTrialData, StartTrialErrors, StartTrialResponses, SttListenBatchData, SttListenBatchErrors, SttListenBatchResponses, SttListenStreamData, SttListenStreamErrors, SttStatusData, SttStatusErrors, SttStatusResponses, SubmitData, SubmitErrors, SubmitResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -88,4 +88,35 @@ export const startTrial = <ThrowOnError extends boolean = false>(options?: Optio
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/subscription/start-trial',
     ...options
+});
+
+export const createContact = <ThrowOnError extends boolean = false>(options: Options<CreateContactData, ThrowOnError>) => (options.client ?? client).post<CreateContactResponses, CreateContactErrors, ThrowOnError>({
+    url: '/support/chatwoot/contact',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const listConversations = <ThrowOnError extends boolean = false>(options: Options<ListConversationsData, ThrowOnError>) => (options.client ?? client).get<ListConversationsResponses, ListConversationsErrors, ThrowOnError>({ url: '/support/chatwoot/conversations', ...options });
+
+export const createConversation = <ThrowOnError extends boolean = false>(options: Options<CreateConversationData, ThrowOnError>) => (options.client ?? client).post<CreateConversationResponses, CreateConversationErrors, ThrowOnError>({
+    url: '/support/chatwoot/conversations',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const getMessages = <ThrowOnError extends boolean = false>(options: Options<GetMessagesData, ThrowOnError>) => (options.client ?? client).get<GetMessagesResponses, GetMessagesErrors, ThrowOnError>({ url: '/support/chatwoot/conversations/{conversation_id}/messages', ...options });
+
+export const sendMessage = <ThrowOnError extends boolean = false>(options: Options<SendMessageData, ThrowOnError>) => (options.client ?? client).post<SendMessageResponses, SendMessageErrors, ThrowOnError>({
+    url: '/support/chatwoot/conversations/{conversation_id}/messages',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });

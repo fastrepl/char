@@ -46,6 +46,31 @@ export type ConnectSessionResponse = {
     token: string;
 };
 
+export type ConversationSummary = {
+    id: number;
+    inboxId?: string | null;
+};
+
+export type CreateContactRequest = {
+    email?: string | null;
+    identifier: string;
+    name?: string | null;
+};
+
+export type CreateContactResponse = {
+    pubsubToken: string;
+    sourceId: string;
+};
+
+export type CreateConversationRequest = {
+    customAttributes?: unknown;
+    sourceId: string;
+};
+
+export type CreateConversationResponse = {
+    conversationId: number;
+};
+
 export type CreateEventRequest = {
     attendees?: Array<EventAttendee> | null;
     calendar_id: string;
@@ -107,6 +132,10 @@ export type ListCalendarsResponse = {
     calendars: Array<unknown>;
 };
 
+export type ListConversationsQuery = {
+    sourceId: string;
+};
+
 export type ListEventsRequest = {
     calendar_id: string;
     connection_id: string;
@@ -131,7 +160,20 @@ export type ListenCallbackResponse = {
     request_id: string;
 };
 
+export type MessageResponse = {
+    content?: string | null;
+    createdAt?: string | null;
+    id: string;
+    messageType?: string | null;
+};
+
 export type PipelineStatus = 'processing' | 'done' | 'error';
+
+export type SendMessageRequest = {
+    content: string;
+    messageType?: string;
+    sourceId?: string | null;
+};
 
 export type StartTrialReason = 'started' | 'not_eligible' | 'error';
 
@@ -575,3 +617,138 @@ export type StartTrialResponses = {
 };
 
 export type StartTrialResponse2 = StartTrialResponses[keyof StartTrialResponses];
+
+export type CreateContactData = {
+    body: CreateContactRequest;
+    path?: never;
+    query?: never;
+    url: '/support/chatwoot/contact';
+};
+
+export type CreateContactErrors = {
+    /**
+     * Chatwoot API error
+     */
+    500: unknown;
+};
+
+export type CreateContactResponses = {
+    /**
+     * Contact created or found
+     */
+    200: CreateContactResponse;
+};
+
+export type CreateContactResponse2 = CreateContactResponses[keyof CreateContactResponses];
+
+export type ListConversationsData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Contact source ID
+         */
+        source_id: string;
+    };
+    url: '/support/chatwoot/conversations';
+};
+
+export type ListConversationsErrors = {
+    /**
+     * Chatwoot API error
+     */
+    500: unknown;
+};
+
+export type ListConversationsResponses = {
+    /**
+     * List of conversations
+     */
+    200: Array<ConversationSummary>;
+};
+
+export type ListConversationsResponse = ListConversationsResponses[keyof ListConversationsResponses];
+
+export type CreateConversationData = {
+    body: CreateConversationRequest;
+    path?: never;
+    query?: never;
+    url: '/support/chatwoot/conversations';
+};
+
+export type CreateConversationErrors = {
+    /**
+     * Chatwoot API error
+     */
+    500: unknown;
+};
+
+export type CreateConversationResponses = {
+    /**
+     * Conversation created
+     */
+    200: CreateConversationResponse;
+};
+
+export type CreateConversationResponse2 = CreateConversationResponses[keyof CreateConversationResponses];
+
+export type GetMessagesData = {
+    body?: never;
+    path: {
+        /**
+         * Conversation ID
+         */
+        conversation_id: number;
+    };
+    query: {
+        /**
+         * Contact source ID
+         */
+        source_id: string;
+    };
+    url: '/support/chatwoot/conversations/{conversation_id}/messages';
+};
+
+export type GetMessagesErrors = {
+    /**
+     * Chatwoot API error
+     */
+    500: unknown;
+};
+
+export type GetMessagesResponses = {
+    /**
+     * List of messages
+     */
+    200: Array<MessageResponse>;
+};
+
+export type GetMessagesResponse = GetMessagesResponses[keyof GetMessagesResponses];
+
+export type SendMessageData = {
+    body: SendMessageRequest;
+    path: {
+        /**
+         * Conversation ID
+         */
+        conversation_id: number;
+    };
+    query?: never;
+    url: '/support/chatwoot/conversations/{conversation_id}/messages';
+};
+
+export type SendMessageErrors = {
+    /**
+     * Chatwoot API error
+     */
+    500: unknown;
+};
+
+export type SendMessageResponses = {
+    /**
+     * Message sent
+     */
+    200: MessageResponse;
+};
+
+export type SendMessageResponse = SendMessageResponses[keyof SendMessageResponses];
