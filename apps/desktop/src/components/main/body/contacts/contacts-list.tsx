@@ -341,7 +341,7 @@ function PersonItem({
       if (currentPinned) {
         store.setPartialRow("humans", humanId, {
           pinned: false,
-          pin_order: undefined,
+          pin_order: 0,
         });
       } else {
         const allHumans = store.getTable("humans");
@@ -438,7 +438,7 @@ function OrganizationItem({
       if (currentPinned) {
         store.setPartialRow("organizations", organizationId, {
           pinned: false,
-          pin_order: undefined,
+          pin_order: 0,
         });
       } else {
         const allOrgs = store.getTable("organizations");

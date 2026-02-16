@@ -117,17 +117,22 @@ export function DetailsColumn({
     if (currentPinned) {
       store.setPartialRow("humans", selectedHumanId, {
         pinned: false,
-        pin_order: undefined,
+        pin_order: 0,
       });
     } else {
       const allHumans = store.getTable("humans");
-      const maxOrder = Object.values(allHumans).reduce((max, h) => {
+      const allOrgs = store.getTable("organizations");
+      const maxHumanOrder = Object.values(allHumans).reduce((max, h) => {
         const order = (h.pin_order as number | undefined) ?? 0;
+        return Math.max(max, order);
+      }, 0);
+      const maxOrgOrder = Object.values(allOrgs).reduce((max, o) => {
+        const order = (o.pin_order as number | undefined) ?? 0;
         return Math.max(max, order);
       }, 0);
       store.setPartialRow("humans", selectedHumanId, {
         pinned: true,
-        pin_order: maxOrder + 1,
+        pin_order: Math.max(maxHumanOrder, maxOrgOrder) + 1,
       });
     }
   }, [store, selectedHumanId]);
