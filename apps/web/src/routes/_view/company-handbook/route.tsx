@@ -99,11 +99,15 @@ function LeftSidebar() {
   }, []);
 
   const close = useCallback(() => {
-    if (window.innerWidth > 1400) return;
+  const close = useCallback(() => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+    }
     closeTimeoutRef.current = setTimeout(() => {
       setIsOpen(false);
     }, 300);
   }, []);
+
 
   return (
     <motion.div
