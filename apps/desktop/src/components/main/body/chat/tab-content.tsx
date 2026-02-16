@@ -126,6 +126,9 @@ function SupportChatTabInner({
   sessionProps: {
     sessionId: string;
     messages: HyprUIMessage[];
+    setMessages: (
+      msgs: HyprUIMessage[] | ((prev: HyprUIMessage[]) => HyprUIMessage[]),
+    ) => void;
     sendMessage: (message: HyprUIMessage) => void;
     regenerate: () => void;
     stop: () => void;

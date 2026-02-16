@@ -1,8 +1,26 @@
 import { Upload } from "tus-js-client";
 
-const BUCKET_NAME = "audio-files";
-const CHUNK_SIZE = 6 * 1024 * 1024;
-const RETRY_DELAYS = [0, 3000, 5000, 10000, 20000];
+export const STORAGE_CONFIG = {
+  bucketName: "audio-files",
+  chunkSize: 6 * 1024 * 1024,
+  retryDelays: [0, 3000, 5000, 10000, 20000],
+} as const;
+
+export function getTusEndpoint(supabaseUrl: string): string {
+  const parsed = new URL(supabaseUrl);
+  const isHostedSupabase = parsed.hostname.endsWith(".supabase.co");
+
+  if (isHostedSupabase) {
+    const projectId = parsed.hostname.split(".")[0];
+    return `https://${projectId}.storage.supabase.co/storage/v1/upload/resumable`;
+  }
+
+  return new URL("/storage/v1/upload/resumable", parsed.origin).toString();
+}
+
+export function buildObjectName(userId: string, fileName: string): string {
+  return `${userId}/${Date.now()}-${fileName}`;
+}
 
 export function uploadAudio(options: {
   file: File | Blob;
@@ -13,16 +31,15 @@ export function uploadAudio(options: {
   userId: string;
   onProgress?: (percentage: number) => void;
 }): { promise: Promise<string>; abort: () => void } {
-  const fileId = `${options.userId}/${Date.now()}-${options.fileName}`;
-  const projectId = new URL(options.supabaseUrl).hostname.split(".")[0];
-  const endpoint = `https://${projectId}.storage.supabase.co/storage/v1/upload/resumable`;
+  const objectName = buildObjectName(options.userId, options.fileName);
+  const endpoint = getTusEndpoint(options.supabaseUrl);
 
   let upload: Upload | null = null;
 
   const promise = new Promise<string>((resolve, reject) => {
     upload = new Upload(options.file, {
       endpoint,
-      retryDelays: RETRY_DELAYS,
+      retryDelays: [...STORAGE_CONFIG.retryDelays],
       headers: {
         authorization: `Bearer ${options.accessToken}`,
         "x-upsert": "true",
@@ -30,12 +47,12 @@ export function uploadAudio(options: {
       uploadDataDuringCreation: true,
       removeFingerprintOnSuccess: true,
       metadata: {
-        bucketName: BUCKET_NAME,
-        objectName: fileId,
+        bucketName: STORAGE_CONFIG.bucketName,
+        objectName,
         contentType: options.contentType,
         cacheControl: "3600",
       },
-      chunkSize: CHUNK_SIZE,
+      chunkSize: STORAGE_CONFIG.chunkSize,
       onError: (error) => {
         reject(error);
       },
@@ -45,7 +62,7 @@ export function uploadAudio(options: {
         }
       },
       onSuccess: () => {
-        resolve(fileId);
+        resolve(objectName);
       },
     });
 

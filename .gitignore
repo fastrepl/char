@@ -13,7 +13,6 @@ Secrets*.toml
 
 *storybook.log
 .cache/
-restate-data
 
 internal
 .turbo

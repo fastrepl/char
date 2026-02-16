@@ -23,10 +23,20 @@ const PLUGIN_NAME: &str = "detect";
 pub(crate) type DetectorState = Mutex<hypr_detect::Detector>;
 pub(crate) type ProcessorState = Arc<Mutex<Processor>>;
 
-#[derive(Default)]
 pub(crate) struct Processor {
     pub(crate) policy: policy::MicNotificationPolicy,
     pub(crate) mic_usage_tracker: mic_usage_tracker::MicUsageTracker,
+    pub(crate) mic_active_threshold_secs: u64,
+}
+
+impl Default for Processor {
+    fn default() -> Self {
+        Self {
+            policy: Default::default(),
+            mic_usage_tracker: Default::default(),
+            mic_active_threshold_secs: mic_usage_tracker::DEFAULT_MIC_ACTIVE_THRESHOLD_SECS,
+        }
+    }
 }
 
 fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
@@ -40,6 +50,7 @@ fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
             commands::list_default_ignored_bundle_ids::<tauri::Wry>,
             commands::get_preferred_languages::<tauri::Wry>,
             commands::get_current_locale_identifier::<tauri::Wry>,
+            commands::set_mic_active_threshold::<tauri::Wry>,
         ])
         .events(tauri_specta::collect_events![DetectEvent])
         .error_handling(tauri_specta::ErrorHandlingMode::Result)

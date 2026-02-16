@@ -258,7 +258,7 @@ export const generalSchema = z.object({
 export const aiProviderSchema = z
   .object({
     type: z.enum(["stt", "llm"]),
-    base_url: z.url().min(1),
+    base_url: z.string(),
     api_key: z.string(),
   })
   .refine(

@@ -32,6 +32,9 @@ interface ChatSessionProps {
   children: (props: {
     sessionId: string;
     messages: HyprUIMessage[];
+    setMessages: (
+      msgs: HyprUIMessage[] | ((prev: HyprUIMessage[]) => HyprUIMessage[]),
+    ) => void;
     sendMessage: (message: HyprUIMessage) => void;
     regenerate: () => void;
     stop: () => void;
@@ -117,6 +120,7 @@ export function ChatSession({
 
   const {
     messages,
+    setMessages,
     sendMessage: rawSendMessage,
     regenerate,
     stop,
@@ -188,6 +192,7 @@ export function ChatSession({
       {children({
         sessionId,
         messages,
+        setMessages,
         sendMessage: rawSendMessage,
         regenerate,
         stop,

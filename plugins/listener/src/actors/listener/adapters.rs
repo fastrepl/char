@@ -5,8 +5,9 @@ use ractor::{ActorProcessingErr, ActorRef};
 use tauri_specta::Event;
 
 use owhisper_client::{
-    AdapterKind, ArgmaxAdapter, AssemblyAIAdapter, DeepgramAdapter, ElevenLabsAdapter,
-    FireworksAdapter, GladiaAdapter, OpenAIAdapter, RealtimeSttAdapter, SonioxAdapter,
+    AdapterKind, ArgmaxAdapter, AssemblyAIAdapter, DashScopeAdapter, DeepgramAdapter,
+    ElevenLabsAdapter, FireworksAdapter, GladiaAdapter, MistralAdapter, OpenAIAdapter,
+    RealtimeSttAdapter, SonioxAdapter,
 };
 use owhisper_interface::stream::Extra;
 use owhisper_interface::{ControlMessage, MixedMessage};
@@ -82,6 +83,18 @@ pub(super) async fn spawn_rx_task(
         }
         (AdapterKind::ElevenLabs, true) => {
             spawn_rx_task_dual_with_adapter::<ElevenLabsAdapter>(args, myself).await
+        }
+        (AdapterKind::DashScope, false) => {
+            spawn_rx_task_single_with_adapter::<DashScopeAdapter>(args, myself).await
+        }
+        (AdapterKind::DashScope, true) => {
+            spawn_rx_task_dual_with_adapter::<DashScopeAdapter>(args, myself).await
+        }
+        (AdapterKind::Mistral, false) => {
+            spawn_rx_task_single_with_adapter::<MistralAdapter>(args, myself).await
+        }
+        (AdapterKind::Mistral, true) => {
+            spawn_rx_task_dual_with_adapter::<MistralAdapter>(args, myself).await
         }
     }?;
 

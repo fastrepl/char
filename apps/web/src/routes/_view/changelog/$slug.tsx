@@ -324,7 +324,7 @@ function RelatedReleases({
         <p className="text-neutral-600">Explore more versions of Char</p>
       </div>
 
-      <div className="grid gap-4 grid-cols-5">
+      <div className="flex overflow-x-auto gap-4 sm:grid sm:grid-cols-5 sm:overflow-visible">
         {relatedChangelogs.map((release) => {
           const version = semver.parse(release.version);
           const isPrerelease = version && version.prerelease.length > 0;
@@ -346,7 +346,7 @@ function RelatedReleases({
             >
               <article
                 className={cn([
-                  "flex flex-col items-center gap-2 p-4 rounded-lg transition-all duration-300",
+                  "flex flex-col items-center gap-2 p-4 rounded-lg transition-all duration-300 shrink-0",
                   isCurrent ? "bg-stone-100" : "hover:bg-stone-50",
                 ])}
               >

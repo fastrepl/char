@@ -31,6 +31,10 @@ pub struct Claims {
 }
 
 impl Claims {
+    pub fn is_pro(&self) -> bool {
+        self.entitlements.contains(&"hyprnote_pro".to_string())
+    }
+
     pub fn decode_insecure(token: &str) -> Result<Self, Error> {
         use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
 

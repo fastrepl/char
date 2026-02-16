@@ -6,8 +6,7 @@ import NoteEditor, {
   type TiptapEditor,
 } from "@hypr/tiptap/editor";
 import {
-  EMPTY_TIPTAP_DOC,
-  isValidTiptapContent,
+  parseJsonContent,
   type PlaceholderFunction,
 } from "@hypr/tiptap/shared";
 
@@ -22,18 +21,10 @@ export const RawEditor = forwardRef<
   const rawMd = main.UI.useCell("sessions", sessionId, "raw_md", main.STORE_ID);
   const onImageUpload = useImageUpload(sessionId);
 
-  const initialContent = useMemo<JSONContent>(() => {
-    if (typeof rawMd !== "string" || !rawMd.trim()) {
-      return EMPTY_TIPTAP_DOC;
-    }
-
-    try {
-      const parsed = JSON.parse(rawMd);
-      return isValidTiptapContent(parsed) ? parsed : EMPTY_TIPTAP_DOC;
-    } catch {
-      return EMPTY_TIPTAP_DOC;
-    }
-  }, [rawMd]);
+  const initialContent = useMemo<JSONContent>(
+    () => parseJsonContent(rawMd as string),
+    [rawMd],
+  );
 
   const persistChange = main.UI.useSetPartialRowCallback(
     "sessions",

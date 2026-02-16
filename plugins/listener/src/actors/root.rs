@@ -8,9 +8,10 @@ use tracing::Instrument;
 use crate::SessionLifecycleEvent;
 use crate::actors::session::lifecycle::{
     clear_sentry_session_context, configure_sentry_session_context, emit_session_ended,
-    stop_actor_by_name_and_wait,
 };
-use crate::actors::{SessionContext, SessionParams, session_span, spawn_session_supervisor};
+use crate::actors::{
+    SessionContext, SessionMsg, SessionParams, session_span, spawn_session_supervisor,
+};
 
 pub enum RootMsg {
     StartSession(SessionParams, RpcReplyPort<bool>),
@@ -103,7 +104,8 @@ impl Actor for RootActor {
                     tracing::info!(?reason, "session_supervisor_terminated");
                     state.supervisor = None;
                     state.finalizing = false;
-                    emit_session_ended(&state.app, &session_id, None);
+
+                    emit_session_ended(&state.app, &session_id, reason);
                 }
             }
             SupervisionEvent::ActorFailed(cell, error) => {
@@ -171,6 +173,7 @@ async fn start_session_impl(
 
                 if let Err(error) = (SessionLifecycleEvent::Active {
                     session_id: params.session_id,
+                    error: None,
                 })
                 .emit(&state.app)
                 {
@@ -212,9 +215,13 @@ async fn stop_session_impl(state: &mut RootState) {
             }
         }
 
-        // TO make sure post_stop is called.
-        stop_actor_by_name_and_wait(crate::actors::RecorderActor::name(), "session_stop").await;
-
-        supervisor.stop(None);
+        let session_ref: ActorRef<SessionMsg> = supervisor.clone().into();
+        if let Err(error) = session_ref.cast(SessionMsg::Shutdown) {
+            tracing::warn!(
+                ?error,
+                "failed_to_cast_session_shutdown_falling_back_to_stop"
+            );
+            supervisor.stop(Some("session_stop_cast_failed".to_string()));
+        }
     }
 }

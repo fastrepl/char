@@ -3,6 +3,7 @@ import {
   Outlet,
   useRouteContext,
 } from "@tanstack/react-router";
+import { isTauri } from "@tauri-apps/api/core";
 import { useCallback, useEffect, useRef } from "react";
 
 import { hydrateSessionContextFromFs } from "../../../chat/session-context-hydrator";
@@ -57,6 +58,10 @@ function Component() {
     const initializeTabs = async () => {
       if (!hasOpenedInitialTab.current) {
         hasOpenedInitialTab.current = true;
+        if (!isTauri()) {
+          openDefaultEmptyTab();
+          return;
+        }
         await restorePinnedTabsToStore(
           openNew,
           pin,

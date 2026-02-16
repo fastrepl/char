@@ -37,7 +37,9 @@ export const env = createEnv({
     VITE_APP_URL: isDev
       ? z.string().default("http://localhost:3000")
       : z.string().min(1),
-    VITE_API_URL: z.string().default("https://api.hyprnote.com"),
+    VITE_API_URL: isDev
+      ? z.string().default("http://localhost:3001")
+      : z.string().default("https://api.hyprnote.com"),
     VITE_SUPABASE_URL: requiredInProd(z.string().min(1)),
     VITE_SUPABASE_ANON_KEY: requiredInProd(z.string().min(1)),
     VITE_POSTHOG_API_KEY: requiredInProd(z.string().min(1)),

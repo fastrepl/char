@@ -71,6 +71,8 @@ export const ADMIN_EMAILS = [
   "yunhyungjo@yonsei.ac.kr",
   "goranmoomin@daum.net",
   "artem@hyprnote.com",
+  "stua@fastmail.com",
+  "thestua@gmail.com",
 ];
 
 export const TEAM_PHOTOS = [

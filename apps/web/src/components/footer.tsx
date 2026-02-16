@@ -167,12 +167,14 @@ function ProductLinks() {
 }
 
 function useRotatingIndex(listLength: number, interval: number) {
-  const [index, setIndex] = useState(() =>
-    Math.floor(Math.random() * listLength),
-  );
+  const [index, setIndex] = useState(0);
   const [fading, setFading] = useState(false);
   const pausedRef = useRef(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setIndex(Math.floor(Math.random() * listLength));
+  }, [listLength]);
 
   const advance = useCallback(() => {
     if (pausedRef.current) return;

@@ -443,7 +443,10 @@ function getAuthorAvatar(author: string): string {
 }
 
 function renderBlogTemplate(params: z.infer<typeof blogSchema>) {
-  const avatarUrl = getAuthorAvatar(params.author);
+  const authors = params.author
+    .split(",")
+    .map((a) => a.trim())
+    .filter(Boolean);
 
   return (
     <div
@@ -471,21 +474,28 @@ function renderBlogTemplate(params: z.infer<typeof blogSchema>) {
           {preventWidow(params.title)}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <img
-            style={{ width: 44, height: 44, borderRadius: 1000 }}
-            src={avatarUrl}
-          />
-          <div
-            style={{
-              color: "#292524",
-              fontSize: 28,
-              fontFamily: "Lora",
-              fontWeight: "400",
-              wordWrap: "break-word",
-            }}
-          >
-            {params.author}
-          </div>
+          {authors.map((name, i) => (
+            <div
+              key={i}
+              style={{ display: "flex", alignItems: "center", gap: 8 }}
+            >
+              <img
+                style={{ width: 44, height: 44, borderRadius: 1000 }}
+                src={getAuthorAvatar(name)}
+              />
+              <div
+                style={{
+                  color: "#292524",
+                  fontSize: 28,
+                  fontFamily: "Lora",
+                  fontWeight: "400",
+                  wordWrap: "break-word",
+                }}
+              >
+                {name}
+              </div>
+            </div>
+          ))}
         </div>
         <div
           style={{

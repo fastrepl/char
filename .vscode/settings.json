@@ -18,6 +18,7 @@
   "editor.wordBasedSuggestions": "off",
   "editor.quickSuggestionsDelay": 200,
   "editor.inlayHints.enabled": "offUnlessPressed",
+  "css.lint.unknownAtRules": "ignore",
   "editor.defaultFormatter": "dprint.dprint",
   "editor.formatOnSave": true,
   "rust-analyzer.diagnostics.disabled": ["macro-error"],

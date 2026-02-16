@@ -42,6 +42,4 @@ pub enum DegradedError {
     ConnectionTimeout,
     #[serde(rename = "stream_error")]
     StreamError { message: String },
-    #[serde(rename = "channel_overflow")]
-    ChannelOverflow,
 }
