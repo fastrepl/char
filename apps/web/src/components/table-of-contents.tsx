@@ -89,7 +89,6 @@ export function TableOfContents({
 
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
-      e.preventDefault();
       e.stopPropagation();
 
       const THRESHOLD = 50;

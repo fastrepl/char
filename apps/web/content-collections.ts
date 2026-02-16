@@ -1,7 +1,7 @@
 import { defineCollection, defineConfig } from "@content-collections/core";
 import { compileMDX } from "@content-collections/mdx";
 import * as fs from "fs";
-import { GithubSlugger } from "github-slugger";
+import GithubSlugger from "github-slugger";
 import mdxMermaid from "mdx-mermaid";
 import * as path from "path";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";

@@ -62,15 +62,22 @@ function LeftSidebar() {
   }, []);
 
   const close = useCallback(() => {
-  const close = useCallback(() => {
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
     }
+    if (window.innerWidth > 1400) return;
     closeTimeoutRef.current = setTimeout(() => {
       setIsOpen(false);
     }, 300);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <motion.div
@@ -89,7 +96,9 @@ function LeftSidebar() {
           <SidebarNavigation
             sections={sections}
             currentSlug={currentSlug}
-            onLinkClick={() => setIsOpen(false)}
+            onLinkClick={() => {
+              if (window.innerWidth <= 1400) setIsOpen(false);
+            }}
             scrollContainerRef={scrollContainerRef}
             linkTo="/docs/$/"
           />
