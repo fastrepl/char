@@ -14,7 +14,7 @@ Secrets*.toml
 *storybook.log
 .cache/
 
-internal
+/internal
 .turbo
 
 # Local Netlify folder

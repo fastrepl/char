@@ -724,6 +724,28 @@ const handbook = defineCollection({
   },
 });
 
+const internal = defineCollection({
+  name: "internal",
+  directory: "content/internal",
+  include: "*.mdx",
+  schema: z.object({
+    display_title: z.string().optional(),
+    meta_title: z.string().optional(),
+    meta_description: z.string().optional(),
+    author: z.string(),
+    date: z.string(),
+  }),
+  transform: async (document, context) => {
+    const mdx = await compileMDX(context, document, {
+      remarkPlugins: [remarkGfm],
+    });
+    return {
+      ...document,
+      mdx,
+    };
+  },
+});
+
 const jobs = defineCollection({
   name: "jobs",
   directory: "content/jobs",
@@ -780,5 +802,6 @@ export default defineConfig({
     roadmap,
     ossFriends,
     jobs,
+    internal,
   ],
 });

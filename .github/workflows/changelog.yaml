@@ -72,6 +72,18 @@ jobs:
         with:
           model: zai-coding-plan/glm-4.7
           prompt: |
+            ## Product Positioning
+
+            BEFORE writing any content, read `apps/web/content/internal/positioning.mdx` to understand current product positioning.
+
+            Ensure all content:
+            - Uses "Char" (not "Hyprnote") consistently
+            - Emphasizes zero lock-in and true ownership
+            - Targets high-agency technical users (engineers, developers, privacy-conscious professionals)
+            - Highlights plain markdown files and complete control over AI stack
+            - Maintains direct, engineering-minded tone (not corporate or overly polished)
+            - Focuses on control, ownership, and simplicity—not fear or feature bloat
+
             1.
             Create apps/web/content/changelog/${{ steps.version.outputs.version }}.mdx.
             Changelog should be generated from commits between ${{ steps.version.outputs.prev }} ~ ${{ steps.version.outputs.current }}.

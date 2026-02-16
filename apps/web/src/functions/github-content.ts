@@ -21,6 +21,7 @@ const VALID_FOLDERS = [
   "changelog",
   "docs",
   "handbook",
+  "internal",
   "legal",
   "templates",
 ];

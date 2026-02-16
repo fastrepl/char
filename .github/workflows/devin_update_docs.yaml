@@ -74,6 +74,18 @@ jobs:
             4. Reference the parent PR #{{ existing_pr_number }} in your PR description
             {% endif %}
 
+            ## Product Positioning
+
+            BEFORE writing any content, read `apps/web/content/internal/positioning.mdx` to understand current product positioning.
+
+            Ensure all content:
+            - Uses "Char" (not "Hyprnote") consistently
+            - Emphasizes zero lock-in and true ownership
+            - Targets high-agency technical users (engineers, developers, privacy-conscious professionals)
+            - Highlights plain markdown files and complete control over AI stack
+            - Maintains direct, engineering-minded tone (not corporate or overly polished)
+            - Focuses on control, ownership, and simplicity—not fear or feature bloat
+
             ## Your Task
             1. **Analyze Recent Changes**
                - Review git commits from the last 7 days using: `git log --since="7 days ago" --stat --oneline`
