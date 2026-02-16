@@ -359,7 +359,9 @@ function CollectionsPage() {
       setTabs((prev) => {
         const filtered = prev.filter((t) => t.path !== deletedPath);
         if (filtered.length > 0 && !filtered.some((t) => t.active)) {
-          filtered[filtered.length - 1].active = true;
+          return filtered.map((t, i) =>
+            i === filtered.length - 1 ? { ...t, active: true } : t,
+          );
         }
         return filtered;
       });
