@@ -22,7 +22,7 @@ pub struct DeviceInfo {
 }
 
 #[derive(askama::Template)]
-#[template(path = "bug_report.md.jinja")]
+#[template(path = "bug_report.md.jinja", escape = "none")]
 struct BugReportBody<'a> {
     description: &'a str,
     platform: &'a str,
@@ -33,7 +33,7 @@ struct BugReportBody<'a> {
 }
 
 #[derive(askama::Template)]
-#[template(path = "feature_request.md.jinja")]
+#[template(path = "feature_request.md.jinja", escape = "none")]
 struct FeatureRequestBody<'a> {
     description: &'a str,
     platform: &'a str,
@@ -44,18 +44,18 @@ struct FeatureRequestBody<'a> {
 }
 
 #[derive(askama::Template)]
-#[template(path = "log_analysis.md.jinja")]
+#[template(path = "log_analysis.md.jinja", escape = "none")]
 struct LogAnalysisComment<'a> {
     summary_section: &'a str,
     tail: &'a str,
 }
 
 #[derive(askama::Template, Default)]
-#[template(path = "support_chat.md.jinja")]
+#[template(path = "support_chat.md.jinja", escape = "none")]
 struct SupportChatPrompt;
 
 #[derive(askama::Template)]
-#[template(path = "support_context.md.jinja")]
+#[template(path = "support_context.md.jinja", escape = "none")]
 struct SupportContextBlock<'a> {
     account: Option<&'a AccountInfo>,
     device: &'a DeviceInfo,
