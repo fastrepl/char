@@ -252,7 +252,9 @@ function TabContentFolderTopLevel() {
           <div className="flex flex-col items-center justify-center h-full text-neutral-400">
             <FoldersIcon className="w-12 h-12 mb-3" />
             <p className="text-sm">No folders yet</p>
-            <p className="text-xs mt-1">Click the + button above to create one</p>
+            <p className="text-xs mt-1">
+              Click the + button above to create one
+            </p>
           </div>
         )}
       </div>
@@ -469,7 +471,10 @@ function FolderSessionItem({ sessionId }: { sessionId: string }) {
   const handleRemoveFromFolder = useCallback(async () => {
     const result = await sessionOps.removeSessionFromFolder(sessionId);
     if (result.status === "error") {
-      console.error("[FolderView] removeSessionFromFolder failed:", result.error);
+      console.error(
+        "[FolderView] removeSessionFromFolder failed:",
+        result.error,
+      );
     }
   }, [sessionId]);
 

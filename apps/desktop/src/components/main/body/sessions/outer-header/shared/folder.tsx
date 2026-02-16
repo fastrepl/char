@@ -116,7 +116,8 @@ function SearchableFolderContent({
 
   const folderEntries = Object.entries(folders);
   const hasExactMatch = folderEntries.some(
-    ([, folder]) => folder.name.toLowerCase() === searchValue.trim().toLowerCase(),
+    ([, folder]) =>
+      folder.name.toLowerCase() === searchValue.trim().toLowerCase(),
   );
   const showCreateOption = searchValue.trim().length > 0 && !hasExactMatch;
 

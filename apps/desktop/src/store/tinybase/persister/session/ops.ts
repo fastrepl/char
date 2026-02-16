@@ -1,7 +1,7 @@
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
-import { sanitizeFilename } from "../shared/paths";
 
 import type { Store } from "../../store/main";
+import { sanitizeFilename } from "../shared/paths";
 
 export interface SessionOpsConfig {
   store: Store;
@@ -76,13 +76,17 @@ export async function renameFolder(
 export async function createFolder(
   folderName: string,
   parentFolderId?: string,
-): Promise<{ status: "ok"; folderId: string } | { status: "error"; error: string }> {
+): Promise<
+  { status: "ok"; folderId: string } | { status: "error"; error: string }
+> {
   const sanitized = sanitizeFilename(folderName.trim());
   if (!sanitized) {
     return { status: "error", error: "Invalid folder name" };
   }
 
-  const folderId = parentFolderId ? `${parentFolderId}/${sanitized}` : sanitized;
+  const folderId = parentFolderId
+    ? `${parentFolderId}/${sanitized}`
+    : sanitized;
   const result = await fsSyncCommands.createFolder(folderId);
 
   if (result.status === "error") {
@@ -109,7 +113,10 @@ export async function deleteFolder(
     const sessionIds = store.getRowIds("sessions");
     for (const id of sessionIds) {
       const sessionFolderId = store.getCell("sessions", id, "folder_id");
-      if (sessionFolderId === folderId || sessionFolderId?.startsWith(folderId + "/")) {
+      if (
+        sessionFolderId === folderId ||
+        sessionFolderId?.startsWith(folderId + "/")
+      ) {
         store.setCell("sessions", id, "folder_id", "");
       }
     }
