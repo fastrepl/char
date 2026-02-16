@@ -14,7 +14,7 @@ function Component() {
   return (
     <div className="bg-linear-to-b from-white via-stone-50/20 to-white min-h-[calc(100vh-4rem)]">
       <div className="max-w-6xl mx-auto border-x border-neutral-100">
-        <div className="flex gap-8">
+        <div className="flex gap-4">
           <LeftSidebar />
           <Outlet />
         </div>
