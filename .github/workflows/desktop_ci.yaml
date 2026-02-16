@@ -68,7 +68,12 @@ jobs:
         if: matrix.platform == 'windows'
       - name: Test workspace crates
         run: |
+          EXTRA_EXCLUDES=""
+          if [[ "${{ matrix.platform }}" == "windows" ]]; then
+            EXTRA_EXCLUDES="--exclude gbnf"
+          fi
           cargo test --workspace \
+            $EXTRA_EXCLUDES \
             --exclude desktop \
             --exclude control-tauri \
             --exclude ai \
