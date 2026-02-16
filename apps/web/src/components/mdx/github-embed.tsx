@@ -130,7 +130,7 @@ export function GithubEmbed({
 
   return (
     <TooltipProvider delayDuration={0}>
-      <div className="border border-neutral-200 rounded-md overflow-hidden bg-stone-50">
+      <div className="border border-neutral-200 rounded-md overflow-hidden bg-stone-50 my-4">
         <div className="flex items-center justify-between pl-3 pr-2 py-2 bg-stone-100 border-b border-neutral-200">
           <div className="flex items-center gap-1.5">
             <Code2 className="w-4 h-4 text-stone-500 shrink-0" />
