@@ -35,7 +35,7 @@ pub struct FeedbackResponse {
     pub error: Option<String>,
 }
 
-const SOURCE: &str = "from the Hyprnote desktop app";
+const SOURCE: &str = "from the Char Desktop app";
 
 #[utoipa::path(
     post,
