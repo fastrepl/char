@@ -17,6 +17,39 @@ export const humanSchema = z.object({
   pin_order: z.preprocess((val) => val ?? undefined, z.number().optional()),
 });
 
+export const sessionEventSchema = z.object({
+  tracking_id: z.string(),
+  calendar_id: z.string(),
+  title: z.string(),
+  started_at: z.string(),
+  ended_at: z.string(),
+  is_all_day: z.boolean(),
+  has_recurrence_rules: z.boolean(),
+  location: z.string().optional(),
+  meeting_link: z.string().optional(),
+  description: z.string().optional(),
+  recurrence_series_id: z.string().optional(),
+});
+
+export const ignoredEventEntrySchema = z.discriminatedUnion("is_recurrent", [
+  z.object({
+    tracking_id: z.string(),
+    is_recurrent: z.literal(false),
+    last_seen: z.string(),
+  }),
+  z.object({
+    tracking_id: z.string(),
+    is_recurrent: z.literal(true),
+    day: z.string(),
+    last_seen: z.string(),
+  }),
+]);
+
+export const ignoredRecurringSeriesEntrySchema = z.object({
+  id: z.string(),
+  last_seen: z.string(),
+});
+
 export const eventSchema = z.object({
   user_id: z.string(),
   created_at: z.string(),
@@ -29,7 +62,6 @@ export const eventSchema = z.object({
   meeting_link: z.preprocess((val) => val ?? undefined, z.string().optional()),
   description: z.preprocess((val) => val ?? undefined, z.string().optional()),
   note: z.preprocess((val) => val ?? undefined, z.string().optional()),
-  ignored: z.preprocess((val) => val ?? undefined, z.boolean().optional()),
   recurrence_series_id: z.preprocess(
     (val) => val ?? undefined,
     z.string().optional(),
@@ -64,7 +96,7 @@ export const sessionSchema = z.object({
   user_id: z.string(),
   created_at: z.string(),
   folder_id: z.preprocess((val) => val ?? undefined, z.string().optional()),
-  event_id: z.preprocess((val) => val ?? undefined, z.string().optional()),
+  event_json: z.preprocess((val) => val ?? undefined, z.string().optional()),
   title: z.string(),
   raw_md: z.string(),
 });
@@ -211,7 +243,10 @@ export const generalSchema = z.object({
   ai_language: z.string().default("en"),
   spoken_languages: jsonObject(z.array(z.string()).default(["en"])),
   ignored_platforms: jsonObject(z.array(z.string()).default([])),
-  ignored_recurring_series: jsonObject(z.array(z.string()).default([])),
+  ignored_events: jsonObject(z.array(ignoredEventEntrySchema).default([])),
+  ignored_recurring_series: jsonObject(
+    z.array(ignoredRecurringSeriesEntrySchema).default([]),
+  ),
   current_llm_provider: z.string().optional(),
   current_llm_model: z.string().optional(),
   current_stt_provider: z.string().optional(),
@@ -223,7 +258,7 @@ export const generalSchema = z.object({
 export const aiProviderSchema = z
   .object({
     type: z.enum(["stt", "llm"]),
-    base_url: z.url().min(1),
+    base_url: z.string(),
     api_key: z.string(),
   })
   .refine(
@@ -239,6 +274,11 @@ export type ProviderSpeakerIndexHint = z.infer<
 >;
 
 export type Human = z.infer<typeof humanSchema>;
+export type SessionEvent = z.infer<typeof sessionEventSchema>;
+export type IgnoredEvent = z.infer<typeof ignoredEventEntrySchema>;
+export type IgnoredRecurringSeries = z.infer<
+  typeof ignoredRecurringSeriesEntrySchema
+>;
 export type Event = z.infer<typeof eventSchema>;
 export type Calendar = z.infer<typeof calendarSchema>;
 export type CalendarStorage = ToStorageType<typeof calendarSchema>;

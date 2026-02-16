@@ -132,7 +132,7 @@ export function TabContentOnboarding({
 
         <div className="flex flex-col px-6 pt-4 pb-16 gap-8">
           <h1 className="text-2xl font-semibold font-serif text-neutral-900">
-            Welcome to Hyprnote
+            Welcome to Char
           </h1>
 
           <OnboardingSection

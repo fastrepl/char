@@ -32,5 +32,20 @@ function initializeStore(store: Store): void {
         org_id: "",
       });
     }
+
+    if (
+      !store.getTableIds().includes("sessions") ||
+      store.getRowIds("sessions").length === 0
+    ) {
+      const sessionId = crypto.randomUUID();
+      const now = new Date().toISOString();
+
+      store.setRow("sessions", sessionId, {
+        user_id: DEFAULT_USER_ID,
+        created_at: now,
+        title: "Welcome to Char",
+        raw_md: "",
+      });
+    }
   });
 }

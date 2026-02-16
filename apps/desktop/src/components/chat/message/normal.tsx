@@ -1,5 +1,5 @@
 import { BrainIcon, CheckIcon, CopyIcon, RotateCcwIcon } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Streamdown } from "streamdown";
 
 import type { HyprUIMessage } from "../../../chat/types";
@@ -26,13 +26,28 @@ export function NormalMessage({
 }) {
   const isUser = message.role === "user";
   const [copied, setCopied] = useState(false);
+  const copiedResetTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copiedResetTimeoutRef.current !== null) {
+        window.clearTimeout(copiedResetTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleCopy = useCallback(async () => {
     const text = getMessageText(message);
     try {
       await navigator.clipboard.writeText(text);
+      if (copiedResetTimeoutRef.current !== null) {
+        window.clearTimeout(copiedResetTimeoutRef.current);
+      }
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      copiedResetTimeoutRef.current = window.setTimeout(() => {
+        setCopied(false);
+        copiedResetTimeoutRef.current = null;
+      }, 2000);
     } catch {
       // ignore
     }

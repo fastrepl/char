@@ -35,7 +35,7 @@ impl RealtimeSttAdapter for ArgmaxAdapter {
     }
 
     fn build_auth_header(&self, api_key: Option<&str>) -> Option<(&'static str, String)> {
-        api_key.map(|key| ("Authorization", format!("Token {}", key)))
+        api_key.and_then(|k| crate::providers::Provider::Deepgram.build_auth_header(k))
     }
 
     fn keep_alive_message(&self) -> Option<Message> {

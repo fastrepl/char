@@ -92,7 +92,7 @@ export async function fetchGitHubStargazers(): Promise<{
 
   while (true) {
     const response = await fetch(
-      `https://api.github.com/repos/fastrepl/hyprnote/stargazers?per_page=${perPage}&page=${page}`,
+      `https://api.github.com/repos/fastrepl/char/stargazers?per_page=${perPage}&page=${page}`,
       {
         headers: getGitHubHeaders("application/vnd.github.star+json"),
       },
@@ -109,7 +109,7 @@ export async function fetchGitHubStargazers(): Promise<{
 
       const result = await sql`
         INSERT INTO public.github_star_leads (github_username, github_id, avatar_url, profile_url, event_type, repo_name, event_at)
-        VALUES (${s.user.login}, ${s.user.id}, ${s.user.avatar_url}, ${s.user.html_url}, 'star', 'fastrepl/hyprnote', ${s.starred_at})
+        VALUES (${s.user.login}, ${s.user.id}, ${s.user.avatar_url}, ${s.user.html_url}, 'star', 'fastrepl/char', ${s.starred_at})
         ON CONFLICT (github_username) DO UPDATE SET
           avatar_url = EXCLUDED.avatar_url,
           github_id = EXCLUDED.github_id
@@ -196,23 +196,23 @@ export async function fetchGitHubActivity(): Promise<{
   return { added, total: parseInt(String(countResult[0].count), 10) };
 }
 
-const RESEARCH_PROMPT = `You are an assistant to the founders of Hyprnote.
+const RESEARCH_PROMPT = `You are an assistant to the founders of Char.
 
-Hyprnote is a privacy-first AI notepad for meetings — it runs transcription and summarization locally on-device, without bots or cloud recording. Think of it as the "anti-Otter.ai" for professionals who care about privacy.
+Char is a privacy-first AI notepad for meetings — it runs transcription and summarization locally on-device, without bots or cloud recording. Think of it as the "anti-Otter.ai" for professionals who care about privacy.
 
 I'm sending you data about a GitHub user who interacted with our repository (starred, forked, opened an issue, etc). Your job is to exhaustively research this person using the information provided to determine if they are:
 
-1. A potential customer (someone who would benefit from Hyprnote)
-2. A potential hire (talented developer who could contribute to Hyprnote)
+1. A potential customer (someone who would benefit from Char)
+2. A potential hire (talented developer who could contribute to Char)
 3. A potential community contributor
 
-Hyprnote's ideal customer profile:
+Char's ideal customer profile:
 1. Professional who has frequent meetings (sales, consulting, recruiting, healthcare, legal, journalism, engineering management)
 2. Privacy-conscious — works with sensitive data
 3. Tech-savvy enough to appreciate local AI / on-device processing
 4. Uses a Mac (our primary platform)
 
-Hyprnote's ideal hire profile:
+Char's ideal hire profile:
 1. Strong Rust and/or TypeScript developer
 2. Experience with audio processing, ML/AI, or desktop apps (Tauri/Electron)
 3. Open source contributor
@@ -230,7 +230,7 @@ Return your final response in JSON only with the following schema:
 - The score field is from 0 to 100.
 - The company is where they currently work, or "" if unknown.
 - For the "reasoning" field, write in Markdown. Include newlines where appropriate.
-- If the person works at Hyprnote (fastrepl), there is no match and the score is 0.
+- If the person works at Char (fastrepl), there is no match and the score is 0.
 - Focus on whether they'd be a good customer, hire, or contributor.`;
 
 export async function researchLead(

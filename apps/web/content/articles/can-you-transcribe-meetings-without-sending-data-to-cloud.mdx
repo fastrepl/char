@@ -1,6 +1,6 @@
 ---
 meta_title: "Can You Transcribe Meetings Without Sending Data to the Cloud?"
-meta_description: "Learn how to transcribe meetings without sending data to the cloud. Discover local AI tools like Hyprnote that keep conversations on-device and completely private."
+meta_description: "Learn how to transcribe meetings without sending data to the cloud. Discover local AI tools like Char that keep conversations on-device and completely private."
 author: "Harshika"
 coverImage: "/api/images/blog/can-you-transcribe-meetings-without-sending-data-to-cloud/cover.png"
 date: "2025-08-22"
@@ -34,15 +34,15 @@ You're not just ensuring your systems meet HIPAA, GDPR, or SOC 2 requirements—
 
 On the other hand, local-first systems shrink the compliance surface area. They reduce dependency on cloud vendors, make audits easier, and give enterprises more control over how data is handled.
 
-## Enter Hyprnote: The Local AI Alternative to Cloud-based Notetakers
+## Enter Char: The Local AI Alternative to Cloud-based Notetakers
 
-[Hyprnote](/) was built specifically to address these concerns as the only truly [local-first AI notepad for meetings](/product/local-ai).
+[Char](/) was built specifically to address these concerns as the only truly [local-first AI notepad for meetings](/product/local-ai).
 
 Here's how it works differently:
 
 ### Complete On-Device Processing
 
-Unlike tools that claim to be "bot-free" but still send your data to the cloud for processing, Hyprnote runs everything locally:
+Unlike tools that claim to be "bot-free" but still send your data to the cloud for processing, Char runs everything locally:
 
 - **Speech-to-Text:** Uses the Whisper series models running directly on your device
 - **AI Summarization:** Powers a custom HyperLLM-V1 model (just 1.1GB) that delivers exceptional summarization quality while being extremely fast
@@ -52,7 +52,7 @@ Unlike tools that claim to be "bot-free" but still send your data to the cloud f
 
 ### Universal Platform Compatibility
 
-Hyprnote captures both your microphone input and system audio directly, meaning it works with:
+Char captures both your microphone input and system audio directly, meaning it works with:
 
 - All meeting platforms (Zoom, Teams, Meet, Slack, and any other platform)
 - In-person meetings where participants are speaking near your device
@@ -61,7 +61,7 @@ Hyprnote captures both your microphone input and system audio directly, meaning 
 
 ### Complete Offline Functionality
 
-Because everything runs locally, Hyprnote works anywhere:
+Because everything runs locally, Char works anywhere:
 
 - Remote locations with poor internet
 - Highly secure air-gapped environments
@@ -72,7 +72,7 @@ Because everything runs locally, Hyprnote works anywhere:
 
 Nope.
 
-Hyprnote delivers the same functionality as cloud tools:
+Char delivers the same functionality as cloud tools:
 
 - Real-time transcription with minimal latency
 - Speaker identification for one-on-one calls
@@ -83,9 +83,9 @@ Hyprnote delivers the same functionality as cloud tools:
 
 Modern local AI is getting shockingly good. What once needed server farms now runs efficiently on your laptop, delivering professional results without the privacy and compliance nightmare.
 
-And here's the thing, Hyprnote doesn't lock you into local-only. It's open-source, so you can configure and deploy it as you like. Let's see how that works.
+And here's the thing, Char doesn't lock you into local-only. It's open-source, so you can configure and deploy it as you like. Let's see how that works.
 
-## Hyprnote's Privacy vs. Performance Spectrum
+## Char's Privacy vs. Performance Spectrum
 
 Think of it like building a custom PC, but for AI transcription. You pick the components that match your needs:
 
@@ -97,7 +97,7 @@ _Uses: Local Whisper models + HyperLLM-V1 + Device-only storage_
 
 _Uses: Local Whisper + Cloud LLM (OpenAI, Claude, etc.) + Hybrid storage_
 
-**Performance Mode:** Use cloud APIs for both transcription and AI processing. You get the absolute best accuracy and speed, but you're back to sending data to third parties. At least with Hyprnote, you choose which third parties.
+**Performance Mode:** Use cloud APIs for both transcription and AI processing. You get the absolute best accuracy and speed, but you're back to sending data to third parties. At least with Char, you choose which third parties.
 
 _Uses: Cloud STT (Deepgram, AssemblyAI) + Cloud LLM + Hybrid storage_
 
@@ -117,7 +117,7 @@ Yes, and you have two main approaches:
 
 **Cloud-Based Apps:** Tools like Otter AI, Fireflies, and others that send your audio to remote servers for processing. While convenient, they expose your conversations to third-party data handling.
 
-**Local Apps:** Hyprnote represents the new generation of on-device AI tools that provide the same transcription capabilities without cloud dependency.
+**Local Apps:** Char represents the new generation of on-device AI tools that provide the same transcription capabilities without cloud dependency.
 
 The key difference isn't just where processing happens—it's about control. With local processing, you maintain complete control over your data, decide which AI providers to connect to (if any), and can verify exactly how your conversations are handled through open-source transparency.
 
@@ -131,16 +131,16 @@ Yes, absolutely. There's an important distinction between transcribing and recor
 
 Many transcription tools do both—they record the audio AND create transcripts. But you can absolutely get transcripts without storing audio files.
 
-Hyprnote, for example, can process speech to create transcripts and summaries while not retaining the original audio, giving you the documentation you need while maintaining maximum privacy.
+Char, for example, can process speech to create transcripts and summaries while not retaining the original audio, giving you the documentation you need while maintaining maximum privacy.
 
 This approach is particularly valuable for sensitive conversations where you want meeting notes but don't want audio files that could be subpoenaed, hacked, or accidentally shared.
 
 ### 3. Can you use local transcription for languages other than English?
 
-Yes, though performance varies by language. Hyprnote supports transcription in all languages that Whisper supports, which includes dozens of languages.
+Yes, though performance varies by language. Char supports transcription in all languages that Whisper supports, which includes dozens of languages.
 
 However, the AI summarization features work best with English since the custom HyperLLM-V1 model was optimized for English conversations.
 
-For multilingual teams, this is an area where you might choose to configure Hyprnote with cloud-based LLM providers that offer better multilingual support.
+For multilingual teams, this is an area where you might choose to configure Char with cloud-based LLM providers that offer better multilingual support.
 
 <CtaCard/>

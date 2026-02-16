@@ -1,6 +1,7 @@
 const COMMANDS: &[&str] = &[
     "get_git_hash",
     "get_fingerprint",
+    "get_device_info",
     "opinionated_md_to_html",
     "delete_session_folder",
     "parse_meeting_link",

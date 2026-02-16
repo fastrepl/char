@@ -422,7 +422,10 @@ function Container({
   children?: ReactNode;
 }) {
   return (
-    <section className="bg-neutral-50 p-4 rounded-lg flex flex-col gap-4">
+    <section
+      data-settings-item
+      className="bg-neutral-50 p-4 rounded-lg flex flex-col gap-4"
+    >
       <div className="flex flex-col gap-2">
         <h1 className="text-md font-semibold font-serif">{title}</h1>
         {description && (

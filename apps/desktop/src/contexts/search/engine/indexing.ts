@@ -17,7 +17,7 @@ export async function indexSessions(store: MainStore): Promise<void> {
     "user_id",
     "created_at",
     "folder_id",
-    "event_id",
+    "event_json",
     "title",
     "raw_md",
     "transcript",

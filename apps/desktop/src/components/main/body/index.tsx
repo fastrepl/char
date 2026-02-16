@@ -564,7 +564,7 @@ function TabItem({
       />
     );
   }
-  if (tab.type === "chat") {
+  if (tab.type === "chat_support") {
     return (
       <TabItemChat
         tab={tab}
@@ -639,7 +639,7 @@ function ContentWrapper({ tab }: { tab: Tab }) {
   if (tab.type === "search") {
     return <TabContentSearch tab={tab} />;
   }
-  if (tab.type === "chat") {
+  if (tab.type === "chat_support") {
     return <TabContentChat tab={tab} />;
   }
   if (tab.type === "onboarding") {
@@ -681,7 +681,7 @@ function TabChatButton({
   if (
     currentTab?.type === "ai" ||
     currentTab?.type === "settings" ||
-    currentTab?.type === "chat" ||
+    currentTab?.type === "chat_support" ||
     currentTab?.type === "onboarding"
   ) {
     return null;
@@ -888,7 +888,7 @@ function useTabsShortcuts() {
         } else if (currentTab.pinned) {
           unpin(currentTab);
         } else {
-          if (currentTab.type === "chat") {
+          if (currentTab.type === "chat_support") {
             chat.sendEvent({ type: "CLOSE" });
           }
           close(currentTab);
@@ -1031,20 +1031,6 @@ function useTabsShortcuts() {
       enableOnContentEditable: true,
     },
     [newNoteAndListen],
-  );
-
-  useHotkeys(
-    "mod+shift+j",
-    () => {
-      openNew({ type: "chat" });
-      chat.sendEvent({ type: "OPEN_TAB" });
-    },
-    {
-      preventDefault: true,
-      enableOnFormTags: true,
-      enableOnContentEditable: true,
-    },
-    [openNew, chat],
   );
 
   return {};

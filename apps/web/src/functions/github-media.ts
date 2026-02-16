@@ -1,6 +1,6 @@
 import { getGitHubCredentials } from "@/functions/github-content";
 
-const GITHUB_REPO = "fastrepl/hyprnote";
+const GITHUB_REPO = "fastrepl/char";
 const GITHUB_BRANCH = "main";
 const IMAGES_PATH = "apps/web/public/images";
 

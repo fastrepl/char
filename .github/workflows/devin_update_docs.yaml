@@ -2,7 +2,7 @@ name: devin_update_docs
 
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 0 * * 0"
   workflow_dispatch:
 
 jobs:
@@ -28,7 +28,7 @@ jobs:
 
           DOCS_PR=$(echo "$PR_JSON" | jq -r '
             [.[] | select(
-              (.title | test("docs.*update|update.*docs"; "i")) and
+              (.title | test("docs\\(weekly\\)|docs.*update|update.*docs"; "i")) and
               (.headRefName | startswith("devin/"))
             )] | sort_by(.number) | last // empty
           ')
@@ -106,8 +106,9 @@ jobs:
                - Maintain existing tone and style
 
             4. **Create a Summary**
-               After making changes, create a PR with a summary of:
-               - What changed in the codebase
+               After making changes, create a PR with:
+               - Title format: "docs(weekly): [brief description of updates]"
+               - A summary of what changed in the codebase
                - Which docs were updated and why
                - Any documentation gaps that need human attention
 

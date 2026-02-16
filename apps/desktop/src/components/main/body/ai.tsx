@@ -9,6 +9,7 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 
 import type { ChatShortcut } from "@hypr/store";
 import { Button } from "@hypr/ui/components/ui/button";
@@ -18,6 +19,7 @@ import {
 } from "@hypr/ui/components/ui/scroll-fade";
 import { cn } from "@hypr/utils";
 
+import { useSettingsNavigation } from "../../../hooks/useSettingsNavigation";
 import * as main from "../../../store/tinybase/store/main";
 import { type Tab, useTabs } from "../../../store/zustand/tabs";
 import { LLM } from "../../settings/ai/llm";
@@ -96,6 +98,46 @@ function AIView({ tab }: { tab: Extract<Tab, { type: "ai" }> }) {
     },
     [updateAiTabState, tab],
   );
+
+  const enabledMenuKeys: AITabKey[] = [
+    "transcription",
+    "intelligence",
+    "templates",
+    "shortcuts",
+  ];
+  const currentIndex = enabledMenuKeys.indexOf(activeTab);
+
+  useHotkeys(
+    "ctrl+alt+left",
+    () => {
+      if (currentIndex > 0) {
+        setActiveTab(enabledMenuKeys[currentIndex - 1]);
+      }
+    },
+    {
+      preventDefault: true,
+      enableOnFormTags: true,
+      enableOnContentEditable: true,
+    },
+    [currentIndex, setActiveTab],
+  );
+
+  useHotkeys(
+    "ctrl+alt+right",
+    () => {
+      if (currentIndex >= 0 && currentIndex < enabledMenuKeys.length - 1) {
+        setActiveTab(enabledMenuKeys[currentIndex + 1]);
+      }
+    },
+    {
+      preventDefault: true,
+      enableOnFormTags: true,
+      enableOnContentEditable: true,
+    },
+    [currentIndex, setActiveTab],
+  );
+
+  useSettingsNavigation(ref, activeTab);
 
   const menuItems: Array<{
     key: AITabKey;

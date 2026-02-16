@@ -239,17 +239,200 @@
         }
       }
     },
+    "/stt/listen": {
+      "get": {
+        "tags": [
+          "stt"
+        ],
+        "operationId": "stt_listen_stream",
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "query",
+            "description": "STT provider. Use 'hyprnote' for automatic routing (default), or specify:\ndeepgram, soniox, assemblyai, gladia, elevenlabs, fireworks, openai, dashscope, mistral",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "model",
+            "in": "query",
+            "description": "Model to use for transcription (provider-specific, e.g. 'nova-3')",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "description": "BCP-47 language hint (e.g. 'en', 'ko', 'ja'). Multiple values or comma-separated supported",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keywords",
+            "in": "query",
+            "description": "Keyword boosting. Comma-separated or repeated query params",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sample_rate",
+            "in": "query",
+            "description": "Audio sample rate in Hz (default: 16000)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "channels",
+            "in": "query",
+            "description": "Number of audio channels (default: 1)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "encoding",
+            "in": "query",
+            "description": "Audio encoding: linear16, flac, mulaw, opus, ogg-opus, etc.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "101": {
+            "description": "WebSocket upgrade. Server sends StreamResponse JSON messages."
+          },
+          "400": {
+            "description": "Bad request (invalid provider, missing params, etc.)"
+          },
+          "502": {
+            "description": "Upstream provider connection failed"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "stt"
+        ],
+        "operationId": "stt_listen_batch",
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "query",
+            "description": "STT provider. Use 'hyprnote' for automatic routing (default), or specify:\ndeepgram, soniox, assemblyai, gladia, elevenlabs, fireworks, openai, dashscope, mistral",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "model",
+            "in": "query",
+            "description": "Model to use for transcription (provider-specific, e.g. 'nova-3')",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "description": "BCP-47 language hint (e.g. 'en', 'ko', 'ja'). Multiple values or comma-separated supported",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keywords",
+            "in": "query",
+            "description": "Keyword boosting. Comma-separated or repeated query params",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "callback",
+            "in": "query",
+            "description": "When set, enables async callback mode. Body should be JSON with a `url` field instead of raw audio",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Raw audio bytes (sync mode) or JSON `{ \"url\": \"<file_id>\" }` (callback mode)",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListenCallbackRequest"
+              }
+            },
+            "application/octet-stream": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "binary",
+                  "minimum": 0
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Transcription result (sync) or ListenCallbackResponse (callback)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (empty body, invalid provider, etc.)"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "502": {
+            "description": "All upstream providers failed"
+          }
+        }
+      }
+    },
     "/stt/status/{pipeline_id}": {
       "get": {
         "tags": [
           "stt"
         ],
-        "operationId": "handler",
+        "operationId": "stt_status",
         "parameters": [
           {
             "name": "pipeline_id",
             "in": "path",
-            "description": "Pipeline ID (Restate workflow key)",
+            "description": "Pipeline ID",
             "required": true,
             "schema": {
               "type": "string"
@@ -267,8 +450,11 @@
               }
             }
           },
-          "502": {
-            "description": "Restate service unavailable"
+          "404": {
+            "description": "Job not found"
+          },
+          "500": {
+            "description": "Internal error"
           }
         }
       }
@@ -345,10 +531,305 @@
           }
         ]
       }
+    },
+    "/support/chatwoot/contact": {
+      "post": {
+        "tags": [
+          "chatwoot"
+        ],
+        "operationId": "create_contact",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContactRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Contact created or found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateContactResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Chatwoot API error"
+          }
+        }
+      }
+    },
+    "/support/chatwoot/conversations": {
+      "get": {
+        "tags": [
+          "chatwoot"
+        ],
+        "operationId": "list_conversations",
+        "parameters": [
+          {
+            "name": "source_id",
+            "in": "query",
+            "description": "Contact source ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of conversations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConversationSummary"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Chatwoot API error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "chatwoot"
+        ],
+        "operationId": "create_conversation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConversationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Conversation created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateConversationResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Chatwoot API error"
+          }
+        }
+      }
+    },
+    "/support/chatwoot/conversations/{conversation_id}/messages": {
+      "get": {
+        "tags": [
+          "chatwoot"
+        ],
+        "operationId": "get_messages",
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "description": "Conversation ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "source_id",
+            "in": "query",
+            "description": "Contact source ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of messages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MessageResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Chatwoot API error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "chatwoot"
+        ],
+        "operationId": "send_message",
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "description": "Conversation ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Message sent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Chatwoot API error"
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "BatchAlternatives": {
+        "type": "object",
+        "required": [
+          "transcript",
+          "confidence"
+        ],
+        "properties": {
+          "confidence": {
+            "type": "number",
+            "format": "double"
+          },
+          "transcript": {
+            "type": "string"
+          },
+          "words": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatchWord"
+            }
+          }
+        }
+      },
+      "BatchChannel": {
+        "type": "object",
+        "required": [
+          "alternatives"
+        ],
+        "properties": {
+          "alternatives": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatchAlternatives"
+            }
+          }
+        }
+      },
+      "BatchResponse": {
+        "type": "object",
+        "required": [
+          "metadata",
+          "results"
+        ],
+        "properties": {
+          "metadata": {
+            "type": "object"
+          },
+          "results": {
+            "$ref": "#/components/schemas/BatchResults"
+          }
+        }
+      },
+      "BatchResults": {
+        "type": "object",
+        "required": [
+          "channels"
+        ],
+        "properties": {
+          "channels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatchChannel"
+            }
+          }
+        }
+      },
+      "BatchWord": {
+        "type": "object",
+        "required": [
+          "word",
+          "start",
+          "end",
+          "confidence"
+        ],
+        "properties": {
+          "confidence": {
+            "type": "number",
+            "format": "double"
+          },
+          "end": {
+            "type": "number",
+            "format": "double"
+          },
+          "punctuated_word": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "speaker": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "start": {
+            "type": "number",
+            "format": "double"
+          },
+          "word": {
+            "type": "string"
+          }
+        }
+      },
       "CanStartTrialReason": {
         "type": "string",
         "enum": [
@@ -391,6 +872,86 @@
           },
           "token": {
             "type": "string"
+          }
+        }
+      },
+      "ConversationSummary": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inboxId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "CreateContactRequest": {
+        "type": "object",
+        "required": [
+          "identifier"
+        ],
+        "properties": {
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "identifier": {
+            "type": "string"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "CreateContactResponse": {
+        "type": "object",
+        "required": [
+          "sourceId",
+          "pubsubToken"
+        ],
+        "properties": {
+          "pubsubToken": {
+            "type": "string"
+          },
+          "sourceId": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateConversationRequest": {
+        "type": "object",
+        "required": [
+          "sourceId"
+        ],
+        "properties": {
+          "customAttributes": {},
+          "sourceId": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateConversationResponse": {
+        "type": "object",
+        "required": [
+          "conversationId"
+        ],
+        "properties": {
+          "conversationId": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -465,6 +1026,18 @@
           },
           "arch": {
             "type": "string"
+          },
+          "buildHash": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "locale": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "osVersion": {
             "type": "string"
@@ -604,6 +1177,17 @@
           }
         }
       },
+      "ListConversationsQuery": {
+        "type": "object",
+        "required": [
+          "sourceId"
+        ],
+        "properties": {
+          "sourceId": {
+            "type": "string"
+          }
+        }
+      },
       "ListEventsRequest": {
         "type": "object",
         "required": [
@@ -675,14 +1259,84 @@
           }
         }
       },
+      "ListenCallbackRequest": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "ListenCallbackResponse": {
+        "type": "object",
+        "required": [
+          "request_id"
+        ],
+        "properties": {
+          "request_id": {
+            "type": "string"
+          }
+        }
+      },
+      "MessageResponse": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "content": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "messageType": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
       "PipelineStatus": {
         "type": "string",
         "enum": [
-          "QUEUED",
-          "TRANSCRIBING",
-          "DONE",
-          "ERROR"
+          "processing",
+          "done",
+          "error"
         ]
+      },
+      "SendMessageRequest": {
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "messageType": {
+            "type": "string"
+          },
+          "sourceId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
       },
       "StartTrialReason": {
         "type": "string",
@@ -714,6 +1368,312 @@
           }
         }
       },
+      "StreamAlternatives": {
+        "type": "object",
+        "required": [
+          "transcript",
+          "words",
+          "confidence"
+        ],
+        "properties": {
+          "confidence": {
+            "type": "number",
+            "format": "double"
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "transcript": {
+            "type": "string"
+          },
+          "words": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StreamWord"
+            }
+          }
+        }
+      },
+      "StreamChannel": {
+        "type": "object",
+        "required": [
+          "alternatives"
+        ],
+        "properties": {
+          "alternatives": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StreamAlternatives"
+            }
+          }
+        }
+      },
+      "StreamMetadata": {
+        "type": "object",
+        "required": [
+          "request_id",
+          "model_info",
+          "model_uuid"
+        ],
+        "properties": {
+          "extra": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "model_info": {
+            "$ref": "#/components/schemas/StreamModelInfo"
+          },
+          "model_uuid": {
+            "type": "string"
+          },
+          "request_id": {
+            "type": "string"
+          }
+        }
+      },
+      "StreamModelInfo": {
+        "type": "object",
+        "required": [
+          "name",
+          "version",
+          "arch"
+        ],
+        "properties": {
+          "arch": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        }
+      },
+      "StreamResponse": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "start",
+              "duration",
+              "is_final",
+              "speech_final",
+              "from_finalize",
+              "channel",
+              "metadata",
+              "channel_index",
+              "type"
+            ],
+            "properties": {
+              "channel": {
+                "$ref": "#/components/schemas/StreamChannel"
+              },
+              "channel_index": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              "duration": {
+                "type": "number",
+                "format": "double"
+              },
+              "from_finalize": {
+                "type": "boolean"
+              },
+              "is_final": {
+                "type": "boolean"
+              },
+              "metadata": {
+                "$ref": "#/components/schemas/StreamMetadata"
+              },
+              "speech_final": {
+                "type": "boolean"
+              },
+              "start": {
+                "type": "number",
+                "format": "double"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "Results"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "request_id",
+              "created",
+              "duration",
+              "channels",
+              "type"
+            ],
+            "properties": {
+              "channels": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              },
+              "created": {
+                "type": "string"
+              },
+              "duration": {
+                "type": "number",
+                "format": "double"
+              },
+              "request_id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "Metadata"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "channel",
+              "timestamp",
+              "type"
+            ],
+            "properties": {
+              "channel": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 0
+                }
+              },
+              "timestamp": {
+                "type": "number",
+                "format": "double"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "SpeechStarted"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "channel",
+              "last_word_end",
+              "type"
+            ],
+            "properties": {
+              "channel": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 0
+                }
+              },
+              "last_word_end": {
+                "type": "number",
+                "format": "double"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "UtteranceEnd"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "error_message",
+              "provider",
+              "type"
+            ],
+            "properties": {
+              "error_code": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int32"
+              },
+              "error_message": {
+                "type": "string"
+              },
+              "provider": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "Error"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "StreamWord": {
+        "type": "object",
+        "required": [
+          "word",
+          "start",
+          "end",
+          "confidence"
+        ],
+        "properties": {
+          "confidence": {
+            "type": "number",
+            "format": "double"
+          },
+          "end": {
+            "type": "number",
+            "format": "double"
+          },
+          "language": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "punctuated_word": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "speaker": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "start": {
+            "type": "number",
+            "format": "double"
+          },
+          "word": {
+            "type": "string"
+          }
+        }
+      },
       "SttStatusResponse": {
         "type": "object",
         "required": [
@@ -726,14 +1686,20 @@
               "null"
             ]
           },
-          "status": {
-            "$ref": "#/components/schemas/PipelineStatus"
-          },
-          "transcript": {
+          "provider": {
             "type": [
               "string",
               "null"
             ]
+          },
+          "rawResult": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/PipelineStatus"
           }
         }
       },
@@ -796,6 +1762,10 @@
     {
       "name": "support",
       "description": "User feedback and support"
+    },
+    {
+      "name": "chatwoot",
+      "description": "Chatwoot conversation persistence"
     }
   ]
 }

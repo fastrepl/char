@@ -53,6 +53,8 @@
 @import "tailwind-scrollbar-hide/v4";
 @plugin "@tailwindcss/typography";
 
+@source "../../../packages/transcript/src";
+
 @theme {
   --font-sans: "SF Pro", system-ui, -apple-system, sans-serif;
   --font-serif: "Lora", Georgia, serif;

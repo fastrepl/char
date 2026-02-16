@@ -59,7 +59,7 @@ jobs:
 
             3. **Create a PR**
                - Create a PR with the blog post
-               - The PR title should be: "feat(blog): add Hyprnote Weekly post for [date]"
+               - The PR title should be: "blog(weekly): [date]"
                - Include a summary of what the post covers in the PR description
 
             ## Important Notes

@@ -1,12 +1,14 @@
+import { TriangleAlert } from "lucide-react";
 import { type RefObject, useCallback, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
+import type { DegradedError } from "@hypr/plugin-listener";
+import type { RuntimeSpeakerHint } from "@hypr/transcript";
 import { cn } from "@hypr/utils";
 
 import { useAudioPlayer } from "../../../../../../../contexts/audio-player/provider";
 import { useListener } from "../../../../../../../contexts/listener";
 import * as main from "../../../../../../../store/tinybase/store/main";
-import type { RuntimeSpeakerHint } from "../../../../../../../utils/segment";
 import { TranscriptEmptyState } from "../empty-state";
 import {
   useAutoScroll,
@@ -35,6 +37,7 @@ export function TranscriptContainer({
   );
 
   const sessionMode = useListener((state) => state.getSessionMode(sessionId));
+  const degraded = useListener((state) => state.live.degraded);
   const currentActive =
     sessionMode === "active" || sessionMode === "finalizing";
   const editable =
@@ -126,6 +129,9 @@ export function TranscriptContainer({
 
   // TOOD: this can't handle words=[]
   if (transcriptIds.length === 0) {
+    if (currentActive && degraded) {
+      return <DegradedState error={degraded} />;
+    }
     return (
       <TranscriptEmptyState isBatching={sessionMode === "running_batch"} />
     );
@@ -147,6 +153,7 @@ export function TranscriptContainer({
           "pb-16 scroll-pb-32 scrollbar-hide",
         ])}
       >
+        {currentActive && degraded && <DegradedState error={degraded} />}
         {transcriptIds.map((transcriptId, index) => (
           <div key={transcriptId} className="flex flex-col gap-8">
             <RenderTranscript
@@ -208,6 +215,36 @@ function TranscriptSeparator() {
       <div className="flex-1 border-t border-neutral-200/40" />
       <span>~ ~ ~ ~ ~ ~ ~ ~ ~</span>
       <div className="flex-1 border-t border-neutral-200/40" />
+    </div>
+  );
+}
+
+function degradedMessage(error: DegradedError): string {
+  switch (error.type) {
+    case "authentication_failed":
+      return `Authentication failed (${error.provider})`;
+    case "upstream_unavailable":
+      return error.message;
+    case "connection_timeout":
+      return "Transcription connection timed out";
+    case "stream_error":
+      return "Transcription stream error";
+  }
+}
+
+function DegradedState({ error }: { error: DegradedError }) {
+  return (
+    <div
+      className={cn([
+        "h-full flex flex-col items-center justify-center gap-3",
+        "bg-red-50/50 text-red-700",
+      ])}
+    >
+      <TriangleAlert size={24} className="text-red-400" />
+      <div className="flex flex-col items-center gap-1">
+        <p className="text-sm font-medium">{degradedMessage(error)}</p>
+        <p className="text-xs text-red-400">Recording continues.</p>
+      </div>
     </div>
   );
 }

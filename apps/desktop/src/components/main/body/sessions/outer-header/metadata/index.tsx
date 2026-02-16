@@ -18,7 +18,7 @@ import {
 } from "@hypr/utils";
 
 import { useConfigValue } from "../../../../../../config/use-config";
-import { useEvent, useSession } from "../../../../../../hooks/tinybase";
+import { useSessionEvent } from "../../../../../../hooks/tinybase";
 import * as main from "../../../../../../store/tinybase/store/main";
 import { DateDisplay } from "./date";
 import { ParticipantsDisplay } from "./participants";
@@ -51,13 +51,12 @@ const TriggerInner = forwardRef<
     "created_at",
     main.STORE_ID,
   );
-  const { eventId } = useSession(sessionId);
-  const event = useEvent(eventId);
+  const sessionEvent = useSessionEvent(sessionId);
 
-  const hasEvent = !!event;
+  const hasEvent = !!sessionEvent;
   const parsedDate = safeParseDate(createdAt);
   const displayText = hasEvent
-    ? event.title || "Untitled Event"
+    ? sessionEvent.title || "Untitled Event"
     : formatRelativeOrAbsolute(parsedDate ?? new Date());
 
   return (
@@ -72,7 +71,7 @@ const TriggerInner = forwardRef<
         hasEvent && "max-w-50",
       ])}
     >
-      {hasEvent && event?.meetingLink ? (
+      {hasEvent && sessionEvent?.meeting_link ? (
         <VideoIcon size={14} className="shrink-0" />
       ) : (
         <CalendarIcon size={14} className="shrink-0" />
@@ -83,13 +82,24 @@ const TriggerInner = forwardRef<
 });
 
 function ContentInner({ sessionId }: { sessionId: string }) {
-  const { eventId } = useSession(sessionId);
-  const event = useEvent(eventId);
+  const sessionEvent = useSessionEvent(sessionId);
+
+  const eventDisplayData = sessionEvent
+    ? {
+        title: sessionEvent.title,
+        startedAt: sessionEvent.started_at,
+        endedAt: sessionEvent.ended_at,
+        location: sessionEvent.location,
+        meetingLink: sessionEvent.meeting_link,
+        description: sessionEvent.description,
+        calendarId: sessionEvent.calendar_id,
+      }
+    : null;
 
   return (
     <div className="flex flex-col gap-4 p-4 overflow-y-auto">
-      {event && <EventDisplay event={event} />}
-      {!event && <DateDisplay sessionId={sessionId} />}
+      {eventDisplayData && <EventDisplay event={eventDisplayData} />}
+      {!eventDisplayData && <DateDisplay sessionId={sessionId} />}
       <ParticipantsDisplay sessionId={sessionId} />
     </div>
   );

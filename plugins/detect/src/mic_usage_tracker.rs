@@ -5,8 +5,8 @@ use tokio_util::sync::CancellationToken;
 
 use crate::{DetectEvent, ProcessorState, env::Env};
 
-pub(crate) const MIC_ACTIVE_THRESHOLD: Duration = Duration::from_secs(3 * 60);
-pub(crate) const COOLDOWN_DURATION: Duration = Duration::from_secs(60 * 60);
+pub(crate) const DEFAULT_MIC_ACTIVE_THRESHOLD_SECS: u64 = 15;
+pub(crate) const COOLDOWN_DURATION: Duration = Duration::from_mins(10);
 
 struct TimerEntry {
     generation: u64,
@@ -79,44 +79,43 @@ impl MicUsageTracker {
     }
 }
 
-pub(crate) fn on_timer_fired<E: Env>(env: &E, app: &hypr_detect::InstalledApp, duration_secs: u64) {
-    tracing::info!(
-        app_id = %app.id,
-        duration_secs,
-        "mic_prolonged_usage"
-    );
-
-    let key = uuid::Uuid::new_v4().to_string();
-    env.emit(DetectEvent::MicProlongedUsage {
-        key,
-        app: app.clone(),
-        duration_secs,
-    });
-}
-
 pub(crate) fn spawn_timer<E: Env>(
     env: E,
     state: ProcessorState,
     app: hypr_detect::InstalledApp,
     generation: u64,
     token: CancellationToken,
+    threshold_secs: u64,
 ) {
-    let duration_secs = MIC_ACTIVE_THRESHOLD.as_secs();
+    let duration = Duration::from_secs(threshold_secs);
     let app_id = app.id.clone();
 
     tokio::spawn(async move {
         tokio::select! {
-            _ = tokio::time::sleep(MIC_ACTIVE_THRESHOLD) => {}
+            _ = tokio::time::sleep(duration) => {}
             _ = token.cancelled() => { return; }
         }
 
-        let claimed = {
+        let emit_event = {
             let mut guard = state.lock().unwrap_or_else(|e| e.into_inner());
-            guard.mic_usage_tracker.claim(&app_id, generation)
+            if !guard.mic_usage_tracker.claim(&app_id, generation) {
+                None
+            } else if guard.policy.respect_dnd && env.is_do_not_disturb() {
+                tracing::info!(app_id = %app_id, "skip_mic_detected: DoNotDisturb");
+                None
+            } else {
+                let key = uuid::Uuid::new_v4().to_string();
+                Some(DetectEvent::MicDetected {
+                    key,
+                    apps: vec![app.clone()],
+                    duration_secs: threshold_secs,
+                })
+            }
         };
 
-        if claimed {
-            on_timer_fired(&env, &app, duration_secs);
+        if let Some(event) = emit_event {
+            tracing::info!(app_id = %app.id, threshold_secs, "mic_detected");
+            env.emit(event);
         }
     });
 }
@@ -188,16 +187,16 @@ mod tests {
         assert!(tracker.claim("app.x", generation));
         assert!(tracker.is_in_cooldown("app.x"));
 
-        tokio::time::advance(Duration::from_secs(30 * 60)).await;
+        tokio::time::advance(Duration::from_secs(5 * 60)).await;
         assert!(
             tracker.is_in_cooldown("app.x"),
-            "still in cooldown at 30 min"
+            "still in cooldown at 5 min"
         );
 
-        tokio::time::advance(Duration::from_secs(30 * 60)).await;
+        tokio::time::advance(Duration::from_secs(5 * 60)).await;
         assert!(
             !tracker.is_in_cooldown("app.x"),
-            "cooldown expired at 60 min"
+            "cooldown expired at 10 min"
         );
     }
 

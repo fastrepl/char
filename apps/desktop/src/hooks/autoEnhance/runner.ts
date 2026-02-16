@@ -179,40 +179,6 @@ export function useAutoEnhanceRunner(
       model,
       taskType: "enhance",
       args: { sessionId, enhancedNoteId },
-      onComplete: (text) => {
-        if (!text || !store) return;
-        try {
-          const jsonContent = md2json(text);
-          store.setPartialRow("enhanced_notes", enhancedNoteId, {
-            content: JSON.stringify(jsonContent),
-          });
-
-          const currentTitle = store.getCell("sessions", sessionId, "title");
-          const trimmedTitle =
-            typeof currentTitle === "string" ? currentTitle.trim() : "";
-
-          if (!trimmedTitle && model) {
-            const titleTaskId = createTaskId(sessionId, "title");
-            void generate(titleTaskId, {
-              model,
-              taskType: "title",
-              args: { sessionId },
-              onComplete: (titleText) => {
-                if (titleText && store) {
-                  const trimmed = titleText.trim();
-                  if (trimmed && trimmed !== "<EMPTY>") {
-                    store.setPartialRow("sessions", sessionId, {
-                      title: trimmed,
-                    });
-                  }
-                }
-              },
-            });
-          }
-        } catch (error) {
-          console.error("Failed to convert markdown to JSON:", error);
-        }
-      },
     });
 
     return { type: "started", noteId: enhancedNoteId };

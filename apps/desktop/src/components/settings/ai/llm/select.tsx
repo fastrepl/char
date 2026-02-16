@@ -14,6 +14,7 @@ import { useAuth } from "../../../../auth";
 import { useBillingAccess } from "../../../../billing";
 import { useConfigValues } from "../../../../config/use-config";
 import * as settings from "../../../../store/tinybase/store/settings";
+import { providerRowId } from "../shared";
 import {
   getProviderSelectionBlockers,
   requiresEntitlement,
@@ -199,7 +200,7 @@ function useConfiguredMapping(): Record<string, ProviderStatus> {
   const mapping = useMemo(() => {
     return Object.fromEntries(
       PROVIDERS.map((provider) => {
-        const config = configuredProviders[provider.id];
+        const config = configuredProviders[providerRowId("llm", provider.id)];
         const baseUrl = String(
           config?.base_url || provider.baseUrl || "",
         ).trim();

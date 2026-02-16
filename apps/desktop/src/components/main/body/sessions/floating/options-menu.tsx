@@ -255,7 +255,12 @@ export function OptionsMenu({
           }),
         ),
         Effect.tap(() => Effect.sync(() => clearBatchSession(sessionId))),
-        Effect.flatMap(() => Effect.promise(() => runBatch(path))),
+        Effect.flatMap((importedPath) =>
+          Effect.tryPromise({
+            try: () => runBatch(importedPath),
+            catch: (error) => error,
+          }),
+        ),
         Effect.tap(() => Effect.sync(() => triggerEnhance())),
         Effect.catchAll((error: unknown) =>
           Effect.sync(() => {

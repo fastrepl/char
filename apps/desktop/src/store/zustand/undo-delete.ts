@@ -5,7 +5,7 @@ type SessionRow = {
   user_id: string;
   created_at: string;
   folder_id: string;
-  event_id: string;
+  event_json: string;
   title: string;
   raw_md: string;
 };

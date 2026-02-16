@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteRouteImport } from './routes/app/route'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
-import { Route as AppExtHostRouteImport } from './routes/app/ext-host'
 import { Route as AppControlRouteImport } from './routes/app/control'
 import { Route as AppMainLayoutRouteImport } from './routes/app/main/_layout'
 import { Route as AppMainLayoutIndexRouteImport } from './routes/app/main/_layout.index'
@@ -25,11 +24,6 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/auth/callback',
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AppExtHostRoute = AppExtHostRouteImport.update({
-  id: '/ext-host',
-  path: '/ext-host',
-  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppControlRoute = AppControlRouteImport.update({
   id: '/control',
@@ -50,7 +44,6 @@ const AppMainLayoutIndexRoute = AppMainLayoutIndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/app': typeof AppRouteRouteWithChildren
   '/app/control': typeof AppControlRoute
-  '/app/ext-host': typeof AppExtHostRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/app/main': typeof AppMainLayoutRouteWithChildren
   '/app/main/': typeof AppMainLayoutIndexRoute
@@ -58,7 +51,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/app': typeof AppRouteRouteWithChildren
   '/app/control': typeof AppControlRoute
-  '/app/ext-host': typeof AppExtHostRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/app/main': typeof AppMainLayoutIndexRoute
 }
@@ -66,7 +58,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/app': typeof AppRouteRouteWithChildren
   '/app/control': typeof AppControlRoute
-  '/app/ext-host': typeof AppExtHostRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/app/main/_layout': typeof AppMainLayoutRouteWithChildren
   '/app/main/_layout/': typeof AppMainLayoutIndexRoute
@@ -76,17 +67,15 @@ export interface FileRouteTypes {
   fullPaths:
     | '/app'
     | '/app/control'
-    | '/app/ext-host'
     | '/auth/callback'
     | '/app/main'
     | '/app/main/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/app' | '/app/control' | '/app/ext-host' | '/auth/callback' | '/app/main'
+  to: '/app' | '/app/control' | '/auth/callback' | '/app/main'
   id:
     | '__root__'
     | '/app'
     | '/app/control'
-    | '/app/ext-host'
     | '/auth/callback'
     | '/app/main/_layout'
     | '/app/main/_layout/'
@@ -112,13 +101,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/callback'
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/app/ext-host': {
-      id: '/app/ext-host'
-      path: '/ext-host'
-      fullPath: '/app/ext-host'
-      preLoaderRoute: typeof AppExtHostRouteImport
-      parentRoute: typeof AppRouteRoute
     }
     '/app/control': {
       id: '/app/control'
@@ -158,13 +140,11 @@ const AppMainLayoutRouteWithChildren = AppMainLayoutRoute._addFileChildren(
 
 interface AppRouteRouteChildren {
   AppControlRoute: typeof AppControlRoute
-  AppExtHostRoute: typeof AppExtHostRoute
   AppMainLayoutRoute: typeof AppMainLayoutRouteWithChildren
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppControlRoute: AppControlRoute,
-  AppExtHostRoute: AppExtHostRoute,
   AppMainLayoutRoute: AppMainLayoutRouteWithChildren,
 }
 

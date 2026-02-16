@@ -18,15 +18,15 @@ export const Route = createFileRoute("/_view/changelog/")({
   },
   head: () => ({
     meta: [
-      { title: "Changelog - Hyprnote" },
+      { title: "Changelog - Char" },
       {
         name: "description",
-        content: "Track every update, improvement, and fix to Hyprnote",
+        content: "Track every update, improvement, and fix to Char",
       },
-      { property: "og:title", content: "Changelog - Hyprnote" },
+      { property: "og:title", content: "Changelog - Char" },
       {
         property: "og:description",
-        content: "Track every update, improvement, and fix to Hyprnote",
+        content: "Track every update, improvement, and fix to Char",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://hyprnote.com/changelog" },
@@ -71,7 +71,7 @@ function HeroSection() {
         Changelog
       </h1>
       <p className="text-lg sm:text-xl text-neutral-600">
-        Track every update, improvement, and fix to Hyprnote
+        Track every update, improvement, and fix to Char
       </p>
     </div>
   );

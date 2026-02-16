@@ -8,6 +8,12 @@ import {
   TZDate,
 } from "@hypr/utils";
 
+import {
+  eventMatchingKey,
+  getSessionEvent,
+  sessionEventMatchingKey,
+} from "./session-event";
+
 function toTZ(date: Date, timezone?: string): Date {
   return timezone ? new TZDate(date, timezone) : date;
 }
@@ -18,17 +24,17 @@ export type TimelineEventRow = {
   started_at?: string | null;
   ended_at?: string | null;
   calendar_id?: string | null;
+  tracking_id_event?: string | null;
+  has_recurrence_rules: boolean;
   recurrence_series_id?: string | null;
-  ignored?: boolean | null;
 };
 
 // comes from QUERIES.timelineSessions
 export type TimelineSessionRow = {
   title?: string | null;
   created_at?: string | null;
-  event_id?: string | null;
+  event_json?: string | null;
   folder_id?: string | null;
-  event_started_at?: string | null;
 };
 
 export type TimelineEventsTable =
@@ -184,11 +190,22 @@ export function calculateIndicatorIndex(
 }
 
 export function getItemTimestamp(item: TimelineItem): Date | null {
-  const value =
-    item.type === "event"
-      ? item.data.started_at
-      : (item.data.event_started_at ?? item.data.created_at);
-  return safeParseDate(value);
+  if (item.type === "event") {
+    return safeParseDate(item.data.started_at);
+  }
+  return safeParseDate(
+    getSessionEvent(item.data)?.started_at ?? item.data.created_at,
+  );
+}
+
+function getEventKey(row: TimelineEventRow, timezone?: string): string {
+  return eventMatchingKey(row, timezone);
+}
+
+function getSessionKey(row: TimelineSessionRow, timezone?: string): string {
+  const event = getSessionEvent(row);
+  if (!event) return "";
+  return sessionEventMatchingKey(event, timezone);
 }
 
 export function buildTimelineBuckets({
@@ -201,11 +218,14 @@ export function buildTimelineBuckets({
   timezone?: string;
 }): TimelineBucket[] {
   const items: TimelineItem[] = [];
-  const seenEventIds = new Set<string>();
+  const seenEventKeys = new Set<string>();
 
   if (timelineSessionsTable) {
     Object.entries(timelineSessionsTable).forEach(([sessionId, row]) => {
-      const startTime = safeParseDate(row.event_started_at ?? row.created_at);
+      const sessionEvent = getSessionEvent(row);
+      const startTime = safeParseDate(
+        sessionEvent?.started_at ?? row.created_at,
+      );
 
       if (!startTime) {
         return;
@@ -216,16 +236,17 @@ export function buildTimelineBuckets({
         id: sessionId,
         data: row,
       });
-      if (row.event_id) {
-        seenEventIds.add(row.event_id);
+      const key = getSessionKey(row, timezone);
+      if (key) {
+        seenEventKeys.add(key);
       }
     });
   }
 
   if (timelineEventsTable) {
     Object.entries(timelineEventsTable).forEach(([eventId, row]) => {
-      // only return events without sessions for timeline
-      if (seenEventIds.has(eventId)) {
+      const key = getEventKey(row, timezone);
+      if (key && seenEventKeys.has(key)) {
         return;
       }
       const eventStartTime = safeParseDate(row.started_at);
@@ -250,6 +271,13 @@ export function buildTimelineBuckets({
     const dateB = getItemTimestamp(b);
     const timeAValue = dateA?.getTime() ?? 0;
     const timeBValue = dateB?.getTime() ?? 0;
+    if (timeBValue == timeAValue) {
+      return (a.data.title ?? "Untitled") > (b.data.title ?? "Untitled")
+        ? 1
+        : (a.data.title ?? "Untitled") < (b.data.title ?? "Untitled")
+          ? -1
+          : 0;
+    }
     return timeBValue - timeAValue;
   });
 

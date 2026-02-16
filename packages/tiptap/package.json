@@ -17,6 +17,7 @@
   "dependencies": {
     "@floating-ui/dom": "^1.7.5",
     "@hypr/ui": "workspace:^",
+    "@hypr/utils": "workspace:^",
     "@remixicon/react": "^4.9.0",
     "@tanstack/react-query": "^5.90.20",
     "@tanstack/react-router": "^1.159.5",

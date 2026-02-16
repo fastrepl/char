@@ -70,12 +70,33 @@ impl ContentPart {
         }
     }
 
+    pub fn image_url_with_detail(url: impl Into<String>, detail: ImageDetail) -> Self {
+        Self::ImageUrl {
+            image_url: ImageUrlContent {
+                url: url.into(),
+                detail: Some(detail),
+            },
+        }
+    }
+
     pub fn input_audio(data: impl Into<String>, format: impl Into<String>) -> Self {
         Self::InputAudio {
             input_audio: InputAudioContent {
                 data: data.into(),
                 format: format.into(),
             },
+        }
+    }
+
+    pub fn input_video(url: impl Into<String>) -> Self {
+        Self::InputVideo {
+            video_url: VideoUrlContent { url: url.into() },
+        }
+    }
+
+    pub fn video_url(url: impl Into<String>) -> Self {
+        Self::VideoUrl {
+            video_url: VideoUrlContent { url: url.into() },
         }
     }
 }

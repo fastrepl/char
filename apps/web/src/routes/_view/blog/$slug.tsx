@@ -25,8 +25,16 @@ export const Route = createFileRoute("/_view/blog/$slug")({
     const relatedArticles = allArticles
       .filter((a) => a.slug !== article.slug)
       .sort((a, b) => {
-        const aScore = a.author === article.author ? 1 : 0;
-        const bScore = b.author === article.author ? 1 : 0;
+        const aScore = a.author.some((name: string) =>
+          article.author.includes(name),
+        )
+          ? 1
+          : 0;
+        const bScore = b.author.some((name: string) =>
+          article.author.includes(name),
+        )
+          ? 1
+          : 0;
         if (aScore !== bScore) {
           return bScore - aScore;
         }
@@ -45,22 +53,24 @@ export const Route = createFileRoute("/_view/blog/$slug")({
     const { article } = loaderData;
     const url = `https://hyprnote.com/blog/${article.slug}`;
 
+    const title = article.title ?? "";
+    const metaDescription = article.meta_description ?? "";
     const ogImage =
       article.coverImage ||
-      `https://hyprnote.com/og?type=blog&title=${encodeURIComponent(article.title)}${article.author ? `&author=${encodeURIComponent(article.author)}` : ""}${article.date ? `&date=${encodeURIComponent(new Date(article.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }))}` : ""}&v=1`;
+      `https://hyprnote.com/og?type=blog&title=${encodeURIComponent(title)}${article.author.length > 0 ? `&author=${encodeURIComponent(article.author.join(", "))}` : ""}${article.date ? `&date=${encodeURIComponent(new Date(article.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }))}` : ""}&v=1`;
 
     return {
       meta: [
-        { title: `${article.title} - Hyprnote Blog` },
-        { name: "description", content: article.meta_description },
+        { title: `${title} - Char Blog` },
+        { name: "description", content: metaDescription },
         { tag: "link", attrs: { rel: "canonical", href: url } },
         {
           property: "og:title",
-          content: `${article.title} - Hyprnote Blog`,
+          content: `${title} - Char Blog`,
         },
         {
           property: "og:description",
-          content: article.meta_description,
+          content: metaDescription,
         },
         { property: "og:type", content: "article" },
         { property: "og:url", content: url },
@@ -68,15 +78,15 @@ export const Route = createFileRoute("/_view/blog/$slug")({
         { name: "twitter:card", content: "summary_large_image" },
         {
           name: "twitter:title",
-          content: `${article.title} - Hyprnote Blog`,
+          content: `${title} - Char Blog`,
         },
         {
           name: "twitter:description",
-          content: article.meta_description,
+          content: metaDescription,
         },
         { name: "twitter:image", content: ogImage },
-        ...(article.author
-          ? [{ name: "author", content: article.author }]
+        ...(article.author.length > 0
+          ? [{ name: "author", content: article.author.join(", ") }]
           : []),
         {
           property: "article:published_time",
@@ -112,8 +122,6 @@ function Component() {
 }
 
 function HeroSection({ article }: { article: any }) {
-  const avatarUrl = AUTHOR_AVATARS[article.author];
-
   return (
     <header className="py-12 lg:py-16 text-center px-4">
       <Link
@@ -134,16 +142,23 @@ function HeroSection({ article }: { article: any }) {
         {article.title}
       </h1>
 
-      {article.author && (
+      {article.author.length > 0 && (
         <div className="flex items-center justify-center gap-3 mb-2">
-          {avatarUrl && (
-            <img
-              src={avatarUrl}
-              alt={article.author}
-              className="w-8 h-8 rounded-full object-cover"
-            />
-          )}
-          <p className="text-base text-neutral-600">{article.author}</p>
+          {article.author.map((name: string) => {
+            const avatarUrl = AUTHOR_AVATARS[name];
+            return (
+              <div key={name} className="flex items-center gap-2">
+                {avatarUrl && (
+                  <img
+                    src={avatarUrl}
+                    alt={name}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                )}
+                <p className="text-base text-neutral-600">{name}</p>
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -208,14 +223,14 @@ function CTASection() {
         <div className="mb-4 size-40 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[48px] bg-transparent">
           <Image
             src="/api/images/hyprnote/icon.png"
-            alt="Hyprnote"
+            alt="Char"
             width={144}
             height={144}
             className="size-36 mx-auto rounded-[40px] border border-neutral-100"
           />
         </div>
         <h2 className="text-2xl sm:text-3xl font-serif">
-          Try Hyprnote for yourself
+          Try Char for yourself
         </h2>
         <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
           The AI notepad for people in back-to-back meetings. Local-first,
@@ -378,7 +393,7 @@ function TableOfContents({
   return (
     <aside
       className={cn([
-        "hidden xl:flex fixed left-0 top-0 h-screen z-10",
+        "hidden xl:flex fixed right-0 top-0 h-screen z-10",
         "w-64 items-center",
       ])}
     >
@@ -435,9 +450,10 @@ function TableOfContents({
 }
 
 function RelatedArticleCard({ article }: { article: any }) {
+  const title = article.title ?? "";
   const ogImage =
     article.coverImage ||
-    `https://hyprnote.com/og?type=blog&title=${encodeURIComponent(article.title)}${article.author ? `&author=${encodeURIComponent(article.author)}` : ""}${article.date ? `&date=${encodeURIComponent(new Date(article.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }))}` : ""}&v=1`;
+    `https://hyprnote.com/og?type=blog&title=${encodeURIComponent(title)}${article.author ? `&author=${encodeURIComponent(article.author)}` : ""}${article.date ? `&date=${encodeURIComponent(new Date(article.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }))}` : ""}&v=1`;
 
   return (
     <Link
@@ -448,13 +464,13 @@ function RelatedArticleCard({ article }: { article: any }) {
       <div className="aspect-40/21 overflow-hidden">
         <img
           src={ogImage}
-          alt={article.title}
+          alt={title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
       </div>
       <div className="p-4">
         <h4 className="font-serif text-sm text-stone-600 group-hover:text-stone-800 transition-colors line-clamp-2 mb-2">
-          {article.title}
+          {title}
         </h4>
         <p className="text-xs text-neutral-500 line-clamp-2 mb-2">
           {article.summary}

@@ -34,7 +34,7 @@ export function captureSessionData(
     user_id: sessionRow.user_id as string,
     created_at: sessionRow.created_at as string,
     folder_id: sessionRow.folder_id as string,
-    event_id: sessionRow.event_id as string,
+    event_json: sessionRow.event_json as string,
     title: sessionRow.title as string,
     raw_md: sessionRow.raw_md as string,
   };
@@ -140,7 +140,7 @@ export function restoreSessionData(
       user_id: session.user_id,
       created_at: session.created_at,
       folder_id: session.folder_id,
-      event_id: session.event_id,
+      event_json: session.event_json,
       title: session.title,
       raw_md: session.raw_md,
     });

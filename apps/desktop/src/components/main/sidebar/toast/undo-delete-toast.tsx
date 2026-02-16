@@ -289,8 +289,8 @@ function ToastBubble({
   const isTop = index === total - 1;
 
   const count = group.sessionIds.length;
-  const undoLabel = group.isBatch ? `Restore all (${count})` : "Undo";
-  const deleteLabel = group.isBatch ? `Delete all (${count})` : "Delete";
+  const undoLabel = group.isBatch ? "Restore all" : "Undo";
+  const deleteLabel = group.isBatch ? "Delete all" : "Delete";
 
   return (
     <motion.div

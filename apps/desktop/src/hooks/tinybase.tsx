@@ -3,12 +3,16 @@ import { type ReactNode, useCallback, useMemo } from "react";
 import type {
   EnhancedNoteStorage,
   HumanStorage,
+  IgnoredEvent,
+  IgnoredRecurringSeries,
   OrganizationStorage,
+  SessionEvent,
   SessionStorage,
   TemplateStorage,
 } from "@hypr/store";
 
 import * as main from "../store/tinybase/store/main";
+import { getSessionEvent } from "../utils/session-event";
 
 export function useSession(sessionId: string) {
   const title = main.UI.useCell("sessions", sessionId, "title", main.STORE_ID);
@@ -19,10 +23,10 @@ export function useSession(sessionId: string) {
     "created_at",
     main.STORE_ID,
   );
-  const eventId = main.UI.useCell(
+  const eventJson = main.UI.useCell(
     "sessions",
     sessionId,
-    "event_id",
+    "event_json",
     main.STORE_ID,
   );
   const folderId = main.UI.useCell(
@@ -32,10 +36,25 @@ export function useSession(sessionId: string) {
     main.STORE_ID,
   );
 
-  return useMemo(
-    () => ({ title, rawMd, createdAt, eventId, folderId }),
-    [title, rawMd, createdAt, eventId, folderId],
+  const event = useMemo(
+    () => getSessionEvent({ event_json: eventJson }),
+    [eventJson],
   );
+
+  return useMemo(
+    () => ({ title, rawMd, createdAt, event, folderId }),
+    [title, rawMd, createdAt, event, folderId],
+  );
+}
+
+export function useSessionEvent(sessionId: string): SessionEvent | null {
+  const eventJson = main.UI.useCell(
+    "sessions",
+    sessionId,
+    "event_json",
+    main.STORE_ID,
+  );
+  return useMemo(() => getSessionEvent({ event_json: eventJson }), [eventJson]);
 }
 
 export function useSetSessionTitle() {
@@ -159,6 +178,159 @@ export function useEvent(eventId: string | undefined) {
       calendarId,
     ],
   );
+}
+
+function parseIgnoredEvents(raw: string | undefined): IgnoredEvent[] {
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw) as IgnoredEvent[];
+  } catch {
+    return [];
+  }
+}
+
+function parseIgnoredSeries(raw: string | undefined): IgnoredRecurringSeries[] {
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw) as IgnoredRecurringSeries[];
+  } catch {
+    return [];
+  }
+}
+
+export function useIgnoredEvents() {
+  const store = main.UI.useStore(main.STORE_ID);
+
+  const ignoredEventsRaw = main.UI.useValue("ignored_events", main.STORE_ID) as
+    | string
+    | undefined;
+  const ignoredSeriesRaw = main.UI.useValue(
+    "ignored_recurring_series",
+    main.STORE_ID,
+  ) as string | undefined;
+
+  const ignoredNonRecurrentIds = useMemo(() => {
+    const list = parseIgnoredEvents(ignoredEventsRaw);
+    const set = new Set<string>();
+    for (const e of list) {
+      if (!e.is_recurrent) {
+        set.add(e.tracking_id);
+      }
+    }
+    return set;
+  }, [ignoredEventsRaw]);
+
+  const ignoredRecurrentMap = useMemo(() => {
+    const list = parseIgnoredEvents(ignoredEventsRaw);
+    const map = new Map<string, Set<string>>();
+    for (const e of list) {
+      if (!e.is_recurrent) continue;
+      const set = map.get(e.tracking_id) ?? new Set();
+      set.add(e.day);
+      map.set(e.tracking_id, set);
+    }
+    return map;
+  }, [ignoredEventsRaw]);
+
+  const ignoredSeriesIds = useMemo(() => {
+    const list = parseIgnoredSeries(ignoredSeriesRaw);
+    return new Set(list.map((e) => e.id));
+  }, [ignoredSeriesRaw]);
+
+  const isIgnored = useCallback(
+    (
+      trackingId: string | null | undefined,
+      recurrenceSeriesId: string | null | undefined,
+      day: string | null | undefined,
+    ) => {
+      if (!trackingId) return false;
+      if (!recurrenceSeriesId) {
+        return ignoredNonRecurrentIds.has(trackingId);
+      }
+      if (day && ignoredRecurrentMap.get(trackingId)?.has(day)) return true;
+      if (ignoredSeriesIds.has(recurrenceSeriesId)) return true;
+      return false;
+    },
+    [ignoredNonRecurrentIds, ignoredRecurrentMap, ignoredSeriesIds],
+  );
+
+  const ignoreEvent = useCallback(
+    (trackingId: string, isRecurrent: boolean, day?: string) => {
+      if (!store) return;
+      const list = parseIgnoredEvents(
+        store.getValue("ignored_events") as string | undefined,
+      );
+      const now = new Date().toISOString();
+      if (isRecurrent && day) {
+        list.push({
+          tracking_id: trackingId,
+          is_recurrent: true,
+          day,
+          last_seen: now,
+        });
+      } else {
+        list.push({
+          tracking_id: trackingId,
+          is_recurrent: false,
+          last_seen: now,
+        });
+      }
+      store.setValue("ignored_events", JSON.stringify(list));
+    },
+    [store],
+  );
+
+  const unignoreEvent = useCallback(
+    (trackingId: string, isRecurrent: boolean, day?: string) => {
+      if (!store) return;
+      const list = parseIgnoredEvents(
+        store.getValue("ignored_events") as string | undefined,
+      );
+      const filtered = list.filter((e) => {
+        if (e.tracking_id !== trackingId) return true;
+        if (!isRecurrent) return e.is_recurrent;
+        return !(e.is_recurrent && e.day === day);
+      });
+      store.setValue("ignored_events", JSON.stringify(filtered));
+    },
+    [store],
+  );
+
+  const ignoreSeries = useCallback(
+    (seriesId: string) => {
+      if (!store) return;
+      const list = parseIgnoredSeries(
+        store.getValue("ignored_recurring_series") as string | undefined,
+      );
+      if (!list.some((e) => e.id === seriesId)) {
+        list.push({ id: seriesId, last_seen: new Date().toISOString() });
+        store.setValue("ignored_recurring_series", JSON.stringify(list));
+      }
+    },
+    [store],
+  );
+
+  const unignoreSeries = useCallback(
+    (seriesId: string) => {
+      if (!store) return;
+      const list = parseIgnoredSeries(
+        store.getValue("ignored_recurring_series") as string | undefined,
+      );
+      store.setValue(
+        "ignored_recurring_series",
+        JSON.stringify(list.filter((e) => e.id !== seriesId)),
+      );
+    },
+    [store],
+  );
+
+  return {
+    isIgnored,
+    ignoreEvent,
+    unignoreEvent,
+    ignoreSeries,
+    unignoreSeries,
+  };
 }
 
 export function useTemplate(templateId: string) {
@@ -287,19 +459,12 @@ export function TinyBaseTestWrapper({
   );
 
   const relationships = useCreateRelationships(store, (store) =>
-    createRelationships(store)
-      .setRelationshipDefinition(
-        main.RELATIONSHIPS.sessionToEvent,
-        "sessions",
-        "events",
-        "event_id",
-      )
-      .setRelationshipDefinition(
-        main.RELATIONSHIPS.enhancedNoteToSession,
-        "enhanced_notes",
-        "sessions",
-        "session_id",
-      ),
+    createRelationships(store).setRelationshipDefinition(
+      main.RELATIONSHIPS.enhancedNoteToSession,
+      "enhanced_notes",
+      "sessions",
+      "session_id",
+    ),
   );
 
   const queries = useCreateQueries(store, (store) =>

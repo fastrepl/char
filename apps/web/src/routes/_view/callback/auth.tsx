@@ -232,7 +232,7 @@ function Component() {
                   "bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
                 ])}
               >
-                Open Hyprnote
+                Open Char
               </button>
 
               <button

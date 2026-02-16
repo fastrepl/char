@@ -24,8 +24,12 @@ export const useTimelineSelection = create<TimelineSelectionState>(
           anchorId: filtered.length > 0 ? anchorId : null,
         });
       } else {
+        const base =
+          selectedIds.length === 0 && anchorId && anchorId !== id
+            ? [anchorId]
+            : selectedIds;
         set({
-          selectedIds: [...selectedIds, id],
+          selectedIds: [...base, id],
           anchorId: anchorId ?? id,
         });
       }

@@ -11,7 +11,7 @@ const VALID_SCHEMES = [
 ] as const;
 
 const validateSearch = z.object({
-  period: z.enum(["monthly", "yearly"]).default("monthly"),
+  period: z.enum(["monthly", "yearly"]).catch("monthly"),
   scheme: z.enum(VALID_SCHEMES).optional(),
 });
 
