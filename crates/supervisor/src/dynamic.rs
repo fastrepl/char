@@ -209,9 +209,10 @@ impl DynamicSupervisorState {
 
         if let Some(reset_after) = self.options.reset_after
             && let Some(latest) = self.restart_log.last()
-                && now.duration_since(latest.timestamp) >= reset_after {
-                    self.restart_log.clear();
-                }
+            && now.duration_since(latest.timestamp) >= reset_after
+        {
+            self.restart_log.clear();
+        }
 
         self.restart_log.push(RestartLogEntry {
             _child_id: child_id.to_string(),
@@ -242,9 +243,10 @@ impl DynamicSupervisorState {
             });
 
         if let Some(threshold) = spec.reset_after
-            && now.duration_since(entry.last_fail) >= threshold {
-                entry.restart_count = 0;
-            }
+            && now.duration_since(entry.last_fail) >= threshold
+        {
+            entry.restart_count = 0;
+        }
 
         entry.restart_count += 1;
         entry.last_fail = now;
@@ -342,9 +344,10 @@ async fn handle_spawn_child(
     }
 
     if let Some(max) = state.options.max_children
-        && state.active_children.len() >= max {
-            return Err(SupervisorError::MaxChildrenExceeded.into());
-        }
+        && state.active_children.len() >= max
+    {
+        return Err(SupervisorError::MaxChildrenExceeded.into());
+    }
 
     let result = spec.spawn_fn.call(myself.get_cell(), spec.id.clone()).await;
 
