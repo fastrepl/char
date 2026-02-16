@@ -15,9 +15,12 @@ export const Route = createFileRoute("/_view/company-handbook")({
 
 function Component() {
   return (
-    <div className="bg-linear-to-b from-white via-stone-50/20 to-white min-h-[calc(100vh-4rem)]">
+    <div
+      className="bg-linear-to-b from-white via-stone-50/20 to-white min-h-[calc(100vh-4rem)]"
+      style={{ backgroundImage: "url(/patterns/dots.svg)" }}
+    >
       <LeftSidebar />
-      <div className="max-w-6xl mx-auto border-x border-neutral-100">
+      <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
         <Outlet />
       </div>
     </div>
@@ -96,6 +99,7 @@ function LeftSidebar() {
   }, []);
 
   const close = useCallback(() => {
+    if (window.innerWidth > 1400) return;
     closeTimeoutRef.current = setTimeout(() => {
       setIsOpen(false);
     }, 300);
