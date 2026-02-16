@@ -835,6 +835,9 @@ importers:
       exa-js:
         specifier: ^1.10.2
         version: 1.10.2(ws@8.19.0)
+      github-slugger:
+        specifier: ^2.0.0
+        version: 2.0.0
       jszip:
         specifier: ^3.10.1
         version: 3.10.1
