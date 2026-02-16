@@ -3080,14 +3080,11 @@ name = "chatwoot"
 version = "0.1.0"
 dependencies = [
  "chrono",
- "openapiv3",
- "prettyplease",
- "progenitor",
  "progenitor-client",
+ "progenitor-utils",
  "reqwest 0.13.2",
  "serde",
  "serde_json",
- "syn 2.0.115",
 ]
 
 [[package]]
@@ -14094,6 +14091,17 @@ dependencies = [
  "serde_json",
  "serde_tokenstream",
  "serde_yaml",
+ "syn 2.0.115",
+]
+
+[[package]]
+name = "progenitor-utils"
+version = "0.1.0"
+dependencies = [
+ "openapiv3",
+ "prettyplease",
+ "progenitor",
+ "serde_json",
  "syn 2.0.115",
 ]
 

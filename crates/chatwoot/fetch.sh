@@ -5,6 +5,6 @@ cd "$(dirname "$0")"
 
 curl -sL \
   https://raw.githubusercontent.com/chatwoot/chatwoot/refs/heads/develop/swagger/swagger.json \
-  -o swagger.json
+  -o swagger.gen.json
 
-echo "Fetched swagger.json ($(wc -l < swagger.json) lines)"
+echo "Fetched swagger.gen.json ($(wc -l < swagger.gen.json) lines)"
