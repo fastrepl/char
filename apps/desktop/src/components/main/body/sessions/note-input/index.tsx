@@ -181,7 +181,10 @@ function handleTranscriptReplace(
     let changed = false;
 
     if (detail.all) {
+      const processedWords = new Set<number>();
       for (const match of matches) {
+        if (processedWords.has(match.wordIndex)) continue;
+        processedWords.add(match.wordIndex);
         const word = words[match.wordIndex];
         const originalText = word.text ?? "";
         word.text = replaceInText(
