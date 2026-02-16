@@ -353,8 +353,17 @@ function CollectionsPage() {
       }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      const deletedPath = variables.path;
       setDeleteConfirmation(null);
+      setTabs((prev) => {
+        const filtered = prev.filter((t) => t.path !== deletedPath);
+        if (filtered.length > 0 && !filtered.some((t) => t.active)) {
+          filtered[filtered.length - 1].active = true;
+        }
+        return filtered;
+      });
+      queryClient.invalidateQueries({ queryKey: ["draftArticles"] });
     },
   });
 
@@ -551,6 +560,19 @@ function CollectionsPage() {
             onRenameFile={(fromPath, toPath) =>
               renameMutation.mutate({ fromPath, toPath })
             }
+            onDeleteFile={(path) =>
+              setDeleteConfirmation({
+                item: {
+                  name: path.split("/").pop() || path,
+                  path,
+                  slug: (path.split("/").pop() || "").replace(/\.mdx$/, ""),
+                  type: "file",
+                  collection: path.split("/")[0] || "articles",
+                },
+                collectionName: path.split("/")[0] || "articles",
+              })
+            }
+            isDeleting={deleteMutation.isPending}
           />
         </div>
       </ResizablePanel>
@@ -1205,6 +1227,8 @@ function ContentPanel({
   filteredItems,
   onFileClick,
   onRenameFile,
+  onDeleteFile,
+  isDeleting,
 }: {
   tabs: Tab[];
   currentTab: Tab | undefined;
@@ -1217,6 +1241,8 @@ function ContentPanel({
   filteredItems: ContentItem[];
   onFileClick: (item: ContentItem) => void;
   onRenameFile: (fromPath: string, toPath: string) => void;
+  onDeleteFile: (path: string) => void;
+  isDeleting: boolean;
 }) {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [editorData, setEditorData] = useState<EditorData | null>(null);
@@ -1415,6 +1441,8 @@ function ContentPanel({
               const newPath = pathParts.join("/");
               onRenameFile(currentTab.path, newPath);
             }}
+            onDelete={() => onDeleteFile(currentTab.path)}
+            isDeleting={isDeleting}
             hasUnsavedChanges={editorData?.hasUnsavedChanges}
             autoSaveCountdown={editorData?.autoSaveCountdown}
           />
@@ -1462,6 +1490,8 @@ function EditorHeader({
   isPublishing,
   hasPendingPR,
   onRenameFile,
+  onDelete,
+  isDeleting,
   hasUnsavedChanges,
   autoSaveCountdown,
 }: {
@@ -1481,6 +1511,8 @@ function EditorHeader({
   isPublishing?: boolean;
   hasPendingPR?: boolean;
   onRenameFile?: (newSlug: string) => void;
+  onDelete?: () => void;
+  isDeleting?: boolean;
   hasUnsavedChanges?: boolean;
   autoSaveCountdown?: number | null;
 }) {
@@ -1574,6 +1606,24 @@ function EditorHeader({
 
         {currentTab.type === "file" && (
           <div className="flex items-center gap-1">
+            {onDelete && (
+              <button
+                onClick={onDelete}
+                disabled={isDeleting}
+                className={cn([
+                  "cursor-pointer px-2 py-1.5 text-xs font-medium font-mono rounded-xs transition-colors flex items-center gap-1.5",
+                  "text-red-600 hover:bg-red-50",
+                  "disabled:cursor-not-allowed disabled:opacity-50",
+                ])}
+                title="Delete"
+              >
+                {isDeleting ? (
+                  <Spinner size={16} color="currentColor" />
+                ) : (
+                  <Trash2Icon className="size-4" />
+                )}
+              </button>
+            )}
             <button
               onClick={onTogglePreview}
               className={cn([
