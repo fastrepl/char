@@ -234,6 +234,9 @@ importers:
       '@hypr/plugin-permissions':
         specifier: workspace:*
         version: link:../../plugins/permissions
+      '@hypr/plugin-relay':
+        specifier: workspace:*
+        version: link:../../plugins/relay
       '@hypr/plugin-screen':
         specifier: workspace:*
         version: link:../../plugins/screen
@@ -1795,6 +1798,8 @@ importers:
       '@tauri-apps/api':
         specifier: ^2.10.1
         version: 2.10.1
+
+  plugins/relay: {}
 
   plugins/screen:
     dependencies:
