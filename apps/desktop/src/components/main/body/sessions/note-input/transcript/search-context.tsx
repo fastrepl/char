@@ -166,10 +166,14 @@ function getEditorMatches(
   prepared: string,
   opts: SearchOptions,
 ): MatchResult[] {
-  const blocks = Array.from(
+  const allBlocks = Array.from(
     proseMirror.querySelectorAll<HTMLElement>(
       "p, h1, h2, h3, h4, h5, h6, li, blockquote, td, th",
     ),
+  );
+
+  const blocks = allBlocks.filter(
+    (el) => !allBlocks.some((other) => other !== el && other.contains(el)),
   );
 
   const result: MatchResult[] = [];
