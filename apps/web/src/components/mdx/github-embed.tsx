@@ -176,7 +176,7 @@ export function GithubEmbed({
             </Tooltip>
           </div>
         </div>
-        <div className="overflow-x-hidden bg-white">
+        <div className="overflow-x-auto bg-white">
           <table className="w-full border-collapse my-0!">
             <tbody>
               {lines.map((line, index) => {
