@@ -51,7 +51,7 @@ pub async fn nango_webhook(
     );
 
     if payload.r#type == "auth" && payload.success && payload.operation != "deletion" {
-        if let Err(e) = state
+        state
             .supabase
             .upsert_connection(
                 &payload.end_user.end_user_id,
@@ -60,19 +60,23 @@ pub async fn nango_webhook(
                 &payload.provider,
             )
             .await
-        {
-            tracing::error!(error = %e, "failed to upsert nango connection");
-        }
+            .map_err(|e| {
+                tracing::error!(error = %e, "failed to upsert nango connection");
+                NangoError::Internal(e.to_string())
+            })?;
     }
 
+    // Nango sends deletion webhooks with `success: true` on successful revocation.
+    // We gate on `success` to avoid deleting local state if revocation failed on Nango's side.
     if payload.r#type == "auth" && payload.success && payload.operation == "deletion" {
-        if let Err(e) = state
+        state
             .supabase
             .delete_connection(&payload.end_user.end_user_id, &payload.provider_config_key)
             .await
-        {
-            tracing::error!(error = %e, "failed to delete nango connection");
-        }
+            .map_err(|e| {
+                tracing::error!(error = %e, "failed to delete nango connection");
+                NangoError::Internal(e.to_string())
+            })?;
     }
 
     Ok(Json(WebhookResponse {
