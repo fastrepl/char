@@ -51,8 +51,6 @@ import { Route as AdminLeadFinderIndexRouteImport } from './routes/admin/lead-fi
 import { Route as AdminKanbanIndexRouteImport } from './routes/admin/kanban/index'
 import { Route as AdminCrmIndexRouteImport } from './routes/admin/crm/index'
 import { Route as AdminCollectionsIndexRouteImport } from './routes/admin/collections/index'
-import { Route as ViewTemplatesIndexRouteImport } from './routes/_view/templates/index'
-import { Route as ViewShortcutsIndexRouteImport } from './routes/_view/shortcuts/index'
 import { Route as ViewRoadmapIndexRouteImport } from './routes/_view/roadmap/index'
 import { Route as ViewPressKitIndexRouteImport } from './routes/_view/press-kit/index'
 import { Route as ViewLegalIndexRouteImport } from './routes/_view/legal/index'
@@ -70,7 +68,6 @@ import { Route as ApiWebhooksSlackInteractiveRouteImport } from './routes/api/we
 import { Route as ApiTweetIdRouteImport } from './routes/api/tweet.$id'
 import { Route as ApiImagesSplatRouteImport } from './routes/api/images.$'
 import { Route as ViewVsSlugRouteImport } from './routes/_view/vs/$slug'
-import { Route as ViewTemplatesSlugRouteImport } from './routes/_view/templates/$slug'
 import { Route as ViewSolutionSalesRouteImport } from './routes/_view/solution/sales'
 import { Route as ViewSolutionResearchRouteImport } from './routes/_view/solution/research'
 import { Route as ViewSolutionRecruitingRouteImport } from './routes/_view/solution/recruiting'
@@ -87,7 +84,6 @@ import { Route as ViewSolutionEngineeringRouteImport } from './routes/_view/solu
 import { Route as ViewSolutionCustomerSuccessRouteImport } from './routes/_view/solution/customer-success'
 import { Route as ViewSolutionConsultingRouteImport } from './routes/_view/solution/consulting'
 import { Route as ViewSolutionCoachingRouteImport } from './routes/_view/solution/coaching'
-import { Route as ViewShortcutsSlugRouteImport } from './routes/_view/shortcuts/$slug'
 import { Route as ViewRoadmapSlugRouteImport } from './routes/_view/roadmap/$slug'
 import { Route as ViewProductSelfHostingRouteImport } from './routes/_view/product/self-hosting'
 import { Route as ViewProductSearchRouteImport } from './routes/_view/product/search'
@@ -362,16 +358,6 @@ const AdminCollectionsIndexRoute = AdminCollectionsIndexRouteImport.update({
   path: '/collections/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
-const ViewTemplatesIndexRoute = ViewTemplatesIndexRouteImport.update({
-  id: '/templates/',
-  path: '/templates/',
-  getParentRoute: () => ViewRouteRoute,
-} as any)
-const ViewShortcutsIndexRoute = ViewShortcutsIndexRouteImport.update({
-  id: '/shortcuts/',
-  path: '/shortcuts/',
-  getParentRoute: () => ViewRouteRoute,
-} as any)
 const ViewRoadmapIndexRoute = ViewRoadmapIndexRouteImport.update({
   id: '/roadmap/',
   path: '/roadmap/',
@@ -459,11 +445,6 @@ const ViewVsSlugRoute = ViewVsSlugRouteImport.update({
   path: '/vs/$slug',
   getParentRoute: () => ViewRouteRoute,
 } as any)
-const ViewTemplatesSlugRoute = ViewTemplatesSlugRouteImport.update({
-  id: '/templates/$slug',
-  path: '/templates/$slug',
-  getParentRoute: () => ViewRouteRoute,
-} as any)
 const ViewSolutionSalesRoute = ViewSolutionSalesRouteImport.update({
   id: '/solution/sales',
   path: '/solution/sales',
@@ -546,11 +527,6 @@ const ViewSolutionConsultingRoute = ViewSolutionConsultingRouteImport.update({
 const ViewSolutionCoachingRoute = ViewSolutionCoachingRouteImport.update({
   id: '/solution/coaching',
   path: '/solution/coaching',
-  getParentRoute: () => ViewRouteRoute,
-} as any)
-const ViewShortcutsSlugRoute = ViewShortcutsSlugRouteImport.update({
-  id: '/shortcuts/$slug',
-  path: '/shortcuts/$slug',
   getParentRoute: () => ViewRouteRoute,
 } as any)
 const ViewRoadmapSlugRoute = ViewRoadmapSlugRouteImport.update({
@@ -950,7 +926,6 @@ export interface FileRoutesByFullPath {
   '/product/search': typeof ViewProductSearchRoute
   '/product/self-hosting': typeof ViewProductSelfHostingRoute
   '/roadmap/$slug': typeof ViewRoadmapSlugRoute
-  '/shortcuts/$slug': typeof ViewShortcutsSlugRoute
   '/solution/coaching': typeof ViewSolutionCoachingRoute
   '/solution/consulting': typeof ViewSolutionConsultingRoute
   '/solution/customer-success': typeof ViewSolutionCustomerSuccessRoute
@@ -967,7 +942,6 @@ export interface FileRoutesByFullPath {
   '/solution/recruiting': typeof ViewSolutionRecruitingRoute
   '/solution/research': typeof ViewSolutionResearchRoute
   '/solution/sales': typeof ViewSolutionSalesRoute
-  '/templates/$slug': typeof ViewTemplatesSlugRoute
   '/vs/$slug': typeof ViewVsSlugRoute
   '/api/images/$': typeof ApiImagesSplatRoute
   '/api/tweet/$id': typeof ApiTweetIdRoute
@@ -985,8 +959,6 @@ export interface FileRoutesByFullPath {
   '/legal/': typeof ViewLegalIndexRoute
   '/press-kit/': typeof ViewPressKitIndexRoute
   '/roadmap/': typeof ViewRoadmapIndexRoute
-  '/shortcuts/': typeof ViewShortcutsIndexRoute
-  '/templates/': typeof ViewTemplatesIndexRoute
   '/admin/collections/': typeof AdminCollectionsIndexRoute
   '/admin/crm/': typeof AdminCrmIndexRoute
   '/admin/kanban/': typeof AdminKanbanIndexRoute
@@ -1089,7 +1061,6 @@ export interface FileRoutesByTo {
   '/product/search': typeof ViewProductSearchRoute
   '/product/self-hosting': typeof ViewProductSelfHostingRoute
   '/roadmap/$slug': typeof ViewRoadmapSlugRoute
-  '/shortcuts/$slug': typeof ViewShortcutsSlugRoute
   '/solution/coaching': typeof ViewSolutionCoachingRoute
   '/solution/consulting': typeof ViewSolutionConsultingRoute
   '/solution/customer-success': typeof ViewSolutionCustomerSuccessRoute
@@ -1106,7 +1077,6 @@ export interface FileRoutesByTo {
   '/solution/recruiting': typeof ViewSolutionRecruitingRoute
   '/solution/research': typeof ViewSolutionResearchRoute
   '/solution/sales': typeof ViewSolutionSalesRoute
-  '/templates/$slug': typeof ViewTemplatesSlugRoute
   '/vs/$slug': typeof ViewVsSlugRoute
   '/api/images/$': typeof ApiImagesSplatRoute
   '/api/tweet/$id': typeof ApiTweetIdRoute
@@ -1124,8 +1094,6 @@ export interface FileRoutesByTo {
   '/legal': typeof ViewLegalIndexRoute
   '/press-kit': typeof ViewPressKitIndexRoute
   '/roadmap': typeof ViewRoadmapIndexRoute
-  '/shortcuts': typeof ViewShortcutsIndexRoute
-  '/templates': typeof ViewTemplatesIndexRoute
   '/admin/collections': typeof AdminCollectionsIndexRoute
   '/admin/crm': typeof AdminCrmIndexRoute
   '/admin/kanban': typeof AdminKanbanIndexRoute
@@ -1234,7 +1202,6 @@ export interface FileRoutesById {
   '/_view/product/search': typeof ViewProductSearchRoute
   '/_view/product/self-hosting': typeof ViewProductSelfHostingRoute
   '/_view/roadmap/$slug': typeof ViewRoadmapSlugRoute
-  '/_view/shortcuts/$slug': typeof ViewShortcutsSlugRoute
   '/_view/solution/coaching': typeof ViewSolutionCoachingRoute
   '/_view/solution/consulting': typeof ViewSolutionConsultingRoute
   '/_view/solution/customer-success': typeof ViewSolutionCustomerSuccessRoute
@@ -1251,7 +1218,6 @@ export interface FileRoutesById {
   '/_view/solution/recruiting': typeof ViewSolutionRecruitingRoute
   '/_view/solution/research': typeof ViewSolutionResearchRoute
   '/_view/solution/sales': typeof ViewSolutionSalesRoute
-  '/_view/templates/$slug': typeof ViewTemplatesSlugRoute
   '/_view/vs/$slug': typeof ViewVsSlugRoute
   '/api/images/$': typeof ApiImagesSplatRoute
   '/api/tweet/$id': typeof ApiTweetIdRoute
@@ -1269,8 +1235,6 @@ export interface FileRoutesById {
   '/_view/legal/': typeof ViewLegalIndexRoute
   '/_view/press-kit/': typeof ViewPressKitIndexRoute
   '/_view/roadmap/': typeof ViewRoadmapIndexRoute
-  '/_view/shortcuts/': typeof ViewShortcutsIndexRoute
-  '/_view/templates/': typeof ViewTemplatesIndexRoute
   '/admin/collections/': typeof AdminCollectionsIndexRoute
   '/admin/crm/': typeof AdminCrmIndexRoute
   '/admin/kanban/': typeof AdminKanbanIndexRoute
@@ -1379,7 +1343,6 @@ export interface FileRouteTypes {
     | '/product/search'
     | '/product/self-hosting'
     | '/roadmap/$slug'
-    | '/shortcuts/$slug'
     | '/solution/coaching'
     | '/solution/consulting'
     | '/solution/customer-success'
@@ -1396,7 +1359,6 @@ export interface FileRouteTypes {
     | '/solution/recruiting'
     | '/solution/research'
     | '/solution/sales'
-    | '/templates/$slug'
     | '/vs/$slug'
     | '/api/images/$'
     | '/api/tweet/$id'
@@ -1414,8 +1376,6 @@ export interface FileRouteTypes {
     | '/legal/'
     | '/press-kit/'
     | '/roadmap/'
-    | '/shortcuts/'
-    | '/templates/'
     | '/admin/collections/'
     | '/admin/crm/'
     | '/admin/kanban/'
@@ -1518,7 +1478,6 @@ export interface FileRouteTypes {
     | '/product/search'
     | '/product/self-hosting'
     | '/roadmap/$slug'
-    | '/shortcuts/$slug'
     | '/solution/coaching'
     | '/solution/consulting'
     | '/solution/customer-success'
@@ -1535,7 +1494,6 @@ export interface FileRouteTypes {
     | '/solution/recruiting'
     | '/solution/research'
     | '/solution/sales'
-    | '/templates/$slug'
     | '/vs/$slug'
     | '/api/images/$'
     | '/api/tweet/$id'
@@ -1553,8 +1511,6 @@ export interface FileRouteTypes {
     | '/legal'
     | '/press-kit'
     | '/roadmap'
-    | '/shortcuts'
-    | '/templates'
     | '/admin/collections'
     | '/admin/crm'
     | '/admin/kanban'
@@ -1662,7 +1618,6 @@ export interface FileRouteTypes {
     | '/_view/product/search'
     | '/_view/product/self-hosting'
     | '/_view/roadmap/$slug'
-    | '/_view/shortcuts/$slug'
     | '/_view/solution/coaching'
     | '/_view/solution/consulting'
     | '/_view/solution/customer-success'
@@ -1679,7 +1634,6 @@ export interface FileRouteTypes {
     | '/_view/solution/recruiting'
     | '/_view/solution/research'
     | '/_view/solution/sales'
-    | '/_view/templates/$slug'
     | '/_view/vs/$slug'
     | '/api/images/$'
     | '/api/tweet/$id'
@@ -1697,8 +1651,6 @@ export interface FileRouteTypes {
     | '/_view/legal/'
     | '/_view/press-kit/'
     | '/_view/roadmap/'
-    | '/_view/shortcuts/'
-    | '/_view/templates/'
     | '/admin/collections/'
     | '/admin/crm/'
     | '/admin/kanban/'
@@ -2085,20 +2037,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCollectionsIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/_view/templates/': {
-      id: '/_view/templates/'
-      path: '/templates'
-      fullPath: '/templates/'
-      preLoaderRoute: typeof ViewTemplatesIndexRouteImport
-      parentRoute: typeof ViewRouteRoute
-    }
-    '/_view/shortcuts/': {
-      id: '/_view/shortcuts/'
-      path: '/shortcuts'
-      fullPath: '/shortcuts/'
-      preLoaderRoute: typeof ViewShortcutsIndexRouteImport
-      parentRoute: typeof ViewRouteRoute
-    }
     '/_view/roadmap/': {
       id: '/_view/roadmap/'
       path: '/roadmap'
@@ -2218,13 +2156,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ViewVsSlugRouteImport
       parentRoute: typeof ViewRouteRoute
     }
-    '/_view/templates/$slug': {
-      id: '/_view/templates/$slug'
-      path: '/templates/$slug'
-      fullPath: '/templates/$slug'
-      preLoaderRoute: typeof ViewTemplatesSlugRouteImport
-      parentRoute: typeof ViewRouteRoute
-    }
     '/_view/solution/sales': {
       id: '/_view/solution/sales'
       path: '/solution/sales'
@@ -2335,13 +2266,6 @@ declare module '@tanstack/react-router' {
       path: '/solution/coaching'
       fullPath: '/solution/coaching'
       preLoaderRoute: typeof ViewSolutionCoachingRouteImport
-      parentRoute: typeof ViewRouteRoute
-    }
-    '/_view/shortcuts/$slug': {
-      id: '/_view/shortcuts/$slug'
-      path: '/shortcuts/$slug'
-      fullPath: '/shortcuts/$slug'
-      preLoaderRoute: typeof ViewShortcutsSlugRouteImport
       parentRoute: typeof ViewRouteRoute
     }
     '/_view/roadmap/$slug': {
@@ -2882,7 +2806,6 @@ interface ViewRouteRouteChildren {
   ViewProductSearchRoute: typeof ViewProductSearchRoute
   ViewProductSelfHostingRoute: typeof ViewProductSelfHostingRoute
   ViewRoadmapSlugRoute: typeof ViewRoadmapSlugRoute
-  ViewShortcutsSlugRoute: typeof ViewShortcutsSlugRoute
   ViewSolutionCoachingRoute: typeof ViewSolutionCoachingRoute
   ViewSolutionConsultingRoute: typeof ViewSolutionConsultingRoute
   ViewSolutionCustomerSuccessRoute: typeof ViewSolutionCustomerSuccessRoute
@@ -2899,7 +2822,6 @@ interface ViewRouteRouteChildren {
   ViewSolutionRecruitingRoute: typeof ViewSolutionRecruitingRoute
   ViewSolutionResearchRoute: typeof ViewSolutionResearchRoute
   ViewSolutionSalesRoute: typeof ViewSolutionSalesRoute
-  ViewTemplatesSlugRoute: typeof ViewTemplatesSlugRoute
   ViewVsSlugRoute: typeof ViewVsSlugRoute
   ViewBlogIndexRoute: typeof ViewBlogIndexRoute
   ViewChangelogIndexRoute: typeof ViewChangelogIndexRoute
@@ -2911,8 +2833,6 @@ interface ViewRouteRouteChildren {
   ViewLegalIndexRoute: typeof ViewLegalIndexRoute
   ViewPressKitIndexRoute: typeof ViewPressKitIndexRoute
   ViewRoadmapIndexRoute: typeof ViewRoadmapIndexRoute
-  ViewShortcutsIndexRoute: typeof ViewShortcutsIndexRoute
-  ViewTemplatesIndexRoute: typeof ViewTemplatesIndexRoute
   ViewGalleryTypeSlugRoute: typeof ViewGalleryTypeSlugRoute
   ViewIntegrationsCategorySlugRoute: typeof ViewIntegrationsCategorySlugRoute
 }
@@ -2961,7 +2881,6 @@ const ViewRouteRouteChildren: ViewRouteRouteChildren = {
   ViewProductSearchRoute: ViewProductSearchRoute,
   ViewProductSelfHostingRoute: ViewProductSelfHostingRoute,
   ViewRoadmapSlugRoute: ViewRoadmapSlugRoute,
-  ViewShortcutsSlugRoute: ViewShortcutsSlugRoute,
   ViewSolutionCoachingRoute: ViewSolutionCoachingRoute,
   ViewSolutionConsultingRoute: ViewSolutionConsultingRoute,
   ViewSolutionCustomerSuccessRoute: ViewSolutionCustomerSuccessRoute,
@@ -2978,7 +2897,6 @@ const ViewRouteRouteChildren: ViewRouteRouteChildren = {
   ViewSolutionRecruitingRoute: ViewSolutionRecruitingRoute,
   ViewSolutionResearchRoute: ViewSolutionResearchRoute,
   ViewSolutionSalesRoute: ViewSolutionSalesRoute,
-  ViewTemplatesSlugRoute: ViewTemplatesSlugRoute,
   ViewVsSlugRoute: ViewVsSlugRoute,
   ViewBlogIndexRoute: ViewBlogIndexRoute,
   ViewChangelogIndexRoute: ViewChangelogIndexRoute,
@@ -2990,8 +2908,6 @@ const ViewRouteRouteChildren: ViewRouteRouteChildren = {
   ViewLegalIndexRoute: ViewLegalIndexRoute,
   ViewPressKitIndexRoute: ViewPressKitIndexRoute,
   ViewRoadmapIndexRoute: ViewRoadmapIndexRoute,
-  ViewShortcutsIndexRoute: ViewShortcutsIndexRoute,
-  ViewTemplatesIndexRoute: ViewTemplatesIndexRoute,
   ViewGalleryTypeSlugRoute: ViewGalleryTypeSlugRoute,
   ViewIntegrationsCategorySlugRoute: ViewIntegrationsCategorySlugRoute,
 }

@@ -34,8 +34,7 @@ Disallow: /product/
 Disallow: /solution/
 Disallow: /integrations/
 Disallow: /press-kit
-Disallow: /shortcuts/
-Disallow: /templates/
+
 Disallow: /vs/
 
 # AI-specific content reference

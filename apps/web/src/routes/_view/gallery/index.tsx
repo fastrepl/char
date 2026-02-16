@@ -1,15 +1,7 @@
 import { Icon } from "@iconify-icon/react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { allShortcuts, allTemplates } from "content-collections";
-import { CircleHelp } from "lucide-react";
 import { useMemo, useState } from "react";
-
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@hypr/ui/components/ui/tooltip";
 import { cn } from "@hypr/utils";
 
 import { DownloadButton } from "@/components/download-button";
@@ -241,39 +233,7 @@ function HeroSection({
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600">
             Browse and discover{" "}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    to="/templates/"
-                    className="underline decoration-dotted underline-offset-2 cursor-pointer inline-flex items-center gap-0.5 hover:text-stone-800 transition-colors"
-                  >
-                    templates
-                    <CircleHelp className="size-3.5" />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent className="bg-black text-white rounded-md">
-                  AI instructions for summarizing meetings
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>{" "}
-            and{" "}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    to="/shortcuts/"
-                    className="underline decoration-dotted underline-offset-2 cursor-pointer inline-flex items-center gap-0.5 hover:text-stone-800 transition-colors"
-                  >
-                    shortcuts
-                    <CircleHelp className="size-3.5" />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent className="bg-black text-white rounded-md">
-                  Quick commands for the AI chat assistant
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>{" "}
+            templates and shortcuts{" "}
             for your workflow
           </p>
         </div>
