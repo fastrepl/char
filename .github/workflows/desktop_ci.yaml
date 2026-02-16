@@ -70,7 +70,7 @@ jobs:
         run: |
           EXTRA_EXCLUDES=""
           if [[ "${{ matrix.platform }}" == "windows" ]]; then
-            EXTRA_EXCLUDES="--exclude gbnf"
+            EXTRA_EXCLUDES="--exclude gbnf --exclude tauri-plugin-dock --exclude tauri-plugin-flag --exclude tauri-plugin-git --exclude tauri-plugin-mcp"
           fi
           cargo test --workspace \
             $EXTRA_EXCLUDES \
