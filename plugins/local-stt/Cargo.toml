@@ -45,6 +45,7 @@ hypr-host = { workspace = true }
 hypr-language = { workspace = true, features = ["whisper"] }
 hypr-transcribe-moonshine = { workspace = true }
 
+hypr-transcribe-cactus = { workspace = true }
 hypr-transcribe-whisper-local = { workspace = true, optional = true }
 hypr-whisper-local = { workspace = true, optional = true }
 hypr-whisper-local-model = { workspace = true }

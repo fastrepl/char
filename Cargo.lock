@@ -2777,6 +2777,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ade8366b8bd5ba243f0a58f036cc0ca8a2f069cff1a2351ef1cac6b083e16fc0"
 
 [[package]]
+name = "cactus"
+version = "0.1.0"
+dependencies = [
+ "cactus-sys",
+ "data",
+ "futures-util",
+ "llm-types",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-stream",
+ "tokio-util",
+]
+
+[[package]]
+name = "cactus-sys"
+version = "0.1.0"
+dependencies = [
+ "bindgen 0.72.1",
+ "cmake",
+]
+
+[[package]]
 name = "cairo-rs"
 version = "0.18.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10932,9 +10956,9 @@ dependencies = [
  "gguf",
  "llama-cpp-2",
  "llama-cpp-sys-2",
+ "llm-types",
  "minijinja",
  "minijinja-contrib",
- "nom 8.0.0",
  "rand 0.9.2",
  "serde",
  "serde_json",
@@ -10979,6 +11003,7 @@ dependencies = [
  "gbnf",
  "llama",
  "llm-interface",
+ "llm-types",
  "serde",
  "serde_json",
  "template-app-legacy",
@@ -10991,6 +11016,7 @@ name = "llm-interface"
 version = "0.1.0"
 dependencies = [
  "llama",
+ "llm-types",
  "serde",
  "thiserror 2.0.18",
  "tokio",
@@ -11019,6 +11045,17 @@ dependencies = [
  "tracing-subscriber",
  "utoipa",
  "wiremock",
+]
+
+[[package]]
+name = "llm-types"
+version = "0.1.0"
+dependencies = [
+ "async-openai",
+ "nom 8.0.0",
+ "rand 0.9.2",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -17492,6 +17529,7 @@ dependencies = [
  "serde_json",
  "thiserror 2.0.18",
  "tokio",
+ "urlencoding",
 ]
 
 [[package]]
@@ -18979,6 +19017,7 @@ dependencies = [
  "llama",
  "llm",
  "llm-interface",
+ "llm-types",
  "reqwest 0.13.2",
  "reqwest-streams",
  "serde",
@@ -19046,6 +19085,7 @@ dependencies = [
  "tower 0.5.3",
  "tower-http 0.6.8",
  "tracing",
+ "transcribe-cactus",
  "transcribe-moonshine",
  "transcribe-whisper-local",
  "whisper-local",
@@ -20816,6 +20856,29 @@ dependencies = [
  "tokio-tungstenite 0.28.0",
  "tower 0.5.3",
  "tracing",
+]
+
+[[package]]
+name = "transcribe-cactus"
+version = "0.1.0"
+dependencies = [
+ "audio-utils",
+ "axum 0.8.8",
+ "bytes",
+ "cactus",
+ "data",
+ "futures-util",
+ "owhisper-interface",
+ "serde_json",
+ "serde_qs",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-tungstenite 0.28.0",
+ "tower 0.5.3",
+ "tracing",
+ "uuid",
+ "ws-utils",
 ]
 
 [[package]]

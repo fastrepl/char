@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 hypr-llama = { workspace = true }
+hypr-llm-types = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }

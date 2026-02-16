@@ -14,9 +14,9 @@ openmp = ["llama-cpp-2/openmp"]
 
 [dependencies]
 hypr-gguf = { workspace = true }
+hypr-llm-types = { workspace = true }
 
 encoding_rs = "0.8.35"
-nom = "8.0.0"
 
 llama-cpp-2 = { git = "https://github.com/utilityai/llama-cpp-rs", tag = "0.1.122", default-features = false }
 llama-cpp-sys-2 = { git = "https://github.com/utilityai/llama-cpp-rs", tag = "0.1.122", default-features = false }

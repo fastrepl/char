@@ -302,11 +302,14 @@ function useConfiguredMapping(): Record<
 
   const isAppleSilicon = targetArch.data === "aarch64";
 
-  const [p2, p3, whisperLargeV3] = useQueries({
+  const [p2, p3, whisperLargeV3, qSmall, qSmallEn, qLargeTurbo] = useQueries({
     queries: [
       sttModelQueries.isDownloaded("am-parakeet-v2"),
       sttModelQueries.isDownloaded("am-parakeet-v3"),
       sttModelQueries.isDownloaded("am-whisper-large-v3"),
+      sttModelQueries.isDownloaded("QuantizedSmall"),
+      sttModelQueries.isDownloaded("QuantizedSmallEn"),
+      sttModelQueries.isDownloaded("QuantizedLargeTurbo"),
     ],
   });
 
@@ -333,6 +336,21 @@ function useConfiguredMapping(): Record<
         const models: Array<{ id: string; isDownloaded: boolean }> = [
           { id: "cloud", isDownloaded: billing.isPro },
         ];
+
+        models.push(
+          {
+            id: "QuantizedSmall",
+            isDownloaded: qSmall.data ?? false,
+          },
+          {
+            id: "QuantizedSmallEn",
+            isDownloaded: qSmallEn.data ?? false,
+          },
+          {
+            id: "QuantizedLargeTurbo",
+            isDownloaded: qLargeTurbo.data ?? false,
+          },
+        );
 
         if (isAppleSilicon) {
           models.push(

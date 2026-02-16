@@ -134,6 +134,22 @@ function HyprProviderCard({
             <div className="flex-1 border-t border-dashed border-neutral-300" />
           </div>
 
+          <HyprProviderLocalRow
+            model="QuantizedSmall"
+            displayName="Whisper Small"
+            description="Multilingual. Good balance of speed and accuracy."
+          />
+          <HyprProviderLocalRow
+            model="QuantizedSmallEn"
+            displayName="Whisper Small (English)"
+            description="English only. Optimized for English transcription."
+          />
+          <HyprProviderLocalRow
+            model="QuantizedLargeTurbo"
+            displayName="Whisper Large Turbo"
+            description="Multilingual. Best accuracy, larger download."
+          />
+
           {isAppleSilicon && (
             <>
               <HyprProviderLocalRow

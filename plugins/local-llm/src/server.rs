@@ -22,6 +22,8 @@ use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 use tower_http::cors::{self, CorsLayer};
 
+use hypr_llm_types::Response as LlmResponse;
+
 use crate::{ModelManager, events::LLMEvent};
 
 type StreamWithCancellation = (
@@ -191,7 +193,7 @@ impl LocalProvider {
         let messages = request
             .messages
             .iter()
-            .map(hypr_llama::FromOpenAI::from_openai)
+            .map(hypr_llm_types::FromOpenAI::from_openai)
             .collect();
 
         let maybe_grammar = request
@@ -300,7 +302,7 @@ impl MockProvider {
 
         let stream = Box::pin(stream::iter(chunks).then(|chunk| async move {
             tokio::time::sleep(Duration::from_millis(50)).await;
-            StreamEvent::Response(hypr_llama::Response::TextDelta(chunk))
+            StreamEvent::Response(LlmResponse::TextDelta(chunk))
         }));
 
         let cancellation_token = CancellationToken::new();
@@ -310,7 +312,7 @@ impl MockProvider {
 
 #[derive(Debug, Clone)]
 enum StreamEvent {
-    Response(hypr_llama::Response),
+    Response(LlmResponse),
     Progress(f64),
 }
 
@@ -387,8 +389,8 @@ async fn build_chat_completion_response(
         while let Some(event) = futures_util::StreamExt::next(&mut stream).await {
             match event {
                 StreamEvent::Response(response) => match response {
-                    hypr_llama::Response::TextDelta(chunk) => completion.push_str(&chunk),
-                    hypr_llama::Response::ToolCall { name, arguments } => {
+                    LlmResponse::TextDelta(chunk) => completion.push_str(&chunk),
+                    LlmResponse::ToolCall { name, arguments } => {
                         tool_calls.push(async_openai::types::ChatCompletionMessageToolCall {
                             id: uuid::Uuid::new_v4().to_string(),
                             r#type: ChatCompletionToolType::Function,
@@ -398,7 +400,7 @@ async fn build_chat_completion_response(
                             },
                         });
                     }
-                    hypr_llama::Response::Reasoning(s) => {
+                    LlmResponse::Reasoning(s) => {
                         tracing::debug!("reasoning: {}", s);
                     }
                 },
@@ -438,7 +440,7 @@ async fn build_chat_completion_response(
 
                     match event {
                         StreamEvent::Response(llama_response) => match llama_response {
-                            hypr_llama::Response::TextDelta(chunk) => {
+                            LlmResponse::TextDelta(chunk) => {
                                 Some(Ok(CreateChatCompletionStreamResponse {
                                     choices: vec![ChatChoiceStream {
                                         index: 0,
@@ -452,8 +454,8 @@ async fn build_chat_completion_response(
                                     ..response_template
                                 }))
                             }
-                            hypr_llama::Response::Reasoning(_) => None,
-                            hypr_llama::Response::ToolCall { name, arguments } => {
+                            LlmResponse::Reasoning(_) => None,
+                            LlmResponse::ToolCall { name, arguments } => {
                                 Some(Ok(CreateChatCompletionStreamResponse {
                                     choices: vec![ChatChoiceStream {
                                         index: 0,

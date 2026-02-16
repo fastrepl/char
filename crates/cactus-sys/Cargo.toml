@@ -1,0 +1,10 @@
+[package]
+name = "cactus-sys"
+version = "0.1.0"
+build = "build.rs"
+edition = "2021"
+links = "cactus"
+
+[build-dependencies]
+bindgen = "0.72"
+cmake = "0.1"

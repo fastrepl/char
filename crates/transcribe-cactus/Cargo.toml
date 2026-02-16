@@ -1,0 +1,27 @@
+[package]
+name = "transcribe-cactus"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+hypr-audio-utils = { workspace = true }
+hypr-cactus = { workspace = true }
+hypr-ws-utils = { workspace = true }
+owhisper-interface = { workspace = true }
+
+bytes = { workspace = true }
+serde_json = { workspace = true }
+serde_qs = { workspace = true }
+tempfile = { workspace = true }
+thiserror = { workspace = true }
+uuid = { workspace = true, features = ["v4"] }
+
+axum = { workspace = true, features = ["ws"] }
+futures-util = { workspace = true }
+tokio = { workspace = true }
+tower = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+hypr-data = { workspace = true }
+tokio-tungstenite = { workspace = true }

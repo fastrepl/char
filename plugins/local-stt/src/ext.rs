@@ -14,7 +14,7 @@ use hypr_file::download_file_parallel_cancellable;
 use crate::server::internal;
 use crate::{
     model::SupportedSttModel,
-    server::{ServerInfo, ServerStatus, ServerType, external, supervisor},
+    server::{ServerInfo, ServerStatus, ServerType, external, internal2, supervisor},
     types::DownloadProgressPayload,
 };
 
@@ -53,22 +53,10 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
     ) -> Result<bool, crate::Error> {
         match model {
             SupportedSttModel::Am(model) => Ok(model.is_downloaded(self.models_dir())?),
-            SupportedSttModel::Whisper(model) => {
-                let model_path = self.models_dir().join(model.file_name());
-
-                {
-                    let (path, expected) = (model_path, model.model_size_bytes());
-                    if !path.exists() {
-                        return Ok(false);
-                    }
-
-                    let actual = hypr_file::file_size(path)?;
-                    if actual != expected {
-                        return Ok(false);
-                    }
-                }
-
-                Ok(true)
+            SupportedSttModel::Whisper(_model) => {
+                // TODO: replace with proper cactus model registry once models are hosted
+                let cactus_dir = self.models_dir().join("whisper-small");
+                Ok(cactus_dir.join("config.txt").exists())
             }
         }
     }
@@ -80,16 +68,8 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
             SupportedSttModel::Whisper(_) => ServerType::Internal,
         };
 
-        #[cfg(not(feature = "whisper-cpp"))]
-        if matches!(server_type, ServerType::Internal) {
-            return Err(crate::Error::UnsupportedModelType);
-        }
-
         let current_info = match server_type {
-            #[cfg(feature = "whisper-cpp")]
-            ServerType::Internal => internal_health().await,
-            #[cfg(not(feature = "whisper-cpp"))]
-            ServerType::Internal => None,
+            ServerType::Internal => internal2_health().await,
             ServerType::External => external_health().await,
         };
 
@@ -116,7 +96,6 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
             .map_err(|e| crate::Error::ServerStopFailed(e.to_string()))?;
 
         match server_type {
-            #[cfg(feature = "whisper-cpp")]
             ServerType::Internal => {
                 let cache_dir = self.models_dir();
                 let whisper_model = match model {
@@ -124,10 +103,8 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
                     _ => return Err(crate::Error::UnsupportedModelType),
                 };
 
-                start_internal_server(&supervisor, cache_dir, whisper_model).await
+                start_internal2_server(&supervisor, cache_dir, whisper_model).await
             }
-            #[cfg(not(feature = "whisper-cpp"))]
-            ServerType::Internal => Err(crate::Error::UnsupportedModelType),
             ServerType::External => {
                 let data_dir = self.models_dir();
                 let am_model = match model {
@@ -162,18 +139,11 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
 
     #[tracing::instrument(skip_all)]
     pub async fn get_servers(&self) -> Result<HashMap<ServerType, ServerInfo>, crate::Error> {
-        #[cfg(feature = "whisper-cpp")]
-        let internal_info = internal_health().await.unwrap_or(ServerInfo {
+        let internal_info = internal2_health().await.unwrap_or(ServerInfo {
             url: None,
             status: ServerStatus::Unreachable,
             model: None,
         });
-        #[cfg(not(feature = "whisper-cpp"))]
-        let internal_info = ServerInfo {
-            url: None,
-            status: ServerStatus::Unreachable,
-            model: None,
-        };
 
         let external_info = external_health().await.unwrap_or(ServerInfo {
             url: None,
@@ -482,6 +452,27 @@ impl<R: Runtime, T: Manager<R>> LocalSttPluginExt<R> for T {
     }
 }
 
+async fn start_internal2_server(
+    supervisor: &supervisor::SupervisorRef,
+    cache_dir: PathBuf,
+    model: hypr_whisper_local_model::WhisperModel,
+) -> Result<String, crate::Error> {
+    supervisor::start_internal2_stt(
+        supervisor,
+        internal2::Internal2STTArgs {
+            model_cache_dir: cache_dir,
+            model_type: model,
+        },
+    )
+    .await
+    .map_err(|e| crate::Error::ServerStartFailed(e.to_string()))?;
+
+    internal2_health()
+        .await
+        .and_then(|info| info.url)
+        .ok_or_else(|| crate::Error::ServerStartFailed("empty_health".to_string()))
+}
+
 #[cfg(feature = "whisper-cpp")]
 async fn start_internal_server(
     supervisor: &supervisor::SupervisorRef,
@@ -550,6 +541,16 @@ async fn start_external_server<R: Runtime, T: Manager<R>>(
         .await
         .and_then(|info| info.url)
         .ok_or_else(|| crate::Error::ServerStartFailed("empty_health".to_string()))
+}
+
+async fn internal2_health() -> Option<ServerInfo> {
+    match registry::where_is(internal2::Internal2STTActor::name()) {
+        Some(cell) => {
+            let actor: ActorRef<internal2::Internal2STTMessage> = cell.into();
+            call_t!(actor, internal2::Internal2STTMessage::GetHealth, 10 * 1000).ok()
+        }
+        None => None,
+    }
 }
 
 #[cfg(feature = "whisper-cpp")]

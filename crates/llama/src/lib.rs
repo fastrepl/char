@@ -16,11 +16,10 @@ use tokio_util::sync::CancellationToken;
 use hypr_gguf::GgufExt;
 
 mod error;
-mod parser;
 mod types;
 
 pub use error::*;
-pub use parser::{Response, StreamingParser};
+pub use hypr_llm_types::{Response, StreamingParser};
 pub use types::*;
 
 const DEFAULT_MAX_INPUT_TOKENS: u32 = 1024 * 16;

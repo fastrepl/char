@@ -5,7 +5,6 @@ use swift_rs::SRString;
 pub mod diarization;
 mod ffi;
 pub mod transcribe;
-pub mod vad;
 
 use ffi::initialize_am2_sdk;
 

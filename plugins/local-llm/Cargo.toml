@@ -31,6 +31,7 @@ hypr-gguf = { workspace = true }
 hypr-llama = { workspace = true }
 hypr-llm = { workspace = true }
 hypr-llm-interface = { workspace = true }
+hypr-llm-types = { workspace = true }
 
 tauri = { workspace = true, features = ["test"] }
 tauri-specta = { workspace = true, features = ["derive", "typescript"] }
