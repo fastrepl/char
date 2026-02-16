@@ -3,8 +3,6 @@ use hypr_api_auth::AuthContext;
 use owhisper_client::{CallbackSttAdapter, DeepgramAdapter, Provider, SonioxAdapter};
 use serde::{Deserialize, Serialize};
 
-use hypr_supabase_storage::SupabaseStorage;
-
 use crate::query_params::QueryParams;
 use crate::supabase::{PipelineStatus, SupabaseClient, TranscriptionJob};
 
@@ -50,13 +48,8 @@ pub(super) async fn handle_callback(
         .map_err(|_| RouteError::BadRequest("expected JSON body with url field".into()))?;
     let file_id = req.url;
 
-    let storage = SupabaseStorage::new(
-        supabase.client.clone(),
-        &supabase.url,
-        &supabase.service_role_key,
-    );
-
-    let audio_url = storage
+    let audio_url = supabase
+        .storage()
         .create_signed_url("audio-files", &file_id, 3600)
         .await
         .map_err(|e| {
@@ -120,16 +113,20 @@ pub(super) async fn handle_callback(
 }
 
 fn build_supabase_client(state: &AppState) -> Result<SupabaseClient, RouteError> {
-    Ok(SupabaseClient {
-        client: state.client.clone(),
-        url: state
+    let url = state
+        .config
+        .supabase
+        .url
+        .as_deref()
+        .ok_or(RouteError::MissingConfig("supabase_url not configured"))?;
+    let key =
+        state
             .config
             .supabase
-            .url
-            .clone()
-            .ok_or(RouteError::MissingConfig("supabase_url not configured"))?,
-        service_role_key: state.config.supabase.service_role_key.clone().ok_or(
-            RouteError::MissingConfig("supabase_service_role_key not configured"),
-        )?,
-    })
+            .service_role_key
+            .as_deref()
+            .ok_or(RouteError::MissingConfig(
+                "supabase_service_role_key not configured",
+            ))?;
+    Ok(SupabaseClient::new(state.client.clone(), url, key))
 }

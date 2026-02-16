@@ -32,6 +32,7 @@ serde_json = { workspace = true }
 tempfile = { workspace = true }
 thiserror = { workspace = true }
 url = { workspace = true }
+urlencoding = { workspace = true }
 utoipa = { workspace = true }
 
 [dev-dependencies]
