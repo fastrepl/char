@@ -7,9 +7,10 @@ import {
 import { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 
-import "../../styles.css";
-import * as shared from "../shared";
-import type { ImageUploadResult } from "../shared/extensions";
+import { getExtensions, type ImageUploadResult } from "@hypr/tiptap/shared";
+import "@hypr/tiptap/styles.css";
+
+import "./blog-editor.css";
 import { GoogleDocsImport } from "./google-docs-import";
 import { BlogImage } from "./image-with-alt";
 import { Toolbar } from "./toolbar";
@@ -58,7 +59,7 @@ const BlogEditor = forwardRef<{ editor: TiptapEditor | null }, BlogEditorProps>(
 
     const extensions = useMemo(
       () => [
-        ...shared.getExtensions(
+        ...getExtensions(
           ({ node }) => {
             if (node.type.name === "paragraph") {
               return "Start typing...";
