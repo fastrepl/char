@@ -299,9 +299,9 @@ function HeroSection({
                         !shake && mutation.isError && "border-red-500",
                         !shake && mutation.isSuccess && "border-green-500",
                         !shake &&
-                        !mutation.isError &&
-                        !mutation.isSuccess &&
-                        "border-neutral-200 focus-within:border-stone-500",
+                          !mutation.isError &&
+                          !mutation.isSuccess &&
+                          "border-neutral-200 focus-within:border-stone-500",
                       ])}
                     >
                       <input
@@ -1193,7 +1193,7 @@ function FeaturesMobileCarousel({
                   className={cn([
                     "aspect-video border-b border-neutral-100 overflow-hidden relative block",
                     (feature.image || feature.muxPlaybackId) &&
-                    "bg-neutral-100",
+                      "bg-neutral-100",
                   ])}
                 >
                   {feature.muxPlaybackId ? (
@@ -1488,7 +1488,8 @@ export function TemplatesSection() {
 
       <div className="text-center py-8 border-t border-neutral-100">
         <Link
-          to="/gallery?type=template"
+          to="/gallery/"
+          search={{ type: "template" }}
           className={cn([
             "inline-flex items-center gap-2",
             "text-stone-600 hover:text-stone-800",
@@ -1512,7 +1513,7 @@ function TemplatesMobileView() {
           className={cn([
             "p-6",
             index < templateCategories.length - 1 &&
-            "border-b border-neutral-100",
+              "border-b border-neutral-100",
           ])}
         >
           <div className="flex items-center gap-3 mb-3">
@@ -1550,7 +1551,7 @@ function TemplatesDesktopView() {
           className={cn([
             "p-6",
             index < templateCategories.length - 1 &&
-            "border-r border-neutral-100",
+              "border-r border-neutral-100",
           ])}
         >
           <div className="flex items-center gap-3 mb-3">

@@ -2,6 +2,7 @@ import { Icon } from "@iconify-icon/react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { allShortcuts, allTemplates } from "content-collections";
 import { useMemo, useState } from "react";
+
 import { cn } from "@hypr/utils";
 
 import { DownloadButton } from "@/components/download-button";
@@ -232,9 +233,7 @@ function HeroSection({
             Gallery
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600">
-            Browse and discover{" "}
-            templates and shortcuts{" "}
-            for your workflow
+            Browse and discover templates and shortcuts for your workflow
           </p>
         </div>
 
