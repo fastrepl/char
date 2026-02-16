@@ -2584,8 +2584,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminKanbanCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
-      parentRoute: typeof rootRouteImport
-    }
     '/api/admin/import/google-docs': {
       id: '/api/admin/import/google-docs'
       path: '/api/admin/import/google-docs'
