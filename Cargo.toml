@@ -44,6 +44,7 @@ hypr-audio-interface = { path = "crates/audio-interface", package = "audio-inter
 hypr-audio-utils = { path = "crates/audio-utils", package = "audio-utils" }
 hypr-buffer = { path = "crates/buffer", package = "buffer" }
 hypr-bundle = { path = "crates/bundle", package = "bundle" }
+hypr-chatwoot = { path = "crates/chatwoot", package = "chatwoot" }
 hypr-data = { path = "crates/data", package = "data" }
 hypr-db-core = { path = "crates/db-core", package = "db-core" }
 hypr-db-parser = { path = "crates/db-parser", package = "db-parser" }
