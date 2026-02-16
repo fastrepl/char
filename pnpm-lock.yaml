@@ -895,9 +895,6 @@ importers:
       shiki:
         specifier: ^3.22.0
         version: 3.22.0
-      streamdown:
-        specifier: ^2.2.0
-        version: 2.2.0(react@19.2.4)
       stripe:
         specifier: ^20.3.1
         version: 20.3.1(@types/node@22.19.11)
