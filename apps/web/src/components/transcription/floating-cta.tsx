@@ -36,7 +36,7 @@ export function FloatingCTA({
             Uploading... {progress}%
           </span>
         </div>
-      ) : status === "uploaded" || status === "transcribing" ? (
+      ) : status === "transcribing" ? (
         <div className={pillClasses}>
           <div className="animate-spin rounded-full h-4 w-4 border-2 border-stone-300 border-t-stone-600" />
           <span className="text-sm font-medium text-neutral-700">
