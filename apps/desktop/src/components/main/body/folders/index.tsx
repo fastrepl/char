@@ -1,6 +1,21 @@
-import { FolderIcon, FoldersIcon, StickyNoteIcon } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import {
+  FolderIcon,
+  FolderPlusIcon,
+  FoldersIcon,
+  PencilIcon,
+  StickyNoteIcon,
+  Trash2Icon,
+} from "lucide-react";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
 
+import { Button } from "@hypr/ui/components/ui/button";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@hypr/ui/components/ui/context-menu";
 import { cn } from "@hypr/utils";
 
 import { useSession } from "../../../../hooks/tinybase";
@@ -10,7 +25,6 @@ import { type Tab, useTabs } from "../../../../store/zustand/tabs";
 import { StandardTabWrapper } from "../index";
 import { type TabItem, TabItemBase } from "../shared";
 import { FolderBreadcrumb, useFolderChain } from "../shared/folder-breadcrumb";
-import { Section } from "./shared";
 
 function useFolderTree() {
   const sessionIds = main.UI.useRowIds("sessions", main.STORE_ID);
@@ -149,20 +163,99 @@ export function TabContentFolder({ tab }: { tab: Tab }) {
   );
 }
 
+function FolderToolbar({
+  title,
+  parentFolderId,
+  breadcrumb,
+}: {
+  title: string;
+  parentFolderId?: string;
+  breadcrumb?: ReactNode;
+}) {
+  const [isCreating, setIsCreating] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+
+  const handleCreate = async () => {
+    const name = newFolderName.trim();
+    if (!name) {
+      setIsCreating(false);
+      setNewFolderName("");
+      return;
+    }
+
+    const result = await sessionOps.createFolder(name, parentFolderId);
+    if (result.status === "error") {
+      console.error("[FolderView] createFolder failed:", result.error);
+    }
+    setIsCreating(false);
+    setNewFolderName("");
+  };
+
+  return (
+    <div
+      className={cn([
+        "flex items-center justify-between",
+        "px-2 pt-1 pb-1 border-b border-neutral-200",
+      ])}
+    >
+      <div className="flex items-center gap-2 min-w-0">
+        {breadcrumb || (
+          <h2 className="text-lg font-semibold text-neutral-900">{title}</h2>
+        )}
+      </div>
+      <div className="flex items-center gap-1 shrink-0">
+        {isCreating ? (
+          <input
+            type="text"
+            value={newFolderName}
+            onChange={(e) => setNewFolderName(e.target.value)}
+            onBlur={handleCreate}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleCreate();
+              if (e.key === "Escape") {
+                setIsCreating(false);
+                setNewFolderName("");
+              }
+            }}
+            autoFocus
+            placeholder="Folder name"
+            className="text-sm border border-neutral-200 rounded-md px-2 py-1 w-40 focus:outline-hidden focus:ring-1 focus:ring-neutral-400"
+          />
+        ) : (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsCreating(true)}
+          >
+            <FolderPlusIcon className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function TabContentFolderTopLevel() {
   const { topLevel: topLevelFolderIds } = useFolderTree();
 
   return (
-    <div className="flex flex-col gap-6">
-      <Section icon={<FolderIcon className="w-4 h-4" />} title="Folders">
-        {topLevelFolderIds.length > 0 && (
-          <div className="grid grid-cols-4 gap-4">
+    <div className="flex flex-col h-full">
+      <FolderToolbar title="Folders" />
+      <div className="flex-1 overflow-y-auto p-3">
+        {topLevelFolderIds.length > 0 ? (
+          <div className="grid grid-cols-4 gap-3">
             {topLevelFolderIds.map((folderId) => (
               <FolderCard key={folderId} folderId={folderId} />
             ))}
           </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full text-neutral-400">
+            <FoldersIcon className="w-12 h-12 mb-3" />
+            <p className="text-sm">No folders yet</p>
+            <p className="text-xs mt-1">Click the + button above to create one</p>
+          </div>
         )}
-      </Section>
+      </div>
     </div>
   );
 }
@@ -204,11 +297,19 @@ function FolderCard({ folderId }: { folderId: string }) {
     setIsEditing(false);
   }, [editValue, name, folderId]);
 
-  return (
+  const handleDelete = useCallback(async () => {
+    const result = await sessionOps.deleteFolder(folderId);
+    if (result.status === "error") {
+      console.error("[FolderView] deleteFolder failed:", result.error);
+    }
+  }, [folderId]);
+
+  const cardContent = (
     <div
       className={cn([
         "flex flex-col items-center justify-center",
-        "gap-2 p-6 border rounded-lg hover:bg-muted cursor-pointer",
+        "gap-1.5 p-4 border border-neutral-200 rounded-lg",
+        "hover:bg-neutral-50 cursor-pointer transition-colors",
       ])}
       onClick={() => {
         if (!isEditing) {
@@ -216,7 +317,7 @@ function FolderCard({ folderId }: { folderId: string }) {
         }
       }}
     >
-      <FolderIcon className="w-12 h-12 text-muted-foreground" />
+      <FolderIcon className="w-10 h-10 text-neutral-400" />
       {isEditing ? (
         <input
           type="text"
@@ -239,29 +340,46 @@ function FolderCard({ folderId }: { folderId: string }) {
           ])}
         />
       ) : (
-        <span
-          className="text-sm font-medium text-center"
-          onClick={(e) => {
-            e.stopPropagation();
+        <span className="text-sm font-medium text-center text-neutral-900 truncate w-full">
+          {name}
+        </span>
+      )}
+      <span className="text-xs text-neutral-400">
+        {childCount} {childCount === 1 ? "item" : "items"}
+      </span>
+    </div>
+  );
+
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger asChild>{cardContent}</ContextMenuTrigger>
+      <ContextMenuContent className="w-48">
+        <ContextMenuItem
+          onClick={() => {
             setEditValue(name);
             setIsEditing(true);
           }}
         >
-          {name}
-        </span>
-      )}
-      {childCount > 0 && (
-        <span className="text-xs text-muted-foreground">
-          {childCount} items
-        </span>
-      )}
-    </div>
+          <PencilIcon className="w-4 h-4 mr-2" />
+          Rename
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem
+          onClick={handleDelete}
+          className="text-red-600 focus:text-red-600"
+        >
+          <Trash2Icon className="w-4 h-4 mr-2" />
+          Delete
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 
 function TabContentFolderSpecific({ folderId }: { folderId: string }) {
   const { byParent } = useFolderTree();
   const childFolderIds = byParent[folderId] || [];
+  const openCurrent = useTabs((state) => state.openCurrent);
 
   const sessionIds = main.UI.useSliceRowIds(
     main.INDEXES.sessionsByFolder,
@@ -272,45 +390,13 @@ function TabContentFolderSpecific({ folderId }: { folderId: string }) {
   const isEmpty =
     childFolderIds.length === 0 && (sessionIds?.length ?? 0) === 0;
 
-  return (
-    <div className="flex flex-col gap-6">
-      <TabContentFolderBreadcrumb folderId={folderId} />
-
-      <Section icon={<FolderIcon className="w-4 h-4" />} title="Folders">
-        {childFolderIds.length > 0 && (
-          <div className="grid grid-cols-4 gap-4">
-            {childFolderIds.map((childId) => (
-              <FolderCard key={childId} folderId={childId} />
-            ))}
-          </div>
-        )}
-      </Section>
-
-      {!isEmpty && (
-        <Section icon={<StickyNoteIcon className="w-4 h-4" />} title="Notes">
-          {(sessionIds?.length ?? 0) > 0 && (
-            <div className="flex flex-col gap-2">
-              {sessionIds!.map((sessionId) => (
-                <FolderSessionItem key={sessionId} sessionId={sessionId} />
-              ))}
-            </div>
-          )}
-        </Section>
-      )}
-    </div>
-  );
-}
-
-function TabContentFolderBreadcrumb({ folderId }: { folderId: string }) {
-  const openCurrent = useTabs((state) => state.openCurrent);
-
-  return (
+  const breadcrumb = (
     <FolderBreadcrumb
       folderId={folderId}
       renderBefore={() => (
         <button
           onClick={() => openCurrent({ type: "folders", id: null })}
-          className="hover:text-foreground"
+          className="text-neutral-500 hover:text-neutral-900"
         >
           <FoldersIcon className="w-4 h-4" />
         </button>
@@ -318,14 +404,61 @@ function TabContentFolderBreadcrumb({ folderId }: { folderId: string }) {
       renderCrumb={({ id, name, isLast }) => (
         <button
           onClick={() => !isLast && openCurrent({ type: "folders", id })}
-          className={
-            isLast ? "text-foreground font-medium" : "hover:text-foreground"
-          }
+          className={cn([
+            "text-sm",
+            isLast
+              ? "text-neutral-900 font-semibold"
+              : "text-neutral-500 hover:text-neutral-900",
+          ])}
         >
           {name}
         </button>
       )}
     />
+  );
+
+  return (
+    <div className="flex flex-col h-full">
+      <FolderToolbar
+        title=""
+        parentFolderId={folderId}
+        breadcrumb={breadcrumb}
+      />
+      <div className="flex-1 overflow-y-auto p-3">
+        {childFolderIds.length > 0 && (
+          <div className="mb-4">
+            <div className="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-2 px-1">
+              Folders
+            </div>
+            <div className="grid grid-cols-4 gap-3">
+              {childFolderIds.map((childId) => (
+                <FolderCard key={childId} folderId={childId} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {(sessionIds?.length ?? 0) > 0 && (
+          <div>
+            <div className="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-2 px-1">
+              Notes
+            </div>
+            <div className="flex flex-col gap-1">
+              {sessionIds!.map((sessionId) => (
+                <FolderSessionItem key={sessionId} sessionId={sessionId} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {isEmpty && (
+          <div className="flex flex-col items-center justify-center h-full text-neutral-400">
+            <FolderIcon className="w-12 h-12 mb-3" />
+            <p className="text-sm">This folder is empty</p>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -333,13 +466,38 @@ function FolderSessionItem({ sessionId }: { sessionId: string }) {
   const session = useSession(sessionId);
   const openCurrent = useTabs((state) => state.openCurrent);
 
+  const handleRemoveFromFolder = useCallback(async () => {
+    const result = await sessionOps.removeSessionFromFolder(sessionId);
+    if (result.status === "error") {
+      console.error("[FolderView] removeSessionFromFolder failed:", result.error);
+    }
+  }, [sessionId]);
+
   return (
-    <div
-      className="flex items-center gap-2 px-3 py-2 border rounded-md hover:bg-muted cursor-pointer"
-      onClick={() => openCurrent({ type: "sessions", id: sessionId })}
-    >
-      <StickyNoteIcon className="w-4 h-4 text-muted-foreground" />
-      <span className="text-sm">{session.title || "Untitled"}</span>
-    </div>
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <div
+          className={cn([
+            "flex items-center gap-2 px-3 py-2 rounded-md",
+            "hover:bg-neutral-50 cursor-pointer transition-colors",
+          ])}
+          onClick={() => openCurrent({ type: "sessions", id: sessionId })}
+        >
+          <StickyNoteIcon className="w-4 h-4 text-neutral-400" />
+          <span className="text-sm text-neutral-900">
+            {session.title || "Untitled"}
+          </span>
+        </div>
+      </ContextMenuTrigger>
+      <ContextMenuContent className="w-48">
+        <ContextMenuItem
+          onClick={handleRemoveFromFolder}
+          className="text-red-600 focus:text-red-600"
+        >
+          <Trash2Icon className="w-4 h-4 mr-2" />
+          Remove from folder
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }

@@ -1,4 +1,5 @@
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
+import { sanitizeFilename } from "../shared/paths";
 
 import type { Store } from "../../store/main";
 
@@ -72,7 +73,72 @@ export async function renameFolder(
   return { status: "ok" };
 }
 
+export async function createFolder(
+  folderName: string,
+  parentFolderId?: string,
+): Promise<{ status: "ok"; folderId: string } | { status: "error"; error: string }> {
+  const sanitized = sanitizeFilename(folderName.trim());
+  if (!sanitized) {
+    return { status: "error", error: "Invalid folder name" };
+  }
+
+  const folderId = parentFolderId ? `${parentFolderId}/${sanitized}` : sanitized;
+  const result = await fsSyncCommands.createFolder(folderId);
+
+  if (result.status === "error") {
+    console.error("[SessionOps] createFolder failed:", result.error);
+    return { status: "error", error: result.error };
+  }
+
+  return { status: "ok", folderId };
+}
+
+export async function deleteFolder(
+  folderId: string,
+): Promise<{ status: "ok" } | { status: "error"; error: string }> {
+  const { store, reloadSessions } = getConfig();
+
+  const result = await fsSyncCommands.deleteFolder(folderId);
+
+  if (result.status === "error") {
+    console.error("[SessionOps] deleteFolder failed:", result.error);
+    return { status: "error", error: result.error };
+  }
+
+  store.transaction(() => {
+    const sessionIds = store.getRowIds("sessions");
+    for (const id of sessionIds) {
+      const sessionFolderId = store.getCell("sessions", id, "folder_id");
+      if (sessionFolderId === folderId || sessionFolderId?.startsWith(folderId + "/")) {
+        store.setCell("sessions", id, "folder_id", "");
+      }
+    }
+  });
+
+  await reloadSessions();
+  return { status: "ok" };
+}
+
+export async function removeSessionFromFolder(
+  sessionId: string,
+): Promise<{ status: "ok" } | { status: "error"; error: string }> {
+  const { store } = getConfig();
+
+  const result = await fsSyncCommands.moveSession(sessionId, "");
+
+  if (result.status === "error") {
+    console.error("[SessionOps] removeSessionFromFolder failed:", result.error);
+    return { status: "error", error: result.error };
+  }
+
+  store.setCell("sessions", sessionId, "folder_id", "");
+  return { status: "ok" };
+}
+
 export const sessionOps = {
   moveSessionToFolder,
   renameFolder,
+  createFolder,
+  deleteFolder,
+  removeSessionFromFolder,
 };

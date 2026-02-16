@@ -1,4 +1,4 @@
-import { FolderIcon } from "lucide-react";
+import { FolderIcon, FolderPlusIcon } from "lucide-react";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 
 import {
@@ -8,6 +8,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from "@hypr/ui/components/ui/command";
 import {
   DropdownMenu,
@@ -54,17 +55,11 @@ export function SearchableFolderDropdown({
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-50 p-0">
-        {Object.keys(folders).length ? (
-          <SearchableFolderContent
-            folders={folders}
-            onSelectFolder={handleSelectFolder}
-            setOpen={setOpen}
-          />
-        ) : (
-          <div className="py-6 text-center text-sm text-muted-foreground">
-            No folders available
-          </div>
-        )}
+        <SearchableFolderContent
+          folders={folders}
+          onSelectFolder={handleSelectFolder}
+          setOpen={setOpen}
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -83,17 +78,11 @@ export function SearchableFolderSubmenuContent({
 
   return (
     <DropdownMenuSubContent className="w-50 p-0">
-      {Object.keys(folders).length ? (
-        <SearchableFolderContent
-          folders={folders}
-          onSelectFolder={handleSelectFolder}
-          setOpen={setOpen}
-        />
-      ) : (
-        <div className="py-6 text-center text-sm text-muted-foreground">
-          No folders available
-        </div>
-      )}
+      <SearchableFolderContent
+        folders={folders}
+        onSelectFolder={handleSelectFolder}
+        setOpen={setOpen}
+      />
     </DropdownMenuSubContent>
   );
 }
@@ -107,28 +96,78 @@ function SearchableFolderContent({
   onSelectFolder: (folderId: string) => Promise<void>;
   setOpen?: (open: boolean) => void;
 }) {
+  const [searchValue, setSearchValue] = useState("");
+
   const handleSelect = async (folderId: string) => {
     await onSelectFolder(folderId);
     setOpen?.(false);
   };
 
+  const handleCreateAndSelect = async () => {
+    const name = searchValue.trim();
+    if (!name) return;
+
+    const result = await sessionOps.createFolder(name);
+    if (result.status === "ok") {
+      await onSelectFolder(result.folderId);
+      setOpen?.(false);
+    }
+  };
+
+  const folderEntries = Object.entries(folders);
+  const hasExactMatch = folderEntries.some(
+    ([, folder]) => folder.name.toLowerCase() === searchValue.trim().toLowerCase(),
+  );
+  const showCreateOption = searchValue.trim().length > 0 && !hasExactMatch;
+
   return (
     <Command>
-      <CommandInput placeholder="Search folders..." autoFocus className="h-9" />
+      <CommandInput
+        placeholder="Search or create folder..."
+        autoFocus
+        className="h-9"
+        value={searchValue}
+        onValueChange={setSearchValue}
+      />
       <CommandList>
-        <CommandEmpty>No folders found.</CommandEmpty>
-        <CommandGroup>
-          {Object.entries(folders).map(([folderId, folder]) => (
-            <CommandItem
-              key={folderId}
-              value={folder.name}
-              onSelect={() => handleSelect(folderId)}
+        <CommandEmpty>
+          {searchValue.trim() ? (
+            <button
+              onClick={handleCreateAndSelect}
+              className="flex items-center gap-2 w-full px-2 py-1.5 text-sm cursor-pointer hover:bg-accent rounded-sm"
             >
-              <FolderIcon />
-              {folder.name}
-            </CommandItem>
-          ))}
-        </CommandGroup>
+              <FolderPlusIcon className="w-4 h-4" />
+              <span>Create "{searchValue.trim()}"</span>
+            </button>
+          ) : (
+            "Type to create a new folder"
+          )}
+        </CommandEmpty>
+        {folderEntries.length > 0 && (
+          <CommandGroup>
+            {folderEntries.map(([folderId, folder]) => (
+              <CommandItem
+                key={folderId}
+                value={folder.name}
+                onSelect={() => handleSelect(folderId)}
+              >
+                <FolderIcon />
+                {folder.name}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
+        {showCreateOption && folderEntries.length > 0 && (
+          <>
+            <CommandSeparator />
+            <CommandGroup>
+              <CommandItem onSelect={handleCreateAndSelect}>
+                <FolderPlusIcon />
+                Create "{searchValue.trim()}"
+              </CommandItem>
+            </CommandGroup>
+          </>
+        )}
       </CommandList>
     </Command>
   );
