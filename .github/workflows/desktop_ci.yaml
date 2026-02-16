@@ -63,6 +63,9 @@ jobs:
           platform: ${{ matrix.platform }}
       - run: cargo check -p desktop
       - run: cargo test -p desktop
+        if: matrix.platform != 'windows'
+      - run: cargo test -p desktop --no-run
+        if: matrix.platform == 'windows'
       - name: Test workspace crates
         run: |
           cargo test --workspace \
