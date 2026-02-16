@@ -289,9 +289,7 @@ export function ContactsListColumn({
                     key={`pinned-person-${item.id}`}
                     active={isActive(item)}
                     humanId={item.id}
-                    onClick={() =>
-                      setSelected({ type: "person", id: item.id })
-                    }
+                    onClick={() => setSelected({ type: "person", id: item.id })}
                   />
                 ) : (
                   <OrganizationItem
