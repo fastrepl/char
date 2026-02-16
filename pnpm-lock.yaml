@@ -234,6 +234,9 @@ importers:
       '@hypr/plugin-permissions':
         specifier: workspace:*
         version: link:../../plugins/permissions
+      '@hypr/plugin-relay':
+        specifier: workspace:*
+        version: link:../../plugins/relay
       '@hypr/plugin-screen':
         specifier: workspace:*
         version: link:../../plugins/screen
@@ -889,6 +892,9 @@ importers:
       shiki:
         specifier: ^3.22.0
         version: 3.22.0
+      streamdown:
+        specifier: ^2.2.0
+        version: 2.2.0(react@19.2.4)
       stripe:
         specifier: ^20.3.1
         version: 20.3.1(@types/node@22.19.11)
@@ -1789,6 +1795,8 @@ importers:
       '@tauri-apps/api':
         specifier: ^2.10.1
         version: 2.10.1
+
+  plugins/relay: {}
 
   plugins/screen:
     dependencies:

@@ -4726,6 +4726,7 @@ dependencies = [
  "tauri-plugin-permissions",
  "tauri-plugin-prevent-default",
  "tauri-plugin-process",
+ "tauri-plugin-relay",
  "tauri-plugin-screen",
  "tauri-plugin-sentry",
  "tauri-plugin-settings",
@@ -19248,6 +19249,22 @@ checksum = "d55511a7bf6cd70c8767b02c97bf8134fa434daf3926cfc1be0a0f94132d165a"
 dependencies = [
  "tauri",
  "tauri-plugin",
+]
+
+[[package]]
+name = "tauri-plugin-relay"
+version = "0.1.0"
+dependencies = [
+ "axum 0.8.8",
+ "futures-util",
+ "reqwest 0.13.2",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-plugin",
+ "tokio",
+ "tower-http 0.6.8",
+ "tracing",
 ]
 
 [[package]]
