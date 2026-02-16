@@ -1,10 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { fetchAdminUser } from "@/functions/admin";
-import {
-  addIssueToProject,
-  createIssue,
-} from "@/functions/github-projects";
+import { addIssueToProject, createIssue } from "@/functions/github-projects";
 
 export const Route = createFileRoute("/api/admin/kanban/create")({
   server: {
@@ -43,10 +40,10 @@ export const Route = createFileRoute("/api/admin/kanban/create")({
           );
 
           if (issueResult.error) {
-            return new Response(
-              JSON.stringify({ error: issueResult.error }),
-              { status: 500, headers: { "Content-Type": "application/json" } },
-            );
+            return new Response(JSON.stringify({ error: issueResult.error }), {
+              status: 500,
+              headers: { "Content-Type": "application/json" },
+            });
           }
 
           if (body.projectId && issueResult.issue) {
@@ -68,10 +65,10 @@ export const Route = createFileRoute("/api/admin/kanban/create")({
             }
           }
 
-          return new Response(
-            JSON.stringify({ issue: issueResult.issue }),
-            { status: 200, headers: { "Content-Type": "application/json" } },
-          );
+          return new Response(JSON.stringify({ issue: issueResult.issue }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
         } catch (err) {
           return new Response(
             JSON.stringify({ error: (err as Error).message }),

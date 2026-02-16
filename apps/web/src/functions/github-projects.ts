@@ -90,10 +90,14 @@ export async function listProjects(): Promise<{
     }
   `;
 
-  const data = (await graphql(query, {
-    owner: MARKETING_REPO_OWNER,
-    name: MARKETING_REPO_NAME,
-  }, token)) as {
+  const data = (await graphql(
+    query,
+    {
+      owner: MARKETING_REPO_OWNER,
+      name: MARKETING_REPO_NAME,
+    },
+    token,
+  )) as {
     repository: {
       projectsV2: {
         nodes: Array<{
@@ -276,7 +280,10 @@ export async function createIssue(
   title: string,
   body: string,
   labels?: string[],
-): Promise<{ issue?: { id: string; number: number; url: string }; error?: string }> {
+): Promise<{
+  issue?: { id: string; number: number; url: string };
+  error?: string;
+}> {
   const token = getToken();
   if (!token) {
     return { error: "GitHub token not configured" };
@@ -407,11 +414,7 @@ export async function updateItemStatus(
     }
   `;
 
-  await graphql(
-    mutation,
-    { projectId, itemId, fieldId, optionId },
-    token,
-  );
+  await graphql(mutation, { projectId, itemId, fieldId, optionId }, token);
 
   return {};
 }
@@ -444,9 +447,7 @@ export async function updateIssue(
   return {};
 }
 
-export async function closeIssue(
-  issueId: string,
-): Promise<{ error?: string }> {
+export async function closeIssue(issueId: string): Promise<{ error?: string }> {
   const token = getToken();
   if (!token) {
     return { error: "GitHub token not configured" };

@@ -1,10 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { fetchAdminUser } from "@/functions/admin";
-import {
-  updateIssue,
-  updateItemStatus,
-} from "@/functions/github-projects";
+import { updateIssue, updateItemStatus } from "@/functions/github-projects";
 
 export const Route = createFileRoute("/api/admin/kanban/update")({
   server: {
@@ -39,22 +36,14 @@ export const Route = createFileRoute("/api/admin/kanban/update")({
               body.body,
             );
             if (result.error) {
-              return new Response(
-                JSON.stringify({ error: result.error }),
-                {
-                  status: 500,
-                  headers: { "Content-Type": "application/json" },
-                },
-              );
+              return new Response(JSON.stringify({ error: result.error }), {
+                status: 500,
+                headers: { "Content-Type": "application/json" },
+              });
             }
           }
 
-          if (
-            body.projectId &&
-            body.itemId &&
-            body.fieldId &&
-            body.optionId
-          ) {
+          if (body.projectId && body.itemId && body.fieldId && body.optionId) {
             const result = await updateItemStatus(
               body.projectId,
               body.itemId,
@@ -62,13 +51,10 @@ export const Route = createFileRoute("/api/admin/kanban/update")({
               body.optionId,
             );
             if (result.error) {
-              return new Response(
-                JSON.stringify({ error: result.error }),
-                {
-                  status: 500,
-                  headers: { "Content-Type": "application/json" },
-                },
-              );
+              return new Response(JSON.stringify({ error: result.error }), {
+                status: 500,
+                headers: { "Content-Type": "application/json" },
+              });
             }
           }
 

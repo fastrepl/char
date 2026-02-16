@@ -51,7 +51,8 @@ function KanbanPage() {
   } = useQuery({
     queryKey: ["kanban-items", activeProject?.number, activeProject?.id],
     queryFn: async () => {
-      if (!activeProject) return { items: [], statusField: { fieldId: "", options: [] } };
+      if (!activeProject)
+        return { items: [], statusField: { fieldId: "", options: [] } };
       const params = new URLSearchParams({
         projectNumber: String(activeProject.number),
         projectId: activeProject.id,
@@ -95,8 +96,7 @@ function KanbanPage() {
 
     const noStatus = items.filter(
       (item) =>
-        !item.status ||
-        !statusOptions.some((opt) => opt.name === item.status),
+        !item.status || !statusOptions.some((opt) => opt.name === item.status),
     );
     if (noStatus.length > 0) {
       cols.unshift({ id: "no-status", name: "No Status", items: noStatus });
@@ -212,9 +212,7 @@ function KanbanPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-semibold text-neutral-900">Kanban</h1>
-            <span className="text-sm text-neutral-500">
-              fastrepl/marketing
-            </span>
+            <span className="text-sm text-neutral-500">fastrepl/marketing</span>
             {projects.length > 1 && (
               <select
                 value={activeProject?.id ?? ""}
@@ -337,10 +335,10 @@ function KanbanColumn({
   isUpdating: boolean;
 }) {
   const COLUMN_COLORS: Record<string, string> = {
-    "Todo": "border-t-blue-400",
+    Todo: "border-t-blue-400",
     "In Progress": "border-t-yellow-400",
-    "Done": "border-t-green-400",
-    "Backlog": "border-t-neutral-300",
+    Done: "border-t-green-400",
+    Backlog: "border-t-neutral-300",
     "No Status": "border-t-neutral-200",
   };
 

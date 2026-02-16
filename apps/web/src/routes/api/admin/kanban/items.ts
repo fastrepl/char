@@ -37,10 +37,10 @@ export const Route = createFileRoute("/api/admin/kanban/items")({
           ]);
 
           if (itemsResult.error) {
-            return new Response(
-              JSON.stringify({ error: itemsResult.error }),
-              { status: 500, headers: { "Content-Type": "application/json" } },
-            );
+            return new Response(JSON.stringify({ error: itemsResult.error }), {
+              status: 500,
+              headers: { "Content-Type": "application/json" },
+            });
           }
 
           return new Response(
