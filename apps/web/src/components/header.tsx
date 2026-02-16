@@ -43,7 +43,7 @@ function getMaxWidthClass(pathname: string): string {
 const featuresList = [
   { to: "/product/ai-notetaking", label: "AI Notetaking" },
   { to: "/product/search", label: "Searchable Notes" },
-  { to: "/gallery/templates", label: "Custom Templates" },
+  { to: "/gallery?type=template", label: "Custom Templates" },
   { to: "/product/markdown", label: "Markdown Files" },
   { to: "/product/flexible-ai", label: "Flexible AI" },
   { to: "/opensource", label: "Open Source" },
@@ -64,7 +64,7 @@ const resourcesList: {
   { to: "/blog/", label: "Blog", icon: FileText },
   { to: "/docs/", label: "Documentation", icon: BookOpen },
   {
-    to: "/gallery/templates",
+    to: "/gallery?type=template",
     label: "Meeting Templates",
     icon: LayoutTemplate,
   },

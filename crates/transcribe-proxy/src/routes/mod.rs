@@ -38,18 +38,22 @@ impl FromRequestParts<AppState> for SupabaseClient {
         _parts: &mut Parts,
         state: &AppState,
     ) -> Result<Self, Self::Rejection> {
-        Ok(Self {
-            client: state.client.clone(),
-            url: state
+        let url = state
+            .config
+            .supabase
+            .url
+            .as_deref()
+            .ok_or(RouteError::MissingConfig("supabase_url not configured"))?;
+        let key =
+            state
                 .config
                 .supabase
-                .url
-                .clone()
-                .ok_or(RouteError::MissingConfig("supabase_url not configured"))?,
-            service_role_key: state.config.supabase.service_role_key.clone().ok_or(
-                RouteError::MissingConfig("supabase_service_role_key not configured"),
-            )?,
-        })
+                .service_role_key
+                .as_deref()
+                .ok_or(RouteError::MissingConfig(
+                    "supabase_service_role_key not configured",
+                ))?;
+        Ok(Self::new(state.client.clone(), url, key))
     }
 }
 

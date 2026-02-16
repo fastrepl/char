@@ -1488,7 +1488,8 @@ export function TemplatesSection() {
 
       <div className="text-center py-8 border-t border-neutral-100">
         <Link
-          to="/templates/"
+          to="/gallery/"
+          search={{ type: "template" }}
           className={cn([
             "inline-flex items-center gap-2",
             "text-stone-600 hover:text-stone-800",

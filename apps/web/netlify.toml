@@ -52,12 +52,6 @@ status = 301
 force = true
 
 [[redirects]]
-from = "https://hyprnote.com/templates/*"
-to = "https://char.com/templates/:splat"
-status = 301
-force = true
-
-[[redirects]]
 from = "https://hyprnote.com/gallery/*"
 to = "https://char.com/gallery/:splat"
 status = 301
