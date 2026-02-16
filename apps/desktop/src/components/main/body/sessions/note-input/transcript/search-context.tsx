@@ -212,9 +212,16 @@ export interface SearchReplaceDetail {
   wholeWord: boolean;
   all: boolean;
   matchIndex: number;
+  sessionId: string;
 }
 
-export function SearchProvider({ children }: { children: React.ReactNode }) {
+export function SearchProvider({
+  children,
+  sessionId,
+}: {
+  children: React.ReactNode;
+  sessionId: string;
+}) {
   const [isVisible, setIsVisible] = useState(false);
   const [query, setQuery] = useState("");
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
@@ -364,6 +371,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       wholeWord,
       all: false,
       matchIndex: currentMatchIndex,
+      sessionId,
     };
     window.dispatchEvent(new CustomEvent("search-replace", { detail }));
     setTimeout(runSearch, 50);
@@ -374,6 +382,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     wholeWord,
     currentMatchIndex,
     runSearch,
+    sessionId,
   ]);
 
   const replaceAllFn = useCallback(() => {
@@ -385,10 +394,11 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       wholeWord,
       all: true,
       matchIndex: 0,
+      sessionId,
     };
     window.dispatchEvent(new CustomEvent("search-replace", { detail }));
     setTimeout(runSearch, 50);
-  }, [query, replaceQuery, caseSensitive, wholeWord, runSearch]);
+  }, [query, replaceQuery, caseSensitive, wholeWord, runSearch, sessionId]);
 
   useEffect(() => {
     if (!isVisible || !activeMatchId) return;

@@ -270,36 +270,40 @@ function handleEditorReplace(
     ? detail.query
     : detail.query.toLowerCase();
 
-  type TextNodeWithPosition = { text: string; pos: number };
-  const textNodesWithPosition: TextNodeWithPosition[] = [];
-  let index = 0;
-
-  doc.descendants((node, pos) => {
-    if (node.isText) {
-      if (textNodesWithPosition[index]) {
-        textNodesWithPosition[index] = {
-          text: textNodesWithPosition[index].text + node.text,
-          pos: textNodesWithPosition[index].pos,
-        };
-      } else {
-        textNodesWithPosition[index] = {
-          text: node.text ?? "",
-          pos,
-        };
-      }
-    } else {
-      index += 1;
-    }
-  });
-
   type Hit = { from: number; to: number };
   const hits: Hit[] = [];
 
-  for (const entry of textNodesWithPosition) {
-    if (!entry) continue;
-    const { text, pos } = entry;
+  type TextSegment = { textStart: number; pmPos: number; length: number };
 
-    const searchText = detail.caseSensitive ? text : text.toLowerCase();
+  doc.descendants((node, pos) => {
+    if (!node.isBlock) return false;
+
+    let hasChildBlock = false;
+    node.forEach((child) => {
+      if (child.isBlock) hasChildBlock = true;
+    });
+
+    if (hasChildBlock) return true;
+
+    let blockText = "";
+    const segments: TextSegment[] = [];
+
+    node.descendants((child, childPos) => {
+      if (child.isText && child.text) {
+        segments.push({
+          textStart: blockText.length,
+          pmPos: pos + 1 + childPos,
+          length: child.text.length,
+        });
+        blockText += child.text;
+      }
+    });
+
+    if (!blockText) return false;
+
+    const searchText = detail.caseSensitive
+      ? blockText
+      : blockText.toLowerCase();
     let from = 0;
 
     while (from <= searchText.length - searchQuery.length) {
@@ -315,13 +319,35 @@ function handleEditorReplace(
         }
       }
 
-      hits.push({
-        from: pos + idx,
-        to: pos + idx + detail.query.length,
-      });
+      let pmFrom = -1;
+      let pmTo = -1;
+
+      for (const seg of segments) {
+        if (
+          pmFrom < 0 &&
+          idx >= seg.textStart &&
+          idx < seg.textStart + seg.length
+        ) {
+          pmFrom = seg.pmPos + (idx - seg.textStart);
+        }
+        const endOffset = idx + detail.query.length;
+        if (
+          endOffset > seg.textStart &&
+          endOffset <= seg.textStart + seg.length
+        ) {
+          pmTo = seg.pmPos + (endOffset - seg.textStart);
+        }
+      }
+
+      if (pmFrom >= 0 && pmTo >= 0) {
+        hits.push({ from: pmFrom, to: pmTo });
+      }
+
       from = idx + 1;
     }
-  }
+
+    return false;
+  });
 
   if (hits.length === 0) return;
 
@@ -548,6 +574,7 @@ export const NoteInput = forwardRef<
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<SearchReplaceDetail>).detail;
+      if (detail.sessionId !== sessionId) return;
       if (currentTab.type === "transcript") {
         handleTranscriptReplace(detail, store, indexes, checkpoints, sessionId);
       } else {

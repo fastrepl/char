@@ -166,7 +166,7 @@ export function TabContentNote({
 
   return (
     <CaretPositionProvider>
-      <SearchProvider>
+      <SearchProvider sessionId={tab.id}>
         <AudioPlayer.Provider sessionId={tab.id} url={audioUrl ?? ""}>
           <TabContentNoteInner tab={tab} showTimeline={showTimeline} />
         </AudioPlayer.Provider>
