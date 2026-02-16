@@ -1,4 +1,4 @@
-import { Check, Code2, Copy } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Code2, Copy } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 
 import {
@@ -23,9 +23,11 @@ export function GithubEmbed({
   language?: string;
   highlightedHtml?: string;
 }) {
+  const MAX_COLLAPSED_LINES = 10;
   const [copied, setCopied] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const [collapsedLines, setCollapsedLines] = useState<Set<number>>(new Set());
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const highlightedLines = useMemo(() => {
     if (!highlightedHtml) return null;
@@ -179,8 +181,14 @@ export function GithubEmbed({
             <tbody>
               {lines.map((line, index) => {
                 if (!isLineVisible(index)) return null;
+                if (
+                  !isExpanded &&
+                  lines.length > MAX_COLLAPSED_LINES &&
+                  index >= MAX_COLLAPSED_LINES
+                )
+                  return null;
                 const isFoldable = foldRegions.has(index);
-                const isCollapsed = collapsedLines.has(index);
+                const isFolded = collapsedLines.has(index);
 
                 return (
                   <tr key={index} className="leading-5 border-0">
@@ -193,7 +201,7 @@ export function GithubEmbed({
                               onClick={() => toggleFold(index)}
                               className="text-stone-400 hover:text-stone-600 cursor-pointer leading-none"
                             >
-                              {isCollapsed ? "▸" : "▾"}
+                              {isFolded ? "▸" : "▾"}
                             </button>
                           )}
                         </span>
@@ -222,7 +230,7 @@ export function GithubEmbed({
                           {line || " "}
                         </span>
                       )}
-                      {isCollapsed && (
+                      {isFolded && (
                         <span className="ml-2 text-xs bg-stone-100 text-stone-400 px-1.5 py-0.5 rounded border border-stone-200 align-middle">
                           ⋯
                         </span>
@@ -234,6 +242,25 @@ export function GithubEmbed({
             </tbody>
           </table>
         </div>
+        {lines.length > MAX_COLLAPSED_LINES && (
+          <button
+            type="button"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="flex items-center justify-center gap-1.5 w-full py-1.5 text-xs font-mono text-stone-500 hover:text-stone-700 bg-stone-50 border-t border-neutral-200 cursor-pointer transition-colors"
+          >
+            {isExpanded ? (
+              <>
+                <ChevronUp className="w-3 h-3" />
+                Collapse
+              </>
+            ) : (
+              <>
+                <ChevronDown className="w-3 h-3" />
+                Expand ({lines.length - MAX_COLLAPSED_LINES} more lines)
+              </>
+            )}
+          </button>
+        )}
       </div>
     </TooltipProvider>
   );
