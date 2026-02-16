@@ -29,12 +29,12 @@ serde_json = { workspace = true }
 strum = { workspace = true, features = ["derive"] }
 thiserror = { workspace = true }
 
+async-stream = { workspace = true }
+futures-util = { workspace = true }
 rmcp = { workspace = true, features = ["server", "elicitation", "schemars"] }
 tokio = { workspace = true, features = ["rt", "time", "sync"] }
 tokio-tungstenite = { workspace = true }
 tokio-util = { workspace = true }
-async-stream = { workspace = true }
-futures-util = { workspace = true }
 
 async-stripe = { workspace = true }
 async-stripe-billing = { workspace = true, features = ["billing_portal_session", "subscription"] }

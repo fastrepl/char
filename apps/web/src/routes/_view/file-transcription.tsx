@@ -1,4 +1,5 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { FileText } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
 
 import type { JSONContent } from "@hypr/tiptap/editor";
@@ -6,6 +7,7 @@ import { EMPTY_TIPTAP_DOC } from "@hypr/tiptap/shared";
 import "@hypr/tiptap/styles.css";
 import { cn } from "@hypr/utils";
 
+import { Notepad } from "@/components/notepad";
 import { EMPTY_MENTION_CONFIG } from "@/components/transcription/constants";
 import { fetchUser } from "@/functions/auth";
 
@@ -19,7 +21,10 @@ export const Route = createFileRoute("/_view/file-transcription")({
   beforeLoad: async ({ search }) => {
     const user = await fetchUser();
     if (user) {
-      throw redirect({ to: "/app/file-transcription/", search });
+      throw redirect({
+        to: "/app/file-transcription/",
+        search: { ...search, tab: undefined },
+      });
     }
   },
   head: () => ({
@@ -42,7 +47,7 @@ export const Route = createFileRoute("/_view/file-transcription")({
       { property: "og:type", content: "website" },
       {
         property: "og:url",
-        content: "https://hyprnote.com/file-transcription",
+        content: "https://char.dev/file-transcription",
       },
     ],
   }),
@@ -57,41 +62,53 @@ function Component() {
   };
 
   return (
-    <div className="relative min-h-[calc(100vh-200px)] pb-24">
-      <div className="max-w-3xl mx-auto px-6 pt-10">
-        <h1 className="text-xl font-semibold text-muted-foreground">
-          Untitled
-        </h1>
+    <Notepad
+      title="Char — Web demo"
+      store={false}
+      tabs={[
+        {
+          value: "default",
+          icon: FileText,
+          content: (
+            <>
+              <div className="px-6 pt-6 pb-24">
+                <h2 className="text-xl font-semibold text-muted-foreground">
+                  Untitled
+                </h2>
 
-        <div className="mt-4">
-          <Suspense fallback={null}>
-            <NoteEditor
-              initialContent={noteContent}
-              handleChange={setNoteContent}
-              mentionConfig={EMPTY_MENTION_CONFIG}
-            />
-          </Suspense>
-        </div>
-      </div>
+                <div className="mt-4">
+                  <Suspense fallback={null}>
+                    <NoteEditor
+                      initialContent={noteContent}
+                      handleChange={setNoteContent}
+                      mentionConfig={EMPTY_MENTION_CONFIG}
+                    />
+                  </Suspense>
+                </div>
+              </div>
 
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
-        <button
-          onClick={handleUploadClick}
-          className={cn([
-            "flex items-center gap-2 px-5 py-2.5",
-            "rounded-full border-2 border-neutral-200 bg-white",
-            "shadow-lg",
-            "hover:border-neutral-300 hover:shadow-xl",
-            "active:scale-[98%]",
-            "transition-all",
-          ])}
-        >
-          <span className="flex h-2.5 w-2.5 rounded-full bg-red-400" />
-          <span className="text-sm font-medium text-neutral-700">
-            Upload file
-          </span>
-        </button>
-      </div>
-    </div>
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40">
+                <button
+                  onClick={handleUploadClick}
+                  className={cn([
+                    "flex items-center gap-2 px-5 py-2.5",
+                    "rounded-full bg-neutral-900",
+                    "shadow-lg",
+                    "hover:bg-neutral-800",
+                    "active:scale-[98%]",
+                    "transition-all",
+                  ])}
+                >
+                  <span className="flex h-2.5 w-2.5 rounded-full bg-red-400" />
+                  <span className="text-sm font-medium text-white">
+                    Upload file
+                  </span>
+                </button>
+              </div>
+            </>
+          ),
+        },
+      ]}
+    />
   );
 }

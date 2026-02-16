@@ -1,8 +1,24 @@
+import { useMemo } from "react";
+
+import {
+  type Segment,
+  type SegmentKey,
+  SegmentKey as SegmentKeyUtils,
+  SpeakerLabelManager,
+} from "@hypr/transcript";
+import { getSegmentColor, SegmentsList } from "@hypr/transcript/ui";
+
 export function TranscriptContent({
   transcript,
+  segments,
 }: {
-  transcript: string | null;
+  transcript?: string | null;
+  segments?: Segment[] | null;
 }) {
+  if (segments && segments.length > 0) {
+    return <StructuredTranscript segments={segments} />;
+  }
+
   if (!transcript) {
     return (
       <div className="py-8 text-center">
@@ -20,5 +36,31 @@ export function TranscriptContent({
         {transcript}
       </p>
     </div>
+  );
+}
+
+function StructuredTranscript({ segments }: { segments: Segment[] }) {
+  const speakerLabelManager = useMemo(
+    () => SpeakerLabelManager.fromSegments(segments),
+    [segments],
+  );
+
+  const speakerLabelResolver = useMemo(() => {
+    return (key: SegmentKey) => {
+      const label = SegmentKeyUtils.renderLabel(
+        key,
+        undefined,
+        speakerLabelManager,
+      );
+      const color = getSegmentColor(key);
+      return { label, color };
+    };
+  }, [speakerLabelManager]);
+
+  return (
+    <SegmentsList
+      segments={segments}
+      speakerLabelResolver={speakerLabelResolver}
+    />
   );
 }

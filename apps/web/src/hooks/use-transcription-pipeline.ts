@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import { sttListenBatch, sttStatus } from "@hypr/api-client";
 import type {
@@ -7,19 +7,19 @@ import type {
   SttStatusResponse,
 } from "@hypr/api-client";
 import { createClient } from "@hypr/api-client/client";
+import {
+  buildSegments,
+  ChannelProfile,
+  type RuntimeSpeakerHint,
+  type Segment,
+  type WordLike,
+} from "@hypr/transcript";
 
 import { env } from "@/env";
 import { getAccessToken } from "@/functions/access-token";
 import { useAudioUppy } from "@/hooks/use-audio-uppy";
 import { useSummaryStream } from "@/hooks/use-summary-stream";
-
-export type PipelineStatus =
-  | "idle"
-  | "uploading"
-  | "uploaded"
-  | "transcribing"
-  | "done"
-  | "error";
+import type { SessionCell, Store } from "@/store/tinybase";
 
 function createAuthClient(accessToken: string) {
   return createClient({
@@ -28,30 +28,87 @@ function createAuthClient(accessToken: string) {
   });
 }
 
-function extractTranscript(response: SttStatusResponse): string | null {
-  if (response.status !== "done" || !response.rawResult) return null;
+type RawWord = {
+  word: string;
+  start: number;
+  end: number;
+  confidence: number;
+  speaker?: number | null;
+  punctuated_word?: string | null;
+};
+
+type RawResults = {
+  channels?: Array<{
+    alternatives?: Array<{
+      transcript?: string;
+      words?: RawWord[];
+    }>;
+  }>;
+};
+
+function extractTranscriptData(response: SttStatusResponse): {
+  text: string | null;
+  segments: Segment[] | null;
+} {
+  if (response.status !== "done" || !response.rawResult) {
+    return { text: null, segments: null };
+  }
 
   if (typeof response.rawResult.text === "string") {
-    return response.rawResult.text;
+    return { text: response.rawResult.text, segments: null };
   }
 
-  const results = response.rawResult.results as
-    | { channels?: Array<{ alternatives?: Array<{ transcript?: string }> }> }
-    | undefined;
-  const transcript = results?.channels?.[0]?.alternatives?.[0]?.transcript;
-  if (typeof transcript === "string") {
-    return transcript;
+  const results = response.rawResult.results as RawResults | undefined;
+  const alternative = results?.channels?.[0]?.alternatives?.[0];
+  const text =
+    typeof alternative?.transcript === "string" ? alternative.transcript : null;
+
+  const rawWords = alternative?.words;
+  if (!rawWords || rawWords.length === 0) {
+    return { text, segments: null };
   }
 
-  return null;
+  const words: (WordLike & { id: string })[] = [];
+  const speakerHints: RuntimeSpeakerHint[] = [];
+
+  for (let i = 0; i < rawWords.length; i++) {
+    const w = rawWords[i];
+    words.push({
+      id: `w${i}`,
+      text: (w.punctuated_word ?? w.word) + " ",
+      start_ms: Math.round(w.start * 1000),
+      end_ms: Math.round(w.end * 1000),
+      channel: ChannelProfile.MixedCapture,
+    });
+
+    if (w.speaker != null) {
+      speakerHints.push({
+        wordIndex: i,
+        data: { type: "provider_speaker_index", speaker_index: w.speaker },
+      });
+    }
+  }
+
+  const segments = buildSegments(words, [], speakerHints);
+  return { text, segments };
 }
 
-export function useTranscriptionPipeline(searchId: string | undefined) {
-  const [file, setFile] = useState<File | null>(null);
-  const [pipelineId, setPipelineId] = useState<string | null>(searchId ?? null);
-  const [transcript, setTranscript] = useState<string | null>(null);
-
+export function useTranscriptionPipeline(
+  sessionId: string,
+  store: Store | undefined,
+) {
   const summaryTriggeredRef = useRef(false);
+
+  const pipelineId = store?.getCell("sessions", sessionId, "pipeline_id") as
+    | string
+    | undefined;
+
+  const setCell = useCallback(
+    (cell: SessionCell, value: string | number | boolean) => {
+      store?.setCell("sessions", sessionId, cell, value);
+    },
+    [store, sessionId],
+  );
 
   const {
     summary,
@@ -68,6 +125,22 @@ export function useTranscriptionPipeline(searchId: string | undefined) {
     error: uppyError,
   } = useAudioUppy();
 
+  useEffect(() => {
+    setCell("upload_progress", uppyProgress);
+  }, [uppyProgress, setCell]);
+
+  useEffect(() => {
+    setCell("summary", summary);
+  }, [summary, setCell]);
+
+  useEffect(() => {
+    setCell("is_summarizing", isSummarizing);
+  }, [isSummarizing, setCell]);
+
+  useEffect(() => {
+    setCell("summary_error", summaryError ?? "");
+  }, [summaryError, setCell]);
+
   const startPipelineMutation = useMutation({
     mutationFn: async (fileId: string) => {
       const token = await getAccessToken();
@@ -83,7 +156,7 @@ export function useTranscriptionPipeline(searchId: string | undefined) {
       return (data as unknown as ListenCallbackResponse).request_id;
     },
     onSuccess: (newPipelineId) => {
-      setPipelineId(newPipelineId);
+      setCell("pipeline_id", newPipelineId);
       const url = new URL(window.location.href);
       url.searchParams.set("id", newPipelineId);
       window.history.replaceState({}, "", url.toString());
@@ -117,19 +190,41 @@ export function useTranscriptionPipeline(searchId: string | undefined) {
   useEffect(() => {
     const data = pipelineStatusQuery.data;
     if (data) {
-      const text = extractTranscript(data);
+      const { text, segments } = extractTranscriptData(data);
       if (text) {
-        setTranscript(text);
+        setCell("transcript", text);
+      }
+      if (segments) {
+        setCell("transcript_segments", JSON.stringify(segments));
       }
     }
-  }, [pipelineStatusQuery.data]);
+  }, [pipelineStatusQuery.data, setCell]);
+
+  const transcript = store?.getCell("sessions", sessionId, "transcript") as
+    | string
+    | undefined;
+
+  const transcriptSegmentsRaw = store?.getCell(
+    "sessions",
+    sessionId,
+    "transcript_segments",
+  ) as string | undefined;
+
+  const transcriptSegments: Segment[] | null = (() => {
+    if (!transcriptSegmentsRaw) return null;
+    try {
+      return JSON.parse(transcriptSegmentsRaw) as Segment[];
+    } catch {
+      return null;
+    }
+  })();
 
   useEffect(() => {
-    if (transcript && !summaryTriggeredRef.current) {
+    if (transcriptSegments && !summaryTriggeredRef.current) {
       summaryTriggeredRef.current = true;
-      generateSummary(transcript);
+      generateSummary(transcriptSegments);
     }
-  }, [transcript, generateSummary]);
+  }, [transcriptSegments, generateSummary]);
 
   useEffect(() => {
     if (uppyStatus === "done" && uppyFileId && !pipelineId) {
@@ -139,62 +234,75 @@ export function useTranscriptionPipeline(searchId: string | undefined) {
 
   const pipelineStatus = pipelineStatusQuery.data?.status;
 
-  const status: PipelineStatus = (() => {
-    if (pipelineStatus === "error") return "error";
-    if (pipelineStatus === "done" || transcript) return "done";
-    if (
-      pipelineStatus === "processing" ||
-      pipelineId ||
-      startPipelineMutation.isPending
-    ) {
-      return "transcribing";
-    }
-    if (uppyStatus === "uploading") return "uploading";
-    if (uppyStatus === "error") return "error";
-    if (uppyStatus === "done" && uppyFileId) return "uploaded";
-    return "idle";
-  })();
+  useEffect(() => {
+    const status = (() => {
+      if (pipelineStatus === "error") return "error";
+      if (pipelineStatus === "done" || transcript) return "done";
+      if (
+        pipelineStatus === "processing" ||
+        pipelineId ||
+        startPipelineMutation.isPending
+      ) {
+        return "transcribing";
+      }
+      if (uppyStatus === "uploading") return "uploading";
+      if (uppyStatus === "error") return "error";
+      if (uppyStatus === "done" && uppyFileId) return "uploaded";
+      return "idle";
+    })();
+    setCell("pipeline_status", status);
 
-  const errorMessage =
-    uppyError ??
-    (startPipelineMutation.error instanceof Error
-      ? startPipelineMutation.error.message
-      : null) ??
-    (pipelineStatusQuery.isError && pipelineStatusQuery.error instanceof Error
-      ? pipelineStatusQuery.error.message
-      : null) ??
-    (pipelineStatus === "error"
-      ? (pipelineStatusQuery.data?.error ?? null)
-      : null);
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (!selectedFile) return;
-    setFile(selectedFile);
-    setPipelineId(null);
-    setTranscript(null);
-    summaryTriggeredRef.current = false;
-    startPipelineMutation.reset();
-    uppyAddFile(selectedFile);
-  };
-
-  const handleRegenerate = () => {
-    if (transcript) {
-      summaryTriggeredRef.current = true;
-      generateSummary(transcript);
-    }
-  };
-
-  return {
-    file,
+    const errorMessage =
+      uppyError ??
+      (startPipelineMutation.error instanceof Error
+        ? startPipelineMutation.error.message
+        : null) ??
+      (pipelineStatusQuery.isError && pipelineStatusQuery.error instanceof Error
+        ? pipelineStatusQuery.error.message
+        : null) ??
+      (pipelineStatus === "error"
+        ? (pipelineStatusQuery.data?.error ?? null)
+        : null) ??
+      "";
+    setCell("error_message", errorMessage);
+  }, [
+    pipelineStatus,
     transcript,
-    summary,
-    isSummarizing,
-    summaryError,
-    uppyProgress,
-    status,
-    errorMessage,
-    handleFileSelect,
-    handleRegenerate,
-  };
+    pipelineId,
+    startPipelineMutation.isPending,
+    startPipelineMutation.error,
+    uppyStatus,
+    uppyFileId,
+    uppyError,
+    pipelineStatusQuery.isError,
+    pipelineStatusQuery.error,
+    pipelineStatusQuery.data?.error,
+    setCell,
+  ]);
+
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const selectedFile = e.target.files?.[0];
+      if (!selectedFile) return;
+      setCell("file_name", selectedFile.name);
+      setCell("pipeline_id", "");
+      setCell("transcript", "");
+      setCell("transcript_segments", "");
+      setCell("summary", "");
+      setCell("summary_error", "");
+      summaryTriggeredRef.current = false;
+      startPipelineMutation.reset();
+      uppyAddFile(selectedFile);
+    },
+    [setCell, startPipelineMutation, uppyAddFile],
+  );
+
+  const handleRegenerate = useCallback(() => {
+    if (transcriptSegments) {
+      summaryTriggeredRef.current = true;
+      generateSummary(transcriptSegments);
+    }
+  }, [transcriptSegments, generateSummary]);
+
+  return { handleFileSelect, handleRegenerate };
 }

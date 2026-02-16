@@ -52,6 +52,7 @@ export type ConversationSummary = {
 };
 
 export type CreateContactRequest = {
+    customAttributes?: Record<string, unknown> | null;
     email?: string | null;
     identifier: string;
     name?: string | null;

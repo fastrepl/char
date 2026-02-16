@@ -3,12 +3,12 @@ import { type RefObject, useCallback, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import type { DegradedError } from "@hypr/plugin-listener";
+import type { RuntimeSpeakerHint } from "@hypr/transcript";
 import { cn } from "@hypr/utils";
 
 import { useAudioPlayer } from "../../../../../../../contexts/audio-player/provider";
 import { useListener } from "../../../../../../../contexts/listener";
 import * as main from "../../../../../../../store/tinybase/store/main";
-import type { RuntimeSpeakerHint } from "../../../../../../../utils/segment";
 import { TranscriptEmptyState } from "../empty-state";
 import {
   useAutoScroll,

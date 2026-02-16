@@ -81,6 +81,7 @@
     "@hypr/supabase": "workspace:*",
     "@hypr/tinybase-utils": "workspace:*",
     "@hypr/tiptap": "workspace:^",
+    "@hypr/transcript": "workspace:^",
     "@hypr/ui": "workspace:^",
     "@hypr/utils": "workspace:^",
     "@iconify-icon/react": "^3.0.3",

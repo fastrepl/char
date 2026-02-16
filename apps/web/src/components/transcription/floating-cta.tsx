@@ -2,8 +2,6 @@ import { useRef } from "react";
 
 import { cn } from "@hypr/utils";
 
-import type { PipelineStatus } from "@/hooks/use-transcription-pipeline";
-
 const pillClasses = cn([
   "flex items-center gap-2 px-5 py-2.5",
   "rounded-full border-2 border-neutral-200 bg-white",
@@ -15,14 +13,14 @@ export function FloatingCTA({
   progress,
   onFileSelect,
 }: {
-  status: PipelineStatus;
+  status: string;
   progress: number;
   onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
+    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40">
       <input
         ref={fileInputRef}
         type="file"
@@ -50,17 +48,15 @@ export function FloatingCTA({
           onClick={() => fileInputRef.current?.click()}
           className={cn([
             "flex items-center gap-2 px-5 py-2.5",
-            "rounded-full border-2 border-neutral-200 bg-white",
+            "rounded-full bg-neutral-900",
             "shadow-lg",
-            "hover:border-neutral-300 hover:shadow-xl",
+            "hover:bg-neutral-800",
             "active:scale-[98%]",
             "transition-all",
           ])}
         >
           <span className="flex h-2.5 w-2.5 rounded-full bg-red-400" />
-          <span className="text-sm font-medium text-neutral-700">
-            Upload file
-          </span>
+          <span className="text-sm font-medium text-white">Upload file</span>
         </button>
       )}
     </div>

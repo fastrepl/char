@@ -1,5 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 
+import type { Segment } from "@hypr/transcript";
+
 import { env } from "@/env";
 import { getAccessToken } from "@/functions/access-token";
 
@@ -24,10 +26,27 @@ const SYSTEM_PROMPT = `You are an expert at creating structured, comprehensive m
 - Preserve essential details; avoid excessive abstraction. Ensure content remains concrete and specific.
 - Do not include meeting note title, attendee lists nor explanatory notes about the output structure.`;
 
-function buildUserPrompt(transcript: string): string {
+function segmentsToText(segments: Segment[]): string {
+  return segments
+    .map((seg) => {
+      const label =
+        seg.key.speaker_human_id ??
+        (seg.key.speaker_index != null
+          ? `Speaker ${seg.key.speaker_index}`
+          : "Unknown");
+      const text = seg.words
+        .map((w) => w.text)
+        .join("")
+        .trim();
+      return `${label}: ${text}`;
+    })
+    .join("\n");
+}
+
+function buildUserPrompt(segments: Segment[]): string {
   return `# Transcript
 
-${transcript}
+${segmentsToText(segments)}
 
 # Instructions
 
@@ -48,7 +67,7 @@ export function useSummaryStream() {
   }, []);
 
   const generate = useCallback(
-    async (transcript: string) => {
+    async (segments: Segment[]) => {
       cancel();
 
       setSummary("");
@@ -70,7 +89,7 @@ export function useSummaryStream() {
           body: JSON.stringify({
             messages: [
               { role: "system", content: SYSTEM_PROMPT },
-              { role: "user", content: buildUserPrompt(transcript) },
+              { role: "user", content: buildUserPrompt(segments) },
             ],
             stream: true,
           }),
