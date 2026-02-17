@@ -35,7 +35,8 @@ impl NangoConnectionState {
     }
 
     pub fn from_config(config: &crate::config::NangoConfig) -> Self {
-        let mut builder = hypr_nango::NangoClient::builder().api_key(&config.nango.nango_api_key);
+        let mut builder =
+            hypr_nango::NangoClient::builder().api_key(&config.nango.nango_secret_key);
         if let Some(api_base) = &config.nango.nango_api_base {
             builder = builder.api_base(api_base);
         }

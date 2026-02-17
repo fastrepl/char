@@ -31,7 +31,7 @@ pub async fn nango_webhook(
         .ok_or_else(|| NangoError::Auth("Missing X-Nango-Hmac-Sha256 header".to_string()))?;
 
     let valid = hypr_nango::verify_webhook_signature(
-        &state.config.nango.nango_api_key,
+        &state.config.nango.nango_secret_key,
         body.as_bytes(),
         signature,
     );
