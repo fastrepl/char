@@ -1488,7 +1488,9 @@ export function AISection() {
                 JJ
               </div>
               <div className="flex flex-col gap-0.5 min-w-0 overflow-hidden">
-                <p className="text-xs text-neutral-400">John Jeong's progress</p>
+                <p className="text-xs text-neutral-400">
+                  John Jeong's progress
+                </p>
                 <div className="relative h-5">
                   <AnimatePresence mode="wait">
                     <motion.p
