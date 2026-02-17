@@ -137,11 +137,6 @@ function Component() {
     >
       <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
         <YCombinatorBanner />
-        {/* <HeroSection
-          onVideoExpand={setExpandedVideo}
-          heroInputRef={heroInputRef}
-        /> */}
-        {/* <SlashSeparator /> */}
         <HeroParagraphSection onVideoExpand={setExpandedVideo} />
         <SlashSeparator />
         <HowItWorksSection />
@@ -594,7 +589,7 @@ function HeroParagraphSection({
 }) {
   return (
     <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
-      <section className="flex flex-col items-center text-left lg:pt-32 lg:pb-32 md:pt-24 md:pb-24 pt-16 pb-16 px-4 laptop:px-8">
+      <section className="flex flex-col items-center text-left lg:pt-24 lg:pb-32 md:pt-20 md:pb-24 pt-16 pb-16 px-4 laptop:px-8">
         <p className="font-serif text-2xl lg:text-[3rem] md:text-3xl text-stone-600 leading-relaxed w-full">
           We believe in the power of notetaking, not notetakers. Meetings should
           be moments of presence, not passive attendance.{" "}
