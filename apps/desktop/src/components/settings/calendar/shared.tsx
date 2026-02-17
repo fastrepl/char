@@ -26,10 +26,10 @@ const _PROVIDERS = [
     docsPath: "https://hyprnote.com/docs/calendar/apple",
   },
   {
-    disabled: true,
+    disabled: false,
     id: "google",
     displayName: "Google",
-    badge: "Coming soon",
+    badge: "Beta",
     icon: <Icon icon="logos:google-calendar" width={20} height={20} />,
     platform: "all",
     docsPath: "https://hyprnote.com/docs/calendar/gcal",

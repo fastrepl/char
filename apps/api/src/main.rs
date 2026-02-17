@@ -103,14 +103,23 @@ async fn app() -> Router {
             hypr_transcribe_proxy::callback_router(stt_config.clone()),
         );
 
+    let auth_state_integration = AuthState::new(&env.supabase.supabase_url);
+
     let pro_routes = Router::new()
         .merge(hypr_api_research::router(research_config))
+        .route_layer(middleware::from_fn(auth::sentry_and_analytics))
+        .route_layer(middleware::from_fn_with_state(
+            auth_state_pro,
+            auth::require_auth,
+        ));
+
+    let integration_routes = Router::new()
         .nest("/calendar", hypr_api_calendar::router())
         .nest("/nango", hypr_api_nango::router(nango_config.clone()))
         .layer(axum::Extension(nango_connection_state))
         .route_layer(middleware::from_fn(auth::sentry_and_analytics))
         .route_layer(middleware::from_fn_with_state(
-            auth_state_pro,
+            auth_state_integration,
             auth::require_auth,
         ));
 
@@ -156,6 +165,7 @@ async fn app() -> Router {
         .merge(support_routes)
         .merge(webhook_routes)
         .merge(pro_routes)
+        .merge(integration_routes)
         .merge(auth_routes)
         .layer(
             CorsLayer::new()

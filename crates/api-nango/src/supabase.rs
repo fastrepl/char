@@ -1,6 +1,7 @@
 #[derive(Clone)]
 pub(crate) struct SupabaseClient {
     supabase_url: String,
+    supabase_anon_key: String,
     supabase_service_role_key: Option<String>,
     http_client: reqwest::Client,
 }
@@ -8,10 +9,12 @@ pub(crate) struct SupabaseClient {
 impl SupabaseClient {
     pub(crate) fn new(
         supabase_url: impl Into<String>,
+        supabase_anon_key: impl Into<String>,
         supabase_service_role_key: Option<String>,
     ) -> Self {
         Self {
             supabase_url: supabase_url.into().trim_end_matches('/').to_string(),
+            supabase_anon_key: supabase_anon_key.into(),
             supabase_service_role_key,
             http_client: reqwest::Client::new(),
         }
@@ -19,6 +22,20 @@ impl SupabaseClient {
 
     pub(crate) fn is_configured(&self) -> bool {
         self.supabase_service_role_key.is_some()
+    }
+
+    pub(crate) async fn anon_query(
+        &self,
+        url: &str,
+        auth_token: &str,
+    ) -> Result<reqwest::Response, crate::error::NangoError> {
+        self.http_client
+            .get(url)
+            .header("Authorization", format!("Bearer {}", auth_token))
+            .header("apikey", &self.supabase_anon_key)
+            .send()
+            .await
+            .map_err(|e| crate::error::NangoError::Internal(e.to_string()))
     }
 
     fn service_role_key(&self) -> Result<&str, crate::error::NangoError> {

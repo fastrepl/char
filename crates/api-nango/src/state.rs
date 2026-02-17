@@ -20,6 +20,7 @@ impl AppState {
 
         let supabase = SupabaseClient::new(
             &config.supabase_url,
+            &config.supabase_anon_key,
             config.supabase_service_role_key.clone(),
         );
 

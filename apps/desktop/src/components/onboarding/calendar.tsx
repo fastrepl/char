@@ -1,7 +1,11 @@
 import { useState } from "react";
 
+import { commands as openerCommands } from "@hypr/plugin-opener2";
 import { cn } from "@hypr/utils";
 
+import { useAuth } from "../../auth";
+import { env } from "../../env";
+import { getScheme } from "../../utils";
 import { useAppleCalendarSelection } from "../settings/calendar/configure/apple/calendar-selection";
 import { SyncProvider } from "../settings/calendar/configure/apple/context";
 import { ApplePermissions } from "../settings/calendar/configure/apple/permission";
@@ -20,6 +24,38 @@ function AppleCalendarList() {
       onToggle={handleToggle}
       className="border rounded-lg"
     />
+  );
+}
+
+function GoogleCalendarConnect() {
+  const auth = useAuth();
+
+  const handleConnect = async () => {
+    const base = env.VITE_APP_URL ?? "http://localhost:3000";
+    const scheme = await getScheme();
+    await openerCommands.openUrl(
+      `${base}/app/integration?flow=desktop&scheme=${scheme}`,
+      null,
+    );
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-sm text-neutral-600">
+        Connect your Google Calendar to sync your meetings.
+      </p>
+      <button
+        onClick={handleConnect}
+        disabled={!auth.session}
+        className={cn([
+          "w-full h-10 flex items-center justify-center text-sm font-medium transition-all cursor-pointer rounded-lg",
+          "bg-neutral-900 text-white hover:bg-neutral-800 active:scale-[98%]",
+          !auth.session && "opacity-50 cursor-not-allowed",
+        ])}
+      >
+        Connect Google Calendar
+      </button>
+    </div>
   );
 }
 
@@ -62,6 +98,8 @@ export function CalendarSection({ onContinue }: { onContinue: () => void }) {
           </SyncProvider>
         </div>
       )}
+
+      {provider === "google" && <GoogleCalendarConnect />}
 
       <OnboardingButton onClick={onContinue}>Continue</OnboardingButton>
     </div>
