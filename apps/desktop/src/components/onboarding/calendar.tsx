@@ -4,8 +4,7 @@ import { commands as openerCommands } from "@hypr/plugin-opener2";
 import { cn } from "@hypr/utils";
 
 import { useAuth } from "../../auth";
-import { env } from "../../env";
-import { getScheme } from "../../utils";
+import { buildWebAppUrl } from "../../utils";
 import { useAppleCalendarSelection } from "../settings/calendar/configure/apple/calendar-selection";
 import { SyncProvider } from "../settings/calendar/configure/apple/context";
 import { ApplePermissions } from "../settings/calendar/configure/apple/permission";
@@ -31,12 +30,8 @@ function GoogleCalendarConnect() {
   const auth = useAuth();
 
   const handleConnect = async () => {
-    const base = env.VITE_APP_URL ?? "http://localhost:3000";
-    const scheme = await getScheme();
-    await openerCommands.openUrl(
-      `${base}/app/integration?flow=desktop&scheme=${scheme}`,
-      null,
-    );
+    const url = await buildWebAppUrl("/app/integration");
+    await openerCommands.openUrl(url, null);
   };
 
   return (

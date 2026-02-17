@@ -7,8 +7,7 @@ import {
 import { cn } from "@hypr/utils";
 
 import { useAuth } from "../../../../auth";
-import { env } from "../../../../env";
-import { getScheme } from "../../../../utils";
+import { buildWebAppUrl } from "../../../../utils";
 import { StyledStreamdown } from "../../ai/shared";
 import { PROVIDERS } from "../shared";
 
@@ -17,12 +16,8 @@ export function GoogleCalendarProviderCard() {
   const auth = useAuth();
 
   const handleConnect = async () => {
-    const base = env.VITE_APP_URL ?? "http://localhost:3000";
-    const scheme = await getScheme();
-    await openerCommands.openUrl(
-      `${base}/app/integration?flow=desktop&scheme=${scheme}`,
-      null,
-    );
+    const url = await buildWebAppUrl("/app/integration");
+    await openerCommands.openUrl(url, null);
   };
 
   return (
