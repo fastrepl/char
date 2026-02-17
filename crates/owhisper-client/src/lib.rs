@@ -101,6 +101,10 @@ impl<A: RealtimeSttAdapter> ListenClientBuilder<A> {
         let mut params = self.get_params();
         let original_api_base = self.get_api_base();
 
+        // HACK: When going through hyprnote proxy, the model is "cloud" which isn't
+        // a real provider model. Resolve it to the actual provider model (e.g., "nova-3")
+        // so that language strategies like can_use_multi() work correctly.
+        // This will go away once we migrate to using the HyprnoteAdapter directly.
         if is_hyprnote_proxy(original_api_base) {
             let adapter_kind = AdapterKind::from_url_and_languages(
                 original_api_base,
@@ -178,5 +182,83 @@ impl<A: RealtimeSttAdapter + BatchSttAdapter> ListenClientBuilder<A> {
         let params = self.get_params();
         let api_base = self.get_api_base().to_string();
         BatchClient::new(api_base, self.api_key.unwrap_or_default(), params)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use hypr_language::ISO639;
+
+    fn resolve_model_for_proxy(
+        api_base: &str,
+        model: &str,
+        languages: &[hypr_language::Language],
+    ) -> String {
+        let mut params = owhisper_interface::ListenParams {
+            model: Some(model.to_string()),
+            languages: languages.to_vec(),
+            ..Default::default()
+        };
+
+        if is_hyprnote_proxy(api_base) {
+            let adapter_kind =
+                AdapterKind::from_url_and_languages(api_base, &params.languages, Some(model));
+            if let Some(recommended) = adapter_kind.recommended_model_live(&params.languages) {
+                params.model = Some(recommended.to_string());
+            }
+        }
+
+        let adapter = DeepgramAdapter::default();
+        let api_base = append_provider_param(api_base, adapter.provider_name());
+        let url = adapter.build_ws_url(&api_base, &params, 1);
+        url.to_string()
+    }
+
+    #[test]
+    fn test_proxy_cloud_model_resolves_for_multi_language() {
+        let url = resolve_model_for_proxy(
+            "https://api.hyprnote.com/stt",
+            "cloud",
+            &[ISO639::En.into(), ISO639::De.into()],
+        );
+        assert!(
+            url.contains("language=multi"),
+            "proxy 'cloud' with en+de should use language=multi, got: {}",
+            url
+        );
+        assert!(
+            url.contains("model=nova-3"),
+            "proxy 'cloud' should resolve to nova-3, got: {}",
+            url
+        );
+    }
+
+    #[test]
+    fn test_proxy_cloud_model_single_language_unchanged() {
+        let url = resolve_model_for_proxy(
+            "https://api.hyprnote.com/stt",
+            "cloud",
+            &[ISO639::En.into()],
+        );
+        assert!(
+            url.contains("language=en"),
+            "single language should still work, got: {}",
+            url
+        );
+    }
+
+    #[test]
+    fn test_direct_connection_model_not_overridden() {
+        let url = resolve_model_for_proxy(
+            "https://api.deepgram.com/v1",
+            "nova-3",
+            &[ISO639::En.into(), ISO639::De.into()],
+        );
+        assert!(
+            url.contains("model=nova-3"),
+            "direct connection model should be preserved, got: {}",
+            url
+        );
     }
 }

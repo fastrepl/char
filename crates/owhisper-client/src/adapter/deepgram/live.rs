@@ -231,6 +231,44 @@ mod tests {
     }
 
     #[test]
+    fn test_proxy_cloud_model_multi_language_uses_multi() {
+        let adapter = DeepgramAdapter::default();
+
+        let params = owhisper_interface::ListenParams {
+            model: Some("nova-3".to_string()),
+            languages: vec![ISO639::En.into(), ISO639::De.into()],
+            ..Default::default()
+        };
+        let url =
+            adapter.build_ws_url("https://api.hyprnote.com/stt?provider=deepgram", &params, 1);
+        let url_str = url.as_str();
+        assert!(
+            url_str.contains("language=multi"),
+            "en+de with resolved model should use language=multi, got: {}",
+            url_str
+        );
+    }
+
+    #[test]
+    fn test_proxy_cloud_model_unresolved_falls_back_to_first_language() {
+        let adapter = DeepgramAdapter::default();
+
+        let params = owhisper_interface::ListenParams {
+            model: Some("cloud".to_string()),
+            languages: vec![ISO639::En.into(), ISO639::De.into()],
+            ..Default::default()
+        };
+        let url =
+            adapter.build_ws_url("https://api.hyprnote.com/stt?provider=deepgram", &params, 1);
+        let url_str = url.as_str();
+        assert!(
+            url_str.contains("language=en") && !url_str.contains("language=multi"),
+            "unresolved 'cloud' model breaks multi-language, got: {}",
+            url_str
+        );
+    }
+
+    #[test]
     fn test_basic_url_params() {
         let adapter = DeepgramAdapter::default();
         let params = owhisper_interface::ListenParams {
