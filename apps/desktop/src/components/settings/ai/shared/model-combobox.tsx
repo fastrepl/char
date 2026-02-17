@@ -101,19 +101,22 @@ export function ModelCombobox({
   );
 
   const autoSelectedRef = useRef(false);
+  const userSelectedRef = useRef(false);
+
   useEffect(() => {
-    if (autoSelectedRef.current) {
+    autoSelectedRef.current = false;
+    userSelectedRef.current = false;
+  }, [providerId]);
+
+  useEffect(() => {
+    if (autoSelectedRef.current || userSelectedRef.current) {
       return;
     }
-    if (!value && options.length > 0) {
+    if (options.length > 0 && (!value || !options.includes(value))) {
       autoSelectedRef.current = true;
       onChange(options[0]);
     }
   }, [value, options, onChange]);
-
-  useEffect(() => {
-    autoSelectedRef.current = false;
-  }, [providerId]);
   const ignoredOptions = useMemo(
     () => fetchedResult?.ignored ?? [],
     [fetchedResult],
@@ -132,6 +135,7 @@ export function ModelCombobox({
 
   const handleSelect = useCallback(
     (option: string) => {
+      userSelectedRef.current = true;
       onChange(option);
       setOpen(false);
       setQuery("");
