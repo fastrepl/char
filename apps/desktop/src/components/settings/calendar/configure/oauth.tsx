@@ -45,8 +45,7 @@ export function OAuthProviderCard({
       <AccordionContent className="px-4 flex flex-col gap-5">
         <div className="flex items-center justify-between">
           <StyledStreamdown>
-            Connect your **{config.displayName} Calendar** to sync meetings.
-            Opens your browser to authenticate.
+            {`Connect your **${config.displayName} Calendar** to sync meetings. Opens your browser to authenticate.`}
           </StyledStreamdown>
           <button
             onClick={() => openerCommands.openUrl(config.docsPath, null)}

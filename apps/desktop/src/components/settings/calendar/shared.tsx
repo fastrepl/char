@@ -25,6 +25,7 @@ const _PROVIDERS = [
     icon: <Icon icon="logos:apple" width={20} height={20} />,
     platform: "macos",
     docsPath: "https://hyprnote.com/docs/calendar/apple",
+    nangoIntegrationId: undefined,
   },
   {
     disabled: false,
@@ -44,6 +45,7 @@ const _PROVIDERS = [
     icon: <OutlookIcon size={20} />,
     platform: "all",
     docsPath: "https://hyprnote.com/docs/calendar/outlook",
+    nangoIntegrationId: undefined,
   },
 ] as const satisfies readonly CalendarProvider[];
 
