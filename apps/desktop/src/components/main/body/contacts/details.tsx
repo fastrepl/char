@@ -211,16 +211,18 @@ export function DetailsColumn({
         <>
           <div className="px-6 py-4 border-b border-neutral-200">
             <div className="flex items-start gap-4">
-              <Facehash
-                name={String(
-                  selectedPersonData.name ||
-                    selectedPersonData.email ||
-                    selectedHumanId,
-                )}
-                size={48}
-                interactive={false}
-                showInitial={false}
-              />
+              <div className="rounded-full bg-amber-50">
+                <Facehash
+                  name={String(
+                    selectedPersonData.name ||
+                      selectedPersonData.email ||
+                      selectedHumanId,
+                  )}
+                  size={48}
+                  interactive={false}
+                  showInitial={false}
+                />
+              </div>
               <div className="flex-1">
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
@@ -267,12 +269,14 @@ export function DetailsColumn({
                       className="flex items-center justify-between p-2 bg-neutral-50 rounded-md border border-neutral-200"
                     >
                       <div className="flex items-center gap-2">
-                        <Facehash
-                          name={String(dup.name || dup.email || dup.id)}
-                          size={32}
-                          interactive={false}
-                          showInitial={false}
-                        />
+                        <div className="rounded-full bg-amber-50">
+                          <Facehash
+                            name={String(dup.name || dup.email || dup.id)}
+                            size={32}
+                            interactive={false}
+                            showInitial={false}
+                          />
+                        </div>
                         <div>
                           <div className="text-sm font-medium text-neutral-900">
                             {dup.name || "Unnamed Contact"}

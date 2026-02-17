@@ -88,12 +88,14 @@ function HumanSearchResultItem({
         isSelected && "bg-neutral-100",
       ])}
     >
-      <Facehash
-        name={result.title || result.id}
-        size={32}
-        interactive={false}
-        showInitial={false}
-      />
+      <div className="shrink-0 rounded-full bg-amber-50">
+        <Facehash
+          name={result.title || result.id}
+          size={32}
+          interactive={false}
+          showInitial={false}
+        />
+      </div>
       <div className={cn(["flex-1 min-w-0"])}>
         <div
           className={cn([

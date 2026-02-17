@@ -252,12 +252,14 @@ function PersonItem({
         active ? "border-neutral-500 bg-neutral-100" : "border-transparent",
       ])}
     >
-      <Facehash
-        name={personName || personEmail || humanId}
-        size={32}
-        interactive={false}
-        showInitial={false}
-      />
+      <div className="shrink-0 rounded-full bg-amber-50">
+        <Facehash
+          name={personName || personEmail || humanId}
+          size={32}
+          interactive={false}
+          showInitial={false}
+        />
+      </div>
       <div className="flex-1 min-w-0">
         <div className="font-medium truncate flex items-center gap-1">
           {personName || personEmail || "Unnamed"}

@@ -77,14 +77,16 @@ export function OrganizationDetailsColumn({
                           onClick={() => onPersonClick?.(humanId)}
                         >
                           <div className="flex flex-col items-center text-center gap-3">
-                            <Facehash
-                              name={String(
-                                human.name || human.email || humanId,
-                              )}
-                              size={48}
-                              interactive={false}
-                              showInitial={false}
-                            />
+                            <div className="rounded-full bg-amber-50">
+                              <Facehash
+                                name={String(
+                                  human.name || human.email || humanId,
+                                )}
+                                size={48}
+                                interactive={false}
+                                showInitial={false}
+                              />
+                            </div>
                             <div className="w-full">
                               <div className="font-semibold text-sm truncate">
                                 {human.name || human.email || "Unnamed"}

@@ -304,6 +304,10 @@ function ProfileButton({
     [auth?.session?.user.email, name],
   );
 
+  useEffect(() => {
+    setImgError(false);
+  }, [profile.data]);
+
   const showFacehash = !profile.data || imgError;
 
   return (
@@ -327,12 +331,14 @@ function ProfileButton({
         ])}
       >
         {showFacehash ? (
-          <Facehash
-            name={facehashName}
-            size={32}
-            interactive={false}
-            showInitial={false}
-          />
+          <div className="bg-amber-50 rounded-full">
+            <Facehash
+              name={facehashName}
+              size={32}
+              interactive={false}
+              showInitial={false}
+            />
+          </div>
         ) : (
           <img
             src={profile.data!}
