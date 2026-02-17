@@ -9,6 +9,7 @@ pub trait HttpClient: Send + Sync {
         &self,
         path: &str,
         body: Vec<u8>,
+        content_type: &str,
     ) -> impl Future<Output = Result<Vec<u8>, Error>> + Send;
 
     fn put(&self, path: &str, body: Vec<u8>)

@@ -48,10 +48,9 @@ import { Route as ViewAppRouteRouteImport } from './routes/_view/app/route'
 import { Route as AdminStarsIndexRouteImport } from './routes/admin/stars/index'
 import { Route as AdminMediaIndexRouteImport } from './routes/admin/media/index'
 import { Route as AdminLeadFinderIndexRouteImport } from './routes/admin/lead-finder/index'
+import { Route as AdminKanbanIndexRouteImport } from './routes/admin/kanban/index'
 import { Route as AdminCrmIndexRouteImport } from './routes/admin/crm/index'
 import { Route as AdminCollectionsIndexRouteImport } from './routes/admin/collections/index'
-import { Route as ViewTemplatesIndexRouteImport } from './routes/_view/templates/index'
-import { Route as ViewShortcutsIndexRouteImport } from './routes/_view/shortcuts/index'
 import { Route as ViewRoadmapIndexRouteImport } from './routes/_view/roadmap/index'
 import { Route as ViewPressKitIndexRouteImport } from './routes/_view/press-kit/index'
 import { Route as ViewLegalIndexRouteImport } from './routes/_view/legal/index'
@@ -69,7 +68,6 @@ import { Route as ApiWebhooksSlackInteractiveRouteImport } from './routes/api/we
 import { Route as ApiTweetIdRouteImport } from './routes/api/tweet.$id'
 import { Route as ApiImagesSplatRouteImport } from './routes/api/images.$'
 import { Route as ViewVsSlugRouteImport } from './routes/_view/vs/$slug'
-import { Route as ViewTemplatesSlugRouteImport } from './routes/_view/templates/$slug'
 import { Route as ViewSolutionSalesRouteImport } from './routes/_view/solution/sales'
 import { Route as ViewSolutionResearchRouteImport } from './routes/_view/solution/research'
 import { Route as ViewSolutionRecruitingRouteImport } from './routes/_view/solution/recruiting'
@@ -86,7 +84,6 @@ import { Route as ViewSolutionEngineeringRouteImport } from './routes/_view/solu
 import { Route as ViewSolutionCustomerSuccessRouteImport } from './routes/_view/solution/customer-success'
 import { Route as ViewSolutionConsultingRouteImport } from './routes/_view/solution/consulting'
 import { Route as ViewSolutionCoachingRouteImport } from './routes/_view/solution/coaching'
-import { Route as ViewShortcutsSlugRouteImport } from './routes/_view/shortcuts/$slug'
 import { Route as ViewRoadmapSlugRouteImport } from './routes/_view/roadmap/$slug'
 import { Route as ViewProductSelfHostingRouteImport } from './routes/_view/product/self-hosting'
 import { Route as ViewProductSearchRouteImport } from './routes/_view/product/search'
@@ -115,6 +112,7 @@ import { Route as ViewDocsSplatRouteImport } from './routes/_view/docs/$'
 import { Route as ViewCompanyHandbookSplatRouteImport } from './routes/_view/company-handbook/$'
 import { Route as ViewChangelogSlugRouteImport } from './routes/_view/changelog/$slug'
 import { Route as ViewCallbackSignoutRouteImport } from './routes/_view/callback/signout'
+import { Route as ViewCallbackIntegrationRouteImport } from './routes/_view/callback/integration'
 import { Route as ViewCallbackAuthRouteImport } from './routes/_view/callback/auth'
 import { Route as ViewBlogSlugRouteImport } from './routes/_view/blog/$slug'
 import { Route as ViewAppIntegrationRouteImport } from './routes/_view/app/integration'
@@ -129,7 +127,11 @@ import { Route as ApiAdminMediaMoveRouteImport } from './routes/api/admin/media/
 import { Route as ApiAdminMediaListRouteImport } from './routes/api/admin/media/list'
 import { Route as ApiAdminMediaDeleteRouteImport } from './routes/api/admin/media/delete'
 import { Route as ApiAdminMediaCreateFolderRouteImport } from './routes/api/admin/media/create-folder'
-import { Route as ApiAdminImportSaveRouteImport } from './routes/api/admin/import/save'
+import { Route as ApiAdminKanbanUpdateRouteImport } from './routes/api/admin/kanban/update'
+import { Route as ApiAdminKanbanProjectsRouteImport } from './routes/api/admin/kanban/projects'
+import { Route as ApiAdminKanbanItemsRouteImport } from './routes/api/admin/kanban/items'
+import { Route as ApiAdminKanbanDeleteRouteImport } from './routes/api/admin/kanban/delete'
+import { Route as ApiAdminKanbanCreateRouteImport } from './routes/api/admin/kanban/create'
 import { Route as ApiAdminImportGoogleDocsRouteImport } from './routes/api/admin/import/google-docs'
 import { Route as ApiAdminContentSaveRouteImport } from './routes/api/admin/content/save'
 import { Route as ApiAdminContentRenameRouteImport } from './routes/api/admin/content/rename'
@@ -145,6 +147,11 @@ import { Route as ApiAdminContentCreateRouteImport } from './routes/api/admin/co
 import { Route as ApiAdminBlogUploadImageRouteImport } from './routes/api/admin/blog/upload-image'
 import { Route as ViewIntegrationsCategorySlugRouteImport } from './routes/_view/integrations/$category.$slug'
 import { Route as ViewGalleryTypeSlugRouteImport } from './routes/_view/gallery/$type.$slug'
+import { Route as ViewDownloadNightlyWindowsRouteImport } from './routes/_view/download/nightly/windows'
+import { Route as ViewDownloadNightlyLinuxDebRouteImport } from './routes/_view/download/nightly/linux-deb'
+import { Route as ViewDownloadNightlyLinuxAppimageRouteImport } from './routes/_view/download/nightly/linux-appimage'
+import { Route as ViewDownloadNightlyAppleSiliconRouteImport } from './routes/_view/download/nightly/apple-silicon'
+import { Route as ViewDownloadNightlyAppleIntelRouteImport } from './routes/_view/download/nightly/apple-intel'
 
 const YoutubeRoute = YoutubeRouteImport.update({
   id: '/youtube',
@@ -341,6 +348,11 @@ const AdminLeadFinderIndexRoute = AdminLeadFinderIndexRouteImport.update({
   path: '/lead-finder/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminKanbanIndexRoute = AdminKanbanIndexRouteImport.update({
+  id: '/kanban/',
+  path: '/kanban/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminCrmIndexRoute = AdminCrmIndexRouteImport.update({
   id: '/crm/',
   path: '/crm/',
@@ -350,16 +362,6 @@ const AdminCollectionsIndexRoute = AdminCollectionsIndexRouteImport.update({
   id: '/collections/',
   path: '/collections/',
   getParentRoute: () => AdminRouteRoute,
-} as any)
-const ViewTemplatesIndexRoute = ViewTemplatesIndexRouteImport.update({
-  id: '/templates/',
-  path: '/templates/',
-  getParentRoute: () => ViewRouteRoute,
-} as any)
-const ViewShortcutsIndexRoute = ViewShortcutsIndexRouteImport.update({
-  id: '/shortcuts/',
-  path: '/shortcuts/',
-  getParentRoute: () => ViewRouteRoute,
 } as any)
 const ViewRoadmapIndexRoute = ViewRoadmapIndexRouteImport.update({
   id: '/roadmap/',
@@ -448,11 +450,6 @@ const ViewVsSlugRoute = ViewVsSlugRouteImport.update({
   path: '/vs/$slug',
   getParentRoute: () => ViewRouteRoute,
 } as any)
-const ViewTemplatesSlugRoute = ViewTemplatesSlugRouteImport.update({
-  id: '/templates/$slug',
-  path: '/templates/$slug',
-  getParentRoute: () => ViewRouteRoute,
-} as any)
 const ViewSolutionSalesRoute = ViewSolutionSalesRouteImport.update({
   id: '/solution/sales',
   path: '/solution/sales',
@@ -535,11 +532,6 @@ const ViewSolutionConsultingRoute = ViewSolutionConsultingRouteImport.update({
 const ViewSolutionCoachingRoute = ViewSolutionCoachingRouteImport.update({
   id: '/solution/coaching',
   path: '/solution/coaching',
-  getParentRoute: () => ViewRouteRoute,
-} as any)
-const ViewShortcutsSlugRoute = ViewShortcutsSlugRouteImport.update({
-  id: '/shortcuts/$slug',
-  path: '/shortcuts/$slug',
   getParentRoute: () => ViewRouteRoute,
 } as any)
 const ViewRoadmapSlugRoute = ViewRoadmapSlugRouteImport.update({
@@ -685,6 +677,11 @@ const ViewCallbackSignoutRoute = ViewCallbackSignoutRouteImport.update({
   path: '/callback/signout',
   getParentRoute: () => ViewRouteRoute,
 } as any)
+const ViewCallbackIntegrationRoute = ViewCallbackIntegrationRouteImport.update({
+  id: '/callback/integration',
+  path: '/callback/integration',
+  getParentRoute: () => ViewRouteRoute,
+} as any)
 const ViewCallbackAuthRoute = ViewCallbackAuthRouteImport.update({
   id: '/callback/auth',
   path: '/callback/auth',
@@ -757,9 +754,29 @@ const ApiAdminMediaCreateFolderRoute =
     path: '/api/admin/media/create-folder',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiAdminImportSaveRoute = ApiAdminImportSaveRouteImport.update({
-  id: '/api/admin/import/save',
-  path: '/api/admin/import/save',
+const ApiAdminKanbanUpdateRoute = ApiAdminKanbanUpdateRouteImport.update({
+  id: '/api/admin/kanban/update',
+  path: '/api/admin/kanban/update',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminKanbanProjectsRoute = ApiAdminKanbanProjectsRouteImport.update({
+  id: '/api/admin/kanban/projects',
+  path: '/api/admin/kanban/projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminKanbanItemsRoute = ApiAdminKanbanItemsRouteImport.update({
+  id: '/api/admin/kanban/items',
+  path: '/api/admin/kanban/items',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminKanbanDeleteRoute = ApiAdminKanbanDeleteRouteImport.update({
+  id: '/api/admin/kanban/delete',
+  path: '/api/admin/kanban/delete',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminKanbanCreateRoute = ApiAdminKanbanCreateRouteImport.update({
+  id: '/api/admin/kanban/create',
+  path: '/api/admin/kanban/create',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAdminImportGoogleDocsRoute =
@@ -843,6 +860,36 @@ const ViewGalleryTypeSlugRoute = ViewGalleryTypeSlugRouteImport.update({
   path: '/gallery/$type/$slug',
   getParentRoute: () => ViewRouteRoute,
 } as any)
+const ViewDownloadNightlyWindowsRoute =
+  ViewDownloadNightlyWindowsRouteImport.update({
+    id: '/download/nightly/windows',
+    path: '/download/nightly/windows',
+    getParentRoute: () => ViewRouteRoute,
+  } as any)
+const ViewDownloadNightlyLinuxDebRoute =
+  ViewDownloadNightlyLinuxDebRouteImport.update({
+    id: '/download/nightly/linux-deb',
+    path: '/download/nightly/linux-deb',
+    getParentRoute: () => ViewRouteRoute,
+  } as any)
+const ViewDownloadNightlyLinuxAppimageRoute =
+  ViewDownloadNightlyLinuxAppimageRouteImport.update({
+    id: '/download/nightly/linux-appimage',
+    path: '/download/nightly/linux-appimage',
+    getParentRoute: () => ViewRouteRoute,
+  } as any)
+const ViewDownloadNightlyAppleSiliconRoute =
+  ViewDownloadNightlyAppleSiliconRouteImport.update({
+    id: '/download/nightly/apple-silicon',
+    path: '/download/nightly/apple-silicon',
+    getParentRoute: () => ViewRouteRoute,
+  } as any)
+const ViewDownloadNightlyAppleIntelRoute =
+  ViewDownloadNightlyAppleIntelRouteImport.update({
+    id: '/download/nightly/apple-intel',
+    path: '/download/nightly/apple-intel',
+    getParentRoute: () => ViewRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof ViewIndexRoute
@@ -886,6 +933,7 @@ export interface FileRoutesByFullPath {
   '/app/integration': typeof ViewAppIntegrationRoute
   '/blog/$slug': typeof ViewBlogSlugRoute
   '/callback/auth': typeof ViewCallbackAuthRoute
+  '/callback/integration': typeof ViewCallbackIntegrationRoute
   '/callback/signout': typeof ViewCallbackSignoutRoute
   '/changelog/$slug': typeof ViewChangelogSlugRoute
   '/company-handbook/$': typeof ViewCompanyHandbookSplatRoute
@@ -914,7 +962,6 @@ export interface FileRoutesByFullPath {
   '/product/search': typeof ViewProductSearchRoute
   '/product/self-hosting': typeof ViewProductSelfHostingRoute
   '/roadmap/$slug': typeof ViewRoadmapSlugRoute
-  '/shortcuts/$slug': typeof ViewShortcutsSlugRoute
   '/solution/coaching': typeof ViewSolutionCoachingRoute
   '/solution/consulting': typeof ViewSolutionConsultingRoute
   '/solution/customer-success': typeof ViewSolutionCustomerSuccessRoute
@@ -931,7 +978,6 @@ export interface FileRoutesByFullPath {
   '/solution/recruiting': typeof ViewSolutionRecruitingRoute
   '/solution/research': typeof ViewSolutionResearchRoute
   '/solution/sales': typeof ViewSolutionSalesRoute
-  '/templates/$slug': typeof ViewTemplatesSlugRoute
   '/vs/$slug': typeof ViewVsSlugRoute
   '/api/images/$': typeof ApiImagesSplatRoute
   '/api/tweet/$id': typeof ApiTweetIdRoute
@@ -949,13 +995,17 @@ export interface FileRoutesByFullPath {
   '/legal/': typeof ViewLegalIndexRoute
   '/press-kit/': typeof ViewPressKitIndexRoute
   '/roadmap/': typeof ViewRoadmapIndexRoute
-  '/shortcuts/': typeof ViewShortcutsIndexRoute
-  '/templates/': typeof ViewTemplatesIndexRoute
   '/admin/collections/': typeof AdminCollectionsIndexRoute
   '/admin/crm/': typeof AdminCrmIndexRoute
+  '/admin/kanban/': typeof AdminKanbanIndexRoute
   '/admin/lead-finder/': typeof AdminLeadFinderIndexRoute
   '/admin/media/': typeof AdminMediaIndexRoute
   '/admin/stars/': typeof AdminStarsIndexRoute
+  '/download/nightly/apple-intel': typeof ViewDownloadNightlyAppleIntelRoute
+  '/download/nightly/apple-silicon': typeof ViewDownloadNightlyAppleSiliconRoute
+  '/download/nightly/linux-appimage': typeof ViewDownloadNightlyLinuxAppimageRoute
+  '/download/nightly/linux-deb': typeof ViewDownloadNightlyLinuxDebRoute
+  '/download/nightly/windows': typeof ViewDownloadNightlyWindowsRoute
   '/gallery/$type/$slug': typeof ViewGalleryTypeSlugRoute
   '/integrations/$category/$slug': typeof ViewIntegrationsCategorySlugRoute
   '/api/admin/blog/upload-image': typeof ApiAdminBlogUploadImageRoute
@@ -971,7 +1021,11 @@ export interface FileRoutesByFullPath {
   '/api/admin/content/rename': typeof ApiAdminContentRenameRoute
   '/api/admin/content/save': typeof ApiAdminContentSaveRoute
   '/api/admin/import/google-docs': typeof ApiAdminImportGoogleDocsRoute
-  '/api/admin/import/save': typeof ApiAdminImportSaveRoute
+  '/api/admin/kanban/create': typeof ApiAdminKanbanCreateRoute
+  '/api/admin/kanban/delete': typeof ApiAdminKanbanDeleteRoute
+  '/api/admin/kanban/items': typeof ApiAdminKanbanItemsRoute
+  '/api/admin/kanban/projects': typeof ApiAdminKanbanProjectsRoute
+  '/api/admin/kanban/update': typeof ApiAdminKanbanUpdateRoute
   '/api/admin/media/create-folder': typeof ApiAdminMediaCreateFolderRoute
   '/api/admin/media/delete': typeof ApiAdminMediaDeleteRoute
   '/api/admin/media/list': typeof ApiAdminMediaListRoute
@@ -1019,6 +1073,7 @@ export interface FileRoutesByTo {
   '/app/integration': typeof ViewAppIntegrationRoute
   '/blog/$slug': typeof ViewBlogSlugRoute
   '/callback/auth': typeof ViewCallbackAuthRoute
+  '/callback/integration': typeof ViewCallbackIntegrationRoute
   '/callback/signout': typeof ViewCallbackSignoutRoute
   '/changelog/$slug': typeof ViewChangelogSlugRoute
   '/company-handbook/$': typeof ViewCompanyHandbookSplatRoute
@@ -1047,7 +1102,6 @@ export interface FileRoutesByTo {
   '/product/search': typeof ViewProductSearchRoute
   '/product/self-hosting': typeof ViewProductSelfHostingRoute
   '/roadmap/$slug': typeof ViewRoadmapSlugRoute
-  '/shortcuts/$slug': typeof ViewShortcutsSlugRoute
   '/solution/coaching': typeof ViewSolutionCoachingRoute
   '/solution/consulting': typeof ViewSolutionConsultingRoute
   '/solution/customer-success': typeof ViewSolutionCustomerSuccessRoute
@@ -1064,7 +1118,6 @@ export interface FileRoutesByTo {
   '/solution/recruiting': typeof ViewSolutionRecruitingRoute
   '/solution/research': typeof ViewSolutionResearchRoute
   '/solution/sales': typeof ViewSolutionSalesRoute
-  '/templates/$slug': typeof ViewTemplatesSlugRoute
   '/vs/$slug': typeof ViewVsSlugRoute
   '/api/images/$': typeof ApiImagesSplatRoute
   '/api/tweet/$id': typeof ApiTweetIdRoute
@@ -1082,13 +1135,17 @@ export interface FileRoutesByTo {
   '/legal': typeof ViewLegalIndexRoute
   '/press-kit': typeof ViewPressKitIndexRoute
   '/roadmap': typeof ViewRoadmapIndexRoute
-  '/shortcuts': typeof ViewShortcutsIndexRoute
-  '/templates': typeof ViewTemplatesIndexRoute
   '/admin/collections': typeof AdminCollectionsIndexRoute
   '/admin/crm': typeof AdminCrmIndexRoute
+  '/admin/kanban': typeof AdminKanbanIndexRoute
   '/admin/lead-finder': typeof AdminLeadFinderIndexRoute
   '/admin/media': typeof AdminMediaIndexRoute
   '/admin/stars': typeof AdminStarsIndexRoute
+  '/download/nightly/apple-intel': typeof ViewDownloadNightlyAppleIntelRoute
+  '/download/nightly/apple-silicon': typeof ViewDownloadNightlyAppleSiliconRoute
+  '/download/nightly/linux-appimage': typeof ViewDownloadNightlyLinuxAppimageRoute
+  '/download/nightly/linux-deb': typeof ViewDownloadNightlyLinuxDebRoute
+  '/download/nightly/windows': typeof ViewDownloadNightlyWindowsRoute
   '/gallery/$type/$slug': typeof ViewGalleryTypeSlugRoute
   '/integrations/$category/$slug': typeof ViewIntegrationsCategorySlugRoute
   '/api/admin/blog/upload-image': typeof ApiAdminBlogUploadImageRoute
@@ -1104,7 +1161,11 @@ export interface FileRoutesByTo {
   '/api/admin/content/rename': typeof ApiAdminContentRenameRoute
   '/api/admin/content/save': typeof ApiAdminContentSaveRoute
   '/api/admin/import/google-docs': typeof ApiAdminImportGoogleDocsRoute
-  '/api/admin/import/save': typeof ApiAdminImportSaveRoute
+  '/api/admin/kanban/create': typeof ApiAdminKanbanCreateRoute
+  '/api/admin/kanban/delete': typeof ApiAdminKanbanDeleteRoute
+  '/api/admin/kanban/items': typeof ApiAdminKanbanItemsRoute
+  '/api/admin/kanban/projects': typeof ApiAdminKanbanProjectsRoute
+  '/api/admin/kanban/update': typeof ApiAdminKanbanUpdateRoute
   '/api/admin/media/create-folder': typeof ApiAdminMediaCreateFolderRoute
   '/api/admin/media/delete': typeof ApiAdminMediaDeleteRoute
   '/api/admin/media/list': typeof ApiAdminMediaListRoute
@@ -1158,6 +1219,7 @@ export interface FileRoutesById {
   '/_view/app/integration': typeof ViewAppIntegrationRoute
   '/_view/blog/$slug': typeof ViewBlogSlugRoute
   '/_view/callback/auth': typeof ViewCallbackAuthRoute
+  '/_view/callback/integration': typeof ViewCallbackIntegrationRoute
   '/_view/callback/signout': typeof ViewCallbackSignoutRoute
   '/_view/changelog/$slug': typeof ViewChangelogSlugRoute
   '/_view/company-handbook/$': typeof ViewCompanyHandbookSplatRoute
@@ -1186,7 +1248,6 @@ export interface FileRoutesById {
   '/_view/product/search': typeof ViewProductSearchRoute
   '/_view/product/self-hosting': typeof ViewProductSelfHostingRoute
   '/_view/roadmap/$slug': typeof ViewRoadmapSlugRoute
-  '/_view/shortcuts/$slug': typeof ViewShortcutsSlugRoute
   '/_view/solution/coaching': typeof ViewSolutionCoachingRoute
   '/_view/solution/consulting': typeof ViewSolutionConsultingRoute
   '/_view/solution/customer-success': typeof ViewSolutionCustomerSuccessRoute
@@ -1203,7 +1264,6 @@ export interface FileRoutesById {
   '/_view/solution/recruiting': typeof ViewSolutionRecruitingRoute
   '/_view/solution/research': typeof ViewSolutionResearchRoute
   '/_view/solution/sales': typeof ViewSolutionSalesRoute
-  '/_view/templates/$slug': typeof ViewTemplatesSlugRoute
   '/_view/vs/$slug': typeof ViewVsSlugRoute
   '/api/images/$': typeof ApiImagesSplatRoute
   '/api/tweet/$id': typeof ApiTweetIdRoute
@@ -1221,13 +1281,17 @@ export interface FileRoutesById {
   '/_view/legal/': typeof ViewLegalIndexRoute
   '/_view/press-kit/': typeof ViewPressKitIndexRoute
   '/_view/roadmap/': typeof ViewRoadmapIndexRoute
-  '/_view/shortcuts/': typeof ViewShortcutsIndexRoute
-  '/_view/templates/': typeof ViewTemplatesIndexRoute
   '/admin/collections/': typeof AdminCollectionsIndexRoute
   '/admin/crm/': typeof AdminCrmIndexRoute
+  '/admin/kanban/': typeof AdminKanbanIndexRoute
   '/admin/lead-finder/': typeof AdminLeadFinderIndexRoute
   '/admin/media/': typeof AdminMediaIndexRoute
   '/admin/stars/': typeof AdminStarsIndexRoute
+  '/_view/download/nightly/apple-intel': typeof ViewDownloadNightlyAppleIntelRoute
+  '/_view/download/nightly/apple-silicon': typeof ViewDownloadNightlyAppleSiliconRoute
+  '/_view/download/nightly/linux-appimage': typeof ViewDownloadNightlyLinuxAppimageRoute
+  '/_view/download/nightly/linux-deb': typeof ViewDownloadNightlyLinuxDebRoute
+  '/_view/download/nightly/windows': typeof ViewDownloadNightlyWindowsRoute
   '/_view/gallery/$type/$slug': typeof ViewGalleryTypeSlugRoute
   '/_view/integrations/$category/$slug': typeof ViewIntegrationsCategorySlugRoute
   '/api/admin/blog/upload-image': typeof ApiAdminBlogUploadImageRoute
@@ -1243,7 +1307,11 @@ export interface FileRoutesById {
   '/api/admin/content/rename': typeof ApiAdminContentRenameRoute
   '/api/admin/content/save': typeof ApiAdminContentSaveRoute
   '/api/admin/import/google-docs': typeof ApiAdminImportGoogleDocsRoute
-  '/api/admin/import/save': typeof ApiAdminImportSaveRoute
+  '/api/admin/kanban/create': typeof ApiAdminKanbanCreateRoute
+  '/api/admin/kanban/delete': typeof ApiAdminKanbanDeleteRoute
+  '/api/admin/kanban/items': typeof ApiAdminKanbanItemsRoute
+  '/api/admin/kanban/projects': typeof ApiAdminKanbanProjectsRoute
+  '/api/admin/kanban/update': typeof ApiAdminKanbanUpdateRoute
   '/api/admin/media/create-folder': typeof ApiAdminMediaCreateFolderRoute
   '/api/admin/media/delete': typeof ApiAdminMediaDeleteRoute
   '/api/admin/media/list': typeof ApiAdminMediaListRoute
@@ -1297,6 +1365,7 @@ export interface FileRouteTypes {
     | '/app/integration'
     | '/blog/$slug'
     | '/callback/auth'
+    | '/callback/integration'
     | '/callback/signout'
     | '/changelog/$slug'
     | '/company-handbook/$'
@@ -1325,7 +1394,6 @@ export interface FileRouteTypes {
     | '/product/search'
     | '/product/self-hosting'
     | '/roadmap/$slug'
-    | '/shortcuts/$slug'
     | '/solution/coaching'
     | '/solution/consulting'
     | '/solution/customer-success'
@@ -1342,7 +1410,6 @@ export interface FileRouteTypes {
     | '/solution/recruiting'
     | '/solution/research'
     | '/solution/sales'
-    | '/templates/$slug'
     | '/vs/$slug'
     | '/api/images/$'
     | '/api/tweet/$id'
@@ -1360,13 +1427,17 @@ export interface FileRouteTypes {
     | '/legal/'
     | '/press-kit/'
     | '/roadmap/'
-    | '/shortcuts/'
-    | '/templates/'
     | '/admin/collections/'
     | '/admin/crm/'
+    | '/admin/kanban/'
     | '/admin/lead-finder/'
     | '/admin/media/'
     | '/admin/stars/'
+    | '/download/nightly/apple-intel'
+    | '/download/nightly/apple-silicon'
+    | '/download/nightly/linux-appimage'
+    | '/download/nightly/linux-deb'
+    | '/download/nightly/windows'
     | '/gallery/$type/$slug'
     | '/integrations/$category/$slug'
     | '/api/admin/blog/upload-image'
@@ -1382,7 +1453,11 @@ export interface FileRouteTypes {
     | '/api/admin/content/rename'
     | '/api/admin/content/save'
     | '/api/admin/import/google-docs'
-    | '/api/admin/import/save'
+    | '/api/admin/kanban/create'
+    | '/api/admin/kanban/delete'
+    | '/api/admin/kanban/items'
+    | '/api/admin/kanban/projects'
+    | '/api/admin/kanban/update'
     | '/api/admin/media/create-folder'
     | '/api/admin/media/delete'
     | '/api/admin/media/list'
@@ -1430,6 +1505,7 @@ export interface FileRouteTypes {
     | '/app/integration'
     | '/blog/$slug'
     | '/callback/auth'
+    | '/callback/integration'
     | '/callback/signout'
     | '/changelog/$slug'
     | '/company-handbook/$'
@@ -1458,7 +1534,6 @@ export interface FileRouteTypes {
     | '/product/search'
     | '/product/self-hosting'
     | '/roadmap/$slug'
-    | '/shortcuts/$slug'
     | '/solution/coaching'
     | '/solution/consulting'
     | '/solution/customer-success'
@@ -1475,7 +1550,6 @@ export interface FileRouteTypes {
     | '/solution/recruiting'
     | '/solution/research'
     | '/solution/sales'
-    | '/templates/$slug'
     | '/vs/$slug'
     | '/api/images/$'
     | '/api/tweet/$id'
@@ -1493,13 +1567,17 @@ export interface FileRouteTypes {
     | '/legal'
     | '/press-kit'
     | '/roadmap'
-    | '/shortcuts'
-    | '/templates'
     | '/admin/collections'
     | '/admin/crm'
+    | '/admin/kanban'
     | '/admin/lead-finder'
     | '/admin/media'
     | '/admin/stars'
+    | '/download/nightly/apple-intel'
+    | '/download/nightly/apple-silicon'
+    | '/download/nightly/linux-appimage'
+    | '/download/nightly/linux-deb'
+    | '/download/nightly/windows'
     | '/gallery/$type/$slug'
     | '/integrations/$category/$slug'
     | '/api/admin/blog/upload-image'
@@ -1515,7 +1593,11 @@ export interface FileRouteTypes {
     | '/api/admin/content/rename'
     | '/api/admin/content/save'
     | '/api/admin/import/google-docs'
-    | '/api/admin/import/save'
+    | '/api/admin/kanban/create'
+    | '/api/admin/kanban/delete'
+    | '/api/admin/kanban/items'
+    | '/api/admin/kanban/projects'
+    | '/api/admin/kanban/update'
     | '/api/admin/media/create-folder'
     | '/api/admin/media/delete'
     | '/api/admin/media/list'
@@ -1568,6 +1650,7 @@ export interface FileRouteTypes {
     | '/_view/app/integration'
     | '/_view/blog/$slug'
     | '/_view/callback/auth'
+    | '/_view/callback/integration'
     | '/_view/callback/signout'
     | '/_view/changelog/$slug'
     | '/_view/company-handbook/$'
@@ -1596,7 +1679,6 @@ export interface FileRouteTypes {
     | '/_view/product/search'
     | '/_view/product/self-hosting'
     | '/_view/roadmap/$slug'
-    | '/_view/shortcuts/$slug'
     | '/_view/solution/coaching'
     | '/_view/solution/consulting'
     | '/_view/solution/customer-success'
@@ -1613,7 +1695,6 @@ export interface FileRouteTypes {
     | '/_view/solution/recruiting'
     | '/_view/solution/research'
     | '/_view/solution/sales'
-    | '/_view/templates/$slug'
     | '/_view/vs/$slug'
     | '/api/images/$'
     | '/api/tweet/$id'
@@ -1631,13 +1712,17 @@ export interface FileRouteTypes {
     | '/_view/legal/'
     | '/_view/press-kit/'
     | '/_view/roadmap/'
-    | '/_view/shortcuts/'
-    | '/_view/templates/'
     | '/admin/collections/'
     | '/admin/crm/'
+    | '/admin/kanban/'
     | '/admin/lead-finder/'
     | '/admin/media/'
     | '/admin/stars/'
+    | '/_view/download/nightly/apple-intel'
+    | '/_view/download/nightly/apple-silicon'
+    | '/_view/download/nightly/linux-appimage'
+    | '/_view/download/nightly/linux-deb'
+    | '/_view/download/nightly/windows'
     | '/_view/gallery/$type/$slug'
     | '/_view/integrations/$category/$slug'
     | '/api/admin/blog/upload-image'
@@ -1653,7 +1738,11 @@ export interface FileRouteTypes {
     | '/api/admin/content/rename'
     | '/api/admin/content/save'
     | '/api/admin/import/google-docs'
-    | '/api/admin/import/save'
+    | '/api/admin/kanban/create'
+    | '/api/admin/kanban/delete'
+    | '/api/admin/kanban/items'
+    | '/api/admin/kanban/projects'
+    | '/api/admin/kanban/update'
     | '/api/admin/media/create-folder'
     | '/api/admin/media/delete'
     | '/api/admin/media/list'
@@ -1701,7 +1790,11 @@ export interface RootRouteChildren {
   ApiAdminContentRenameRoute: typeof ApiAdminContentRenameRoute
   ApiAdminContentSaveRoute: typeof ApiAdminContentSaveRoute
   ApiAdminImportGoogleDocsRoute: typeof ApiAdminImportGoogleDocsRoute
-  ApiAdminImportSaveRoute: typeof ApiAdminImportSaveRoute
+  ApiAdminKanbanCreateRoute: typeof ApiAdminKanbanCreateRoute
+  ApiAdminKanbanDeleteRoute: typeof ApiAdminKanbanDeleteRoute
+  ApiAdminKanbanItemsRoute: typeof ApiAdminKanbanItemsRoute
+  ApiAdminKanbanProjectsRoute: typeof ApiAdminKanbanProjectsRoute
+  ApiAdminKanbanUpdateRoute: typeof ApiAdminKanbanUpdateRoute
   ApiAdminMediaCreateFolderRoute: typeof ApiAdminMediaCreateFolderRoute
   ApiAdminMediaDeleteRoute: typeof ApiAdminMediaDeleteRoute
   ApiAdminMediaListRoute: typeof ApiAdminMediaListRoute
@@ -1987,6 +2080,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLeadFinderIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/kanban/': {
+      id: '/admin/kanban/'
+      path: '/kanban'
+      fullPath: '/admin/kanban/'
+      preLoaderRoute: typeof AdminKanbanIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/crm/': {
       id: '/admin/crm/'
       path: '/crm'
@@ -2000,20 +2100,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/collections/'
       preLoaderRoute: typeof AdminCollectionsIndexRouteImport
       parentRoute: typeof AdminRouteRoute
-    }
-    '/_view/templates/': {
-      id: '/_view/templates/'
-      path: '/templates'
-      fullPath: '/templates/'
-      preLoaderRoute: typeof ViewTemplatesIndexRouteImport
-      parentRoute: typeof ViewRouteRoute
-    }
-    '/_view/shortcuts/': {
-      id: '/_view/shortcuts/'
-      path: '/shortcuts'
-      fullPath: '/shortcuts/'
-      preLoaderRoute: typeof ViewShortcutsIndexRouteImport
-      parentRoute: typeof ViewRouteRoute
     }
     '/_view/roadmap/': {
       id: '/_view/roadmap/'
@@ -2134,13 +2220,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ViewVsSlugRouteImport
       parentRoute: typeof ViewRouteRoute
     }
-    '/_view/templates/$slug': {
-      id: '/_view/templates/$slug'
-      path: '/templates/$slug'
-      fullPath: '/templates/$slug'
-      preLoaderRoute: typeof ViewTemplatesSlugRouteImport
-      parentRoute: typeof ViewRouteRoute
-    }
     '/_view/solution/sales': {
       id: '/_view/solution/sales'
       path: '/solution/sales'
@@ -2251,13 +2330,6 @@ declare module '@tanstack/react-router' {
       path: '/solution/coaching'
       fullPath: '/solution/coaching'
       preLoaderRoute: typeof ViewSolutionCoachingRouteImport
-      parentRoute: typeof ViewRouteRoute
-    }
-    '/_view/shortcuts/$slug': {
-      id: '/_view/shortcuts/$slug'
-      path: '/shortcuts/$slug'
-      fullPath: '/shortcuts/$slug'
-      preLoaderRoute: typeof ViewShortcutsSlugRouteImport
       parentRoute: typeof ViewRouteRoute
     }
     '/_view/roadmap/$slug': {
@@ -2456,6 +2528,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ViewCallbackSignoutRouteImport
       parentRoute: typeof ViewRouteRoute
     }
+    '/_view/callback/integration': {
+      id: '/_view/callback/integration'
+      path: '/callback/integration'
+      fullPath: '/callback/integration'
+      preLoaderRoute: typeof ViewCallbackIntegrationRouteImport
+      parentRoute: typeof ViewRouteRoute
+    }
     '/_view/callback/auth': {
       id: '/_view/callback/auth'
       path: '/callback/auth'
@@ -2554,11 +2633,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminMediaCreateFolderRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/admin/import/save': {
-      id: '/api/admin/import/save'
-      path: '/api/admin/import/save'
-      fullPath: '/api/admin/import/save'
-      preLoaderRoute: typeof ApiAdminImportSaveRouteImport
+    '/api/admin/kanban/update': {
+      id: '/api/admin/kanban/update'
+      path: '/api/admin/kanban/update'
+      fullPath: '/api/admin/kanban/update'
+      preLoaderRoute: typeof ApiAdminKanbanUpdateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/kanban/projects': {
+      id: '/api/admin/kanban/projects'
+      path: '/api/admin/kanban/projects'
+      fullPath: '/api/admin/kanban/projects'
+      preLoaderRoute: typeof ApiAdminKanbanProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/kanban/items': {
+      id: '/api/admin/kanban/items'
+      path: '/api/admin/kanban/items'
+      fullPath: '/api/admin/kanban/items'
+      preLoaderRoute: typeof ApiAdminKanbanItemsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/kanban/delete': {
+      id: '/api/admin/kanban/delete'
+      path: '/api/admin/kanban/delete'
+      fullPath: '/api/admin/kanban/delete'
+      preLoaderRoute: typeof ApiAdminKanbanDeleteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/kanban/create': {
+      id: '/api/admin/kanban/create'
+      path: '/api/admin/kanban/create'
+      fullPath: '/api/admin/kanban/create'
+      preLoaderRoute: typeof ApiAdminKanbanCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/admin/import/google-docs': {
@@ -2666,6 +2773,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ViewGalleryTypeSlugRouteImport
       parentRoute: typeof ViewRouteRoute
     }
+    '/_view/download/nightly/windows': {
+      id: '/_view/download/nightly/windows'
+      path: '/download/nightly/windows'
+      fullPath: '/download/nightly/windows'
+      preLoaderRoute: typeof ViewDownloadNightlyWindowsRouteImport
+      parentRoute: typeof ViewRouteRoute
+    }
+    '/_view/download/nightly/linux-deb': {
+      id: '/_view/download/nightly/linux-deb'
+      path: '/download/nightly/linux-deb'
+      fullPath: '/download/nightly/linux-deb'
+      preLoaderRoute: typeof ViewDownloadNightlyLinuxDebRouteImport
+      parentRoute: typeof ViewRouteRoute
+    }
+    '/_view/download/nightly/linux-appimage': {
+      id: '/_view/download/nightly/linux-appimage'
+      path: '/download/nightly/linux-appimage'
+      fullPath: '/download/nightly/linux-appimage'
+      preLoaderRoute: typeof ViewDownloadNightlyLinuxAppimageRouteImport
+      parentRoute: typeof ViewRouteRoute
+    }
+    '/_view/download/nightly/apple-silicon': {
+      id: '/_view/download/nightly/apple-silicon'
+      path: '/download/nightly/apple-silicon'
+      fullPath: '/download/nightly/apple-silicon'
+      preLoaderRoute: typeof ViewDownloadNightlyAppleSiliconRouteImport
+      parentRoute: typeof ViewRouteRoute
+    }
+    '/_view/download/nightly/apple-intel': {
+      id: '/_view/download/nightly/apple-intel'
+      path: '/download/nightly/apple-intel'
+      fullPath: '/download/nightly/apple-intel'
+      preLoaderRoute: typeof ViewDownloadNightlyAppleIntelRouteImport
+      parentRoute: typeof ViewRouteRoute
+    }
   }
 }
 
@@ -2737,6 +2879,7 @@ interface ViewRouteRouteChildren {
   ViewIndexRoute: typeof ViewIndexRoute
   ViewBlogSlugRoute: typeof ViewBlogSlugRoute
   ViewCallbackAuthRoute: typeof ViewCallbackAuthRoute
+  ViewCallbackIntegrationRoute: typeof ViewCallbackIntegrationRoute
   ViewCallbackSignoutRoute: typeof ViewCallbackSignoutRoute
   ViewChangelogSlugRoute: typeof ViewChangelogSlugRoute
   ViewDownloadAppleIntelRoute: typeof ViewDownloadAppleIntelRoute
@@ -2763,7 +2906,6 @@ interface ViewRouteRouteChildren {
   ViewProductSearchRoute: typeof ViewProductSearchRoute
   ViewProductSelfHostingRoute: typeof ViewProductSelfHostingRoute
   ViewRoadmapSlugRoute: typeof ViewRoadmapSlugRoute
-  ViewShortcutsSlugRoute: typeof ViewShortcutsSlugRoute
   ViewSolutionCoachingRoute: typeof ViewSolutionCoachingRoute
   ViewSolutionConsultingRoute: typeof ViewSolutionConsultingRoute
   ViewSolutionCustomerSuccessRoute: typeof ViewSolutionCustomerSuccessRoute
@@ -2780,7 +2922,6 @@ interface ViewRouteRouteChildren {
   ViewSolutionRecruitingRoute: typeof ViewSolutionRecruitingRoute
   ViewSolutionResearchRoute: typeof ViewSolutionResearchRoute
   ViewSolutionSalesRoute: typeof ViewSolutionSalesRoute
-  ViewTemplatesSlugRoute: typeof ViewTemplatesSlugRoute
   ViewVsSlugRoute: typeof ViewVsSlugRoute
   ViewBlogIndexRoute: typeof ViewBlogIndexRoute
   ViewChangelogIndexRoute: typeof ViewChangelogIndexRoute
@@ -2792,8 +2933,11 @@ interface ViewRouteRouteChildren {
   ViewLegalIndexRoute: typeof ViewLegalIndexRoute
   ViewPressKitIndexRoute: typeof ViewPressKitIndexRoute
   ViewRoadmapIndexRoute: typeof ViewRoadmapIndexRoute
-  ViewShortcutsIndexRoute: typeof ViewShortcutsIndexRoute
-  ViewTemplatesIndexRoute: typeof ViewTemplatesIndexRoute
+  ViewDownloadNightlyAppleIntelRoute: typeof ViewDownloadNightlyAppleIntelRoute
+  ViewDownloadNightlyAppleSiliconRoute: typeof ViewDownloadNightlyAppleSiliconRoute
+  ViewDownloadNightlyLinuxAppimageRoute: typeof ViewDownloadNightlyLinuxAppimageRoute
+  ViewDownloadNightlyLinuxDebRoute: typeof ViewDownloadNightlyLinuxDebRoute
+  ViewDownloadNightlyWindowsRoute: typeof ViewDownloadNightlyWindowsRoute
   ViewGalleryTypeSlugRoute: typeof ViewGalleryTypeSlugRoute
   ViewIntegrationsCategorySlugRoute: typeof ViewIntegrationsCategorySlugRoute
 }
@@ -2816,6 +2960,7 @@ const ViewRouteRouteChildren: ViewRouteRouteChildren = {
   ViewIndexRoute: ViewIndexRoute,
   ViewBlogSlugRoute: ViewBlogSlugRoute,
   ViewCallbackAuthRoute: ViewCallbackAuthRoute,
+  ViewCallbackIntegrationRoute: ViewCallbackIntegrationRoute,
   ViewCallbackSignoutRoute: ViewCallbackSignoutRoute,
   ViewChangelogSlugRoute: ViewChangelogSlugRoute,
   ViewDownloadAppleIntelRoute: ViewDownloadAppleIntelRoute,
@@ -2842,7 +2987,6 @@ const ViewRouteRouteChildren: ViewRouteRouteChildren = {
   ViewProductSearchRoute: ViewProductSearchRoute,
   ViewProductSelfHostingRoute: ViewProductSelfHostingRoute,
   ViewRoadmapSlugRoute: ViewRoadmapSlugRoute,
-  ViewShortcutsSlugRoute: ViewShortcutsSlugRoute,
   ViewSolutionCoachingRoute: ViewSolutionCoachingRoute,
   ViewSolutionConsultingRoute: ViewSolutionConsultingRoute,
   ViewSolutionCustomerSuccessRoute: ViewSolutionCustomerSuccessRoute,
@@ -2859,7 +3003,6 @@ const ViewRouteRouteChildren: ViewRouteRouteChildren = {
   ViewSolutionRecruitingRoute: ViewSolutionRecruitingRoute,
   ViewSolutionResearchRoute: ViewSolutionResearchRoute,
   ViewSolutionSalesRoute: ViewSolutionSalesRoute,
-  ViewTemplatesSlugRoute: ViewTemplatesSlugRoute,
   ViewVsSlugRoute: ViewVsSlugRoute,
   ViewBlogIndexRoute: ViewBlogIndexRoute,
   ViewChangelogIndexRoute: ViewChangelogIndexRoute,
@@ -2871,8 +3014,11 @@ const ViewRouteRouteChildren: ViewRouteRouteChildren = {
   ViewLegalIndexRoute: ViewLegalIndexRoute,
   ViewPressKitIndexRoute: ViewPressKitIndexRoute,
   ViewRoadmapIndexRoute: ViewRoadmapIndexRoute,
-  ViewShortcutsIndexRoute: ViewShortcutsIndexRoute,
-  ViewTemplatesIndexRoute: ViewTemplatesIndexRoute,
+  ViewDownloadNightlyAppleIntelRoute: ViewDownloadNightlyAppleIntelRoute,
+  ViewDownloadNightlyAppleSiliconRoute: ViewDownloadNightlyAppleSiliconRoute,
+  ViewDownloadNightlyLinuxAppimageRoute: ViewDownloadNightlyLinuxAppimageRoute,
+  ViewDownloadNightlyLinuxDebRoute: ViewDownloadNightlyLinuxDebRoute,
+  ViewDownloadNightlyWindowsRoute: ViewDownloadNightlyWindowsRoute,
   ViewGalleryTypeSlugRoute: ViewGalleryTypeSlugRoute,
   ViewIntegrationsCategorySlugRoute: ViewIntegrationsCategorySlugRoute,
 }
@@ -2885,6 +3031,7 @@ interface AdminRouteRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   AdminCollectionsIndexRoute: typeof AdminCollectionsIndexRoute
   AdminCrmIndexRoute: typeof AdminCrmIndexRoute
+  AdminKanbanIndexRoute: typeof AdminKanbanIndexRoute
   AdminLeadFinderIndexRoute: typeof AdminLeadFinderIndexRoute
   AdminMediaIndexRoute: typeof AdminMediaIndexRoute
   AdminStarsIndexRoute: typeof AdminStarsIndexRoute
@@ -2894,6 +3041,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   AdminCollectionsIndexRoute: AdminCollectionsIndexRoute,
   AdminCrmIndexRoute: AdminCrmIndexRoute,
+  AdminKanbanIndexRoute: AdminKanbanIndexRoute,
   AdminLeadFinderIndexRoute: AdminLeadFinderIndexRoute,
   AdminMediaIndexRoute: AdminMediaIndexRoute,
   AdminStarsIndexRoute: AdminStarsIndexRoute,
@@ -2940,7 +3088,11 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminContentRenameRoute: ApiAdminContentRenameRoute,
   ApiAdminContentSaveRoute: ApiAdminContentSaveRoute,
   ApiAdminImportGoogleDocsRoute: ApiAdminImportGoogleDocsRoute,
-  ApiAdminImportSaveRoute: ApiAdminImportSaveRoute,
+  ApiAdminKanbanCreateRoute: ApiAdminKanbanCreateRoute,
+  ApiAdminKanbanDeleteRoute: ApiAdminKanbanDeleteRoute,
+  ApiAdminKanbanItemsRoute: ApiAdminKanbanItemsRoute,
+  ApiAdminKanbanProjectsRoute: ApiAdminKanbanProjectsRoute,
+  ApiAdminKanbanUpdateRoute: ApiAdminKanbanUpdateRoute,
   ApiAdminMediaCreateFolderRoute: ApiAdminMediaCreateFolderRoute,
   ApiAdminMediaDeleteRoute: ApiAdminMediaDeleteRoute,
   ApiAdminMediaListRoute: ApiAdminMediaListRoute,

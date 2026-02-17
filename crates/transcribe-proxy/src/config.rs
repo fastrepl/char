@@ -36,7 +36,7 @@ pub struct SttProxyConfig {
 }
 
 impl SttProxyConfig {
-    pub fn new(env: &Env) -> Self {
+    pub fn new(env: &Env, supabase: &hypr_api_env::SupabaseEnv) -> Self {
         Self {
             api_keys: ApiKeys::from(&env.stt).0,
             default_provider: Provider::Deepgram,
@@ -45,11 +45,11 @@ impl SttProxyConfig {
             upstream_urls: HashMap::new(),
             hyprnote_routing: None,
             supabase: SupabaseConfig {
-                url: env.supabase.supabase_url.clone(),
-                service_role_key: env.supabase.supabase_service_role_key.clone(),
+                url: Some(supabase.supabase_url.clone()),
+                service_role_key: Some(supabase.supabase_service_role_key.clone()),
             },
             callback: CallbackConfig {
-                api_base_url: env.callback.api_base_url.clone(),
+                api_base_url: Some(env.callback.api_base_url.clone()),
                 secret: env.callback.callback_secret.clone(),
             },
         }

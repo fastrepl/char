@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Facehash } from "facehash";
 import {
   CalendarIcon,
   ChevronUpIcon,
@@ -10,7 +11,7 @@ import {
   UsersIcon,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useResizeObserver } from "usehooks-ts";
 
 import { Kbd } from "@hypr/ui/components/ui/kbd";
@@ -287,6 +288,7 @@ function ProfileButton({
 }) {
   const auth = useAuth();
   const name = useMyName(auth?.session?.user.email);
+  const [imgError, setImgError] = useState(false);
 
   const profile = useQuery({
     queryKey: ["profile"],
@@ -295,6 +297,17 @@ function ProfileButton({
       return avatarUrl;
     },
   });
+
+  const facehashName = useMemo(
+    () => auth?.session?.user.email || name || "user",
+    [auth?.session?.user.email, name],
+  );
+
+  useEffect(() => {
+    setImgError(false);
+  }, [profile.data]);
+
+  const showFacehash = !profile.data || imgError;
 
   return (
     <button
@@ -312,17 +325,25 @@ function ProfileButton({
         className={cn([
           "flex size-8 shrink-0 items-center justify-center",
           "overflow-hidden rounded-full",
-          "border border-t border-neutral-400",
-          "bg-linear-to-br from-indigo-400 to-purple-500",
           "shadow-xs",
           "transition-transform duration-300",
         ])}
       >
-        {profile.data && (
+        {showFacehash ? (
+          <div className="bg-amber-50 rounded-full">
+            <Facehash
+              name={facehashName}
+              size={32}
+              interactive={false}
+              showInitial={false}
+            />
+          </div>
+        ) : (
           <img
-            src={profile.data}
+            src={profile.data!}
             alt="Profile"
             className="h-full w-full rounded-full"
+            onError={() => setImgError(true)}
           />
         )}
       </div>

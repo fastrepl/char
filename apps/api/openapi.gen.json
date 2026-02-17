@@ -15,16 +15,6 @@
           "calendar"
         ],
         "operationId": "list_calendars",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ListCalendarsRequest"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Calendars fetched",
@@ -195,6 +185,37 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ConnectSessionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/nango/connections": {
+      "get": {
+        "tags": [
+          "nango"
+        ],
+        "operationId": "list_connections",
+        "responses": {
+          "200": {
+            "description": "List of active connections",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListConnectionsResponse"
                 }
               }
             }
@@ -531,6 +552,197 @@
           }
         ]
       }
+    },
+    "/support/chatwoot/contact": {
+      "post": {
+        "tags": [
+          "chatwoot"
+        ],
+        "operationId": "create_contact",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContactRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Contact created or found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateContactResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Chatwoot API error"
+          }
+        }
+      }
+    },
+    "/support/chatwoot/conversations": {
+      "get": {
+        "tags": [
+          "chatwoot"
+        ],
+        "operationId": "list_conversations",
+        "parameters": [
+          {
+            "name": "source_id",
+            "in": "query",
+            "description": "Contact source ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of conversations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConversationSummary"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Chatwoot API error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "chatwoot"
+        ],
+        "operationId": "create_conversation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConversationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Conversation created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateConversationResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Chatwoot API error"
+          }
+        }
+      }
+    },
+    "/support/chatwoot/conversations/{conversation_id}/messages": {
+      "get": {
+        "tags": [
+          "chatwoot"
+        ],
+        "operationId": "get_messages",
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "description": "Conversation ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "source_id",
+            "in": "query",
+            "description": "Contact source ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of messages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MessageResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Chatwoot API error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "chatwoot"
+        ],
+        "operationId": "send_message",
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "description": "Conversation ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Message sent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Chatwoot API error"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -684,10 +896,111 @@
           }
         }
       },
+      "ConnectionItem": {
+        "type": "object",
+        "required": [
+          "integration_id",
+          "connection_id"
+        ],
+        "properties": {
+          "connection_id": {
+            "type": "string"
+          },
+          "integration_id": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "ConversationSummary": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inboxId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "CreateContactRequest": {
+        "type": "object",
+        "required": [
+          "identifier"
+        ],
+        "properties": {
+          "customAttributes": {},
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "identifier": {
+            "type": "string"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "CreateContactResponse": {
+        "type": "object",
+        "required": [
+          "sourceId",
+          "pubsubToken"
+        ],
+        "properties": {
+          "pubsubToken": {
+            "type": "string"
+          },
+          "sourceId": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateConversationRequest": {
+        "type": "object",
+        "required": [
+          "sourceId"
+        ],
+        "properties": {
+          "customAttributes": {},
+          "sourceId": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateConversationResponse": {
+        "type": "object",
+        "required": [
+          "conversationId"
+        ],
+        "properties": {
+          "conversationId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "CreateEventRequest": {
         "type": "object",
         "required": [
-          "connection_id",
           "calendar_id",
           "summary",
           "start",
@@ -704,9 +1017,6 @@
             }
           },
           "calendar_id": {
-            "type": "string"
-          },
-          "connection_id": {
             "type": "string"
           },
           "description": {
@@ -883,17 +1193,6 @@
           "yearly"
         ]
       },
-      "ListCalendarsRequest": {
-        "type": "object",
-        "required": [
-          "connection_id"
-        ],
-        "properties": {
-          "connection_id": {
-            "type": "string"
-          }
-        }
-      },
       "ListCalendarsResponse": {
         "type": "object",
         "required": [
@@ -906,17 +1205,38 @@
           }
         }
       },
+      "ListConnectionsResponse": {
+        "type": "object",
+        "required": [
+          "connections"
+        ],
+        "properties": {
+          "connections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConnectionItem"
+            }
+          }
+        }
+      },
+      "ListConversationsQuery": {
+        "type": "object",
+        "required": [
+          "sourceId"
+        ],
+        "properties": {
+          "sourceId": {
+            "type": "string"
+          }
+        }
+      },
       "ListEventsRequest": {
         "type": "object",
         "required": [
-          "connection_id",
           "calendar_id"
         ],
         "properties": {
           "calendar_id": {
-            "type": "string"
-          },
-          "connection_id": {
             "type": "string"
           },
           "max_results": {
@@ -999,6 +1319,35 @@
           }
         }
       },
+      "MessageResponse": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "content": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "messageType": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
       "PipelineStatus": {
         "type": "string",
         "enum": [
@@ -1006,6 +1355,26 @@
           "done",
           "error"
         ]
+      },
+      "SendMessageRequest": {
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "messageType": {
+            "type": "string"
+          },
+          "sourceId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
       },
       "StartTrialReason": {
         "type": "string",
@@ -1431,6 +1800,10 @@
     {
       "name": "support",
       "description": "User feedback and support"
+    },
+    {
+      "name": "chatwoot",
+      "description": "Chatwoot conversation persistence"
     }
   ]
 }

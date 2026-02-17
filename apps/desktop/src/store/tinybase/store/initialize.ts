@@ -43,7 +43,7 @@ function initializeStore(store: Store): void {
       store.setRow("sessions", sessionId, {
         user_id: DEFAULT_USER_ID,
         created_at: now,
-        title: "Welcome to Hyprnote",
+        title: "Welcome to Char",
         raw_md: "",
       });
     }

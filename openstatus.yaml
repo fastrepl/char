@@ -8,7 +8,7 @@
       target: 200
   frequency: 1m
   kind: http
-  name: Hyprnote Web
+  name: Char Web
   openTelemetry: {}
   regions:
     - railway_europe-west4-drams3a
@@ -19,7 +19,7 @@
     - koyeb_was
   request:
     method: GET
-    url: https://hyprnote.com
+    url: https://char.com
   retry: 3
 "8351":
   active: true
@@ -29,7 +29,7 @@
       target: 200
   frequency: 1m
   kind: http
-  name: Hyprnote API
+  name: Char API
   openTelemetry: {}
   regions:
     - cdg
@@ -50,7 +50,7 @@
       target: 200
   frequency: 1m
   kind: http
-  name: Hyprnote Web
+  name: Char Web
   openTelemetry: {}
   regions:
     - railway_europe-west4-drams3a
@@ -61,7 +61,7 @@
     - koyeb_was
   request:
     method: GET
-    url: https://hyprnote.com
+    url: https://char.com
   retry: 3
 "8355":
   active: true
@@ -71,7 +71,7 @@
       target: 200
   frequency: 1m
   kind: http
-  name: Hyprnote API
+  name: Char API
   openTelemetry: {}
   regions:
     - cdg

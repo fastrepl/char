@@ -9,13 +9,11 @@ import {
 } from "@hypr/supabase/storage";
 
 import { env } from "@/env";
+import { getAccessToken } from "@/functions/access-token";
 import { getSupabaseBrowserClient } from "@/functions/supabase";
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
-  const supabase = getSupabaseBrowserClient();
-  const { data } = await supabase.auth.getSession();
-  const token = data?.session?.access_token;
-  if (!token) throw new Error("Not authenticated");
+  const token = await getAccessToken();
   return {
     authorization: `Bearer ${token}`,
     "x-upsert": "true",

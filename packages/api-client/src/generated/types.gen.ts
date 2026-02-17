@@ -46,10 +46,41 @@ export type ConnectSessionResponse = {
     token: string;
 };
 
+export type ConnectionItem = {
+    connection_id: string;
+    integration_id: string;
+    updated_at?: string | null;
+};
+
+export type ConversationSummary = {
+    id: number;
+    inboxId?: string | null;
+};
+
+export type CreateContactRequest = {
+    customAttributes?: unknown;
+    email?: string | null;
+    identifier: string;
+    name?: string | null;
+};
+
+export type CreateContactResponse = {
+    pubsubToken: string;
+    sourceId: string;
+};
+
+export type CreateConversationRequest = {
+    customAttributes?: unknown;
+    sourceId: string;
+};
+
+export type CreateConversationResponse = {
+    conversationId: number;
+};
+
 export type CreateEventRequest = {
     attendees?: Array<EventAttendee> | null;
     calendar_id: string;
-    connection_id: string;
     description?: string | null;
     end: EventDateTime;
     location?: string | null;
@@ -99,17 +130,20 @@ export type FeedbackType = 'bug' | 'feature';
 
 export type Interval = 'monthly' | 'yearly';
 
-export type ListCalendarsRequest = {
-    connection_id: string;
-};
-
 export type ListCalendarsResponse = {
     calendars: Array<unknown>;
 };
 
+export type ListConnectionsResponse = {
+    connections: Array<ConnectionItem>;
+};
+
+export type ListConversationsQuery = {
+    sourceId: string;
+};
+
 export type ListEventsRequest = {
     calendar_id: string;
-    connection_id: string;
     max_results?: number | null;
     order_by?: string | null;
     page_token?: string | null;
@@ -131,7 +165,20 @@ export type ListenCallbackResponse = {
     request_id: string;
 };
 
+export type MessageResponse = {
+    content?: string | null;
+    createdAt?: string | null;
+    id: string;
+    messageType?: string | null;
+};
+
 export type PipelineStatus = 'processing' | 'done' | 'error';
+
+export type SendMessageRequest = {
+    content: string;
+    messageType?: string;
+    sourceId?: string | null;
+};
 
 export type StartTrialReason = 'started' | 'not_eligible' | 'error';
 
@@ -221,7 +268,7 @@ export type WebhookResponse = {
 };
 
 export type ListCalendarsData = {
-    body: ListCalendarsRequest;
+    body?: never;
     path?: never;
     query?: never;
     url: '/calendar/calendars';
@@ -356,6 +403,33 @@ export type CreateConnectSessionResponses = {
 };
 
 export type CreateConnectSessionResponse = CreateConnectSessionResponses[keyof CreateConnectSessionResponses];
+
+export type ListConnectionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/nango/connections';
+};
+
+export type ListConnectionsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Internal server error
+     */
+    500: unknown;
+};
+
+export type ListConnectionsResponses = {
+    /**
+     * List of active connections
+     */
+    200: ListConnectionsResponse;
+};
+
+export type ListConnectionsResponse2 = ListConnectionsResponses[keyof ListConnectionsResponses];
 
 export type NangoWebhookData = {
     body?: never;
@@ -575,3 +649,138 @@ export type StartTrialResponses = {
 };
 
 export type StartTrialResponse2 = StartTrialResponses[keyof StartTrialResponses];
+
+export type CreateContactData = {
+    body: CreateContactRequest;
+    path?: never;
+    query?: never;
+    url: '/support/chatwoot/contact';
+};
+
+export type CreateContactErrors = {
+    /**
+     * Chatwoot API error
+     */
+    500: unknown;
+};
+
+export type CreateContactResponses = {
+    /**
+     * Contact created or found
+     */
+    200: CreateContactResponse;
+};
+
+export type CreateContactResponse2 = CreateContactResponses[keyof CreateContactResponses];
+
+export type ListConversationsData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Contact source ID
+         */
+        source_id: string;
+    };
+    url: '/support/chatwoot/conversations';
+};
+
+export type ListConversationsErrors = {
+    /**
+     * Chatwoot API error
+     */
+    500: unknown;
+};
+
+export type ListConversationsResponses = {
+    /**
+     * List of conversations
+     */
+    200: Array<ConversationSummary>;
+};
+
+export type ListConversationsResponse = ListConversationsResponses[keyof ListConversationsResponses];
+
+export type CreateConversationData = {
+    body: CreateConversationRequest;
+    path?: never;
+    query?: never;
+    url: '/support/chatwoot/conversations';
+};
+
+export type CreateConversationErrors = {
+    /**
+     * Chatwoot API error
+     */
+    500: unknown;
+};
+
+export type CreateConversationResponses = {
+    /**
+     * Conversation created
+     */
+    200: CreateConversationResponse;
+};
+
+export type CreateConversationResponse2 = CreateConversationResponses[keyof CreateConversationResponses];
+
+export type GetMessagesData = {
+    body?: never;
+    path: {
+        /**
+         * Conversation ID
+         */
+        conversation_id: number;
+    };
+    query: {
+        /**
+         * Contact source ID
+         */
+        source_id: string;
+    };
+    url: '/support/chatwoot/conversations/{conversation_id}/messages';
+};
+
+export type GetMessagesErrors = {
+    /**
+     * Chatwoot API error
+     */
+    500: unknown;
+};
+
+export type GetMessagesResponses = {
+    /**
+     * List of messages
+     */
+    200: Array<MessageResponse>;
+};
+
+export type GetMessagesResponse = GetMessagesResponses[keyof GetMessagesResponses];
+
+export type SendMessageData = {
+    body: SendMessageRequest;
+    path: {
+        /**
+         * Conversation ID
+         */
+        conversation_id: number;
+    };
+    query?: never;
+    url: '/support/chatwoot/conversations/{conversation_id}/messages';
+};
+
+export type SendMessageErrors = {
+    /**
+     * Chatwoot API error
+     */
+    500: unknown;
+};
+
+export type SendMessageResponses = {
+    /**
+     * Message sent
+     */
+    200: MessageResponse;
+};
+
+export type SendMessageResponse = SendMessageResponses[keyof SendMessageResponses];

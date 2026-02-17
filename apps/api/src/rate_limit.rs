@@ -61,6 +61,10 @@ pub async fn rate_limit(
     request: Request,
     next: Next,
 ) -> Result<Response, Response> {
+    if cfg!(debug_assertions) {
+        return Ok(next.run(request).await);
+    }
+
     if let Some(auth) = request.extensions().get::<AuthContext>() {
         let limiter = if auth.claims.is_pro() {
             &state.limiter_pro

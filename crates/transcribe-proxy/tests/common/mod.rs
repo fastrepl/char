@@ -21,6 +21,14 @@ use transcribe_proxy::{
     HyprnoteRoutingConfig, SttAnalyticsReporter, SttEvent, SttProxyConfig, router,
 };
 
+fn test_supabase_env() -> hypr_api_env::SupabaseEnv {
+    hypr_api_env::SupabaseEnv {
+        supabase_url: String::new(),
+        supabase_anon_key: String::new(),
+        supabase_service_role_key: String::new(),
+    }
+}
+
 #[derive(Default, Clone)]
 pub struct MockAnalytics {
     pub events: Arc<Mutex<Vec<SttEvent>>>,
@@ -53,7 +61,7 @@ pub async fn start_server(config: SttProxyConfig) -> SocketAddr {
 
 pub async fn start_server_with_provider(provider: Provider, api_key: String) -> SocketAddr {
     let env = env_with_provider(provider, api_key);
-    let config = SttProxyConfig::new(&env)
+    let config = SttProxyConfig::new(&env, &test_supabase_env())
         .with_default_provider(provider)
         .with_hyprnote_routing(HyprnoteRoutingConfig::default());
     start_server(config).await
@@ -61,7 +69,7 @@ pub async fn start_server_with_provider(provider: Provider, api_key: String) -> 
 
 pub async fn start_server_with_upstream_url(provider: Provider, upstream_url: &str) -> SocketAddr {
     let env = env_with_provider(provider, "mock-api-key".to_string());
-    let config = SttProxyConfig::new(&env)
+    let config = SttProxyConfig::new(&env, &test_supabase_env())
         .with_default_provider(provider)
         .with_upstream_url(provider, upstream_url);
     start_server(config).await

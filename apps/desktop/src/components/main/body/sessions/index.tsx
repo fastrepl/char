@@ -254,6 +254,7 @@ function TabContentNoteInner({
       <StatusBanner
         skipReason={skipReason}
         showConsentBanner={showConsentBanner}
+        showTimeline={showTimeline}
       />
     </>
   );
@@ -262,9 +263,11 @@ function TabContentNoteInner({
 function StatusBanner({
   skipReason,
   showConsentBanner,
+  showTimeline,
 }: {
   skipReason: string | null;
   showConsentBanner: boolean;
+  showTimeline: boolean;
 }) {
   const { leftsidebar, chat } = useShell();
   const [chatPanelWidth, setChatPanelWidth] = useState(0);
@@ -319,9 +322,10 @@ function StatusBanner({
           transition={{ duration: 0.3, ease: "easeOut" }}
           style={{ left: `calc(50% + ${totalOffset}px)` }}
           className={cn([
-            "fixed -translate-x-1/2 bottom-6 z-50",
+            "fixed -translate-x-1/2 z-50",
             "whitespace-nowrap text-center text-xs",
             skipReason ? "text-red-400" : "text-stone-300",
+            showTimeline ? "bottom-[76px]" : "bottom-6",
           ])}
         >
           {skipReason || "Ask for consent when using Hyprnote"}

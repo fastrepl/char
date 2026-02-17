@@ -1,19 +1,14 @@
-import chroma from "chroma-js";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 
+import type { Segment } from "@hypr/transcript";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@hypr/ui/components/ui/dropdown-menu";
-import { cn } from "@hypr/utils";
+  getTimestampRange,
+  SegmentHeader as SharedSegmentHeader,
+  useSegmentColor,
+} from "@hypr/transcript/ui";
 
 import * as main from "../../../../../../../store/tinybase/store/main";
-import { type Segment, SegmentKey } from "../../../../../../../utils/segment";
+import { SegmentKey } from "../../../../../../../utils/segment";
 import {
   defaultRenderLabelContext,
   SpeakerLabelManager,
@@ -31,120 +26,20 @@ export function SegmentHeader({
   sessionId?: string;
   speakerLabelManager?: SpeakerLabelManager;
 }) {
-  const formatTimestamp = useCallback((ms: number): string => {
-    const totalSeconds = Math.floor(ms / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    if (hours > 0) {
-      return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-    }
-
-    return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-  }, []);
-
-  const timestamp = useMemo(() => {
-    if (segment.words.length === 0) {
-      return "00:00 - 00:00";
-    }
-
-    const firstWord = segment.words[0];
-    const lastWord = segment.words[segment.words.length - 1];
-
-    const [from, to] = [firstWord.start_ms, lastWord.end_ms].map(
-      formatTimestamp,
-    );
-    return `${from} - ${to}`;
-  }, [segment.words, formatTimestamp]);
-
   const color = useSegmentColor(segment.key);
   const label = useSpeakerLabel(segment.key, speakerLabelManager);
   const participants = useSessionParticipants(sessionId);
-
-  const mode =
-    operations && Object.keys(operations).length > 0 ? "editor" : "viewer";
-  const wordIds = segment.words.filter((w) => w.id).map((w) => w.id!);
-  const headerClassName = cn([
-    "sticky top-0 z-20 bg-background",
-    "-mx-3 px-3 py-1",
-    "border-b border-neutral-200",
-    "text-xs font-light",
-    "flex items-center justify-between",
-  ]);
-
-  const handleAssignSpeaker = useCallback(
-    (humanId: string) => {
-      if (wordIds.length > 0 && operations?.onAssignSpeaker) {
-        operations.onAssignSpeaker(wordIds, humanId);
-      }
-    },
-    [wordIds, operations],
-  );
-
-  if (mode === "editor" && wordIds.length > 0) {
-    return (
-      <p className={headerClassName}>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <span
-              style={{ color }}
-              className="cursor-pointer rounded-xs hover:bg-neutral-100"
-            >
-              {label}
-            </span>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>Assign Speaker</DropdownMenuSubTrigger>
-              <DropdownMenuSubContent>
-                {participants.map((participant) => (
-                  <DropdownMenuItem
-                    key={participant.humanId}
-                    onClick={() => handleAssignSpeaker(participant.humanId)}
-                  >
-                    {participant.name || participant.humanId}
-                  </DropdownMenuItem>
-                ))}
-                {participants.length === 0 && (
-                  <DropdownMenuItem disabled>
-                    No participants available
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <span className="font-mono text-neutral-500">{timestamp}</span>
-      </p>
-    );
-  }
+  const timestamp = getTimestampRange(segment);
 
   return (
-    <p className={headerClassName}>
-      <span style={{ color }}>{label}</span>
-      <span className="font-mono text-neutral-500">{timestamp}</span>
-    </p>
+    <SharedSegmentHeader
+      segment={segment}
+      speakerInfo={{ label, color }}
+      timestamp={timestamp}
+      operations={operations}
+      participants={participants}
+    />
   );
-}
-
-function useSegmentColor(key: Segment["key"]) {
-  return useMemo(() => {
-    const speakerIndex = key.speaker_index ?? 0;
-
-    const channelPalettes = [
-      [10, 25, 0, 340, 15, 350],
-      [285, 305, 270, 295, 315, 280],
-    ];
-
-    const hues = channelPalettes[key.channel % 2];
-    const hue = hues[speakerIndex % hues.length];
-
-    const light = 0.55;
-    const chromaVal = 0.15;
-
-    return chroma.oklch(light, chromaVal, hue).hex();
-  }, [key]);
 }
 
 function useSpeakerLabel(key: Segment["key"], manager?: SpeakerLabelManager) {

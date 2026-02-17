@@ -1,10 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { generateJSON } from "@tiptap/html";
+import { Markdown } from "@tiptap/markdown";
+import type { JSONContent } from "@tiptap/react";
+
+import * as shared from "@hypr/tiptap/shared";
 
 import { fetchAdminUser } from "@/functions/admin";
 import { getSupabaseServerClient } from "@/functions/supabase";
 import { uploadMediaFile } from "@/functions/supabase-media";
 
-import { extractBase64Images, getExtensionFromMimeType } from "../content/save";
+import { getExtensionFromMimeType } from "../content/save";
 
 interface ImportRequest {
   url: string;
@@ -17,7 +22,7 @@ interface ImportRequest {
 
 interface ImportResponse {
   success: boolean;
-  mdx?: string;
+  json?: JSONContent;
   frontmatter?: Record<string, string | boolean>;
   error?: string;
 }
@@ -64,138 +69,65 @@ function parseGoogleDocsUrl(url: string): ParsedGoogleDocsUrl | null {
   return { docId, tabParam };
 }
 
-function htmlToMarkdown(html: string): string {
-  let markdown = html;
+interface Base64ImageNode {
+  node: JSONContent;
+  mimeType: string;
+  base64Data: string;
+}
 
-  markdown = markdown.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "");
-  markdown = markdown.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "");
+function extractBase64ImageNodes(json: JSONContent): Base64ImageNode[] {
+  const results: Base64ImageNode[] = [];
 
-  markdown = markdown.replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, "\n# $1\n");
-  markdown = markdown.replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, "\n## $1\n");
-  markdown = markdown.replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, "\n### $1\n");
-  markdown = markdown.replace(/<h4[^>]*>([\s\S]*?)<\/h4>/gi, "\n#### $1\n");
-  markdown = markdown.replace(/<h5[^>]*>([\s\S]*?)<\/h5>/gi, "\n##### $1\n");
-  markdown = markdown.replace(/<h6[^>]*>([\s\S]*?)<\/h6>/gi, "\n###### $1\n");
-
-  markdown = markdown.replace(/<strong[^>]*>([\s\S]*?)<\/strong>/gi, "**$1**");
-  markdown = markdown.replace(/<b[^>]*>([\s\S]*?)<\/b>/gi, "**$1**");
-  markdown = markdown.replace(/<em[^>]*>([\s\S]*?)<\/em>/gi, "*$1*");
-  markdown = markdown.replace(/<i[^>]*>([\s\S]*?)<\/i>/gi, "*$1*");
-  markdown = markdown.replace(/<u[^>]*>([\s\S]*?)<\/u>/gi, "_$1_");
-  markdown = markdown.replace(/<s[^>]*>([\s\S]*?)<\/s>/gi, "~~$1~~");
-  markdown = markdown.replace(/<strike[^>]*>([\s\S]*?)<\/strike>/gi, "~~$1~~");
-  markdown = markdown.replace(/<del[^>]*>([\s\S]*?)<\/del>/gi, "~~$1~~");
-
-  markdown = markdown.replace(/<code[^>]*>([\s\S]*?)<\/code>/gi, "`$1`");
-  markdown = markdown.replace(
-    /<pre[^>]*>([\s\S]*?)<\/pre>/gi,
-    "\n```\n$1\n```\n",
-  );
-
-  markdown = markdown.replace(
-    /<a[^>]*href=["']([^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi,
-    "[$2]($1)",
-  );
-
-  markdown = markdown.replace(
-    /<img[^>]*src=["']([^"']*)["'][^>]*alt=["']([^"']*)["'][^>]*\/?>/gi,
-    "![$2]($1)",
-  );
-  markdown = markdown.replace(
-    /<img[^>]*alt=["']([^"']*)["'][^>]*src=["']([^"']*)["'][^>]*\/?>/gi,
-    "![$1]($2)",
-  );
-  markdown = markdown.replace(
-    /<img[^>]*src=["']([^"']*)["'][^>]*\/?>/gi,
-    "![]($1)",
-  );
-
-  markdown = markdown.replace(/<ul[^>]*>/gi, "\n");
-  markdown = markdown.replace(/<\/ul>/gi, "\n");
-  markdown = markdown.replace(/<ol[^>]*>/gi, "\n");
-  markdown = markdown.replace(/<\/ol>/gi, "\n");
-  markdown = markdown.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, "- $1\n");
-
-  markdown = markdown.replace(
-    /<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi,
-    (_, content) => {
-      return content
-        .split("\n")
-        .map((line: string) => `> ${line}`)
-        .join("\n");
-    },
-  );
-
-  markdown = markdown.replace(/<hr[^>]*\/?>/gi, "\n---\n");
-
-  markdown = markdown.replace(/<br[^>]*\/?>/gi, "\n");
-  markdown = markdown.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, "\n$1\n");
-  markdown = markdown.replace(/<div[^>]*>([\s\S]*?)<\/div>/gi, "\n$1\n");
-
-  markdown = markdown.replace(/<span[^>]*>([\s\S]*?)<\/span>/gi, "$1");
-
-  markdown = markdown.replace(
-    /<table[^>]*>([\s\S]*?)<\/table>/gi,
-    (_, tableContent) => {
-      const rows: string[][] = [];
-      const rowMatches = tableContent.match(/<tr[^>]*>[\s\S]*?<\/tr>/gi) || [];
-
-      for (const row of rowMatches) {
-        const cells: string[] = [];
-        const cellMatches =
-          row.match(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi) || [];
-        for (const cell of cellMatches) {
-          const cellContent = cell
-            .replace(/<t[dh][^>]*>/gi, "")
-            .replace(/<\/t[dh]>/gi, "")
-            .replace(/<[^>]+>/g, "")
-            .replace(/\n/g, " ")
-            .trim();
-          cells.push(cellContent);
-        }
-        if (cells.length > 0) {
-          rows.push(cells);
-        }
+  function walk(node: JSONContent) {
+    if (node.type === "image" && typeof node.attrs?.src === "string") {
+      const match = node.attrs.src.match(/^data:image\/([^;]+);base64,(.+)$/);
+      if (match) {
+        results.push({ node, mimeType: match[1], base64Data: match[2] });
       }
-
-      if (rows.length === 0) return "";
-
-      const colCount = Math.max(...rows.map((r) => r.length));
-      const normalizedRows = rows.map((r) => {
-        while (r.length < colCount) r.push("");
-        return r;
-      });
-
-      let mdTable = "\n";
-      mdTable += "| " + normalizedRows[0].join(" | ") + " |\n";
-      mdTable += "| " + normalizedRows[0].map(() => "---").join(" | ") + " |\n";
-      for (let i = 1; i < normalizedRows.length; i++) {
-        mdTable += "| " + normalizedRows[i].join(" | ") + " |\n";
+    }
+    if (node.content) {
+      for (const child of node.content) {
+        walk(child);
       }
-      return mdTable + "\n";
-    },
-  );
+    }
+  }
 
-  markdown = markdown.replace(/<[^>]+>/g, "");
+  walk(json);
+  return results;
+}
 
-  markdown = markdown.replace(/&nbsp;/g, " ");
-  markdown = markdown.replace(/&amp;/g, "&");
-  markdown = markdown.replace(/&lt;/g, "<");
-  markdown = markdown.replace(/&gt;/g, ">");
-  markdown = markdown.replace(/&quot;/g, '"');
-  markdown = markdown.replace(/&#39;/g, "'");
-  markdown = markdown.replace(/&rsquo;/g, "'");
-  markdown = markdown.replace(/&lsquo;/g, "'");
-  markdown = markdown.replace(/&rdquo;/g, '"');
-  markdown = markdown.replace(/&ldquo;/g, '"');
-  markdown = markdown.replace(/&mdash;/g, "—");
-  markdown = markdown.replace(/&ndash;/g, "–");
-  markdown = markdown.replace(/&hellip;/g, "...");
+function clean(node: JSONContent): void {
+  if (node.type === "text" && node.text) {
+    node.text = node.text.replace(/\u00a0/g, " ");
+  }
+  if (node.content) {
+    node.content = node.content.filter(
+      (node) => !(node.type === "paragraph" && !node.content),
+    );
+    for (const child of node.content) {
+      clean(child);
+    }
+    if (node.type === "table") {
+      node.content = node.content.filter(
+        (row) => row.type !== "tableRow" || !isEmptyTableRow(row),
+      );
+    }
+  }
+}
 
-  markdown = markdown.replace(/\n{3,}/g, "\n\n");
-  markdown = markdown.trim();
-
-  return markdown;
+function isEmptyTableRow(row: JSONContent): boolean {
+  if (!row.content) return true;
+  return row.content.every((cell) => {
+    if (!cell.content) return true;
+    return cell.content.every((node) => {
+      if (node.type !== "paragraph") return false;
+      if (!node.content || node.content.length === 0) return true;
+      return node.content.every(
+        (child) =>
+          child.type === "text" && (!child.text || child.text.trim() === ""),
+      );
+    });
+  });
 }
 
 function extractTitle(html: string): string | null {
@@ -221,30 +153,6 @@ function removeTabTitleFromContent(html: string): string {
   bodyContent = bodyContent.replace(tabTitlePattern, "");
 
   return html.replace(bodyMatch[1], bodyContent);
-}
-
-function generateMdx(
-  content: string,
-  options: {
-    title: string;
-    author: string;
-    description: string;
-    coverImage: string;
-  },
-): string {
-  const today = new Date().toISOString().split("T")[0];
-
-  const frontmatter = `---
-meta_title: "${options.title}"
-display_title: ""
-meta_description: "${options.description}"
-author: "${options.author}"
-coverImage: "${options.coverImage}"
-featured: false
-date: "${today}"
----`;
-
-  return `${frontmatter}\n\n${content}`;
 }
 
 export const Route = createFileRoute("/api/admin/import/google-docs")({
@@ -321,11 +229,16 @@ export const Route = createFileRoute("/api/admin/import/google-docs")({
           const finalTitle = title || extractedTitle;
 
           const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-          const bodyContent = bodyMatch ? bodyMatch[1] : html;
+          let bodyContent = bodyMatch ? bodyMatch[1] : html;
+          bodyContent = bodyContent.replace(/&nbsp;/g, " ");
 
-          let markdown = htmlToMarkdown(bodyContent);
+          const rawJson: JSONContent = generateJSON(bodyContent, [
+            ...shared.getExtensions(),
+            Markdown,
+          ]);
+          clean(rawJson);
 
-          const base64Images = extractBase64Images(markdown);
+          const base64Images = extractBase64ImageNodes(rawJson);
           if (base64Images.length > 0) {
             if (!slug) {
               return new Response(
@@ -349,24 +262,17 @@ export const Route = createFileRoute("/api/admin/import/google-docs")({
                 folder,
               );
               if (uploadResult.success && uploadResult.publicUrl) {
-                markdown = markdown.replace(
-                  image.fullMatch,
-                  `![](${uploadResult.publicUrl})`,
-                );
+                image.node.attrs!.src = uploadResult.publicUrl;
               }
             }
           }
 
+          const md = shared.json2md(rawJson);
+          const json = shared.md2json(md);
+
           const today = new Date().toISOString().split("T")[0];
           const finalAuthor = author || "Unknown";
           const finalDescription = description || "";
-
-          const mdx = generateMdx(markdown, {
-            title: finalTitle,
-            author: finalAuthor,
-            description: finalDescription,
-            coverImage: coverImage || "",
-          });
 
           const frontmatter = {
             meta_title: finalTitle,
@@ -380,7 +286,7 @@ export const Route = createFileRoute("/api/admin/import/google-docs")({
 
           const result: ImportResponse = {
             success: true,
-            mdx,
+            json,
             frontmatter,
           };
 

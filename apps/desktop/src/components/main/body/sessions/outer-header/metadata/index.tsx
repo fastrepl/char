@@ -98,15 +98,20 @@ function ContentInner({ sessionId }: { sessionId: string }) {
 
   return (
     <div className="flex flex-col gap-4 p-4 overflow-y-auto">
-      {eventDisplayData && <EventDisplay event={eventDisplayData} />}
       {!eventDisplayData && <DateDisplay sessionId={sessionId} />}
-      <ParticipantsDisplay sessionId={sessionId} />
+      {eventDisplayData && (
+        <EventDisplay event={eventDisplayData}>
+          <ParticipantsDisplay sessionId={sessionId} />
+        </EventDisplay>
+      )}
+      {!eventDisplayData && <ParticipantsDisplay sessionId={sessionId} />}
     </div>
   );
 }
 
 export function EventDisplay({
   event,
+  children,
 }: {
   event: {
     title: string | undefined;
@@ -117,6 +122,7 @@ export function EventDisplay({
     description: string | undefined;
     calendarId: string | undefined;
   };
+  children?: React.ReactNode;
 }) {
   const tz = useConfigValue("timezone") || undefined;
 
@@ -222,6 +228,8 @@ export function EventDisplay({
       {event.startedAt && (
         <div className="text-sm text-neutral-700">{formatEventDateTime()}</div>
       )}
+
+      {children}
 
       {event.description && (
         <>

@@ -1,14 +1,9 @@
-use axum::{Json, extract::State};
+use axum::Json;
+use hypr_api_nango::{GoogleCalendar, NangoConnection};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 use crate::error::{CalendarError, Result};
-use crate::state::AppState;
-
-#[derive(Debug, Deserialize, ToSchema)]
-pub struct ListCalendarsRequest {
-    pub connection_id: String,
-}
 
 #[derive(Debug, Serialize, ToSchema)]
 pub struct ListCalendarsResponse {
@@ -17,7 +12,6 @@ pub struct ListCalendarsResponse {
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct ListEventsRequest {
-    pub connection_id: String,
     pub calendar_id: String,
     #[serde(default)]
     pub time_min: Option<String>,
@@ -42,7 +36,6 @@ pub struct ListEventsResponse {
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct CreateEventRequest {
-    pub connection_id: String,
     pub calendar_id: String,
     pub summary: String,
     pub start: EventDateTime,
@@ -79,10 +72,39 @@ pub struct CreateEventResponse {
     pub event: serde_json::Value,
 }
 
+fn parse_date(s: &str, field: &str) -> std::result::Result<chrono::NaiveDate, CalendarError> {
+    chrono::NaiveDate::parse_from_str(s, "%Y-%m-%d")
+        .map_err(|e| CalendarError::BadRequest(format!("Invalid {field}: {e}")))
+}
+
+fn parse_datetime(
+    s: &str,
+    field: &str,
+) -> std::result::Result<chrono::DateTime<chrono::FixedOffset>, CalendarError> {
+    chrono::DateTime::parse_from_rfc3339(s)
+        .map_err(|e| CalendarError::BadRequest(format!("Invalid {field}: {e}")))
+}
+
+fn convert_event_datetime(
+    dt: EventDateTime,
+    prefix: &str,
+) -> std::result::Result<hypr_google_calendar::EventDateTime, CalendarError> {
+    Ok(hypr_google_calendar::EventDateTime {
+        date: dt
+            .date
+            .map(|s| parse_date(&s, &format!("{prefix}.date")))
+            .transpose()?,
+        date_time: dt
+            .date_time
+            .map(|s| parse_datetime(&s, &format!("{prefix}.dateTime")))
+            .transpose()?,
+        time_zone: dt.time_zone,
+    })
+}
+
 #[utoipa::path(
     post,
     path = "/calendars",
-    request_body = ListCalendarsRequest,
     responses(
         (status = 200, description = "Calendars fetched", body = ListCalendarsResponse),
         (status = 401, description = "Unauthorized"),
@@ -91,15 +113,9 @@ pub struct CreateEventResponse {
     tag = "calendar",
 )]
 pub async fn list_calendars(
-    State(state): State<AppState>,
-    Json(payload): Json<ListCalendarsRequest>,
+    nango: NangoConnection<GoogleCalendar>,
 ) -> Result<Json<ListCalendarsResponse>> {
-    let proxy = state
-        .nango
-        .integration("google-calendar")
-        .connection(&payload.connection_id);
-    let http = hypr_nango::NangoHttpClient::new(proxy);
-    let client = hypr_google_calendar::GoogleCalendarClient::new(http);
+    let client = hypr_google_calendar::GoogleCalendarClient::new(nango.into_http());
 
     let response = client
         .list_calendars()
@@ -127,15 +143,10 @@ pub async fn list_calendars(
     tag = "calendar",
 )]
 pub async fn list_events(
-    State(state): State<AppState>,
+    nango: NangoConnection<GoogleCalendar>,
     Json(payload): Json<ListEventsRequest>,
 ) -> Result<Json<ListEventsResponse>> {
-    let proxy = state
-        .nango
-        .integration("google-calendar")
-        .connection(&payload.connection_id);
-    let http = hypr_nango::NangoHttpClient::new(proxy);
-    let client = hypr_google_calendar::GoogleCalendarClient::new(http);
+    let client = hypr_google_calendar::GoogleCalendarClient::new(nango.into_http());
 
     let time_min = payload
         .time_min
@@ -157,6 +168,18 @@ pub async fn list_events(
         })
         .transpose()?;
 
+    let order_by = payload
+        .order_by
+        .as_deref()
+        .map(|s| match s {
+            "startTime" => Ok(hypr_google_calendar::EventOrderBy::StartTime),
+            "updated" => Ok(hypr_google_calendar::EventOrderBy::Updated),
+            other => Err(CalendarError::BadRequest(format!(
+                "Invalid order_by: {other}"
+            ))),
+        })
+        .transpose()?;
+
     let req = hypr_google_calendar::ListEventsRequest {
         calendar_id: payload.calendar_id,
         time_min,
@@ -164,7 +187,15 @@ pub async fn list_events(
         max_results: payload.max_results,
         page_token: payload.page_token,
         single_events: payload.single_events,
-        order_by: payload.order_by,
+        order_by,
+        show_deleted: None,
+        show_hidden_invitations: None,
+        updated_min: None,
+        i_cal_uid: None,
+        q: None,
+        sync_token: None,
+        time_zone: None,
+        event_types: None,
     };
 
     let response = client
@@ -196,45 +227,51 @@ pub async fn list_events(
     tag = "calendar",
 )]
 pub async fn create_event(
-    State(state): State<AppState>,
+    nango: NangoConnection<GoogleCalendar>,
     Json(payload): Json<CreateEventRequest>,
 ) -> Result<Json<CreateEventResponse>> {
-    let proxy = state
-        .nango
-        .integration("google-calendar")
-        .connection(&payload.connection_id);
-    let http = hypr_nango::NangoHttpClient::new(proxy);
-    let client = hypr_google_calendar::GoogleCalendarClient::new(http);
+    let client = hypr_google_calendar::GoogleCalendarClient::new(nango.into_http());
+
+    let start = convert_event_datetime(payload.start, "start")?;
+    let end = convert_event_datetime(payload.end, "end")?;
 
     let req = hypr_google_calendar::CreateEventRequest {
         calendar_id: payload.calendar_id,
         event: hypr_google_calendar::CreateEventBody {
             summary: payload.summary,
-            start: hypr_google_calendar::GoogleEventDateTime {
-                date: payload.start.date,
-                date_time: payload.start.date_time,
-                time_zone: payload.start.time_zone,
-            },
-            end: hypr_google_calendar::GoogleEventDateTime {
-                date: payload.end.date,
-                date_time: payload.end.date_time,
-                time_zone: payload.end.time_zone,
-            },
+            start,
+            end,
             description: payload.description,
             location: payload.location,
             attendees: payload.attendees.map(|attendees| {
                 attendees
                     .into_iter()
-                    .map(|a| hypr_google_calendar::GoogleEventAttendee {
+                    .map(|a| hypr_google_calendar::Attendee {
+                        id: None,
                         email: Some(a.email),
                         display_name: a.display_name,
-                        response_status: None,
-                        is_self: None,
                         organizer: None,
+                        is_self: None,
+                        resource: None,
                         optional: a.optional,
+                        response_status: None,
+                        comment: None,
+                        additional_guests: None,
                     })
                     .collect()
             }),
+            recurrence: None,
+            transparency: None,
+            visibility: None,
+            color_id: None,
+            conference_data: None,
+            reminders: None,
+            guests_can_invite_others: None,
+            guests_can_modify: None,
+            guests_can_see_other_guests: None,
+            source: None,
+            extended_properties: None,
+            event_type: None,
         },
     };
 

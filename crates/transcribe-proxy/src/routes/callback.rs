@@ -5,10 +5,8 @@ use axum::{
 use owhisper_client::{CallbackResult, CallbackSttAdapter};
 use serde::Deserialize;
 
-use hypr_supabase_storage::SupabaseStorage;
-
 use super::{AppState, RouteError, parse_async_provider};
-use crate::supabase::{PipelineStatus, SupabaseClient};
+use crate::supabase::{JobUpdate, PipelineStatus, SupabaseClient};
 
 #[derive(Deserialize)]
 pub(crate) struct CallbackQuery {
@@ -69,16 +67,16 @@ pub async fn handler(
     })?;
 
     let update = match &outcome {
-        CallbackResult::Done(raw_result) => serde_json::json!({
-            "status": PipelineStatus::Done,
-            "raw_result": raw_result,
-            "updated_at": chrono::Utc::now().to_rfc3339(),
-        }),
-        CallbackResult::ProviderError(message) => serde_json::json!({
-            "status": PipelineStatus::Error,
-            "error": message,
-            "updated_at": chrono::Utc::now().to_rfc3339(),
-        }),
+        CallbackResult::Done(raw_result) => JobUpdate {
+            status: PipelineStatus::Done,
+            raw_result: Some(raw_result.clone()),
+            error: None,
+        },
+        CallbackResult::ProviderError(message) => JobUpdate {
+            status: PipelineStatus::Error,
+            raw_result: None,
+            error: Some(message.clone()),
+        },
     };
 
     supabase
@@ -101,12 +99,11 @@ async fn cleanup_audio(supabase: &SupabaseClient, job_id: &str) {
         }
     };
 
-    let storage = SupabaseStorage::new(
-        supabase.client.clone(),
-        &supabase.url,
-        &supabase.service_role_key,
-    );
-    if let Err(e) = storage.delete_file("audio-files", &job.file_id).await {
+    if let Err(e) = supabase
+        .storage()
+        .delete_file("audio-files", &job.file_id)
+        .await
+    {
         tracing::warn!(
             job_id = %job_id,
             file_id = %job.file_id,

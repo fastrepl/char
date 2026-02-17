@@ -50,7 +50,7 @@ type AuthTokenHandlers = {
 
 type AuthUtils = {
   getHeaders: () => Record<string, string> | null;
-  getAvatarUrl: () => Promise<string>;
+  getAvatarUrl: () => Promise<string | null>;
 };
 
 export type AuthContextType = AuthState &
@@ -336,7 +336,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const email = session?.user.email;
 
     if (!email) {
-      return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23e0e0e0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='48' fill='%23666'%3E%3F%3C/text%3E%3C/svg%3E";
+      return null;
     }
 
     const address = email.trim().toLowerCase();
@@ -346,7 +346,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 
-    return `https://gravatar.com/avatar/${hash}`;
+    return `https://gravatar.com/avatar/${hash}?d=404`;
   }, [session]);
 
   const value = useMemo(

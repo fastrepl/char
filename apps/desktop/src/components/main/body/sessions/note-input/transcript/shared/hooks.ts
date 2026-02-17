@@ -9,13 +9,13 @@ import {
 } from "react";
 
 import type { SpeakerHintStorage, Word } from "@hypr/store";
-
-import * as main from "../../../../../../../store/tinybase/store/main";
 import {
   buildSegments,
   type RuntimeSpeakerHint,
   type Segment,
-} from "../../../../../../../utils/segment";
+} from "@hypr/transcript";
+
+import * as main from "../../../../../../../store/tinybase/store/main";
 import { convertStorageHintsToRuntime } from "../../../../../../../utils/speaker-hints";
 
 export function useFinalWords(transcriptId: string): (Word & { id: string })[] {

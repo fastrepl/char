@@ -20,13 +20,14 @@ where
 pub struct SupabaseEnv {
     pub supabase_url: String,
     pub supabase_anon_key: String,
+    pub supabase_service_role_key: String,
 }
 
 #[derive(Clone, Deserialize)]
 pub struct NangoEnv {
     #[serde(default)]
     pub nango_api_base: Option<String>,
-    pub nango_api_key: String,
+    pub nango_secret_key: String,
 }
 
 #[derive(Clone, Deserialize)]

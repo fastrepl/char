@@ -4,6 +4,7 @@ import { allDocs } from "content-collections";
 import { useMemo } from "react";
 
 import { defaultMDXComponents } from "@/components/mdx";
+import { TableOfContents } from "@/components/table-of-contents";
 
 import { docsStructure } from "./-structure";
 
@@ -16,11 +17,12 @@ export function DocLayout({
 }) {
   return (
     <>
-      <main className="flex-1 min-w-0 px-4 py-6">
+      <main className="max-w-200 mx-auto px-4 py-6">
         <ArticleHeader doc={doc} showSectionTitle={showSectionTitle} />
         <ArticleContent doc={doc} />
         <PageNavigation currentSlug={doc.slug} />
       </main>
+      <TableOfContents toc={doc.toc} />
     </>
   );
 }

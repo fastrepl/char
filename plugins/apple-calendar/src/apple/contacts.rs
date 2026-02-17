@@ -8,13 +8,18 @@ use crate::types::{ParticipantContact, ParticipantScheduleStatus};
 pub fn resolve_participant_contact(
     participant: &objc2_event_kit::EKParticipant,
     url: Option<&str>,
+    name: Option<&str>,
 ) -> (Option<String>, Option<ParticipantContact>) {
     if let Some(contact) = try_fetch_contact(participant) {
         let email = contact.email_addresses.first().cloned();
+        if email.is_some() {
+            return (email, Some(contact));
+        }
+        let email = parse_email_from_url(url).or_else(|| parse_email_from_name(name));
         return (email, Some(contact));
     }
 
-    let email = parse_email_from_url(url);
+    let email = parse_email_from_url(url).or_else(|| parse_email_from_name(name));
     (email, None)
 }
 
@@ -31,8 +36,20 @@ fn try_fetch_contact(participant: &objc2_event_kit::EKParticipant) -> Option<Par
 
 fn parse_email_from_url(url: Option<&str>) -> Option<String> {
     let url = url?;
-    if url.starts_with("mailto:") {
-        Some(url.trim_start_matches("mailto:").to_string())
+    let lower = url.to_lowercase();
+    if lower.starts_with("mailto:") {
+        let email = url[7..].to_string();
+        if !email.is_empty() {
+            return Some(email);
+        }
+    }
+    None
+}
+
+fn parse_email_from_name(name: Option<&str>) -> Option<String> {
+    let name = name?.trim();
+    if name.contains('@') && name.contains('.') && !name.contains(' ') {
+        Some(name.to_string())
     } else {
         None
     }

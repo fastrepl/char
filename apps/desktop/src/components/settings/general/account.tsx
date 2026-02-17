@@ -211,7 +211,7 @@ export function AccountSettings() {
 
         <button
           onClick={handleSignIn}
-          className="px-6 h-10 rounded-full bg-linear-to-b from-stone-700 to-stone-800 hover:from-stone-600 hover:to-stone-700 text-white text-sm font-medium border-2 border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)] transition-all duration-200"
+          className="px-6 h-10 rounded-full bg-stone-800 hover:bg-stone-700 text-white text-sm font-medium border-2 border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)] transition-all duration-200"
         >
           Get Started
         </button>

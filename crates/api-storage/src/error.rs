@@ -26,10 +26,14 @@ pub enum StorageError {
     Auth(String),
 
     #[error("Invalid request: {0}")]
+    #[allow(dead_code)]
     BadRequest(String),
 
     #[error("Internal error: {0}")]
     Internal(String),
+
+    #[error(transparent)]
+    NangoConnection(#[from] hypr_api_nango::NangoConnectionError),
 }
 
 impl IntoResponse for StorageError {
@@ -48,6 +52,7 @@ impl IntoResponse for StorageError {
                     internal_message,
                 )
             }
+            Self::NangoConnection(err) => return err.into_response(),
         };
 
         let body = Json(ErrorResponse {
