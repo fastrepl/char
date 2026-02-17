@@ -1,5 +1,7 @@
 #[derive(serde::Deserialize)]
 pub(crate) struct NangoConnectionRow {
+    #[serde(default)]
+    pub integration_id: String,
     pub connection_id: String,
     pub updated_at: Option<String>,
 }

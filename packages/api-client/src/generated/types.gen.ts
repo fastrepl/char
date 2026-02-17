@@ -46,8 +46,8 @@ export type ConnectSessionResponse = {
     token: string;
 };
 
-export type ConnectionStatusResponse = {
-    connected: boolean;
+export type ConnectionItem = {
+    connection_id: string;
     integration_id: string;
     updated_at?: string | null;
 };
@@ -132,6 +132,10 @@ export type Interval = 'monthly' | 'yearly';
 
 export type ListCalendarsResponse = {
     calendars: Array<unknown>;
+};
+
+export type ListConnectionsResponse = {
+    connections: Array<ConnectionItem>;
 };
 
 export type ListConversationsQuery = {
@@ -400,16 +404,14 @@ export type CreateConnectSessionResponses = {
 
 export type CreateConnectSessionResponse = CreateConnectSessionResponses[keyof CreateConnectSessionResponses];
 
-export type ConnectionStatusData = {
+export type ListConnectionsData = {
     body?: never;
     path?: never;
-    query: {
-        integration_id: string;
-    };
-    url: '/nango/connection-status';
+    query?: never;
+    url: '/nango/connections';
 };
 
-export type ConnectionStatusErrors = {
+export type ListConnectionsErrors = {
     /**
      * Unauthorized
      */
@@ -420,14 +422,14 @@ export type ConnectionStatusErrors = {
     500: unknown;
 };
 
-export type ConnectionStatusResponses = {
+export type ListConnectionsResponses = {
     /**
-     * Connection status
+     * List of active connections
      */
-    200: ConnectionStatusResponse;
+    200: ListConnectionsResponse;
 };
 
-export type ConnectionStatusResponse2 = ConnectionStatusResponses[keyof ConnectionStatusResponses];
+export type ListConnectionsResponse2 = ListConnectionsResponses[keyof ListConnectionsResponses];
 
 export type NangoWebhookData = {
     body?: never;

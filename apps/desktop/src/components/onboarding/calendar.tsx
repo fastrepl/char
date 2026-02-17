@@ -5,6 +5,7 @@ import { commands as openerCommands } from "@hypr/plugin-opener2";
 import { cn } from "@hypr/utils";
 
 import { useAuth } from "../../auth";
+import { useConnections } from "../../hooks/useConnections";
 import { buildWebAppUrl } from "../../utils";
 import { useAppleCalendarSelection } from "../settings/calendar/configure/apple/calendar-selection";
 import { SyncProvider } from "../settings/calendar/configure/apple/context";
@@ -33,6 +34,10 @@ function OAuthCalendarConnect({
   provider: (typeof PROVIDERS)[number];
 }) {
   const auth = useAuth();
+  const { data: connections } = useConnections();
+  const connection = connections?.find(
+    (c) => c.integration_id === provider.nangoIntegrationId,
+  );
 
   const handleConnect = async () => {
     if (!provider.nangoIntegrationId) return;
@@ -45,18 +50,22 @@ function OAuthCalendarConnect({
   return (
     <div className="flex flex-col gap-3">
       <p className="text-sm text-neutral-600">
-        Connect your {provider.displayName} Calendar to sync your meetings.
+        {connection
+          ? `Your ${provider.displayName} Calendar is connected.`
+          : `Connect your ${provider.displayName} Calendar to sync your meetings.`}
       </p>
       <button
         onClick={handleConnect}
         disabled={!auth.session}
         className={cn([
           "w-full h-10 flex items-center justify-center text-sm font-medium transition-all cursor-pointer rounded-lg",
-          "bg-neutral-900 text-white hover:bg-neutral-800 active:scale-[98%]",
+          connection
+            ? "bg-neutral-200 text-neutral-600 hover:bg-neutral-300 active:scale-[98%]"
+            : "bg-neutral-900 text-white hover:bg-neutral-800 active:scale-[98%]",
           !auth.session && "opacity-50 cursor-not-allowed",
         ])}
       >
-        Connect {provider.displayName} Calendar
+        {connection ? "Reconnect" : "Connect"} {provider.displayName} Calendar
       </button>
     </div>
   );
