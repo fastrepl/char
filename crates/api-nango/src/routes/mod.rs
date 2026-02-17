@@ -11,7 +11,7 @@ use crate::config::NangoConfig;
 use crate::state::AppState;
 
 pub use connect::ConnectSessionResponse;
-pub use status::ConnectionStatusResponse;
+pub use status::{ConnectionItem, ListConnectionsResponse};
 pub use webhook::WebhookResponse;
 
 pub fn router(config: NangoConfig) -> Router {
@@ -19,7 +19,7 @@ pub fn router(config: NangoConfig) -> Router {
 
     Router::new()
         .route("/connect-session", post(connect::create_connect_session))
-        .route("/connection-status", get(status::connection_status))
+        .route("/connections", get(status::list_connections))
         .with_state(state)
 }
 

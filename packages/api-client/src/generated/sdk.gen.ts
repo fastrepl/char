@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { CanStartTrialData, CanStartTrialErrors, CanStartTrialResponses, ConnectionStatusData, ConnectionStatusErrors, ConnectionStatusResponses, CreateConnectSessionData, CreateConnectSessionErrors, CreateConnectSessionResponses, CreateContactData, CreateContactErrors, CreateContactResponses, CreateConversationData, CreateConversationErrors, CreateConversationResponses, CreateEventData, CreateEventErrors, CreateEventResponses, GetMessagesData, GetMessagesErrors, GetMessagesResponses, ListCalendarsData, ListCalendarsErrors, ListCalendarsResponses, ListConversationsData, ListConversationsErrors, ListConversationsResponses, ListEventsData, ListEventsErrors, ListEventsResponses, NangoWebhookData, NangoWebhookErrors, NangoWebhookResponses, SendMessageData, SendMessageErrors, SendMessageResponses, StartTrialData, StartTrialErrors, StartTrialResponses, SttListenBatchData, SttListenBatchErrors, SttListenBatchResponses, SttListenStreamData, SttListenStreamErrors, SttStatusData, SttStatusErrors, SttStatusResponses, SubmitData, SubmitErrors, SubmitResponses } from './types.gen';
+import type { CanStartTrialData, CanStartTrialErrors, CanStartTrialResponses, CreateConnectSessionData, CreateConnectSessionErrors, CreateConnectSessionResponses, CreateContactData, CreateContactErrors, CreateContactResponses, CreateConversationData, CreateConversationErrors, CreateConversationResponses, CreateEventData, CreateEventErrors, CreateEventResponses, GetMessagesData, GetMessagesErrors, GetMessagesResponses, ListCalendarsData, ListCalendarsErrors, ListCalendarsResponses, ListConnectionsData, ListConnectionsErrors, ListConnectionsResponses, ListConversationsData, ListConversationsErrors, ListConversationsResponses, ListEventsData, ListEventsErrors, ListEventsResponses, NangoWebhookData, NangoWebhookErrors, NangoWebhookResponses, SendMessageData, SendMessageErrors, SendMessageResponses, StartTrialData, StartTrialErrors, StartTrialResponses, SttListenBatchData, SttListenBatchErrors, SttListenBatchResponses, SttListenStreamData, SttListenStreamErrors, SttStatusData, SttStatusErrors, SttStatusResponses, SubmitData, SubmitErrors, SubmitResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -59,9 +59,9 @@ export const createConnectSession = <ThrowOnError extends boolean = false>(optio
     ...options
 });
 
-export const connectionStatus = <ThrowOnError extends boolean = false>(options: Options<ConnectionStatusData, ThrowOnError>) => (options.client ?? client).get<ConnectionStatusResponses, ConnectionStatusErrors, ThrowOnError>({
+export const listConnections = <ThrowOnError extends boolean = false>(options?: Options<ListConnectionsData, ThrowOnError>) => (options?.client ?? client).get<ListConnectionsResponses, ListConnectionsErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/nango/connection-status',
+    url: '/nango/connections',
     ...options
 });
 

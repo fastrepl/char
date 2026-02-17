@@ -203,29 +203,19 @@
         ]
       }
     },
-    "/nango/connection-status": {
+    "/nango/connections": {
       "get": {
         "tags": [
           "nango"
         ],
-        "operationId": "connection_status",
-        "parameters": [
-          {
-            "name": "integration_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "operationId": "list_connections",
         "responses": {
           "200": {
-            "description": "Connection status",
+            "description": "List of active connections",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ConnectionStatusResponse"
+                  "$ref": "#/components/schemas/ListConnectionsResponse"
                 }
               }
             }
@@ -906,15 +896,15 @@
           }
         }
       },
-      "ConnectionStatusResponse": {
+      "ConnectionItem": {
         "type": "object",
         "required": [
-          "connected",
-          "integration_id"
+          "integration_id",
+          "connection_id"
         ],
         "properties": {
-          "connected": {
-            "type": "boolean"
+          "connection_id": {
+            "type": "string"
           },
           "integration_id": {
             "type": "string"
@@ -1212,6 +1202,20 @@
           "calendars": {
             "type": "array",
             "items": {}
+          }
+        }
+      },
+      "ListConnectionsResponse": {
+        "type": "object",
+        "required": [
+          "connections"
+        ],
+        "properties": {
+          "connections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConnectionItem"
+            }
           }
         }
       },
