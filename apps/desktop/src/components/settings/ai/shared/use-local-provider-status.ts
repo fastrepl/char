@@ -17,18 +17,30 @@ async function checkConnection(
   baseUrl: string,
 ): Promise<boolean> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 2000);
+  const timeout = setTimeout(() => controller.abort(), 3000);
   try {
     const headers: Record<string, string> = {};
+    let url: string;
+
     if (providerId === "ollama") {
       const host = baseUrl.replace(/\/v1\/?$/, "");
       headers["Origin"] = new URL(host).origin;
+      url = `${host}/api/tags`;
+    } else {
+      url = `${baseUrl}/models`;
     }
-    const res = await tauriFetch(`${baseUrl}/models`, {
+
+    const res = await tauriFetch(url, {
       signal: controller.signal,
       headers,
     });
-    return res.ok;
+    if (!res.ok) return false;
+
+    const body = await res.json();
+    if (providerId === "ollama") {
+      return Array.isArray(body?.models);
+    }
+    return Array.isArray(body?.data);
   } catch {
     return false;
   } finally {
