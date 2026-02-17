@@ -1,3 +1,9 @@
+#[derive(serde::Deserialize)]
+pub(crate) struct NangoConnectionRow {
+    pub connection_id: String,
+    pub updated_at: Option<String>,
+}
+
 #[derive(Clone)]
 pub(crate) struct SupabaseClient {
     supabase_url: String,

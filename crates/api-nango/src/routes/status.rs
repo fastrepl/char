@@ -62,14 +62,7 @@ pub async fn connection_status(
         )));
     }
 
-    #[derive(serde::Deserialize)]
-    struct Row {
-        #[allow(dead_code)]
-        connection_id: String,
-        updated_at: Option<String>,
-    }
-
-    let rows: Vec<Row> = response
+    let rows: Vec<crate::supabase::NangoConnectionRow> = response
         .json()
         .await
         .map_err(|e| crate::error::NangoError::Internal(e.to_string()))?;

@@ -14,7 +14,10 @@ const validateSearch = z.object({
   scheme: z.string().default("hyprnote"),
 });
 
-const INTEGRATION_DISPLAY: Record<string, { name: string; description: string; connectingHint: string }> = {
+const INTEGRATION_DISPLAY: Record<
+  string,
+  { name: string; description: string; connectingHint: string }
+> = {
   "google-calendar": {
     name: "Google Calendar",
     description: "Connect your Google Calendar to sync your meetings",
@@ -28,11 +31,13 @@ const INTEGRATION_DISPLAY: Record<string, { name: string; description: string; c
 };
 
 function getIntegrationDisplay(integrationId: string) {
-  return INTEGRATION_DISPLAY[integrationId] ?? {
-    name: integrationId,
-    description: `Connect ${integrationId} to sync your data`,
-    connectingHint: "Follow the prompts to complete the connection",
-  };
+  return (
+    INTEGRATION_DISPLAY[integrationId] ?? {
+      name: integrationId,
+      description: `Connect ${integrationId} to sync your data`,
+      connectingHint: "Follow the prompts to complete the connection",
+    }
+  );
 }
 
 export const Route = createFileRoute("/_view/app/integration")({
