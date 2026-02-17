@@ -1,4 +1,4 @@
-import { CalendarOffIcon, CheckIcon } from "lucide-react";
+import { CalendarOffIcon, CheckIcon, Loader2Icon } from "lucide-react";
 import { useMemo } from "react";
 
 import {
@@ -25,12 +25,14 @@ interface CalendarSelectionProps {
   groups: CalendarGroup[];
   onToggle: (calendar: CalendarItem, enabled: boolean) => void;
   className?: string;
+  isLoading?: boolean;
 }
 
 export function CalendarSelection({
   groups,
   onToggle,
   className,
+  isLoading,
 }: CalendarSelectionProps) {
   const defaultOpen = useMemo(
     () =>
@@ -48,8 +50,17 @@ export function CalendarSelection({
           className,
         ])}
       >
-        <CalendarOffIcon className="size-6 text-neutral-300 mb-2" />
-        <p className="text-xs text-neutral-500">No calendars found</p>
+        {isLoading ? (
+          <>
+            <Loader2Icon className="size-6 text-neutral-300 mb-2 animate-spin" />
+            <p className="text-xs text-neutral-500">Loading calendars…</p>
+          </>
+        ) : (
+          <>
+            <CalendarOffIcon className="size-6 text-neutral-300 mb-2" />
+            <p className="text-xs text-neutral-500">No calendars found</p>
+          </>
+        )}
       </div>
     );
   }
