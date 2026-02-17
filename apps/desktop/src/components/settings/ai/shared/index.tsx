@@ -1,5 +1,6 @@
 import { Icon } from "@iconify-icon/react";
 import { type AnyFieldApi, useForm } from "@tanstack/react-form";
+import { ExternalLink } from "lucide-react";
 import type { ReactNode } from "react";
 import { Streamdown } from "streamdown";
 
@@ -11,6 +12,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@hypr/ui/components/ui/accordion";
+import { Button } from "@hypr/ui/components/ui/button";
 import {
   InputGroup,
   InputGroupInput,
@@ -26,7 +28,10 @@ import {
   type ProviderRequirement,
   requiresEntitlement,
 } from "./eligibility";
-import { useLocalProviderStatus } from "./use-local-provider-status";
+import {
+  type LocalProviderStatus,
+  useLocalProviderStatus,
+} from "./use-local-provider-status";
 
 export * from "./model-combobox";
 
@@ -40,6 +45,11 @@ type ProviderConfig = {
   baseUrl?: string;
   disabled?: boolean;
   requirements: ProviderRequirement[];
+  links?: {
+    download?: { label: string; url: string };
+    models?: { label: string; url: string };
+    setup?: { label: string; url: string };
+  };
 };
 
 export function providerRowId(providerType: ProviderType, providerId: string) {
@@ -100,7 +110,8 @@ export function NonHyprProviderCard({
     providerType,
     providers,
   );
-  const localStatus = useLocalProviderStatus(config.id);
+  const { status: localStatus, refetch: refetchStatus } =
+    useLocalProviderStatus(config.id);
 
   const requiredFields = getRequiredConfigFields(config.requirements);
   const showApiKey = requiredFields.includes("api_key");
@@ -151,28 +162,30 @@ export function NonHyprProviderCard({
           (config.disabled || locked) && "cursor-not-allowed opacity-30",
         ])}
       >
-        <div className="flex items-center gap-2">
-          {config.icon}
-          <span>{config.displayName}</span>
-          {config.badge && (
-            <span className="text-xs text-neutral-500 font-light border border-neutral-300 rounded-full px-2">
-              {config.badge}
-            </span>
-          )}
-          {localStatus === "checking" && (
-            <Spinner size={12} className="shrink-0 text-neutral-400" />
-          )}
-          {localStatus === "connected" && (
-            <span className="flex items-center gap-1 text-xs text-green-600 font-light">
-              <span className="size-1.5 rounded-full bg-green-500" />
-              Connected
-            </span>
-          )}
-          {localStatus === "disconnected" && (
-            <span className="flex items-center gap-1 text-xs text-neutral-500 font-light">
-              <span className="size-1.5 rounded-full bg-neutral-400" />
-              Not Running
-            </span>
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-2">
+            {config.icon}
+            <span>{config.displayName}</span>
+            {config.badge && (
+              <span className="text-xs text-neutral-500 font-light border border-neutral-300 rounded-full px-2">
+                {config.badge}
+              </span>
+            )}
+            {localStatus && <StatusBadge status={localStatus} />}
+          </div>
+          {localStatus && localStatus !== "connected" && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                refetchStatus();
+              }}
+              disabled={localStatus === "checking"}
+              className="mr-2"
+            >
+              Connect
+            </Button>
           )}
         </div>
       </AccordionTrigger>
@@ -207,6 +220,45 @@ export function NonHyprProviderCard({
                 />
               )}
             </form.Field>
+          )}
+          {config.links && (
+            <div className="flex items-center gap-4 text-xs">
+              {config.links.download && (
+                <a
+                  href={config.links.download.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-0.5 text-neutral-600 hover:text-neutral-900 hover:underline"
+                >
+                  {config.links.download.label}
+                  <ExternalLink size={12} />
+                </a>
+              )}
+              {config.links.models && (
+                <div className="inline-flex items-center gap-4">
+                  <a
+                    href={config.links.models.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-0.5 text-neutral-600 hover:text-neutral-900 hover:underline"
+                  >
+                    {config.links.models.label}
+                    <ExternalLink size={12} />
+                  </a>
+                  {config.links.setup && (
+                    <a
+                      href={config.links.setup.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-0.5 text-neutral-600 hover:text-neutral-900 hover:underline"
+                    >
+                      {config.links.setup.label}
+                      <ExternalLink size={12} />
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
           )}
           {!showBaseUrl && config.baseUrl && (
             <details className="flex flex-col gap-4 pt-2">
@@ -264,6 +316,28 @@ export function StyledStreamdown({
     >
       {children}
     </Streamdown>
+  );
+}
+
+function StatusBadge({ status }: { status: LocalProviderStatus }) {
+  if (status === "checking") {
+    return <Spinner size={12} className="shrink-0 text-neutral-400" />;
+  }
+
+  if (status === "connected") {
+    return (
+      <span className="flex items-center gap-1 text-xs text-green-600 font-light">
+        <span className="size-1.5 rounded-full bg-green-500" />
+        Connected
+      </span>
+    );
+  }
+
+  return (
+    <span className="flex items-center gap-1 text-xs text-neutral-500 font-light">
+      <span className="size-1.5 rounded-full bg-neutral-400" />
+      Not Running
+    </span>
   );
 }
 

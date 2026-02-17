@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
+import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 
 import * as settings from "../../../../store/tinybase/store/settings";
-import { checkLocalProvider } from "./check-local-provider";
+
+export type LocalProviderStatus = "connected" | "disconnected" | "checking";
 
 const LOCAL_PROVIDERS = new Set(["ollama", "lmstudio"]);
 
@@ -10,9 +12,34 @@ const DEFAULT_URLS: Record<string, string> = {
   lmstudio: "http://127.0.0.1:1234/v1",
 };
 
-export function useLocalProviderStatus(
+async function checkConnection(
   providerId: string,
-): "connected" | "disconnected" | "checking" | null {
+  baseUrl: string,
+): Promise<boolean> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 2000);
+  try {
+    const headers: Record<string, string> = {};
+    if (providerId === "ollama") {
+      const host = baseUrl.replace(/\/v1\/?$/, "");
+      headers["Origin"] = new URL(host).origin;
+    }
+    const res = await tauriFetch(`${baseUrl}/models`, {
+      signal: controller.signal,
+      headers,
+    });
+    return res.ok;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+export function useLocalProviderStatus(providerId: string): {
+  status: LocalProviderStatus | null;
+  refetch: () => void;
+} {
   const isLocal = LOCAL_PROVIDERS.has(providerId);
 
   const configuredProviders = settings.UI.useResultTable(
@@ -26,19 +53,24 @@ export function useLocalProviderStatus(
   ).trim();
 
   const query = useQuery({
-    enabled: isLocal,
+    enabled: isLocal && !!baseUrl,
     queryKey: ["local-provider-status", providerId, baseUrl],
-    queryFn: () => checkLocalProvider(providerId, baseUrl),
+    queryFn: () => checkConnection(providerId, baseUrl),
     staleTime: 10_000,
     refetchInterval: 15_000,
     retry: false,
   });
 
-  if (!isLocal) return null;
+  if (!isLocal) {
+    return { status: null, refetch: () => {} };
+  }
 
-  return query.isLoading
-    ? "checking"
-    : query.data
-      ? "connected"
-      : "disconnected";
+  const status: LocalProviderStatus =
+    query.isLoading || (query.isFetching && !query.data)
+      ? "checking"
+      : query.data
+        ? "connected"
+        : "disconnected";
+
+  return { status, refetch: () => void query.refetch() };
 }

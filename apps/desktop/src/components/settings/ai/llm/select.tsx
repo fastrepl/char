@@ -48,8 +48,8 @@ export function SelectProviderAndModel() {
   const isConfigured = !!(current_llm_provider && current_llm_model);
   const hasError = isConfigured && health.status === "error";
 
-  const ollamaStatus = useLocalProviderStatus("ollama");
-  const lmStudioStatus = useLocalProviderStatus("lmstudio");
+  const { status: ollamaStatus } = useLocalProviderStatus("ollama");
+  const { status: lmStudioStatus } = useLocalProviderStatus("lmstudio");
 
   const handleSelectProvider = settings.UI.useSetValueCallback(
     "current_llm_provider",
@@ -132,16 +132,15 @@ export function SelectProviderAndModel() {
                           : provider.id === "lmstudio"
                             ? lmStudioStatus
                             : null;
-                      const isLocal = localStatus !== null;
-                      const disabled = isLocal
-                        ? localStatus !== "connected"
-                        : !status?.listModels;
+                      const isDisabled =
+                        !status?.listModels ||
+                        (localStatus !== null && localStatus !== "connected");
 
                       return (
                         <SelectItem
                           key={provider.id}
                           value={provider.id}
-                          disabled={disabled}
+                          disabled={isDisabled}
                         >
                           <div className="flex flex-col gap-0.5">
                             <div className="flex items-center gap-2">
