@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 import { OutlookIcon } from "@hypr/ui/components/icons/outlook";
 
-type CalendarProvider = {
+export type CalendarProvider = {
   disabled: boolean;
   id: string;
   displayName: string;
@@ -13,8 +13,6 @@ type CalendarProvider = {
   docsPath: string;
   nangoIntegrationId?: string;
 };
-
-export type CalendarProviderId = (typeof _PROVIDERS)[number]["id"];
 
 const _PROVIDERS = [
   {

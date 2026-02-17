@@ -1,9 +1,9 @@
 import { platform } from "@tauri-apps/plugin-os";
 
-import { useAppleCalendarSelection } from "../settings/calendar/configure/apple/calendar-selection";
-import { SyncProvider } from "../settings/calendar/configure/apple/context";
-import { ApplePermissions } from "../settings/calendar/configure/apple/permission";
-import { CalendarSelection } from "../settings/calendar/configure/shared";
+import { useAppleCalendarSelection } from "../main/body/calendar/apple/calendar-selection";
+import { SyncProvider } from "../main/body/calendar/apple/context";
+import { ApplePermissions } from "../main/body/calendar/apple/permission";
+import { CalendarSelection } from "../main/body/calendar/calendar-selection";
 import { OnboardingButton } from "./shared";
 
 function AppleCalendarList() {
