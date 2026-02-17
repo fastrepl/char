@@ -1,8 +1,8 @@
 import type { Store } from "../../../../store/tinybase/store/main";
 import { id } from "../../../../utils";
+import { findSessionByEventId } from "../../../../utils/session-event";
 import type { Ctx } from "../../ctx";
 import type { EventParticipant } from "../../fetch/types";
-import { getSessionForEvent } from "../utils";
 import type {
   HumanToCreate,
   ParticipantMappingToAdd,
@@ -23,13 +23,13 @@ export function syncParticipants(
   const humansByEmail = buildHumansByEmailIndex(ctx.store);
   const humansToCreateMap = new Map<string, HumanToCreate>();
 
-  for (const [trackingId, participants] of input.incomingParticipants) {
-    const eventId = input.trackingIdToEventId.get(trackingId);
+  for (const [eventKey, participants] of input.incomingParticipants) {
+    const eventId = input.eventKeyToEventId.get(eventKey);
     if (!eventId) {
       continue;
     }
 
-    const sessionId = getSessionForEvent(ctx.store, eventId);
+    const sessionId = findSessionByEventId(ctx.store, eventId, input.timezone);
     if (!sessionId) {
       continue;
     }

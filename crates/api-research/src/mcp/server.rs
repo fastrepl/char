@@ -55,6 +55,21 @@ impl ResearchMcpServer {
     ) -> Result<CallToolResult, McpError> {
         tools::get_contents(&self.state, params).await
     }
+
+    #[tool(
+        description = "Read a URL and convert it to clean, LLM-friendly markdown text. Powered by Jina Reader.",
+        annotations(
+            read_only_hint = true,
+            destructive_hint = false,
+            open_world_hint = true
+        )
+    )]
+    async fn read_url(
+        &self,
+        Parameters(params): Parameters<hypr_jina::ReadUrlRequest>,
+    ) -> Result<CallToolResult, McpError> {
+        tools::read_url(&self.state, params).await
+    }
 }
 
 #[tool_handler]

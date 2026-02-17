@@ -8,6 +8,7 @@ import * as main from "../../../../../../store/tinybase/store/main";
 import { createTaskId } from "../../../../../../store/zustand/ai-task/task-configs";
 import { ConfigError } from "./config-error";
 import { EnhancedEditor } from "./editor";
+import { EnhanceError } from "./enhance-error";
 import { StreamingView } from "./streaming";
 
 export const Enhanced = forwardRef<
@@ -16,7 +17,7 @@ export const Enhanced = forwardRef<
 >(({ sessionId, enhancedNoteId, onNavigateToTitle }, ref) => {
   const taskId = createTaskId(enhancedNoteId, "enhance");
   const llmStatus = useLLMConnectionStatus();
-  const { status } = useAITaskTask(taskId, "enhance");
+  const { status, error } = useAITaskTask(taskId, "enhance");
   const content = main.UI.useCell(
     "enhanced_notes",
     enhancedNoteId,
@@ -37,7 +38,13 @@ export const Enhanced = forwardRef<
   }
 
   if (status === "error") {
-    return null;
+    return (
+      <EnhanceError
+        sessionId={sessionId}
+        enhancedNoteId={enhancedNoteId}
+        error={error}
+      />
+    );
   }
 
   if (status === "generating") {

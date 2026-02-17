@@ -145,4 +145,4 @@ tasks:
   stripe:
     cmds:
       - stripe listen --print-secret | tr -d '\r\n' | xargs -I{} sh -c 'printf "STRIPE_WEBHOOK_SECRET=\"{}\"\n" > .env.stripe'
-      - stripe listen --skip-verify --forward-to http://localhost:8787/webhook/stripe
+      - stripe listen --skip-verify --forward-to http://localhost:3001/webhook/stripe

@@ -1,14 +1,9 @@
-use axum::{Json, extract::State};
+use axum::Json;
+use hypr_api_nango::{GoogleCalendar, NangoConnection};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 use crate::error::{CalendarError, Result};
-use crate::state::AppState;
-
-#[derive(Debug, Deserialize, ToSchema)]
-pub struct ListCalendarsRequest {
-    pub connection_id: String,
-}
 
 #[derive(Debug, Serialize, ToSchema)]
 pub struct ListCalendarsResponse {
@@ -17,7 +12,6 @@ pub struct ListCalendarsResponse {
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct ListEventsRequest {
-    pub connection_id: String,
     pub calendar_id: String,
     #[serde(default)]
     pub time_min: Option<String>,
@@ -42,7 +36,6 @@ pub struct ListEventsResponse {
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct CreateEventRequest {
-    pub connection_id: String,
     pub calendar_id: String,
     pub summary: String,
     pub start: EventDateTime,
@@ -82,7 +75,6 @@ pub struct CreateEventResponse {
 #[utoipa::path(
     post,
     path = "/calendars",
-    request_body = ListCalendarsRequest,
     responses(
         (status = 200, description = "Calendars fetched", body = ListCalendarsResponse),
         (status = 401, description = "Unauthorized"),
@@ -91,15 +83,9 @@ pub struct CreateEventResponse {
     tag = "calendar",
 )]
 pub async fn list_calendars(
-    State(state): State<AppState>,
-    Json(payload): Json<ListCalendarsRequest>,
+    nango: NangoConnection<GoogleCalendar>,
 ) -> Result<Json<ListCalendarsResponse>> {
-    let proxy = state
-        .nango
-        .integration("google-calendar")
-        .connection(&payload.connection_id);
-    let http = crate::nango_http::NangoHttpClient::new(proxy);
-    let client = hypr_google_calendar::GoogleCalendarClient::new(http);
+    let client = hypr_google_calendar::GoogleCalendarClient::new(nango.into_http());
 
     let response = client
         .list_calendars()
@@ -127,15 +113,10 @@ pub async fn list_calendars(
     tag = "calendar",
 )]
 pub async fn list_events(
-    State(state): State<AppState>,
+    nango: NangoConnection<GoogleCalendar>,
     Json(payload): Json<ListEventsRequest>,
 ) -> Result<Json<ListEventsResponse>> {
-    let proxy = state
-        .nango
-        .integration("google-calendar")
-        .connection(&payload.connection_id);
-    let http = crate::nango_http::NangoHttpClient::new(proxy);
-    let client = hypr_google_calendar::GoogleCalendarClient::new(http);
+    let client = hypr_google_calendar::GoogleCalendarClient::new(nango.into_http());
 
     let time_min = payload
         .time_min
@@ -196,15 +177,10 @@ pub async fn list_events(
     tag = "calendar",
 )]
 pub async fn create_event(
-    State(state): State<AppState>,
+    nango: NangoConnection<GoogleCalendar>,
     Json(payload): Json<CreateEventRequest>,
 ) -> Result<Json<CreateEventResponse>> {
-    let proxy = state
-        .nango
-        .integration("google-calendar")
-        .connection(&payload.connection_id);
-    let http = crate::nango_http::NangoHttpClient::new(proxy);
-    let client = hypr_google_calendar::GoogleCalendarClient::new(http);
+    let client = hypr_google_calendar::GoogleCalendarClient::new(nango.into_http());
 
     let req = hypr_google_calendar::CreateEventRequest {
         calendar_id: payload.calendar_id,

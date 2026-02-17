@@ -121,7 +121,7 @@ export function SearchableSelect({
                   onSelect={() => handleSelect(option.value)}
                   className={cn([
                     "cursor-pointer",
-                    "focus:bg-neutral-200! hover:bg-neutral-200! aria-selected:bg-transparent",
+                    "hover:bg-neutral-200! data-[selected=true]:bg-neutral-200!",
                   ])}
                 >
                   <span className="truncate flex-1">{option.label}</span>

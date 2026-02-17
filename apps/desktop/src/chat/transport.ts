@@ -4,10 +4,11 @@ import {
   type LanguageModel,
   stepCountIs,
   ToolLoopAgent,
+  type ToolSet,
 } from "ai";
 
-import { type ToolRegistry } from "../contexts/tool";
 import type { HyprUIMessage } from "./types";
+import { isRecord } from "./utils";
 
 const MAX_TOOL_STEPS = 5;
 const MESSAGE_WINDOW_THRESHOLD = 20;
@@ -15,26 +16,18 @@ const MESSAGE_WINDOW_SIZE = 10;
 
 export class CustomChatTransport implements ChatTransport<HyprUIMessage> {
   constructor(
-    private registry: ToolRegistry,
     private model: LanguageModel,
-    private chatType: "general" | "support",
+    private tools: ToolSet,
     private systemPrompt?: string,
-    private extraTools?: Record<string, any>,
   ) {}
 
   sendMessages: ChatTransport<HyprUIMessage>["sendMessages"] = async (
     options,
   ) => {
-    const scope = this.chatType === "support" ? "chat-support" : "chat-general";
-    const tools = {
-      ...this.registry.getTools(scope),
-      ...this.extraTools,
-    };
-
     const agent = new ToolLoopAgent({
       model: this.model,
       instructions: this.systemPrompt,
-      tools,
+      tools: this.tools,
       stopWhen: stepCountIs(MAX_TOOL_STEPS),
       prepareStep: async ({ messages }) => {
         if (messages.length > MESSAGE_WINDOW_THRESHOLD) {
@@ -58,7 +51,17 @@ export class CustomChatTransport implements ChatTransport<HyprUIMessage> {
       },
       onError: (error: unknown) => {
         console.error(error);
-        return error instanceof Error ? error.message : String(error);
+        if (error instanceof Error) {
+          return `${error.name}: ${error.message}`;
+        }
+        if (isRecord(error) && typeof error.message === "string") {
+          return error.message;
+        }
+        try {
+          return JSON.stringify(error);
+        } catch {
+          return String(error);
+        }
       },
     });
   };

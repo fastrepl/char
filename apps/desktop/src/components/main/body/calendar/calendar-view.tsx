@@ -35,7 +35,7 @@ import { safeParseDate } from "@hypr/utils";
 import { cn, TZDate } from "@hypr/utils";
 
 import { useConfigValue } from "../../../../config/use-config";
-import { useEvent } from "../../../../hooks/tinybase";
+import { useEvent, useIgnoredEvents } from "../../../../hooks/tinybase";
 import { usePermission } from "../../../../hooks/usePermissions";
 import * as main from "../../../../store/tinybase/store/main";
 import { getOrCreateSessionForEventId } from "../../../../store/tinybase/store/sessions";
@@ -135,6 +135,7 @@ function useCalendarData(): CalendarData {
     main.QUERIES.timelineSessions,
     main.STORE_ID,
   );
+  const { isIgnored } = useIgnoredEvents();
 
   return useMemo(() => {
     const eventIdsByDate: Record<string, string[]> = {};
@@ -142,11 +143,13 @@ function useCalendarData(): CalendarData {
 
     if (eventsTable) {
       for (const [eventId, row] of Object.entries(eventsTable)) {
-        if (!row.title || row.ignored) continue;
+        if (!row.title) continue;
         const raw = safeParseDate(row.started_at);
         if (!raw) continue;
-        const key = format(toTz(raw, tz), "yyyy-MM-dd");
-        (eventIdsByDate[key] ??= []).push(eventId);
+        const day = format(toTz(raw, tz), "yyyy-MM-dd");
+        if (isIgnored(row.tracking_id_event, row.recurrence_series_id, day))
+          continue;
+        (eventIdsByDate[day] ??= []).push(eventId);
       }
 
       for (const ids of Object.values(eventIdsByDate)) {
@@ -160,7 +163,7 @@ function useCalendarData(): CalendarData {
 
     if (sessionsTable) {
       for (const [sessionId, row] of Object.entries(sessionsTable)) {
-        if (row.event_id || !row.title) continue;
+        if (row.event_json || !row.title) continue;
         const raw = safeParseDate(row.created_at);
         if (!raw) continue;
         const key = format(toTz(raw, tz), "yyyy-MM-dd");
@@ -169,7 +172,7 @@ function useCalendarData(): CalendarData {
     }
 
     return { eventIdsByDate, sessionIdsByDate };
-  }, [eventsTable, sessionsTable, tz]);
+  }, [eventsTable, sessionsTable, tz, isIgnored]);
 }
 
 export function CalendarView() {
@@ -505,7 +508,7 @@ function EventChip({ eventId }: { eventId: string }) {
     (event?.calendar_id as string) ?? null,
   );
 
-  if (!event || !event.title || event.ignored) {
+  if (!event || !event.title) {
     return null;
   }
 
@@ -564,6 +567,7 @@ function EventPopoverContent({ eventId }: { eventId: string }) {
   const event = useEvent(eventId);
   const store = main.UI.useStore(main.STORE_ID);
   const openNew = useTabs((state) => state.openNew);
+  const tz = useTimezone();
 
   const eventRow = main.UI.useResultRow(
     main.QUERIES.timelineEvents,
@@ -574,9 +578,9 @@ function EventPopoverContent({ eventId }: { eventId: string }) {
   const handleOpen = useCallback(() => {
     if (!store) return;
     const title = (eventRow?.title as string) || "Untitled";
-    const sessionId = getOrCreateSessionForEventId(store, eventId, title);
+    const sessionId = getOrCreateSessionForEventId(store, eventId, title, tz);
     openNew({ type: "sessions", id: sessionId });
-  }, [store, eventId, eventRow?.title, openNew]);
+  }, [store, eventId, eventRow?.title, openNew, tz]);
 
   if (!event) {
     return null;

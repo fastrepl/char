@@ -52,7 +52,7 @@ const mainFeatures = [
     icon: "mdi:text-box-outline",
     title: "Real-time transcription",
     description:
-      "While you take notes, Hyprnote listens and generates a live transcript",
+      "While you take notes, Char listens and generates a live transcript",
     image: "/api/images/hyprnote/transcript.jpg",
     muxPlaybackId: "rbkYuZpGJGLHx023foq9DCSt3pY1RegJU5PvMCkRE3rE",
     link: "/product/ai-notetaking/#transcription",
@@ -61,7 +61,7 @@ const mainFeatures = [
     icon: "mdi:file-document-outline",
     title: "AI summary",
     description:
-      "Hyprnote combines your notes and the transcript to create a perfect summary",
+      "Char combines your notes and the transcript to create a perfect summary",
     image: "/api/images/hyprnote/summary.jpg",
     muxPlaybackId: "lKr5l1fWGNnRqOehiz15mV79VHtFOCiuO9urmgqs6V8",
     link: "/product/ai-notetaking/#summaries",
@@ -161,10 +161,9 @@ function Component() {
 
 function YCombinatorBanner() {
   return (
-    <a
-      href="https://www.ycombinator.com/companies/hyprnote"
-      target="_blank"
-      rel="noopener noreferrer"
+    <Link
+      to="/blog/$slug/"
+      params={{ slug: "hyprnote-is-now-char" }}
       className="group"
     >
       <div
@@ -176,17 +175,9 @@ function YCombinatorBanner() {
           "hover:bg-stone-50 transition-all",
         ])}
       >
-        <span className="group-hover:font-medium">Backed by</span>
-        <Image
-          src="/icons/yc_stone.svg"
-          alt="Y Combinator"
-          width={16}
-          height={16}
-          className="h-4 w-4 inline-block group-hover:scale-105"
-        />
-        <span className="group-hover:font-medium">Y Combinator</span>
+        <span className="group-hover:font-medium">Hyprnote is now Char.</span>
       </div>
-    </a>
+    </Link>
   );
 }
 
@@ -791,9 +782,9 @@ export function HowItWorksSection() {
         <div className="border-r border-neutral-100 flex flex-col overflow-clip">
           <div className="p-8 flex flex-col gap-4">
             <p className="text-lg font-serif text-neutral-600 leading-relaxed">
-              <span className="font-semibold">While you take notes,</span>{" "}
-              Hyprnote listens and keeps track of everything that happens during
-              the meeting.
+              <span className="font-semibold">While you take notes,</span> Char
+              listens and keeps track of everything that happens during the
+              meeting.
             </p>
           </div>
           <div className="flex-1 flex items-end justify-center px-8 pb-0 bg-stone-50/30">
@@ -824,7 +815,7 @@ export function HowItWorksSection() {
           <div className="p-8 flex flex-col gap-4">
             <p className="text-lg font-serif text-neutral-600 leading-relaxed">
               <span className="font-semibold">After the meeting is over,</span>{" "}
-              Hyprnote combines your notes with transcripts to create a perfect
+              Char combines your notes with transcripts to create a perfect
               summary.
             </p>
           </div>
@@ -913,9 +904,9 @@ export function HowItWorksSection() {
         <div className="border-b border-neutral-100">
           <div className="p-6 pb-2">
             <p className="text-base font-serif text-neutral-600 leading-relaxed mb-4">
-              <span className="font-semibold">While you take notes,</span>{" "}
-              Hyprnote listens and keeps track of everything that happens during
-              the meeting.
+              <span className="font-semibold">While you take notes,</span> Char
+              listens and keeps track of everything that happens during the
+              meeting.
             </p>
           </div>
           <div className="px-6 pb-0 bg-stone-50/30 overflow-clip">
@@ -949,7 +940,7 @@ export function HowItWorksSection() {
           <div className="p-6 pb-2">
             <p className="text-base font-serif text-neutral-600 leading-relaxed mb-4">
               <span className="font-semibold">After the meeting is over,</span>{" "}
-              Hyprnote combines your notes with transcripts to create a perfect
+              Char combines your notes with transcripts to create a perfect
               summary.
             </p>
           </div>
@@ -1129,7 +1120,7 @@ export function MainFeaturesSection({
         <div className="mb-6 mx-auto size-28 shadow-xl border border-neutral-100 flex justify-center items-center rounded-4xl bg-transparent">
           <Image
             src="/api/images/hyprnote/icon.png"
-            alt="Hyprnote"
+            alt="Char"
             width={96}
             height={96}
             className="size-24 rounded-3xl border border-neutral-100"
@@ -1487,7 +1478,7 @@ export function TemplatesSection() {
           A template for every meeting
         </h2>
         <p className="text-neutral-600">
-          Hyprnote adapts to how you work with customizable templates for any
+          Char adapts to how you work with customizable templates for any
           meeting type
         </p>
       </div>
@@ -1497,7 +1488,8 @@ export function TemplatesSection() {
 
       <div className="text-center py-8 border-t border-neutral-100">
         <Link
-          to="/templates/"
+          to="/gallery/"
+          search={{ type: "template" }}
           className={cn([
             "inline-flex items-center gap-2",
             "text-stone-600 hover:text-stone-800",
@@ -1599,7 +1591,7 @@ function FAQSection() {
         </div>
 
         <FAQ>
-          <FAQItem question="What languages does Hyprnote support?">
+          <FAQItem question="What languages does Char support?">
             45+ languages including English, Spanish, French, German, Japanese,
             Mandarin, and more.
           </FAQItem>
@@ -1609,20 +1601,20 @@ function FAQSection() {
             summarized notes.
           </FAQItem>
 
-          <FAQItem question="Does Hyprnote train AI models on my data?">
-            No. Hyprnote does not use your recordings, transcripts, or notes to
+          <FAQItem question="Does Char train AI models on my data?">
+            No. Char does not use your recordings, transcripts, or notes to
             train AI models. When using cloud providers, your data is processed
-            according to their privacy policies, but Hyprnote itself never
-            collects or uses your data for training.
+            according to their privacy policies, but Char itself never collects
+            or uses your data for training.
           </FAQItem>
 
-          <FAQItem question="Is Hyprnote safe?">
-            Hyprnote doesn't store your conversations. Every meeting audio,
+          <FAQItem question="Is Char safe?">
+            Char doesn't store your conversations. Every meeting audio,
             transcript, and note is a file on your computer. You decide if your
             data ever leaves your device.
           </FAQItem>
 
-          <FAQItem question="How is Hyprnote different from other AI note-takers?">
+          <FAQItem question="How is Char different from other AI note-takers?">
             Plain markdown files instead of proprietary databases. System audio
             capture instead of meeting bots. Your choice of AI provider instead
             of vendor lock-in. Open source instead of a black box.
@@ -1661,10 +1653,10 @@ function ManifestoSection() {
                 you and your team.
               </p>
               <p>
-                Hyprnote exists to preserve what makes us human: conversations
-                that spark ideas, collaborations that move work forward. We
-                build tools that amplify human agency, not replace it. No ghost
-                bots. No silent note lurkers. Just people, thinking together.
+                Char exists to preserve what makes us human: conversations that
+                spark ideas, collaborations that move work forward. We build
+                tools that amplify human agency, not replace it. No ghost bots.
+                No silent note lurkers. Just people, thinking together.
               </p>
               <p>
                 We stand with those who value real connection and purposeful
@@ -1692,7 +1684,7 @@ function ManifestoSection() {
             <div className="flex flex-col gap-4">
               <div>
                 <p className="text-base text-neutral-600 font-medium italic font-serif">
-                  Hyprnote
+                  Char
                 </p>
                 <p className="text-sm text-neutral-500">
                   John Jeong, Yujong Lee
@@ -1702,7 +1694,7 @@ function ManifestoSection() {
               <div>
                 <Image
                   src="/api/images/hyprnote/signature-dark.svg"
-                  alt="Hyprnote Signature"
+                  alt="Char Signature"
                   width={124}
                   height={60}
                   layout="constrained"
@@ -1718,8 +1710,7 @@ function ManifestoSection() {
 }
 
 function BlogSection() {
-  const sortedArticles = allArticles
-    .filter((a) => import.meta.env.DEV || a.published !== false)
+  const sortedArticles = [...allArticles]
     .sort((a, b) => {
       const aDate = a.date;
       const bDate = b.date;
@@ -1738,7 +1729,7 @@ function BlogSection() {
           Latest from our blog
         </h2>
         <p className="text-neutral-600 max-w-lg mx-auto">
-          Insights, updates, and stories from the Hyprnote team
+          Insights, updates, and stories from the Char team
         </p>
       </div>
 
@@ -1746,7 +1737,7 @@ function BlogSection() {
         {sortedArticles.map((article) => {
           const ogImage =
             article.coverImage ||
-            `https://hyprnote.com/og?type=blog&title=${encodeURIComponent(article.title)}${article.author ? `&author=${encodeURIComponent(article.author)}` : ""}${article.date ? `&date=${encodeURIComponent(new Date(article.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }))}` : ""}&v=1`;
+            `https://hyprnote.com/og?type=blog&title=${encodeURIComponent(article.title ?? "")}${article.author.length > 0 ? `&author=${encodeURIComponent(article.author.join(", "))}` : ""}${article.date ? `&date=${encodeURIComponent(new Date(article.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }))}` : ""}&v=1`;
 
           return (
             <Link
@@ -1864,7 +1855,7 @@ export function CTASection({
         <div className="mb-4 size-40 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[48px] bg-transparent">
           <Image
             src="/api/images/hyprnote/icon.png"
-            alt="Hyprnote"
+            alt="Char"
             width={144}
             height={144}
             className="size-36 mx-auto rounded-[40px] border border-neutral-100"

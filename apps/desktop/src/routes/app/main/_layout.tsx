@@ -3,12 +3,12 @@ import {
   Outlet,
   useRouteContext,
 } from "@tanstack/react-router";
-import { usePrevious } from "@uidotdev/usehooks";
+import { isTauri } from "@tauri-apps/api/core";
 import { useCallback, useEffect, useRef } from "react";
 
+import { hydrateSessionContextFromFs } from "../../../chat/session-context-hydrator";
 import { buildChatTools } from "../../../chat/tools";
 import { AITaskProvider } from "../../../contexts/ai-task";
-import { useListener } from "../../../contexts/listener";
 import { NotificationProvider } from "../../../contexts/notifications";
 import { useSearchEngine } from "../../../contexts/search/engine";
 import { SearchEngineProvider } from "../../../contexts/search/engine";
@@ -20,11 +20,13 @@ import { useDeeplinkHandler } from "../../../hooks/useDeeplinkHandler";
 import { deleteSessionCascade } from "../../../store/tinybase/store/deleteSession";
 import * as main from "../../../store/tinybase/store/main";
 import { isSessionEmpty } from "../../../store/tinybase/store/sessions";
+import { listenerStore } from "../../../store/zustand/listener/instance";
 import {
   restorePinnedTabsToStore,
   restoreRecentlyOpenedToStore,
   useTabs,
 } from "../../../store/zustand/tabs";
+import { commands } from "../../../types/tauri.gen";
 
 export const Route = createFileRoute("/app/main/_layout")({
   component: Component,
@@ -43,9 +45,6 @@ function Component() {
     invalidateResource,
   } = useTabs();
   const hasOpenedInitialTab = useRef(false);
-  const liveSessionId = useListener((state) => state.live.sessionId);
-  const liveStatus = useListener((state) => state.live.status);
-  const prevLiveStatus = usePrevious(liveStatus);
   const store = main.UI.useStore(main.STORE_ID);
   const indexes = main.UI.useIndexes(main.STORE_ID);
 
@@ -59,6 +58,10 @@ function Component() {
     const initializeTabs = async () => {
       if (!hasOpenedInitialTab.current) {
         hasOpenedInitialTab.current = true;
+        if (!isTauri()) {
+          openDefaultEmptyTab();
+          return;
+        }
         await restorePinnedTabsToStore(
           openNew,
           pin,
@@ -69,7 +72,12 @@ function Component() {
         });
         const currentTabs = useTabs.getState().tabs;
         if (currentTabs.length === 0) {
-          openDefaultEmptyTab();
+          const result = await commands.getOnboardingNeeded();
+          if (result.status === "ok" && result.data) {
+            openNew({ type: "onboarding" });
+          } else {
+            openDefaultEmptyTab();
+          }
         }
       }
     };
@@ -77,20 +85,6 @@ function Component() {
     initializeTabs();
     registerOnEmpty(openDefaultEmptyTab);
   }, [openNew, pin, openDefaultEmptyTab, registerOnEmpty]);
-
-  useEffect(() => {
-    const justStartedListening =
-      prevLiveStatus !== "active" && liveStatus === "active";
-    if (justStartedListening && liveSessionId) {
-      const currentTabs = useTabs.getState().tabs;
-      const sessionTab = currentTabs.find(
-        (t) => t.type === "sessions" && t.id === liveSessionId,
-      );
-      if (sessionTab && !sessionTab.pinned) {
-        pin(sessionTab);
-      }
-    }
-  }, [liveStatus, prevLiveStatus, liveSessionId, pin]);
 
   useEffect(() => {
     registerCanClose(() => true);
@@ -103,7 +97,10 @@ function Component() {
     registerOnClose((tab) => {
       if (tab.type === "sessions") {
         const sessionId = tab.id;
-        if (isSessionEmpty(store, sessionId)) {
+        const isBatchRunning =
+          listenerStore.getState().getSessionMode(sessionId) ===
+          "running_batch";
+        if (!isBatchRunning && isSessionEmpty(store, sessionId)) {
           invalidateResource("sessions", sessionId);
           void deleteSessionCascade(store, indexes, sessionId);
         }
@@ -135,8 +132,18 @@ function Component() {
 
 function ToolRegistration() {
   const { search } = useSearchEngine();
+  const store = main.UI.useStore(main.STORE_ID);
 
-  useRegisterTools("chat-general", () => buildChatTools({ search }), [search]);
+  useRegisterTools(
+    "chat-general",
+    () =>
+      buildChatTools({
+        search,
+        resolveSessionContext: (sessionId) =>
+          hydrateSessionContextFromFs(store, sessionId),
+      }),
+    [search, store],
+  );
 
   return null;
 }

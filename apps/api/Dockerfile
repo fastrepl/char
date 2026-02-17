@@ -28,6 +28,7 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
     cargo chef cook --release --recipe-path recipe.json -p api
 COPY Cargo.toml Cargo.lock ./
 RUN sed -i '/^members = \[/,/^\]/c\members = ["apps/api", "crates/*"]' Cargo.toml
+COPY .git .git
 COPY crates crates
 COPY apps/api apps/api
 RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \

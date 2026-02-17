@@ -45,7 +45,7 @@ export function LeftSidebar() {
         className={cn([
           "flex flex-row items-center",
           "w-full h-9 py-1",
-          isLinux ? "pl-3 justify-between" : "pl-18 justify-end",
+          isLinux ? "pl-3 justify-between" : "pl-20 justify-end",
           "shrink-0",
           "rounded-xl bg-neutral-50",
         ])}

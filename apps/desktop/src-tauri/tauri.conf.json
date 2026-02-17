@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Hyprnote Dev",
+  "productName": "Char Dev",
   "mainBinaryName": "hyprnote-dev",
   "identifier": "com.hyprnote.dev",
   "build": {
@@ -59,7 +59,9 @@
   },
   "plugins": {
     "deep-link": {
-      "desktop": { "schemes": ["hyprnote"] }
+      "desktop": {
+        "schemes": ["hyprnote", "char"]
+      }
     },
     "updater": {
       "active": false,

@@ -5,7 +5,7 @@ import { nangoMiddleware } from "@/middleware/nango";
 
 const CreateConnectSessionInput = z.object({
   userId: z.string().min(1),
-  userEmail: z.string().email().optional(),
+  userEmail: z.email().optional(),
   userName: z.string().optional(),
   organizationId: z.string().optional(),
   allowedIntegrations: z.array(z.string()).optional(),

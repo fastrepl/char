@@ -1,8 +1,10 @@
 mod auth;
 mod env;
 mod openapi;
+mod rate_limit;
 
 use std::net::SocketAddr;
+use std::num::NonZeroU32;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -36,14 +38,45 @@ async fn app() -> Router {
 
     let llm_config =
         hypr_llm_proxy::LlmProxyConfig::new(&env.llm).with_analytics(analytics.clone());
-    let stt_config = hypr_transcribe_proxy::SttProxyConfig::new(&env.stt).with_analytics(analytics);
+    let stt_config = hypr_transcribe_proxy::SttProxyConfig::new(&env.stt, &env.supabase)
+        .with_analytics(analytics);
+
+    let stt_rate_limit = rate_limit::RateLimitState::builder()
+        .pro(
+            governor::Quota::with_period(Duration::from_mins(5))
+                .unwrap()
+                .allow_burst(NonZeroU32::new(20).unwrap()),
+        )
+        .free(
+            governor::Quota::with_period(Duration::from_hours(24))
+                .unwrap()
+                .allow_burst(NonZeroU32::new(3).unwrap()),
+        )
+        .build();
+    let llm_rate_limit = rate_limit::RateLimitState::builder()
+        .pro(
+            governor::Quota::with_period(Duration::from_secs(1))
+                .unwrap()
+                .allow_burst(NonZeroU32::new(30).unwrap()),
+        )
+        .free(
+            governor::Quota::with_period(Duration::from_hours(12))
+                .unwrap()
+                .allow_burst(NonZeroU32::new(5).unwrap()),
+        )
+        .build();
+
     let auth_state_pro =
         AuthState::new(&env.supabase.supabase_url).with_required_entitlement("hyprnote_pro");
     let auth_state_basic = AuthState::new(&env.supabase.supabase_url);
     let auth_state_support = AuthState::new(&env.supabase.supabase_url);
 
-    let calendar_config = hypr_api_calendar::CalendarConfig::new(&env.nango);
-    let nango_config = hypr_api_nango::NangoConfig::new(&env.nango);
+    let nango_config = hypr_api_nango::NangoConfig::new(
+        &env.nango,
+        &env.supabase,
+        Some(env.supabase.supabase_service_role_key.clone()),
+    );
+    let nango_connection_state = hypr_api_nango::NangoConnectionState::from_config(&nango_config);
     let subscription_config =
         hypr_api_subscription::SubscriptionConfig::new(&env.supabase, &env.stripe);
     let support_config = hypr_api_support::SupportConfig::new(
@@ -52,29 +85,55 @@ async fn app() -> Router {
         &env.support_database,
         &env.stripe,
         &env.supabase,
+        &env.chatwoot,
         auth_state_support.clone(),
     );
+    let research_config = hypr_api_research::ResearchConfig {
+        exa_api_key: env.exa_api_key.clone(),
+        jina_api_key: env.jina_api_key.clone(),
+    };
 
-    let webhook_routes = Router::new().nest(
-        "/nango",
-        hypr_api_nango::webhook_router(nango_config.clone()),
-    );
+    let webhook_routes = Router::new()
+        .nest(
+            "/nango",
+            hypr_api_nango::webhook_router(nango_config.clone()),
+        )
+        .nest(
+            "/stt",
+            hypr_transcribe_proxy::callback_router(stt_config.clone()),
+        );
 
     let pro_routes = Router::new()
-        .merge(hypr_transcribe_proxy::listen_router(stt_config.clone()))
-        .merge(hypr_llm_proxy::chat_completions_router(llm_config.clone()))
-        .nest("/stt", hypr_transcribe_proxy::router(stt_config))
-        .nest("/llm", hypr_llm_proxy::router(llm_config))
-        .nest("/calendar", hypr_api_calendar::router(calendar_config))
+        .merge(hypr_api_research::router(research_config))
+        .nest("/calendar", hypr_api_calendar::router())
         .nest("/nango", hypr_api_nango::router(nango_config.clone()))
+        .layer(axum::Extension(nango_connection_state))
         .route_layer(middleware::from_fn(auth::sentry_and_analytics))
         .route_layer(middleware::from_fn_with_state(
             auth_state_pro,
             auth::require_auth,
         ));
 
+    let stt_routes = Router::new()
+        .merge(hypr_transcribe_proxy::listen_router(stt_config.clone()))
+        .nest("/stt", hypr_transcribe_proxy::router(stt_config))
+        .route_layer(middleware::from_fn_with_state(
+            stt_rate_limit,
+            rate_limit::rate_limit,
+        ));
+
+    let llm_routes = Router::new()
+        .merge(hypr_llm_proxy::chat_completions_router(llm_config.clone()))
+        .nest("/llm", hypr_llm_proxy::router(llm_config))
+        .route_layer(middleware::from_fn_with_state(
+            llm_rate_limit,
+            rate_limit::rate_limit,
+        ));
+
     let subscription_router = hypr_api_subscription::router(subscription_config);
     let auth_routes = Router::new()
+        .merge(stt_routes)
+        .merge(llm_routes)
         .nest("/subscription", subscription_router.clone())
         .nest("/rpc", subscription_router.clone())
         .nest("/billing", subscription_router)
@@ -200,7 +259,7 @@ fn main() -> std::io::Result<()> {
 
     let _guard = sentry::init(sentry::ClientOptions {
         dsn: env.sentry_dsn.as_ref().and_then(|s| s.parse().ok()),
-        release: option_env!("APP_VERSION").map(|v| format!("hyprnote-ai@{}", v).into()),
+        release: option_env!("APP_VERSION").map(|v| format!("hyprnote-api@{}", v).into()),
         environment: Some(
             if cfg!(debug_assertions) {
                 "development"
@@ -220,7 +279,7 @@ fn main() -> std::io::Result<()> {
     });
 
     sentry::configure_scope(|scope| {
-        scope.set_tag("service", "hyprnote-ai");
+        scope.set_tag("service", "hyprnote-api");
     });
 
     tracing_subscriber::registry()
@@ -232,7 +291,7 @@ fn main() -> std::io::Result<()> {
         .with(sentry::integrations::tracing::layer())
         .init();
 
-    hypr_transcribe_proxy::ApiKeys::from(&env.stt).log_configured_providers();
+    hypr_transcribe_proxy::ApiKeys::from(&env.stt.stt).log_configured_providers();
 
     tokio::runtime::Builder::new_multi_thread()
         .enable_all()

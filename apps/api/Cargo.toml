@@ -9,6 +9,7 @@ hypr-api-auth = { workspace = true }
 hypr-api-calendar = { workspace = true }
 hypr-api-env = { workspace = true }
 hypr-api-nango = { workspace = true }
+hypr-api-research = { workspace = true }
 hypr-api-subscription = { workspace = true }
 hypr-api-support = { workspace = true }
 hypr-llm-proxy = { workspace = true }
@@ -29,6 +30,7 @@ url = { workspace = true }
 
 dotenvy = { workspace = true }
 envy = { workspace = true }
+governor = { workspace = true }
 jsonwebtoken = { workspace = true }
 sentry = { workspace = true, features = ["tower", "tower-axum-matched-path", "tracing"] }
 tower = { workspace = true }

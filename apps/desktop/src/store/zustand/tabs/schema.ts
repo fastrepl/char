@@ -109,9 +109,10 @@ export type Tab =
       state: SearchState;
     })
   | (BaseTab & {
-      type: "chat";
+      type: "chat_support";
       state: ChatState;
-    });
+    })
+  | (BaseTab & { type: "onboarding" });
 
 export const getDefaultState = (tab: TabInput): Tab => {
   const base = { active: false, slotId: "", pinned: false };
@@ -207,16 +208,17 @@ export const getDefaultState = (tab: TabInput): Tab => {
         type: "search",
         state: tab.state ?? { selectedTypes: null, initialQuery: null },
       };
-    case "chat":
+    case "chat_support":
       return {
         ...base,
-        type: "chat",
+        type: "chat_support",
         state: tab.state ?? {
           groupId: null,
           initialMessage: null,
-          chatType: null,
         },
       };
+    case "onboarding":
+      return { ...base, type: "onboarding" };
     default:
       const _exhaustive: never = tab;
       return _exhaustive;
@@ -257,8 +259,10 @@ export const uniqueIdfromTab = (tab: Tab): string => {
       return `ai`;
     case "search":
       return `search`;
-    case "chat":
-      return `chat`;
+    case "chat_support":
+      return `chat_support`;
+    case "onboarding":
+      return `onboarding`;
   }
 };
 

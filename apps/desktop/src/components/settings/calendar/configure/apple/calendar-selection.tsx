@@ -20,7 +20,9 @@ import { useSync } from "./context";
 import { Section } from "./index";
 import { SyncIndicator } from "./sync";
 
-export function AppleCalendarSelection() {
+export function AppleCalendarSelection({
+  calendarClassName,
+}: { calendarClassName?: string } = {}) {
   const { groups, handleToggle, handleRefresh, isLoading } =
     useAppleCalendarSelection();
 
@@ -46,12 +48,16 @@ export function AppleCalendarSelection() {
       }
     >
       <div className="pt-0.5"></div>
-      <CalendarSelection groups={groups} onToggle={handleToggle} />
+      <CalendarSelection
+        groups={groups}
+        onToggle={handleToggle}
+        className={calendarClassName}
+      />
     </Section>
   );
 }
 
-function useAppleCalendarSelection() {
+export function useAppleCalendarSelection() {
   const { scheduleSync, scheduleDebouncedSync, cancelDebouncedSync } =
     useSync();
 

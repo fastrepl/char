@@ -1,6 +1,7 @@
 mod config;
 mod mcp;
+mod routes;
 mod state;
 
 pub use config::ResearchConfig;
-pub use mcp::mcp_service;
+pub use routes::router;

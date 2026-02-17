@@ -7,10 +7,12 @@ import { events as windowsEvents } from "@hypr/plugin-windows";
 import { AuthProvider } from "../auth";
 import { BillingProvider } from "../billing";
 import { NetworkProvider } from "../contexts/network";
-import { useProSettingsSync } from "../hooks/useProSettingsSync";
 import { useTabs } from "../store/zustand/tabs";
 import { useNewNote } from "./main/shared";
-import { UndoDeleteKeyboardHandler } from "./main/sidebar/toast/undo-delete-toast";
+import {
+  UndoDeleteKeyboardHandler,
+  UndoDeleteToast,
+} from "./main/sidebar/toast/undo-delete-toast";
 
 export default function MainAppLayout() {
   useNavigationEvents();
@@ -27,12 +29,11 @@ export default function MainAppLayout() {
 }
 
 function MainAppContent() {
-  useProSettingsSync();
-
   return (
     <>
       <Outlet />
       <UndoDeleteKeyboardHandler />
+      <UndoDeleteToast />
     </>
   );
 }
@@ -89,12 +90,12 @@ const useNavigationEvents = () => {
           openNewNote();
         } else {
           openNew(payload.tab);
-          if (payload.tab.type === "chat") {
+          if (payload.tab.type === "chat_support") {
             if (payload.tab.state) {
-              const { tabs, updateChatTabState } = useTabs.getState();
-              const chatTab = tabs.find((t) => t.type === "chat");
+              const { tabs, updateChatSupportTabState } = useTabs.getState();
+              const chatTab = tabs.find((t) => t.type === "chat_support");
               if (chatTab) {
-                updateChatTabState(chatTab, payload.tab.state);
+                updateChatSupportTabState(chatTab, payload.tab.state);
               }
             }
             transitionChatMode({ type: "OPEN_TAB" });

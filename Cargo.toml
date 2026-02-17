@@ -22,6 +22,7 @@ exclude = ["plugins/cli2", "plugins/db", "plugins/export"]
 
 [workspace.dependencies]
 hypr-aec = { path = "crates/aec", package = "aec" }
+hypr-afconvert = { path = "crates/afconvert", package = "afconvert" }
 hypr-agc = { path = "crates/agc", package = "agc" }
 hypr-am = { path = "crates/am", package = "am" }
 hypr-am2 = { path = "crates/am2", package = "am2" }
@@ -31,6 +32,7 @@ hypr-api-calendar = { path = "crates/api-calendar", package = "api-calendar" }
 hypr-api-env = { path = "crates/api-env", package = "api-env" }
 hypr-api-nango = { path = "crates/api-nango", package = "api-nango" }
 hypr-api-research = { path = "crates/api-research", package = "api-research" }
+hypr-api-storage = { path = "crates/api-storage", package = "api-storage" }
 hypr-api-subscription = { path = "crates/api-subscription", package = "api-subscription" }
 hypr-api-support = { path = "crates/api-support", package = "api-support" }
 hypr-api-sync = { path = "crates/api-sync", package = "api-sync" }
@@ -42,6 +44,7 @@ hypr-audio-interface = { path = "crates/audio-interface", package = "audio-inter
 hypr-audio-utils = { path = "crates/audio-utils", package = "audio-utils" }
 hypr-buffer = { path = "crates/buffer", package = "buffer" }
 hypr-bundle = { path = "crates/bundle", package = "bundle" }
+hypr-chatwoot = { path = "crates/chatwoot", package = "chatwoot" }
 hypr-data = { path = "crates/data", package = "data" }
 hypr-db-core = { path = "crates/db-core", package = "db-core" }
 hypr-db-parser = { path = "crates/db-parser", package = "db-parser" }
@@ -59,11 +62,13 @@ hypr-frontmatter = { path = "crates/frontmatter", package = "frontmatter" }
 hypr-gbnf = { path = "crates/gbnf", package = "gbnf" }
 hypr-gguf = { path = "crates/gguf", package = "gguf" }
 hypr-google-calendar = { path = "crates/google-calendar", package = "google-calendar" }
+hypr-google-drive = { path = "crates/google-drive", package = "google-drive" }
 hypr-granola = { path = "crates/granola", package = "granola" }
 hypr-host = { path = "crates/host", package = "host" }
 hypr-http = { path = "crates/http", package = "hypr-http-utils" }
 hypr-importer-core = { path = "crates/importer-core", package = "importer-core" }
 hypr-intercept = { path = "crates/intercept", package = "intercept" }
+hypr-jina = { path = "crates/jina", package = "jina" }
 hypr-kyutai = { path = "crates/kyutai", package = "kyutai" }
 hypr-language = { path = "crates/language", package = "language" }
 hypr-llama = { path = "crates/llama", package = "llama" }
@@ -82,16 +87,19 @@ hypr-notion = { path = "crates/notion", package = "notion" }
 hypr-onnx = { path = "crates/onnx", package = "onnx" }
 hypr-openrouter = { path = "crates/openrouter", package = "openrouter" }
 hypr-openstatus = { path = "crates/openstatus", package = "openstatus" }
+hypr-porkbun = { path = "crates/porkbun", package = "porkbun" }
 hypr-posthog = { path = "crates/posthog", package = "posthog" }
 hypr-pyannote-cloud = { path = "crates/pyannote-cloud", package = "pyannote-cloud" }
 hypr-pyannote-local = { path = "crates/pyannote-local", package = "pyannote-local" }
 hypr-s3 = { path = "crates/s3", package = "s3" }
 hypr-slack = { path = "crates/slack", package = "slack" }
 hypr-supabase-auth = { path = "crates/supabase-auth", package = "supabase-auth" }
+hypr-supabase-storage = { path = "crates/supabase-storage", package = "supabase-storage" }
 hypr-tcc = { path = "crates/tcc", package = "tcc" }
 hypr-template-app = { path = "crates/template-app", package = "template-app" }
 hypr-template-app-legacy = { path = "crates/template-app-legacy", package = "template-app-legacy" }
 hypr-template-eval = { path = "crates/template-eval", package = "template-eval" }
+hypr-template-support = { path = "crates/template-support", package = "template-support" }
 hypr-tiptap = { path = "crates/tiptap", package = "tiptap" }
 hypr-transcribe-aws = { path = "crates/transcribe-aws", package = "transcribe-aws" }
 hypr-transcribe-azure = { path = "crates/transcribe-azure", package = "transcribe-azure" }
@@ -116,6 +124,7 @@ hypr-ws-utils = { path = "crates/ws-utils", package = "ws-utils" }
 owhisper-client = { path = "crates/owhisper-client", package = "owhisper-client" }
 owhisper-config = { path = "crates/owhisper-config", package = "owhisper-config" }
 owhisper-interface = { path = "crates/owhisper-interface", package = "owhisper-interface" }
+soniox = { path = "crates/soniox", package = "soniox" }
 
 tauri = "2.10"
 tauri-build = "2.5"
@@ -131,9 +140,9 @@ tauri-plugin-prevent-default = "4"
 tauri-plugin-process = "2.3"
 tauri-plugin-sentry = "0.5"
 tauri-plugin-shell = "2.3"
-tauri-plugin-single-instance = "2.3"
+tauri-plugin-single-instance = "2.4"
 tauri-plugin-store = "2.4"
-tauri-plugin-updater = "2.9"
+tauri-plugin-updater = "2.10"
 tauri-plugin-window-state = "2.4"
 
 tauri-plugin-analytics = { path = "plugins/analytics" }
@@ -170,6 +179,7 @@ tauri-plugin-overlay = { path = "plugins/overlay" }
 tauri-plugin-path2 = { path = "plugins/path2" }
 tauri-plugin-pdf = { path = "plugins/pdf" }
 tauri-plugin-permissions = { path = "plugins/permissions" }
+tauri-plugin-relay = { path = "plugins/relay" }
 tauri-plugin-screen = { path = "plugins/screen" }
 tauri-plugin-settings = { path = "plugins/settings" }
 tauri-plugin-sfx = { path = "plugins/sfx" }
@@ -187,8 +197,8 @@ async-stream = "0.3.6"
 futures-channel = "0.3.31"
 futures-core = "0.3.31"
 futures-util = "0.3.31"
-ractor = "0.14"
-ractor-supervisor = "0.1.9"
+hypr-supervisor = { path = "crates/supervisor", package = "supervisor" }
+ractor = "0.15.10"
 rayon = "1.11"
 reqwest = "0.13"
 reqwest-middleware = "0.5"
@@ -212,11 +222,12 @@ codes-iso-639 = "0.1.5"
 dirs = "6.0.0"
 dotenvy = "0.15.7"
 envy = "0.4"
+governor = "0.10.4"
 include_url_macro = "0.1.0"
 indoc = "2"
 isolang = "2.4"
 itertools = "0.14.0"
-jsonschema = "0.40"
+jsonschema = "0.41"
 lazy_static = "1.5.0"
 open = "5"
 regex = "1.12"
@@ -265,6 +276,7 @@ sentry = "=0.42.0"
 vergen-gix = "1"
 
 askama = "0.15"
+askama_parser = "0.15"
 markdown = "1"
 mdast_util_to_markdown = "0.0.2"
 minijinja = "2.7.0"
@@ -301,15 +313,15 @@ libsql = "0.9.24"
 
 block2 = "0.6"
 objc2 = "0.6"
-objc2-app-kit = "0.3"
-objc2-application-services = "0.3"
-objc2-av-foundation = "0.3"
-objc2-contacts = "0.3"
-objc2-core-foundation = "0.3"
-objc2-core-graphics = "0.3"
-objc2-event-kit = "0.3"
-objc2-foundation = "0.3"
-objc2-user-notifications = "0.3"
+objc2-app-kit = "0.3.2"
+objc2-application-services = "0.3.2"
+objc2-av-foundation = "0.3.2"
+objc2-contacts = "0.3.2"
+objc2-core-foundation = "0.3.2"
+objc2-core-graphics = "0.3.2"
+objc2-event-kit = "0.3.2"
+objc2-foundation = "0.3.2"
+objc2-user-notifications = "0.3.2"
 
 hmac = "0.12"
 sha2 = "0.10"

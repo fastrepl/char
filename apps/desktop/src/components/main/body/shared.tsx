@@ -9,9 +9,9 @@ import {
   PopoverTrigger,
 } from "@hypr/ui/components/ui/popover";
 import { Spinner } from "@hypr/ui/components/ui/spinner";
+import { useCmdKeyPressed } from "@hypr/ui/hooks/use-cmd-key-pressed";
 import { cn } from "@hypr/utils";
 
-import { useCmdKeyPressed } from "../../../hooks/useCmdKeyPressed";
 import { type Tab } from "../../../store/zustand/tabs";
 import { InteractiveButton } from "../../interactive-button";
 
@@ -70,6 +70,7 @@ type TabItemBaseProps = {
   finalizing?: boolean;
   pinned?: boolean;
   allowPin?: boolean;
+  allowClose?: boolean;
   isEmptyTab?: boolean;
   tabIndex?: number;
   accent?: TabAccent;
@@ -96,6 +97,7 @@ export function TabItemBase({
   finalizing = false,
   pinned = false,
   allowPin = true,
+  allowClose = true,
   isEmptyTab = false,
   tabIndex,
   accent = "neutral",
@@ -158,15 +160,15 @@ export function TabItemBase({
   }, [isConfirmationOpen, handleConfirmClose]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button === 1 && !active) {
+    if (e.button === 1 && !active && allowClose) {
       e.preventDefault();
       e.stopPropagation();
       handleCloseThis();
     }
   };
 
-  const contextMenu =
-    active || (selected && !isEmptyTab)
+  const contextMenu = allowClose
+    ? active || (selected && !isEmptyTab)
       ? [
           { id: "close-tab", text: "Close", action: handleAttemptClose },
           ...(allowPin
@@ -202,7 +204,8 @@ export function TabItemBase({
                   : { id: "pin-tab", text: "Pin tab", action: handlePinThis },
               ]
             : []),
-        ];
+        ]
+    : [];
 
   const showShortcut = isCmdPressed && tabIndex !== undefined;
 
@@ -258,25 +261,27 @@ export function TabItemBase({
                 icon
               )}
             </div>
-            <div
-              className={cn([
-                "absolute inset-0 flex items-center justify-center transition-opacity duration-200",
-                isHovered || isConfirmationOpen ? "opacity-100" : "opacity-0",
-              ])}
-            >
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleAttemptClose();
-                }}
+            {allowClose && (
+              <div
                 className={cn([
-                  "flex items-center justify-center transition-colors",
-                  colors.hover[selected ? "selected" : "unselected"],
+                  "absolute inset-0 flex items-center justify-center transition-opacity duration-200",
+                  isHovered || isConfirmationOpen ? "opacity-100" : "opacity-0",
                 ])}
               >
-                <X size={16} />
-              </button>
-            </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAttemptClose();
+                  }}
+                  className={cn([
+                    "flex items-center justify-center transition-colors",
+                    colors.hover[selected ? "selected" : "unselected"],
+                  ])}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
           </div>
           <span className="truncate">{title}</span>
         </div>
@@ -296,7 +301,7 @@ export function TabItemBase({
         <PopoverContent
           side="bottom"
           align="start"
-          className="w-48 p-3 rounded-xl"
+          className="w-[240px] p-3 rounded-xl"
           sideOffset={2}
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
@@ -307,8 +312,7 @@ export function TabItemBase({
             </p>
             <Button
               variant="destructive"
-              size="sm"
-              className="w-full rounded-lg flex items-center justify-center relative group"
+              className="w-full h-9 rounded-lg flex items-center justify-center relative group"
               onClick={(e) => {
                 e.stopPropagation();
                 handleConfirmClose();

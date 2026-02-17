@@ -1,11 +1,10 @@
 import { MessageCircle } from "lucide-react";
 
 import { useShell } from "../../../../contexts/shell";
-import * as main from "../../../../store/tinybase/store/main";
 import type { Tab } from "../../../../store/zustand/tabs";
 import { type TabItem, TabItemBase } from "../shared";
 
-export const TabItemChat: TabItem<Extract<Tab, { type: "chat" }>> = ({
+export const TabItemChat: TabItem<Extract<Tab, { type: "chat_support" }>> = ({
   tab,
   tabIndex,
   handleCloseThis,
@@ -16,23 +15,14 @@ export const TabItemChat: TabItem<Extract<Tab, { type: "chat" }>> = ({
   handleUnpinThis,
 }) => {
   const { chat } = useShell();
-  const chatTitle = main.UI.useCell(
-    "chat_groups",
-    tab.state.groupId || "",
-    "title",
-    main.STORE_ID,
-  );
-
-  const isSupport = tab.state.chatType === "support";
-
   return (
     <TabItemBase
       icon={<MessageCircle className="w-4 h-4" />}
-      title={isSupport ? "Chat (Support)" : chatTitle || "Chat"}
+      title="Chat (Support)"
       selected={tab.active}
       pinned={tab.pinned}
       tabIndex={tabIndex}
-      accent={isSupport ? "blue" : "neutral"}
+      accent="blue"
       handleCloseThis={() => {
         chat.sendEvent({ type: "CLOSE" });
         handleCloseThis(tab);

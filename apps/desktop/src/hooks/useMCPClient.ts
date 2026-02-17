@@ -6,8 +6,14 @@ import { TauriMCPTransport } from "./tauri-mcp-transport";
 
 const TIMEOUT_MS = 5_000;
 
+export interface MCPClientConfig {
+  endpoint: string;
+  clientName: string;
+}
+
 export function useMCPClient(
   enabled: boolean,
+  config: MCPClientConfig,
   accessToken?: string | null,
 ): { client: MCPClient | null; isConnected: boolean; error: Error | null } {
   const [client, setClient] = useState<MCPClient | null>(null);
@@ -32,7 +38,7 @@ export function useMCPClient(
 
     const init = async () => {
       try {
-        const mcpUrl = new URL("/support/mcp", env.VITE_AI_URL).toString();
+        const mcpUrl = new URL(config.endpoint, env.VITE_API_URL).toString();
 
         const headers: Record<string, string> = {};
         if (accessToken) {
@@ -43,7 +49,7 @@ export function useMCPClient(
 
         const created = await createMCPClient({
           transport,
-          name: "hyprnote-support-client",
+          name: config.clientName,
           capabilities: { elicitation: {} },
           onUncaughtError: (err) => {
             const msg = err instanceof Error ? err.message : String(err);
@@ -83,7 +89,7 @@ export function useMCPClient(
       clientRef.current = null;
       setClient(null);
     };
-  }, [enabled, accessToken]);
+  }, [enabled, config.endpoint, config.clientName, accessToken]);
 
   return { client, isConnected, error };
 }

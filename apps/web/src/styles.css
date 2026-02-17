@@ -53,6 +53,8 @@
 @import "tailwind-scrollbar-hide/v4";
 @plugin "@tailwindcss/typography";
 
+@source "../../../packages/transcript/src";
+
 @theme {
   --font-sans: "SF Pro", system-ui, -apple-system, sans-serif;
   --font-serif: "Lora", Georgia, serif;
@@ -123,6 +125,12 @@
 
   [id] {
     scroll-margin-top: 69px;
+  }
+
+  @media (max-width: 639px) {
+    [data-blog-article] [id] {
+      scroll-margin-top: 113px;
+    }
   }
 
   .prose code:not(pre code) {

@@ -255,7 +255,7 @@ function OpenSourceButton({
       <h2 className="text-2xl font-serif text-stone-600">Open source</h2>
       <p className="text-neutral-600">
         {
-          "Hyprnote values privacy and community, so it's been transparent from day one."
+          "Char values privacy and community, so it's been transparent from day one."
         }
       </p>
       <a

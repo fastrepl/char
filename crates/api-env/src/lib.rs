@@ -20,6 +20,7 @@ where
 pub struct SupabaseEnv {
     pub supabase_url: String,
     pub supabase_anon_key: String,
+    pub supabase_service_role_key: String,
 }
 
 #[derive(Clone, Deserialize)]

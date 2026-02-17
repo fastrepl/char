@@ -1,74 +1,86 @@
 import { useChat } from "@ai-sdk/react";
 import type { ChatStatus } from "ai";
-import type { LanguageModel } from "ai";
-import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import type { LanguageModel, ToolSet } from "ai";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 
-import {
-  commands as templateCommands,
-  type Transcript,
-} from "@hypr/plugin-template";
+import type { SessionContext } from "@hypr/plugin-template";
+import { commands as templateCommands } from "@hypr/plugin-template";
 
-import type { ContextItem, ContextSource } from "../../chat/context-item";
+import type { ContextEntity } from "../../chat/context-item";
+import { composeContextEntities } from "../../chat/context/composer";
+import { buildChatSystemContext } from "../../chat/context/prompt-context";
 import { CustomChatTransport } from "../../chat/transport";
 import type { HyprUIMessage } from "../../chat/types";
 import { useToolRegistry } from "../../contexts/tool";
-import { useSession } from "../../hooks/tinybase";
-import { useContextCollection } from "../../hooks/useContextCollection";
 import { useCreateChatMessage } from "../../hooks/useCreateChatMessage";
 import { useLanguageModel } from "../../hooks/useLLMConnection";
 import * as main from "../../store/tinybase/store/main";
+import { useChatContext } from "../../store/zustand/chat-context";
 import { id } from "../../utils";
-import { buildSegments, SegmentKey, type WordLike } from "../../utils/segment";
-import {
-  defaultRenderLabelContext,
-  SpeakerLabelManager,
-} from "../../utils/segment/shared";
+import { useChatContextPipeline } from "./use-chat-context-pipeline";
+import { useSessionContextEntity } from "./use-session-context-entity";
+
+const EMPTY_CONTEXT_ENTITIES: ContextEntity[] = [];
 
 interface ChatSessionProps {
   sessionId: string;
   chatGroupId?: string;
-  chatType?: "general" | "support";
-  attachedSessionId?: string;
+  currentSessionId?: string;
   modelOverride?: LanguageModel;
-  extraTools?: Record<string, any>;
+  extraTools?: ToolSet;
   systemPromptOverride?: string;
   children: (props: {
+    sessionId: string;
     messages: HyprUIMessage[];
+    setMessages: (
+      msgs: HyprUIMessage[] | ((prev: HyprUIMessage[]) => HyprUIMessage[]),
+    ) => void;
     sendMessage: (message: HyprUIMessage) => void;
     regenerate: () => void;
     stop: () => void;
     status: ChatStatus;
     error?: Error;
-    contextItems: ContextItem[];
+    contextEntities: ContextEntity[];
+    onRemoveContextEntity: (key: string) => void;
+    isSystemPromptReady: boolean;
   }) => ReactNode;
 }
 
 export function ChatSession({
   sessionId,
   chatGroupId,
-  chatType = "general",
-  attachedSessionId,
+  currentSessionId,
   modelOverride,
   extraTools,
   systemPromptOverride,
   children,
 }: ChatSessionProps) {
-  const { transport, sessionTitle, sessionDate, wordCount, notePreview } =
-    useTransport(
-      chatType,
-      attachedSessionId,
-      modelOverride,
-      extraTools,
-      systemPromptOverride,
-    );
+  const sessionEntity = useSessionContextEntity(currentSessionId);
 
-  const contextItems = useSessionContextItems(
-    attachedSessionId,
-    sessionTitle,
-    sessionDate,
-    wordCount,
-    notePreview,
+  const persistContext = useChatContext((s) => s.persistContext);
+  const persistedCtx = useChatContext((s) =>
+    chatGroupId ? s.contexts[chatGroupId] : undefined,
   );
+  const persistedEntities =
+    persistedCtx?.contextEntities ?? EMPTY_CONTEXT_ENTITIES;
+
+  const transportContextEntities = useMemo(() => {
+    const sessionEntities: ContextEntity[] = sessionEntity
+      ? [sessionEntity]
+      : [];
+    return composeContextEntities([sessionEntities, persistedEntities]);
+  }, [sessionEntity, persistedEntities]);
+  const sessionContext = useMemo(
+    () => buildChatSystemContext(transportContextEntities).context,
+    [transportContextEntities],
+  );
+  const { transport, isSystemPromptReady } = useTransport(
+    sessionContext,
+    modelOverride,
+    extraTools,
+    systemPromptOverride,
+  );
+
   const store = main.UI.useStore(main.STORE_ID);
   const createChatMessage = useCreateChatMessage();
 
@@ -106,22 +118,15 @@ export function ChatSession({
     return loaded;
   }, [store, messageIds, chatGroupId]);
 
-  const initialAssistantMessages = useMemo(() => {
-    return initialMessages.filter((message) => message.role === "assistant");
-  }, [initialMessages]);
-
-  const persistedAssistantIds = useRef(
-    new Set(initialAssistantMessages.map((message) => message.id)),
-  );
-  const prevMessagesRef = useRef<HyprUIMessage[]>(initialMessages);
-
-  useEffect(() => {
-    persistedAssistantIds.current = new Set(
-      initialAssistantMessages.map((message) => message.id),
-    );
-  }, [initialAssistantMessages]);
-
-  const { messages, sendMessage, regenerate, stop, status, error } = useChat({
+  const {
+    messages,
+    setMessages,
+    sendMessage: rawSendMessage,
+    regenerate,
+    stop,
+    status,
+    error,
+  } = useChat({
     id: sessionId,
     messages: initialMessages,
     generateId: () => id(),
@@ -131,202 +136,87 @@ export function ChatSession({
 
   useEffect(() => {
     if (!chatGroupId || !store) {
-      prevMessagesRef.current = messages;
       return;
     }
 
-    const currentMessageIds = new Set(messages.map((m) => m.id));
+    const assistantMessages = messages.filter(
+      (message) => message.role === "assistant",
+    );
+    const assistantMessageIds = new Set(assistantMessages.map((m) => m.id));
 
-    for (const prevMessage of prevMessagesRef.current) {
-      if (
-        prevMessage.role === "assistant" &&
-        persistedAssistantIds.current.has(prevMessage.id) &&
-        !currentMessageIds.has(prevMessage.id)
-      ) {
-        store.delRow("chat_messages", prevMessage.id);
-        persistedAssistantIds.current.delete(prevMessage.id);
-      }
-    }
-
-    prevMessagesRef.current = messages;
-  }, [chatGroupId, messages, store]);
-
-  useEffect(() => {
-    if (!chatGroupId || status !== "ready") {
-      return;
-    }
-
-    for (const message of messages) {
-      if (
-        message.role !== "assistant" ||
-        persistedAssistantIds.current.has(message.id)
-      ) {
+    for (const messageId of messageIds) {
+      if (assistantMessageIds.has(messageId)) {
         continue;
       }
-
-      const content = message.parts
-        .filter((part) => part.type === "text")
-        .map((part) => (part.type === "text" ? part.text : ""))
-        .join("");
-
-      createChatMessage({
-        id: message.id,
-        chat_group_id: chatGroupId,
-        content,
-        role: "assistant",
-        parts: message.parts,
-        metadata: message.metadata,
-      });
-
-      persistedAssistantIds.current.add(message.id);
+      const row = store.getRow("chat_messages", messageId);
+      if (row?.role === "assistant") {
+        store.delRow("chat_messages", messageId);
+      }
     }
-  }, [chatGroupId, createChatMessage, messages, status]);
+
+    if (status === "ready") {
+      for (const message of assistantMessages) {
+        if (store.hasRow("chat_messages", message.id)) {
+          continue;
+        }
+        const content = message.parts
+          .filter(
+            (p): p is Extract<typeof p, { type: "text" }> => p.type === "text",
+          )
+          .map((p) => p.text)
+          .join("");
+
+        createChatMessage({
+          id: message.id,
+          chat_group_id: chatGroupId,
+          content,
+          role: "assistant",
+          parts: message.parts,
+          metadata: message.metadata,
+        });
+      }
+    }
+  }, [chatGroupId, messages, status, store, createChatMessage, messageIds]);
+
+  const { contextEntities, onRemoveContextEntity } = useChatContextPipeline({
+    sessionId,
+    chatGroupId,
+    messages,
+    sessionEntity,
+    persistedEntities,
+    persistContext,
+  });
 
   return (
     <div className="flex-1 h-full flex flex-col">
       {children({
+        sessionId,
         messages,
-        sendMessage,
+        setMessages,
+        sendMessage: rawSendMessage,
         regenerate,
         stop,
         status,
         error,
-        contextItems,
+        contextEntities,
+        onRemoveContextEntity,
+        isSystemPromptReady,
       })}
     </div>
   );
 }
 
-function useSessionContextItems(
-  attachedSessionId?: string,
-  sessionTitle?: string | null,
-  sessionDate?: string | null,
-  wordCount?: number,
-  notePreview?: string | null,
-): ContextItem[] {
-  const sources = useMemo(() => {
-    if (!attachedSessionId) return [];
-    const s: ContextSource[] = [];
-    if (sessionTitle || sessionDate) {
-      s.push({
-        type: "session",
-        title: sessionTitle ?? undefined,
-        date: sessionDate ?? undefined,
-      });
-    }
-    if (wordCount && wordCount > 0) {
-      s.push({ type: "transcript", wordCount });
-    }
-    if (notePreview) {
-      s.push({ type: "note", preview: notePreview });
-    }
-    return s;
-  }, [attachedSessionId, sessionTitle, sessionDate, wordCount, notePreview]);
-
-  return useContextCollection(sources);
-}
-
 function useTransport(
-  chatType: "general" | "support",
-  attachedSessionId?: string,
+  sessionContext: SessionContext | null,
   modelOverride?: LanguageModel,
-  extraTools?: Record<string, any>,
+  extraTools?: ToolSet,
   systemPromptOverride?: string,
 ) {
   const registry = useToolRegistry();
   const configuredModel = useLanguageModel();
   const model = modelOverride ?? configuredModel;
-  const store = main.UI.useStore(main.STORE_ID);
   const language = main.UI.useValue("ai_language", main.STORE_ID) ?? "en";
   const [systemPrompt, setSystemPrompt] = useState<string | undefined>();
-
-  const { title, rawMd, createdAt } = useSession(attachedSessionId ?? "");
-
-  const enhancedNoteIds = main.UI.useSliceRowIds(
-    main.INDEXES.enhancedNotesBySession,
-    attachedSessionId ?? "",
-    main.STORE_ID,
-  );
-  const firstEnhancedNoteId = enhancedNoteIds?.[0];
-  const enhancedContent = main.UI.useCell(
-    "enhanced_notes",
-    firstEnhancedNoteId ?? "",
-    "content",
-    main.STORE_ID,
-  );
-
-  const transcriptIds = main.UI.useSliceRowIds(
-    main.INDEXES.transcriptBySession,
-    attachedSessionId ?? "",
-    main.STORE_ID,
-  );
-  const firstTranscriptId = transcriptIds?.[0];
-
-  const wordsJson = main.UI.useCell(
-    "transcripts",
-    firstTranscriptId ?? "",
-    "words",
-    main.STORE_ID,
-  ) as string | undefined;
-
-  const words = useMemo((): WordLike[] => {
-    if (!wordsJson) {
-      return [];
-    }
-
-    try {
-      const parsedWords = JSON.parse(wordsJson) as Array<{
-        text: string;
-        start_ms: number;
-        end_ms: number;
-        channel: number;
-      }>;
-
-      return parsedWords
-        .map((w) => ({
-          text: w.text,
-          start_ms: w.start_ms,
-          end_ms: w.end_ms,
-          channel: w.channel as WordLike["channel"],
-        }))
-        .sort((a, b) => a.start_ms - b.start_ms);
-    } catch {
-      return [];
-    }
-  }, [wordsJson]);
-
-  const transcript = useMemo((): Transcript | null => {
-    if (words.length === 0 || !store) {
-      return null;
-    }
-
-    const segments = buildSegments(words, [], []);
-    const ctx = defaultRenderLabelContext(store);
-    const manager = SpeakerLabelManager.fromSegments(segments, ctx);
-
-    return {
-      segments: segments.map((seg) => ({
-        speaker: SegmentKey.renderLabel(seg.key, ctx, manager),
-        text: seg.words.map((w) => w.text).join(" "),
-      })),
-      startedAt: null,
-      endedAt: null,
-    };
-  }, [words, store]);
-
-  const chatContext = useMemo(() => {
-    if (!attachedSessionId) {
-      return null;
-    }
-
-    return {
-      title: (title as string) || null,
-      date: (createdAt as string) || null,
-      rawContent: (rawMd as string) || null,
-      enhancedContent: (enhancedContent as string) || null,
-      transcript,
-    };
-  }, [attachedSessionId, title, rawMd, enhancedContent, createdAt, transcript]);
 
   useEffect(() => {
     if (systemPromptOverride) {
@@ -340,46 +230,65 @@ function useTransport(
       .render({
         chatSystem: {
           language,
-          context: chatContext,
+          context: sessionContext,
         },
       })
       .then((result) => {
-        if (!stale && result.status === "ok") {
+        if (stale) {
+          return;
+        }
+
+        if (result.status === "ok") {
           setSystemPrompt(result.data);
+        } else {
+          setSystemPrompt("");
         }
       })
-      .catch(console.error);
+      .catch((error) => {
+        console.error(error);
+        if (!stale) {
+          setSystemPrompt("");
+        }
+      });
 
     return () => {
       stale = true;
     };
-  }, [language, chatContext, systemPromptOverride]);
+  }, [language, sessionContext, systemPromptOverride]);
 
   const effectiveSystemPrompt = systemPromptOverride ?? systemPrompt;
+  const isSystemPromptReady =
+    typeof systemPromptOverride === "string" || systemPrompt !== undefined;
+
+  const tools = useMemo(() => {
+    const localTools = registry.getTools("chat-general");
+
+    if (extraTools && import.meta.env.DEV) {
+      for (const key of Object.keys(extraTools)) {
+        if (key in localTools) {
+          console.warn(
+            `[ChatSession] Tool name collision: "${key}" exists in both local registry and extraTools. extraTools will take precedence.`,
+          );
+        }
+      }
+    }
+
+    return {
+      ...localTools,
+      ...extraTools,
+    };
+  }, [registry, extraTools]);
 
   const transport = useMemo(() => {
     if (!model) {
       return null;
     }
 
-    return new CustomChatTransport(
-      registry,
-      model,
-      chatType,
-      effectiveSystemPrompt,
-      extraTools,
-    );
-  }, [registry, model, chatType, effectiveSystemPrompt, extraTools]);
-
-  const sessionTitle = (title as string) || null;
-  const sessionDate = (createdAt as string) || null;
-  const notePreview = (enhancedContent as string) || null;
+    return new CustomChatTransport(model, tools, effectiveSystemPrompt);
+  }, [model, tools, effectiveSystemPrompt]);
 
   return {
     transport,
-    sessionTitle,
-    sessionDate,
-    wordCount: words.length,
-    notePreview,
+    isSystemPromptReady,
   };
 }

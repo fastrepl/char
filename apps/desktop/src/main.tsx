@@ -81,10 +81,7 @@ function App() {
   );
 }
 
-const isIframeContext =
-  typeof window !== "undefined" && window.self !== window.top;
-
-if (!isIframeContext && env.VITE_SENTRY_DSN) {
+if (env.VITE_SENTRY_DSN) {
   Sentry.init({
     dsn: env.VITE_SENTRY_DSN,
     release: env.VITE_APP_VERSION
@@ -114,15 +111,14 @@ function AppWithTiny() {
           <StoreComponent />
           <SettingsStoreComponent />
           <App />
-          {!isIframeContext && <TaskManager />}
-          {!isIframeContext && <EventListeners />}
+          <TaskManager />
+          <EventListeners />
         </TinyBaseProvider>
       </TinyTickProvider>
     </QueryClientProvider>
   );
 }
 
-// Initialize plugins - the polyfill in index.html handles iframe context
 initWindowsPlugin();
 initExtensionGlobals();
 

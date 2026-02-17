@@ -11,7 +11,6 @@ use crate::routes::ListEventsResponse;
     ),
     components(
         schemas(
-            crate::routes::calendar::ListCalendarsRequest,
             crate::routes::calendar::ListCalendarsResponse,
             crate::routes::calendar::ListEventsRequest,
             ListEventsResponse,

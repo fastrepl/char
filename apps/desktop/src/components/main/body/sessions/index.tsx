@@ -8,7 +8,6 @@ import { createPortal } from "react-dom";
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 import { cn } from "@hypr/utils";
 
-import { DissolvingContainer } from "../../../../components/ui/dissolving-container";
 import AudioPlayer from "../../../../contexts/audio-player";
 import { useListener } from "../../../../contexts/listener";
 import { useShell } from "../../../../contexts/shell";
@@ -54,7 +53,9 @@ export const TabItemNote: TabItem<Extract<Tab, { type: "sessions" }>> = ({
   const isEnhancing = useIsSessionEnhancing(tab.id);
   const isActive = sessionMode === "active" || sessionMode === "finalizing";
   const isFinalizing = sessionMode === "finalizing";
-  const showSpinner = !tab.active && (isFinalizing || isEnhancing);
+  const isBatching = sessionMode === "running_batch";
+  const showSpinner =
+    !tab.active && (isFinalizing || isEnhancing || isBatching);
 
   const showCloseConfirmation =
     pendingCloseConfirmationTab?.type === "sessions" &&
@@ -101,10 +102,23 @@ export function TabContentNote({
   tab: Extract<Tab, { type: "sessions" }>;
 }) {
   const listenerStatus = useListener((state) => state.live.status);
+  const sessionMode = useListener((state) => state.getSessionMode(tab.id));
   const updateSessionTabState = useTabs((state) => state.updateSessionTabState);
   const { conn } = useSTTConnection();
   const startListening = useStartListening(tab.id);
   const hasAttemptedAutoStart = useRef(false);
+
+  useEffect(() => {
+    if (
+      sessionMode === "running_batch" &&
+      tab.state.view?.type !== "transcript"
+    ) {
+      updateSessionTabState(tab, {
+        ...tab.state,
+        view: { type: "transcript" },
+      });
+    }
+  }, [sessionMode, tab, updateSessionTabState]);
 
   useEffect(() => {
     if (!tab.state.autoStart) {
@@ -190,6 +204,8 @@ function TabContentNoteInner({
   const sessionMode = useListener((state) => state.getSessionMode(sessionId));
   const prevSessionMode = useRef<string | null>(sessionMode);
 
+  useAutoFocusTitle({ sessionId, titleInputRef });
+
   useEffect(() => {
     const justStartedListening =
       prevSessionMode.current !== "active" && sessionMode === "active";
@@ -215,41 +231,40 @@ function TabContentNoteInner({
 
   return (
     <>
-      <DissolvingContainer sessionId={sessionId} variant="content">
-        <StandardTabWrapper
-          afterBorder={showTimeline && <AudioPlayer.Timeline />}
-          floatingButton={<FloatingActionButton tab={tab} />}
-          showTimeline={showTimeline}
-        >
-          <div className="flex flex-col h-full">
-            <div className="pl-2 pr-1">
-              {showSearchBar ? (
-                <SearchBar />
-              ) : (
-                <OuterHeader sessionId={tab.id} currentView={currentView} />
-              )}
-            </div>
-            <div className="mt-2 px-3 shrink-0">
-              <TitleInput
-                ref={titleInputRef}
-                tab={tab}
-                onNavigateToEditor={focusEditor}
-                onGenerateTitle={hasTranscript ? generateTitle : undefined}
-              />
-            </div>
-            <div className="mt-2 px-2 flex-1 min-h-0">
-              <NoteInput
-                ref={noteInputRef}
-                tab={tab}
-                onNavigateToTitle={focusTitle}
-              />
-            </div>
+      <StandardTabWrapper
+        afterBorder={showTimeline && <AudioPlayer.Timeline />}
+        floatingButton={<FloatingActionButton tab={tab} />}
+        showTimeline={showTimeline}
+      >
+        <div className="flex flex-col h-full">
+          <div className="pl-2 pr-1">
+            {showSearchBar ? (
+              <SearchBar />
+            ) : (
+              <OuterHeader sessionId={tab.id} currentView={currentView} />
+            )}
           </div>
-        </StandardTabWrapper>
-      </DissolvingContainer>
+          <div className="mt-2 px-3 shrink-0">
+            <TitleInput
+              ref={titleInputRef}
+              tab={tab}
+              onNavigateToEditor={focusEditor}
+              onGenerateTitle={hasTranscript ? generateTitle : undefined}
+            />
+          </div>
+          <div className="mt-2 px-2 flex-1 min-h-0">
+            <NoteInput
+              ref={noteInputRef}
+              tab={tab}
+              onNavigateToTitle={focusTitle}
+            />
+          </div>
+        </div>
+      </StandardTabWrapper>
       <StatusBanner
         skipReason={skipReason}
         showConsentBanner={showConsentBanner}
+        showTimeline={showTimeline}
       />
     </>
   );
@@ -258,9 +273,11 @@ function TabContentNoteInner({
 function StatusBanner({
   skipReason,
   showConsentBanner,
+  showTimeline,
 }: {
   skipReason: string | null;
   showConsentBanner: boolean;
+  showTimeline: boolean;
 }) {
   const { leftsidebar, chat } = useShell();
   const [chatPanelWidth, setChatPanelWidth] = useState(0);
@@ -315,9 +332,10 @@ function StatusBanner({
           transition={{ duration: 0.3, ease: "easeOut" }}
           style={{ left: `calc(50% + ${totalOffset}px)` }}
           className={cn([
-            "fixed -translate-x-1/2 bottom-6 z-50",
+            "fixed -translate-x-1/2 z-50",
             "whitespace-nowrap text-center text-xs",
             skipReason ? "text-red-400" : "text-stone-300",
+            showTimeline ? "bottom-[76px]" : "bottom-6",
           ])}
         >
           {skipReason || "Ask for consent when using Hyprnote"}
@@ -326,4 +344,26 @@ function StatusBanner({
     </AnimatePresence>,
     document.body,
   );
+}
+
+function useAutoFocusTitle({
+  sessionId,
+  titleInputRef,
+}: {
+  sessionId: string;
+  titleInputRef: React.RefObject<HTMLInputElement | null>;
+}) {
+  // Prevent re-focusing when the user intentionally leaves the title empty.
+  const didAutoFocus = useRef(false);
+
+  const title = main.UI.useCell("sessions", sessionId, "title", main.STORE_ID);
+
+  useEffect(() => {
+    if (didAutoFocus.current) return;
+
+    if (!title) {
+      titleInputRef.current?.focus();
+      didAutoFocus.current = true;
+    }
+  }, [sessionId, title]);
 }

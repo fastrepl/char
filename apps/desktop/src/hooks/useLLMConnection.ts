@@ -15,6 +15,7 @@ import {
   type ProviderId,
   PROVIDERS,
 } from "../components/settings/ai/llm/shared";
+import { providerRowId } from "../components/settings/ai/shared";
 import {
   getProviderSelectionBlockers,
   type ProviderEligibilityContext,
@@ -65,7 +66,7 @@ export const useLLMConnection = (): LLMConnectionResult => {
   );
   const providerConfig = settings.UI.useRow(
     "ai_providers",
-    current_llm_provider ?? "",
+    current_llm_provider ? providerRowId("llm", current_llm_provider) : "",
     settings.STORE_ID,
   ) as AIProviderStorage | undefined;
 
@@ -186,7 +187,7 @@ const resolveLLMConnection = (params: {
       conn: {
         providerId,
         modelId,
-        baseUrl: baseUrl ?? new URL("/llm", env.VITE_AI_URL).toString(),
+        baseUrl: baseUrl ?? new URL("/llm", env.VITE_API_URL).toString(),
         apiKey: session.access_token,
       },
       status: { status: "success", providerId, isHosted: true },
@@ -204,7 +205,7 @@ export const useFeedbackLanguageModel = (): LanguageModelV3 => {
   const apiKey = session?.access_token ?? "CANT_BE_EMPTY";
 
   return useMemo(() => {
-    const baseUrl = new URL("/support/llm", env.VITE_AI_URL).toString();
+    const baseUrl = new URL("/support/llm", env.VITE_API_URL).toString();
     const provider = createOpenRouter({
       fetch: tauriFetch,
       baseURL: baseUrl,

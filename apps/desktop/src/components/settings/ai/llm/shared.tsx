@@ -37,7 +37,7 @@ const _PROVIDERS = [
     displayName: "Hyprnote",
     badge: "Recommended",
     icon: <img src="/assets/icon.png" alt="Hyprnote" className="size-5" />,
-    baseUrl: new URL("/llm", env.VITE_AI_URL).toString(),
+    baseUrl: new URL("/llm", env.VITE_API_URL).toString(),
     requirements: [
       { kind: "requires_auth" },
       { kind: "requires_entitlement", entitlement: "pro" },

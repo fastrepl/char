@@ -41,13 +41,14 @@ impl LlmProxyConfig {
             api_key: api_key.into().0,
             timeout: Duration::from_millis(DEFAULT_TIMEOUT_MS),
             models_tool_calling: vec![
-                "moonshotai/kimi-k2-0905:exacto".into(),
                 "anthropic/claude-haiku-4.5".into(),
                 "openai/gpt-oss-120b:exacto".into(),
+                "moonshotai/kimi-k2-0905:exacto".into(),
             ],
             models_default: vec![
-                "moonshotai/kimi-k2-0905".into(),
+                "anthropic/claude-sonnet-4.5".into(),
                 "openai/gpt-5.2-chat".into(),
+                "moonshotai/kimi-k2-0905".into(),
             ],
             analytics: None,
             provider: Arc::new(OpenRouterProvider::default()),

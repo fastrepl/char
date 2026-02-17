@@ -7,6 +7,7 @@ import {
   UserIcon,
 } from "lucide-react";
 import { useCallback, useRef } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 
 import { Button } from "@hypr/ui/components/ui/button";
 import {
@@ -15,6 +16,7 @@ import {
 } from "@hypr/ui/components/ui/scroll-fade";
 import { cn } from "@hypr/utils";
 
+import { useSettingsNavigation } from "../../../hooks/useSettingsNavigation";
 import {
   type SettingsTab,
   type Tab,
@@ -95,6 +97,40 @@ function SettingsView({ tab }: { tab: Extract<Tab, { type: "settings" }> }) {
     },
     [updateSettingsTabState, tab],
   );
+
+  const currentIndex = SECTIONS.findIndex((s) => s.id === activeTab);
+
+  useHotkeys(
+    "ctrl+alt+left",
+    () => {
+      if (currentIndex > 0) {
+        setActiveTab(SECTIONS[currentIndex - 1].id);
+      }
+    },
+    {
+      preventDefault: true,
+      enableOnFormTags: true,
+      enableOnContentEditable: true,
+    },
+    [currentIndex, setActiveTab],
+  );
+
+  useHotkeys(
+    "ctrl+alt+right",
+    () => {
+      if (currentIndex < SECTIONS.length - 1) {
+        setActiveTab(SECTIONS[currentIndex + 1].id);
+      }
+    },
+    {
+      preventDefault: true,
+      enableOnFormTags: true,
+      enableOnContentEditable: true,
+    },
+    [currentIndex, setActiveTab],
+  );
+
+  useSettingsNavigation(ref, activeTab);
 
   const renderContent = () => {
     switch (activeTab) {

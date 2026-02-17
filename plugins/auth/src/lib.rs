@@ -17,6 +17,7 @@ fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
             commands::set_item::<tauri::Wry>,
             commands::remove_item::<tauri::Wry>,
             commands::clear::<tauri::Wry>,
+            commands::get_account_info::<tauri::Wry>,
         ])
         .typ::<hypr_supabase_auth::Claims>()
         .error_handling(tauri_specta::ErrorHandlingMode::Result)
@@ -67,5 +68,28 @@ mod test {
 
         let _ = app.set_item("test_key".to_string(), "test_value".to_string());
         let _ = app.get_item("test_key".to_string());
+    }
+
+    #[test]
+    fn test_parse_account_info() {
+        let store_path = dirs::data_dir()
+            .unwrap()
+            .join("hyprnote")
+            .join("store.json");
+
+        let store_content: serde_json::Value =
+            serde_json::from_str(&std::fs::read_to_string(&store_path).unwrap()).unwrap();
+
+        let scope_str = store_content[PLUGIN_NAME].as_str().unwrap();
+        let result = ext::parse_account_info(scope_str).unwrap();
+        let info = result.expect("should have account info");
+
+        assert!(!info.user_id.is_empty());
+        assert!(info.email.is_some());
+        assert!(info.full_name.is_some());
+        assert!(info.avatar_url.is_some());
+        assert!(info.stripe_customer_id.is_some());
+
+        eprintln!("{:#?}", info);
     }
 }

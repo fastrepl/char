@@ -8,20 +8,20 @@
     "test": "bun test"
   },
   "dependencies": {
+    "@hypr/supabase": "workspace:*",
     "@sentry/bun": "^10.38.0",
     "@supabase/stripe-sync-engine": "^0.45.0",
-    "@supabase/supabase-js": "^2.93.3",
-    "@hypr/supabase": "workspace:*",
+    "@supabase/supabase-js": "^2.95.3",
     "@t3-oss/env-core": "^0.13.10",
-    "effect": "^3.19.15",
-    "hono": "^4.11.7",
+    "effect": "^3.19.16",
+    "hono": "^4.11.9",
     "pg": "^8.18.0",
-    "stripe": "^19.3.1",
+    "stripe": "^20.3.1",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.52.0",
-    "@types/bun": "^1.3.8",
+    "@types/bun": "^1.3.9",
     "@types/pg": "^8.16.0",
     "typescript": "^5.9.3"
   }

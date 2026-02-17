@@ -8,6 +8,7 @@ mod provider_selector;
 mod query_params;
 mod relay;
 mod routes;
+mod supabase;
 mod upstream_url;
 
 pub use analytics::{SttAnalyticsReporter, SttEvent};
@@ -21,5 +22,5 @@ pub use hyprnote_routing::{
 pub use openapi::openapi;
 pub use provider_selector::{ProviderSelector, SelectedProvider};
 pub use relay::{ClientRequestBuilder, UpstreamError, WebSocketProxy, detect_upstream_error};
-pub use routes::{listen_router, router};
+pub use routes::{callback_router, listen_router, router};
 pub use upstream_url::UpstreamUrlBuilder;

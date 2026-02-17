@@ -4,7 +4,7 @@ use owhisper_client::Provider;
 use serde::Deserialize;
 
 #[derive(Default, Deserialize)]
-pub struct Env {
+pub struct SttApiKeysEnv {
     #[serde(default)]
     pub deepgram_api_key: Option<String>,
     #[serde(default)]
@@ -19,6 +19,43 @@ pub struct Env {
     pub gladia_api_key: Option<String>,
     #[serde(default)]
     pub elevenlabs_api_key: Option<String>,
+    #[serde(default)]
+    pub dashscope_api_key: Option<String>,
+    #[serde(default)]
+    pub mistral_api_key: Option<String>,
+}
+
+#[derive(Deserialize)]
+pub struct CallbackEnv {
+    pub api_base_url: String,
+    #[serde(default)]
+    pub callback_secret: Option<String>,
+}
+
+#[derive(Deserialize)]
+pub struct Env {
+    #[serde(flatten)]
+    pub stt: SttApiKeysEnv,
+    #[serde(flatten)]
+    pub callback: CallbackEnv,
+}
+
+impl Default for CallbackEnv {
+    fn default() -> Self {
+        Self {
+            api_base_url: String::new(),
+            callback_secret: None,
+        }
+    }
+}
+
+impl Default for Env {
+    fn default() -> Self {
+        Self {
+            stt: SttApiKeysEnv::default(),
+            callback: CallbackEnv::default(),
+        }
+    }
 }
 
 pub struct ApiKeys(pub HashMap<Provider, String>);
@@ -39,8 +76,8 @@ impl ApiKeys {
     }
 }
 
-impl From<&Env> for ApiKeys {
-    fn from(env: &Env) -> Self {
+impl From<&SttApiKeysEnv> for ApiKeys {
+    fn from(env: &SttApiKeysEnv) -> Self {
         let mut map = HashMap::new();
         if let Some(key) = env.deepgram_api_key.as_ref().filter(|s| !s.is_empty()) {
             map.insert(Provider::Deepgram, key.clone());
@@ -62,6 +99,12 @@ impl From<&Env> for ApiKeys {
         }
         if let Some(key) = env.elevenlabs_api_key.as_ref().filter(|s| !s.is_empty()) {
             map.insert(Provider::ElevenLabs, key.clone());
+        }
+        if let Some(key) = env.dashscope_api_key.as_ref().filter(|s| !s.is_empty()) {
+            map.insert(Provider::DashScope, key.clone());
+        }
+        if let Some(key) = env.mistral_api_key.as_ref().filter(|s| !s.is_empty()) {
+            map.insert(Provider::Mistral, key.clone());
         }
         Self(map)
     }

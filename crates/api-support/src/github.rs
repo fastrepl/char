@@ -1,40 +1,9 @@
-use askama::Template;
-
 use crate::error::{Result, SupportError};
 use crate::logs;
 use crate::state::AppState;
 
 const GITHUB_OWNER: &str = "fastrepl";
 const GITHUB_REPO: &str = "hyprnote";
-
-#[derive(Template)]
-#[template(path = "bug_report.md.jinja")]
-struct BugReportBody<'a> {
-    description: &'a str,
-    platform: &'a str,
-    arch: &'a str,
-    os_version: &'a str,
-    app_version: &'a str,
-    source: &'a str,
-}
-
-#[derive(Template)]
-#[template(path = "feature_request.md.jinja")]
-struct FeatureRequestBody<'a> {
-    description: &'a str,
-    platform: &'a str,
-    arch: &'a str,
-    os_version: &'a str,
-    app_version: &'a str,
-    source: &'a str,
-}
-
-#[derive(Template)]
-#[template(path = "log_analysis.md.jinja")]
-struct LogAnalysisComment<'a> {
-    summary_section: &'a str,
-    tail: &'a str,
-}
 
 pub(crate) struct BugReportInput<'a> {
     pub description: &'a str,
@@ -61,15 +30,16 @@ pub(crate) async fn submit_bug_report(
 ) -> Result<String> {
     let (description, title) = make_title(input.description, "Bug Report");
 
-    let body = BugReportBody {
-        description: &description,
-        platform: input.platform,
-        arch: input.arch,
-        os_version: input.os_version,
-        app_version: input.app_version,
-        source: input.source,
-    }
-    .render()
+    let body = hypr_template_support::render(hypr_template_support::SupportTemplate::BugReport(
+        hypr_template_support::BugReport {
+            description,
+            platform: input.platform.to_string(),
+            arch: input.arch.to_string(),
+            os_version: input.os_version.to_string(),
+            app_version: input.app_version.to_string(),
+            source: input.source.to_string(),
+        },
+    ))
     .map_err(|e| SupportError::Internal(e.to_string()))?;
 
     let labels = vec!["product/desktop".to_string()];
@@ -88,16 +58,18 @@ pub(crate) async fn submit_feature_request(
 ) -> Result<String> {
     let (description, title) = make_title(input.description, "Feature Request");
 
-    let body = FeatureRequestBody {
-        description: &description,
-        platform: input.platform,
-        arch: input.arch,
-        os_version: input.os_version,
-        app_version: input.app_version,
-        source: input.source,
-    }
-    .render()
-    .map_err(|e| SupportError::Internal(e.to_string()))?;
+    let body =
+        hypr_template_support::render(hypr_template_support::SupportTemplate::FeatureRequest(
+            hypr_template_support::FeatureRequest {
+                description,
+                platform: input.platform.to_string(),
+                arch: input.arch.to_string(),
+                os_version: input.os_version.to_string(),
+                app_version: input.app_version.to_string(),
+                source: input.source.to_string(),
+            },
+        ))
+        .map_err(|e| SupportError::Internal(e.to_string()))?;
 
     let category_id = &state.config.github.github_discussion_category_id;
     if category_id.is_empty() {
@@ -127,20 +99,24 @@ fn make_title(description: &str, fallback: &str) -> (String, String) {
 }
 
 async fn attach_log_analysis(state: &AppState, issue_number: u64, log_text: &str) {
+    let clean_logs = logs::strip_ansi_escapes(log_text);
+
     let log_summary =
-        logs::analyze_logs(&state.config.openrouter.openrouter_api_key, log_text).await;
+        logs::analyze_logs(&state.config.openrouter.openrouter_api_key, &clean_logs).await;
 
     let summary_section = match log_summary.as_deref() {
         Some(s) if !s.trim().is_empty() => format!("### Summary\n```\n{s}\n```"),
         _ => "_No errors or warnings found._".to_string(),
     };
 
-    let tail = logs::safe_tail(log_text, 10000);
-    let comment = LogAnalysisComment {
-        summary_section: &summary_section,
-        tail,
-    };
-    let log_comment = comment.render().unwrap_or_default();
+    let tail = logs::safe_tail(&clean_logs, 10000);
+    let log_comment = hypr_template_support::render(
+        hypr_template_support::SupportTemplate::LogAnalysis(hypr_template_support::LogAnalysis {
+            summary_section,
+            tail: tail.to_string(),
+        }),
+    )
+    .unwrap_or_default();
 
     let _ = add_issue_comment(state, issue_number, &log_comment).await;
 }

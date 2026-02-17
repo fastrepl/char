@@ -1,7 +1,7 @@
 ---
 title: "Run"
 section: "Developers"
-description: "Learn how to run Hyprnote for development"
+description: "Learn how to run Char for development"
 ---
 
 # Development
@@ -28,12 +28,13 @@ pnpm -F ui build && pnpm -F desktop tauri dev
 pnpm -F web dev
 ```
 
-## API (apps/api)
+## API Server (apps/api)
 
 ```bash
 cargo run -p api
 ```
 
+The API server (formerly `apps/ai`) handles LLM proxying (via OpenRouter), STT proxying, calendar integration, subscriptions, and the in-app support chat MCP server. See [Environment Variables](/docs/developers/env) for required configuration.
 
 # Supabase
 
