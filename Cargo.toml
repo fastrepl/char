@@ -30,6 +30,7 @@ hypr-analytics = { path = "crates/analytics", package = "analytics" }
 hypr-api-auth = { path = "crates/api-auth", package = "api-auth" }
 hypr-api-calendar = { path = "crates/api-calendar", package = "api-calendar" }
 hypr-api-env = { path = "crates/api-env", package = "api-env" }
+hypr-api-messenger = { path = "crates/api-messenger", package = "api-messenger" }
 hypr-api-nango = { path = "crates/api-nango", package = "api-nango" }
 hypr-api-research = { path = "crates/api-research", package = "api-research" }
 hypr-api-storage = { path = "crates/api-storage", package = "api-storage" }
@@ -93,6 +94,7 @@ hypr-pyannote-cloud = { path = "crates/pyannote-cloud", package = "pyannote-clou
 hypr-pyannote-local = { path = "crates/pyannote-local", package = "pyannote-local" }
 hypr-s3 = { path = "crates/s3", package = "s3" }
 hypr-slack-web = { path = "crates/slack-web", package = "slack-web" }
+hypr-teems = { path = "crates/teems", package = "teems" }
 hypr-supabase-auth = { path = "crates/supabase-auth", package = "supabase-auth" }
 hypr-supabase-storage = { path = "crates/supabase-storage", package = "supabase-storage" }
 hypr-tcc = { path = "crates/tcc", package = "tcc" }

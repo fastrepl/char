@@ -578,6 +578,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "api-messenger"
+version = "0.1.0"
+dependencies = [
+ "axum 0.8.8",
+ "hypr-http-utils",
+ "serde",
+ "serde_json",
+ "slack-web",
+ "teems",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "api-nango"
 version = "0.1.0"
 dependencies = [
@@ -19763,6 +19776,16 @@ name = "tcc"
 version = "0.1.0"
 dependencies = [
  "swift-rs 1.0.7 (git+https://github.com/yujonglee/swift-rs?rev=41a1605)",
+]
+
+[[package]]
+name = "teems"
+version = "0.1.0"
+dependencies = [
+ "hypr-http-utils",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
 ]
 
 [[package]]
