@@ -105,6 +105,7 @@ export function NonHyprProviderCard({
 
   const form = useForm({
     onSubmit: ({ value }) => {
+      setProvider(value);
       void analyticsCommands.event({
         event: "ai_provider_configured",
         provider: value.type,
@@ -125,7 +126,6 @@ export function NonHyprProviderCard({
     listeners: {
       onChange: ({ formApi }) => {
         queueMicrotask(() => {
-          setProvider(formApi.state.values);
           void formApi.handleSubmit();
         });
       },
