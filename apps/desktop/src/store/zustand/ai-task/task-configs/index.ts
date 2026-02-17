@@ -1,7 +1,5 @@
 import type { LanguageModel, TextStreamPart } from "ai";
 
-import type { ProviderId } from "../../../../components/settings/ai/llm/shared";
-
 import type {
   EnhanceSystem,
   EnhanceUser,
@@ -9,6 +7,7 @@ import type {
   TitleUser,
 } from "@hypr/plugin-template";
 
+import type { ProviderId } from "../../../../components/settings/ai/llm/shared";
 import type { Store as MainStore } from "../../../tinybase/store/main";
 import type { Store as SettingsStore } from "../../../tinybase/store/settings";
 import { StreamTransform } from "../shared/transform_infra";

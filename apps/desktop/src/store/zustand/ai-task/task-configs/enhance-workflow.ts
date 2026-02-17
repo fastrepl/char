@@ -14,8 +14,8 @@ import {
 } from "@hypr/plugin-template";
 import { templateSectionSchema } from "@hypr/store";
 
-import type { ProviderId } from "../../../../components/settings/ai/llm/shared";
 import type { TaskArgsMapTransformed, TaskConfig } from ".";
+import type { ProviderId } from "../../../../components/settings/ai/llm/shared";
 import type { Store } from "../../../tinybase/store/main";
 import { getCustomPrompt } from "../../../tinybase/store/prompts";
 import {
