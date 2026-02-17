@@ -21,6 +21,8 @@ export function StreamingView({ enhancedNoteId }: { enhancedNoteId: string }) {
   if (isGenerating && !hasContent) {
     if (step?.type === "analyzing") {
       statusText = "Analyzing structure...";
+    } else if (step?.type === "chunking") {
+      statusText = `Summarizing part ${step.current} of ${step.total}...`;
     } else if (step?.type === "generating") {
       statusText = "Generating...";
     } else if (step?.type === "retrying") {

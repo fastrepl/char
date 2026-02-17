@@ -26,7 +26,10 @@ import { useListener } from "../../../../../contexts/listener";
 import { fromResult } from "../../../../../effect";
 import { getEligibility } from "../../../../../hooks/autoEnhance/eligibility";
 import { useCreateEnhancedNote } from "../../../../../hooks/useEnhancedNotes";
-import { useLanguageModel } from "../../../../../hooks/useLLMConnection";
+import {
+  useLanguageModel,
+  useLLMConnection,
+} from "../../../../../hooks/useLLMConnection";
 import { useRunBatch } from "../../../../../hooks/useRunBatch";
 import * as main from "../../../../../store/tinybase/store/main";
 import { createTaskId } from "../../../../../store/zustand/ai-task/task-configs";
@@ -62,6 +65,7 @@ export function OptionsMenu({
   const updateSessionTabState = useTabs((state) => state.updateSessionTabState);
   const createEnhancedNote = useCreateEnhancedNote();
   const model = useLanguageModel();
+  const { conn: llmConn } = useLLMConnection();
   const generate = useAITask((state) => state.generate);
   const sessionTab = useTabs((state) => {
     const found = state.tabs.find(
@@ -98,6 +102,7 @@ export function OptionsMenu({
       model,
       taskType: "enhance",
       args: { sessionId, enhancedNoteId },
+      providerId: llmConn?.providerId,
       onComplete: (text) => {
         if (!text || !store) return;
         try {

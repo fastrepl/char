@@ -2,6 +2,7 @@ import type { LanguageModel } from "ai";
 import { useCallback, useEffect, useRef } from "react";
 import { shallow } from "zustand/shallow";
 
+import type { ProviderId } from "../components/settings/ai/llm/shared";
 import { useAITask } from "../contexts/ai-task";
 import type {
   TaskArgsMap,
@@ -34,6 +35,7 @@ type StartParams<T extends TaskType> = {
   model: LanguageModel;
   args: TaskArgsMap[T];
   onComplete?: (text: string) => void;
+  providerId?: ProviderId;
 };
 
 export function useAITaskTask<T extends TaskType>(

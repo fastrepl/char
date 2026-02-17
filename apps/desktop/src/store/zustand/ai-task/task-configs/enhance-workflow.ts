@@ -14,6 +14,7 @@ import {
 } from "@hypr/plugin-template";
 import { templateSectionSchema } from "@hypr/store";
 
+import type { ProviderId } from "../../../../components/settings/ai/llm/shared";
 import type { TaskArgsMapTransformed, TaskConfig } from ".";
 import type { Store } from "../../../tinybase/store/main";
 import { getCustomPrompt } from "../../../tinybase/store/prompts";
@@ -38,14 +39,78 @@ export const enhanceWorkflow: Pick<
   ],
 };
 
+const LOCAL_PROVIDERS: ProviderId[] = ["lmstudio", "ollama"];
+const MAX_CHUNK_TOKENS = 6000;
+const CHARS_PER_TOKEN = 4;
+
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / CHARS_PER_TOKEN);
+}
+
+function shouldChunk(prompt: string, providerId?: ProviderId): boolean {
+  if (!providerId || !LOCAL_PROVIDERS.includes(providerId)) {
+    return false;
+  }
+  return estimateTokens(prompt) > MAX_CHUNK_TOKENS;
+}
+
+function splitTranscriptIntoChunks(
+  prompt: string,
+  maxTokens: number,
+): string[] {
+  const maxChars = maxTokens * CHARS_PER_TOKEN;
+  const lines = prompt.split("\n");
+  const chunks: string[] = [];
+  let current = "";
+
+  for (const line of lines) {
+    if (current.length + line.length + 1 > maxChars && current.length > 0) {
+      chunks.push(current.trim());
+      current = "";
+    }
+    current += (current ? "\n" : "") + line;
+  }
+
+  if (current.trim()) {
+    chunks.push(current.trim());
+  }
+
+  return chunks.length > 0 ? chunks : [prompt];
+}
+
+async function summarizeChunk(params: {
+  model: LanguageModel;
+  system: string;
+  chunk: string;
+  chunkIndex: number;
+  totalChunks: number;
+  signal: AbortSignal;
+}): Promise<string> {
+  const { model, system, chunk, chunkIndex, totalChunks, signal } = params;
+
+  const chunkPrompt = `This is part ${chunkIndex + 1} of ${totalChunks} of a meeting transcript. Summarize the key points from this section in bullet points under relevant headings.
+
+${chunk}`;
+
+  const result = await generateText({
+    model,
+    system,
+    prompt: chunkPrompt,
+    abortSignal: signal,
+  });
+
+  return result.text;
+}
+
 async function* executeWorkflow(params: {
   model: LanguageModel;
   args: TaskArgsMapTransformed["enhance"];
   onProgress: (step: any) => void;
   signal: AbortSignal;
   store: Store;
+  providerId?: ProviderId;
 }) {
-  const { model, args, onProgress, signal, store } = params;
+  const { model, args, onProgress, signal, store, providerId } = params;
 
   const sections = await generateTemplateIfNeeded({
     model,
@@ -62,11 +127,71 @@ async function* executeWorkflow(params: {
   const system = await getSystemPrompt(argsWithTemplate);
   const prompt = await getUserPrompt(argsWithTemplate, store);
 
+  if (shouldChunk(prompt, providerId)) {
+    yield* executeChunkedWorkflow({
+      model,
+      args: argsWithTemplate,
+      system,
+      prompt,
+      onProgress,
+      signal,
+    });
+  } else {
+    yield* generateSummary({
+      model,
+      args: argsWithTemplate,
+      system,
+      prompt,
+      onProgress,
+      signal,
+    });
+  }
+}
+
+async function* executeChunkedWorkflow(params: {
+  model: LanguageModel;
+  args: TaskArgsMapTransformed["enhance"];
+  system: string;
+  prompt: string;
+  onProgress: (step: any) => void;
+  signal: AbortSignal;
+}) {
+  const { model, args, system, prompt, onProgress, signal } = params;
+
+  const chunks = splitTranscriptIntoChunks(prompt, MAX_CHUNK_TOKENS);
+  const partialSummaries: string[] = [];
+
+  for (let i = 0; i < chunks.length; i++) {
+    onProgress({ type: "chunking", current: i + 1, total: chunks.length });
+
+    const summary = await summarizeChunk({
+      model,
+      system,
+      chunk: chunks[i],
+      chunkIndex: i,
+      totalChunks: chunks.length,
+      signal,
+    });
+    partialSummaries.push(summary);
+  }
+
+  const mergedContext = partialSummaries
+    .map((s, i) => `--- Part ${i + 1} Summary ---\n${s}`)
+    .join("\n\n");
+
+  const sectionHint = args.template?.sections
+    ? `\nOrganize the final summary using these section headings: ${args.template.sections.map((s) => s.title).join(", ")}`
+    : "";
+
+  const mergePrompt = `Below are partial summaries from different parts of a meeting transcript. Merge them into a single, coherent, well-structured meeting summary in markdown.${sectionHint}
+
+${mergedContext}`;
+
   yield* generateSummary({
     model,
-    args: argsWithTemplate,
+    args,
     system,
-    prompt,
+    prompt: mergePrompt,
     onProgress,
     signal,
   });

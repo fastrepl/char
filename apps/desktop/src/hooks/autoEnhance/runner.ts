@@ -179,6 +179,7 @@ export function useAutoEnhanceRunner(
       model,
       taskType: "enhance",
       args: { sessionId, enhancedNoteId },
+      providerId: llmConn?.providerId,
     });
 
     return { type: "started", noteId: enhancedNoteId };

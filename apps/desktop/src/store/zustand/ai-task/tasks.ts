@@ -2,6 +2,7 @@ import type { LanguageModel } from "ai";
 import { create as mutate } from "mutative";
 import type { StoreApi } from "zustand";
 
+import type { ProviderId } from "../../../components/settings/ai/llm/shared";
 import type { Store as MainStore } from "../../tinybase/store/main";
 import type { Store as SettingsStore } from "../../tinybase/store/settings";
 import { applyTransforms } from "./shared/transform_infra";
@@ -24,6 +25,7 @@ export type TasksActions = {
       taskType: T;
       args: TaskArgsMap[T];
       onComplete?: (text: string) => void;
+      providerId?: ProviderId;
     },
   ) => Promise<void>;
   cancel: (taskId: string) => void;
@@ -34,6 +36,7 @@ export type TasksActions = {
 export type TaskStepInfo<T extends TaskType = TaskType> = T extends "enhance"
   ?
       | { type: "analyzing" }
+      | { type: "chunking"; current: number; total: number }
       | { type: "generating" }
       | { type: "retrying"; attempt: number; reason: string }
   : T extends "title"
@@ -123,6 +126,7 @@ export const createTasksSlice = <T extends TasksState>(
       taskType: Task;
       args: TaskArgsMap[Task];
       onComplete?: (text: string) => void;
+      providerId?: ProviderId;
     },
   ) => {
     const abortController = new AbortController();
@@ -174,6 +178,7 @@ export const createTasksSlice = <T extends TasksState>(
         onProgress,
         signal: abortController.signal,
         store: deps.persistedStore,
+        providerId: config.providerId,
       });
 
       const transforms = taskConfig.transforms ?? [];

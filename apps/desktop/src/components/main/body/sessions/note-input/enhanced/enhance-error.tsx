@@ -3,7 +3,10 @@ import { AlertCircleIcon, RefreshCwIcon } from "lucide-react";
 import { Button } from "@hypr/ui/components/ui/button";
 
 import { useAITask } from "../../../../../../contexts/ai-task";
-import { useLanguageModel } from "../../../../../../hooks/useLLMConnection";
+import {
+  useLanguageModel,
+  useLLMConnection,
+} from "../../../../../../hooks/useLLMConnection";
 import { createTaskId } from "../../../../../../store/zustand/ai-task/task-configs";
 
 export function EnhanceError({
@@ -16,6 +19,7 @@ export function EnhanceError({
   error: Error | undefined;
 }) {
   const model = useLanguageModel();
+  const { conn: llmConn } = useLLMConnection();
   const generate = useAITask((state) => state.generate);
 
   const handleRetry = () => {
@@ -26,6 +30,7 @@ export function EnhanceError({
       model,
       taskType: "enhance",
       args: { sessionId, enhancedNoteId },
+      providerId: llmConn?.providerId,
     });
   };
 

@@ -1,5 +1,7 @@
 import type { LanguageModel, TextStreamPart } from "ai";
 
+import type { ProviderId } from "../../../../components/settings/ai/llm/shared";
+
 import type {
   EnhanceSystem,
   EnhanceUser,
@@ -49,6 +51,7 @@ export interface TaskConfig<T extends TaskType = TaskType> {
     onProgress: (step: TaskStepInfo<T>) => void;
     signal: AbortSignal;
     store: MainStore;
+    providerId?: ProviderId;
   }) => AsyncIterable<TextStreamPart<any>>;
   transforms?: StreamTransform[];
 }
