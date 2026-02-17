@@ -6,6 +6,7 @@ import {
   fetchJson,
   type InputModality,
   isDateSnapshot,
+  isNonChatModel,
   isOldModel,
   type ListModelsResult,
   type ModelIgnoreReason,
@@ -60,6 +61,9 @@ export async function listOpenRouterModels(
     const reasons: ModelIgnoreReason[] = [];
     if (hasCommonIgnoreKeywords(model)) {
       reasons.push("common_keyword");
+    }
+    if (isNonChatModel(model.id)) {
+      reasons.push("not_chat_model");
     }
     if (!supportsTextInput(model)) {
       reasons.push("no_text_input");

@@ -9,6 +9,7 @@ export type ModelIgnoreReason =
   | "no_text_input"
   | "no_completion"
   | "not_llm"
+  | "not_chat_model"
   | "context_too_small";
 
 export type IgnoredModel = { id: string; reasons: ModelIgnoreReason[] };
@@ -45,6 +46,7 @@ export const commonIgnoreKeywords = [
   "realtime",
   "moderation",
   "codex",
+  "transcribe",
 ] as const;
 
 export const fetchJson = (url: string, headers: Record<string, string>) =>
@@ -68,6 +70,21 @@ export const shouldIgnoreCommonKeywords = (id: string): boolean => {
 export const isDateSnapshot = (id: string): boolean => {
   if (/-\d{4}-\d{2}-\d{2}/.test(id)) return true;
   if (/-\d{4}$/.test(id)) return true;
+  return false;
+};
+
+export const isNonChatModel = (id: string): boolean => {
+  const lowerId = id.toLowerCase();
+  const name = lowerId.includes("/") ? lowerId.split("/").pop()! : lowerId;
+
+  if (/^o\d/.test(name)) return true;
+  if (/^gpt-4o-/.test(name)) return true;
+  if (/^gpt-4\.1/.test(name)) return true;
+  if (name.startsWith("ft:") || lowerId.startsWith("ft:")) return true;
+  if (/^gemini-2\.[05]/.test(name)) return true;
+  if (/^gemma/.test(name)) return true;
+  if (/^nano-banana/.test(name)) return true;
+
   return false;
 };
 

@@ -6,6 +6,7 @@ import {
   fetchJson,
   type InputModality,
   isDateSnapshot,
+  isNonChatModel,
   type ListModelsResult,
   type ModelIgnoreReason,
   partition,
@@ -46,6 +47,9 @@ export async function listGoogleModels(
     const reasons: ModelIgnoreReason[] = [];
     if (shouldIgnoreCommonKeywords(model.name)) {
       reasons.push("common_keyword");
+    }
+    if (isNonChatModel(extractModelId(model))) {
+      reasons.push("not_chat_model");
     }
     if (!supportsGeneration(model)) {
       reasons.push("no_completion");

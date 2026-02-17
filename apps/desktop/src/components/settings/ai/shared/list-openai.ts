@@ -5,6 +5,7 @@ import {
   extractMetadataMap,
   fetchJson,
   isDateSnapshot,
+  isNonChatModel,
   isOldModel,
   type ListModelsResult,
   type ModelIgnoreReason,
@@ -39,6 +40,9 @@ export async function listOpenAIModels(
           const reasons: ModelIgnoreReason[] = [];
           if (shouldIgnoreCommonKeywords(model.id)) {
             reasons.push("common_keyword");
+          }
+          if (isNonChatModel(model.id)) {
+            reasons.push("not_chat_model");
           }
           if (isOldModel(model.id)) {
             reasons.push("old_model");
@@ -80,6 +84,9 @@ export async function listGenericModels(
           const reasons: ModelIgnoreReason[] = [];
           if (shouldIgnoreCommonKeywords(model.id)) {
             reasons.push("common_keyword");
+          }
+          if (isNonChatModel(model.id)) {
+            reasons.push("not_chat_model");
           }
           if (isOldModel(model.id)) {
             reasons.push("old_model");
