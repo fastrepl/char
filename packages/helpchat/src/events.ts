@@ -24,8 +24,7 @@ export async function connectEventStream(
   const fetchFn: FetchFn = config.fetchFn ?? globalThis.fetch;
 
   const params = new URLSearchParams({ pubsub_token: pubsubToken });
-  const url =
-    `${config.baseUrl}/support/chatwoot/conversations/${conversationId}/events?${params}`;
+  const url = `${config.baseUrl}/support/chatwoot/conversations/${conversationId}/events?${params}`;
 
   const headers: Record<string, string> = { Accept: "text/event-stream" };
   if (config.accessToken) {
