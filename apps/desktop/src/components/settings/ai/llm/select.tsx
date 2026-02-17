@@ -94,7 +94,16 @@ export function SelectProviderAndModel() {
     if (!current_llm_provider) return;
 
     const currentStatus = configuredProviders[current_llm_provider];
-    if (currentStatus?.listModels) return;
+    const currentLocalStatus =
+      current_llm_provider === "ollama"
+        ? ollamaStatus
+        : current_llm_provider === "lmstudio"
+          ? lmStudioStatus
+          : null;
+    const currentUsable =
+      !!currentStatus?.listModels &&
+      (currentLocalStatus === null || currentLocalStatus === "connected");
+    if (currentUsable) return;
 
     const fallback = PROVIDERS.find((p) => {
       if (p.id === current_llm_provider) return false;
