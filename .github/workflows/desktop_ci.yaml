@@ -11,8 +11,6 @@ on:
       - Cargo.toml
       - Cargo.lock
   pull_request:
-    branches-ignore:
-      - "**/graphite-base/**"
     paths:
       - apps/desktop/**
       - plugins/**
@@ -20,20 +18,7 @@ on:
       - Cargo.toml
       - Cargo.lock
 jobs:
-  optimize_ci:
-    runs-on: ubuntu-latest
-    outputs:
-      skip: ${{ steps.check_skip.outputs.skip }}
-    steps:
-      - uses: actions/checkout@v4
-      - id: check_skip
-        uses: ./.github/actions/graphite_optimizer
-        with:
-          graphite_token: ${{ secrets.GRAPHITE_TOKEN }}
-
   desktop_ci:
-    needs: optimize_ci
-    if: needs.optimize_ci.outputs.skip == 'false'
     defaults:
       run:
         shell: bash
@@ -160,8 +145,8 @@ jobs:
 
   ci:
     if: always()
-    needs: [optimize_ci, desktop_ci]
+    needs: [desktop_ci]
     runs-on: ubuntu-latest
     steps:
       - run: exit 1
-        if: needs.optimize_ci.outputs.skip == 'false' && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
