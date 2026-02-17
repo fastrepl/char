@@ -51,6 +51,14 @@ export function SelectProviderAndModel() {
   const { status: ollamaStatus } = useLocalProviderStatus("ollama");
   const { status: lmStudioStatus } = useLocalProviderStatus("lmstudio");
 
+  const currentLocalStatus =
+    current_llm_provider === "ollama"
+      ? ollamaStatus
+      : current_llm_provider === "lmstudio"
+        ? lmStudioStatus
+        : null;
+  const isLocalProviderDown = currentLocalStatus === "disconnected";
+
   const handleSelectProvider = settings.UI.useSetValueCallback(
     "current_llm_provider",
     (provider: string) => provider,
@@ -136,7 +144,9 @@ export function SelectProviderAndModel() {
         className={cn([
           "flex flex-col gap-4",
           "p-4 rounded-xl border border-neutral-200",
-          !isConfigured || hasError ? "bg-red-50" : "bg-neutral-50",
+          !isConfigured || hasError || isLocalProviderDown
+            ? "bg-red-50"
+            : "bg-neutral-50",
         ])}
       >
         <div className="flex flex-row items-center gap-4">
@@ -180,6 +190,9 @@ export function SelectProviderAndModel() {
                           key={provider.id}
                           value={provider.id}
                           disabled={isDisabled}
+                          className={cn([
+                            isDisabled && "opacity-50 pointer-events-none",
+                          ])}
                         >
                           <div className="flex flex-col gap-0.5">
                             <div className="flex items-center gap-2">
@@ -205,6 +218,14 @@ export function SelectProviderAndModel() {
             {(field) => {
               const providerId = form.getFieldValue("provider");
               const status = configuredProviders[providerId];
+              const localStatus =
+                providerId === "ollama"
+                  ? ollamaStatus
+                  : providerId === "lmstudio"
+                    ? lmStudioStatus
+                    : null;
+              const isLocalDisconnected =
+                localStatus !== null && localStatus !== "connected";
 
               return (
                 <div className="flex-3 min-w-0">
@@ -212,7 +233,7 @@ export function SelectProviderAndModel() {
                     providerId={providerId}
                     value={field.state.value}
                     onChange={(value) => field.handleChange(value)}
-                    disabled={!status?.listModels}
+                    disabled={!status?.listModels || isLocalDisconnected}
                     listModels={status?.listModels}
                     isConfigured={isConfigured && health.status === "success"}
                     suffix={
@@ -234,7 +255,16 @@ export function SelectProviderAndModel() {
           </div>
         )}
 
-        {hasError && health.message && (
+        {isConfigured && isLocalProviderDown && (
+          <div className="flex items-center gap-2 pt-2 border-t border-red-200">
+            <span className="text-sm text-red-600">
+              {current_llm_provider === "ollama" ? "Ollama" : "LM Studio"} is
+              not running. Start it to use this provider.
+            </span>
+          </div>
+        )}
+
+        {hasError && !isLocalProviderDown && health.message && (
           <div className="flex items-center gap-2 pt-2 border-t border-red-200">
             <span className="text-sm text-red-600">{health.message}</span>
           </div>
