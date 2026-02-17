@@ -117,18 +117,7 @@ export const Route = createFileRoute("/_view/")({
 
 function Component() {
   const [expandedVideo, setExpandedVideo] = useState<string | null>(null);
-  const [selectedFeature, setSelectedFeature] = useState(0);
-  const featuresScrollRef = useRef<HTMLDivElement>(null);
   const heroInputRef = useRef<HTMLInputElement>(null);
-
-  const scrollToFeature = (index: number) => {
-    setSelectedFeature(index);
-    if (featuresScrollRef.current) {
-      const container = featuresScrollRef.current;
-      const scrollLeft = container.offsetWidth * index;
-      container.scrollTo({ left: scrollLeft, behavior: "smooth" });
-    }
-  };
 
   return (
     <main
@@ -188,7 +177,7 @@ function YCombinatorBanner() {
   );
 }
 
-function HeroSection({
+export function HeroSection({
   onVideoExpand,
   heroInputRef,
 }: {
@@ -1127,7 +1116,6 @@ export function HowItWorksSection() {
         <MockWindow
           showAudioIndicator={activeTab === "notes"}
           audioIndicatorColor="#ef4444"
-          audioIndicatorWidth={120}
           headerClassName={activeTab === "notes" ? "bg-red-100" : undefined}
         >
           <div className="flex border-b border-neutral-200 text-sm">
@@ -2231,7 +2219,7 @@ function FAQSection() {
   );
 }
 
-function ManifestoSection() {
+export function ManifestoSection() {
   return (
     <section className="py-16 px-4 laptop:px-0 bg-[linear-gradient(to_right,#f5f5f5_1px,transparent_1px),linear-gradient(to_bottom,#f5f5f5_1px,transparent_1px)] bg-size-[24px_24px] bg-position-[12px_12px,12px_12px]">
       <div className="max-w-4xl mx-auto">
