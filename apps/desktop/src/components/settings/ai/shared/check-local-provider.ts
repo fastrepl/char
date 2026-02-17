@@ -8,8 +8,12 @@ export async function checkLocalProvider(
 
   const headers: Record<string, string> = {};
   if (providerId === "ollama") {
-    const host = baseUrl.replace(/\/v1\/?$/, "");
-    headers["Origin"] = new URL(host).origin;
+    try {
+      const host = baseUrl.replace(/\/v1\/?$/, "");
+      headers["Origin"] = new URL(host).origin;
+    } catch {
+      return false;
+    }
   }
 
   return Promise.race([
