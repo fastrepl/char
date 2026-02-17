@@ -203,9 +203,7 @@ mod tests {
             ..Default::default()
         };
 
-        if is_hyprnote_proxy(api_base)
-            && params.model.as_deref().map_or(true, is_meta_model)
-        {
+        if is_hyprnote_proxy(api_base) && params.model.as_deref().map_or(true, is_meta_model) {
             let adapter_kind =
                 AdapterKind::from_url_and_languages(api_base, &params.languages, Some(model));
             if let Some(recommended) = adapter_kind.recommended_model_live(&params.languages) {
