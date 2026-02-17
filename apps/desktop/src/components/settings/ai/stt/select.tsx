@@ -138,11 +138,7 @@ export function SelectProviderAndModel() {
 
                 const models = (
                   configuredProviders[value as ProviderId]?.models ?? []
-                ).filter((m) => {
-                  if (m.id === "cloud") return true;
-                  if (m.id.startsWith("Quantized")) return m.isDownloaded;
-                  return true;
-                });
+                ).filter((m) => m.isDownloaded);
 
                 const lastModel = getLastUsedModel("stt", value);
                 const lastModelAvailable =
