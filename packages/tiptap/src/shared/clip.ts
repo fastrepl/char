@@ -1,15 +1,35 @@
 import { mergeAttributes, Node } from "@tiptap/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 
+export function parseYouTubeClipId(url: string): string | null {
+  const match = url
+    .trim()
+    .match(/(?:youtube\.com|youtu\.be)\/clip\/([a-zA-Z0-9_-]+)/);
+  return match ? match[1] : null;
+}
+
+export async function resolveYouTubeClipUrl(
+  clipId: string,
+): Promise<{ embedUrl: string } | null> {
+  try {
+    const res = await fetch(`https://www.youtube.com/clip/${clipId}`);
+    const html = await res.text();
+
+    const videoIdMatch = html.match(/"videoId":"([a-zA-Z0-9_-]+)"/);
+    if (!videoIdMatch) return null;
+
+    return {
+      embedUrl: `https://www.youtube.com/embed/${videoIdMatch[1]}`,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export function parseYouTubeUrl(url: string): { embedUrl: string } | null {
   const trimmed = url.trim();
 
-  const clipMatch = trimmed.match(
-    /(?:youtube\.com|youtu\.be)\/clip\/([a-zA-Z0-9_-]+)/,
-  );
-  if (clipMatch) {
-    return { embedUrl: `https://www.youtube.com/embed/clip/${clipMatch[1]}` };
-  }
+  if (parseYouTubeClipId(trimmed)) return null;
 
   const watchMatch = trimmed.match(
     /(?:youtube\.com\/watch\?.*v=|youtu\.be\/)([a-zA-Z0-9_-]+)/,
@@ -79,6 +99,17 @@ export const ClipNode = Node.create({
           handlePaste(view, event) {
             const text = event.clipboardData?.getData("text/plain");
             if (!text) return false;
+
+            const clipId = parseYouTubeClipId(text);
+            if (clipId) {
+              resolveYouTubeClipUrl(clipId).then((resolved) => {
+                if (!resolved) return;
+                const node = nodeType.create({ src: resolved.embedUrl });
+                const tr = view.state.tr.replaceSelectionWith(node);
+                view.dispatch(tr);
+              });
+              return true;
+            }
 
             const parsed = parseYouTubeUrl(text);
             if (!parsed) return false;
