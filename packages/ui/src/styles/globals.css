@@ -242,6 +242,19 @@
     @apply bg-background text-foreground;
   }
 
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
   button,
   [role="button"],
   [type="button"],

@@ -39,6 +39,11 @@ h4 {
   font-family: var(--font-serif);
   font-weight: 500;
   line-height: 1.2;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 a {
