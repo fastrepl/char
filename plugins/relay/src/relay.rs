@@ -125,7 +125,9 @@ async fn event_listen<R: Runtime>(
         });
     });
 
-    subs.lock().await.insert(handler_id, event_id);
+    if let Some(old_event_id) = subs.lock().await.insert(handler_id, event_id) {
+        app.unlisten(old_event_id);
+    }
 
     InvokeResponse {
         id,
@@ -164,12 +166,12 @@ async fn invoke<R: Runtime>(
     pending.lock().await.insert(id, tx);
 
     let args_json = serde_json::to_string(args).unwrap_or("{}".into());
-    let cmd_escaped = cmd.replace('\\', "\\\\").replace('"', "\\\"");
+    let cmd_json = serde_json::to_string(cmd).unwrap_or("\"\"".into());
 
     let js = format!(
         r#"(async function() {{
   try {{
-    var r = await window.__TAURI_INTERNALS__.invoke("{cmd_escaped}", {args_json});
+    var r = await window.__TAURI_INTERNALS__.invoke({cmd_json}, {args_json});
     await window.__TAURI_INTERNALS__.invoke("plugin:relay|relay_result", {{
       id: {id}, ok: true, data: r === undefined ? null : r
     }});

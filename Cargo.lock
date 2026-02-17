@@ -557,17 +557,15 @@ dependencies = [
 name = "api-calendar"
 version = "0.1.0"
 dependencies = [
- "api-env",
+ "api-nango",
  "axum 0.8.8",
  "chrono",
  "google-calendar",
  "nango",
- "reqwest 0.13.2",
  "sentry",
  "serde",
  "serde_json",
  "thiserror 2.0.18",
- "tokio",
  "tracing",
  "utoipa",
 ]
@@ -586,6 +584,7 @@ dependencies = [
  "api-auth",
  "api-env",
  "axum 0.8.8",
+ "chrono",
  "nango",
  "reqwest 0.13.2",
  "sentry",
@@ -594,6 +593,7 @@ dependencies = [
  "thiserror 2.0.18",
  "tokio",
  "tracing",
+ "urlencoding",
  "utoipa",
 ]
 
@@ -618,16 +618,14 @@ dependencies = [
 name = "api-storage"
 version = "0.1.0"
 dependencies = [
- "api-env",
+ "api-nango",
  "axum 0.8.8",
  "google-drive",
  "nango",
- "reqwest 0.13.2",
  "sentry",
  "serde",
  "serde_json",
  "thiserror 2.0.18",
- "tokio",
  "tracing",
  "utoipa",
 ]

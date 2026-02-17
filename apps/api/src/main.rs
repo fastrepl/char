@@ -71,8 +71,12 @@ async fn app() -> Router {
     let auth_state_basic = AuthState::new(&env.supabase.supabase_url);
     let auth_state_support = AuthState::new(&env.supabase.supabase_url);
 
-    let calendar_config = hypr_api_calendar::CalendarConfig::new(&env.nango);
-    let nango_config = hypr_api_nango::NangoConfig::new(&env.nango);
+    let nango_config = hypr_api_nango::NangoConfig::new(
+        &env.nango,
+        &env.supabase,
+        Some(env.supabase.supabase_service_role_key.clone()),
+    );
+    let nango_connection_state = hypr_api_nango::NangoConnectionState::from_config(&nango_config);
     let subscription_config =
         hypr_api_subscription::SubscriptionConfig::new(&env.supabase, &env.stripe);
     let support_config = hypr_api_support::SupportConfig::new(
@@ -101,8 +105,9 @@ async fn app() -> Router {
 
     let pro_routes = Router::new()
         .merge(hypr_api_research::router(research_config))
-        .nest("/calendar", hypr_api_calendar::router(calendar_config))
+        .nest("/calendar", hypr_api_calendar::router())
         .nest("/nango", hypr_api_nango::router(nango_config.clone()))
+        .layer(axum::Extension(nango_connection_state))
         .route_layer(middleware::from_fn(auth::sentry_and_analytics))
         .route_layer(middleware::from_fn_with_state(
             auth_state_pro,

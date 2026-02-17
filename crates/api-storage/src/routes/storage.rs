@@ -1,13 +1,12 @@
-use axum::{Json, extract::State};
+use axum::Json;
+use hypr_api_nango::{GoogleDrive, NangoConnection};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 use crate::error::{Result, StorageError};
-use crate::state::AppState;
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct ListFilesRequest {
-    pub connection_id: String,
     #[serde(default)]
     pub q: Option<String>,
     #[serde(default)]
@@ -27,7 +26,6 @@ pub struct ListFilesResponse {
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct GetFileRequest {
-    pub connection_id: String,
     pub file_id: String,
 }
 
@@ -38,7 +36,6 @@ pub struct GetFileResponse {
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct DownloadFileRequest {
-    pub connection_id: String,
     pub file_id: String,
 }
 
@@ -59,15 +56,10 @@ pub struct DownloadFileResponse {
     tag = "storage",
 )]
 pub async fn list_files(
-    State(state): State<AppState>,
+    nango: NangoConnection<GoogleDrive>,
     Json(payload): Json<ListFilesRequest>,
 ) -> Result<Json<ListFilesResponse>> {
-    let proxy = state
-        .nango
-        .integration("google-drive")
-        .connection(&payload.connection_id);
-    let http = hypr_nango::NangoHttpClient::new(proxy);
-    let client = hypr_google_drive::GoogleDriveClient::new(http);
+    let client = hypr_google_drive::GoogleDriveClient::new(nango.into_http());
 
     let req = hypr_google_drive::ListFilesRequest {
         q: payload.q,
@@ -106,15 +98,10 @@ pub async fn list_files(
     tag = "storage",
 )]
 pub async fn get_file(
-    State(state): State<AppState>,
+    nango: NangoConnection<GoogleDrive>,
     Json(payload): Json<GetFileRequest>,
 ) -> Result<Json<GetFileResponse>> {
-    let proxy = state
-        .nango
-        .integration("google-drive")
-        .connection(&payload.connection_id);
-    let http = hypr_nango::NangoHttpClient::new(proxy);
-    let client = hypr_google_drive::GoogleDriveClient::new(http);
+    let client = hypr_google_drive::GoogleDriveClient::new(nango.into_http());
 
     let req = hypr_google_drive::GetFileRequest {
         file_id: payload.file_id,
@@ -143,15 +130,10 @@ pub async fn get_file(
     tag = "storage",
 )]
 pub async fn download_file(
-    State(state): State<AppState>,
+    nango: NangoConnection<GoogleDrive>,
     Json(payload): Json<DownloadFileRequest>,
 ) -> Result<Json<DownloadFileResponse>> {
-    let proxy = state
-        .nango
-        .integration("google-drive")
-        .connection(&payload.connection_id);
-    let http = hypr_nango::NangoHttpClient::new(proxy);
-    let client = hypr_google_drive::GoogleDriveClient::new(http);
+    let client = hypr_google_drive::GoogleDriveClient::new(nango.into_http());
 
     let data = client
         .download_file(&payload.file_id)
