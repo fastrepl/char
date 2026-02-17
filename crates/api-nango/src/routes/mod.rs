@@ -2,7 +2,10 @@ pub(crate) mod connect;
 pub(crate) mod status;
 pub(crate) mod webhook;
 
-use axum::{Router, routing::{get, post}};
+use axum::{
+    Router,
+    routing::{get, post},
+};
 
 use crate::config::NangoConfig;
 use crate::state::AppState;

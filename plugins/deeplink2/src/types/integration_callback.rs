@@ -11,9 +11,12 @@ pub struct IntegrationCallbackSearch {
 
 impl IntegrationCallbackSearch {
     pub fn from_query_params(query_params: &HashMap<String, String>) -> crate::Result<Self> {
-        let integration_id = query_params
-            .get("integration_id")
-            .ok_or(crate::Error::MissingQueryParam("integration_id".to_string()))?;
+        let integration_id =
+            query_params
+                .get("integration_id")
+                .ok_or(crate::Error::MissingQueryParam(
+                    "integration_id".to_string(),
+                ))?;
 
         let status = query_params
             .get("status")
