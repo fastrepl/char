@@ -73,7 +73,7 @@ export function FolderLocationSection({
         </button>
         <button
           onClick={onContinue}
-          className="px-3 py-1 text-sm rounded-full bg-linear-to-t from-stone-600 to-stone-500 text-white font-medium duration-150 hover:scale-[1.01] active:scale-[0.99] shrink-0"
+          className="px-3 py-1 text-sm rounded-full bg-stone-600 text-white font-medium duration-150 hover:scale-[1.01] active:scale-[0.99] shrink-0"
         >
           Confirm
         </button>
