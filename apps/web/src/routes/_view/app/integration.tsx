@@ -1,7 +1,7 @@
 import Nango from "@nangohq/frontend";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 
 import { cn } from "@hypr/utils";
@@ -29,6 +29,10 @@ function Component() {
   const [status, setStatus] = useState<
     "idle" | "connecting" | "success" | "error"
   >("idle");
+  const statusRef = useRef(status);
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
 
   const handleConnect = async () => {
     if (!user) return;
@@ -37,7 +41,7 @@ function Component() {
     const connect = nangoRef.current.openConnectUI({
       onEvent: (event) => {
         if (event.type === "close") {
-          if (status !== "success") {
+          if (statusRef.current !== "success") {
             setStatus("idle");
           }
         } else if (event.type === "connect") {
@@ -53,14 +57,18 @@ function Component() {
       },
     });
 
-    const { sessionToken } = await getSessionToken({
-      data: {
-        userId: user.id,
-        userEmail: user.email,
-        allowedIntegrations: ["google-calendar"],
-      },
-    });
-    connect.setSessionToken(sessionToken);
+    try {
+      const { sessionToken } = await getSessionToken({
+        data: {
+          userId: user.id,
+          userEmail: user.email,
+          allowedIntegrations: ["google-calendar"],
+        },
+      });
+      connect.setSessionToken(sessionToken);
+    } catch {
+      setStatus("error");
+    }
   };
 
   return (
