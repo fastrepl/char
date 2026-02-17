@@ -98,8 +98,20 @@ impl<A: RealtimeSttAdapter> ListenClientBuilder<A> {
         adapter: &A,
         channels: u8,
     ) -> hypr_ws_client::client::ClientRequestBuilder {
-        let params = self.get_params();
+        let mut params = self.get_params();
         let original_api_base = self.get_api_base();
+
+        if is_hyprnote_proxy(original_api_base) {
+            let adapter_kind = AdapterKind::from_url_and_languages(
+                original_api_base,
+                &params.languages,
+                params.model.as_deref(),
+            );
+            if let Some(recommended) = adapter_kind.recommended_model_live(&params.languages) {
+                params.model = Some(recommended.to_string());
+            }
+        }
+
         let api_base = append_provider_param(original_api_base, adapter.provider_name());
         let url = adapter
             .build_ws_url_with_api_key(&api_base, &params, channels, self.api_key.as_deref())
