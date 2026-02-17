@@ -15,10 +15,31 @@ import {
   type CalendarGroup,
   type CalendarItem,
   CalendarSelection,
-} from "../shared";
+} from "../calendar-selection";
 import { useSync } from "./context";
-import { Section } from "./index";
 import { SyncIndicator } from "./sync";
+
+export function Section({
+  title,
+  action,
+  children,
+}: {
+  title: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-2 border-t border-neutral-200 pt-4">
+      <div className="flex items-center justify-between">
+        <h4 className="text-xs font-medium text-neutral-400 uppercase tracking-wide">
+          {title}
+        </h4>
+        {action}
+      </div>
+      {children}
+    </div>
+  );
+}
 
 export function AppleCalendarSelection({
   calendarClassName,

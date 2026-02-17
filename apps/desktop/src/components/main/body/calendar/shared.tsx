@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 import { OutlookIcon } from "@hypr/ui/components/icons/outlook";
 
-type CalendarProvider = {
+export type CalendarProvider = {
   disabled: boolean;
   id: string;
   displayName: string;
@@ -11,9 +11,8 @@ type CalendarProvider = {
   badge?: string | null;
   platform?: "macos" | "all";
   docsPath: string;
+  nangoIntegrationId?: string;
 };
-
-export type CalendarProviderId = (typeof _PROVIDERS)[number]["id"];
 
 const _PROVIDERS = [
   {
@@ -24,15 +23,17 @@ const _PROVIDERS = [
     icon: <Icon icon="logos:apple" width={20} height={20} />,
     platform: "macos",
     docsPath: "https://hyprnote.com/docs/calendar/apple",
+    nangoIntegrationId: undefined,
   },
   {
-    disabled: true,
+    disabled: false,
     id: "google",
     displayName: "Google",
-    badge: "Coming soon",
+    badge: "Beta",
     icon: <Icon icon="logos:google-calendar" width={20} height={20} />,
     platform: "all",
     docsPath: "https://hyprnote.com/docs/calendar/gcal",
+    nangoIntegrationId: "google-calendar",
   },
   {
     disabled: true,
@@ -42,6 +43,7 @@ const _PROVIDERS = [
     icon: <OutlookIcon size={20} />,
     platform: "all",
     docsPath: "https://hyprnote.com/docs/calendar/outlook",
+    nangoIntegrationId: undefined,
   },
 ] as const satisfies readonly CalendarProvider[];
 

@@ -1,12 +1,17 @@
 pub(crate) mod connect;
+pub(crate) mod status;
 pub(crate) mod webhook;
 
-use axum::{Router, routing::post};
+use axum::{
+    Router,
+    routing::{get, post},
+};
 
 use crate::config::NangoConfig;
 use crate::state::AppState;
 
 pub use connect::ConnectSessionResponse;
+pub use status::{ConnectionItem, ListConnectionsResponse};
 pub use webhook::WebhookResponse;
 
 pub fn router(config: NangoConfig) -> Router {
@@ -14,6 +19,7 @@ pub fn router(config: NangoConfig) -> Router {
 
     Router::new()
         .route("/connect-session", post(connect::create_connect_session))
+        .route("/connections", get(status::list_connections))
         .with_state(state)
 }
 

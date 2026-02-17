@@ -28,7 +28,7 @@ fn default_chatwoot_base_url() -> String {
 pub struct ChatwootEnv {
     #[serde(default = "default_chatwoot_base_url")]
     pub chatwoot_base_url: String,
-    pub chatwoot_api_token: String,
+    pub chatwoot_access_token: String,
     #[serde(deserialize_with = "hypr_api_env::string_to_u64")]
     pub chatwoot_account_id: u64,
     pub chatwoot_inbox_identifier: String,

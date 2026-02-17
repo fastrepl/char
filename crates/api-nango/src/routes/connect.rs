@@ -27,13 +27,20 @@ pub async fn create_connect_session(
     Extension(auth): Extension<AuthContext>,
 ) -> Result<Json<ConnectSessionResponse>> {
     let user_id = auth.claims.sub;
+    let email = auth.claims.email;
+
+    let mut tags = std::collections::HashMap::new();
+    tags.insert("end_user_id".to_string(), user_id.clone());
+    if let Some(ref e) = email {
+        tags.insert("end_user_email".to_string(), e.clone());
+    }
 
     let req = hypr_nango::CreateConnectSessionRequest {
         end_user: hypr_nango::EndUser {
             id: user_id,
             display_name: None,
-            email: None,
-            tags: None,
+            email,
+            tags: Some(tags),
         },
         organization: None,
         allowed_integrations: None,

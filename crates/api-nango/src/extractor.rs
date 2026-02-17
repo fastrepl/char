@@ -35,7 +35,8 @@ impl NangoConnectionState {
     }
 
     pub fn from_config(config: &crate::config::NangoConfig) -> Self {
-        let mut builder = hypr_nango::NangoClient::builder().api_key(&config.nango.nango_api_key);
+        let mut builder =
+            hypr_nango::NangoClient::builder().api_key(&config.nango.nango_secret_key);
         if let Some(api_base) = &config.nango.nango_api_base {
             builder = builder.api_base(api_base);
         }
@@ -75,12 +76,7 @@ impl NangoConnectionState {
             )));
         }
 
-        #[derive(serde::Deserialize)]
-        struct Row {
-            connection_id: String,
-        }
-
-        let rows: Vec<Row> = response
+        let rows: Vec<crate::supabase::NangoConnectionRow> = response
             .json()
             .await
             .map_err(|e| NangoConnectionError::Database(e.to_string()))?;

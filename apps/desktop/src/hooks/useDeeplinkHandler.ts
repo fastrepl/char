@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { isTauri } from "@tauri-apps/api/core";
 import { useEffect } from "react";
 
@@ -7,6 +8,7 @@ import { useAuth } from "../auth";
 
 export function useDeeplinkHandler() {
   const auth = useAuth();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!isTauri()) {
@@ -23,11 +25,19 @@ export function useDeeplinkHandler() {
         if (auth) {
           void auth.refreshSession();
         }
+      } else if (payload.to === "/integration/callback") {
+        const { integration_id, status } = payload.search;
+        if (status === "success") {
+          console.log(`[deeplink] integration connected: ${integration_id}`);
+          void queryClient.invalidateQueries({
+            queryKey: ["integration-status"],
+          });
+        }
       }
     });
 
     return () => {
       void unlisten.then((fn) => fn());
     };
-  }, [auth]);
+  }, [auth, queryClient]);
 }
