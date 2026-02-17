@@ -1,9 +1,7 @@
 import { mergeAttributes, Node } from "@tiptap/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 
-export function parseYouTubeUrl(
-  url: string,
-): { embedUrl: string } | null {
+export function parseYouTubeUrl(url: string): { embedUrl: string } | null {
   const trimmed = url.trim();
 
   const clipMatch = trimmed.match(
@@ -32,9 +30,7 @@ export function parseYouTubeUrl(
     };
   }
 
-  const embedMatch = trimmed.match(
-    /youtube\.com\/embed\/([a-zA-Z0-9_-]+)/,
-  );
+  const embedMatch = trimmed.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/);
   if (embedMatch) {
     return { embedUrl: trimmed };
   }
