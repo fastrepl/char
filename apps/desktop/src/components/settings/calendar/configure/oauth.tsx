@@ -11,12 +11,18 @@ import { buildWebAppUrl } from "../../../../utils";
 import { StyledStreamdown } from "../../ai/shared";
 import { PROVIDERS } from "../shared";
 
-export function GoogleCalendarProviderCard() {
-  const config = PROVIDERS.find((p) => p.id === "google")!;
+export function OAuthProviderCard({
+  config,
+}: {
+  config: (typeof PROVIDERS)[number];
+}) {
   const auth = useAuth();
 
   const handleConnect = async () => {
-    const url = await buildWebAppUrl("/app/integration");
+    if (!config.nangoIntegrationId) return;
+    const url = await buildWebAppUrl("/app/integration", {
+      integration_id: config.nangoIntegrationId,
+    });
     await openerCommands.openUrl(url, null);
   };
 
@@ -39,8 +45,8 @@ export function GoogleCalendarProviderCard() {
       <AccordionContent className="px-4 flex flex-col gap-5">
         <div className="flex items-center justify-between">
           <StyledStreamdown>
-            Connect your **Google Calendar** to sync meetings. Opens your
-            browser to authenticate with Google.
+            Connect your **{config.displayName} Calendar** to sync meetings.
+            Opens your browser to authenticate.
           </StyledStreamdown>
           <button
             onClick={() => openerCommands.openUrl(config.docsPath, null)}
@@ -59,7 +65,7 @@ export function GoogleCalendarProviderCard() {
             !auth.session && "opacity-50 cursor-not-allowed",
           ])}
         >
-          Connect Google Calendar
+          Connect {config.displayName} Calendar
         </button>
       </AccordionContent>
     </AccordionItem>

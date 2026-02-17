@@ -5,7 +5,7 @@ import { Accordion } from "@hypr/ui/components/ui/accordion";
 import { PROVIDERS } from "../shared";
 import { AppleCalendarProviderCard } from "./apple";
 import { DisabledProviderCard } from "./cloud";
-import { GoogleCalendarProviderCard } from "./google";
+import { OAuthProviderCard } from "./oauth";
 
 export function ConfigureProviders() {
   const isMacos = platform() === "macos";
@@ -21,8 +21,8 @@ export function ConfigureProviders() {
           <DisabledProviderCard key={provider.id} config={provider} />
         ) : provider.id === "apple" ? (
           <AppleCalendarProviderCard key={provider.id} />
-        ) : provider.id === "google" ? (
-          <GoogleCalendarProviderCard key={provider.id} />
+        ) : provider.nangoIntegrationId ? (
+          <OAuthProviderCard key={provider.id} config={provider} />
         ) : null,
       )}
     </Accordion>

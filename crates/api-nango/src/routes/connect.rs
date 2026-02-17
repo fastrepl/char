@@ -43,7 +43,7 @@ pub async fn create_connect_session(
             tags: Some(tags),
         },
         organization: None,
-        allowed_integrations: Some(vec!["google-calendar".to_string()]),
+        allowed_integrations: None,
         integrations_config_defaults: None,
     };
 
