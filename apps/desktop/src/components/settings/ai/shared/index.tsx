@@ -268,8 +268,8 @@ function useProvider(providerType: ProviderType, id: string) {
   const data: AIProvider | undefined = hasRow
     ? {
         type: providerRow.type as AIProvider["type"],
-        base_url: providerRow.base_url,
-        api_key: providerRow.api_key,
+        base_url: providerRow.base_url ?? "",
+        api_key: providerRow.api_key ?? "",
       }
     : undefined;
   return [data, setProvider] as const;
