@@ -75,6 +75,7 @@ final class QuitInterceptor {
     case .awaiting:
       state = .pressed
       cancelTimer(&dismissTimer)
+      rustPerformClose()
       scheduleTimer(&holdThresholdTimer, delay: QuitOverlay.holdThreshold) { [weak self] in
         guard let self, self.state == .pressed else { return }
         self.state = .holding
@@ -98,7 +99,7 @@ final class QuitInterceptor {
     case .pressed:
       state = .idle
       cancelTimer(&holdThresholdTimer)
-      performClose()
+      hidePanel()
 
     case .holding:
       state = .awaiting
