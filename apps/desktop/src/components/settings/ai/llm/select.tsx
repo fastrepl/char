@@ -98,13 +98,27 @@ export function SelectProviderAndModel() {
 
     const fallback = PROVIDERS.find((p) => {
       if (p.id === current_llm_provider) return false;
-      return !!configuredProviders[p.id]?.listModels;
+      if (!configuredProviders[p.id]?.listModels) return false;
+      const localStatus =
+        p.id === "ollama"
+          ? ollamaStatus
+          : p.id === "lmstudio"
+            ? lmStudioStatus
+            : null;
+      if (localStatus !== null && localStatus !== "connected") return false;
+      return true;
     });
 
     if (fallback) {
       form.setFieldValue("provider", fallback.id);
     }
-  }, [configuredProviders, current_llm_provider, form]);
+  }, [
+    configuredProviders,
+    current_llm_provider,
+    form,
+    ollamaStatus,
+    lmStudioStatus,
+  ]);
 
   return (
     <div className="flex flex-col gap-3">
