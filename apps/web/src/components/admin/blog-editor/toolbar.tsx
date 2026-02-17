@@ -12,6 +12,7 @@ import {
   ImageIcon,
   ItalicIcon,
   LinkIcon,
+  FilmIcon,
   ListIcon,
   ListOrderedIcon,
   QuoteIcon,
@@ -82,6 +83,8 @@ export function Toolbar({
 }: ToolbarProps) {
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
+  const [showClipInput, setShowClipInput] = useState(false);
+  const [clipUrl, setClipUrl] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [replaceTerm, setReplaceTerm] = useState("");
   const [caseSensitive, setCaseSensitive] = useState(false);
@@ -367,6 +370,54 @@ export function Toolbar({
             </ToolbarButton>
           </>
         )}
+
+        <div className="relative">
+          <ToolbarButton
+            onClick={() => setShowClipInput(!showClipInput)}
+            title="Insert Clip"
+          >
+            <FilmIcon className="size-4" />
+          </ToolbarButton>
+
+          {showClipInput && (
+            <div className="absolute top-full left-0 mt-1 z-10 bg-white border border-neutral-200 rounded shadow-lg p-2 flex gap-2">
+              <input
+                type="url"
+                value={clipUrl}
+                onChange={(e) => setClipUrl(e.target.value)}
+                placeholder="YouTube embed URL..."
+                className="px-2 py-1 text-sm border border-neutral-200 rounded w-64 focus:outline-none focus:border-blue-500"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (editor && clipUrl.trim()) {
+                      editor.chain().focus().insertContent({ type: "clip", attrs: { src: clipUrl.trim() } }).run();
+                      setClipUrl("");
+                      setShowClipInput(false);
+                    }
+                  } else if (e.key === "Escape") {
+                    setShowClipInput(false);
+                    setClipUrl("");
+                  }
+                }}
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (editor && clipUrl.trim()) {
+                    editor.chain().focus().insertContent({ type: "clip", attrs: { src: clipUrl.trim() } }).run();
+                    setClipUrl("");
+                    setShowClipInput(false);
+                  }
+                }}
+                className="px-2 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Add
+              </button>
+            </div>
+          )}
+        </div>
 
         <div className="flex-1" />
 

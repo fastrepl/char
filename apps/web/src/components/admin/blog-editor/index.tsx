@@ -11,6 +11,7 @@ import { getExtensions, type ImageUploadResult } from "@hypr/tiptap/shared";
 import "@hypr/tiptap/styles.css";
 
 import "./blog-editor.css";
+import { ClipNode } from "./clip-embed";
 import { GoogleDocsImport } from "./google-docs-import";
 import { BlogImage } from "./image-with-alt";
 import { Toolbar } from "./toolbar";
@@ -74,6 +75,7 @@ const BlogEditor = forwardRef<{ editor: TiptapEditor | null }, BlogEditorProps>(
           { imageExtension: BlogImage },
         ),
         Markdown,
+        ClipNode,
       ],
       [onImageUpload],
     );
