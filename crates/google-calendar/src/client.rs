@@ -2,7 +2,8 @@ use hypr_http::HttpClient;
 
 use crate::error::Error;
 use crate::types::{
-    CreateEventRequest, GoogleEvent, ListCalendarsResponse, ListEventsRequest, ListEventsResponse,
+    CreateEventRequest, Event, EventType, ListCalendarsResponse, ListEventsRequest,
+    ListEventsResponse,
 };
 
 pub struct GoogleCalendarClient<C> {
@@ -52,7 +53,49 @@ impl<C: HttpClient> GoogleCalendarClient<C> {
             query_parts.push(format!("singleEvents={single_events}"));
         }
         if let Some(ref order_by) = req.order_by {
-            query_parts.push(format!("orderBy={}", urlencoding::encode(order_by)));
+            let value = match order_by {
+                crate::types::EventOrderBy::StartTime => "startTime",
+                crate::types::EventOrderBy::Updated => "updated",
+            };
+            query_parts.push(format!("orderBy={value}"));
+        }
+        if let Some(show_deleted) = req.show_deleted {
+            query_parts.push(format!("showDeleted={show_deleted}"));
+        }
+        if let Some(show_hidden_invitations) = req.show_hidden_invitations {
+            query_parts.push(format!("showHiddenInvitations={show_hidden_invitations}"));
+        }
+        if let Some(ref updated_min) = req.updated_min {
+            query_parts.push(format!(
+                "updatedMin={}",
+                urlencoding::encode(&updated_min.to_rfc3339())
+            ));
+        }
+        if let Some(ref i_cal_uid) = req.i_cal_uid {
+            query_parts.push(format!("iCalUID={}", urlencoding::encode(i_cal_uid)));
+        }
+        if let Some(ref q) = req.q {
+            query_parts.push(format!("q={}", urlencoding::encode(q)));
+        }
+        if let Some(ref sync_token) = req.sync_token {
+            query_parts.push(format!("syncToken={}", urlencoding::encode(sync_token)));
+        }
+        if let Some(ref time_zone) = req.time_zone {
+            query_parts.push(format!("timeZone={}", urlencoding::encode(time_zone)));
+        }
+        if let Some(ref event_types) = req.event_types {
+            for et in event_types {
+                let value = match et {
+                    EventType::Default => "default",
+                    EventType::Birthday => "birthday",
+                    EventType::FocusTime => "focusTime",
+                    EventType::FromGmail => "fromGmail",
+                    EventType::OutOfOffice => "outOfOffice",
+                    EventType::WorkingLocation => "workingLocation",
+                    EventType::Unknown => continue,
+                };
+                query_parts.push(format!("eventTypes={value}"));
+            }
         }
 
         let full_path = if query_parts.is_empty() {
@@ -66,13 +109,13 @@ impl<C: HttpClient> GoogleCalendarClient<C> {
         Ok(response)
     }
 
-    pub async fn create_event(&self, req: CreateEventRequest) -> Result<GoogleEvent, Error> {
+    pub async fn create_event(&self, req: CreateEventRequest) -> Result<Event, Error> {
         let calendar_id = &req.calendar_id;
         let path = format!("/calendar/v3/calendars/{calendar_id}/events");
 
         let body = serde_json::to_vec(&req.event)?;
         let bytes = self.http.post(&path, body).await.map_err(Error::Http)?;
-        let event: GoogleEvent = serde_json::from_slice(&bytes)?;
+        let event: Event = serde_json::from_slice(&bytes)?;
         Ok(event)
     }
 }
