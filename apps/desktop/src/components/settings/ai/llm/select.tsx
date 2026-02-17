@@ -19,6 +19,7 @@ import {
   getProviderSelectionBlockers,
   requiresEntitlement,
 } from "../shared/eligibility";
+import { getLastUsedModel, setLastUsedModel } from "../shared/last-used-model";
 import { listAnthropicModels } from "../shared/list-anthropic";
 import {
   type InputModality,
@@ -79,6 +80,9 @@ export function SelectProviderAndModel() {
     onSubmit: ({ value }) => {
       handleSelectProvider(value.provider);
       handleSelectModel(value.model);
+      if (value.provider && value.model) {
+        setLastUsedModel("llm", value.provider, value.model);
+      }
     },
   });
 
@@ -100,7 +104,8 @@ export function SelectProviderAndModel() {
                 if (value === "hyprnote") {
                   form.setFieldValue("model", "Auto");
                 } else {
-                  form.setFieldValue("model", "");
+                  const lastModel = getLastUsedModel("llm", value);
+                  form.setFieldValue("model", lastModel ?? "");
                 }
               },
             }}

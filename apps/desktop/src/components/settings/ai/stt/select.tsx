@@ -25,6 +25,7 @@ import {
   getProviderSelectionBlockers,
   requiresEntitlement,
 } from "../shared/eligibility";
+import { getLastUsedModel, setLastUsedModel } from "../shared/last-used-model";
 import { useSttSettings } from "./context";
 import { HealthStatusIndicator, useConnectionHealth } from "./health";
 import {
@@ -104,6 +105,9 @@ export function SelectProviderAndModel() {
     onSubmit: ({ value }) => {
       handleSelectProvider(value.provider);
       handleSelectModel(value.model);
+      if (value.provider && value.model) {
+        setLastUsedModel("stt", value.provider, value.model);
+      }
     },
   });
 
@@ -125,8 +129,32 @@ export function SelectProviderAndModel() {
           <form.Field
             name="provider"
             listeners={{
-              onChange: () => {
-                form.setFieldValue("model", "");
+              onChange: ({ value }) => {
+                if (value === "custom") {
+                  const lastModel = getLastUsedModel("stt", value);
+                  form.setFieldValue("model", lastModel ?? "");
+                  return;
+                }
+
+                const models = (
+                  configuredProviders[value as ProviderId]?.models ?? []
+                ).filter((m) => {
+                  if (m.id === "cloud") return true;
+                  if (m.id.startsWith("Quantized")) return m.isDownloaded;
+                  return true;
+                });
+
+                const lastModel = getLastUsedModel("stt", value);
+                const lastModelAvailable =
+                  lastModel && models.some((m) => m.id === lastModel);
+
+                if (lastModelAvailable) {
+                  form.setFieldValue("model", lastModel);
+                } else if (models.length > 0) {
+                  form.setFieldValue("model", models[0].id);
+                } else {
+                  form.setFieldValue("model", "");
+                }
               },
             }}
           >

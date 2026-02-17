@@ -6,7 +6,7 @@ import {
   EyeOff,
   RefreshCcw,
 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@hypr/ui/components/ui/button";
 import {
@@ -99,6 +99,21 @@ export function ModelCombobox({
     () => fetchedResult?.models ?? [],
     [fetchedResult],
   );
+
+  const autoSelectedRef = useRef(false);
+  useEffect(() => {
+    if (autoSelectedRef.current) {
+      return;
+    }
+    if (!value && options.length > 0) {
+      autoSelectedRef.current = true;
+      onChange(options[0]);
+    }
+  }, [value, options, onChange]);
+
+  useEffect(() => {
+    autoSelectedRef.current = false;
+  }, [providerId]);
   const ignoredOptions = useMemo(
     () => fetchedResult?.ignored ?? [],
     [fetchedResult],
