@@ -17,6 +17,10 @@ impl SupabaseClient {
         }
     }
 
+    pub(crate) fn is_configured(&self) -> bool {
+        self.supabase_service_role_key.is_some()
+    }
+
     fn service_role_key(&self) -> Result<&str, crate::error::NangoError> {
         self.supabase_service_role_key.as_deref().ok_or_else(|| {
             crate::error::NangoError::Internal(

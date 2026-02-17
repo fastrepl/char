@@ -15,8 +15,6 @@ pub struct Env {
     pub sentry_dsn: Option<String>,
     #[serde(default, deserialize_with = "hypr_api_env::filter_empty")]
     pub posthog_api_key: Option<String>,
-    #[serde(default, deserialize_with = "hypr_api_env::filter_empty")]
-    pub supabase_service_role_key: Option<String>,
 
     #[serde(flatten)]
     pub supabase: hypr_api_env::SupabaseEnv,

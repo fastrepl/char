@@ -74,7 +74,7 @@ async fn app() -> Router {
     let nango_config = hypr_api_nango::NangoConfig::new(
         &env.nango,
         &env.supabase,
-        env.supabase_service_role_key.clone(),
+        Some(env.supabase.supabase_service_role_key.clone()),
     );
     let nango_connection_state = hypr_api_nango::NangoConnectionState::from_config(&nango_config);
     let subscription_config =
