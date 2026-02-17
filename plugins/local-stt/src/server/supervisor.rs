@@ -1,13 +1,17 @@
-use ractor::{ActorCell, ActorProcessingErr, ActorRef, concurrency::Duration, registry};
-use ractor_supervisor::{
-    core::{ChildBackoffFn, ChildSpec, Restart, SpawnFn, SupervisorError},
-    dynamic::{DynamicSupervisor, DynamicSupervisorMsg, DynamicSupervisorOptions},
+use hypr_supervisor::{
+    RestartPolicy,
+    dynamic::{
+        ChildBackoffFn, DynChildSpec, DynSpawnFn, DynamicSupervisor, DynamicSupervisorMsg,
+        DynamicSupervisorOptions, SupervisorError,
+    },
 };
+use ractor::{ActorCell, ActorProcessingErr, ActorRef, concurrency::Duration, registry};
 
+#[cfg(feature = "whisper-cpp")]
+use super::internal::{InternalSTTActor, InternalSTTArgs};
 use super::{
     ServerType,
     external::{ExternalSTTActor, ExternalSTTArgs},
-    internal::{InternalSTTActor, InternalSTTArgs},
 };
 
 pub type SupervisorRef = ActorRef<DynamicSupervisorMsg>;
@@ -40,6 +44,7 @@ pub async fn spawn_stt_supervisor(
     Ok((supervisor_ref, handle))
 }
 
+#[cfg(feature = "whisper-cpp")]
 pub async fn start_internal_stt(
     supervisor: &ActorRef<DynamicSupervisorMsg>,
     args: InternalSTTArgs,
@@ -56,8 +61,9 @@ pub async fn start_external_stt(
     DynamicSupervisor::spawn_child(supervisor.clone(), child_spec).await
 }
 
-fn create_internal_child_spec_with_args(args: InternalSTTArgs) -> ChildSpec {
-    let spawn_fn = SpawnFn::new(move |supervisor: ActorCell, child_id: String| {
+#[cfg(feature = "whisper-cpp")]
+fn create_internal_child_spec_with_args(args: InternalSTTArgs) -> DynChildSpec {
+    let spawn_fn = DynSpawnFn::new(move |supervisor: ActorCell, child_id: String| {
         let args = args.clone();
         async move {
             let (actor_ref, _handle) =
@@ -67,10 +73,10 @@ fn create_internal_child_spec_with_args(args: InternalSTTArgs) -> ChildSpec {
         }
     });
 
-    ChildSpec {
+    DynChildSpec {
         id: INTERNAL_STT_ACTOR_NAME.to_string(),
         spawn_fn,
-        restart: Restart::Transient,
+        restart: RestartPolicy::Transient,
         backoff_fn: Some(ChildBackoffFn::new(|_, _, _, _| {
             Some(Duration::from_millis(500))
         })),
@@ -78,8 +84,8 @@ fn create_internal_child_spec_with_args(args: InternalSTTArgs) -> ChildSpec {
     }
 }
 
-fn create_external_child_spec_with_args(args: ExternalSTTArgs) -> ChildSpec {
-    let spawn_fn = SpawnFn::new(move |supervisor: ActorCell, child_id: String| {
+fn create_external_child_spec_with_args(args: ExternalSTTArgs) -> DynChildSpec {
+    let spawn_fn = DynSpawnFn::new(move |supervisor: ActorCell, child_id: String| {
         let args = args.clone();
         async move {
             let (actor_ref, _handle) =
@@ -89,10 +95,10 @@ fn create_external_child_spec_with_args(args: ExternalSTTArgs) -> ChildSpec {
         }
     });
 
-    ChildSpec {
+    DynChildSpec {
         id: EXTERNAL_STT_ACTOR_NAME.to_string(),
         spawn_fn,
-        restart: Restart::Transient,
+        restart: RestartPolicy::Transient,
         backoff_fn: Some(ChildBackoffFn::new(|_, _, _, _| {
             Some(Duration::from_secs(1))
         })),
@@ -104,6 +110,11 @@ pub async fn stop_stt_server(
     supervisor: &ActorRef<DynamicSupervisorMsg>,
     server_type: ServerType,
 ) -> Result<(), ActorProcessingErr> {
+    #[cfg(not(feature = "whisper-cpp"))]
+    if matches!(server_type, ServerType::Internal) {
+        return Ok(());
+    }
+
     let child_id = match server_type {
         ServerType::Internal => INTERNAL_STT_ACTOR_NAME,
         ServerType::External => EXTERNAL_STT_ACTOR_NAME,
@@ -121,7 +132,10 @@ pub async fn stop_stt_server(
     }
 
     match server_type {
+        #[cfg(feature = "whisper-cpp")]
         ServerType::Internal => wait_for_actor_shutdown(InternalSTTActor::name()).await,
+        #[cfg(not(feature = "whisper-cpp"))]
+        ServerType::Internal => {}
         ServerType::External => wait_for_actor_shutdown(ExternalSTTActor::name()).await,
     }
 
@@ -131,6 +145,7 @@ pub async fn stop_stt_server(
 pub async fn stop_all_stt_servers(
     supervisor: &ActorRef<DynamicSupervisorMsg>,
 ) -> Result<(), ActorProcessingErr> {
+    #[cfg(feature = "whisper-cpp")]
     let _ = stop_stt_server(supervisor, ServerType::Internal).await;
     let _ = stop_stt_server(supervisor, ServerType::External).await;
     Ok(())

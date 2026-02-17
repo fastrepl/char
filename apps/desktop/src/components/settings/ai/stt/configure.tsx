@@ -151,39 +151,6 @@ function HyprProviderCard({
                 displayName="Whisper Large v3"
                 description="Broad coverage of languages."
               />
-
-              <details className="flex flex-col gap-4 pt-2">
-                <summary className="text-xs cursor-pointer text-neutral-600 hover:text-neutral-900 hover:underline">
-                  Advanced
-                </summary>
-                <div className="mt-4 flex flex-col gap-3">
-                  <HyprProviderLocalRow
-                    model="QuantizedTinyEn"
-                    displayName="whisper-tiny-en-q8"
-                    description="Only for experiment & development purposes."
-                  />
-                  <HyprProviderLocalRow
-                    model="QuantizedSmallEn"
-                    displayName="whisper-small-en-q8"
-                    description="Only for experiment & development purposes."
-                  />
-                </div>
-              </details>
-            </>
-          )}
-
-          {!isAppleSilicon && (
-            <>
-              <HyprProviderLocalRow
-                model="QuantizedTinyEn"
-                displayName="whisper-tiny-en-q8"
-                description="Powered by Whisper.cpp. English only."
-              />
-              <HyprProviderLocalRow
-                model="QuantizedSmallEn"
-                displayName="whisper-small-en-q8"
-                description="Powered by Whisper.cpp. English only."
-              />
             </>
           )}
         </div>
@@ -236,7 +203,7 @@ function HyprProviderCloudRow() {
 
   const buttonLabel = isPro
     ? "Ready to use"
-    : canStartTrial
+    : canStartTrial.data
       ? "Start Free Trial"
       : "Upgrade to Pro";
 
@@ -474,9 +441,11 @@ function ProviderContext({ providerId }: { providerId: ProviderId }) {
                 ? `Use [OpenAI](https://openai.com) for transcriptions.`
                 : providerId === "fireworks"
                   ? `Use [Fireworks AI](https://fireworks.ai) for transcriptions.`
-                  : providerId === "custom"
-                    ? `We only support **Deepgram compatible** endpoints for now.`
-                    : "";
+                  : providerId === "mistral"
+                    ? `Use [Mistral](https://mistral.ai) for transcriptions.`
+                    : providerId === "custom"
+                      ? `We only support **Deepgram compatible** endpoints for now.`
+                      : "";
 
   if (!content.trim()) {
     return null;

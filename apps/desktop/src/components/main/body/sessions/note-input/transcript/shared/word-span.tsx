@@ -1,11 +1,13 @@
-import { Fragment, useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
-import { cn } from "@hypr/utils";
+import type { Operations, SegmentWord } from "@hypr/transcript";
+import {
+  createSearchHighlightSegments,
+  WordSpan as SharedWordSpan,
+} from "@hypr/transcript/ui";
 
 import { useNativeContextMenu } from "../../../../../../../hooks/useNativeContextMenu";
-import { SegmentWord } from "../../../../../../../utils/segment";
 import { useTranscriptSearch } from "../search-context";
-import { Operations } from "./operations";
 
 interface WordSpanProps {
   word: SegmentWord;
@@ -15,116 +17,43 @@ interface WordSpanProps {
 }
 
 export function WordSpan(props: WordSpanProps) {
-  const hasOperations =
-    props.operations && Object.keys(props.operations).length > 0;
-
-  if (hasOperations && props.word.id) {
-    return <EditorWordSpan {...props} operations={props.operations!} />;
-  }
-
-  return <ViewerWordSpan {...props} />;
-}
-
-function ViewerWordSpan({
-  word,
-  audioExists,
-  onClickWord,
-}: Omit<WordSpanProps, "operations">) {
-  const { segments, isActive } = useTranscriptSearchHighlights(word);
-
-  const content = useHighlightedContent(word, segments, isActive);
-
-  const className = useMemo(
-    () =>
-      cn([
-        audioExists && "cursor-pointer hover:bg-neutral-200/60",
-        !word.isFinal && ["opacity-60", "italic"],
-      ]),
-    [audioExists, word.isFinal],
-  );
-
-  const handleClick = useCallback(() => {
-    onClickWord(word);
-  }, [word, onClickWord]);
-
-  return (
-    <span onClick={handleClick} className={className} data-word-id={word.id}>
-      {content}
-    </span>
-  );
-}
-
-function EditorWordSpan({
-  word,
-  audioExists,
-  operations,
-  onClickWord,
-}: Omit<WordSpanProps, "operations"> & { operations: Operations }) {
-  const { segments, isActive } = useTranscriptSearchHighlights(word);
-
-  const content = useHighlightedContent(word, segments, isActive);
-
-  const className = useMemo(
-    () =>
-      cn([
-        audioExists && "cursor-pointer hover:bg-neutral-200/60",
-        !word.isFinal && ["opacity-60", "italic"],
-      ]),
-    [audioExists, word.isFinal],
-  );
-
-  const handleClick = useCallback(() => {
-    onClickWord(word);
-  }, [word, onClickWord]);
+  const searchHighlights = useTranscriptSearchHighlights(props.word);
 
   const contextMenu = useMemo(
-    () => [
-      {
-        id: "delete",
-        text: "Delete",
-        action: () => operations.onDeleteWord?.(word.id!),
-      },
-    ],
-    [operations, word.id],
+    () =>
+      props.operations && props.word.id
+        ? [
+            {
+              id: "delete",
+              text: "Delete",
+              action: () => props.operations!.onDeleteWord?.(props.word.id!),
+            },
+          ]
+        : [],
+    [props.operations, props.word.id],
   );
 
   const showMenu = useNativeContextMenu(contextMenu);
 
-  return (
-    <span
-      onClick={handleClick}
-      onContextMenu={showMenu}
-      className={className}
-      data-word-id={word.id}
-    >
-      {content}
-    </span>
+  const handleContextMenu = useCallback(
+    (_word: SegmentWord, e: React.MouseEvent) => {
+      showMenu(e);
+    },
+    [showMenu],
   );
-}
 
-type HighlightSegment = { text: string; isMatch: boolean };
-
-function useHighlightedContent(
-  word: SegmentWord,
-  segments: HighlightSegment[],
-  isActive: boolean,
-) {
-  return useMemo(() => {
-    const baseKey = word.id ?? word.text ?? "word";
-
-    return segments.map((piece, index) =>
-      piece.isMatch ? (
-        <span
-          key={`${baseKey}-match-${index}`}
-          className={isActive ? "bg-yellow-500" : "bg-yellow-200/50"}
-        >
-          {piece.text}
-        </span>
-      ) : (
-        <Fragment key={`${baseKey}-text-${index}`}>{piece.text}</Fragment>
-      ),
-    );
-  }, [segments, isActive, word.id, word.text]);
+  return (
+    <SharedWordSpan
+      word={props.word}
+      audioExists={props.audioExists}
+      operations={props.operations}
+      searchHighlights={searchHighlights}
+      onClickWord={props.onClickWord}
+      onContextMenu={
+        props.operations && props.word.id ? handleContextMenu : undefined
+      }
+    />
+  );
 }
 
 function useTranscriptSearchHighlights(word: SegmentWord) {
@@ -144,36 +73,10 @@ function useTranscriptSearchHighlights(word: SegmentWord) {
       return [{ text, isMatch: false }];
     }
 
-    return createSegments(text, query);
+    return createSearchHighlightSegments(text, query);
   }, [isVisible, query, word.text]);
 
   const isActive = word.id === activeMatchId;
 
   return { segments, isActive };
-}
-
-function createSegments(text: string, query: string): HighlightSegment[] {
-  const lowerText = text.toLowerCase();
-  const lowerQuery = query.toLowerCase();
-  const segments: HighlightSegment[] = [];
-
-  let cursor = 0;
-  let index = lowerText.indexOf(lowerQuery, cursor);
-
-  while (index !== -1) {
-    if (index > cursor) {
-      segments.push({ text: text.slice(cursor, index), isMatch: false });
-    }
-
-    const end = index + query.length;
-    segments.push({ text: text.slice(index, end), isMatch: true });
-    cursor = end;
-    index = lowerText.indexOf(lowerQuery, cursor);
-  }
-
-  if (cursor < text.length) {
-    segments.push({ text: text.slice(cursor), isMatch: false });
-  }
-
-  return segments.length ? segments : [{ text, isMatch: false }];
 }

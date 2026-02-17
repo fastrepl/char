@@ -69,23 +69,6 @@ function fixImageUrls(content: string): string {
   );
 }
 
-function addEmptyParagraphsBeforeHeaders(
-  json: ReturnType<typeof md2json>,
-): ReturnType<typeof md2json> {
-  if (!json.content) return json;
-
-  const newContent: typeof json.content = [];
-  for (let i = 0; i < json.content.length; i++) {
-    const node = json.content[i];
-    if (node.type === "heading" && i > 0) {
-      newContent.push({ type: "paragraph" });
-    }
-    newContent.push(node);
-  }
-
-  return { ...json, content: newContent };
-}
-
 export const TabItemChangelog: TabItem<Extract<Tab, { type: "changelog" }>> = ({
   tab,
   tabIndex,
@@ -188,7 +171,7 @@ function ChangelogHeader({
               variant="ghost"
               className="pointer-events-none text-neutral-600"
             >
-              <CalendarIcon size={14} className="shrink-0 -mt-0.5" />
+              <CalendarIcon size={14} className="shrink-0" />
               <span>{formattedDate}</span>
             </Button>
           )}
@@ -197,11 +180,14 @@ function ChangelogHeader({
             variant="ghost"
             className="gap-1.5 text-neutral-600 hover:text-black"
             onClick={() =>
-              openerCommands.openUrl("https://hyprnote.com/changelog", null)
+              openerCommands.openUrl(
+                `https://hyprnote.com/changelog/${version}`,
+                null,
+              )
             }
           >
-            <ExternalLinkIcon size={14} className="-mt-0.5" />
-            <span>See all</span>
+            <ExternalLinkIcon size={14} />
+            <span>Open in web</span>
           </Button>
         </div>
       </div>
@@ -232,7 +218,7 @@ function processChangelogContent(raw: string): {
   const markdown = fixImageUrls(body);
   const json = md2json(markdown);
   return {
-    content: addEmptyParagraphsBeforeHeaders(json),
+    content: json,
     date,
   };
 }

@@ -15,11 +15,11 @@ export function ChatBodyEmpty({
   }, [openNew]);
 
   const handleOpenChatShortcuts = useCallback(() => {
-    openNew({ type: "chat_shortcuts" });
+    openNew({ type: "ai", state: { tab: "shortcuts" } });
   }, [openNew]);
 
   const handleOpenPrompts = useCallback(() => {
-    openNew({ type: "prompts" });
+    openNew({ type: "ai", state: { tab: "prompts" } });
   }, [openNew]);
 
   if (!isModelConfigured) {

@@ -3,13 +3,11 @@ import {
   CalendarIcon,
   ChevronUpIcon,
   CircleHelp,
-  FileTextIcon,
   FolderOpenIcon,
-  MessageSquareIcon,
+  SearchIcon,
   SettingsIcon,
   SparklesIcon,
   UsersIcon,
-  ZapIcon,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -19,7 +17,6 @@ import { Kbd } from "@hypr/ui/components/ui/kbd";
 import { cn } from "@hypr/utils";
 
 import { useAuth } from "../../../../auth";
-import { useFeedbackModal } from "../../../../components/feedback/feedback-modal";
 import { useAutoCloser } from "../../../../hooks/useAutoCloser";
 import * as main from "../../../../store/tinybase/store/main";
 import { useTabs } from "../../../../store/zustand/tabs";
@@ -39,7 +36,7 @@ export function ProfileSection({ onExpandChange }: ProfileSectionProps = {}) {
   const [mainViewHeight, setMainViewHeight] = useState<number | null>(null);
   const mainViewRef = useRef<HTMLDivElement | null>(null);
   const openNew = useTabs((state) => state.openNew);
-  const openFeedback = useFeedbackModal((state) => state.open);
+  const transitionChatMode = useTabs((state) => state.transitionChatMode);
   const auth = useAuth();
 
   const isAuthenticated = !!auth?.session;
@@ -128,45 +125,25 @@ export function ProfileSection({ onExpandChange }: ProfileSectionProps = {}) {
     closeMenu();
   }, [openNew, closeMenu]);
 
-  const handleClickTemplates = useCallback(() => {
-    openNew({
-      type: "templates",
-      state: {
-        showHomepage: true,
-        isWebMode: false,
-        selectedMineId: null,
-        selectedWebIndex: null,
-      },
-    });
-    closeMenu();
-  }, [openNew, closeMenu]);
-
-  const handleClickShortcuts = useCallback(() => {
-    openNew({
-      type: "chat_shortcuts",
-      state: {
-        isWebMode: false,
-        selectedMineId: null,
-        selectedWebIndex: null,
-      },
-    });
-    closeMenu();
-  }, [openNew, closeMenu]);
-
-  const handleClickPrompts = useCallback(() => {
-    openNew({
-      type: "prompts",
-      state: {
-        selectedTask: null,
-      },
-    });
-    closeMenu();
-  }, [openNew, closeMenu]);
-
   const handleClickHelp = useCallback(() => {
-    openFeedback("bug");
+    const state = {
+      groupId: null,
+      initialMessage: "I need help.",
+    };
+    openNew({ type: "chat_support", state });
+    const { tabs, updateChatSupportTabState } = useTabs.getState();
+    const existingChatTab = tabs.find((t) => t.type === "chat_support");
+    if (existingChatTab) {
+      updateChatSupportTabState(existingChatTab, state);
+    }
+    transitionChatMode({ type: "OPEN_TAB" });
     closeMenu();
-  }, [openFeedback, closeMenu]);
+  }, [openNew, transitionChatMode, closeMenu]);
+
+  const handleClickAdvancedSearch = useCallback(() => {
+    openNew({ type: "search" });
+    closeMenu();
+  }, [openNew, closeMenu]);
 
   // const handleClickData = useCallback(() => {
   //   openNew({ type: "data" });
@@ -199,25 +176,16 @@ export function ProfileSection({ onExpandChange }: ProfileSectionProps = {}) {
       badge: <Kbd className={kbdClass}>⌘ ⇧ C</Kbd>,
     },
     {
-      icon: FileTextIcon,
-      label: "Templates",
-      onClick: handleClickTemplates,
-    },
-    {
-      icon: ZapIcon,
-      label: "Shortcuts",
-      onClick: handleClickShortcuts,
-    },
-    {
-      icon: MessageSquareIcon,
-      label: "Prompts",
-      onClick: handleClickPrompts,
+      icon: SearchIcon,
+      label: "Advanced Search",
+      onClick: handleClickAdvancedSearch,
+      badge: <Kbd className={kbdClass}>⌘ ⇧ F</Kbd>,
     },
     {
       icon: SparklesIcon,
       label: "AI Settings",
       onClick: handleClickAI,
-      badge: <Kbd className={kbdClass}>⌘ ⇧ A</Kbd>,
+      badge: <Kbd className={kbdClass}>⌘ ⇧ ,</Kbd>,
     },
     {
       icon: SettingsIcon,
@@ -244,7 +212,7 @@ export function ProfileSection({ onExpandChange }: ProfileSectionProps = {}) {
             className="absolute bottom-full left-0 right-0 mb-1"
           >
             <div className="bg-neutral-50 rounded-xl overflow-hidden shadow-xs border">
-              <div className="pt-1">
+              <div className="py-1">
                 <AnimatePresence mode="wait">
                   {currentView === "main" ? (
                     <motion.div
@@ -265,7 +233,7 @@ export function ProfileSection({ onExpandChange }: ProfileSectionProps = {}) {
                       {menuItems.map((item, index) => (
                         <div key={item.label}>
                           <MenuItem {...item} />
-                          {(index === 2 || index === 5 || index === 7) && (
+                          {(index === 3 || index === 5) && (
                             <div className="my-1 border-t border-neutral-100" />
                           )}
                         </div>

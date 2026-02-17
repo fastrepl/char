@@ -10,8 +10,8 @@ use std::time::{Duration, Instant};
 
 use axum::{
     Json, Router,
-    extract::State,
-    http::StatusCode,
+    extract::{FromRequestParts, State},
+    http::{StatusCode, request::Parts},
     response::{IntoResponse, Response},
     routing::post,
 };
@@ -138,8 +138,38 @@ pub fn chat_completions_router(config: LlmProxyConfig) -> Router {
         .with_state(state)
 }
 
+use hypr_analytics::{AuthenticatedUserId, DeviceFingerprint};
+
+pub struct AnalyticsContext {
+    pub fingerprint: Option<String>,
+    pub user_id: Option<String>,
+}
+
+impl<S> FromRequestParts<S> for AnalyticsContext
+where
+    S: Send + Sync,
+{
+    type Rejection = std::convert::Infallible;
+
+    async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
+        let fingerprint = parts
+            .extensions
+            .get::<DeviceFingerprint>()
+            .map(|id| id.0.clone());
+        let user_id = parts
+            .extensions
+            .get::<AuthenticatedUserId>()
+            .map(|id| id.0.clone());
+        Ok(AnalyticsContext {
+            fingerprint,
+            user_id,
+        })
+    }
+}
+
 async fn completions_handler(
     State(state): State<AppState>,
+    analytics_ctx: AnalyticsContext,
     Json(request): Json<ChatCompletionRequest>,
 ) -> Response {
     let start_time = Instant::now();
@@ -233,8 +263,8 @@ async fn completions_handler(
     };
 
     if stream {
-        handle_stream_response(state, response, start_time).await
+        handle_stream_response(state, response, start_time, analytics_ctx).await
     } else {
-        handle_non_stream_response(state, response, start_time).await
+        handle_non_stream_response(state, response, start_time, analytics_ctx).await
     }
 }

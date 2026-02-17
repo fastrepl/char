@@ -62,7 +62,7 @@ pub async fn stop_session<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> Result
 #[specta::specta]
 pub async fn get_state<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
-) -> Result<crate::fsm::State, String> {
+) -> Result<crate::State, String> {
     Ok(app.listener().get_state().await)
 }
 
@@ -110,6 +110,8 @@ pub async fn suggest_providers_for_languages_live<R: tauri::Runtime>(
         AdapterKind::OpenAI,
         AdapterKind::Gladia,
         AdapterKind::ElevenLabs,
+        AdapterKind::DashScope,
+        AdapterKind::Mistral,
     ];
 
     let mut with_support: Vec<_> = all_providers

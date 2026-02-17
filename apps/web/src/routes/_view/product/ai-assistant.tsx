@@ -1,5 +1,6 @@
 import { Icon } from "@iconify-icon/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 
 import { cn } from "@hypr/utils";
 
@@ -9,7 +10,7 @@ export const Route = createFileRoute("/_view/product/ai-assistant")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "AI Assistant - Hyprnote" },
+      { title: "AI Chat - Char" },
       {
         name: "description",
         content:
@@ -46,10 +47,10 @@ function HeroSection() {
     <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30 px-6 py-12 lg:py-20">
       <header className="text-center max-w-4xl mx-auto">
         <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6 flex items-center justify-center flex-wrap">
-          <span>AI assistant</span>
+          <span>AI Chat</span>
           <img
             src="/api/images/hyprnote/ai-assistant.gif"
-            alt="AI assistant"
+            alt="AI Chat"
             className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-full inline-block ml-1 mr-2 sm:mr-0"
           />
           <span>for your meetings</span>
@@ -295,8 +296,128 @@ function DuringMeetingSection() {
 }
 
 function AfterMeetingSection() {
+  const slides = [
+    {
+      prompt:
+        "Add a Jira ticket for the mobile UI bug and assign it to Sarah today",
+      card: (
+        <div
+          className="w-full max-w-[420px] rounded-2xl border border-neutral-200 bg-white p-4"
+          dir="ltr"
+        >
+          <div className="flex flex-row items-center gap-2 text-xs text-neutral-500">
+            <Icon icon="logos:jira" className="text-base" />
+            <span>ENG-247</span>
+            <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[11px] text-stone-600">
+              Todo
+            </span>
+          </div>
+          <div className="mt-2 text-sm font-medium text-stone-700">
+            Mobile UI bug fix
+          </div>
+          <p className="mt-1 text-xs text-neutral-500">
+            Fix the mobile UI bug discussed in today's meeting. Check responsive
+            layout on iOS devices.
+          </p>
+          <div className="mt-3 flex flex-row items-center gap-2 text-xs text-neutral-500">
+            <div className="h-6 w-6 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px]">
+              S
+            </div>
+            <span>Sarah</span>
+          </div>
+        </div>
+      ),
+      toolbar: "simple-icons:jira",
+    },
+    {
+      prompt: "Send the summary to #engineering and update the Q4 roadmap now",
+      card: (
+        <div
+          className="w-full max-w-[420px] rounded-[18px] border border-neutral-200 bg-white px-4 py-4 text-sm text-neutral-700 mt-1"
+          dir="ltr"
+        >
+          <div className="flex items-center gap-2 text-xs text-neutral-500">
+            <Icon icon="logos:slack-icon" className="text-sm" />
+            <span>#engineering</span>
+            <span>·</span>
+            <span>2:15 PM</span>
+          </div>
+          <div className="mt-2">
+            <p className="font-medium text-neutral-700">Jessica Lee</p>
+            <p className="text-[12px] text-neutral-600">
+              Meeting summary attached as a file for review, including key
+              decisions, action items, and next steps for the Q4 rollout.
+            </p>
+            <div className="mt-2 inline-flex items-center gap-2 rounded-md border border-neutral-200 bg-white px-2 py-1 text-xs text-neutral-600">
+              <Icon icon="mdi:file-outline" className="text-sm" />
+              <span>meeting-summary.pdf</span>
+            </div>
+          </div>
+        </div>
+      ),
+      toolbar: "simple-icons:slack",
+    },
+    {
+      prompt:
+        "Schedule a follow-up next week with the client and share the agenda",
+      card: (
+        <div
+          className="w-full max-w-[420px] rounded-[18px] border border-neutral-200 bg-white px-4 py-4 text-sm text-neutral-700 mt-1"
+          dir="ltr"
+        >
+          <div className="flex items-center gap-2 text-xs text-neutral-500">
+            <Icon icon="logos:google-calendar" className="text-sm" />
+            <span>Mon, 9:30 AM</span>
+            <span>·</span>
+            <span>30 min</span>
+          </div>
+          <div className="mt-2">
+            <p className="font-medium text-neutral-700">Follow-up meeting</p>
+            <p className="text-xs text-neutral-600">
+              2 guests · 1 yes, 1 awaiting
+            </p>
+            <div className="mt-2 flex items-center gap-2 text-xs text-neutral-500">
+              <div className="size-5 rounded-full bg-stone-200 flex items-center justify-center text-[10px] text-stone-600">
+                A
+              </div>
+              <span>John Smith</span>
+            </div>
+            <div className="mt-1 flex items-center gap-2 text-xs text-neutral-500">
+              <div className="size-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px]">
+                M
+              </div>
+              <span>Mudit Jain</span>
+            </div>
+          </div>
+        </div>
+      ),
+      toolbar: "simple-icons:googlecalendar",
+    },
+  ];
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setProgress((current) => {
+        const next = current + 2;
+        if (next >= 100) {
+          setActiveIndex(
+            (prevIndex) => (prevIndex - 1 + slides.length) % slides.length,
+          );
+          return 0;
+        }
+        return next;
+      });
+    }, 80);
+
+    return () => window.clearInterval(interval);
+  }, [slides.length]);
+
+  const activeSlide = slides[activeIndex];
+
   return (
-    <section id="after-meeting">
+    <section id="after-meeting" dir="ltr">
       <div className="text-center font-medium text-neutral-600 uppercase tracking-wide py-6 font-serif">
         After meetings
       </div>
@@ -316,33 +437,49 @@ function AfterMeetingSection() {
               rest. Automate follow-up tasks across your tools without manual
               data entry.
             </p>
-            <div className="flex flex-col gap-3">
-              <div className="p-4 bg-stone-50 border border-neutral-200 rounded-lg">
-                <p className="text-sm text-neutral-700 italic mb-2">
-                  "Add a Linear ticket for the mobile UI bug we discussed and
-                  assign it to Sarah"
-                </p>
-                <p className="text-xs text-neutral-500">
-                  ✓ Creates ticket with meeting context and assigns it
-                </p>
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col items-center gap-1 h-[236px]">
+                <div
+                  className="max-w-[420px] rounded-[18px] border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm text-neutral-700 text-center"
+                  style={{
+                    fontFamily:
+                      '"SF Pro", -apple-system, BlinkMacSystemFont, sans-serif',
+                  }}
+                >
+                  "{activeSlide.prompt}"
+                </div>
+                <div className="h-5 w-px border-l-2 border-dotted border-neutral-300" />
+                <div className="w-full flex justify-center" dir="ltr">
+                  {activeSlide.card}
+                </div>
               </div>
-              <div className="p-4 bg-stone-50 border border-neutral-200 rounded-lg">
-                <p className="text-sm text-neutral-700 italic mb-2">
-                  "Send the summary to the #engineering channel and mark the Q4
-                  roadmap item as done"
-                </p>
-                <p className="text-xs text-neutral-500">
-                  ✓ Posts to Slack and updates project status
-                </p>
-              </div>
-              <div className="p-4 bg-stone-50 border border-neutral-200 rounded-lg">
-                <p className="text-sm text-neutral-700 italic mb-2">
-                  "Schedule follow-up meeting with the client for next week and
-                  add action items to Notion"
-                </p>
-                <p className="text-xs text-neutral-500">
-                  ✓ Creates calendar event and syncs tasks
-                </p>
+              <div
+                className="flex flex-row items-center justify-center gap-2 text-center"
+                dir="ltr"
+              >
+                {slides.map((slide, index) => (
+                  <button
+                    key={slide.prompt}
+                    type="button"
+                    className="h-10 min-w-12 rounded-[12px] border border-neutral-200 text-neutral-600 flex items-center justify-center px-2 bg-stone-50 hover:text-stone-700 transition-colors"
+                    onClick={() => {
+                      setProgress(0);
+                      setActiveIndex(index);
+                    }}
+                    style={{
+                      background:
+                        index === activeIndex
+                          ? `linear-gradient(90deg, rgba(0,0,0,0.08) ${progress}%, rgba(0,0,0,0.02) ${progress}%)`
+                          : undefined,
+                    }}
+                  >
+                    <Icon
+                      icon={slide.toolbar}
+                      className="text-base"
+                      color="currentColor"
+                    />
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -409,7 +546,7 @@ function CTASection() {
         <div className="mb-4 size-40 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[48px] bg-transparent">
           <img
             src="/api/images/hyprnote/icon.png"
-            alt="Hyprnote"
+            alt="Char"
             width={144}
             height={144}
             className="size-36 mx-auto rounded-[40px] border border-neutral-100"
@@ -419,8 +556,7 @@ function CTASection() {
           Start using your AI assistant
         </h2>
         <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-          Get AI-powered help before, during, and after every meeting with
-          Hyprnote
+          Get AI-powered help before, during, and after every meeting with Char
         </p>
         <div className="pt-6 flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Link

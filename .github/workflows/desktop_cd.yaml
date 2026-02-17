@@ -153,7 +153,6 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_APP_URL: "https://hyprnote.com"
-          VITE_AI_URL: "https://ai.hyprnote.com"
           VITE_API_URL: "https://api.hyprnote.com"
           VITE_PRO_PRODUCT_ID: ${{ secrets.VITE_PRO_PRODUCT_ID }}
           VITE_APP_VERSION: ${{ needs.compute-version.outputs.version }}
@@ -171,17 +170,6 @@ jobs:
           channel: ${{ env.RELEASE_CHANNEL }}
           framework: tauri
           working-directory: ./apps/desktop
-      - if: ${{ inputs.channel != 'staging' }}
-        run: |
-          DMG_FILE=$(find "apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/dmg/" -name "*.dmg" -type f)
-          cp "$DMG_FILE" "hyprnote-macos-${{ matrix.arch }}.dmg"
-          aws s3 cp "hyprnote-macos-${{ matrix.arch }}.dmg" \
-            "s3://hyprnote-build/desktop/${{ needs.compute-version.outputs.version }}/hyprnote-macos-${{ matrix.arch }}.dmg" \
-            --endpoint-url ${{ secrets.CLOUDFLARE_R2_ENDPOINT_URL }} \
-            --region auto
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
       - if: ${{ inputs.channel == 'staging' }}
         uses: actions/upload-artifact@v4
         with:
@@ -271,23 +259,6 @@ jobs:
           channel: ${{ env.RELEASE_CHANNEL }}
           framework: tauri
           working-directory: ./apps/desktop
-      - if: ${{ inputs.channel != 'staging' }}
-        run: |
-          APPIMAGE_FILE=$(find "apps/desktop/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/" -name "*.AppImage" -type f)
-          cp "$APPIMAGE_FILE" "hyprnote-linux-x86_64.AppImage"
-          aws s3 cp "hyprnote-linux-x86_64.AppImage" \
-            "s3://hyprnote-build/desktop/${{ needs.compute-version.outputs.version }}/hyprnote-linux-x86_64.AppImage" \
-            --endpoint-url ${{ secrets.CLOUDFLARE_R2_ENDPOINT_URL }} \
-            --region auto
-          DEB_FILE=$(find "apps/desktop/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/" -name "*.deb" -type f)
-          cp "$DEB_FILE" "hyprnote-linux-x86_64.deb"
-          aws s3 cp "hyprnote-linux-x86_64.deb" \
-            "s3://hyprnote-build/desktop/${{ needs.compute-version.outputs.version }}/hyprnote-linux-x86_64.deb" \
-            --endpoint-url ${{ secrets.CLOUDFLARE_R2_ENDPOINT_URL }} \
-            --region auto
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
       - if: ${{ inputs.channel == 'staging' }}
         uses: actions/upload-artifact@v4
         with:
@@ -301,9 +272,23 @@ jobs:
           path: apps/desktop/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/*.deb
           retention-days: 3
 
+  create-tag:
+    if: ${{ inputs.channel != 'staging' && !cancelled() && (needs.build-macos.result == 'success' || needs.build-linux.result == 'success') }}
+    needs: [compute-version, build-macos, build-linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: desktop_v${{ needs.compute-version.outputs.version }}
+          tag_prefix: ""
+
   cn-publish:
     if: ${{ inputs.channel != 'staging' && inputs.publish }}
-    needs: [compute-version, build-macos, build-linux]
+    needs: [compute-version, build-macos, build-linux, create-tag]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -318,7 +303,7 @@ jobs:
           working-directory: ./apps/desktop
 
   release:
-    if: ${{ inputs.channel != 'staging' && inputs.publish && !cancelled() && (needs.cn-publish.result == 'success' || needs.cn-publish.result == 'skipped') && (needs.build-macos.result == 'success' || needs.build-linux.result == 'success') }}
+    if: ${{ inputs.channel != 'staging' && inputs.publish && !cancelled() && needs.cn-publish.result == 'success' && (needs.build-macos.result == 'success' || needs.build-linux.result == 'success') }}
     needs: [compute-version, build-macos, build-linux, cn-publish]
     runs-on: ubuntu-latest
     permissions:
@@ -326,40 +311,41 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - if: ${{ needs.build-macos.result == 'success' }}
-        run: |
-          aws s3 cp \
-            "s3://hyprnote-build/desktop/${{ needs.compute-version.outputs.version }}/hyprnote-macos-aarch64.dmg" \
-            "hyprnote-macos-aarch64.dmg" \
-            --endpoint-url ${{ secrets.CLOUDFLARE_R2_ENDPOINT_URL }} \
-            --region auto
-          aws s3 cp \
-            "s3://hyprnote-build/desktop/${{ needs.compute-version.outputs.version }}/hyprnote-macos-x86_64.dmg" \
-            "hyprnote-macos-x86_64.dmg" \
-            --endpoint-url ${{ secrets.CLOUDFLARE_R2_ENDPOINT_URL }} \
-            --region auto
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
-      - if: ${{ needs.build-linux.result == 'success' }}
-        run: |
-          aws s3 cp \
-            "s3://hyprnote-build/desktop/${{ needs.compute-version.outputs.version }}/hyprnote-linux-x86_64.AppImage" \
-            "hyprnote-linux-x86_64.AppImage" \
-            --endpoint-url ${{ secrets.CLOUDFLARE_R2_ENDPOINT_URL }} \
-            --region auto
-          aws s3 cp \
-            "s3://hyprnote-build/desktop/${{ needs.compute-version.outputs.version }}/hyprnote-linux-x86_64.deb" \
-            "hyprnote-linux-x86_64.deb" \
-            --endpoint-url ${{ secrets.CLOUDFLARE_R2_ENDPOINT_URL }} \
-            --region auto
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
-      - uses: mathieudutour/github-tag-action@v6.2
+        uses: ./.github/actions/cn_download
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          custom_tag: desktop_v${{ needs.compute-version.outputs.version }}
-          tag_prefix: ""
+          app: ${{ env.CN_APPLICATION }}
+          version: ${{ needs.compute-version.outputs.version }}
+          channel: ${{ env.RELEASE_CHANNEL }}
+          platform: dmg-aarch64
+          output: hyprnote-macos-aarch64.dmg
+          key: ${{ secrets.CN_API_KEY }}
+      - if: ${{ needs.build-macos.result == 'success' }}
+        uses: ./.github/actions/cn_download
+        with:
+          app: ${{ env.CN_APPLICATION }}
+          version: ${{ needs.compute-version.outputs.version }}
+          channel: ${{ env.RELEASE_CHANNEL }}
+          platform: dmg-x86_64
+          output: hyprnote-macos-x86_64.dmg
+          key: ${{ secrets.CN_API_KEY }}
+      - if: ${{ needs.build-linux.result == 'success' }}
+        uses: ./.github/actions/cn_download
+        with:
+          app: ${{ env.CN_APPLICATION }}
+          version: ${{ needs.compute-version.outputs.version }}
+          channel: ${{ env.RELEASE_CHANNEL }}
+          platform: appimage-x86_64
+          output: hyprnote-linux-x86_64.AppImage
+          key: ${{ secrets.CN_API_KEY }}
+      - if: ${{ needs.build-linux.result == 'success' }}
+        uses: ./.github/actions/cn_download
+        with:
+          app: ${{ env.CN_APPLICATION }}
+          version: ${{ needs.compute-version.outputs.version }}
+          channel: ${{ env.RELEASE_CHANNEL }}
+          platform: debian-x86_64
+          output: hyprnote-linux-x86_64.deb
+          key: ${{ secrets.CN_API_KEY }}
       - id: checksums
         uses: ./.github/actions/generate_checksums
         with:

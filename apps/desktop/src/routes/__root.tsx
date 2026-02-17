@@ -1,8 +1,7 @@
-import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
+import { createRootRouteWithContext } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
 
 import type { Context } from "../types";
-import { isExtHostPath } from "../utils/ext-host";
 
 const MainAppLayout = lazy(() => import("../components/main-app-layout"));
 
@@ -11,13 +10,6 @@ export const Route = createRootRouteWithContext<Partial<Context>>()({
 });
 
 function Component() {
-  const isExtHost =
-    typeof window !== "undefined" && isExtHostPath(window.location.pathname);
-
-  if (isExtHost) {
-    return <Outlet />;
-  }
-
   return (
     <Suspense fallback={null}>
       <MainAppLayout />

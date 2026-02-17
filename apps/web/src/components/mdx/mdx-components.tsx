@@ -30,8 +30,20 @@ export type MDXComponents = {
   [key: string]: ComponentType<any>;
 };
 
+function InlineCode({ children, ...props }: React.ComponentProps<"code">) {
+  return (
+    <code
+      {...props}
+      className={`bg-stone-100 text-stone-800 px-1.5 py-0.5 rounded text-sm font-mono ${props.className ?? ""}`}
+    >
+      {children}
+    </code>
+  );
+}
+
 export const defaultMDXComponents: MDXComponents = {
   a: MDXLink,
+  code: InlineCode,
   Accordion,
   Card,
   Callout,

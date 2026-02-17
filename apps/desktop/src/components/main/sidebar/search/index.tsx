@@ -1,4 +1,8 @@
 import { SearchXIcon } from "lucide-react";
+import { useEffect, useMemo, useRef } from "react";
+import { forwardRef } from "react";
+
+import { cn } from "@hypr/utils";
 
 import {
   type GroupedSearchResults,
@@ -7,30 +11,62 @@ import {
 import { SearchResultGroup } from "./group";
 
 export function SearchResults() {
-  const { results, query, setQuery } = useSearch();
+  const { results, query, setQuery, selectedIndex } = useSearch();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const empty = !query || !results || results.totalResults === 0;
 
+  const flatResults = useMemo(() => {
+    if (!results) return [];
+    return results.groups.flatMap((g) => g.results);
+  }, [results]);
+
+  const selectedId =
+    selectedIndex >= 0 && selectedIndex < flatResults.length
+      ? flatResults[selectedIndex].id
+      : null;
+
+  useEffect(() => {
+    if (!selectedId || !containerRef.current) return;
+    const el = containerRef.current.querySelector(
+      `[data-result-id="${selectedId}"]`,
+    );
+    if (el) {
+      el.scrollIntoView({ block: "nearest" });
+    }
+  }, [selectedId]);
+
   return (
-    <div className="h-full rounded-xl bg-neutral-50">
+    <div className={cn(["h-full rounded-xl bg-neutral-50"])}>
       {empty ? (
         <SearchNoResults query={query} setQuery={setQuery} />
       ) : (
-        <SearchYesResults results={results} />
+        <SearchYesResults
+          ref={containerRef}
+          results={results}
+          selectedId={selectedId}
+        />
       )}
     </div>
   );
 }
 
-function SearchYesResults({ results }: { results: GroupedSearchResults }) {
+const SearchYesResults = forwardRef<
+  HTMLDivElement,
+  { results: GroupedSearchResults; selectedId: string | null }
+>(({ results, selectedId }, ref) => {
   return (
-    <div className="h-full overflow-y-auto scrollbar-hide">
+    <div ref={ref} className="h-full overflow-y-auto scrollbar-hide">
       {results.groups.map((group) => (
-        <SearchResultGroup key={group.key} group={group} />
+        <SearchResultGroup
+          key={group.key}
+          group={group}
+          selectedId={selectedId}
+        />
       ))}
     </div>
   );
-}
+});
 
 function SearchNoResults({
   query,

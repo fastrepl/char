@@ -13,7 +13,7 @@ use tracing::Instrument;
 
 use crate::{
     SessionErrorEvent, SessionProgressEvent,
-    actors::root::session_span,
+    actors::session::session_span,
     actors::{AudioChunk, ChannelMode},
 };
 use hypr_audio::AudioInput;

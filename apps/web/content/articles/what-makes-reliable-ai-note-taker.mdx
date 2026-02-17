@@ -4,11 +4,11 @@ display_title: "The Reliable AI Note-Taker Checklist"
 meta_description: "How to choose an AI notetaker? Use this guide to assess the 5 dependency risks in any AI note-taker before you commit to a platform."
 author: "John Jeong"
 coverImage: "/api/images/blog/what-makes-reliable-ai-note-taker/cover.png"
-published: true
+category: "Comparisons"
 date: "2025-10-25"
 ---
 
-When we started building Hyprnote, we weren't naive about what we were walking into. Otter, Fireflies, Granola, the space was already crowded with well-funded players offering impressive features.
+When we started building Char, we weren't naive about what we were walking into. Otter, Fireflies, Granola, the space was already crowded with well-funded players offering impressive features.
 
 We could have tried to out-feature them by adding more integrations, shinier interfaces, and flashier AI capabilities. But we made reliability our absolute north star.
 
@@ -84,15 +84,15 @@ Ask: What does this tool require to function? Does it need internet? Does it dep
 
 Each requirement is an architectural dependency. Each dependency is a trade-off, but sometimes trade-offs can be worth it and that's exactly what you need to decide.
 
-## How We Are Building Hyprnote
+## How We Are Building Char
 
-This dependency thinking is shaping every architectural decision we're making with Hyprnote.
+This dependency thinking is shaping every architectural decision we're making with Char.
 
 We're starting with a simple premise: the tool should work without requiring anything external. No internet. No cloud services. No platform permissions. No usage limits. No data leaving your device. Then, we're letting users add the capabilities they want—cloud AI, integrations, exports—as optional layers, not requirements.
 
-**Local processing by default.** Hyprnote everything on-device. Transcription happens locally using Whisper models. Summarization uses our custom HyperLLM model that we're optimizing for on-device performance. Nothing needs to leave your machine for the tool to function. You can use Hyprnote in airplane mode, in restricted networks, in secure facilities, anywhere.
+**Local processing by default.** Char everything on-device. Transcription happens locally using Whisper models. Summarization uses our custom HyperLLM model that we're optimizing for on-device performance. Nothing needs to leave your machine for the tool to function. You can use Char in airplane mode, in restricted networks, in secure facilities, anywhere.
 
-**Deployment flexibility.** Because we're open-source, you're not locked into how or where you run Hyprnote. Use it on your device for edge deployment. Self-host on your own servers for complete control. Deploy to your private cloud if you need to scale with isolation. The architecture supports all three: on-device, on-premises, or private cloud, depending on your needs.
+**Deployment flexibility.** Because we're open-source, you're not locked into how or where you run Char. Use it on your device for edge deployment. Self-host on your own servers for complete control. Deploy to your private cloud if you need to scale with isolation. The architecture supports all three: on-device, on-premises, or private cloud, depending on your needs.
 
 **Direct audio capture.** Our platform captures system audio and microphone input directly at the OS level. No bots. No platform permissions. No dependency on whether Zoom or Teams allows access. The tool just records what's coming through your speakers and mic. This works for all meeting platforms and for in-person conversations.
 
@@ -100,6 +100,6 @@ We're starting with a simple premise: the tool should work without requiring any
 
 **Compliance by architecture.** Because data stays local by default, compliance becomes simpler. HIPAA requirements? Your patient data never leaves your device. Attorney-client privilege? Conversations stay on your machine. GDPR data residency? You control exactly where data lives. SOC 2 requirements? Self-host and manage your own security controls. The architecture gives you the foundation to meet your compliance needs.
 
-If this approach resonates with you, we'd love for you to try Hyprnote. [Download Hyprnote for macOS](/download).
+If this approach resonates with you, we'd love for you to try Char. [Download Char for macOS](/download).
 
 <CtaCard/>

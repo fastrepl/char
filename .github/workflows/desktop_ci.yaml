@@ -34,6 +34,9 @@ jobs:
   desktop_ci:
     needs: optimize_ci
     if: needs.optimize_ci.outputs.skip == 'false'
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
@@ -42,6 +45,8 @@ jobs:
             runner: "depot-macos-14"
           - platform: "linux"
             runner: "depot-ubuntu-22.04-8"
+          - platform: "windows"
+            runner: "windows-latest"
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -58,9 +63,17 @@ jobs:
           platform: ${{ matrix.platform }}
       - run: cargo check -p desktop
       - run: cargo test -p desktop
+        if: matrix.platform != 'windows'
+      - run: cargo test -p desktop --no-run
+        if: matrix.platform == 'windows'
       - name: Test workspace crates
         run: |
+          EXTRA_EXCLUDES=""
+          if [[ "${{ matrix.platform }}" == "windows" ]]; then
+            EXTRA_EXCLUDES="--exclude gbnf --exclude tauri-plugin-dock --exclude tauri-plugin-flag --exclude tauri-plugin-git --exclude tauri-plugin-mcp"
+          fi
           cargo test --workspace \
+            $EXTRA_EXCLUDES \
             --exclude desktop \
             --exclude control-tauri \
             --exclude ai \

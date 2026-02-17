@@ -31,7 +31,8 @@ pub struct MicInput {
 impl MicInput {
     pub fn device_name(&self) -> String {
         self.device
-            .name()
+            .description()
+            .map(|d| d.name().to_string())
             .unwrap_or("Unknown Microphone".to_string())
     }
 
@@ -40,7 +41,10 @@ impl MicInput {
             .input_devices()
             .unwrap()
             .filter_map(|d| {
-                let name = d.name().unwrap_or("Unknown Microphone".to_string());
+                let name = d
+                    .description()
+                    .map(|desc| desc.name().to_string())
+                    .unwrap_or("Unknown Microphone".to_string());
                 if is_tap_device(&name) {
                     None
                 } else {
@@ -53,15 +57,21 @@ impl MicInput {
     pub fn new(device_name: Option<String>) -> Result<Self, crate::Error> {
         let host = cpal::default_host();
 
+        let get_device_name = |d: &cpal::Device| {
+            d.description()
+                .map(|desc| desc.name().to_string())
+                .unwrap_or_default()
+        };
+
         let default_input_device = host
             .default_input_device()
-            .filter(|d| !is_tap_device(&d.name().unwrap_or_default()));
+            .filter(|d| !is_tap_device(&get_device_name(d)));
 
         let input_devices: Vec<cpal::Device> = host
             .input_devices()
             .map(|devices| {
                 devices
-                    .filter(|d| !is_tap_device(&d.name().unwrap_or_default()))
+                    .filter(|d| !is_tap_device(&get_device_name(d)))
                     .collect()
             })
             .unwrap_or_else(|_| Vec::new());
@@ -72,11 +82,11 @@ impl MicInput {
                 .ok_or(crate::Error::NoInputDevice)?,
             Some(name) => input_devices
                 .into_iter()
-                .find(|d| d.name().unwrap_or_default() == name)
+                .find(|d| get_device_name(d) == name)
                 .or(default_input_device)
                 .or_else(|| {
                     host.input_devices().ok().and_then(|mut devices| {
-                        devices.find(|d| !is_tap_device(&d.name().unwrap_or_default()))
+                        devices.find(|d| !is_tap_device(&get_device_name(d)))
                     })
                 })
                 .ok_or(crate::Error::NoInputDevice)?,
@@ -93,7 +103,7 @@ impl MicInput {
     }
 
     pub fn sample_rate(&self) -> u32 {
-        self.config.sample_rate().0
+        self.config.sample_rate()
     }
 }
 
@@ -208,7 +218,7 @@ impl AsyncSource for MicStream {
     }
 
     fn sample_rate(&self) -> u32 {
-        self.config.sample_rate().0
+        self.config.sample_rate()
     }
 }
 

@@ -1,4 +1,4 @@
-import { Icon } from "@iconify-icon/react";
+import { HeadsetIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 import { commands as openerCommands } from "@hypr/plugin-opener2";
@@ -6,9 +6,9 @@ import { Spinner } from "@hypr/ui/components/ui/spinner";
 
 import { useListener } from "../../../../../contexts/listener";
 import { useShell } from "../../../../../contexts/shell";
+import { useSessionEvent } from "../../../../../hooks/tinybase";
 import { useEventCountdown } from "../../../../../hooks/useEventCountdown";
 import { useStartListening } from "../../../../../hooks/useStartListening";
-import * as main from "../../../../../store/tinybase/store/main";
 import { type Tab, useTabs } from "../../../../../store/zustand/tabs";
 import { RecordingIcon, useListenButtonState } from "../shared";
 import { OptionsMenu } from "./options-menu";
@@ -132,13 +132,15 @@ function SplitMeetingButtons({
   const getMeetingIcon = () => {
     switch (remote.type) {
       case "zoom":
-        return <Icon icon="logos:zoom-icon" width={20} />;
+        return <img src="/assets/zoom.png" width={20} height={20} />;
       case "google-meet":
-        return <Icon icon="logos:google-meet" width={20} />;
+        return <img src="/assets/meet.png" width={20} height={20} />;
       case "webex":
-        return <Icon icon="simple-icons:webex" width={20} />;
+        return <img src="/assets/webex.png" width={20} height={20} />;
       case "teams":
-        return <Icon icon="logos:microsoft-teams" width={20} />;
+        return <img src="/assets/teams.png" width={20} height={20} />;
+      default:
+        return <HeadsetIcon size={20} />;
     }
   };
 
@@ -301,18 +303,8 @@ function detectMeetingType(
 }
 
 function useRemoteMeeting(sessionId: string): RemoteMeeting | null {
-  const eventId = main.UI.useCell(
-    "sessions",
-    sessionId,
-    "event_id",
-    main.STORE_ID,
-  );
-  const meetingLink = main.UI.useCell(
-    "events",
-    eventId ?? "",
-    "meeting_link",
-    main.STORE_ID,
-  );
+  const event = useSessionEvent(sessionId);
+  const meetingLink = event?.meeting_link ?? null;
 
   if (!meetingLink) {
     return null;

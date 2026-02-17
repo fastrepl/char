@@ -162,7 +162,10 @@ export function ModelCombobox({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0 w-(--radix-popover-trigger-width)">
+      <PopoverContent
+        className="p-0"
+        style={{ width: "var(--radix-popover-trigger-width)" }}
+      >
         <Command filter={filterFunction}>
           <CommandInput
             placeholder="Search or create new"

@@ -1,3 +1,8 @@
+use std::sync::Arc;
+
+use tauri::Manager;
+use tokio::sync::RwLock;
+
 mod commands;
 mod error;
 mod ext;
@@ -6,6 +11,15 @@ mod feature;
 pub use error::*;
 pub use ext::*;
 pub use feature::*;
+
+pub use hypr_flag;
+
+pub struct FlagState {
+    pub client: Option<hypr_flag::FlagClient>,
+    pub cache: Arc<RwLock<Option<hypr_flag::FlagsResponse>>>,
+}
+
+pub type ManagedState = FlagState;
 
 const PLUGIN_NAME: &str = "flag";
 
@@ -23,6 +37,18 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
 
     tauri::plugin::Builder::new(PLUGIN_NAME)
         .invoke_handler(specta_builder.invoke_handler())
+        .setup(|app, _api| {
+            let posthog_key = option_env!("POSTHOG_API_KEY");
+
+            let client = posthog_key.map(hypr_flag::FlagClient::new);
+            let state = FlagState {
+                client,
+                cache: Arc::new(RwLock::new(None)),
+            };
+
+            app.manage(state);
+            Ok(())
+        })
         .build()
 }
 
@@ -58,6 +84,6 @@ mod test {
     #[tokio::test]
     async fn test_flag() {
         let app = create_app(tauri::test::mock_builder());
-        let _result = app.flag().is_enabled(Feature::Chat);
+        let _result = app.flag().is_enabled(Feature::Chat).await;
     }
 }

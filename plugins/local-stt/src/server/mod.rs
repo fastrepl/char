@@ -1,4 +1,5 @@
 pub mod external;
+#[cfg(feature = "whisper-cpp")]
 pub mod internal;
 pub mod supervisor;
 

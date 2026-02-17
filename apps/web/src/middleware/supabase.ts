@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { createMiddleware } from "@tanstack/react-start";
 
-import { env } from "@/env";
+import { env, requireEnv } from "@/env";
 
 export const supabaseAuthMiddleware = createMiddleware().server(
   async ({ next, request }) => {
@@ -18,9 +18,13 @@ export const supabaseAuthMiddleware = createMiddleware().server(
       );
     }
 
-    const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: `Bearer ${token}` } },
-    });
+    const supabase = createClient(
+      requireEnv(env.SUPABASE_URL, "SUPABASE_URL"),
+      requireEnv(env.SUPABASE_ANON_KEY, "SUPABASE_ANON_KEY"),
+      {
+        global: { headers: { Authorization: `Bearer ${token}` } },
+      },
+    );
 
     const { data, error } = await supabase.auth.getUser();
 

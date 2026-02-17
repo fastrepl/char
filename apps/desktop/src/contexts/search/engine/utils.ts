@@ -62,6 +62,20 @@ export function normalizeQuery(query: string): string {
   return query.trim().replace(SPACE_REGEX, " ");
 }
 
+export interface ParsedQuery {
+  term: string;
+  exact: boolean;
+}
+
+export function parseQuery(query: string): ParsedQuery {
+  const normalized = normalizeQuery(query);
+  const quoteMatch = normalized.match(/^"(.+)"$/);
+  if (quoteMatch) {
+    return { term: quoteMatch[1], exact: true };
+  }
+  return { term: normalized, exact: false };
+}
+
 export function toTrimmedString(value: unknown): string {
   if (typeof value === "string") {
     return value.trim();

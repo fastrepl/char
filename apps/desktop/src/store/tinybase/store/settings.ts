@@ -45,6 +45,10 @@ export const SETTINGS_MAPPING = {
       type: "string",
       path: ["notification", "ignored_platforms"],
     },
+    mic_active_threshold: {
+      type: "number",
+      path: ["notification", "mic_active_threshold"],
+    },
     current_llm_provider: {
       type: "string",
       path: ["ai", "current_llm_provider"],
@@ -61,21 +65,13 @@ export const SETTINGS_MAPPING = {
       type: "string",
       path: ["ai", "current_stt_model"],
     },
-    trial_expired_modal_dismissed_at: {
-      type: "number",
-      path: ["billing", "trial_expired_modal_dismissed_at"],
+    timezone: {
+      type: "string",
+      path: ["general", "timezone"],
     },
-    trial_start_checked_at: {
-      type: "number",
-      path: ["billing", "trial_start_checked_at"],
-    },
-    trial_begin_modal_pending: {
-      type: "boolean",
-      path: ["billing", "trial_begin_modal_pending"],
-    },
-    pro_subscription_modal_shown_at: {
-      type: "number",
-      path: ["billing", "pro_subscription_modal_shown_at"],
+    week_start: {
+      type: "string",
+      path: ["general", "week_start"],
     },
   },
   tables: {

@@ -1,31 +1,121 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Brain, Cloud, ExternalLinkIcon, Puzzle, Sparkle } from "lucide-react";
+import {
+  Brain,
+  Cloud,
+  ExternalLinkIcon,
+  Puzzle,
+  Sparkle,
+  Sparkles,
+} from "lucide-react";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 
-import { getRpcCanStartTrial, postBillingStartTrial } from "@hypr/api-client";
+import {
+  canStartTrial as canStartTrialApi,
+  startTrial,
+} from "@hypr/api-client";
 import { createClient } from "@hypr/api-client/client";
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
+import { type SubscriptionStatus } from "@hypr/plugin-auth";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 import { Button } from "@hypr/ui/components/ui/button";
 import { Input } from "@hypr/ui/components/ui/input";
 import { Spinner } from "@hypr/ui/components/ui/spinner";
+import { cn } from "@hypr/utils";
 
 import { useAuth } from "../../../auth";
 import { useBillingAccess } from "../../../billing";
 import { env } from "../../../env";
 import * as settings from "../../../store/tinybase/store/settings";
-import { useTrialBeginModal } from "../../devtool/trial-begin-modal";
+import { configureProSettings } from "../../../utils";
 
 const WEB_APP_BASE_URL = env.VITE_APP_URL ?? "http://localhost:3000";
 
+function PlanStatus({
+  subscriptionStatus,
+  trialDaysRemaining,
+}: {
+  subscriptionStatus: SubscriptionStatus | null;
+  trialDaysRemaining: number | null;
+}) {
+  if (!subscriptionStatus) {
+    return <span className="text-neutral-500">FREE</span>;
+  }
+
+  switch (subscriptionStatus) {
+    case "active":
+      return (
+        <span className="inline-flex items-center gap-1 font-medium text-neutral-800">
+          <Sparkles size={13} className="text-neutral-500" />
+          PRO
+        </span>
+      );
+
+    case "trialing": {
+      const isUrgent = trialDaysRemaining !== null && trialDaysRemaining <= 3;
+      let trialText = null;
+      if (trialDaysRemaining !== null) {
+        if (trialDaysRemaining === 0) {
+          trialText = "Trial ends today";
+        } else if (trialDaysRemaining === 1) {
+          trialText = "Trial ends tomorrow";
+        } else {
+          trialText = `${trialDaysRemaining} days left`;
+        }
+      }
+      return (
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-flex items-center gap-1 font-medium text-neutral-800">
+            <Sparkles size={13} className="text-neutral-500" />
+            PRO
+          </span>
+          {trialText && (
+            <span
+              className={cn(["text-neutral-500", isUrgent && "text-amber-600"])}
+            >
+              ({trialText})
+            </span>
+          )}
+        </span>
+      );
+    }
+
+    case "past_due":
+      return (
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-flex items-center gap-1 font-medium text-neutral-800">
+            <Sparkles size={13} className="text-neutral-500" />
+            PRO
+          </span>
+          <span className="text-amber-600">(Payment issue)</span>
+        </span>
+      );
+
+    case "unpaid":
+      return <span className="text-amber-600">Payment failed</span>;
+
+    case "canceled":
+      return <span className="text-neutral-500">Canceled</span>;
+
+    case "incomplete":
+      return <span className="text-neutral-500">Setup incomplete</span>;
+
+    case "incomplete_expired":
+      return <span className="text-neutral-500">Expired</span>;
+
+    case "paused":
+      return <span className="text-neutral-500">Paused</span>;
+
+    default:
+      return <span className="text-neutral-500">FREE</span>;
+  }
+}
+
 export function AccountSettings() {
   const auth = useAuth();
-  const { isPro } = useBillingAccess();
-  const store = settings.UI.useStore(settings.STORE_ID);
+  const { subscriptionStatus, trialDaysRemaining } = useBillingAccess();
 
   const isAuthenticated = !!auth?.session;
   const [isPending, setIsPending] = useState(false);
-  const [devMode, setDevMode] = useState(false);
   const [callbackUrl, setCallbackUrl] = useState("");
 
   useEffect(() => {
@@ -57,60 +147,14 @@ export function AccountSettings() {
       },
     });
 
-    if (store) {
-      const currentSttProvider = store.getValue("current_stt_provider");
-      const currentSttModel = store.getValue("current_stt_model");
-      const currentLlmProvider = store.getValue("current_llm_provider");
-
-      if (currentSttProvider === "hyprnote" && currentSttModel === "cloud") {
-        store.setValue("current_stt_model", "");
-      }
-
-      if (currentLlmProvider === "hyprnote") {
-        store.setValue("current_llm_provider", "");
-        store.setValue("current_llm_model", "");
-      }
-    }
-
     await auth?.signOut();
-  }, [auth, store]);
+  }, [auth]);
 
   const handleRefreshPlan = useCallback(async () => {
     await auth?.refreshSession();
   }, [auth]);
 
   if (!isAuthenticated) {
-    if (isPending && devMode) {
-      return (
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-1.5">
-            <h2 className="text-sm font-medium">Manual callback</h2>
-            <p className="text-xs text-neutral-500">
-              Paste the callback URL from your browser
-            </p>
-          </div>
-          <Input
-            type="text"
-            className="text-xs font-mono"
-            placeholder="hyprnote://deeplink/auth?access_token=...&refresh_token=..."
-            value={callbackUrl}
-            onChange={(e) => setCallbackUrl(e.target.value)}
-          />
-          <div className="flex gap-2">
-            <Button
-              onClick={() => auth?.handleAuthCallback(callbackUrl)}
-              className="flex-1"
-            >
-              Submit
-            </Button>
-            <Button variant="outline" onClick={() => setDevMode(false)}>
-              Back
-            </Button>
-          </div>
-        </div>
-      );
-    }
-
     if (isPending) {
       return (
         <div className="flex flex-col items-center gap-6 text-center">
@@ -126,13 +170,29 @@ export function AccountSettings() {
             <Button onClick={handleSignIn} variant="outline" className="w-full">
               Reopen sign-in page
             </Button>
-            <Button
-              onClick={() => setDevMode(true)}
-              variant="ghost"
-              className="w-full text-sm"
-            >
-              Having trouble? Paste callback URL manually
-            </Button>
+            <div className="flex items-center gap-2 w-full">
+              <div className="flex-1 border-t border-neutral-200" />
+              <span className="text-xs text-neutral-400 shrink-0">
+                Having trouble?
+              </span>
+              <div className="flex-1 border-t border-neutral-200" />
+            </div>
+            <div className="flex gap-2 w-full">
+              <Input
+                type="text"
+                className="flex-1 text-xs font-mono"
+                placeholder="hyprnote://deeplink/auth?access_token=..."
+                value={callbackUrl}
+                onChange={(e) => setCallbackUrl(e.target.value)}
+              />
+              <Button
+                onClick={() => auth?.handleAuthCallback(callbackUrl)}
+                disabled={!callbackUrl}
+                size="sm"
+              >
+                Submit
+              </Button>
+            </div>
           </div>
         </div>
       );
@@ -151,7 +211,7 @@ export function AccountSettings() {
 
         <button
           onClick={handleSignIn}
-          className="px-6 h-[42px] rounded-full bg-linear-to-t from-stone-600 to-stone-500 text-white text-sm font-mono text-center transition-opacity duration-150 hover:opacity-90"
+          className="px-6 h-10 rounded-full bg-linear-to-b from-stone-700 to-stone-800 hover:from-stone-600 hover:to-stone-700 text-white text-sm font-medium border-2 border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)] transition-all duration-200"
         >
           Get Started
         </button>
@@ -205,10 +265,18 @@ export function AccountSettings() {
 
       <Container
         title="Plan & Billing"
-        description={`Your current plan is ${isPro ? "PRO" : "FREE"}. `}
+        description={
+          <span>
+            Your current plan is{" "}
+            <PlanStatus
+              subscriptionStatus={subscriptionStatus}
+              trialDaysRemaining={trialDaysRemaining}
+            />
+          </span>
+        }
         action={<BillingButton />}
       >
-        <p className="text-sm text-neutral-600 flex items-center gap-1">
+        <div className="text-sm text-neutral-600 flex items-center gap-1">
           {auth?.isRefreshingSession ? (
             <>
               <Spinner size={14} />
@@ -226,7 +294,7 @@ export function AccountSettings() {
               <span className="text-neutral-600"> to refresh plan status.</span>
             </>
           )}
-        </p>
+        </div>
       </Container>
     </div>
   );
@@ -235,7 +303,7 @@ export function AccountSettings() {
 function BillingButton() {
   const auth = useAuth();
   const { isPro } = useBillingAccess();
-  const { open: openTrialBeginModal } = useTrialBeginModal();
+  const store = settings.UI.useStore(settings.STORE_ID);
 
   const canTrialQuery = useQuery({
     enabled: !!auth?.session && !isPro,
@@ -246,7 +314,7 @@ function BillingButton() {
         return false;
       }
       const client = createClient({ baseUrl: env.VITE_API_URL, headers });
-      const { data, error } = await getRpcCanStartTrial({ client });
+      const { data, error } = await canStartTrialApi({ client });
       if (error) {
         throw error;
       }
@@ -262,7 +330,7 @@ function BillingButton() {
         throw new Error("Not authenticated");
       }
       const client = createClient({ baseUrl: env.VITE_API_URL, headers });
-      const { error } = await postBillingStartTrial({
+      const { error } = await startTrial({
         client,
         query: { interval: "monthly" },
       });
@@ -287,8 +355,10 @@ function BillingButton() {
           trial_end_date: trialEndDate.toISOString(),
         },
       });
+      if (store) {
+        configureProSettings(store);
+      }
       await auth?.refreshSession();
-      openTrialBeginModal();
     },
   });
 
@@ -347,12 +417,15 @@ function Container({
   children,
 }: {
   title: string;
-  description?: string;
+  description?: ReactNode;
   action?: ReactNode;
   children?: ReactNode;
 }) {
   return (
-    <section className="bg-neutral-50 p-4 rounded-lg flex flex-col gap-4">
+    <section
+      data-settings-item
+      className="bg-neutral-50 p-4 rounded-lg flex flex-col gap-4"
+    >
       <div className="flex flex-col gap-2">
         <h1 className="text-md font-semibold font-serif">{title}</h1>
         {description && (

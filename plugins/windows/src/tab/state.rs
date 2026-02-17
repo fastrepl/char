@@ -70,6 +70,12 @@ crate::common_derives! {
         Transcription,
         #[serde(rename = "intelligence")]
         Intelligence,
+        #[serde(rename = "templates")]
+        Templates,
+        #[serde(rename = "shortcuts")]
+        Shortcuts,
+        #[serde(rename = "prompts")]
+        Prompts,
     }
 }
 
@@ -77,5 +83,21 @@ crate::common_derives! {
     #[derive(Default)]
     pub struct AiState {
         pub tab: Option<AiTab>,
+    }
+}
+
+crate::common_derives! {
+    #[derive(Default)]
+    pub struct SearchState {
+        pub selected_types: Option<Vec<String>>,
+        pub initial_query: Option<String>,
+    }
+}
+
+crate::common_derives! {
+    #[derive(Default)]
+    pub struct ChatState {
+        pub group_id: Option<String>,
+        pub initial_message: Option<String>,
     }
 }

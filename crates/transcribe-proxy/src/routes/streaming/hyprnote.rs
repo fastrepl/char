@@ -1,41 +1,29 @@
 use std::str::FromStr;
 
 use owhisper_client::{
-    AdapterKind, AssemblyAIAdapter, Auth, DeepgramAdapter, DeepgramModel, ElevenLabsAdapter,
-    FireworksAdapter, GladiaAdapter, OpenAIAdapter, Provider, RealtimeSttAdapter, SonioxAdapter,
+    AdapterKind, AssemblyAIAdapter, Auth, DashScopeAdapter, DeepgramAdapter, DeepgramModel,
+    ElevenLabsAdapter, FireworksAdapter, GladiaAdapter, MistralAdapter, OpenAIAdapter, Provider,
+    RealtimeSttAdapter, SonioxAdapter,
 };
 use owhisper_interface::ListenParams;
 
 use crate::config::SttProxyConfig;
 use crate::provider_selector::SelectedProvider;
-use crate::query_params::{QueryParams, QueryValue};
+use crate::query_params::QueryParams;
 use crate::relay::WebSocketProxy;
 use crate::routes::AppState;
 
+use super::AnalyticsContext;
 use super::common::{ProxyBuildError, build_proxy_with_url, finalize_proxy_builder, parse_param};
 use super::session::init_session;
 
 fn build_listen_params(params: &QueryParams) -> ListenParams {
-    let model = params.get_first("model").map(|s| s.to_string());
-    let languages = params.get_languages();
-    let sample_rate: u32 = parse_param(params, "sample_rate", 16000);
-    let channels: u8 = parse_param(params, "channels", 1);
-
-    let keywords: Vec<String> = params
-        .get("keyword")
-        .or_else(|| params.get("keywords"))
-        .map(|v| match v {
-            QueryValue::Single(s) => s.split(',').map(|k| k.trim().to_string()).collect(),
-            QueryValue::Multi(vec) => vec.iter().map(|k| k.trim().to_string()).collect(),
-        })
-        .unwrap_or_default();
-
     ListenParams {
-        model,
-        languages,
-        sample_rate,
-        channels,
-        keywords,
+        model: params.get_first("model").map(|s| s.to_string()),
+        languages: params.get_languages(),
+        sample_rate: parse_param(params, "sample_rate", 16000),
+        channels: parse_param(params, "channels", 1),
+        keywords: params.parse_keywords(),
         ..Default::default()
     }
 }
@@ -54,6 +42,8 @@ fn build_upstream_url_with_adapter(
         Provider::OpenAI => OpenAIAdapter.build_ws_url(api_base, params, channels),
         Provider::Gladia => GladiaAdapter.build_ws_url(api_base, params, channels),
         Provider::ElevenLabs => ElevenLabsAdapter.build_ws_url(api_base, params, channels),
+        Provider::DashScope => DashScopeAdapter.build_ws_url(api_base, params, channels),
+        Provider::Mistral => MistralAdapter::default().build_ws_url(api_base, params, channels),
     }
 }
 
@@ -71,6 +61,8 @@ fn build_initial_message_with_adapter(
         Provider::OpenAI => OpenAIAdapter.initial_message(api_key, params, channels),
         Provider::Gladia => GladiaAdapter.initial_message(api_key, params, channels),
         Provider::ElevenLabs => ElevenLabsAdapter.initial_message(api_key, params, channels),
+        Provider::DashScope => DashScopeAdapter.initial_message(api_key, params, channels),
+        Provider::Mistral => MistralAdapter::default().initial_message(api_key, params, channels),
     };
 
     msg.and_then(|m| match m {
@@ -82,6 +74,7 @@ fn build_initial_message_with_adapter(
 fn build_response_transformer(
     provider: Provider,
 ) -> impl Fn(&str) -> Option<String> + Send + Sync + 'static {
+    let mistral_adapter = MistralAdapter::default();
     move |raw: &str| {
         let responses: Vec<owhisper_interface::stream::StreamResponse> = match provider {
             Provider::Deepgram => DeepgramAdapter.parse_response(raw),
@@ -91,6 +84,8 @@ fn build_response_transformer(
             Provider::OpenAI => OpenAIAdapter.parse_response(raw),
             Provider::Gladia => GladiaAdapter.parse_response(raw),
             Provider::ElevenLabs => ElevenLabsAdapter.parse_response(raw),
+            Provider::DashScope => DashScopeAdapter.parse_response(raw),
+            Provider::Mistral => mistral_adapter.parse_response(raw),
         };
 
         if responses.is_empty() {
@@ -119,6 +114,7 @@ fn build_proxy_with_adapter(
     selected: &SelectedProvider,
     client_params: &QueryParams,
     config: &SttProxyConfig,
+    analytics_ctx: AnalyticsContext,
 ) -> Result<WebSocketProxy, crate::ProxyError> {
     let provider = selected.provider();
     let mut listen_params = build_listen_params(client_params);
@@ -160,13 +156,14 @@ fn build_proxy_with_adapter(
         builder = builder.initial_message(msg);
     }
 
-    finalize_proxy_builder!(builder, provider, config)
+    finalize_proxy_builder!(builder, provider, config, analytics_ctx)
 }
 
 fn build_proxy_with_url_and_transformer(
     selected: &SelectedProvider,
     upstream_url: &str,
     config: &SttProxyConfig,
+    analytics_ctx: AnalyticsContext,
 ) -> Result<WebSocketProxy, crate::ProxyError> {
     let provider = selected.provider();
     let builder = WebSocketProxy::builder()
@@ -176,18 +173,24 @@ fn build_proxy_with_url_and_transformer(
         .response_transformer(build_response_transformer(provider))
         .apply_auth(selected);
 
-    finalize_proxy_builder!(builder, provider, config)
+    finalize_proxy_builder!(builder, provider, config, analytics_ctx)
 }
 
 pub async fn build_proxy(
     state: &AppState,
     selected: &SelectedProvider,
     params: &QueryParams,
+    analytics_ctx: AnalyticsContext,
 ) -> Result<WebSocketProxy, ProxyBuildError> {
     let provider = selected.provider();
 
     if let Some(custom_url) = selected.upstream_url() {
-        return Ok(build_proxy_with_url(selected, custom_url, &state.config)?);
+        return Ok(build_proxy_with_url(
+            selected,
+            custom_url,
+            &state.config,
+            analytics_ctx,
+        )?);
     }
 
     match provider.auth() {
@@ -195,10 +198,16 @@ pub async fn build_proxy(
             let url = init_session(state, selected, header_name, params)
                 .await
                 .map_err(ProxyBuildError::SessionInitFailed)?;
-            let proxy = build_proxy_with_url_and_transformer(selected, &url, &state.config)?;
+            let proxy =
+                build_proxy_with_url_and_transformer(selected, &url, &state.config, analytics_ctx)?;
             Ok(proxy)
         }
-        _ => Ok(build_proxy_with_adapter(selected, params, &state.config)?),
+        _ => Ok(build_proxy_with_adapter(
+            selected,
+            params,
+            &state.config,
+            analytics_ctx,
+        )?),
     }
 }
 

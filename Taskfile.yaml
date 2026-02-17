@@ -3,8 +3,6 @@ dotenv: [".env"]
 includes:
   web:
     taskfile: ./apps/web
-  api:
-    taskfile: ./apps/api
 
 tasks:
   py:init: POETRY_VIRTUALENVS_IN_PROJECT=true poetry install --no-cache --no-interaction --all-extras
@@ -12,6 +10,7 @@ tasks:
 
   stripe: stripe listen --skip-verify --forward-to http://localhost:5000/webhook/stripe
   bacon: bacon {{.CLI_ARGS}}
+  stat: btop -f hyprnote -u 500 --preset 1
 
   clean-plugins:
     cmds:
@@ -146,4 +145,4 @@ tasks:
   stripe:
     cmds:
       - stripe listen --print-secret | tr -d '\r\n' | xargs -I{} sh -c 'printf "STRIPE_WEBHOOK_SECRET=\"{}\"\n" > .env.stripe'
-      - stripe listen --skip-verify --forward-to http://localhost:8787/webhook/stripe
+      - stripe listen --skip-verify --forward-to http://localhost:3001/webhook/stripe

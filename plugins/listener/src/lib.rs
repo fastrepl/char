@@ -6,15 +6,23 @@ mod commands;
 mod error;
 mod events;
 mod ext;
-pub mod fsm;
 
-pub use error::*;
+pub use error::{DegradedError, Error, Result};
 pub use events::*;
 pub use ext::*;
 
 use actors::{RootActor, RootArgs};
 
 const PLUGIN_NAME: &str = "listener";
+
+#[derive(Debug, Clone, PartialEq, Eq, specta::Type, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum State {
+    Active,
+    Inactive,
+    // Transitioning from Active to Inactive. For ex, waiting for `from_finalize=true` from upstream provider.
+    Finalizing,
+}
 
 fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
     tauri_specta::Builder::<R>::new()

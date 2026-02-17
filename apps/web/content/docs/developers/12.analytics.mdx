@@ -1,7 +1,7 @@
 ---
 title: "Analytics"
 section: "Developers"
-description: "Learn about analytics in Hyprnote"
+description: "Learn about analytics in Char"
 ---
 
 ## What are we tracking?
@@ -29,8 +29,9 @@ Events tracked when users first launch the desktop app:
 | Event | Description | Properties |
 |-------|-------------|------------|
 | `show_main_window` | Main window is shown (fires on every app launch) | - |
+| `onboarding_step_viewed` | User views an onboarding step | `step`, `platform`, `skip_login` |
 | `account_skipped` | User proceeds without account (local mode) | - |
-| `user_signed_in` | User signs in | - |
+| `user_signed_in` | User signs in (triggers `$identify` to link anonymous ID) | - |
 | `ai_provider_configured` | User configures an AI provider | `provider` |
 | `data_imported` | User imports data from another app | `source` |
 | `trial_started` | User starts a trial | `plan` |
@@ -109,10 +110,21 @@ Properties set to track user context and configuration:
 
 Available methods for tracking events and properties:
 
-- `event(name, properties?)` - Track a custom event with optional properties
-- `setProperties(properties)` - Set user properties (supports `set` and `set_once` types)
+- `event(payload)` - Track a custom event with optional properties
+- `setProperties(payload)` - Set user properties (supports `set` and `set_once` types)
+- `identify(userId, payload)` - Link anonymous device ID to authenticated user ID using PostHog's `$identify` event
 - `setDisabled(disabled)` - Enable or disable analytics tracking
 - `isDisabled()` - Check if analytics is currently disabled
+
+## User Identification
+
+When a user signs in, the `identify` command is called to link their anonymous device ID (machine fingerprint) to their authenticated user ID. This uses PostHog's `$identify` event with the `$anon_distinct_id` property, enabling:
+
+- Attribution of pre-login activity to the authenticated user
+- Unified user profiles across anonymous and authenticated sessions
+- Accurate conversion funnel analysis from first visit to active usage
+
+The identification flow works as follows: before sign-in, events are tracked using the device fingerprint as the distinct ID. Upon successful authentication, `identify(userId, payload)` is called, which sends a `$identify` event to PostHog with both the new user ID and the anonymous device ID, merging the two identities.
 
 ## Conversion Funnel Tracking
 
@@ -120,10 +132,28 @@ To track the user journey from website visit to active usage, use PostHog's funn
 
 1. `download_clicked` (web) - User downloads the app
 2. `show_main_window` (desktop) - User launches the app
-3. `note_created` (desktop) - User creates their first note
-4. `note_enhanced` (desktop) - User uses AI enhancement
+3. `user_signed_in` (desktop) - User signs in (triggers identity merge)
+4. `note_created` (desktop) - User creates their first note
+5. `note_enhanced` (desktop) - User uses AI enhancement
 
-PostHog's anonymous ID tracking links web and desktop events for the same user, enabling conversion analysis without additional implementation.
+PostHog's `$identify` event links anonymous device IDs to authenticated user IDs, enabling accurate conversion analysis across the entire user journey.
+
+## Feature Flags
+
+Char uses PostHog feature flags to control feature rollouts. The system is built on two layers:
+
+- **`crates/flag`** - A standalone Rust client for the PostHog feature flags API (`/flags?v=2`). It fetches flags by `distinct_id` and supports groups, person properties, and group properties.
+- **`plugins/flag`** - A Tauri plugin that wraps the flag client with caching and provides the `FlagPluginExt` trait for checking flags from application code via `app.flag().is_enabled(feature)`.
+
+Each feature defines a `FlagStrategy`:
+
+| Strategy | Behavior |
+|----------|----------|
+| `Debug` | Enabled only in debug builds |
+| `Posthog(key)` | Resolved via PostHog API (cached after first fetch) |
+| `Hardcoded(bool)` | Always enabled or disabled |
+
+Features can also be overridden at build time using environment variables (e.g., `CHAT=1` forces the Chat feature on).
 
 ## How to make changes?
 

@@ -10,9 +10,11 @@ use tauri_plugin_sidecar2::Sidecar2PluginExt;
 use hypr_download_interface::DownloadProgress;
 use hypr_file::download_file_parallel_cancellable;
 
+#[cfg(feature = "whisper-cpp")]
+use crate::server::internal;
 use crate::{
     model::SupportedSttModel,
-    server::{ServerInfo, ServerStatus, ServerType, external, internal, supervisor},
+    server::{ServerInfo, ServerStatus, ServerType, external, supervisor},
     types::DownloadProgressPayload,
 };
 
@@ -78,8 +80,16 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
             SupportedSttModel::Whisper(_) => ServerType::Internal,
         };
 
+        #[cfg(not(feature = "whisper-cpp"))]
+        if matches!(server_type, ServerType::Internal) {
+            return Err(crate::Error::UnsupportedModelType);
+        }
+
         let current_info = match server_type {
+            #[cfg(feature = "whisper-cpp")]
             ServerType::Internal => internal_health().await,
+            #[cfg(not(feature = "whisper-cpp"))]
+            ServerType::Internal => None,
             ServerType::External => external_health().await,
         };
 
@@ -106,6 +116,7 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
             .map_err(|e| crate::Error::ServerStopFailed(e.to_string()))?;
 
         match server_type {
+            #[cfg(feature = "whisper-cpp")]
             ServerType::Internal => {
                 let cache_dir = self.models_dir();
                 let whisper_model = match model {
@@ -115,6 +126,8 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
 
                 start_internal_server(&supervisor, cache_dir, whisper_model).await
             }
+            #[cfg(not(feature = "whisper-cpp"))]
+            ServerType::Internal => Err(crate::Error::UnsupportedModelType),
             ServerType::External => {
                 let data_dir = self.models_dir();
                 let am_model = match model {
@@ -149,11 +162,18 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
 
     #[tracing::instrument(skip_all)]
     pub async fn get_servers(&self) -> Result<HashMap<ServerType, ServerInfo>, crate::Error> {
+        #[cfg(feature = "whisper-cpp")]
         let internal_info = internal_health().await.unwrap_or(ServerInfo {
             url: None,
             status: ServerStatus::Unreachable,
             model: None,
         });
+        #[cfg(not(feature = "whisper-cpp"))]
+        let internal_info = ServerInfo {
+            url: None,
+            status: ServerStatus::Unreachable,
+            model: None,
+        };
 
         let external_info = external_health().await.unwrap_or(ServerInfo {
             url: None,
@@ -343,7 +363,12 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
 
                     if checksum != m.checksum() {
                         tracing::error!("model_download_error: checksum mismatch");
-                        std::fs::remove_file(&model_path).unwrap();
+                        if let Err(e) = std::fs::remove_file(&model_path) {
+                            tracing::warn!(
+                                "failed to remove corrupted model file after checksum mismatch: {}",
+                                e
+                            );
+                        }
                         let _ = DownloadProgressPayload {
                             model: model_for_task.clone(),
                             progress: -1,
@@ -457,6 +482,7 @@ impl<R: Runtime, T: Manager<R>> LocalSttPluginExt<R> for T {
     }
 }
 
+#[cfg(feature = "whisper-cpp")]
 async fn start_internal_server(
     supervisor: &supervisor::SupervisorRef,
     cache_dir: PathBuf,
@@ -526,6 +552,7 @@ async fn start_external_server<R: Runtime, T: Manager<R>>(
         .ok_or_else(|| crate::Error::ServerStartFailed("empty_health".to_string()))
 }
 
+#[cfg(feature = "whisper-cpp")]
 async fn internal_health() -> Option<ServerInfo> {
     match registry::where_is(internal::InternalSTTActor::name()) {
         Some(cell) => {
