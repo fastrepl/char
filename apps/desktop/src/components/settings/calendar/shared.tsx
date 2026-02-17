@@ -44,7 +44,6 @@ const _PROVIDERS = [
     icon: <OutlookIcon size={20} />,
     platform: "all",
     docsPath: "https://hyprnote.com/docs/calendar/outlook",
-    nangoIntegrationId: "outlook-calendar",
   },
 ] as const satisfies readonly CalendarProvider[];
 

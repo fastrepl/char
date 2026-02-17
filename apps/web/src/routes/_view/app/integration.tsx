@@ -23,11 +23,6 @@ const INTEGRATION_DISPLAY: Record<
     description: "Connect your Google Calendar to sync your meetings",
     connectingHint: "Follow the prompts to connect your Google account",
   },
-  "outlook-calendar": {
-    name: "Outlook Calendar",
-    description: "Connect your Outlook Calendar to sync your meetings",
-    connectingHint: "Follow the prompts to connect your Microsoft account",
-  },
 };
 
 function getIntegrationDisplay(integrationId: string) {
