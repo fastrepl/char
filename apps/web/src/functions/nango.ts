@@ -17,14 +17,22 @@ export const nangoCreateConnectSession = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { nango } = context;
 
+    const tags: Record<string, string> = {
+      end_user_id: data.userId,
+    };
+    if (data.userEmail) {
+      tags.end_user_email = data.userEmail;
+    }
+    if (data.organizationId) {
+      tags.organization_id = data.organizationId;
+    }
+
     const res = await nango.createConnectSession({
       end_user: {
         id: data.userId,
         email: data.userEmail,
         display_name: data.userName,
-        tags: data.organizationId
-          ? { organizationId: data.organizationId }
-          : undefined,
+        tags,
       },
       allowed_integrations: data.allowedIntegrations,
     });

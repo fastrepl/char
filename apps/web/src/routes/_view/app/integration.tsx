@@ -41,7 +41,10 @@ function Component() {
     const connect = nango.openConnectUI({
       onEvent: (event) => {
         if (event.type === "close") {
-          if (statusRef.current !== "success") {
+          if (
+            statusRef.current !== "success" &&
+            statusRef.current !== "error"
+          ) {
             setStatus("idle");
           }
         } else if (event.type === "connect") {
