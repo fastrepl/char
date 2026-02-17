@@ -5,6 +5,7 @@ import {
   extractMetadataMap,
   fetchJson,
   type InputModality,
+  isDateSnapshot,
   type ListModelsResult,
   type ModelIgnoreReason,
   partition,
@@ -37,6 +38,10 @@ export async function listGoogleModels(
     !model.supportedGenerationMethods ||
     model.supportedGenerationMethods.includes("generateContent");
 
+  const extractModelId = (model: GoogleModel): string => {
+    return model.name.replace(/^models\//, "");
+  };
+
   const getIgnoreReasons = (model: GoogleModel): ModelIgnoreReason[] | null => {
     const reasons: ModelIgnoreReason[] = [];
     if (shouldIgnoreCommonKeywords(model.name)) {
@@ -45,11 +50,10 @@ export async function listGoogleModels(
     if (!supportsGeneration(model)) {
       reasons.push("no_completion");
     }
+    if (isDateSnapshot(extractModelId(model))) {
+      reasons.push("date_snapshot");
+    }
     return reasons.length > 0 ? reasons : null;
-  };
-
-  const extractModelId = (model: GoogleModel): string => {
-    return model.name.replace(/^models\//, "");
   };
 
   return pipe(

@@ -3,6 +3,8 @@ import { Effect } from "effect";
 
 export type ModelIgnoreReason =
   | "common_keyword"
+  | "old_model"
+  | "date_snapshot"
   | "no_tool"
   | "no_text_input"
   | "no_completion"
@@ -40,6 +42,9 @@ export const commonIgnoreKeywords = [
   "image",
   "computer",
   "robotics",
+  "realtime",
+  "moderation",
+  "codex",
 ] as const;
 
 export const fetchJson = (url: string, headers: Record<string, string>) =>
@@ -58,6 +63,21 @@ export const fetchJson = (url: string, headers: Record<string, string>) =>
 export const shouldIgnoreCommonKeywords = (id: string): boolean => {
   const lowerId = id.toLowerCase();
   return commonIgnoreKeywords.some((keyword) => lowerId.includes(keyword));
+};
+
+export const isDateSnapshot = (id: string): boolean => {
+  if (/-\d{4}-\d{2}-\d{2}/.test(id)) return true;
+  if (/-\d{4}$/.test(id)) return true;
+  return false;
+};
+
+export const isOldModel = (id: string): boolean => {
+  const lowerId = id.toLowerCase();
+  if (/^gpt-3\.5/.test(lowerId)) return true;
+  if (/^gpt-4(?!o|\.)/.test(lowerId)) return true;
+  if (/^(davinci|babbage|curie|ada)(-|$)/.test(lowerId)) return true;
+  if (/^claude-(2|instant)/.test(lowerId)) return true;
+  return false;
 };
 
 const hasMetadata = (metadata: ModelMetadata | undefined): boolean => {

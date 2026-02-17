@@ -45,6 +45,10 @@ const formatIgnoreReason = (reason: ModelIgnoreReason): string => {
   switch (reason) {
     case "common_keyword":
       return "Contains common ignore keyword";
+    case "old_model":
+      return "Old or deprecated model";
+    case "date_snapshot":
+      return "Date-specific snapshot";
     case "no_tool":
       return "No tool support";
     case "no_text_input":

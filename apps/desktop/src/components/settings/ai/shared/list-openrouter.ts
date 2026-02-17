@@ -5,6 +5,8 @@ import {
   extractMetadataMap,
   fetchJson,
   type InputModality,
+  isDateSnapshot,
+  isOldModel,
   type ListModelsResult,
   type ModelIgnoreReason,
   partition,
@@ -64,6 +66,12 @@ export async function listOpenRouterModels(
     }
     if (!supportsToolUse(model)) {
       reasons.push("no_tool");
+    }
+    if (isOldModel(model.id)) {
+      reasons.push("old_model");
+    }
+    if (isDateSnapshot(model.id)) {
+      reasons.push("date_snapshot");
     }
     return reasons.length > 0 ? reasons : null;
   };

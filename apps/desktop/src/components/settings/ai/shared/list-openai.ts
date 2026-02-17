@@ -4,6 +4,8 @@ import {
   DEFAULT_RESULT,
   extractMetadataMap,
   fetchJson,
+  isDateSnapshot,
+  isOldModel,
   type ListModelsResult,
   type ModelIgnoreReason,
   partition,
@@ -37,6 +39,12 @@ export async function listOpenAIModels(
           const reasons: ModelIgnoreReason[] = [];
           if (shouldIgnoreCommonKeywords(model.id)) {
             reasons.push("common_keyword");
+          }
+          if (isOldModel(model.id)) {
+            reasons.push("old_model");
+          }
+          if (isDateSnapshot(model.id)) {
+            reasons.push("date_snapshot");
           }
           return reasons.length > 0 ? reasons : null;
         },
@@ -72,6 +80,12 @@ export async function listGenericModels(
           const reasons: ModelIgnoreReason[] = [];
           if (shouldIgnoreCommonKeywords(model.id)) {
             reasons.push("common_keyword");
+          }
+          if (isOldModel(model.id)) {
+            reasons.push("old_model");
+          }
+          if (isDateSnapshot(model.id)) {
+            reasons.push("date_snapshot");
           }
           return reasons.length > 0 ? reasons : null;
         },
