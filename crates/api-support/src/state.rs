@@ -47,7 +47,7 @@ impl AppState {
         let chatwoot = {
             let mut headers = reqwest::header::HeaderMap::new();
             let mut token =
-                reqwest::header::HeaderValue::from_str(&config.chatwoot.chatwoot_api_token)
+                reqwest::header::HeaderValue::from_str(&config.chatwoot.chatwoot_access_token)
                     .expect("invalid chatwoot api token");
             token.set_sensitive(true);
             headers.insert("api_access_token", token);

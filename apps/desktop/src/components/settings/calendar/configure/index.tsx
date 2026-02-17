@@ -4,7 +4,7 @@ import { Accordion } from "@hypr/ui/components/ui/accordion";
 
 import { PROVIDERS } from "../shared";
 import { AppleCalendarProviderCard } from "./apple";
-import { DisabledProviderCard } from "./cloud";
+import { DisabledProviderCard } from "./disabled";
 import { OAuthProviderCard } from "./oauth";
 
 export function ConfigureProviders() {
