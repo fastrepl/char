@@ -126,6 +126,7 @@ export function NonHyprProviderCard({
     listeners: {
       onChange: ({ formApi }) => {
         queueMicrotask(() => {
+          setProvider(formApi.state.values);
           void formApi.handleSubmit();
         });
       },
@@ -264,7 +265,14 @@ function useProvider(providerType: ProviderType, id: string) {
     settings.STORE_ID,
   ) as (row: Partial<AIProvider>) => void;
 
-  const { data } = aiProviderSchema.safeParse(providerRow);
+  const hasRow = Object.keys(providerRow).length > 0;
+  const data: AIProvider | undefined = hasRow
+    ? {
+        type: providerRow.type as AIProvider["type"],
+        base_url: providerRow.base_url,
+        api_key: providerRow.api_key,
+      }
+    : undefined;
   return [data, setProvider] as const;
 }
 
