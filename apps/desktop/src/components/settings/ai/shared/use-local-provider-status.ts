@@ -16,10 +16,8 @@ async function checkConnection(baseUrl: string): Promise<boolean> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 2000);
   try {
-    const origin = new URL(baseUrl).origin;
     const res = await tauriFetch(`${baseUrl}/models`, {
       signal: controller.signal,
-      headers: { Origin: origin },
     });
     return res.ok;
   } catch {
@@ -56,11 +54,12 @@ export function useLocalProviderStatus(providerId: string): {
     return { status: null, refetch: () => {} };
   }
 
-  const status: LocalProviderStatus = query.isLoading
-    ? "checking"
-    : query.data
-      ? "connected"
-      : "disconnected";
+  const status: LocalProviderStatus =
+    query.isLoading || (query.isFetching && !query.data)
+      ? "checking"
+      : query.data
+        ? "connected"
+        : "disconnected";
 
   return { status, refetch: () => void query.refetch() };
 }
