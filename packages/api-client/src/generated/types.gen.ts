@@ -46,13 +46,19 @@ export type ConnectSessionResponse = {
     token: string;
 };
 
+export type ConnectionStatusResponse = {
+    connected: boolean;
+    integration_id: string;
+    updated_at?: string | null;
+};
+
 export type ConversationSummary = {
     id: number;
     inboxId?: string | null;
 };
 
 export type CreateContactRequest = {
-    customAttributes?: Record<string, unknown> | null;
+    customAttributes?: unknown;
     email?: string | null;
     identifier: string;
     name?: string | null;
@@ -75,7 +81,6 @@ export type CreateConversationResponse = {
 export type CreateEventRequest = {
     attendees?: Array<EventAttendee> | null;
     calendar_id: string;
-    connection_id: string;
     description?: string | null;
     end: EventDateTime;
     location?: string | null;
@@ -125,10 +130,6 @@ export type FeedbackType = 'bug' | 'feature';
 
 export type Interval = 'monthly' | 'yearly';
 
-export type ListCalendarsRequest = {
-    connection_id: string;
-};
-
 export type ListCalendarsResponse = {
     calendars: Array<unknown>;
 };
@@ -139,7 +140,6 @@ export type ListConversationsQuery = {
 
 export type ListEventsRequest = {
     calendar_id: string;
-    connection_id: string;
     max_results?: number | null;
     order_by?: string | null;
     page_token?: string | null;
@@ -264,7 +264,7 @@ export type WebhookResponse = {
 };
 
 export type ListCalendarsData = {
-    body: ListCalendarsRequest;
+    body?: never;
     path?: never;
     query?: never;
     url: '/calendar/calendars';
@@ -399,6 +399,35 @@ export type CreateConnectSessionResponses = {
 };
 
 export type CreateConnectSessionResponse = CreateConnectSessionResponses[keyof CreateConnectSessionResponses];
+
+export type ConnectionStatusData = {
+    body?: never;
+    path?: never;
+    query: {
+        integration_id: string;
+    };
+    url: '/nango/connection-status';
+};
+
+export type ConnectionStatusErrors = {
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Internal server error
+     */
+    500: unknown;
+};
+
+export type ConnectionStatusResponses = {
+    /**
+     * Connection status
+     */
+    200: ConnectionStatusResponse;
+};
+
+export type ConnectionStatusResponse2 = ConnectionStatusResponses[keyof ConnectionStatusResponses];
 
 export type NangoWebhookData = {
     body?: never;
