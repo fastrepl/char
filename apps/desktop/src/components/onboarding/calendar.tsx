@@ -27,18 +27,25 @@ function AppleCalendarList() {
   );
 }
 
-function GoogleCalendarConnect() {
+function OAuthCalendarConnect({
+  provider,
+}: {
+  provider: (typeof PROVIDERS)[number];
+}) {
   const auth = useAuth();
 
   const handleConnect = async () => {
-    const url = await buildWebAppUrl("/app/integration");
+    if (!provider.nangoIntegrationId) return;
+    const url = await buildWebAppUrl("/app/integration", {
+      integration_id: provider.nangoIntegrationId,
+    });
     await openerCommands.openUrl(url, null);
   };
 
   return (
     <div className="flex flex-col gap-3">
       <p className="text-sm text-neutral-600">
-        Connect your Google Calendar to sync your meetings.
+        Connect your {provider.displayName} Calendar to sync your meetings.
       </p>
       <button
         onClick={handleConnect}
@@ -49,7 +56,7 @@ function GoogleCalendarConnect() {
           !auth.session && "opacity-50 cursor-not-allowed",
         ])}
       >
-        Connect Google Calendar
+        Connect {provider.displayName} Calendar
       </button>
     </div>
   );
@@ -110,7 +117,13 @@ export function CalendarSection({ onContinue }: { onContinue: () => void }) {
         </div>
       )}
 
-      {provider === "google" && <GoogleCalendarConnect />}
+      {(() => {
+        const selected = visibleProviders.find((p) => p.id === provider);
+        if (selected?.nangoIntegrationId) {
+          return <OAuthCalendarConnect provider={selected} />;
+        }
+        return null;
+      })()}
 
       <OnboardingButton onClick={onContinue}>Continue</OnboardingButton>
     </div>

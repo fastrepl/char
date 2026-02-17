@@ -9,9 +9,31 @@ import { cn } from "@hypr/utils";
 import { nangoCreateConnectSession } from "../../../functions/nango";
 
 const validateSearch = z.object({
+  integration_id: z.string().default("google-calendar"),
   flow: z.enum(["desktop", "web"]).default("web"),
   scheme: z.string().default("hyprnote"),
 });
+
+const INTEGRATION_DISPLAY: Record<string, { name: string; description: string; connectingHint: string }> = {
+  "google-calendar": {
+    name: "Google Calendar",
+    description: "Connect your Google Calendar to sync your meetings",
+    connectingHint: "Follow the prompts to connect your Google account",
+  },
+  "outlook-calendar": {
+    name: "Outlook Calendar",
+    description: "Connect your Outlook Calendar to sync your meetings",
+    connectingHint: "Follow the prompts to connect your Microsoft account",
+  },
+};
+
+function getIntegrationDisplay(integrationId: string) {
+  return INTEGRATION_DISPLAY[integrationId] ?? {
+    name: integrationId,
+    description: `Connect ${integrationId} to sync your data`,
+    connectingHint: "Follow the prompts to complete the connection",
+  };
+}
 
 export const Route = createFileRoute("/_view/app/integration")({
   validateSearch,
@@ -35,6 +57,8 @@ function Component() {
     statusRef.current = status;
   }, [status]);
 
+  const display = getIntegrationDisplay(search.integration_id);
+
   const handleConnect = async () => {
     if (!user) return;
     setStatus("connecting");
@@ -53,7 +77,7 @@ function Component() {
           void navigate({
             to: "/callback/integration",
             search: {
-              integration_id: "google-calendar",
+              integration_id: search.integration_id,
               status: "success",
               flow: search.flow,
               scheme: search.scheme,
@@ -66,7 +90,7 @@ function Component() {
     try {
       const { sessionToken } = await getSessionToken({
         data: {
-          allowedIntegrations: ["google-calendar"],
+          allowedIntegrations: [search.integration_id],
         },
       });
       connect.setSessionToken(sessionToken);
@@ -80,12 +104,12 @@ function Component() {
       <div className="max-w-md w-full text-center flex flex-col gap-8">
         <div className="flex flex-col gap-3">
           <h1 className="text-3xl font-serif tracking-tight text-stone-600">
-            Connect Google Calendar
+            Connect {display.name}
           </h1>
           <p className="text-neutral-600">
             {status === "connecting"
-              ? "Follow the prompts to connect your Google account"
-              : "Connect your Google Calendar to sync your meetings"}
+              ? display.connectingHint
+              : display.description}
           </p>
         </div>
 
@@ -97,7 +121,7 @@ function Component() {
               "bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
             ])}
           >
-            Connect Google Calendar
+            Connect {display.name}
           </button>
         )}
 

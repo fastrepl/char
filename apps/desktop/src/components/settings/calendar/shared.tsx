@@ -11,6 +11,7 @@ type CalendarProvider = {
   badge?: string | null;
   platform?: "macos" | "all";
   docsPath: string;
+  nangoIntegrationId?: string;
 };
 
 export type CalendarProviderId = (typeof _PROVIDERS)[number]["id"];
@@ -33,6 +34,7 @@ const _PROVIDERS = [
     icon: <Icon icon="logos:google-calendar" width={20} height={20} />,
     platform: "all",
     docsPath: "https://hyprnote.com/docs/calendar/gcal",
+    nangoIntegrationId: "google-calendar",
   },
   {
     disabled: true,
@@ -42,6 +44,7 @@ const _PROVIDERS = [
     icon: <OutlookIcon size={20} />,
     platform: "all",
     docsPath: "https://hyprnote.com/docs/calendar/outlook",
+    nangoIntegrationId: "outlook-calendar",
   },
 ] as const satisfies readonly CalendarProvider[];
 
