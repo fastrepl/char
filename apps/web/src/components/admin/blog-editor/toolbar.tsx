@@ -5,6 +5,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CodeIcon,
+  FilmIcon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
@@ -12,7 +13,6 @@ import {
   ImageIcon,
   ItalicIcon,
   LinkIcon,
-  FilmIcon,
   ListIcon,
   ListOrderedIcon,
   QuoteIcon,
@@ -391,7 +391,14 @@ export function Toolbar({
                   if (e.key === "Enter") {
                     e.preventDefault();
                     if (editor && clipUrl.trim()) {
-                      editor.chain().focus().insertContent({ type: "clip", attrs: { src: clipUrl.trim() } }).run();
+                      editor
+                        .chain()
+                        .focus()
+                        .insertContent({
+                          type: "clip",
+                          attrs: { src: clipUrl.trim() },
+                        })
+                        .run();
                       setClipUrl("");
                       setShowClipInput(false);
                     }
@@ -406,7 +413,14 @@ export function Toolbar({
                 type="button"
                 onClick={() => {
                   if (editor && clipUrl.trim()) {
-                    editor.chain().focus().insertContent({ type: "clip", attrs: { src: clipUrl.trim() } }).run();
+                    editor
+                      .chain()
+                      .focus()
+                      .insertContent({
+                        type: "clip",
+                        attrs: { src: clipUrl.trim() },
+                      })
+                      .run();
                     setClipUrl("");
                     setShowClipInput(false);
                   }
