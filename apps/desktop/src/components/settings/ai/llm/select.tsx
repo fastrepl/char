@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 import {
   Select,
@@ -19,6 +19,7 @@ import {
   getProviderSelectionBlockers,
   requiresEntitlement,
 } from "../shared/eligibility";
+import { getLastUsedModel, setLastUsedModel } from "../shared/last-used-model";
 import { listAnthropicModels } from "../shared/list-anthropic";
 import {
   type InputModality,
@@ -31,6 +32,7 @@ import { listOllamaModels } from "../shared/list-ollama";
 import { listGenericModels, listOpenAIModels } from "../shared/list-openai";
 import { listOpenRouterModels } from "../shared/list-openrouter";
 import { ModelCombobox } from "../shared/model-combobox";
+import { useLocalProviderStatus } from "../shared/use-local-provider-status";
 import { HealthStatusIndicator, useConnectionHealth } from "./health";
 import { PROVIDERS } from "./shared";
 
@@ -45,6 +47,9 @@ export function SelectProviderAndModel() {
   const health = useConnectionHealth();
   const isConfigured = !!(current_llm_provider && current_llm_model);
   const hasError = isConfigured && health.status === "error";
+
+  const { status: ollamaStatus } = useLocalProviderStatus("ollama");
+  const { status: lmStudioStatus } = useLocalProviderStatus("lmstudio");
 
   const handleSelectProvider = settings.UI.useSetValueCallback(
     "current_llm_provider",
@@ -79,8 +84,50 @@ export function SelectProviderAndModel() {
     onSubmit: ({ value }) => {
       handleSelectProvider(value.provider);
       handleSelectModel(value.model);
+      if (value.provider && value.model) {
+        setLastUsedModel("llm", value.provider, value.model);
+      }
     },
   });
+
+  useEffect(() => {
+    if (!current_llm_provider) return;
+
+    const currentStatus = configuredProviders[current_llm_provider];
+    const currentLocalStatus =
+      current_llm_provider === "ollama"
+        ? ollamaStatus
+        : current_llm_provider === "lmstudio"
+          ? lmStudioStatus
+          : null;
+    const currentUsable =
+      !!currentStatus?.listModels &&
+      (currentLocalStatus === null || currentLocalStatus === "connected");
+    if (currentUsable) return;
+
+    const fallback = PROVIDERS.find((p) => {
+      if (p.id === current_llm_provider) return false;
+      if (!configuredProviders[p.id]?.listModels) return false;
+      const localStatus =
+        p.id === "ollama"
+          ? ollamaStatus
+          : p.id === "lmstudio"
+            ? lmStudioStatus
+            : null;
+      if (localStatus !== null && localStatus !== "connected") return false;
+      return true;
+    });
+
+    if (fallback) {
+      form.setFieldValue("provider", fallback.id);
+    }
+  }, [
+    configuredProviders,
+    current_llm_provider,
+    form,
+    ollamaStatus,
+    lmStudioStatus,
+  ]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -100,7 +147,8 @@ export function SelectProviderAndModel() {
                 if (value === "hyprnote") {
                   form.setFieldValue("model", "Auto");
                 } else {
-                  form.setFieldValue("model", "");
+                  const lastModel = getLastUsedModel("llm", value);
+                  form.setFieldValue("model", lastModel ?? "");
                 }
               },
             }}
@@ -117,17 +165,29 @@ export function SelectProviderAndModel() {
                   <SelectContent>
                     {PROVIDERS.map((provider) => {
                       const status = configuredProviders[provider.id];
+                      const localStatus =
+                        provider.id === "ollama"
+                          ? ollamaStatus
+                          : provider.id === "lmstudio"
+                            ? lmStudioStatus
+                            : null;
+                      const isDisabled =
+                        !status?.listModels ||
+                        (localStatus !== null && localStatus !== "connected");
 
                       return (
                         <SelectItem
                           key={provider.id}
                           value={provider.id}
-                          disabled={!status?.listModels}
+                          disabled={isDisabled}
                         >
                           <div className="flex flex-col gap-0.5">
                             <div className="flex items-center gap-2">
                               {provider.icon}
                               <span>{provider.displayName}</span>
+                              {localStatus === "connected" && (
+                                <span className="size-1.5 rounded-full bg-green-500" />
+                              )}
                             </div>
                           </div>
                         </SelectItem>
@@ -154,7 +214,7 @@ export function SelectProviderAndModel() {
                     onChange={(value) => field.handleChange(value)}
                     disabled={!status?.listModels}
                     listModels={status?.listModels}
-                    isConfigured={isConfigured}
+                    isConfigured={isConfigured && health.status === "success"}
                     suffix={
                       isConfigured ? <HealthStatusIndicator /> : undefined
                     }

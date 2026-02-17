@@ -24,6 +24,11 @@ type Provider = {
   icon: ReactNode;
   baseUrl?: string;
   requirements: ProviderRequirement[];
+  links?: {
+    download?: { label: string; url: string };
+    models?: { label: string; url: string };
+    setup?: { label: string; url: string };
+  };
 };
 
 const _PROVIDERS = [
@@ -45,6 +50,17 @@ const _PROVIDERS = [
     icon: <LmStudio size={16} />,
     baseUrl: "http://127.0.0.1:1234/v1",
     requirements: [],
+    links: {
+      download: {
+        label: "Download LM Studio",
+        url: "https://lmstudio.ai/download",
+      },
+      models: { label: "Available models", url: "https://lmstudio.ai/models" },
+      setup: {
+        label: "Setup guide",
+        url: "https://hyprnote.com/docs/faq/local-llm-setup/#lm-studio-setup",
+      },
+    },
   },
   {
     id: "ollama",
@@ -53,6 +69,17 @@ const _PROVIDERS = [
     icon: <Ollama size={16} />,
     baseUrl: "http://127.0.0.1:11434/v1",
     requirements: [],
+    links: {
+      download: {
+        label: "Download Ollama",
+        url: "https://ollama.com/download",
+      },
+      models: { label: "Available models", url: "https://ollama.com/library" },
+      setup: {
+        label: "Setup guide",
+        url: "https://hyprnote.com/docs/faq/local-llm-setup/#ollama-setup",
+      },
+    },
   },
   {
     id: "openrouter",
