@@ -94,10 +94,10 @@ hypr-pyannote-cloud = { path = "crates/pyannote-cloud", package = "pyannote-clou
 hypr-pyannote-local = { path = "crates/pyannote-local", package = "pyannote-local" }
 hypr-s3 = { path = "crates/s3", package = "s3" }
 hypr-slack-web = { path = "crates/slack-web", package = "slack-web" }
-hypr-teems = { path = "crates/teems", package = "teems" }
 hypr-supabase-auth = { path = "crates/supabase-auth", package = "supabase-auth" }
 hypr-supabase-storage = { path = "crates/supabase-storage", package = "supabase-storage" }
 hypr-tcc = { path = "crates/tcc", package = "tcc" }
+hypr-teems = { path = "crates/teems", package = "teems" }
 hypr-template-app = { path = "crates/template-app", package = "template-app" }
 hypr-template-app-legacy = { path = "crates/template-app-legacy", package = "template-app-legacy" }
 hypr-template-eval = { path = "crates/template-eval", package = "template-eval" }

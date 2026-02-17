@@ -18,10 +18,7 @@ impl<C: HttpClient> TeamsClient<C> {
         channel_id: &str,
         req: SendMessageRequest,
     ) -> Result<SendMessageResponse, Error> {
-        let path = format!(
-            "/v1.0/teams/{}/channels/{}/messages",
-            team_id, channel_id
-        );
+        let path = format!("/v1.0/teams/{}/channels/{}/messages", team_id, channel_id);
         let body = serde_json::to_vec(&req)?;
         let bytes = self
             .http
