@@ -35,19 +35,23 @@ export function parseYouTubeUrl(url: string): { embedUrl: string } | null {
     /(?:youtube\.com\/watch\?.*v=|youtu\.be\/)([a-zA-Z0-9_-]+)/,
   );
   if (watchMatch) {
-    const videoId = watchMatch[1];
-    const urlObj = new URL(trimmed);
-    const t = urlObj.searchParams.get("t");
-    const clip = urlObj.searchParams.get("clip");
-    const clipt = urlObj.searchParams.get("clipt");
-    const params = new URLSearchParams();
-    if (clip) params.set("clip", clip);
-    if (clipt) params.set("clipt", clipt);
-    if (t) params.set("start", t.replace(/s$/, ""));
-    const qs = params.toString();
-    return {
-      embedUrl: `https://www.youtube.com/embed/${videoId}${qs ? `?${qs}` : ""}`,
-    };
+    try {
+      const videoId = watchMatch[1];
+      const urlObj = new URL(trimmed);
+      const t = urlObj.searchParams.get("t");
+      const clip = urlObj.searchParams.get("clip");
+      const clipt = urlObj.searchParams.get("clipt");
+      const params = new URLSearchParams();
+      if (clip) params.set("clip", clip);
+      if (clipt) params.set("clipt", clipt);
+      if (t) params.set("start", t.replace(/s$/, ""));
+      const qs = params.toString();
+      return {
+        embedUrl: `https://www.youtube.com/embed/${videoId}${qs ? `?${qs}` : ""}`,
+      };
+    } catch {
+      return null;
+    }
   }
 
   const embedMatch = trimmed.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/);
@@ -136,7 +140,7 @@ export const ClipNode = Node.create({
   },
 
   renderMarkdown: (node: { attrs?: { src?: string } }) => {
-    const src = node.attrs?.src || "";
+    const src = (node.attrs?.src || "").replace(/"/g, "&quot;");
     return `<Clip src="${src}" />`;
   },
 });

@@ -1,12 +1,16 @@
 import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
 import type { NodeViewProps } from "@tiptap/react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { ClipNode as BaseClipNode } from "@hypr/tiptap/shared";
 
 function ClipNodeView({ node, updateAttributes, selected }: NodeViewProps) {
   const [isEditing, setIsEditing] = useState(!node.attrs.src);
   const [inputValue, setInputValue] = useState(node.attrs.src || "");
+
+  useEffect(() => {
+    setInputValue(node.attrs.src || "");
+  }, [node.attrs.src]);
 
   const handleSubmit = useCallback(() => {
     const url = inputValue.trim();

@@ -26,6 +26,8 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { parseYouTubeUrl } from "@hypr/tiptap/shared";
+
 interface ToolbarProps {
   editor: TiptapEditor | null;
   onAddImage?: () => void;
@@ -391,12 +393,14 @@ export function Toolbar({
                   if (e.key === "Enter") {
                     e.preventDefault();
                     if (editor && clipUrl.trim()) {
+                      const parsed = parseYouTubeUrl(clipUrl.trim());
+                      const embedSrc = parsed?.embedUrl ?? clipUrl.trim();
                       editor
                         .chain()
                         .focus()
                         .insertContent({
                           type: "clip",
-                          attrs: { src: clipUrl.trim() },
+                          attrs: { src: embedSrc },
                         })
                         .run();
                       setClipUrl("");
@@ -413,12 +417,14 @@ export function Toolbar({
                 type="button"
                 onClick={() => {
                   if (editor && clipUrl.trim()) {
+                    const parsed = parseYouTubeUrl(clipUrl.trim());
+                    const embedSrc = parsed?.embedUrl ?? clipUrl.trim();
                     editor
                       .chain()
                       .focus()
                       .insertContent({
                         type: "clip",
-                        attrs: { src: clipUrl.trim() },
+                        attrs: { src: embedSrc },
                       })
                       .run();
                     setClipUrl("");
