@@ -56,8 +56,9 @@ export function useLocalProviderStatus(providerId: string): {
     enabled: isLocal && !!baseUrl,
     queryKey: ["local-provider-status", providerId, baseUrl],
     queryFn: () => checkConnection(providerId, baseUrl),
-    staleTime: 10_000,
-    refetchInterval: 15_000,
+    staleTime: 0,
+    gcTime: 0,
+    refetchInterval: 5_000,
     retry: false,
   });
 
