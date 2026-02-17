@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { z } from "zod";
@@ -12,6 +12,11 @@ const validateSearch = z.object({
   scheme: z.string().default("hyprnote"),
 });
 
+type IntegrationDeeplinkParams = {
+  integration_id: string;
+  status: string;
+};
+
 export const Route = createFileRoute("/_view/callback/integration")({
   validateSearch,
   component: Component,
@@ -20,15 +25,27 @@ export const Route = createFileRoute("/_view/callback/integration")({
   }),
 });
 
+function buildDeeplinkUrl(
+  scheme: string,
+  search: IntegrationDeeplinkParams,
+): string {
+  const params = new URLSearchParams({
+    integration_id: search.integration_id,
+    status: search.status,
+  });
+  return `${scheme}://integration/callback?${params.toString()}`;
+}
+
 function Component() {
   const search = Route.useSearch();
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
 
   const getDeeplink = () => {
-    const params = new URLSearchParams();
-    params.set("integration_id", search.integration_id);
-    params.set("status", search.status);
-    return `${search.scheme}://integration/callback?${params.toString()}`;
+    return buildDeeplinkUrl(search.scheme, {
+      integration_id: search.integration_id,
+      status: search.status,
+    });
   };
 
   const handleDeeplink = () => {
@@ -49,9 +66,9 @@ function Component() {
 
   useEffect(() => {
     if (search.flow === "web") {
-      window.location.href = "/app/account/";
+      void navigate({ to: "/app/account" });
     }
-  }, [search.flow]);
+  }, [search.flow, navigate]);
 
   const isSuccess = search.status === "success";
 
