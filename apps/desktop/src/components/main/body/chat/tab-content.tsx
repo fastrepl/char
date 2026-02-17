@@ -179,14 +179,22 @@ function SupportChatTabInner({
   const lastPersistedCountRef = useRef(0);
 
   useEffect(() => {
-    if (chatwoot.isReady && !chatwoot.conversationId && !chatwootConvStartedRef.current) {
+    if (
+      chatwoot.isReady &&
+      !chatwoot.conversationId &&
+      !chatwootConvStartedRef.current
+    ) {
       chatwootConvStartedRef.current = true;
       chatwoot.startConversation();
     }
   }, [chatwoot.isReady, chatwoot.conversationId, chatwoot.startConversation]);
 
   useEffect(() => {
-    if (!chatwoot.conversationId || status === "streaming" || status === "submitted") {
+    if (
+      !chatwoot.conversationId ||
+      status === "streaming" ||
+      status === "submitted"
+    ) {
       return;
     }
 
@@ -199,7 +207,9 @@ function SupportChatTabInner({
 
     for (const msg of newMessages) {
       const textContent = msg.parts
-        .filter((p): p is Extract<typeof p, { type: "text" }> => p.type === "text")
+        .filter(
+          (p): p is Extract<typeof p, { type: "text" }> => p.type === "text",
+        )
         .map((p) => p.text)
         .join("");
 
@@ -213,7 +223,13 @@ function SupportChatTabInner({
         chatwoot.persistAgentMessage(textContent).catch(console.error);
       }
     }
-  }, [messages, status, chatwoot.conversationId, chatwoot.persistUserMessage, chatwoot.persistAgentMessage]);
+  }, [
+    messages,
+    status,
+    chatwoot.conversationId,
+    chatwoot.persistUserMessage,
+    chatwoot.persistAgentMessage,
+  ]);
 
   useEffect(() => {
     const initialMessage = tab.state.initialMessage;

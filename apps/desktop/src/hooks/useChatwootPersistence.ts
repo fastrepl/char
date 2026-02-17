@@ -1,5 +1,5 @@
-import { useMemo } from "react";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
+import { useMemo } from "react";
 
 import type { AgentMessage, ContactInfo, HelpChatConfig } from "@hypr/helpchat";
 import { useHelpChat } from "@hypr/helpchat";

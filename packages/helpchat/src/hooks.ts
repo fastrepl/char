@@ -134,11 +134,7 @@ export function useConversation(
       conversationIdRef.current = latest.id;
       setConversationId(latest.id);
 
-      const messages = await fetchMessages(
-        config,
-        latest.id,
-        contact.sourceId,
-      );
+      const messages = await fetchMessages(config, latest.id, contact.sourceId);
       setHistory(messages);
       return latest.id;
     }
@@ -151,7 +147,13 @@ export function useConversation(
       if (convId == null || !contact) {
         return;
       }
-      await persistMessage(config, convId, contact.sourceId, content, "incoming");
+      await persistMessage(
+        config,
+        convId,
+        contact.sourceId,
+        content,
+        "incoming",
+      );
     },
     [config, contact],
   );
@@ -162,7 +164,13 @@ export function useConversation(
       if (convId == null || !contact) {
         return;
       }
-      await persistMessage(config, convId, contact.sourceId, content, "outgoing");
+      await persistMessage(
+        config,
+        convId,
+        contact.sourceId,
+        content,
+        "outgoing",
+      );
     },
     [config, contact],
   );
