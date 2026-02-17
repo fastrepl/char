@@ -138,6 +138,9 @@ importers:
       '@hypr/codemirror':
         specifier: workspace:^
         version: link:../../packages/codemirror
+      '@hypr/helpchat':
+        specifier: workspace:*
+        version: link:../../packages/helpchat
       '@hypr/plugin-analytics':
         specifier: workspace:*
         version: link:../../plugins/analytics
@@ -1249,6 +1252,19 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
+
+  packages/helpchat:
+    dependencies:
+      '@hypr/api-client':
+        specifier: workspace:*
+        version: link:../api-client
+      react:
+        specifier: ^19.2.3
+        version: 19.2.4
+    devDependencies:
+      '@types/react':
+        specifier: ^19.2.13
+        version: 19.2.13
 
   packages/store:
     dependencies:

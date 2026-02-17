@@ -8,6 +8,7 @@ import type { ContextEntity } from "../../../../chat/context-item";
 import { composeContextEntities } from "../../../../chat/context/composer";
 import type { HyprUIMessage } from "../../../../chat/types";
 import { ElicitationProvider } from "../../../../contexts/elicitation";
+import { useChatwootPersistence } from "../../../../hooks/useChatwootPersistence";
 import { useFeedbackLanguageModel } from "../../../../hooks/useLLMConnection";
 import { useSupportMCP } from "../../../../hooks/useSupportMCP";
 import type { Tab } from "../../../../store/zustand/tabs";
@@ -43,6 +44,8 @@ function SupportChatTabView({
     (state) => state.updateChatSupportTabState,
   );
   const { session } = useAuth();
+  const userId = session?.user?.id;
+  const userEmail = session?.user?.email;
 
   const stableSessionId = useStableSessionId(groupId);
   const feedbackModel = useFeedbackLanguageModel();
@@ -54,6 +57,11 @@ function SupportChatTabView({
     respondToElicitation,
     isReady,
   } = useSupportMCP(true, session?.access_token);
+
+  const chatwoot = useChatwootPersistence(userId, {
+    email: userEmail,
+    name: userEmail,
+  });
 
   const mcpToolCount = Object.keys(mcpTools).length;
 
@@ -105,6 +113,7 @@ function SupportChatTabView({
             supportContextEntities={supportContextEntities}
             pendingElicitation={pendingElicitation}
             respondToElicitation={respondToElicitation}
+            chatwoot={chatwoot}
           />
         )}
       </ChatSession>
@@ -121,6 +130,7 @@ function SupportChatTabInner({
   supportContextEntities,
   pendingElicitation,
   respondToElicitation,
+  chatwoot,
 }: {
   tab: Extract<Tab, { type: "chat_support" }>;
   sessionProps: {
@@ -151,6 +161,7 @@ function SupportChatTabInner({
   supportContextEntities: ContextEntity[];
   pendingElicitation?: { message: string } | null;
   respondToElicitation?: (approved: boolean) => void;
+  chatwoot: ReturnType<typeof useChatwootPersistence>;
 }) {
   const {
     messages,
@@ -164,6 +175,45 @@ function SupportChatTabInner({
     isSystemPromptReady,
   } = sessionProps;
   const sentRef = useRef(false);
+  const chatwootConvStartedRef = useRef(false);
+  const lastPersistedCountRef = useRef(0);
+
+  useEffect(() => {
+    if (chatwoot.isReady && !chatwoot.conversationId && !chatwootConvStartedRef.current) {
+      chatwootConvStartedRef.current = true;
+      chatwoot.startConversation();
+    }
+  }, [chatwoot.isReady, chatwoot.conversationId, chatwoot.startConversation]);
+
+  useEffect(() => {
+    if (!chatwoot.conversationId || status === "streaming" || status === "submitted") {
+      return;
+    }
+
+    const newMessages = messages.slice(lastPersistedCountRef.current);
+    if (newMessages.length === 0) {
+      return;
+    }
+
+    lastPersistedCountRef.current = messages.length;
+
+    for (const msg of newMessages) {
+      const textContent = msg.parts
+        .filter((p): p is Extract<typeof p, { type: "text" }> => p.type === "text")
+        .map((p) => p.text)
+        .join("");
+
+      if (!textContent) {
+        continue;
+      }
+
+      if (msg.role === "user") {
+        chatwoot.persistUserMessage(textContent).catch(console.error);
+      } else if (msg.role === "assistant") {
+        chatwoot.persistAgentMessage(textContent).catch(console.error);
+      }
+    }
+  }, [messages, status, chatwoot.conversationId, chatwoot.persistUserMessage, chatwoot.persistAgentMessage]);
 
   useEffect(() => {
     const initialMessage = tab.state.initialMessage;

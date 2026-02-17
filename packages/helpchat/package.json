@@ -1,0 +1,15 @@
+{
+  "name": "@hypr/helpchat",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@hypr/api-client": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^19.2.3"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.13"
+  }
+}
