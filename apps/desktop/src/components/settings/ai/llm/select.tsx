@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 import {
   Select,
@@ -89,6 +89,22 @@ export function SelectProviderAndModel() {
       }
     },
   });
+
+  useEffect(() => {
+    if (!current_llm_provider) return;
+
+    const currentStatus = configuredProviders[current_llm_provider];
+    if (currentStatus?.listModels) return;
+
+    const fallback = PROVIDERS.find((p) => {
+      if (p.id === current_llm_provider) return false;
+      return !!configuredProviders[p.id]?.listModels;
+    });
+
+    if (fallback) {
+      form.setFieldValue("provider", fallback.id);
+    }
+  }, [configuredProviders, current_llm_provider, form]);
 
   return (
     <div className="flex flex-col gap-3">

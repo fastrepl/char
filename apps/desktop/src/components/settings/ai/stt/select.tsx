@@ -2,6 +2,7 @@ import { useForm } from "@tanstack/react-form";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { arch } from "@tauri-apps/plugin-os";
 import { Check, Loader2 } from "lucide-react";
+import { useEffect } from "react";
 
 import { commands as listenerCommands } from "@hypr/plugin-listener";
 import type { SupportedSttModel } from "@hypr/plugin-local-stt";
@@ -110,6 +111,24 @@ export function SelectProviderAndModel() {
       }
     },
   });
+
+  useEffect(() => {
+    if (!current_stt_provider) return;
+
+    const currentConfig =
+      configuredProviders[current_stt_provider as ProviderId];
+    if (currentConfig?.configured) return;
+
+    const fallback = PROVIDERS.find((p) => {
+      if (p.disabled || p.id === current_stt_provider) return false;
+      const config = configuredProviders[p.id];
+      return config?.configured && config.models.some((m) => m.isDownloaded);
+    });
+
+    if (fallback) {
+      form.setFieldValue("provider", fallback.id);
+    }
+  }, [configuredProviders, current_stt_provider, form]);
 
   return (
     <div className="flex flex-col gap-3">
