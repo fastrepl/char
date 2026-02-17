@@ -1,13 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+import { getSupabaseServerClient } from "@/functions/supabase";
 import { nangoMiddleware } from "@/middleware/nango";
 
 const CreateConnectSessionInput = z.object({
-  userId: z.string().min(1),
-  userEmail: z.email().optional(),
-  userName: z.string().optional(),
-  organizationId: z.string().optional(),
   allowedIntegrations: z.array(z.string()).optional(),
 });
 
@@ -17,21 +14,29 @@ export const nangoCreateConnectSession = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { nango } = context;
 
-    const tags: Record<string, string> = {
-      end_user_id: data.userId,
-    };
-    if (data.userEmail) {
-      tags.end_user_email = data.userEmail;
+    const supabase = getSupabaseServerClient();
+    const { data: userData, error } = await supabase.auth.getUser();
+    if (error || !userData.user) {
+      throw new Response(JSON.stringify({ error: "not_authenticated" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
-    if (data.organizationId) {
-      tags.organization_id = data.organizationId;
+
+    const userId = userData.user.id;
+    const userEmail = userData.user.email;
+
+    const tags: Record<string, string> = {
+      end_user_id: userId,
+    };
+    if (userEmail) {
+      tags.end_user_email = userEmail;
     }
 
     const res = await nango.createConnectSession({
       end_user: {
-        id: data.userId,
-        email: data.userEmail,
-        display_name: data.userName,
+        id: userId,
+        email: userEmail,
         tags,
       },
       allowed_integrations: data.allowedIntegrations,

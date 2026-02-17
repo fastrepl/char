@@ -1,3 +1,4 @@
+import { platform } from "@tauri-apps/plugin-os";
 import { useState } from "react";
 
 import { commands as openerCommands } from "@hypr/plugin-opener2";
@@ -55,12 +56,27 @@ function GoogleCalendarConnect() {
 }
 
 export function CalendarSection({ onContinue }: { onContinue: () => void }) {
-  const [provider, setProvider] = useState<CalendarProviderId>("apple");
+  const isMacos = platform() === "macos";
+  const visibleProviders = PROVIDERS.filter(
+    (p) => p.platform === "all" || (p.platform === "macos" && isMacos),
+  );
+  const [provider, setProvider] = useState<CalendarProviderId>(
+    isMacos ? "apple" : "google",
+  );
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-3 rounded-lg border border-neutral-200 bg-neutral-50 p-0.5">
-        {PROVIDERS.map((p) => (
+      <div
+        className={cn([
+          "grid rounded-lg border border-neutral-200 bg-neutral-50 p-0.5",
+          visibleProviders.length === 1
+            ? "grid-cols-1"
+            : visibleProviders.length === 2
+              ? "grid-cols-2"
+              : "grid-cols-3",
+        ])}
+      >
+        {visibleProviders.map((p) => (
           <button
             key={p.id}
             disabled={p.disabled}

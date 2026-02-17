@@ -66,8 +66,6 @@ function Component() {
     try {
       const { sessionToken } = await getSessionToken({
         data: {
-          userId: user.id,
-          userEmail: user.email,
           allowedIntegrations: ["google-calendar"],
         },
       });
