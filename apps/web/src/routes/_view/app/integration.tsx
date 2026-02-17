@@ -25,7 +25,7 @@ function Component() {
   const search = Route.useSearch();
   const { user } = Route.useRouteContext();
   const getSessionToken = useServerFn(nangoCreateConnectSession);
-  const nangoRef = useRef(new Nango());
+  const [nango] = useState(() => new Nango());
   const [status, setStatus] = useState<
     "idle" | "connecting" | "success" | "error"
   >("idle");
@@ -38,7 +38,7 @@ function Component() {
     if (!user) return;
     setStatus("connecting");
 
-    const connect = nangoRef.current.openConnectUI({
+    const connect = nango.openConnectUI({
       onEvent: (event) => {
         if (event.type === "close") {
           if (statusRef.current !== "success") {
