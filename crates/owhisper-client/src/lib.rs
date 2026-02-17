@@ -101,11 +101,13 @@ impl<A: RealtimeSttAdapter> ListenClientBuilder<A> {
         let mut params = self.get_params();
         let original_api_base = self.get_api_base();
 
-        // HACK: When going through hyprnote proxy, the model is "cloud" which isn't
-        // a real provider model. Resolve it to the actual provider model (e.g., "nova-3")
+        // HACK: When going through hyprnote proxy, meta models like "cloud" aren't
+        // real provider models. Resolve to actual provider model (e.g., "nova-3")
         // so that language strategies like can_use_multi() work correctly.
         // This will go away once we migrate to using the HyprnoteAdapter directly.
-        if is_hyprnote_proxy(original_api_base) {
+        if is_hyprnote_proxy(original_api_base)
+            && params.model.as_deref().map_or(true, is_meta_model)
+        {
             let adapter_kind = AdapterKind::from_url_and_languages(
                 original_api_base,
                 &params.languages,
@@ -201,7 +203,9 @@ mod tests {
             ..Default::default()
         };
 
-        if is_hyprnote_proxy(api_base) {
+        if is_hyprnote_proxy(api_base)
+            && params.model.as_deref().map_or(true, is_meta_model)
+        {
             let adapter_kind =
                 AdapterKind::from_url_and_languages(api_base, &params.languages, Some(model));
             if let Some(recommended) = adapter_kind.recommended_model_live(&params.languages) {
@@ -258,6 +262,20 @@ mod tests {
         assert!(
             url.contains("model=nova-3"),
             "direct connection model should be preserved, got: {}",
+            url
+        );
+    }
+
+    #[test]
+    fn test_proxy_explicit_model_not_overridden() {
+        let url = resolve_model_for_proxy(
+            "https://api.hyprnote.com/stt",
+            "nova-2",
+            &[ISO639::En.into()],
+        );
+        assert!(
+            url.contains("model=nova-2"),
+            "explicit provider model on proxy should be preserved, got: {}",
             url
         );
     }
