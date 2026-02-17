@@ -1,5 +1,5 @@
 import Nango from "@nangohq/frontend";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useRef, useState } from "react";
 import { z } from "zod";
@@ -24,7 +24,6 @@ export const Route = createFileRoute("/_view/app/integration")({
 function Component() {
   const search = Route.useSearch();
   const { user } = Route.useRouteContext();
-  const navigate = useNavigate();
   const getSessionToken = useServerFn(nangoCreateConnectSession);
   const nangoRef = useRef(new Nango());
   const [status, setStatus] = useState<
@@ -43,15 +42,13 @@ function Component() {
           }
         } else if (event.type === "connect") {
           setStatus("success");
-          navigate({
-            to: "/callback/integration",
-            search: {
-              integration_id: "google-calendar",
-              status: "success",
-              flow: search.flow,
-              scheme: search.scheme,
-            },
+          const params = new URLSearchParams({
+            integration_id: "google-calendar",
+            status: "success",
+            flow: search.flow,
+            scheme: search.scheme,
           });
+          window.location.href = `/callback/integration/?${params.toString()}`;
         }
       },
     });
