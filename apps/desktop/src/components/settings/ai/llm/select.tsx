@@ -159,7 +159,7 @@ export function SelectProviderAndModel() {
                     onChange={(value) => field.handleChange(value)}
                     disabled={!status?.listModels}
                     listModels={status?.listModels}
-                    isConfigured={isConfigured}
+                    isConfigured={isConfigured && health.status === "success"}
                     suffix={
                       isConfigured ? <HealthStatusIndicator /> : undefined
                     }
