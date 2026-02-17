@@ -282,36 +282,6 @@ function AccountSettingsCard() {
   );
 }
 
-// function IntegrationsSettingsCard() {
-//   const connectedApps = 1;
-//
-//   return (
-//     <div className="border border-neutral-100 rounded-xs">
-//       <div className="p-4">
-//         <h3 className="font-serif text-lg font-semibold mb-2">
-//           Integrations Settings
-//         </h3>
-//         <p className="text-sm text-neutral-600">
-//           Save your time by streamlining your work related to meetings
-//         </p>
-//       </div>
-//
-//       <div className="flex items-center justify-between border-t border-neutral-100 p-4">
-//         <div className="text-sm">
-//           {connectedApps} {connectedApps === 1 ? "app is" : "apps are"}{" "}
-//           connected to Char
-//         </div>
-//         <Link
-//           to="/app/integration/"
-//           className="px-4 h-8 flex items-center text-sm bg-linear-to-b from-white to-stone-50 border border-neutral-300 text-neutral-700 rounded-full shadow-xs hover:shadow-md hover:scale-[102%] active:scale-[98%] transition-all"
-//         >
-//           See all
-//         </Link>
-//       </div>
-//     </div>
-//   );
-// }
-
 function SignOutSection() {
   const navigate = useNavigate();
 
