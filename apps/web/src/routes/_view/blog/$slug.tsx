@@ -393,7 +393,7 @@ function TableOfContents({
   return (
     <aside
       className={cn([
-        "hidden xl:flex fixed left-0 top-0 h-screen z-10",
+        "hidden xl:flex fixed right-0 top-0 h-screen z-10",
         "w-64 items-center",
       ])}
     >

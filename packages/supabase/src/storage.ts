@@ -7,8 +7,15 @@ export const STORAGE_CONFIG = {
 } as const;
 
 export function getTusEndpoint(supabaseUrl: string): string {
-  const projectId = new URL(supabaseUrl).hostname.split(".")[0];
-  return `https://${projectId}.storage.supabase.co/storage/v1/upload/resumable`;
+  const parsed = new URL(supabaseUrl);
+  const isHostedSupabase = parsed.hostname.endsWith(".supabase.co");
+
+  if (isHostedSupabase) {
+    const projectId = parsed.hostname.split(".")[0];
+    return `https://${projectId}.storage.supabase.co/storage/v1/upload/resumable`;
+  }
+
+  return new URL("/storage/v1/upload/resumable", parsed.origin).toString();
 }
 
 export function buildObjectName(userId: string, fileName: string): string {

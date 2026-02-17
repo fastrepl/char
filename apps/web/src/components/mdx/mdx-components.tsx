@@ -10,6 +10,7 @@ import { DeeplinksList } from "../deeplinks-list";
 import { HooksList } from "../hooks-list";
 import { OpenAPIDocs } from "../openapi-docs";
 import { Callout } from "./callout";
+import { Clip } from "./clip";
 import { CodeBlock } from "./code-block";
 import { GithubEmbed } from "./github-embed";
 import { MDXLink } from "./link";
@@ -47,6 +48,7 @@ export const defaultMDXComponents: MDXComponents = {
   Accordion,
   Card,
   Callout,
+  Clip,
   Columns,
   CtaCard,
   DeeplinksList,

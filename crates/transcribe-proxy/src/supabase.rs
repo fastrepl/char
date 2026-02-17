@@ -1,6 +1,13 @@
+use hypr_supabase_storage::SupabaseStorage;
 use serde::{Deserialize, Serialize};
 
-type BoxError = Box<dyn std::error::Error + Send + Sync>;
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error("request failed: {0}")]
+    Request(#[from] reqwest::Error),
+    #[error("{0}")]
+    Api(String),
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, utoipa::ToSchema)]
 #[serde(rename_all = "lowercase")]
@@ -25,19 +32,37 @@ pub struct TranscriptionJob {
     pub error: Option<String>,
 }
 
+#[derive(Debug, Serialize)]
+pub struct JobUpdate {
+    pub status: PipelineStatus,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub raw_result: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+}
+
 #[derive(Clone)]
 pub struct SupabaseClient {
-    pub client: reqwest::Client,
-    pub url: String,
-    pub service_role_key: String,
+    client: reqwest::Client,
+    base_url: String,
+    service_role_key: String,
 }
 
 impl SupabaseClient {
+    pub fn new(client: reqwest::Client, supabase_url: &str, service_role_key: &str) -> Self {
+        Self {
+            client,
+            base_url: supabase_url.trim_end_matches('/').to_string(),
+            service_role_key: service_role_key.to_string(),
+        }
+    }
+
+    pub fn storage(&self) -> SupabaseStorage {
+        SupabaseStorage::new(self.client.clone(), &self.base_url, &self.service_role_key)
+    }
+
     fn rest_url(&self) -> String {
-        format!(
-            "{}/rest/v1/transcription_jobs",
-            self.url.trim_end_matches('/')
-        )
+        format!("{}/rest/v1/transcription_jobs", self.base_url)
     }
 
     fn auth_headers(&self, builder: reqwest::RequestBuilder) -> reqwest::RequestBuilder {
@@ -46,10 +71,9 @@ impl SupabaseClient {
             .header("apikey", &self.service_role_key)
     }
 
-    pub async fn insert_job(&self, job: &TranscriptionJob) -> Result<(), BoxError> {
+    pub async fn insert_job(&self, job: &TranscriptionJob) -> Result<(), Error> {
         let response = self
             .auth_headers(self.client.post(self.rest_url()))
-            .header("Content-Type", "application/json")
             .header("Prefer", "return=minimal")
             .json(job)
             .send()
@@ -58,18 +82,18 @@ impl SupabaseClient {
         if !response.status().is_success() {
             let status = response.status();
             let body = response.text().await.unwrap_or_default();
-            return Err(format!("failed to insert job: {status} {body}").into());
+            return Err(Error::Api(format!("failed to insert job: {status} {body}")));
         }
 
         Ok(())
     }
 
-    pub async fn update_job(&self, id: &str, updates: &serde_json::Value) -> Result<(), BoxError> {
-        let url = format!("{}?id=eq.{}", self.rest_url(), id);
+    pub async fn update_job(&self, id: &str, updates: &JobUpdate) -> Result<(), Error> {
+        let encoded_id = urlencoding::encode(id);
+        let url = format!("{}?id=eq.{encoded_id}", self.rest_url());
 
         let response = self
             .auth_headers(self.client.patch(&url))
-            .header("Content-Type", "application/json")
             .header("Prefer", "return=minimal")
             .json(updates)
             .send()
@@ -78,14 +102,15 @@ impl SupabaseClient {
         if !response.status().is_success() {
             let status = response.status();
             let body = response.text().await.unwrap_or_default();
-            return Err(format!("failed to update job: {status} {body}").into());
+            return Err(Error::Api(format!("failed to update job: {status} {body}")));
         }
 
         Ok(())
     }
 
-    pub async fn get_job(&self, id: &str) -> Result<Option<TranscriptionJob>, BoxError> {
-        let url = format!("{}?id=eq.{}&select=*", self.rest_url(), id);
+    pub async fn get_job(&self, id: &str) -> Result<Option<TranscriptionJob>, Error> {
+        let encoded_id = urlencoding::encode(id);
+        let url = format!("{}?id=eq.{encoded_id}&select=*", self.rest_url());
 
         let response = self
             .auth_headers(self.client.get(&url))
@@ -96,7 +121,7 @@ impl SupabaseClient {
         if !response.status().is_success() {
             let status = response.status();
             let body = response.text().await.unwrap_or_default();
-            return Err(format!("failed to get job: {status} {body}").into());
+            return Err(Error::Api(format!("failed to get job: {status} {body}")));
         }
 
         let jobs: Vec<TranscriptionJob> = response.json().await?;

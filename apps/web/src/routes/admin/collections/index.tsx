@@ -1,6 +1,7 @@
 import { MDXContent } from "@content-collections/mdx/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import type { JSONContent } from "@tiptap/react";
 import { allArticles } from "content-collections";
 import {
   AlertTriangleIcon,
@@ -42,8 +43,6 @@ import React, {
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-import BlogEditor from "@hypr/tiptap/blog-editor";
-import "@hypr/tiptap/styles.css";
 import {
   Dialog,
   DialogContent,
@@ -63,6 +62,7 @@ import { Spinner } from "@hypr/ui/components/ui/spinner";
 import { sonnerToast } from "@hypr/ui/components/ui/toast";
 import { cn } from "@hypr/utils";
 
+import BlogEditor from "@/components/admin/blog-editor";
 import { MediaSelectorModal } from "@/components/admin/media-selector-modal";
 import { defaultMDXComponents } from "@/components/mdx";
 import { fetchGitHubCredentials } from "@/functions/admin";
@@ -265,7 +265,6 @@ function CollectionsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [clipboard, setClipboard] = useState<ClipboardItem | null>(null);
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isCreatingNewPost, setIsCreatingNewPost] = useState(false);
   const [editingItem, setEditingItem] = useState<EditingItem | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] =
@@ -354,8 +353,19 @@ function CollectionsPage() {
       }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      const deletedPath = variables.path;
       setDeleteConfirmation(null);
+      setTabs((prev) => {
+        const filtered = prev.filter((t) => t.path !== deletedPath);
+        if (filtered.length > 0 && !filtered.some((t) => t.active)) {
+          return filtered.map((t, i) =>
+            i === filtered.length - 1 ? { ...t, active: true } : t,
+          );
+        }
+        return filtered;
+      });
+      queryClient.invalidateQueries({ queryKey: ["draftArticles"] });
     },
   });
 
@@ -552,15 +562,22 @@ function CollectionsPage() {
             onRenameFile={(fromPath, toPath) =>
               renameMutation.mutate({ fromPath, toPath })
             }
+            onDeleteFile={(path) =>
+              setDeleteConfirmation({
+                item: {
+                  name: path.split("/").pop() || path,
+                  path,
+                  slug: (path.split("/").pop() || "").replace(/\.mdx$/, ""),
+                  type: "file",
+                  collection: path.split("/")[0] || "articles",
+                },
+                collectionName: path.split("/")[0] || "articles",
+              })
+            }
+            isDeleting={deleteMutation.isPending}
           />
         </div>
       </ResizablePanel>
-
-      <ImportModal
-        open={isImportModalOpen}
-        onOpenChange={setIsImportModalOpen}
-      />
-
       <Dialog
         open={deleteConfirmation !== null}
         onOpenChange={(open) => !open && setDeleteConfirmation(null)}
@@ -1212,6 +1229,8 @@ function ContentPanel({
   filteredItems,
   onFileClick,
   onRenameFile,
+  onDeleteFile,
+  isDeleting,
 }: {
   tabs: Tab[];
   currentTab: Tab | undefined;
@@ -1224,6 +1243,8 @@ function ContentPanel({
   filteredItems: ContentItem[];
   onFileClick: (item: ContentItem) => void;
   onRenameFile: (fromPath: string, toPath: string) => void;
+  onDeleteFile: (path: string) => void;
+  isDeleting: boolean;
 }) {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [editorData, setEditorData] = useState<EditorData | null>(null);
@@ -1422,6 +1443,8 @@ function ContentPanel({
               const newPath = pathParts.join("/");
               onRenameFile(currentTab.path, newPath);
             }}
+            onDelete={() => onDeleteFile(currentTab.path)}
+            isDeleting={isDeleting}
             hasUnsavedChanges={editorData?.hasUnsavedChanges}
             autoSaveCountdown={editorData?.autoSaveCountdown}
           />
@@ -1469,6 +1492,8 @@ function EditorHeader({
   isPublishing,
   hasPendingPR,
   onRenameFile,
+  onDelete,
+  isDeleting,
   hasUnsavedChanges,
   autoSaveCountdown,
 }: {
@@ -1488,6 +1513,8 @@ function EditorHeader({
   isPublishing?: boolean;
   hasPendingPR?: boolean;
   onRenameFile?: (newSlug: string) => void;
+  onDelete?: () => void;
+  isDeleting?: boolean;
   hasUnsavedChanges?: boolean;
   autoSaveCountdown?: number | null;
 }) {
@@ -1581,6 +1608,24 @@ function EditorHeader({
 
         {currentTab.type === "file" && (
           <div className="flex items-center gap-1">
+            {onDelete && (
+              <button
+                onClick={onDelete}
+                disabled={isDeleting}
+                className={cn([
+                  "cursor-pointer px-2 py-1.5 text-xs font-medium font-mono rounded-xs transition-colors flex items-center gap-1.5",
+                  "text-red-600 hover:bg-red-50",
+                  "disabled:cursor-not-allowed disabled:opacity-50",
+                ])}
+                title="Delete"
+              >
+                {isDeleting ? (
+                  <Spinner size={16} color="currentColor" />
+                ) : (
+                  <Trash2Icon className="size-4" />
+                )}
+              </button>
+            )}
             <button
               onClick={onTogglePreview}
               className={cn([
@@ -2002,10 +2047,12 @@ function AuthorSelect({
 }
 
 const CATEGORIES = [
-  "Case Study",
-  "Char Weekly",
-  "Productivity Hack",
+  "Product",
+  "Comparisons",
   "Engineering",
+  "Founders' notes",
+  "Guides",
+  "Char Weekly",
 ];
 
 function CategorySelect({
@@ -2714,11 +2761,8 @@ const FileEditor = React.forwardRef<
       return response.json() as Promise<ImportResult>;
     },
     onSuccess: (data) => {
-      if (data.mdx) {
-        const mdxWithoutFrontmatter = data.mdx
-          .replace(/^---[\s\S]*?---\n*/, "")
-          .trim();
-        setContent(mdxWithoutFrontmatter);
+      if (data.json) {
+        editorRef.current?.editor?.commands.setContent(data.json);
         setHasUnsavedChanges(true);
       }
       if (data.frontmatter) {
@@ -3258,11 +3302,9 @@ function FileItem({
   );
 }
 
-const CONTENT_FOLDERS = [{ value: "articles", label: "Articles (Blog)" }];
-
 interface ImportResult {
   success: boolean;
-  mdx?: string;
+  json?: JSONContent;
   frontmatter?: {
     meta_title: string;
     display_title: string;
@@ -3273,361 +3315,4 @@ interface ImportResult {
     date: string;
   };
   error?: string;
-}
-
-interface SaveResult {
-  success: boolean;
-  path?: string;
-  url?: string;
-  error?: string;
-}
-
-interface ImportParams {
-  url: string;
-  title?: string;
-  author?: string;
-  description?: string;
-  coverImage?: string;
-  slug?: string;
-}
-
-async function importFromGoogleDocs(
-  params: ImportParams,
-): Promise<ImportResult> {
-  const response = await fetch("/api/admin/import/google-docs", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      url: params.url,
-      title: params.title || undefined,
-      author: params.author || undefined,
-      description: params.description || undefined,
-      coverImage: params.coverImage || undefined,
-      slug: params.slug || undefined,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    try {
-      const errorData = JSON.parse(errorText);
-      throw new Error(
-        errorData.error || `Import failed with status ${response.status}`,
-      );
-    } catch {
-      throw new Error(
-        `Import failed: ${response.status} ${response.statusText}`,
-      );
-    }
-  }
-
-  const data: ImportResult = await response.json();
-
-  if (!data.success) {
-    throw new Error(data.error || "Import failed");
-  }
-
-  return data;
-}
-
-interface SaveParams {
-  content: string;
-  filename: string;
-  folder: string;
-}
-
-async function saveToRepository(params: SaveParams): Promise<SaveResult> {
-  const response = await fetch("/api/admin/import/save", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      content: params.content,
-      filename: params.filename,
-      folder: params.folder,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    try {
-      const errorData = JSON.parse(errorText);
-      throw new Error(
-        errorData.error || `Save failed with status ${response.status}`,
-      );
-    } catch {
-      throw new Error(`Save failed: ${response.status} ${response.statusText}`);
-    }
-  }
-
-  const data: SaveResult = await response.json();
-
-  if (!data.success) {
-    throw new Error(data.error || "Save failed");
-  }
-
-  return data;
-}
-
-function ImportModal({
-  open,
-  onOpenChange,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}) {
-  const [url, setUrl] = useState("");
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [description, setDescription] = useState("");
-  const [coverImage, setCoverImage] = useState("");
-  const [slug, setSlug] = useState("");
-  const [folder, setFolder] = useState("articles");
-  const [editedMdx, setEditedMdx] = useState("");
-
-  const importMutation = useMutation({
-    mutationFn: importFromGoogleDocs,
-    onSuccess: (data) => {
-      setEditedMdx(data.mdx || "");
-      if (data.frontmatter) {
-        if (!title) setTitle(data.frontmatter.meta_title);
-        if (!author) setAuthor(data.frontmatter.author);
-        if (!description) setDescription(data.frontmatter.meta_description);
-      }
-    },
-  });
-
-  const saveMutation = useMutation({
-    mutationFn: saveToRepository,
-    onSuccess: () => {
-      setUrl("");
-      setTitle("");
-      setAuthor("");
-      setDescription("");
-      setCoverImage("");
-      setSlug("");
-      setEditedMdx("");
-      importMutation.reset();
-    },
-  });
-
-  const handleImport = () => {
-    if (!url) return;
-    saveMutation.reset();
-    importMutation.mutate({
-      url,
-      title: title || undefined,
-      author: author || undefined,
-      description: description || undefined,
-      coverImage: coverImage || undefined,
-      slug: slug || undefined,
-    });
-  };
-
-  const handleSave = () => {
-    if (!editedMdx || !slug) return;
-    const filename = slug.endsWith(".mdx") ? slug : `${slug}.mdx`;
-    saveMutation.mutate({ content: editedMdx, filename, folder });
-  };
-
-  const error = importMutation.error || saveMutation.error;
-
-  const generateSlugFromTitle = () => {
-    if (title) {
-      const generatedSlug = title
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-")
-        .replace(/^-|-$/g, "");
-      setSlug(generatedSlug);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Import from Google Docs</DialogTitle>
-        </DialogHeader>
-
-        <div className="flex flex-col gap-4">
-          <p className="text-sm text-neutral-600">
-            The document must be either published to the web or shared with
-            "Anyone with the link can view" permissions.
-          </p>
-
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">
-              Google Docs URL *
-            </label>
-            <input
-              type="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://docs.google.com/document/d/..."
-              className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">
-                Title (optional)
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Article title"
-                className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">
-                Author
-              </label>
-              <input
-                type="text"
-                value={author}
-                onChange={(e) => setAuthor(e.target.value)}
-                placeholder="Author name"
-                className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">
-              Description
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Brief description for SEO"
-              rows={2}
-              className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">
-                Cover Image Path
-              </label>
-              <input
-                type="text"
-                value={coverImage}
-                onChange={(e) => setCoverImage(e.target.value)}
-                placeholder="/api/images/blog/slug/cover.png"
-                className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">
-                Filename Slug
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
-                  placeholder="my-article-slug"
-                  className="flex-1 px-3 py-2 border border-neutral-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  type="button"
-                  onClick={generateSlugFromTitle}
-                  className="px-3 py-2 text-sm text-neutral-600 bg-neutral-100 rounded-md hover:bg-neutral-200"
-                >
-                  Auto
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={handleImport}
-            disabled={importMutation.isPending || !url}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
-          >
-            {importMutation.isPending && <Spinner size={14} color="white" />}
-            {importMutation.isPending ? "Importing..." : "Import Document"}
-          </button>
-
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
-              {error instanceof Error ? error.message : "An error occurred"}
-            </div>
-          )}
-
-          {importMutation.data && (
-            <div className="flex flex-col gap-4 pt-4 border-t">
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1">
-                  Generated MDX Content
-                </label>
-                <textarea
-                  value={editedMdx}
-                  onChange={(e) => setEditedMdx(e.target.value)}
-                  rows={12}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500 font-mono text-sm"
-                />
-              </div>
-
-              <div className="flex items-end gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1">
-                    Folder
-                  </label>
-                  <select
-                    value={folder}
-                    onChange={(e) => setFolder(e.target.value)}
-                    className="px-3 py-2 border border-neutral-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-                  >
-                    {CONTENT_FOLDERS.map((f) => (
-                      <option key={f.value} value={f.value}>
-                        {f.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <button
-                  onClick={handleSave}
-                  disabled={saveMutation.isPending || !editedMdx || !slug}
-                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
-                >
-                  {saveMutation.isPending && (
-                    <Spinner size={14} color="white" />
-                  )}
-                  {saveMutation.isPending ? "Saving..." : "Save to Repository"}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {saveMutation.data && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-md text-green-700 text-sm">
-              <p className="font-medium">File saved successfully!</p>
-              <p className="mt-1">
-                Path:{" "}
-                <code className="bg-green-100 px-1 rounded">
-                  {saveMutation.data.path}
-                </code>
-              </p>
-              {saveMutation.data.url && (
-                <a
-                  href={saveMutation.data.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-green-600 hover:text-green-800 underline"
-                >
-                  View on GitHub
-                </a>
-              )}
-            </div>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
 }

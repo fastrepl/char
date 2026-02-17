@@ -82,6 +82,7 @@ export const fetchUser = createServerFn({ method: "GET" }).handler(async () => {
   }
 
   return {
+    id: data.user.id,
     email: data.user.email,
   };
 });

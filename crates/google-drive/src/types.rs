@@ -1,49 +1,45 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GoogleDriveFile {
-    pub id: String,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mime_type: Option<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub kind: Option<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub size: Option<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub created_time: Option<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub modified_time: Option<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parents: Option<Vec<String>>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub web_view_link: Option<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub web_content_link: Option<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub trashed: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub starred: Option<bool>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct ListFilesRequest {
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub q: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub page_size: Option<u32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub page_token: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub order_by: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub fields: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ListFilesResponse {
     pub kind: String,
@@ -55,10 +51,32 @@ pub struct ListFilesResponse {
     pub files: Vec<GoogleDriveFile>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct GetFileRequest {
     pub file_id: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub fields: Option<String>,
+}
+
+pub struct CreateFolderRequest {
+    pub name: String,
+    pub parent_id: Option<String>,
+}
+
+pub struct UploadFileRequest {
+    pub name: String,
+    pub parent_id: Option<String>,
+    pub mime_type: String,
+    pub data: Vec<u8>,
+}
+
+#[derive(Debug, Default, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateMetadataRequest {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub starred: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trashed: Option<bool>,
 }

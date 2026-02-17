@@ -3,7 +3,8 @@ CREATE TABLE public.transcription_jobs (
   user_id uuid NOT NULL,
   file_id text NOT NULL,
   provider text NOT NULL,
-  status text NOT NULL DEFAULT 'queued',
+  status text NOT NULL DEFAULT 'processing'
+    CONSTRAINT transcription_jobs_status_check CHECK (status IN ('processing', 'done', 'error')),
   provider_request_id text,
   raw_result jsonb,
   error text,
@@ -29,6 +30,21 @@ CREATE POLICY "transcription_jobs_service_all"
 CREATE INDEX transcription_jobs_user_id_idx
   ON public.transcription_jobs (user_id);
 
-CREATE INDEX transcription_jobs_status_pending_idx
+CREATE INDEX transcription_jobs_status_processing_idx
   ON public.transcription_jobs (status, created_at)
   WHERE status NOT IN ('done', 'error');
+
+CREATE OR REPLACE FUNCTION public.set_updated_at()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER transcription_jobs_set_updated_at
+  BEFORE UPDATE ON public.transcription_jobs
+  FOR EACH ROW
+  EXECUTE FUNCTION public.set_updated_at();

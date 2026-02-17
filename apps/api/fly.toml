@@ -9,7 +9,6 @@ strategy = "bluegreen"
 
 [env]
 PORT = "3001"
-API_BASE_URL = "https://api.char.com"
 
 [http_service]
 processes = ['app']

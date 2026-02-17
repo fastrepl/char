@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { getCurrentWindow } from "@tauri-apps/api/window";
+import { isTauri } from "@tauri-apps/api/core";
 import { ChevronDown, Mic, MicOff, Square, X } from "lucide-react";
 import { useRef } from "react";
 
@@ -165,8 +165,12 @@ function ExpandedPanel({
   stop: () => void;
   setMuted: (muted: boolean) => void;
 }) {
-  const handleClose = () => {
-    getCurrentWindow().close();
+  const handleClose = async () => {
+    if (!isTauri()) {
+      return;
+    }
+    const { getCurrentWindow } = await import("@tauri-apps/api/window");
+    await getCurrentWindow().close();
   };
 
   return (
@@ -196,7 +200,9 @@ function ExpandedPanel({
           variant="ghost"
           size="icon"
           className="h-5 w-5 text-white/40 hover:text-white hover:bg-white/10"
-          onClick={handleClose}
+          onClick={() => {
+            void handleClose();
+          }}
         >
           <X className="h-3 w-3" />
         </Button>

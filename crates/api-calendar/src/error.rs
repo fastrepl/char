@@ -30,6 +30,9 @@ pub enum CalendarError {
 
     #[error("Internal error: {0}")]
     Internal(String),
+
+    #[error(transparent)]
+    NangoConnection(#[from] hypr_api_nango::NangoConnectionError),
 }
 
 impl IntoResponse for CalendarError {
@@ -48,6 +51,7 @@ impl IntoResponse for CalendarError {
                     internal_message,
                 )
             }
+            Self::NangoConnection(err) => return err.into_response(),
         };
 
         let body = Json(ErrorResponse {

@@ -1,6 +1,7 @@
 import { defineCollection, defineConfig } from "@content-collections/core";
 import { compileMDX } from "@content-collections/mdx";
 import * as fs from "fs";
+import GithubSlugger from "github-slugger";
 import mdxMermaid from "mdx-mermaid";
 import * as path from "path";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
@@ -121,6 +122,7 @@ function extractToc(
   content: string,
 ): Array<{ id: string; text: string; level: number }> {
   const toc: Array<{ id: string; text: string; level: number }> = [];
+  const slugger = new GithubSlugger();
   const lines = content.split("\n");
 
   for (const line of lines) {
@@ -128,11 +130,7 @@ function extractToc(
     if (match) {
       const level = match[1].length;
       const text = match[2].trim();
-
-      const id = text
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-");
+      const id = slugger.slug(text);
 
       toc.push({ id, text, level });
     }
@@ -148,8 +146,8 @@ const articles = defineCollection({
   exclude: "AGENTS.md",
   schema: z.object({
     display_title: z.string().optional(),
-    meta_title: z.string().optional(),
-    meta_description: z.string().optional(),
+    meta_title: z.string().default(""),
+    meta_description: z.string().default(""),
     author: z.union([z.string(), z.array(z.string())]),
     date: z.string(),
     coverImage: z.string().optional(),
@@ -157,11 +155,12 @@ const articles = defineCollection({
     ready_for_review: z.boolean().default(false),
     category: z
       .enum([
-        "Case Study",
-        "Products In-depth",
-        "Char Weekly",
-        "Productivity Hack",
+        "Product",
+        "Comparisons",
         "Engineering",
+        "Founders' notes",
+        "Guides",
+        "Char Weekly",
       ])
       .optional(),
   }),

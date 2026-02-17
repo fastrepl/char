@@ -49,28 +49,15 @@ impl<'a> NangoProxy<'a> {
     }
 
     fn apply_headers(&self, builder: reqwest::RequestBuilder) -> reqwest::RequestBuilder {
-        let mut builder = builder
-            .header("Connection-Id", &self.connection_id)
-            .header("Provider-Config-Key", &self.integration_id);
-
-        if let Some(retries) = self.retries {
-            builder = builder.header("Retries", retries.to_string());
-        }
-
-        if let Some(ref retry_on) = self.retry_on {
-            let codes: Vec<String> = retry_on.iter().map(|c| c.to_string()).collect();
-            builder = builder.header("Retry-On", codes.join(","));
-        }
-
-        if let Some(ref base_url) = self.base_url_override {
-            builder = builder.header("Base-Url-Override", base_url);
-        }
-
-        if let Some(decompress) = self.decompress {
-            builder = builder.header("Decompress", decompress.to_string());
-        }
-
-        builder
+        apply_proxy_headers(
+            builder,
+            &self.connection_id,
+            &self.integration_id,
+            self.retries,
+            self.retry_on.as_ref(),
+            self.base_url_override.as_deref(),
+            self.decompress,
+        )
     }
 
     pub fn get(
@@ -81,18 +68,19 @@ impl<'a> NangoProxy<'a> {
         Ok(self.apply_headers(self.nango.client.get(url)))
     }
 
-    pub fn post<T: serde::Serialize + ?Sized>(
+    pub fn post(
         &self,
         path: impl std::fmt::Display,
-        data: &T,
+        body: Vec<u8>,
+        content_type: &str,
     ) -> Result<reqwest::RequestBuilder, crate::Error> {
         let url = make_proxy_url(&self.nango.api_base, path)?;
         Ok(self.apply_headers(
             self.nango
                 .client
                 .post(url)
-                .header("Content-Type", "application/json")
-                .json(data),
+                .header("Content-Type", content_type)
+                .body(body),
         ))
     }
 
@@ -133,6 +121,137 @@ impl<'a> NangoProxy<'a> {
         let url = make_proxy_url(&self.nango.api_base, path)?;
         Ok(self.apply_headers(self.nango.client.delete(url)))
     }
+}
+
+#[derive(Clone)]
+pub struct OwnedNangoProxy {
+    client: reqwest::Client,
+    api_base: url::Url,
+    integration_id: String,
+    connection_id: String,
+    retries: Option<u32>,
+    retry_on: Option<Vec<u16>>,
+    base_url_override: Option<String>,
+    decompress: Option<bool>,
+}
+
+impl OwnedNangoProxy {
+    pub fn new(nango: &NangoClient, integration_id: String, connection_id: String) -> Self {
+        Self {
+            client: nango.client.clone(),
+            api_base: nango.api_base.clone(),
+            integration_id,
+            connection_id,
+            retries: Some(3),
+            retry_on: Some(vec![429, 500, 502, 503, 504]),
+            base_url_override: None,
+            decompress: None,
+        }
+    }
+
+    fn apply_headers(&self, builder: reqwest::RequestBuilder) -> reqwest::RequestBuilder {
+        apply_proxy_headers(
+            builder,
+            &self.connection_id,
+            &self.integration_id,
+            self.retries,
+            self.retry_on.as_ref(),
+            self.base_url_override.as_deref(),
+            self.decompress,
+        )
+    }
+
+    pub fn get(
+        &self,
+        path: impl std::fmt::Display,
+    ) -> Result<reqwest::RequestBuilder, crate::Error> {
+        let url = make_proxy_url(&self.api_base, path)?;
+        Ok(self.apply_headers(self.client.get(url)))
+    }
+
+    pub fn post(
+        &self,
+        path: impl std::fmt::Display,
+        body: Vec<u8>,
+        content_type: &str,
+    ) -> Result<reqwest::RequestBuilder, crate::Error> {
+        let url = make_proxy_url(&self.api_base, path)?;
+        Ok(self.apply_headers(
+            self.client
+                .post(url)
+                .header("Content-Type", content_type)
+                .body(body),
+        ))
+    }
+
+    pub fn put<T: serde::Serialize + ?Sized>(
+        &self,
+        path: impl std::fmt::Display,
+        data: &T,
+    ) -> Result<reqwest::RequestBuilder, crate::Error> {
+        let url = make_proxy_url(&self.api_base, path)?;
+        Ok(self.apply_headers(
+            self.client
+                .put(url)
+                .header("Content-Type", "application/json")
+                .json(data),
+        ))
+    }
+
+    pub fn patch<T: serde::Serialize + ?Sized>(
+        &self,
+        path: impl std::fmt::Display,
+        data: &T,
+    ) -> Result<reqwest::RequestBuilder, crate::Error> {
+        let url = make_proxy_url(&self.api_base, path)?;
+        Ok(self.apply_headers(
+            self.client
+                .patch(url)
+                .header("Content-Type", "application/json")
+                .json(data),
+        ))
+    }
+
+    pub fn delete(
+        &self,
+        path: impl std::fmt::Display,
+    ) -> Result<reqwest::RequestBuilder, crate::Error> {
+        let url = make_proxy_url(&self.api_base, path)?;
+        Ok(self.apply_headers(self.client.delete(url)))
+    }
+}
+
+fn apply_proxy_headers(
+    builder: reqwest::RequestBuilder,
+    connection_id: &str,
+    integration_id: &str,
+    retries: Option<u32>,
+    retry_on: Option<&Vec<u16>>,
+    base_url_override: Option<&str>,
+    decompress: Option<bool>,
+) -> reqwest::RequestBuilder {
+    let mut builder = builder
+        .header("Connection-Id", connection_id)
+        .header("Provider-Config-Key", integration_id);
+
+    if let Some(retries) = retries {
+        builder = builder.header("Retries", retries.to_string());
+    }
+
+    if let Some(retry_on) = retry_on {
+        let codes: Vec<String> = retry_on.iter().map(|c| c.to_string()).collect();
+        builder = builder.header("Retry-On", codes.join(","));
+    }
+
+    if let Some(base_url) = base_url_override {
+        builder = builder.header("Base-Url-Override", base_url);
+    }
+
+    if let Some(decompress) = decompress {
+        builder = builder.header("Decompress", decompress.to_string());
+    }
+
+    builder
 }
 
 fn make_proxy_url(base: &url::Url, path: impl std::fmt::Display) -> Result<url::Url, crate::Error> {

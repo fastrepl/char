@@ -25,30 +25,37 @@ pub struct SttApiKeysEnv {
     pub mistral_api_key: Option<String>,
 }
 
-#[derive(Default, Deserialize)]
-pub struct SupabaseEnv {
-    #[serde(default)]
-    pub supabase_url: Option<String>,
-    #[serde(default)]
-    pub supabase_service_role_key: Option<String>,
-}
-
-#[derive(Default, Deserialize)]
+#[derive(Deserialize)]
 pub struct CallbackEnv {
-    #[serde(default)]
-    pub api_base_url: Option<String>,
+    pub api_base_url: String,
     #[serde(default)]
     pub callback_secret: Option<String>,
 }
 
-#[derive(Default, Deserialize)]
+#[derive(Deserialize)]
 pub struct Env {
     #[serde(flatten)]
     pub stt: SttApiKeysEnv,
     #[serde(flatten)]
-    pub supabase: SupabaseEnv,
-    #[serde(flatten)]
     pub callback: CallbackEnv,
+}
+
+impl Default for CallbackEnv {
+    fn default() -> Self {
+        Self {
+            api_base_url: String::new(),
+            callback_secret: None,
+        }
+    }
+}
+
+impl Default for Env {
+    fn default() -> Self {
+        Self {
+            stt: SttApiKeysEnv::default(),
+            callback: CallbackEnv::default(),
+        }
+    }
 }
 
 pub struct ApiKeys(pub HashMap<Provider, String>);

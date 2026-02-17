@@ -85,6 +85,7 @@
     "autostart:default",
     "js:default",
     "flag:default",
+    "relay:default",
     {
       "identifier": "http:default",
       "deny": [],

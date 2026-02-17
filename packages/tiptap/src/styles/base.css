@@ -9,19 +9,6 @@
   min-height: 100%;
 }
 
-.blog-editor.tiptap-root {
-  height: auto;
-  min-height: 0;
-}
-
-.blog-editor.tiptap-root .tiptap {
-  min-height: 0;
-}
-
-.blog-editor.tiptap-root .tiptap p {
-  margin-bottom: 1rem;
-}
-
 .tiptap {
   word-break: break-word;
   overflow-wrap: break-word;

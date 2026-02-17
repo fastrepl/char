@@ -5,8 +5,8 @@ final class QuitInterceptor {
 
   enum State {
     case idle
+    case firstPress
     case awaiting
-    case pressed
     case holding
   }
 
@@ -64,19 +64,10 @@ final class QuitInterceptor {
   func onCmdQPressed() {
     switch state {
     case .idle:
-      state = .awaiting
+      state = .firstPress
       showOverlay()
-      scheduleTimer(&dismissTimer, delay: QuitOverlay.overlayDuration) { [weak self] in
-        guard let self, self.state == .awaiting else { return }
-        self.state = .idle
-        self.hidePanel()
-      }
-
-    case .awaiting:
-      state = .pressed
-      cancelTimer(&dismissTimer)
       scheduleTimer(&holdThresholdTimer, delay: QuitOverlay.holdThreshold) { [weak self] in
-        guard let self, self.state == .pressed else { return }
+        guard let self, self.state == .firstPress else { return }
         self.state = .holding
         self.setHoldingAppearance()
         self.startProgressAnimation()
@@ -85,8 +76,13 @@ final class QuitInterceptor {
         }
       }
 
-    case .pressed, .holding:
+    case .firstPress, .holding:
       break
+
+    case .awaiting:
+      state = .idle
+      cancelTimer(&dismissTimer)
+      performClose()
     }
   }
 
@@ -95,10 +91,14 @@ final class QuitInterceptor {
     case .idle, .awaiting:
       break
 
-    case .pressed:
-      state = .idle
+    case .firstPress:
+      state = .awaiting
       cancelTimer(&holdThresholdTimer)
-      performClose()
+      scheduleTimer(&dismissTimer, delay: QuitOverlay.overlayDuration) { [weak self] in
+        guard let self, self.state == .awaiting else { return }
+        self.state = .idle
+        self.hidePanel()
+      }
 
     case .holding:
       state = .awaiting
