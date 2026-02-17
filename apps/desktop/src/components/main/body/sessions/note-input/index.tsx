@@ -110,9 +110,10 @@ function handleTranscriptReplace(
   );
   if (!transcriptIds) return;
 
+  const normalizedQuery = detail.query.trim().normalize("NFC");
   const searchQuery = detail.caseSensitive
-    ? detail.query
-    : detail.query.toLowerCase();
+    ? normalizedQuery
+    : normalizedQuery.toLowerCase();
 
   let globalMatchIndex = 0;
 
@@ -189,7 +190,7 @@ function handleTranscriptReplace(
         const originalText = word.text ?? "";
         word.text = replaceInText(
           originalText,
-          detail.query,
+          normalizedQuery,
           detail.replacement,
           detail.caseSensitive,
           detail.wholeWord,
@@ -207,8 +208,8 @@ function handleTranscriptReplace(
             ? originalText
             : originalText.toLowerCase();
           const searchQueryInWord = detail.caseSensitive
-            ? detail.query
-            : detail.query.toLowerCase();
+            ? normalizedQuery
+            : normalizedQuery.toLowerCase();
 
           let nthInWord = 0;
           let pos = 0;
@@ -237,7 +238,7 @@ function handleTranscriptReplace(
 
           word.text = replaceInText(
             originalText,
-            detail.query,
+            normalizedQuery,
             detail.replacement,
             detail.caseSensitive,
             detail.wholeWord,
@@ -266,9 +267,10 @@ function handleEditorReplace(
   if (!editor) return;
 
   const doc = editor.state.doc;
+  const normalizedQuery = detail.query.trim().normalize("NFC");
   const searchQuery = detail.caseSensitive
-    ? detail.query
-    : detail.query.toLowerCase();
+    ? normalizedQuery
+    : normalizedQuery.toLowerCase();
 
   type Hit = { from: number; to: number };
   const hits: Hit[] = [];
@@ -330,7 +332,7 @@ function handleEditorReplace(
         ) {
           pmFrom = seg.pmPos + (idx - seg.textStart);
         }
-        const endOffset = idx + detail.query.length;
+        const endOffset = idx + normalizedQuery.length;
         if (
           endOffset > seg.textStart &&
           endOffset <= seg.textStart + seg.length
@@ -369,7 +371,7 @@ function handleEditorReplace(
     } else {
       tr.delete(adjustedFrom, adjustedTo);
     }
-    offset += detail.replacement.length - detail.query.length;
+    offset += detail.replacement.length - normalizedQuery.length;
   }
 
   editor.view.dispatch(tr);
