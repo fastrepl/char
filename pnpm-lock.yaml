@@ -1250,6 +1250,12 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  packages/helpchat:
+    devDependencies:
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+
   packages/store:
     dependencies:
       tinybase:
