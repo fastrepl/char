@@ -75,12 +75,7 @@ impl NangoConnectionState {
             )));
         }
 
-        #[derive(serde::Deserialize)]
-        struct Row {
-            connection_id: String,
-        }
-
-        let rows: Vec<Row> = response
+        let rows: Vec<crate::supabase::NangoConnectionRow> = response
             .json()
             .await
             .map_err(|e| NangoConnectionError::Database(e.to_string()))?;
