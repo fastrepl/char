@@ -121,7 +121,9 @@ export function SessionPanel({
   );
 
   const hasTabs =
-    pipelineStatus === "done" || pipelineStatus === "transcribing";
+    pipelineStatus === "done" ||
+    pipelineStatus === "transcribing" ||
+    pipelineStatus === "error";
   const displayTitle = fileName ? fileName.replace(/\.[^.]+$/, "") : title;
 
   useEffect(() => {
@@ -253,7 +255,7 @@ export function SessionPanel({
         )}
       </div>
 
-      {!hasTabs && !readonly && (
+      {(!hasTabs || pipelineStatus === "error") && !readonly && (
         <FloatingCTA
           status={pipelineStatus}
           progress={uploadProgress}

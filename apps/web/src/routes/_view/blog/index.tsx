@@ -8,10 +8,12 @@ import { SlashSeparator } from "@/components/slash-separator";
 import { AUTHOR_AVATARS } from "@/lib/team";
 
 const CATEGORIES = [
-  "Case Study",
-  "Char Weekly",
-  "Productivity Hack",
+  "Product",
+  "Comparisons",
   "Engineering",
+  "Founders' notes",
+  "Guides",
+  "Char Weekly",
 ] as const;
 
 type BlogSearch = {

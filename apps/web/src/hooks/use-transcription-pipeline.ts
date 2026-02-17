@@ -151,7 +151,13 @@ export function useTranscriptionPipeline(
         query: { callback: "true", provider: "deepgram" },
       });
       if (error || !data) {
-        throw new Error("Failed to start transcription");
+        const detail =
+          typeof error === "object" && error !== null
+            ? ((error as Record<string, unknown>).detail ??
+              (error as Record<string, unknown>).error ??
+              JSON.stringify(error))
+            : String(error ?? "unknown error");
+        throw new Error(`Failed to start transcription: ${detail}`);
       }
       return (data as unknown as ListenCallbackResponse).request_id;
     },
@@ -236,7 +242,13 @@ export function useTranscriptionPipeline(
 
   useEffect(() => {
     const status = (() => {
-      if (pipelineStatus === "error") return "error";
+      if (
+        pipelineStatus === "error" ||
+        startPipelineMutation.isError ||
+        pipelineStatusQuery.isError
+      ) {
+        return "error";
+      }
       if (pipelineStatus === "done" || transcript) return "done";
       if (
         pipelineStatus === "processing" ||
@@ -270,6 +282,7 @@ export function useTranscriptionPipeline(
     transcript,
     pipelineId,
     startPipelineMutation.isPending,
+    startPipelineMutation.isError,
     startPipelineMutation.error,
     uppyStatus,
     uppyFileId,

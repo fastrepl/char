@@ -42,15 +42,9 @@ impl SupabaseStorage {
         object_path: &str,
         expires_in_seconds: u64,
     ) -> Result<String, Error> {
-        let encoded = object_path
-            .split('/')
-            .map(|s| urlencoding::encode(s))
-            .collect::<Vec<_>>()
-            .join("/");
-
         let response = self
             .auth_headers(self.client.post(format!(
-                "{}/storage/v1/object/sign/{bucket}/{encoded}",
+                "{}/storage/v1/object/sign/{bucket}/{object_path}",
                 self.base_url
             )))
             .json(&serde_json::json!({ "expiresIn": expires_in_seconds }))
@@ -78,15 +72,9 @@ impl SupabaseStorage {
     }
 
     pub async fn delete_file(&self, bucket: &str, object_path: &str) -> Result<(), Error> {
-        let encoded = object_path
-            .split('/')
-            .map(|s| urlencoding::encode(s))
-            .collect::<Vec<_>>()
-            .join("/");
-
         let response = self
             .auth_headers(self.client.delete(format!(
-                "{}/storage/v1/object/{bucket}/{encoded}",
+                "{}/storage/v1/object/{bucket}/{object_path}",
                 self.base_url
             )))
             .send()

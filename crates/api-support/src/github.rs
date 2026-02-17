@@ -99,15 +99,17 @@ fn make_title(description: &str, fallback: &str) -> (String, String) {
 }
 
 async fn attach_log_analysis(state: &AppState, issue_number: u64, log_text: &str) {
+    let clean_logs = logs::strip_ansi_escapes(log_text);
+
     let log_summary =
-        logs::analyze_logs(&state.config.openrouter.openrouter_api_key, log_text).await;
+        logs::analyze_logs(&state.config.openrouter.openrouter_api_key, &clean_logs).await;
 
     let summary_section = match log_summary.as_deref() {
         Some(s) if !s.trim().is_empty() => format!("### Summary\n```\n{s}\n```"),
         _ => "_No errors or warnings found._".to_string(),
     };
 
-    let tail = logs::safe_tail(log_text, 10000);
+    let tail = logs::safe_tail(&clean_logs, 10000);
     let log_comment = hypr_template_support::render(
         hypr_template_support::SupportTemplate::LogAnalysis(hypr_template_support::LogAnalysis {
             summary_section,

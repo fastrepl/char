@@ -8,13 +8,10 @@ import type { ContextEntity } from "../../../../chat/context-item";
 import { composeContextEntities } from "../../../../chat/context/composer";
 import type { HyprUIMessage } from "../../../../chat/types";
 import { ElicitationProvider } from "../../../../contexts/elicitation";
-import { useChatwootEvents } from "../../../../hooks/useChatwootEvents";
-import { useChatwootPersistence } from "../../../../hooks/useChatwootPersistence";
 import { useFeedbackLanguageModel } from "../../../../hooks/useLLMConnection";
 import { useSupportMCP } from "../../../../hooks/useSupportMCP";
 import type { Tab } from "../../../../store/zustand/tabs";
 import { useTabs } from "../../../../store/zustand/tabs";
-import { id } from "../../../../utils";
 import { ChatBody } from "../../../chat/body";
 import { ChatContent } from "../../../chat/content";
 import { ChatSession } from "../../../chat/session";
@@ -58,10 +55,6 @@ function SupportChatTabView({
     isReady,
   } = useSupportMCP(true, session?.access_token);
 
-  const chatwoot = useChatwootPersistence(session?.user?.id, {
-    email: session?.user?.email,
-  });
-
   const mcpToolCount = Object.keys(mcpTools).length;
 
   const onGroupCreated = useCallback(
@@ -74,25 +67,10 @@ function SupportChatTabView({
     [updateChatSupportTabState, tab],
   );
 
-  const { handleSendMessage: baseHandleSendMessage } = useChatActions({
+  const { handleSendMessage } = useChatActions({
     groupId,
     onGroupCreated,
   });
-
-  const handleSendMessage = useCallback(
-    async (
-      content: string,
-      parts: HyprUIMessage["parts"],
-      sendMessage: (message: HyprUIMessage) => void,
-    ) => {
-      if (chatwoot.conversationId == null && chatwoot.isReady) {
-        await chatwoot.startConversation();
-      }
-      baseHandleSendMessage(content, parts, sendMessage);
-      chatwoot.persistMessage(content, "incoming");
-    },
-    [baseHandleSendMessage, chatwoot],
-  );
 
   if (!isReady) {
     return (
@@ -127,9 +105,6 @@ function SupportChatTabView({
             supportContextEntities={supportContextEntities}
             pendingElicitation={pendingElicitation}
             respondToElicitation={respondToElicitation}
-            chatwootPersistMessage={chatwoot.persistMessage}
-            chatwootPubsubToken={chatwoot.pubsubToken}
-            chatwootConversationId={chatwoot.conversationId}
           />
         )}
       </ChatSession>
@@ -146,9 +121,6 @@ function SupportChatTabInner({
   supportContextEntities,
   pendingElicitation,
   respondToElicitation,
-  chatwootPersistMessage,
-  chatwootPubsubToken,
-  chatwootConversationId,
 }: {
   tab: Extract<Tab, { type: "chat_support" }>;
   sessionProps: {
@@ -179,16 +151,9 @@ function SupportChatTabInner({
   supportContextEntities: ContextEntity[];
   pendingElicitation?: { message: string } | null;
   respondToElicitation?: (approved: boolean) => void;
-  chatwootPersistMessage: (
-    content: string,
-    messageType: "incoming" | "outgoing",
-  ) => Promise<void>;
-  chatwootPubsubToken: string | null;
-  chatwootConversationId: number | null;
 }) {
   const {
     messages,
-    setMessages,
     sendMessage,
     regenerate,
     stop,
@@ -199,52 +164,6 @@ function SupportChatTabInner({
     isSystemPromptReady,
   } = sessionProps;
   const sentRef = useRef(false);
-  const persistedAssistantIdsRef = useRef<Set<string>>(new Set());
-
-  const onAgentMessage = useCallback(
-    (content: string, _senderName: string) => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: id(),
-          role: "assistant",
-          parts: [{ type: "text", text: content }],
-          metadata: { createdAt: Date.now() },
-        },
-      ]);
-    },
-    [setMessages],
-  );
-
-  useChatwootEvents({
-    pubsubToken: chatwootPubsubToken,
-    conversationId: chatwootConversationId,
-    onAgentMessage,
-  });
-
-  useEffect(() => {
-    if (status !== "ready") {
-      return;
-    }
-    for (const msg of messages) {
-      if (msg.role !== "assistant") {
-        continue;
-      }
-      if (persistedAssistantIdsRef.current.has(msg.id)) {
-        continue;
-      }
-      persistedAssistantIdsRef.current.add(msg.id);
-      const text = msg.parts
-        .filter(
-          (p): p is Extract<typeof p, { type: "text" }> => p.type === "text",
-        )
-        .map((p) => p.text)
-        .join("");
-      if (text) {
-        chatwootPersistMessage(text, "outgoing");
-      }
-    }
-  }, [status, messages, chatwootPersistMessage]);
 
   useEffect(() => {
     const initialMessage = tab.state.initialMessage;

@@ -146,8 +146,8 @@ const articles = defineCollection({
   exclude: "AGENTS.md",
   schema: z.object({
     display_title: z.string().optional(),
-    meta_title: z.string().optional(),
-    meta_description: z.string().optional(),
+    meta_title: z.string().default(""),
+    meta_description: z.string().default(""),
     author: z.union([z.string(), z.array(z.string())]),
     date: z.string(),
     coverImage: z.string().optional(),
@@ -155,11 +155,12 @@ const articles = defineCollection({
     ready_for_review: z.boolean().default(false),
     category: z
       .enum([
-        "Case Study",
-        "Products In-depth",
-        "Char Weekly",
-        "Productivity Hack",
+        "Product",
+        "Comparisons",
         "Engineering",
+        "Founders' notes",
+        "Guides",
+        "Char Weekly",
       ])
       .optional(),
   }),
