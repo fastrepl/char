@@ -66,7 +66,7 @@ function Component() {
 
   useEffect(() => {
     if (search.flow === "web") {
-      void navigate({ to: "/app/account" });
+      void navigate({ to: "/app/account/" });
     }
   }, [search.flow, navigate]);
 

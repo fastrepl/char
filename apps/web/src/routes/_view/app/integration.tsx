@@ -51,7 +51,7 @@ function Component() {
         } else if (event.type === "connect") {
           setStatus("success");
           void navigate({
-            to: "/callback/integration",
+            to: "/callback/integration/",
             search: {
               integration_id: "google-calendar",
               status: "success",
