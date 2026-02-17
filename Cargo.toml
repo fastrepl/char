@@ -64,6 +64,7 @@ hypr-gbnf = { path = "crates/gbnf", package = "gbnf" }
 hypr-gguf = { path = "crates/gguf", package = "gguf" }
 hypr-google-calendar = { path = "crates/google-calendar", package = "google-calendar" }
 hypr-google-drive = { path = "crates/google-drive", package = "google-drive" }
+hypr-outlook-calendar = { path = "crates/outlook-calendar", package = "outlook-calendar" }
 hypr-granola = { path = "crates/granola", package = "granola" }
 hypr-host = { path = "crates/host", package = "host" }
 hypr-http = { path = "crates/http", package = "hypr-http-utils" }

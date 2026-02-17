@@ -12933,6 +12933,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "outlook-calendar"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "hypr-http-utils",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tokio",
+ "urlencoding",
+]
+
+[[package]]
 name = "outref"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
