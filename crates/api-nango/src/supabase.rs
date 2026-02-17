@@ -3,6 +3,7 @@ pub(crate) struct NangoConnectionRow {
     #[serde(default)]
     pub integration_id: String,
     pub connection_id: String,
+    #[serde(default)]
     pub updated_at: Option<String>,
 }
 
