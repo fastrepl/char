@@ -1,5 +1,5 @@
-import type { AgentMessage, FetchFn, HelpChatConfig } from "./types";
 import { buildEventsUrl } from "./client";
+import type { AgentMessage, FetchFn, HelpChatConfig } from "./types";
 
 export interface EventStreamOptions {
   config: HelpChatConfig;
