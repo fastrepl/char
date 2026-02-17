@@ -15,16 +15,6 @@
           "calendar"
         ],
         "operationId": "list_calendars",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ListCalendarsRequest"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Calendars fetched",
@@ -195,6 +185,47 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ConnectSessionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/nango/connection-status": {
+      "get": {
+        "tags": [
+          "nango"
+        ],
+        "operationId": "connection_status",
+        "parameters": [
+          {
+            "name": "integration_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Connection status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionStatusResponse"
                 }
               }
             }
@@ -875,6 +906,27 @@
           }
         }
       },
+      "ConnectionStatusResponse": {
+        "type": "object",
+        "required": [
+          "connected",
+          "integration_id"
+        ],
+        "properties": {
+          "connected": {
+            "type": "boolean"
+          },
+          "integration_id": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
       "ConversationSummary": {
         "type": "object",
         "required": [
@@ -899,6 +951,7 @@
           "identifier"
         ],
         "properties": {
+          "customAttributes": {},
           "email": {
             "type": [
               "string",
@@ -958,7 +1011,6 @@
       "CreateEventRequest": {
         "type": "object",
         "required": [
-          "connection_id",
           "calendar_id",
           "summary",
           "start",
@@ -975,9 +1027,6 @@
             }
           },
           "calendar_id": {
-            "type": "string"
-          },
-          "connection_id": {
             "type": "string"
           },
           "description": {
@@ -1154,17 +1203,6 @@
           "yearly"
         ]
       },
-      "ListCalendarsRequest": {
-        "type": "object",
-        "required": [
-          "connection_id"
-        ],
-        "properties": {
-          "connection_id": {
-            "type": "string"
-          }
-        }
-      },
       "ListCalendarsResponse": {
         "type": "object",
         "required": [
@@ -1191,14 +1229,10 @@
       "ListEventsRequest": {
         "type": "object",
         "required": [
-          "connection_id",
           "calendar_id"
         ],
         "properties": {
           "calendar_id": {
-            "type": "string"
-          },
-          "connection_id": {
             "type": "string"
           },
           "max_results": {
