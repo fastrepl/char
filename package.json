@@ -18,6 +18,11 @@
     "turbo": "2.8.3",
     "typescript-eslint": "^8.55.0"
   },
+  "pnpm": {
+    "overrides": {
+      "@slack/web-api": "^7.14.0"
+    }
+  },
   "packageManager": "pnpm@10.30.0",
   "engines": {
     "node": ">=22"
