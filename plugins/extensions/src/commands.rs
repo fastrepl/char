@@ -93,7 +93,8 @@ pub async fn get_extensions_dir<R: tauri::Runtime>(
         .join("extensions");
 
     if !extensions_dir.exists() {
-        std::fs::create_dir_all(extensions_dir.as_std_path()).map_err(|e| Error::Io(e.to_string()))?;
+        std::fs::create_dir_all(extensions_dir.as_std_path())
+            .map_err(|e| Error::Io(e.to_string()))?;
     }
 
     Ok(extensions_dir.to_string())

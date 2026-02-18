@@ -29,7 +29,10 @@ fn resolve_session_dir<R: tauri::Runtime>(
         .settings()
         .cached_vault_base()
         .map_err(|e| e.to_string())?;
-    Ok(find_session_dir(&base.join("sessions").into_std_path_buf(), session_id))
+    Ok(find_session_dir(
+        &base.join("sessions").into_std_path_buf(),
+        session_id,
+    ))
 }
 
 #[tauri::command]

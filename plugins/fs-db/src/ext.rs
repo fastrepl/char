@@ -44,7 +44,10 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> FsDb<'a, R, M> {
 
     fn resolve_session_dir(&self, session_id: &str) -> crate::Result<PathBuf> {
         let base = self.manager.app_handle().settings().cached_vault_base()?;
-        Ok(find_session_dir(&base.join("sessions").into_std_path_buf(), session_id))
+        Ok(find_session_dir(
+            &base.join("sessions").into_std_path_buf(),
+            session_id,
+        ))
     }
 
     async fn ensure_session_dir(&self, session_dir: &PathBuf) -> crate::Result<()> {
