@@ -1,0 +1,21 @@
+---
+source: crates/transcribe-proxy/src/hyprnote_routing.rs
+expression: table
+---
+  en => Deepgram     chain=[Deepgram, Soniox]
+  es => Deepgram     chain=[Deepgram, Soniox]
+  fr => Deepgram     chain=[Deepgram, Soniox]
+  de => Deepgram     chain=[Deepgram, Soniox]
+  it => Deepgram     chain=[Deepgram, Soniox]
+  ja => Deepgram     chain=[Deepgram, Soniox]
+  ko => Soniox       chain=[Soniox, Deepgram]
+  zh => Soniox       chain=[Soniox, Deepgram]
+  ar => Soniox       chain=[Soniox]
+  hi => Soniox       chain=[Soniox, Deepgram]
+  pt => Soniox       chain=[Soniox, Deepgram]
+  ru => Deepgram     chain=[Deepgram, Soniox]
+  nl => Deepgram     chain=[Deepgram, Soniox]
+  sv => Deepgram     chain=[Deepgram, Soniox]
+  vi => Soniox       chain=[Soniox, Deepgram]
+  pl => Deepgram     chain=[Deepgram, Soniox]
+  tr => Deepgram     chain=[Deepgram, Soniox]

@@ -274,83 +274,150 @@ mod tests {
         codes.iter().map(|c| c.parse().unwrap()).collect()
     }
 
+    fn format_provider(p: Option<Provider>) -> String {
+        match p {
+            Some(p) => format!("{p:?}"),
+            None => "None".to_string(),
+        }
+    }
+
+    fn format_chain(chain: &[Provider]) -> String {
+        let names: Vec<_> = chain.iter().map(|p| format!("{p:?}")).collect();
+        format!("[{}]", names.join(", "))
+    }
+
     #[test]
-    fn test_deepgram_first_for_excellent_quality_languages() {
+    fn routing_table_single_language() {
         let router = HyprnoteRouter::default();
         let available = default_available();
 
-        for code in ["en", "es", "fr", "it", "ja", "de"] {
+        let codes = [
+            "en", "es", "fr", "de", "it", "ja", "ko", "zh", "ar", "hi", "pt", "ru", "nl", "sv",
+            "vi", "pl", "tr",
+        ];
+
+        let mut table = String::new();
+        for code in codes {
             let selected = router.select_provider(&langs(&[code]), &available);
-            assert_eq!(
-                selected,
-                Some(Provider::Deepgram),
-                "Deepgram should be selected first for high-quality language: {code}"
-            );
+            let chain = router.select_provider_chain(&langs(&[code]), &available);
+            table.push_str(&format!(
+                "{code:>4} => {:12} chain={}\n",
+                format_provider(selected),
+                format_chain(&chain),
+            ));
         }
+
+        insta::assert_snapshot!(table);
     }
 
     #[test]
-    fn test_soniox_first_for_languages_with_better_quality() {
+    fn routing_table_multi_language() {
         let router = HyprnoteRouter::default();
         let available = default_available();
 
-        for code in ["zh", "ko"] {
-            let selected = router.select_provider(&langs(&[code]), &available);
-            assert_eq!(
-                selected,
-                Some(Provider::Soniox),
-                "Soniox should win on quality for: {code}"
-            );
-        }
-    }
+        let combos: &[&[&str]] = &[
+            &["en", "es"],
+            &["en", "fr"],
+            &["en", "de"],
+            &["en", "ja"],
+            &["en", "ko"],
+            &["en", "zh"],
+            &["ko", "en"],
+            &["zh", "en"],
+            &["de", "fr"],
+            &["es", "fr"],
+            &["en", "hi"],
+            &["en", "ru"],
+            &["en", "pt"],
+            &["en", "it"],
+            &["en", "nl"],
+        ];
 
-    #[test]
-    fn test_deepgram_first_for_supported_multi_languages() {
-        let router = HyprnoteRouter::default();
-        let available = default_available();
-
-        let deepgram_multi_combos: &[&[&str]] = &[&["en", "es"], &["en", "de"], &["en", "fr"]];
-
-        for combo in deepgram_multi_combos {
+        let mut table = String::new();
+        for combo in combos {
             let selected = router.select_provider(&langs(combo), &available);
-            assert_eq!(
-                selected,
-                Some(Provider::Deepgram),
-                "Deepgram should be selected for multi-language combo: {combo:?}"
-            );
-        }
-    }
-
-    #[test]
-    fn test_soniox_fallback_for_unsupported_deepgram_multi() {
-        let router = HyprnoteRouter::default();
-        let available = default_available();
-
-        let soniox_combos: &[&[&str]] = &[&["ko", "en"], &["en", "ko"]];
-
-        for combo in soniox_combos {
-            let selected = router.select_provider(&langs(combo), &available);
-            assert_eq!(
-                selected,
-                Some(Provider::Soniox),
-                "Soniox should be the fallback for language combo: {combo:?}"
-            );
-        }
-    }
-
-    #[test]
-    fn test_soniox_always_in_fallback_chain() {
-        let router = HyprnoteRouter::default();
-        let available = default_available();
-
-        let all_combos: &[&[&str]] = &[&["en"], &["ko"], &["en", "de"], &["ko", "en"], &["zh"]];
-
-        for combo in all_combos {
             let chain = router.select_provider_chain(&langs(combo), &available);
-            assert!(
-                chain.contains(&Provider::Soniox),
-                "Soniox should always be in the fallback chain for: {combo:?}"
-            );
+            table.push_str(&format!(
+                "{:>12} => {:12} chain={}\n",
+                format!("{combo:?}"),
+                format_provider(selected),
+                format_chain(&chain),
+            ));
         }
+
+        insta::assert_snapshot!(table);
+    }
+
+    const TEST_LANG_CODES: &[&str] = &[
+        "en", "es", "fr", "de", "it", "ja", "ko", "zh", "ar", "hi", "pt", "ru", "nl", "sv",
+        "vi",
+    ];
+
+    #[derive(Debug, Clone)]
+    struct LangCombo(Vec<Language>);
+
+    impl quickcheck::Arbitrary for LangCombo {
+        fn arbitrary(g: &mut quickcheck::Gen) -> Self {
+            let count = *g.choose(&[1usize, 2, 3]).unwrap();
+            let langs = (0..count)
+                .map(|_| g.choose(TEST_LANG_CODES).unwrap().parse().unwrap())
+                .collect();
+            LangCombo(langs)
+        }
+    }
+
+    #[quickcheck_macros::quickcheck]
+    fn prop_select_is_first_of_chain(combo: LangCombo) -> bool {
+        let router = HyprnoteRouter::default();
+        let available = default_available();
+        router.select_provider(&combo.0, &available)
+            == router
+                .select_provider_chain(&combo.0, &available)
+                .into_iter()
+                .next()
+    }
+
+    #[quickcheck_macros::quickcheck]
+    fn prop_chain_no_duplicates(combo: LangCombo) -> bool {
+        let router = HyprnoteRouter::default();
+        let available = default_available();
+        let chain = router.select_provider_chain(&combo.0, &available);
+        let unique: HashSet<_> = chain.iter().collect();
+        unique.len() == chain.len()
+    }
+
+    #[quickcheck_macros::quickcheck]
+    fn prop_chain_subset_of_available(combo: LangCombo) -> bool {
+        let router = HyprnoteRouter::default();
+        let available = default_available();
+        router
+            .select_provider_chain(&combo.0, &available)
+            .iter()
+            .all(|p| available.contains(p))
+    }
+
+    #[quickcheck_macros::quickcheck]
+    fn prop_language_order_independent(combo: LangCombo) -> bool {
+        let router = HyprnoteRouter::default();
+        let available = default_available();
+        let mut reversed = combo.0.clone();
+        reversed.reverse();
+        router.select_provider(&combo.0, &available)
+            == router.select_provider(&reversed, &available)
+    }
+
+    #[quickcheck_macros::quickcheck]
+    fn prop_always_returns_some(combo: LangCombo) -> bool {
+        let router = HyprnoteRouter::default();
+        let available = default_available();
+        router.select_provider(&combo.0, &available).is_some()
+    }
+
+    #[quickcheck_macros::quickcheck]
+    fn prop_soniox_always_in_chain(combo: LangCombo) -> bool {
+        let router = HyprnoteRouter::default();
+        let available = default_available();
+        let chain = router.select_provider_chain(&combo.0, &available);
+        chain.contains(&Provider::Soniox)
     }
 }

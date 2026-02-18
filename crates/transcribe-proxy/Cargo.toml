@@ -41,6 +41,9 @@ hypr-data = { workspace = true }
 hypr-language = { workspace = true }
 owhisper-interface = { workspace = true, features = ["openapi"] }
 
+insta = { workspace = true }
+quickcheck = { workspace = true }
+quickcheck_macros = { workspace = true }
 rodio = { workspace = true }
 tokio-stream = { workspace = true }
 tracing-subscriber = { workspace = true }
