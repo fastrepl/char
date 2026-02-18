@@ -223,7 +223,7 @@ function EditableOrganizationNameField({
       value={(value as string) || ""}
       onChange={handleChange}
       placeholder="Organization name"
-      className="border-none shadow-none p-0 h-8 text-lg font-semibold focus-visible:ring-0 focus-visible:ring-offset-0"
+      className="border-none shadow-none p-0 h-7 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
     />
   );
 }

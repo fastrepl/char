@@ -304,10 +304,11 @@ export function DetailsColumn({
               <EditablePersonJobTitleField personId={selectedHumanId} />
 
               <div className="flex items-center px-4 py-3 border-b border-neutral-200">
-                <div className="w-28 text-sm text-neutral-500">Company</div>
+                <div className="w-28 text-sm text-neutral-500">Name</div>
                 <div className="flex-1">
-                  <EditPersonOrganizationSelector personId={selectedHumanId} />
+                  <EditablePersonNameField personId={selectedHumanId} />
                 </div>
+              </div>
               </div>
 
               <EditablePersonEmailField personId={selectedHumanId} />
@@ -433,7 +434,7 @@ function EditablePersonNameField({ personId }: { personId: string }) {
       value={(value as string) || ""}
       onChange={handleChange}
       placeholder="Name"
-      className="border-none shadow-none p-0 h-8 text-lg font-semibold focus-visible:ring-0 focus-visible:ring-offset-0"
+      className="border-none shadow-none p-0 h-7 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
     />
   );
 }
