@@ -1,21 +1,20 @@
-import { FolderIcon, FolderPlusIcon } from "lucide-react";
-import { type ReactNode, useCallback, useMemo, useState } from "react";
-
+import { CornerDownLeft } from "lucide-react";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "@hypr/ui/components/ui/command";
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuSubContent,
   DropdownMenuTrigger,
 } from "@hypr/ui/components/ui/dropdown-menu";
+import { cn } from "@hypr/utils";
 
 import { sessionOps } from "../../../../../../store/tinybase/persister/session/ops";
 import * as main from "../../../../../../store/tinybase/store/main";
@@ -87,6 +86,10 @@ export function SearchableFolderSubmenuContent({
   );
 }
 
+type FolderOption =
+  | { type: "create"; name: string }
+  | { type: "folder"; folderId: string; name: string };
+
 function SearchableFolderContent({
   folders,
   onSelectFolder,
@@ -96,81 +99,138 @@ function SearchableFolderContent({
   onSelectFolder: (folderId: string) => Promise<void>;
   setOpen?: (open: boolean) => void;
 }) {
-  const [searchValue, setSearchValue] = useState("");
+  const [inputValue, setInputValue] = useState("");
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const listRef = useRef<HTMLDivElement>(null);
 
-  const handleSelect = async (folderId: string) => {
-    await onSelectFolder(folderId);
-    setOpen?.(false);
-  };
+  const folderEntries = useMemo(() => Object.entries(folders), [folders]);
 
-  const handleCreateAndSelect = async () => {
-    const name = searchValue.trim();
-    if (!name) return;
+  const filteredFolders = useMemo(() => {
+    if (!inputValue.trim()) return folderEntries;
+    const search = inputValue.toLowerCase();
+    return folderEntries.filter(([, folder]) =>
+      folder.name.toLowerCase().includes(search),
+    );
+  }, [folderEntries, inputValue]);
 
-    const result = await sessionOps.createFolder(name);
-    if (result.status === "ok") {
-      await onSelectFolder(result.folderId);
+  const hasExactMatch = filteredFolders.some(
+    ([, folder]) =>
+      folder.name.toLowerCase() === inputValue.trim().toLowerCase(),
+  );
+  const showCreateOption = inputValue.trim().length > 0 && !hasExactMatch;
+
+  const options: FolderOption[] = useMemo(() => {
+    const result: FolderOption[] = [];
+    if (showCreateOption) {
+      result.push({ type: "create", name: inputValue.trim() });
+    }
+    for (const [folderId, folder] of filteredFolders) {
+      result.push({ type: "folder", folderId, name: folder.name });
+    }
+    return result;
+  }, [filteredFolders, showCreateOption, inputValue]);
+
+  useEffect(() => {
+    if (selectedIndex >= options.length) {
+      setSelectedIndex(Math.max(0, options.length - 1));
+    }
+  }, [options.length, selectedIndex]);
+
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const el = list.children[selectedIndex] as HTMLElement;
+    if (el) el.scrollIntoView({ block: "nearest" });
+  }, [selectedIndex]);
+
+  const handleSelectOption = async (option: FolderOption) => {
+    if (option.type === "create") {
+      const result = await sessionOps.createFolder(option.name);
+      if (result.status === "ok") {
+        await onSelectFolder(result.folderId);
+        setOpen?.(false);
+      }
+    } else {
+      await onSelectFolder(option.folderId);
       setOpen?.(false);
     }
   };
 
-  const folderEntries = Object.entries(folders);
-  const hasExactMatch = folderEntries.some(
-    ([, folder]) =>
-      folder.name.toLowerCase() === searchValue.trim().toLowerCase(),
-  );
-  const showCreateOption = searchValue.trim().length > 0 && !hasExactMatch;
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Escape") return;
+    e.stopPropagation();
+
+    if (e.key === "Enter" && options.length > 0) {
+      e.preventDefault();
+      handleSelectOption(options[selectedIndex]);
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev < options.length - 1 ? prev + 1 : prev));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : prev));
+    }
+  };
 
   return (
-    <Command>
-      <CommandInput
+    <div className="flex flex-col">
+      <input
+        type="text"
+        className="w-full bg-transparent outline-hidden text-sm placeholder:text-neutral-400 px-3 py-2"
         placeholder="Search or create folder..."
+        value={inputValue}
+        onChange={(e) => {
+          setInputValue(e.target.value);
+          setSelectedIndex(0);
+        }}
+        onKeyDown={handleKeyDown}
         autoFocus
-        className="h-9"
-        value={searchValue}
-        onValueChange={setSearchValue}
       />
-      <CommandList>
-        <CommandEmpty>
-          {searchValue.trim() ? (
-            <button
-              onClick={handleCreateAndSelect}
-              className="flex items-center gap-2 w-full px-2 py-1.5 text-sm cursor-pointer hover:bg-accent rounded-sm"
-            >
-              <FolderPlusIcon className="w-4 h-4" />
-              <span>Create "{searchValue.trim()}"</span>
-            </button>
-          ) : (
-            "Type to create a new folder"
-          )}
-        </CommandEmpty>
-        {folderEntries.length > 0 && (
-          <CommandGroup>
-            {folderEntries.map(([folderId, folder]) => (
-              <CommandItem
-                key={folderId}
-                value={folder.name}
-                onSelect={() => handleSelect(folderId)}
+      {options.length > 0 && (
+        <>
+          <div className="h-px bg-neutral-200" />
+          <div ref={listRef} className="max-h-50 overflow-auto py-1">
+            {options.map((option, index) => (
+              <button
+                key={option.type === "create" ? "new" : option.folderId}
+                type="button"
+                tabIndex={-1}
+                className={cn([
+                  "w-full px-3 py-1.5 text-left text-sm",
+                  selectedIndex === index
+                    ? "bg-neutral-100"
+                    : "hover:bg-neutral-50",
+                ])}
+                onClick={() => handleSelectOption(option)}
+                onMouseEnter={() => setSelectedIndex(index)}
               >
-                <FolderIcon />
-                {folder.name}
-              </CommandItem>
+                <span className="flex items-center justify-between w-full">
+                  {option.type === "create" ? (
+                    <span>
+                      Create "<span className="font-medium">{option.name}</span>
+                      "
+                    </span>
+                  ) : (
+                    <span className="font-medium">{option.name}</span>
+                  )}
+                  {selectedIndex === index && (
+                    <CornerDownLeft className="size-3 text-muted-foreground" />
+                  )}
+                </span>
+              </button>
             ))}
-          </CommandGroup>
-        )}
-        {showCreateOption && folderEntries.length > 0 && (
-          <>
-            <CommandSeparator />
-            <CommandGroup>
-              <CommandItem onSelect={handleCreateAndSelect}>
-                <FolderPlusIcon />
-                Create "{searchValue.trim()}"
-              </CommandItem>
-            </CommandGroup>
-          </>
-        )}
-      </CommandList>
-    </Command>
+          </div>
+        </>
+      )}
+      {options.length === 0 && !inputValue.trim() && (
+        <>
+          <div className="h-px bg-neutral-200" />
+          <div className="px-3 py-2 text-sm text-neutral-400">
+            Type to create a new folder
+          </div>
+        </>
+      )}
+    </div>
   );
 }
 

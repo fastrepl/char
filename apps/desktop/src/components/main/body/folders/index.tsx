@@ -195,12 +195,12 @@ function FolderToolbar({
     <div
       className={cn([
         "flex items-center justify-between",
-        "px-2 pt-1 pb-1 border-b border-neutral-200",
+        "py-2 pl-3 pr-1 h-12 border-b border-neutral-200",
       ])}
     >
       <div className="flex items-center gap-2 min-w-0">
         {breadcrumb || (
-          <h2 className="text-lg font-semibold text-neutral-900">{title}</h2>
+          <h2 className="text-sm font-medium text-neutral-900">{title}</h2>
         )}
       </div>
       <div className="flex items-center gap-1 shrink-0">
