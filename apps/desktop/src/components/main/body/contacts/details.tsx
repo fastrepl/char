@@ -579,6 +579,7 @@ function OrganizationControl({
   closePopover: () => void;
 }) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const userId = main.UI.useValue("user_id", main.STORE_ID);
 
   const organizationsData = main.UI.useResultTable(
@@ -598,6 +599,9 @@ function OrganizationControl({
         org.name.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     : allOrganizations;
+
+  const showCreateOption = searchTerm.trim() && organizations.length === 0;
+  const itemCount = organizations.length + (showCreateOption ? 1 : 0);
 
   const createOrganization = main.UI.useSetRowCallback(
     "organizations",
@@ -623,8 +627,19 @@ function OrganizationControl({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+    if (e.key === "ArrowDown") {
       e.preventDefault();
+      setHighlightedIndex((prev) => (prev < itemCount - 1 ? prev + 1 : 0));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : itemCount - 1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (highlightedIndex >= 0 && highlightedIndex < organizations.length) {
+        selectOrganization(organizations[highlightedIndex].id);
+      } else if (showCreateOption) {
+        handleCreateOrganization();
+      }
     }
   };
 
@@ -646,7 +661,10 @@ function OrganizationControl({
             <input
               type="text"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setHighlightedIndex(-1);
+              }}
               onKeyDown={handleKeyDown}
               placeholder="Search or add company"
               className="w-full bg-transparent text-sm focus:outline-hidden placeholder:text-neutral-400 focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -655,12 +673,18 @@ function OrganizationControl({
 
           {searchTerm.trim() && (
             <div className="flex flex-col w-full rounded-xs border border-neutral-200 overflow-hidden">
-              {organizations.map((org: any) => (
+              {organizations.map((org: any, index: number) => (
                 <button
                   key={org.id}
                   type="button"
-                  className="flex items-center px-3 py-2 text-sm text-left hover:bg-neutral-100 transition-colors w-full"
+                  className={[
+                    "flex items-center px-3 py-2 text-sm text-left transition-colors w-full",
+                    highlightedIndex === index
+                      ? "bg-neutral-100"
+                      : "hover:bg-neutral-100",
+                  ].join(" ")}
                   onClick={() => selectOrganization(org.id)}
+                  onMouseEnter={() => setHighlightedIndex(index)}
                 >
                   <span className="shrink-0 size-5 flex items-center justify-center mr-2 bg-neutral-100 rounded-full">
                     <Building2 className="size-3" />
@@ -669,11 +693,17 @@ function OrganizationControl({
                 </button>
               ))}
 
-              {organizations.length === 0 && (
+              {showCreateOption && (
                 <button
                   type="button"
-                  className="flex items-center px-3 py-2 text-sm text-left hover:bg-neutral-100 transition-colors w-full"
+                  className={[
+                    "flex items-center px-3 py-2 text-sm text-left transition-colors w-full",
+                    highlightedIndex === organizations.length
+                      ? "bg-neutral-100"
+                      : "hover:bg-neutral-100",
+                  ].join(" ")}
                   onClick={() => handleCreateOrganization()}
+                  onMouseEnter={() => setHighlightedIndex(organizations.length)}
                 >
                   <span className="shrink-0 size-5 flex items-center justify-center mr-2 bg-neutral-200 rounded-full">
                     <span className="text-xs">+</span>
@@ -691,12 +721,18 @@ function OrganizationControl({
 
           {!searchTerm.trim() && organizations.length > 0 && (
             <div className="flex flex-col w-full rounded-xs border border-neutral-200 overflow-hidden max-h-[40vh] overflow-y-auto custom-scrollbar">
-              {organizations.map((org: any) => (
+              {organizations.map((org: any, index: number) => (
                 <button
                   key={org.id}
                   type="button"
-                  className="flex items-center px-3 py-2 text-sm text-left hover:bg-neutral-100 transition-colors w-full"
+                  className={[
+                    "flex items-center px-3 py-2 text-sm text-left transition-colors w-full",
+                    highlightedIndex === index
+                      ? "bg-neutral-100"
+                      : "hover:bg-neutral-100",
+                  ].join(" ")}
                   onClick={() => selectOrganization(org.id)}
+                  onMouseEnter={() => setHighlightedIndex(index)}
                 >
                   <span className="shrink-0 size-5 flex items-center justify-center mr-2 bg-neutral-100 rounded-full">
                     <Building2 className="size-3" />
