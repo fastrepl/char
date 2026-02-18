@@ -19,6 +19,20 @@ fn main() {
         cactus_src_dir.join("ffi").join("cactus_ffi.h").display()
     );
 
+    // GCC on Linux doesn't include <iomanip> transitively through <sstream>,
+    // but cactus/telemetry/telemetry.cpp uses std::setfill/setw without including it.
+    #[cfg(target_os = "linux")]
+    {
+        let existing = env::var("CXXFLAGS").unwrap_or_default();
+        let patched = if existing.is_empty() {
+            "-include iomanip".to_string()
+        } else {
+            format!("-include iomanip {existing}")
+        };
+        // Safety: build scripts run in an isolated process.
+        unsafe { env::set_var("CXXFLAGS", patched) };
+    }
+
     let dst = cmake::Config::new(&cactus_src_dir)
         .define("BUILD_SHARED_LIBS", "OFF")
         .define("CMAKE_BUILD_TYPE", "Release")
