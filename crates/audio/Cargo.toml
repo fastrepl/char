@@ -17,6 +17,7 @@ serde_json = { workspace = true }
 
 futures-channel = { workspace = true }
 futures-util = { workspace = true }
+pin-project = { workspace = true }
 tokio = { workspace = true, features = ["rt", "macros"] }
 
 cpal = { workspace = true }

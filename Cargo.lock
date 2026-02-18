@@ -1271,6 +1271,7 @@ dependencies = [
  "futures-util",
  "hound",
  "libpulse-binding",
+ "pin-project",
  "ringbuf",
  "rodio",
  "serde",
@@ -1317,6 +1318,7 @@ dependencies = [
  "data",
  "futures-util",
  "hound",
+ "pin-project",
  "rodio",
  "rubato",
  "thiserror 2.0.18",
@@ -2772,6 +2774,28 @@ name = "cached_proc_macro_types"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ade8366b8bd5ba243f0a58f036cc0ca8a2f069cff1a2351ef1cac6b083e16fc0"
+
+[[package]]
+name = "cactus"
+version = "0.2.0"
+source = "git+https://github.com/mrsarac/cactus-rs#dd82beae35c97acc283acd839860184ff5e29571"
+dependencies = [
+ "cactus-sys",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "cactus-sys"
+version = "0.2.0"
+source = "git+https://github.com/mrsarac/cactus-rs#dd82beae35c97acc283acd839860184ff5e29571"
+dependencies = [
+ "bindgen 0.70.1",
+ "cmake",
+ "libc",
+ "pkg-config",
+]
 
 [[package]]
 name = "cairo-rs"
@@ -9406,6 +9430,16 @@ name = "hypher"
 version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "74e25026c579b170c59f8d3ddfc523d7dab0abe079f09eb8edaebd2417044f60"
+
+[[package]]
+name = "hypr-cactus"
+version = "0.1.0"
+dependencies = [
+ "cactus",
+ "data",
+ "hound",
+ "serde_json",
+]
 
 [[package]]
 name = "hypr-http-utils"
@@ -22057,6 +22091,7 @@ dependencies = [
  "data",
  "futures-util",
  "hound",
+ "pin-project",
  "rodio",
  "serde",
  "silero",
@@ -23708,6 +23743,7 @@ dependencies = [
  "axum 0.8.8",
  "futures-util",
  "owhisper-interface",
+ "pin-project",
  "serde_json",
  "tokio",
  "tokio-util",
