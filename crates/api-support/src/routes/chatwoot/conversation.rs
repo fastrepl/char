@@ -46,7 +46,7 @@ pub async fn create_conversation(
         .into_inner();
 
     Ok(Json(CreateConversationResponse {
-        conversation_id: conv.id.unwrap_or_default() as i64,
+        conversation_id: conv.id.unwrap_or_default(),
     }))
 }
 
@@ -89,7 +89,7 @@ pub async fn list_conversations(
     let summaries = conversations
         .into_iter()
         .map(|c| ConversationSummary {
-            id: c.id.unwrap_or_default() as i64,
+            id: c.id.unwrap_or_default(),
             inbox_id: c.inbox_id.clone(),
         })
         .collect();

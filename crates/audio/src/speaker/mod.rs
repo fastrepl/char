@@ -1,5 +1,6 @@
 use anyhow::Result;
-use futures_util::{Stream, StreamExt};
+use futures_util::Stream;
+use pin_project::pin_project;
 
 pub(super) const CHUNK_SIZE: usize = 256;
 pub(super) const BUFFER_SIZE: usize = CHUNK_SIZE * 256;
@@ -78,7 +79,9 @@ impl SpeakerInput {
 }
 
 // https://github.com/floneum/floneum/blob/50afe10/interfaces/kalosm-sound/src/source/mic.rs#L140
+#[pin_project]
 pub struct SpeakerStream {
+    #[pin]
     inner: InnerStream,
     buffer: Vec<f32>,
     buffer_idx: usize,
@@ -110,23 +113,25 @@ impl Stream for SpeakerStream {
     type Item = f32;
 
     fn poll_next(
-        mut self: std::pin::Pin<&mut Self>,
+        self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
     ) -> std::task::Poll<Option<Self::Item>> {
-        if self.buffer_idx < self.buffer.len() {
-            let sample = self.buffer[self.buffer_idx];
-            self.buffer_idx += 1;
+        let mut this = self.project();
+
+        if *this.buffer_idx < this.buffer.len() {
+            let sample = this.buffer[*this.buffer_idx];
+            *this.buffer_idx += 1;
             return std::task::Poll::Ready(Some(sample));
         }
 
-        match self.inner.poll_next_unpin(cx) {
+        match this.inner.as_mut().poll_next(cx) {
             std::task::Poll::Ready(Some(chunk)) => {
-                self.buffer = chunk;
-                self.buffer_idx = 0;
-                self.buffer_rate = self.inner.sample_rate();
-                if !self.buffer.is_empty() {
-                    let sample = self.buffer[0];
-                    self.buffer_idx = 1;
+                *this.buffer = chunk;
+                *this.buffer_idx = 0;
+                *this.buffer_rate = this.inner.sample_rate();
+                if !this.buffer.is_empty() {
+                    let sample = this.buffer[0];
+                    *this.buffer_idx = 1;
                     std::task::Poll::Ready(Some(sample))
                 } else {
                     std::task::Poll::Pending

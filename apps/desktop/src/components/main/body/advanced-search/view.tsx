@@ -260,8 +260,8 @@ export function AdvancedSearchView({
                 className={cn([
                   "cursor-pointer transition-all",
                   isActive
-                    ? "bg-linear-to-t from-stone-600 to-stone-500 text-white border-stone-600 hover:from-stone-700 hover:to-stone-600"
-                    : "bg-linear-to-b from-white to-stone-50 text-neutral-600 border-neutral-200 hover:from-neutral-50 hover:to-stone-100",
+                    ? "bg-stone-600 text-white border-stone-600 hover:bg-stone-700"
+                    : "bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-100",
                 ])}
                 onClick={() => toggleFilter(option.type)}
               >
@@ -278,8 +278,8 @@ export function AdvancedSearchView({
                 className={cn([
                   "cursor-pointer transition-all",
                   isActive
-                    ? "bg-linear-to-t from-stone-600 to-stone-500 text-white border-stone-600 hover:from-stone-700 hover:to-stone-600"
-                    : "bg-linear-to-b from-white to-stone-50 text-neutral-600 border-neutral-200 hover:from-neutral-50 hover:to-stone-100",
+                    ? "bg-stone-600 text-white border-stone-600 hover:bg-stone-700"
+                    : "bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-100",
                 ])}
                 onClick={() => toggleDatePreset(preset.key)}
               >

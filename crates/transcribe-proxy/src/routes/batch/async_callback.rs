@@ -150,7 +150,7 @@ async fn handle_sync_fallback(
         &selected,
         ListenParams::default(),
         audio_bytes,
-        &content_type,
+        content_type,
     )
     .await
     {

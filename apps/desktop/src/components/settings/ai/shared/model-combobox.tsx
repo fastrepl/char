@@ -6,7 +6,7 @@ import {
   EyeOff,
   RefreshCcw,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { Button } from "@hypr/ui/components/ui/button";
 import {
@@ -45,6 +45,10 @@ const formatIgnoreReason = (reason: ModelIgnoreReason): string => {
   switch (reason) {
     case "common_keyword":
       return "Contains common ignore keyword";
+    case "old_model":
+      return "Old or deprecated model";
+    case "date_snapshot":
+      return "Date-specific snapshot";
     case "no_tool":
       return "No tool support";
     case "no_text_input":
@@ -53,6 +57,8 @@ const formatIgnoreReason = (reason: ModelIgnoreReason): string => {
       return "No completion support";
     case "not_llm":
       return "Not an LLM type";
+    case "not_chat_model":
+      return "Not a chat model";
     case "context_too_small":
       return "Context length too small";
   }
@@ -99,24 +105,6 @@ export function ModelCombobox({
     () => fetchedResult?.models ?? [],
     [fetchedResult],
   );
-
-  const autoSelectedRef = useRef(false);
-  const userSelectedRef = useRef(false);
-
-  useEffect(() => {
-    autoSelectedRef.current = false;
-    userSelectedRef.current = false;
-  }, [providerId]);
-
-  useEffect(() => {
-    if (autoSelectedRef.current || userSelectedRef.current) {
-      return;
-    }
-    if (options.length > 0 && (!value || !options.includes(value))) {
-      autoSelectedRef.current = true;
-      onChange(options[0]);
-    }
-  }, [value, options, onChange]);
   const ignoredOptions = useMemo(
     () => fetchedResult?.ignored ?? [],
     [fetchedResult],
@@ -135,7 +123,6 @@ export function ModelCombobox({
 
   const handleSelect = useCallback(
     (option: string) => {
-      userSelectedRef.current = true;
       onChange(option);
       setOpen(false);
       setQuery("");

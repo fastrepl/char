@@ -1,4 +1,5 @@
 import DOMPurify from "dompurify";
+import { Facehash } from "facehash";
 import { useCallback, useMemo } from "react";
 
 import { cn } from "@hypr/utils";
@@ -6,7 +7,6 @@ import { cn } from "@hypr/utils";
 import { type SearchResult } from "../../../../contexts/search/ui";
 import * as main from "../../../../store/tinybase/store/main";
 import { type TabInput, useTabs } from "../../../../store/zustand/tabs";
-import { getInitials } from "../../body/contacts/shared";
 
 export function SearchResultItem({
   result,
@@ -88,14 +88,13 @@ function HumanSearchResultItem({
         isSelected && "bg-neutral-100",
       ])}
     >
-      <div
-        className={cn([
-          "shrink-0 w-8 h-8 rounded-full bg-neutral-200 flex items-center justify-center",
-        ])}
-      >
-        <span className={cn(["text-xs font-medium text-neutral-600"])}>
-          {getInitials(result.title)}
-        </span>
+      <div className="shrink-0 rounded-full bg-amber-50">
+        <Facehash
+          name={result.title || result.id}
+          size={32}
+          interactive={false}
+          showInitial={false}
+        />
       </div>
       <div className={cn(["flex-1 min-w-0"])}>
         <div
@@ -283,13 +282,13 @@ function getTab(result: SearchResult): TabInput | null {
   if (result.type === "human") {
     return {
       type: "contacts",
-      state: { selectedPerson: result.id, selectedOrganization: null },
+      state: { selected: { type: "person", id: result.id } },
     };
   }
   if (result.type === "organization") {
     return {
       type: "contacts",
-      state: { selectedOrganization: result.id, selectedPerson: null },
+      state: { selected: { type: "organization", id: result.id } },
     };
   }
 

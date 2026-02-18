@@ -72,7 +72,7 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
             use tauri_plugin_settings::SettingsPluginExt;
             specta_builder.mount_events(app);
 
-            let data_dir = app.settings().global_base()?;
+            let data_dir = app.settings().global_base()?.into_std_path_buf();
             let models_dir = app.models_dir();
 
             // for backward compatibility

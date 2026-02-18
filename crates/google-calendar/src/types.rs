@@ -570,7 +570,7 @@ pub struct Event {
 
 // === Sub-resource structs ===
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EventDateTime {
     #[serde(default)]
@@ -594,7 +594,7 @@ pub struct EventPerson {
     pub is_self: Option<bool>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Attendee {
     #[serde(default)]
@@ -663,7 +663,7 @@ pub struct ListEventsResponse {
     pub items: Vec<Event>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ListEventsRequest {
     pub calendar_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -702,11 +702,14 @@ pub struct CreateEventRequest {
     pub event: CreateEventBody,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateEventBody {
+    #[serde(default)]
     pub summary: String,
+    #[serde(default)]
     pub start: EventDateTime,
+    #[serde(default)]
     pub end: EventDateTime,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,

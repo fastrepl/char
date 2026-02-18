@@ -30,6 +30,7 @@ hypr-analytics = { path = "crates/analytics", package = "analytics" }
 hypr-api-auth = { path = "crates/api-auth", package = "api-auth" }
 hypr-api-calendar = { path = "crates/api-calendar", package = "api-calendar" }
 hypr-api-env = { path = "crates/api-env", package = "api-env" }
+hypr-api-messenger = { path = "crates/api-messenger", package = "api-messenger" }
 hypr-api-nango = { path = "crates/api-nango", package = "api-nango" }
 hypr-api-research = { path = "crates/api-research", package = "api-research" }
 hypr-api-storage = { path = "crates/api-storage", package = "api-storage" }
@@ -87,6 +88,7 @@ hypr-notion = { path = "crates/notion", package = "notion" }
 hypr-onnx = { path = "crates/onnx", package = "onnx" }
 hypr-openrouter = { path = "crates/openrouter", package = "openrouter" }
 hypr-openstatus = { path = "crates/openstatus", package = "openstatus" }
+hypr-outlook-calendar = { path = "crates/outlook-calendar", package = "outlook-calendar" }
 hypr-porkbun = { path = "crates/porkbun", package = "porkbun" }
 hypr-posthog = { path = "crates/posthog", package = "posthog" }
 hypr-pyannote-cloud = { path = "crates/pyannote-cloud", package = "pyannote-cloud" }
@@ -96,6 +98,7 @@ hypr-slack-web = { path = "crates/slack-web", package = "slack-web" }
 hypr-supabase-auth = { path = "crates/supabase-auth", package = "supabase-auth" }
 hypr-supabase-storage = { path = "crates/supabase-storage", package = "supabase-storage" }
 hypr-tcc = { path = "crates/tcc", package = "tcc" }
+hypr-teems = { path = "crates/teems", package = "teems" }
 hypr-template-app = { path = "crates/template-app", package = "template-app" }
 hypr-template-app-legacy = { path = "crates/template-app-legacy", package = "template-app-legacy" }
 hypr-template-eval = { path = "crates/template-eval", package = "template-eval" }
@@ -198,6 +201,7 @@ futures-channel = "0.3.31"
 futures-core = "0.3.31"
 futures-util = "0.3.31"
 hypr-supervisor = { path = "crates/supervisor", package = "supervisor" }
+pin-project = "1"
 ractor = "0.15.10"
 rayon = "1.11"
 reqwest = "0.13"
@@ -209,6 +213,8 @@ tokio = "1"
 tokio-stream = "0.1.17"
 tokio-tungstenite = "0.28"
 tokio-util = "0.7.15"
+
+camino = "1"
 
 anyhow = "1"
 approx = "0.5.1"

@@ -44,3 +44,9 @@ owhisper-interface = { workspace = true, features = ["openapi"] }
 rodio = { workspace = true }
 tokio-stream = { workspace = true }
 tracing-subscriber = { workspace = true }
+
+codes-iso-639 = { workspace = true }
+insta = { workspace = true }
+itertools = { workspace = true }
+quickcheck = { workspace = true }
+quickcheck_macros = { workspace = true }

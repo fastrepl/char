@@ -143,7 +143,7 @@ async fn start_session_impl(
         configure_sentry_session_context(&params);
 
         let app_dir = match state.app.settings().cached_vault_base() {
-            Ok(base) => base.join("sessions"),
+            Ok(base) => base.join("sessions").into_std_path_buf(),
             Err(e) => {
                 tracing::error!(error = ?e, "failed_to_resolve_sessions_base_dir");
                 clear_sentry_session_context();

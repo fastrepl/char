@@ -19,7 +19,7 @@ pub const FILENAME: &str = "store.json";
 
 pub fn store_path<R: tauri::Runtime>(app: &tauri::AppHandle<R>) -> Result<PathBuf, crate::Error> {
     let store_dir = app.settings().global_base()?;
-    Ok(store_dir.join(FILENAME))
+    Ok(store_dir.join(FILENAME).into_std_path_buf())
 }
 
 pub struct Store2<'a, R: tauri::Runtime, M: tauri::Manager<R>> {

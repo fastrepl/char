@@ -68,12 +68,12 @@ function SearchView({ tab }: { tab: Extract<Tab, { type: "search" }> }) {
       } else if (type === "human") {
         openNew({
           type: "contacts",
-          state: { selectedPerson: id, selectedOrganization: null },
+          state: { selected: { type: "person", id } },
         });
       } else if (type === "organization") {
         openNew({
           type: "contacts",
-          state: { selectedOrganization: id, selectedPerson: null },
+          state: { selected: { type: "organization", id } },
         });
       }
     },

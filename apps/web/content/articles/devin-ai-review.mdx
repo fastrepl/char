@@ -15,7 +15,7 @@ Here's what we learned.
 
 ## Not a Reader? Watch the Video Instead
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/UojsNSbhm6o?si=2UEgp4KmILzbzrcD" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o" />
 
 *Timestamps throughout this post link to specific examples in the video.*
 
@@ -29,13 +29,13 @@ Slack is where discussions already happen. We're already getting alerts from Zen
 
 This is collaborative debugging without context switching. No copying issues into a separate tool. No explaining the same problem twice.
 
-**→ Watch in video:** **[https://www.youtube.com/watch?v=UojsNSbhm6o&t=52s](https://www.youtube.com/watch?v=UojsNSbhm6o&t=52s)**
+<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=52" />
 
 **Another example:** I tagged Devin about our 404 page not rendering properly. John, who works on our webpage primarily, pointed out reference files to look at in the same thread. Based on his input, we got a PR and merged it.
 
 The agent isn't replacing us—it's joining the conversation where it's already happening.
 
-**→ Watch in video:** **[https://www.youtube.com/watch?v=UojsNSbhm6o&t=74s](https://www.youtube.com/watch?v=UojsNSbhm6o&t=74s)**
+<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=74" />
 
 ## AI Agents Enable Non-Technical Teams to Ship Code
 
@@ -43,11 +43,11 @@ Having an agent accessible from Slack opened up tasks that don't necessarily req
 
 John attached some PostHog docs and asked questions about what we're tracking and what we should be tracking long-term. Devin made the changes. Now both John and I know we have analytics updates—super helpful for staying aligned.
 
-**→ Watch in video:** **[https://www.youtube.com/watch?v=UojsNSbhm6o&t=108s](https://www.youtube.com/watch?v=UojsNSbhm6o&t=108s)**
+<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=108" />
 
 Since we use GitHub as a CMS for Hyprnote, we can even update landing pages or blog content directly from Slack. John attached a PDF from an internal discussion, and Devin updated our docs based on the actual conversation we had.
 
-**→ Watch in video: [https://www.youtube.com/watch?v=UojsNSbhm6o&t=132s](https://www.youtube.com/watch?v=UojsNSbhm6o&t=132s)**
+<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=132" />
 
 ## Three Types of Tasks to Delegate to Devin AI
 
@@ -63,7 +63,7 @@ This is work that isn't planned for the immediate future. We're not going to shi
 
 Then we cloned the repository of a popular Chrome extension framework. Based on the docs and actual code examples, we implemented it to see how it would look. We didn't even merge it, but it's still useful to see how it'll look in the future.
 
-**→ Watch in video: [https://www.youtube.com/watch?v=UojsNSbhm6o&t=177s](https://www.youtube.com/watch?v=UojsNSbhm6o&t=177s)**
+<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=177" />
 
 ### Degree 2: Preparation (Relevant, But Not Right Now)
 
@@ -73,7 +73,7 @@ This is work we'll likely merge, but I won't pull it into my IDE yet.
 
 We did research to see if there was any existing work on that. There was, so we cloned it, ported the test cases, and let Devin implement it. Tests passed, so we safely merged it for a future feature.
 
-**→ Watch in video: [https://www.youtube.com/watch?v=UojsNSbhm6o&t=227s](https://www.youtube.com/watch?v=UojsNSbhm6o&t=227s)**
+<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=227" />
 
 ### Degree 3: Production (Very Relevant Right Now)
 
@@ -85,7 +85,7 @@ One interesting trick: we asked Devin to use the Claude CLI that we already inst
 
 **Pro tip:** We encoded this knowledge as an "offload agent" on how to use Claude CLI. Mentioning "consult smart friend" (something Devin uses as a prompt internally) helps Claude CLI get called at the right timing.
 
-**→ Watch in video: [https://www.youtube.com/watch?v=UojsNSbhm6o&t=263s](https://www.youtube.com/watch?v=UojsNSbhm6o&t=263s)**
+<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=263" />
 
 ## Good Documentation Enables AI Agents to Ship Code Faster
 
@@ -99,13 +99,13 @@ We support both WebSocket-based real-time transcription and file upload-based ba
 
 Since we have end-to-end testing support in place, we sent the ElevenLabs API key as credentials (this can be passed in the prompt or through Infisical CLI). With all the documentation, test cases, and API key in place, Devin implemented it in almost one shot, and we safely merged it.
 
-**→ Watch in video: [https://www.youtube.com/watch?v=UojsNSbhm6o&t=349s](https://www.youtube.com/watch?v=UojsNSbhm6o&t=349s)**
+<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=349" />
 
 **Example: Mistral Support**
 
 Same story for language models—even easier because there's no WebSocket involved. Since we have infrastructure to support any language provider, Mistral was supported in less than 10 minutes.
 
-**→ Watch in video: [https://www.youtube.com/watch?v=UojsNSbhm6o&t=392s](https://www.youtube.com/watch?v=UojsNSbhm6o&t=392s)**
+<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=392" />
 
 **Example: OpenAI Support**
 
@@ -113,7 +113,7 @@ This one was a little harder. We had errors in the client, so we passed the erro
 
 The pattern is clear: **good docs + clean interfaces + test infrastructure = AI agents that actually ship code.**
 
-**→ Watch in video: [https://www.youtube.com/watch?v=UojsNSbhm6o&t=406s](https://www.youtube.com/watch?v=UojsNSbhm6o&t=406s)**
+<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=406" />
 
 ## Automating Code Maintenance with AI Agents
 
@@ -126,7 +126,7 @@ One common example is doing migrations that have clear documentation. In Hyprnot
 - **AI SDK version 6 migration** in a single prompt
 - **Tailwind v3 to v4 migration** in a single prompt
 
-**→ Watch in video: [https://www.youtube.com/watch?v=UojsNSbhm6o&t=447s](https://www.youtube.com/watch?v=UojsNSbhm6o&t=447s)**
+<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=447" />
 
 ### Concurrent Multi-PR Migrations
 
@@ -136,7 +136,7 @@ A good example is applying Vercel's recent React best practices agent skills. We
 
 One way to do this is to ask Devin to make actual API calls. But there's a better way: use the analyze-session task. This lets you spawn concurrent Devin sessions to run work concurrently and generate separate PRs per task.
 
-**→ Watch in video: [https://www.youtube.com/watch?v=UojsNSbhm6o&t=463s](https://www.youtube.com/watch?v=UojsNSbhm6o&t=463s)**
+<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=463" />
 
 ### Daily Automated Linting
 
@@ -146,7 +146,7 @@ In Hyprnote, we have a large Rust codebase, and since Cargo Clippy is pretty goo
 
 Since it takes a lot of time to run Clippy and Cargo check, we save a lot of time applying these guidelines or Clippy warnings in an async manner.
 
-**→ Watch in video: [https://www.youtube.com/watch?v=UojsNSbhm6o&t=528s](https://www.youtube.com/watch?v=UojsNSbhm6o&t=528s)**
+<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=528" />
 
 ## Final Verdict: Is Devin AI Worth It?
 

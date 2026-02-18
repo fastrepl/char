@@ -35,10 +35,8 @@ impl OpenApiSpec {
             };
             for (code, resp) in responses.iter_mut() {
                 let dominated = code == "204" || !code.starts_with('2');
-                if dominated {
-                    if let Some(obj) = resp.as_object_mut() {
-                        obj.remove("content");
-                    }
+                if dominated && let Some(obj) = resp.as_object_mut() {
+                    obj.remove("content");
                 }
             }
         });

@@ -19,7 +19,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           PR_JSON=$(gh pr list \
-            --repo fastrepl/hyprnote \
+            --repo fastrepl/char \
             --state open \
             --author "app/devin-ai-integration" \
             --search "docs" \
@@ -55,11 +55,11 @@ jobs:
               "existing_pr_number": "${{ steps.existing_pr.outputs.number }}"
             }
           prompt: |
-            You are tasked with updating Hyprnote's technical documentation based on recent code changes.
+            You are tasked with updating Char's technical documentation based on recent code changes.
 
             ## Context
-            Hyprnote is a Tauri-based desktop app for AI meeting notes that prioritizes privacy.
-            Repository: fastrepl/hyprnote
+            Char is an open-source AI notepad for meetings built for high-agency people who demand complete control over their data and AI stack.
+            Repository: fastrepl/char
 
             {% if has_existing_pr == "true" %}
             ## Stacked PR Instructions
@@ -73,6 +73,8 @@ jobs:
             3. When creating your PR, set the base branch to `{{ existing_pr_branch }}` (not main)
             4. Reference the parent PR #{{ existing_pr_number }} in your PR description
             {% endif %}
+
+            Read and follow positioning guidelines in `apps/web/content/AGENTS.md`.
 
             ## Your Task
             1. **Analyze Recent Changes**

@@ -213,7 +213,7 @@ export function LoginSection({ onContinue }: { onContinue: () => void }) {
         <button
           onClick={() => auth?.handleAuthCallback(callbackUrl)}
           disabled={!callbackUrl}
-          className="absolute right-0.5 px-4 py-2 text-sm bg-linear-to-t from-neutral-600 to-neutral-500 text-white rounded-full enabled:hover:scale-[1.02] enabled:active:scale-[0.98] transition-all disabled:opacity-50"
+          className="absolute right-0.5 px-4 py-2 text-sm bg-neutral-600 text-white rounded-full enabled:hover:scale-[1.02] enabled:active:scale-[0.98] transition-all disabled:opacity-50"
         >
           Submit
         </button>

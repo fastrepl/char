@@ -29,7 +29,7 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
         self.manager
             .settings()
             .global_base()
-            .map(|base| base.join("models").join("stt"))
+            .map(|base| base.join("models").join("stt").into_std_path_buf())
             .unwrap_or_else(|_| {
                 dirs::data_dir()
                     .unwrap_or_default()

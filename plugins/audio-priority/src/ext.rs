@@ -12,7 +12,7 @@ pub fn audio_priority_path<R: tauri::Runtime>(
     app: &tauri::AppHandle<R>,
 ) -> Result<PathBuf, crate::Error> {
     let base = app.settings().global_base()?;
-    Ok(base.join(FILENAME))
+    Ok(base.join(FILENAME).into_std_path_buf())
 }
 
 pub struct AudioPriority<'a, R: tauri::Runtime, M: tauri::Manager<R>> {

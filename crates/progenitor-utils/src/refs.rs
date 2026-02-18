@@ -33,10 +33,10 @@ pub(crate) fn transitively_referenced_schemas(spec: &Value) -> BTreeSet<String> 
 fn collect_schema_refs(value: &Value, out: &mut VecDeque<String>) {
     match value {
         Value::Object(map) => {
-            if let Some(Value::String(r)) = map.get("$ref") {
-                if let Some(name) = r.strip_prefix("#/components/schemas/") {
-                    out.push_back(name.to_string());
-                }
+            if let Some(Value::String(r)) = map.get("$ref")
+                && let Some(name) = r.strip_prefix("#/components/schemas/")
+            {
+                out.push_back(name.to_string());
             }
             for v in map.values() {
                 collect_schema_refs(v, out);

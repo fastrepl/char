@@ -37,7 +37,8 @@ pub fn should_skip_path(relative_path: &str, path: &Path) -> bool {
 pub fn to_relative_path(path: &Path, base: &Path) -> String {
     path.strip_prefix(base)
         .unwrap_or(path)
-        .to_string_lossy()
+        .to_str()
+        .unwrap_or_default()
         .to_string()
 }
 

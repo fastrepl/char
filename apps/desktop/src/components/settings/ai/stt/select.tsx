@@ -2,7 +2,6 @@ import { useForm } from "@tanstack/react-form";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { arch } from "@tauri-apps/plugin-os";
 import { Check, Loader2 } from "lucide-react";
-import { useEffect } from "react";
 
 import { commands as listenerCommands } from "@hypr/plugin-listener";
 import type { SupportedSttModel } from "@hypr/plugin-local-stt";
@@ -26,7 +25,6 @@ import {
   getProviderSelectionBlockers,
   requiresEntitlement,
 } from "../shared/eligibility";
-import { getLastUsedModel, setLastUsedModel } from "../shared/last-used-model";
 import { useSttSettings } from "./context";
 import { HealthStatusIndicator, useConnectionHealth } from "./health";
 import {
@@ -106,29 +104,8 @@ export function SelectProviderAndModel() {
     onSubmit: ({ value }) => {
       handleSelectProvider(value.provider);
       handleSelectModel(value.model);
-      if (value.provider && value.model) {
-        setLastUsedModel("stt", value.provider, value.model);
-      }
     },
   });
-
-  useEffect(() => {
-    if (!current_stt_provider) return;
-
-    const currentConfig =
-      configuredProviders[current_stt_provider as ProviderId];
-    if (currentConfig?.configured) return;
-
-    const fallback = PROVIDERS.find((p) => {
-      if (p.disabled || p.id === current_stt_provider) return false;
-      const config = configuredProviders[p.id];
-      return config?.configured && config.models.some((m) => m.isDownloaded);
-    });
-
-    if (fallback) {
-      form.setFieldValue("provider", fallback.id);
-    }
-  }, [configuredProviders, current_stt_provider, form]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -148,28 +125,8 @@ export function SelectProviderAndModel() {
           <form.Field
             name="provider"
             listeners={{
-              onChange: ({ value }) => {
-                if (value === "custom") {
-                  const lastModel = getLastUsedModel("stt", value);
-                  form.setFieldValue("model", lastModel ?? "");
-                  return;
-                }
-
-                const models = (
-                  configuredProviders[value as ProviderId]?.models ?? []
-                ).filter((m) => m.isDownloaded);
-
-                const lastModel = getLastUsedModel("stt", value);
-                const lastModelAvailable =
-                  lastModel && models.some((m) => m.id === lastModel);
-
-                if (lastModelAvailable) {
-                  form.setFieldValue("model", lastModel);
-                } else if (models.length > 0) {
-                  form.setFieldValue("model", models[0].id);
-                } else {
-                  form.setFieldValue("model", "");
-                }
+              onChange: () => {
+                form.setFieldValue("model", "");
               },
             }}
           >

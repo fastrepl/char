@@ -39,6 +39,7 @@ async fn app() -> Router {
     let llm_config =
         hypr_llm_proxy::LlmProxyConfig::new(&env.llm).with_analytics(analytics.clone());
     let stt_config = hypr_transcribe_proxy::SttProxyConfig::new(&env.stt, &env.supabase)
+        .with_hyprnote_routing(hypr_transcribe_proxy::HyprnoteRoutingConfig::default())
         .with_analytics(analytics);
 
     let stt_rate_limit = rate_limit::RateLimitState::builder()
@@ -113,8 +114,13 @@ async fn app() -> Router {
             auth::require_auth,
         ));
 
+    let calendar_config = hypr_api_calendar::CalendarConfig {
+        google: true,
+        ..Default::default()
+    };
+
     let integration_routes = Router::new()
-        .nest("/calendar", hypr_api_calendar::router())
+        .nest("/calendar", hypr_api_calendar::router(calendar_config))
         .nest("/nango", hypr_api_nango::router(nango_config.clone()))
         .layer(axum::Extension(nango_connection_state))
         .route_layer(middleware::from_fn(auth::sentry_and_analytics))

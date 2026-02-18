@@ -89,7 +89,7 @@ function StoragePathRow({
   };
 
   return (
-    <div data-settings-item className="flex items-center gap-3">
+    <div className="flex items-center gap-3">
       <Tooltip delayDuration={0}>
         <TooltipTrigger asChild>
           <div className="flex items-center gap-2 w-24 shrink-0 cursor-default">

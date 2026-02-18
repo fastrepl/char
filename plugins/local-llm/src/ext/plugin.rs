@@ -51,7 +51,7 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
         use tauri_plugin_settings::SettingsPluginExt;
         self.settings()
             .global_base()
-            .map(|base| base.join("models").join("llm"))
+            .map(|base| base.join("models").join("llm").into_std_path_buf())
             .unwrap_or_else(|_| dirs::data_dir().unwrap().join("models").join("llm"))
     }
 

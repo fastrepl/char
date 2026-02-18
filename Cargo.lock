@@ -562,6 +562,7 @@ dependencies = [
  "chrono",
  "google-calendar",
  "nango",
+ "outlook-calendar",
  "sentry",
  "serde",
  "serde_json",
@@ -575,6 +576,19 @@ name = "api-env"
 version = "0.1.0"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "api-messenger"
+version = "0.1.0"
+dependencies = [
+ "axum 0.8.8",
+ "hypr-http-utils",
+ "serde",
+ "serde_json",
+ "slack-web",
+ "teems",
+ "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -1258,6 +1272,7 @@ dependencies = [
  "futures-util",
  "hound",
  "libpulse-binding",
+ "pin-project",
  "ringbuf",
  "rodio",
  "serde",
@@ -1304,6 +1319,7 @@ dependencies = [
  "data",
  "futures-util",
  "hound",
+ "pin-project",
  "rodio",
  "rubato",
  "thiserror 2.0.18",
@@ -12920,6 +12936,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "outlook-calendar"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "hypr-http-utils",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tokio",
+ "urlencoding",
+]
+
+[[package]]
 name = "outref"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -18609,6 +18638,7 @@ dependencies = [
 name = "tauri-plugin-extensions"
 version = "0.1.0"
 dependencies = [
+ "camino",
  "extensions-runtime",
  "serde",
  "serde_json",
@@ -18913,6 +18943,7 @@ version = "0.1.0"
 dependencies = [
  "aspasia",
  "audio-utils",
+ "camino",
  "futures-util",
  "host",
  "language",
@@ -19101,6 +19132,7 @@ dependencies = [
 name = "tauri-plugin-notify"
 version = "0.1.0"
 dependencies = [
+ "camino",
  "notify",
  "notify-debouncer-full",
  "serde",
@@ -19321,6 +19353,7 @@ dependencies = [
 name = "tauri-plugin-settings"
 version = "0.1.0"
 dependencies = [
+ "camino",
  "dirs 6.0.0",
  "serde",
  "serde_json",
@@ -19763,6 +19796,16 @@ name = "tcc"
 version = "0.1.0"
 dependencies = [
  "swift-rs 1.0.7 (git+https://github.com/yujonglee/swift-rs?rev=41a1605)",
+]
+
+[[package]]
+name = "teems"
+version = "0.1.0"
+dependencies = [
+ "hypr-http-utils",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -20888,11 +20931,16 @@ dependencies = [
  "backon",
  "base64 0.22.1",
  "bytes",
+ "codes-iso-639",
  "data",
  "futures-util",
+ "insta",
+ "itertools 0.14.0",
  "language",
  "owhisper-client",
  "owhisper-interface",
+ "quickcheck",
+ "quickcheck_macros",
  "reqwest 0.13.2",
  "reqwest-middleware",
  "rodio",
@@ -22021,6 +22069,7 @@ dependencies = [
  "data",
  "futures-util",
  "hound",
+ "pin-project",
  "rodio",
  "serde",
  "silero",
@@ -23672,6 +23721,7 @@ dependencies = [
  "axum 0.8.8",
  "futures-util",
  "owhisper-interface",
+ "pin-project",
  "serde_json",
  "tokio",
  "tokio-util",

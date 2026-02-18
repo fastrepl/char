@@ -121,6 +121,7 @@
     "date-fns": "^4.1.0",
     "dompurify": "^3.3.1",
     "effect": "^3.19.16",
+    "facehash": "^0.0.7",
     "json5": "^2.2.3",
     "lucide-react": "^0.544.0",
     "motion": "^11.18.2",

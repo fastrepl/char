@@ -16,11 +16,13 @@ jobs:
         with:
           api_key: ${{ secrets.DEVIN_API_KEY }}
           prompt: |
-            You are tasked with writing the weekly "Hyprnote Weekly" blog post summarizing the past week's development work.
+            You are tasked with writing the weekly "Char Weekly" blog post summarizing the past week's development work.
 
             ## Context
-            Hyprnote is a Tauri-based desktop app for AI meeting notes that prioritizes privacy.
-            Repository: fastrepl/hyprnote
+            Char is an open-source AI notepad for meetings built for high-agency people who demand complete control over their data and AI stack.
+            Repository: fastrepl/char
+
+            Read and follow positioning guidelines in `apps/web/content/AGENTS.md`.
 
             ## Your Task
             1. **Analyze Recent Changes**
@@ -35,17 +37,17 @@ jobs:
                  * New integrations or providers
 
             2. **Write the Blog Post**
-               Create a new MDX file at `apps/web/content/articles/hyprnote-weekly-YYYY-MM-DD.mdx` where YYYY-MM-DD is today's date.
+               Create a new MDX file at `apps/web/content/articles/char-weekly-YYYY-MM-DD.mdx` where YYYY-MM-DD is today's date.
 
                Use this frontmatter format:
                ```
                ---
-               meta_title: "Hyprnote Weekly: [Brief Summary of Key Changes]"
-               display_title: "Hyprnote Weekly: [Month Day, Year]"
+               meta_title: "Char Weekly: [Brief Summary of Key Changes]"
+               display_title: "Char Weekly: [Month Day, Year]"
                meta_description: "[1-2 sentence summary of the week's highlights]"
                author: "John Jeong"
                published: true
-               category: "Hyprnote Weekly"
+               category: "Char Weekly"
                date: "YYYY-MM-DD"
                ---
                ```
