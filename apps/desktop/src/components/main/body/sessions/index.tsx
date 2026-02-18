@@ -182,7 +182,7 @@ function TabContentNoteInner({
   tab: Extract<Tab, { type: "sessions" }>;
   showTimeline: boolean;
 }) {
-  const titleInputRef= React.useRef<HTMLInputElement>(null);
+  const titleInputRef = React.useRef<HTMLInputElement>(null);
   const noteInputRef = React.useRef<{
     editor: import("@hypr/tiptap/editor").TiptapEditor | null;
   }>(null);
