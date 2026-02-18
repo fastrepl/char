@@ -8,28 +8,28 @@ import {
 } from "./searchable-select";
 
 const COMMON_TIMEZONES = [
-  { value: "Pacific/Honolulu", label: "Hawaii (UTC-10)" },
-  { value: "America/Anchorage", label: "Alaska (UTC-9)" },
-  { value: "America/Los_Angeles", label: "Pacific Time (UTC-8)" },
-  { value: "America/Denver", label: "Mountain Time (UTC-7)" },
-  { value: "America/Chicago", label: "Central Time (UTC-6)" },
-  { value: "America/New_York", label: "Eastern Time (UTC-5)" },
-  { value: "America/Sao_Paulo", label: "Sao Paulo (UTC-3)" },
-  { value: "Atlantic/Reykjavik", label: "Reykjavik (UTC+0)" },
-  { value: "Europe/London", label: "London (UTC+0/+1)" },
-  { value: "Europe/Paris", label: "Paris (UTC+1/+2)" },
-  { value: "Europe/Berlin", label: "Berlin (UTC+1/+2)" },
-  { value: "Africa/Cairo", label: "Cairo (UTC+2)" },
-  { value: "Europe/Moscow", label: "Moscow (UTC+3)" },
-  { value: "Asia/Dubai", label: "Dubai (UTC+4)" },
-  { value: "Asia/Kolkata", label: "India (UTC+5:30)" },
-  { value: "Asia/Bangkok", label: "Bangkok (UTC+7)" },
-  { value: "Asia/Singapore", label: "Singapore (UTC+8)" },
-  { value: "Asia/Shanghai", label: "China (UTC+8)" },
-  { value: "Asia/Tokyo", label: "Tokyo (UTC+9)" },
-  { value: "Asia/Seoul", label: "Seoul (UTC+9)" },
-  { value: "Australia/Sydney", label: "Sydney (UTC+10/+11)" },
-  { value: "Pacific/Auckland", label: "Auckland (UTC+12/+13)" },
+  { value: "Pacific/Honolulu", label: "Hawaii", detail: "UTC-10" },
+  { value: "America/Anchorage", label: "Alaska", detail: "UTC-9" },
+  { value: "America/Los_Angeles", label: "Pacific Time", detail: "UTC-8" },
+  { value: "America/Denver", label: "Mountain Time", detail: "UTC-7" },
+  { value: "America/Chicago", label: "Central Time", detail: "UTC-6" },
+  { value: "America/New_York", label: "Eastern Time", detail: "UTC-5" },
+  { value: "America/Sao_Paulo", label: "Sao Paulo", detail: "UTC-3" },
+  { value: "Atlantic/Reykjavik", label: "Reykjavik", detail: "UTC+0" },
+  { value: "Europe/London", label: "London", detail: "UTC+0/+1" },
+  { value: "Europe/Paris", label: "Paris", detail: "UTC+1/+2" },
+  { value: "Europe/Berlin", label: "Berlin", detail: "UTC+1/+2" },
+  { value: "Africa/Cairo", label: "Cairo", detail: "UTC+2" },
+  { value: "Europe/Moscow", label: "Moscow", detail: "UTC+3" },
+  { value: "Asia/Dubai", label: "Dubai", detail: "UTC+4" },
+  { value: "Asia/Kolkata", label: "India", detail: "UTC+5:30" },
+  { value: "Asia/Bangkok", label: "Bangkok", detail: "UTC+7" },
+  { value: "Asia/Singapore", label: "Singapore", detail: "UTC+8" },
+  { value: "Asia/Shanghai", label: "China", detail: "UTC+8" },
+  { value: "Asia/Tokyo", label: "Tokyo", detail: "UTC+9" },
+  { value: "Asia/Seoul", label: "Seoul", detail: "UTC+9" },
+  { value: "Australia/Sydney", label: "Sydney", detail: "UTC+10/+11" },
+  { value: "Pacific/Auckland", label: "Auckland", detail: "UTC+12/+13" },
 ];
 
 export function TimezoneSelector() {
@@ -45,22 +45,19 @@ export function TimezoneSelector() {
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
   }, []);
 
-  const options: SearchableSelectOption[] = useMemo(
-    () => [
-      { value: "system", label: `System (${systemTimezone})` },
-      ...COMMON_TIMEZONES,
-    ],
-    [systemTimezone],
-  );
+  const options: SearchableSelectOption[] = useMemo(() => COMMON_TIMEZONES, []);
 
-  const displayValue = value || "system";
+  const displayValue = value || systemTimezone;
 
   const handleChange = (val: string) => {
-    setTimezone(val === "system" ? "" : val);
+    setTimezone(val === systemTimezone ? "" : val);
   };
 
   return (
-    <div className="flex flex-row items-center justify-between">
+    <div
+      data-settings-item
+      className="flex flex-row items-center justify-between"
+    >
       <div>
         <h3 className="text-sm font-medium mb-1">Timezone</h3>
         <p className="text-xs text-neutral-600">
@@ -73,7 +70,7 @@ export function TimezoneSelector() {
         options={options}
         placeholder="Select timezone"
         searchPlaceholder="Search timezone..."
-        className="w-56"
+        className="w-40"
       />
     </div>
   );

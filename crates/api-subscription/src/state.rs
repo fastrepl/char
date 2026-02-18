@@ -4,20 +4,20 @@ use crate::config::SubscriptionConfig;
 use crate::supabase::SupabaseClient;
 
 #[derive(Clone)]
-pub struct AppState {
-    pub config: SubscriptionConfig,
-    pub supabase: SupabaseClient,
-    pub stripe: StripeClient,
+pub(crate) struct AppState {
+    pub(crate) config: SubscriptionConfig,
+    pub(crate) supabase: SupabaseClient,
+    pub(crate) stripe: StripeClient,
 }
 
 impl AppState {
-    pub fn new(config: SubscriptionConfig) -> Self {
+    pub(crate) fn new(config: SubscriptionConfig) -> Self {
         let supabase = SupabaseClient::new(
-            config.supabase_url.clone(),
-            config.supabase_anon_key.clone(),
+            config.supabase.supabase_url.clone(),
+            config.supabase.supabase_anon_key.clone(),
         );
 
-        let stripe = StripeClient::new(&config.stripe_api_key);
+        let stripe = StripeClient::new(&config.stripe.stripe_secret_key);
 
         Self {
             config,

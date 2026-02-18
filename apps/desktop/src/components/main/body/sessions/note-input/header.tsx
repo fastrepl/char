@@ -8,6 +8,7 @@ import {
   commands as fsSyncCommands,
 } from "@hypr/plugin-fs-sync";
 import { md2json } from "@hypr/tiptap/shared";
+import { NoteTab } from "@hypr/ui/components/ui/note-tab";
 import {
   Popover,
   PopoverContent,
@@ -40,34 +41,6 @@ import { type EditorView } from "../../../../../store/zustand/tabs/schema";
 import { useHasTranscript } from "../shared";
 import { EditingControls } from "./transcript/editing-controls";
 import { TranscriptionProgress } from "./transcript/progress";
-
-function HeaderTab({
-  isActive,
-  onClick = () => {},
-  children,
-}: {
-  isActive: boolean;
-  onClick?: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn([
-        "relative my-2 border-b-2 px-1 py-0.5 text-xs font-medium transition-all duration-200 shrink-0",
-        isActive
-          ? ["border-neutral-900", "text-neutral-900"]
-          : [
-              "border-transparent",
-              "text-neutral-600",
-              "hover:text-neutral-800",
-            ],
-      ])}
-    >
-      <span className="flex items-center h-5">{children}</span>
-    </button>
-  );
-}
 
 function TruncatedTitle({
   title,
@@ -164,39 +137,25 @@ function HeaderTabTranscript({
   const showRefreshButton = audioExists && isActive && isSessionInactive;
 
   return (
-    <button
-      onClick={onClick}
-      className={cn([
-        "relative my-2 border-b-2 px-1 py-0.5 text-xs font-medium transition-all duration-200 shrink-0",
-        isActive
-          ? ["border-neutral-900", "text-neutral-900"]
-          : [
-              "border-transparent",
-              "text-neutral-600",
-              "hover:text-neutral-800",
-            ],
-      ])}
-    >
-      <span className="flex items-center gap-1 h-5">
-        Transcript
-        {showRefreshButton && (
-          <span
-            onClick={handleRefreshClick}
-            className={cn([
-              "inline-flex h-5 w-5 items-center justify-center rounded-xs transition-colors cursor-pointer",
-              "hover:bg-neutral-200 focus-visible:bg-neutral-200",
-              (isBatchProcessing || isRedoing) && "pointer-events-none",
-            ])}
-          >
-            {isBatchProcessing || isRedoing ? (
-              <Spinner size={12} />
-            ) : (
-              <RefreshCwIcon size={12} />
-            )}
-          </span>
-        )}
-      </span>
-    </button>
+    <NoteTab isActive={isActive} onClick={onClick}>
+      Transcript
+      {showRefreshButton && (
+        <span
+          onClick={handleRefreshClick}
+          className={cn([
+            "inline-flex h-5 w-5 items-center justify-center rounded-xs transition-colors cursor-pointer",
+            "hover:bg-neutral-200 focus-visible:bg-neutral-200",
+            (isBatchProcessing || isRedoing) && "pointer-events-none",
+          ])}
+        >
+          {isBatchProcessing || isRedoing ? (
+            <Spinner size={12} />
+          ) : (
+            <RefreshCwIcon size={12} />
+          )}
+        </span>
+      )}
+    </NoteTab>
   );
 }
 
@@ -317,24 +276,10 @@ function HeaderTabEnhanced({
   );
 
   return (
-    <button
-      onClick={onClick}
-      className={cn([
-        "relative my-2 py-0.5 px-1 text-xs font-medium transition-all duration-200 border-b-2 shrink-0",
-        isActive
-          ? ["text-neutral-900", "border-neutral-900"]
-          : [
-              "text-neutral-600",
-              "border-transparent",
-              "hover:text-neutral-800",
-            ],
-      ])}
-    >
-      <span className="flex items-center gap-1 h-5">
-        <TruncatedTitle title={title} isActive={isActive} />
-        {isActive && regenerateIcon}
-      </span>
-    </button>
+    <NoteTab isActive={isActive} onClick={onClick}>
+      <TruncatedTitle title={title} isActive={isActive} />
+      {isActive && regenerateIcon}
+    </NoteTab>
   );
 }
 
@@ -448,7 +393,7 @@ function CreateOtherFormatButton({
                 className="italic text-neutral-500 hover:text-neutral-700 hover:bg-neutral-50"
                 onClick={() => {
                   setOpen(false);
-                  openNew({ type: "templates" });
+                  openNew({ type: "ai", state: { tab: "templates" } });
                 }}
               >
                 Manage templates
@@ -462,7 +407,7 @@ function CreateOtherFormatButton({
               <button
                 onClick={() => {
                   setOpen(false);
-                  openNew({ type: "templates" });
+                  openNew({ type: "ai", state: { tab: "templates" } });
                 }}
                 className="px-6 py-2 rounded-full bg-linear-to-t from-stone-600 to-stone-500 text-white text-sm font-medium transition-opacity duration-150 hover:opacity-90"
               >
@@ -546,13 +491,13 @@ export function Header({
               }
 
               return (
-                <HeaderTab
+                <NoteTab
                   key={view.type}
                   isActive={currentTab.type === view.type}
                   onClick={() => handleTabChange(view)}
                 >
                   {labelForEditorView(view)}
-                </HeaderTab>
+                </NoteTab>
               );
             })}
             {isMeetingOver && (

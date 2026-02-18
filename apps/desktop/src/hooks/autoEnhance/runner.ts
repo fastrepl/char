@@ -53,9 +53,14 @@ export function useAutoEnhanceRunner(
 
   const titleTaskId = createTaskId(sessionId, "title");
 
-  const { generate, tasks } = useAITask((state) => ({
+  const {
+    generate,
+    tasks,
+    getState: getAITaskState,
+  } = useAITask((state) => ({
     generate: state.generate,
     tasks: state.tasks,
+    getState: state.getState,
   }));
 
   const handleTitleSuccess = useCallback(
@@ -162,6 +167,14 @@ export function useAutoEnhanceRunner(
     }
 
     const enhanceTaskId = createTaskId(enhancedNoteId, "enhance");
+    const existingTask = getAITaskState(enhanceTaskId);
+    if (
+      existingTask?.status === "generating" ||
+      existingTask?.status === "success"
+    ) {
+      return { type: "started", noteId: enhancedNoteId };
+    }
+
     void generate(enhanceTaskId, {
       model,
       taskType: "enhance",
@@ -179,6 +192,7 @@ export function useAutoEnhanceRunner(
     updateSessionTabState,
     llmConn,
     generate,
+    getAITaskState,
   ]);
 
   const currentEnhanceTaskId = currentNoteIdRef.current

@@ -44,7 +44,10 @@ export function MainLanguageView({
   );
 
   return (
-    <div className="flex flex-row items-center justify-between">
+    <div
+      data-settings-item
+      className="flex flex-row items-center justify-between"
+    >
       <div>
         <h3 className="text-sm font-medium mb-1">Main language</h3>
         <p className="text-xs text-neutral-600">
@@ -57,7 +60,7 @@ export function MainLanguageView({
         options={options}
         placeholder="Select language"
         searchPlaceholder="Search language..."
-        className="w-56"
+        className="w-40"
       />
     </div>
   );

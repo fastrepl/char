@@ -171,7 +171,7 @@ function ChangelogHeader({
               variant="ghost"
               className="pointer-events-none text-neutral-600"
             >
-              <CalendarIcon size={14} className="shrink-0 -mt-0.5" />
+              <CalendarIcon size={14} className="shrink-0" />
               <span>{formattedDate}</span>
             </Button>
           )}
@@ -186,7 +186,7 @@ function ChangelogHeader({
               )
             }
           >
-            <ExternalLinkIcon size={14} className="-mt-0.5" />
+            <ExternalLinkIcon size={14} />
             <span>Open in web</span>
           </Button>
         </div>

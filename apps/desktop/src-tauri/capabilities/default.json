@@ -73,7 +73,9 @@
     "git:default",
     "os:default",
     "opener2:default",
+    "mcp:default",
     "detect:default",
+    "dock:default",
     "permissions:default",
     "screen:default",
     "settings:default",
@@ -83,6 +85,7 @@
     "autostart:default",
     "js:default",
     "flag:default",
+    "relay:default",
     {
       "identifier": "http:default",
       "deny": [],

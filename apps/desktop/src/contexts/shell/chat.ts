@@ -1,85 +1,32 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { createActor, fromTransition } from "xstate";
 
-export type ChatMode = "RightPanelOpen" | "FloatingClosed" | "FloatingOpen";
-export type ChatEvent =
-  | { type: "OPEN" }
-  | { type: "CLOSE" }
-  | { type: "SHIFT" }
-  | { type: "TOGGLE" };
+import { useChatContext } from "../../store/zustand/chat-context";
+import { useTabs } from "../../store/zustand/tabs";
 
-const chatModeLogic = fromTransition(
-  (state: ChatMode, event: ChatEvent): ChatMode => {
-    switch (state) {
-      case "RightPanelOpen":
-        if (event.type === "CLOSE" || event.type === "TOGGLE") {
-          return "FloatingClosed";
-        }
-        if (event.type === "SHIFT") {
-          return "FloatingOpen";
-        }
-        return state;
-      case "FloatingClosed":
-        if (event.type === "OPEN" || event.type === "TOGGLE") {
-          return "FloatingOpen";
-        }
-        return state;
-      case "FloatingOpen":
-        if (event.type === "CLOSE" || event.type === "TOGGLE") {
-          return "FloatingClosed";
-        }
-        if (event.type === "SHIFT") {
-          return "RightPanelOpen";
-        }
-        return state;
-      default:
-        return state;
-    }
-  },
-  "FloatingClosed" as ChatMode,
-);
+export type { ChatEvent, ChatMode } from "../../store/zustand/tabs";
 
 export function useChatMode() {
-  const [mode, setMode] = useState<ChatMode>("FloatingClosed");
-  const [groupId, setGroupId] = useState<string | undefined>(undefined);
-  const [draftMessage, setDraftMessage] = useState<any>(undefined);
+  const mode = useTabs((state) => state.chatMode);
+  const transitionChatMode = useTabs((state) => state.transitionChatMode);
 
-  const actorRef = useMemo(() => createActor(chatModeLogic), []);
-
-  useEffect(() => {
-    const subscription = actorRef.subscribe((snapshot) =>
-      setMode(snapshot.context),
-    );
-    actorRef.start();
-    return () => {
-      subscription.unsubscribe();
-      actorRef.stop();
-    };
-  }, [actorRef]);
-
-  const sendEvent = useCallback(
-    (event: ChatEvent) => actorRef.send(event),
-    [actorRef],
-  );
+  const groupId = useChatContext((state) => state.groupId);
+  const setGroupId = useChatContext((state) => state.setGroupId);
 
   useHotkeys(
     "mod+j",
-    () => sendEvent({ type: "TOGGLE" }),
+    () => transitionChatMode({ type: "TOGGLE" }),
     {
       preventDefault: true,
       enableOnFormTags: true,
       enableOnContentEditable: true,
     },
-    [sendEvent],
+    [transitionChatMode],
   );
 
   return {
     mode,
-    sendEvent,
+    sendEvent: transitionChatMode,
     groupId,
     setGroupId,
-    draftMessage,
-    setDraftMessage,
   };
 }

@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_view/roadmap/$slug")({
 
     return {
       meta: [
-        { title: `${item.title} - Roadmap - Hyprnote` },
+        { title: `${item.title} - Roadmap - Char` },
         {
           name: "description",
           content: `Roadmap item: ${item.title}`,

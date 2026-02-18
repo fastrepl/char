@@ -1,160 +1,48 @@
-import * as Sentry from "@sentry/react";
-import { CheckCircle2Icon, Loader2Icon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-
-import { getRpcCanStartTrial, postBillingStartTrial } from "@hypr/api-client";
-import { createClient } from "@hypr/api-client/client";
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
+import { commands as openerCommands } from "@hypr/plugin-opener2";
 import { commands as sfxCommands } from "@hypr/plugin-sfx";
-import { commands as windowsCommands } from "@hypr/plugin-windows";
 
-import { useAuth } from "../../auth";
-import { env } from "../../env";
-import { Route } from "../../routes/app/onboarding/_layout.index";
-import * as settings from "../../store/tinybase/store/settings";
 import { commands } from "../../types/tauri.gen";
-import { configureProSettings } from "../../utils";
-import { getBack, type StepProps } from "./config";
-import { OnboardingContainer } from "./shared";
+import { OnboardingButton } from "./shared";
 
-export const STEP_ID_FINAL = "final" as const;
+const SOCIALS = [
+  { label: "Discord", url: "https://discord.gg/CX8gTH2tj9" },
+  { label: "GitHub", url: "https://github.com/fastrepl/hyprnote" },
+  { label: "X", url: "https://x.com/tryhyprnote" },
+] as const;
 
-export function Final({ onNavigate }: StepProps) {
-  const search = Route.useSearch();
-  const auth = useAuth();
-  const store = settings.UI.useStore(settings.STORE_ID);
-  const [isLoading, setIsLoading] = useState(true);
-  const [trialStarted, setTrialStarted] = useState(false);
-  const hasHandledRef = useRef(false);
-
-  const backStep = getBack(search);
-
-  useEffect(() => {
-    if (hasHandledRef.current) {
-      return;
-    }
-    hasHandledRef.current = true;
-
-    const handle = async () => {
-      if (!auth?.session) {
-        setIsLoading(false);
-        return;
-      }
-
-      const headers = auth.getHeaders();
-      if (!headers) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const started = await tryStartTrial(headers, store);
-        setTrialStarted(started);
-        if (started) {
-          await new Promise((resolve) => setTimeout(resolve, 3000));
-        }
-        await auth.refreshSession();
-      } catch (e) {
-        Sentry.captureException(e);
-        console.error(e);
-      }
-
-      setIsLoading(false);
-    };
-
-    void handle();
-  }, [auth, store]);
-
-  if (isLoading) {
-    return (
-      <OnboardingContainer
-        title="Setting up your account..."
-        description={trialStarted ? "Starting your Pro trial" : "Please wait"}
-        onBack={
-          backStep ? () => onNavigate({ ...search, step: backStep }) : undefined
-        }
-      >
-        <div className="flex justify-center py-4">
-          <Loader2Icon size={64} className="text-neutral-400 animate-spin" />
-        </div>
-      </OnboardingContainer>
-    );
-  }
-
+export function FinalSection({ onContinue }: { onContinue: () => void }) {
   return (
-    <OnboardingContainer
-      title="You're all set!"
-      description="Everything is configured and ready to go"
-      onBack={
-        backStep ? () => onNavigate({ ...search, step: backStep }) : undefined
-      }
-    >
-      <div className="flex justify-center py-4">
-        <CheckCircle2Icon size={64} className="text-emerald-500" />
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3">
+        <p className="text-sm text-neutral-500">
+          Join our community and stay updated:
+        </p>
+        <div className="flex gap-2">
+          {SOCIALS.map(({ label, url }) => (
+            <button
+              key={label}
+              onClick={() => void openerCommands.openUrl(url, null)}
+              className="px-4 py-2 text-sm rounded-full border border-neutral-200 text-neutral-700 transition-colors duration-150 hover:bg-neutral-50 hover:border-neutral-300"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <button
-        onClick={() => void finishOnboarding()}
-        className="w-full py-3 rounded-full bg-linear-to-t from-neutral-800 to-neutral-700 text-white text-sm font-medium duration-150 hover:scale-[1.01] active:scale-[0.99]"
-      >
+      <OnboardingButton onClick={() => void finishOnboarding(onContinue)}>
         Get Started
-      </button>
-    </OnboardingContainer>
+      </OnboardingButton>
+    </div>
   );
 }
 
-async function tryStartTrial(
-  headers: Record<string, string>,
-  store: Parameters<typeof configureProSettings>[0] | undefined,
-) {
-  const client = createClient({ baseUrl: env.VITE_API_URL, headers });
-  const { data } = await getRpcCanStartTrial({ client });
-
-  if (!data?.canStartTrial) {
-    console.warn("Trial not started:", data?.reason ?? "unknown");
-    if (data?.reason === "error") {
-      Sentry.captureMessage("Trial eligibility check failed", {
-        level: "warning",
-        extra: { reason: data.reason },
-      });
-    }
-    return false;
-  }
-
-  const { data: startData, error } = await postBillingStartTrial({
-    client,
-    query: { interval: "monthly" },
-  });
-
-  if (error || !startData?.started) {
-    console.warn("Trial start failed:", startData?.reason ?? error);
-    Sentry.captureMessage("Trial start failed", {
-      level: "warning",
-      extra: { reason: startData?.reason, error },
-    });
-    return false;
-  }
-
-  if (store) {
-    configureProSettings(store);
-  }
-
-  void analyticsCommands.event({ event: "trial_started", plan: "pro" });
-  const trialEndDate = new Date();
-  trialEndDate.setDate(trialEndDate.getDate() + 14);
-  void analyticsCommands.setProperties({
-    set: { plan: "pro", trial_end_date: trialEndDate.toISOString() },
-  });
-
-  return true;
-}
-
-async function finishOnboarding() {
+export async function finishOnboarding(onContinue?: () => void) {
   await sfxCommands.stop("BGM").catch(console.error);
   await new Promise((resolve) => setTimeout(resolve, 100));
   await commands.setOnboardingNeeded(false).catch(console.error);
   await new Promise((resolve) => setTimeout(resolve, 100));
-  await windowsCommands.windowShow({ type: "main" });
-  await new Promise((resolve) => setTimeout(resolve, 100));
-  await windowsCommands.windowDestroy({ type: "onboarding" });
+  await analyticsCommands.event({ event: "onboarding_completed" });
+  onContinue?.();
 }

@@ -1,5 +1,7 @@
 use std::path::PathBuf;
 
+use camino::Utf8PathBuf;
+
 use crate::global;
 use crate::obsidian::ObsidianVault;
 use crate::vault;
@@ -18,24 +20,26 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Settings<'a, R, M> {
         Ok(path)
     }
 
-    pub fn global_base(&self) -> Result<PathBuf, crate::Error> {
-        self.default_base()
+    pub fn global_base(&self) -> Result<Utf8PathBuf, crate::Error> {
+        let path = self.default_base()?;
+        Utf8PathBuf::from_path_buf(path).map_err(|_| crate::Error::PathNotValidUtf8)
     }
 
-    pub fn settings_path(&self) -> Result<PathBuf, crate::Error> {
+    pub fn settings_path(&self) -> Result<Utf8PathBuf, crate::Error> {
         let base = self.cached_vault_base()?;
-        Ok(vault::compute_settings_path(&base))
+        Ok(base.join(vault::SETTINGS_FILENAME))
     }
 
-    pub fn cached_vault_base(&self) -> Result<PathBuf, crate::Error> {
+    pub fn cached_vault_base(&self) -> Result<Utf8PathBuf, crate::Error> {
         let state = self.manager.state::<crate::state::State>();
-        Ok(state.vault_base().clone())
+        Utf8PathBuf::from_path_buf(state.vault_base().clone())
+            .map_err(|_| crate::Error::PathNotValidUtf8)
     }
 
     pub fn fresh_vault_base(&self) -> Result<PathBuf, crate::Error> {
         let default_base = self.default_base()?;
         let global_base = self.global_base()?;
-        let custom_base = vault::resolve_custom(&global_base, &default_base);
+        let custom_base = vault::resolve_custom(global_base.as_ref(), &default_base);
         Ok(custom_base.unwrap_or(default_base))
     }
 
@@ -60,7 +64,7 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Settings<'a, R, M> {
 }
 
 impl<'a, R: tauri::Runtime, M: tauri::Manager<R> + tauri::Emitter<R>> Settings<'a, R, M> {
-    pub async fn change_vault_base(&self, new_path: PathBuf) -> Result<(), crate::Error> {
+    pub async fn change_vault_base(&self, new_path: Utf8PathBuf) -> Result<(), crate::Error> {
         let old_vault_base = self.cached_vault_base()?;
         let default_base = self.default_base()?;
 
@@ -68,16 +72,16 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R> + tauri::Emitter<R>> Settings<'
             return Ok(());
         }
 
-        vault::validate_vault_base_change(&old_vault_base, &new_path)?;
-        vault::ensure_vault_dir(&new_path)?;
-        vault::copy_vault_items(&old_vault_base, &new_path).await?;
+        vault::validate_vault_base_change(old_vault_base.as_ref(), new_path.as_ref())?;
+        vault::ensure_vault_dir(new_path.as_ref())?;
+        vault::copy_vault_items(old_vault_base.as_ref(), new_path.as_ref()).await?;
 
         let vault_config_path = global::compute_vault_config_path(&default_base);
         let mut config = std::fs::read_to_string(&vault_config_path)
             .ok()
             .and_then(|s| serde_json::from_str(&s).ok())
             .unwrap_or_else(|| serde_json::json!({}));
-        vault::set_vault_path(&mut config, &new_path);
+        vault::set_vault_path(&mut config, new_path.as_ref());
 
         crate::fs::atomic_write(&vault_config_path, &serde_json::to_string_pretty(&config)?)?;
 

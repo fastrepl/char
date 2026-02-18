@@ -3,7 +3,7 @@ use chrono::{DateTime, Utc};
 use crate::error::Error;
 
 // https://docs.stripe.com/api/subscriptions/object#subscription_object-status
-#[derive(Debug, serde::Serialize, serde::Deserialize, specta::Type)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
 #[serde(rename_all = "snake_case")]
 pub enum SubscriptionStatus {
     Incomplete,
@@ -16,7 +16,7 @@ pub enum SubscriptionStatus {
     Paused,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize, specta::Type)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
 pub struct Claims {
     pub sub: String,
     #[serde(default)]
@@ -31,6 +31,10 @@ pub struct Claims {
 }
 
 impl Claims {
+    pub fn is_pro(&self) -> bool {
+        self.entitlements.contains(&"hyprnote_pro".to_string())
+    }
+
     pub fn decode_insecure(token: &str) -> Result<Self, Error> {
         use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
 

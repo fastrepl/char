@@ -72,11 +72,15 @@ function EmptyView() {
     () => openCurrent({ type: "ai" }),
     [openCurrent],
   );
+  const openAdvancedSearch = useCallback(
+    () => openCurrent({ type: "search" }),
+    [openCurrent],
+  );
 
   useHotkeys(
     "mod+o",
     () => setOpenNoteDialogOpen(true),
-    { preventDefault: true },
+    { preventDefault: true, enableOnFormTags: true },
     [setOpenNoteDialogOpen],
   );
 
@@ -89,26 +93,32 @@ function EmptyView() {
           shortcut={["⌘", "O"]}
           onClick={() => setOpenNoteDialogOpen(true)}
         />
+        <div className="h-px bg-neutral-200 my-1" />
+        <ActionItem
+          label="Contacts"
+          shortcut={["⌘", "⇧", "O"]}
+          onClick={openContacts}
+        />
         <ActionItem
           label="Calendar"
           shortcut={["⌘", "⇧", "C"]}
           onClick={openCalendar}
         />
         <ActionItem
-          label="Contacts"
-          shortcut={["⌘", "⇧", "O"]}
-          onClick={openContacts}
+          label="Advanced Search"
+          shortcut={["⌘", "⇧", "F"]}
+          onClick={openAdvancedSearch}
         />
         <div className="h-px bg-neutral-200 my-1" />
-        <ActionItem
-          label="Settings"
-          shortcut={["⌘", ","]}
-          onClick={openSettings}
-        />
         <ActionItem
           label="AI Settings"
           shortcut={["⌘", "⇧", ","]}
           onClick={openAiSettings}
+        />
+        <ActionItem
+          label="App Settings"
+          shortcut={["⌘", ","]}
+          onClick={openSettings}
         />
       </div>
       <OpenNoteDialog

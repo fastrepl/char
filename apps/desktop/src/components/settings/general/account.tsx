@@ -9,7 +9,10 @@ import {
 } from "lucide-react";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 
-import { getRpcCanStartTrial, postBillingStartTrial } from "@hypr/api-client";
+import {
+  canStartTrial as canStartTrialApi,
+  startTrial,
+} from "@hypr/api-client";
 import { createClient } from "@hypr/api-client/client";
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { type SubscriptionStatus } from "@hypr/plugin-auth";
@@ -22,6 +25,8 @@ import { cn } from "@hypr/utils";
 import { useAuth } from "../../../auth";
 import { useBillingAccess } from "../../../billing";
 import { env } from "../../../env";
+import * as settings from "../../../store/tinybase/store/settings";
+import { configureProSettings } from "../../../utils";
 
 const WEB_APP_BASE_URL = env.VITE_APP_URL ?? "http://localhost:3000";
 
@@ -111,7 +116,6 @@ export function AccountSettings() {
 
   const isAuthenticated = !!auth?.session;
   const [isPending, setIsPending] = useState(false);
-  const [devMode, setDevMode] = useState(false);
   const [callbackUrl, setCallbackUrl] = useState("");
 
   useEffect(() => {
@@ -151,37 +155,6 @@ export function AccountSettings() {
   }, [auth]);
 
   if (!isAuthenticated) {
-    if (isPending && devMode) {
-      return (
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-1.5">
-            <h2 className="text-sm font-medium">Manual callback</h2>
-            <p className="text-xs text-neutral-500">
-              Paste the callback URL from your browser
-            </p>
-          </div>
-          <Input
-            type="text"
-            className="text-xs font-mono"
-            placeholder="hyprnote://deeplink/auth?access_token=...&refresh_token=..."
-            value={callbackUrl}
-            onChange={(e) => setCallbackUrl(e.target.value)}
-          />
-          <div className="flex gap-2">
-            <Button
-              onClick={() => auth?.handleAuthCallback(callbackUrl)}
-              className="flex-1"
-            >
-              Submit
-            </Button>
-            <Button variant="outline" onClick={() => setDevMode(false)}>
-              Back
-            </Button>
-          </div>
-        </div>
-      );
-    }
-
     if (isPending) {
       return (
         <div className="flex flex-col items-center gap-6 text-center">
@@ -197,13 +170,28 @@ export function AccountSettings() {
             <Button onClick={handleSignIn} variant="outline" className="w-full">
               Reopen sign-in page
             </Button>
-            <Button
-              onClick={() => setDevMode(true)}
-              variant="ghost"
-              className="w-full text-sm"
-            >
-              Having trouble? Paste callback URL manually
-            </Button>
+            <div className="flex items-center gap-2 w-full">
+              <div className="flex-1 border-t border-neutral-200" />
+              <span className="text-xs text-neutral-400 shrink-0">
+                Having trouble?
+              </span>
+              <div className="flex-1 border-t border-neutral-200" />
+            </div>
+            <div className="flex items-center gap-2 w-full">
+              <Input
+                type="text"
+                className="flex-1 text-xs font-mono"
+                placeholder="hyprnote://deeplink/auth?access_token=..."
+                value={callbackUrl}
+                onChange={(e) => setCallbackUrl(e.target.value)}
+              />
+              <Button
+                onClick={() => auth?.handleAuthCallback(callbackUrl)}
+                disabled={!callbackUrl}
+              >
+                Submit
+              </Button>
+            </div>
           </div>
         </div>
       );
@@ -222,7 +210,7 @@ export function AccountSettings() {
 
         <button
           onClick={handleSignIn}
-          className="px-6 h-[42px] rounded-full bg-linear-to-t from-stone-600 to-stone-500 text-white text-sm font-mono text-center transition-opacity duration-150 hover:opacity-90"
+          className="px-6 h-10 rounded-full bg-stone-800 hover:bg-stone-700 text-white text-sm font-medium border-2 border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)] transition-all duration-200"
         >
           Get Started
         </button>
@@ -314,6 +302,7 @@ export function AccountSettings() {
 function BillingButton() {
   const auth = useAuth();
   const { isPro } = useBillingAccess();
+  const store = settings.UI.useStore(settings.STORE_ID);
 
   const canTrialQuery = useQuery({
     enabled: !!auth?.session && !isPro,
@@ -324,7 +313,7 @@ function BillingButton() {
         return false;
       }
       const client = createClient({ baseUrl: env.VITE_API_URL, headers });
-      const { data, error } = await getRpcCanStartTrial({ client });
+      const { data, error } = await canStartTrialApi({ client });
       if (error) {
         throw error;
       }
@@ -340,7 +329,7 @@ function BillingButton() {
         throw new Error("Not authenticated");
       }
       const client = createClient({ baseUrl: env.VITE_API_URL, headers });
-      const { error } = await postBillingStartTrial({
+      const { error } = await startTrial({
         client,
         query: { interval: "monthly" },
       });
@@ -365,6 +354,9 @@ function BillingButton() {
           trial_end_date: trialEndDate.toISOString(),
         },
       });
+      if (store) {
+        configureProSettings(store);
+      }
       await auth?.refreshSession();
     },
   });
@@ -429,7 +421,10 @@ function Container({
   children?: ReactNode;
 }) {
   return (
-    <section className="bg-neutral-50 p-4 rounded-lg flex flex-col gap-4">
+    <section
+      data-settings-item
+      className="bg-neutral-50 p-4 rounded-lg flex flex-col gap-4"
+    >
       <div className="flex flex-col gap-2">
         <h1 className="text-md font-semibold font-serif">{title}</h1>
         {description && (

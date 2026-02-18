@@ -48,7 +48,16 @@ const buildLongData = (): Tables<Schemas[0]> => {
   return {
     organizations: { [organization.id]: organization.data },
     humans: { [human.id]: human.data },
-    sessions: { [session.id]: session.data },
+    sessions: {
+      [session.id]: {
+        user_id: session.data.user_id ?? "",
+        created_at: session.data.created_at ?? "",
+        title: session.data.title ?? "",
+        raw_md: session.data.raw_md ?? "",
+        event_json: session.data.event_json,
+        folder_id: session.data.folder_id,
+      },
+    },
     transcripts,
   };
 };

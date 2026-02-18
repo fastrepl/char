@@ -21,10 +21,12 @@ import { useBillingAccess } from "../../../../billing";
 import { useConfigValues } from "../../../../config/use-config";
 import { useNotifications } from "../../../../contexts/notifications";
 import * as settings from "../../../../store/tinybase/store/settings";
+import { providerRowId } from "../shared";
 import {
   getProviderSelectionBlockers,
   requiresEntitlement,
 } from "../shared/eligibility";
+import { getLastUsedModel, setLastUsedModel } from "../shared/last-used-model";
 import { useSttSettings } from "./context";
 import { HealthStatusIndicator, useConnectionHealth } from "./health";
 import {
@@ -104,38 +106,29 @@ export function SelectProviderAndModel() {
     onSubmit: ({ value }) => {
       handleSelectProvider(value.provider);
       handleSelectModel(value.model);
+      if (value.provider && value.model) {
+        setLastUsedModel("stt", value.provider, value.model);
+      }
     },
   });
 
   useEffect(() => {
-    if (!current_stt_provider || !current_stt_model) {
-      return;
-    }
+    if (!current_stt_provider) return;
 
-    const providerConfig =
+    const currentConfig =
       configuredProviders[current_stt_provider as ProviderId];
-    if (!providerConfig) {
-      return;
-    }
+    if (currentConfig?.configured) return;
 
-    if (current_stt_provider === "custom") {
-      return;
-    }
+    const fallback = PROVIDERS.find((p) => {
+      if (p.disabled || p.id === current_stt_provider) return false;
+      const config = configuredProviders[p.id];
+      return config?.configured && config.models.some((m) => m.isDownloaded);
+    });
 
-    const modelEntry = providerConfig.models.find(
-      (m) => m.id === current_stt_model,
-    );
-    if (modelEntry && !modelEntry.isDownloaded) {
-      handleSelectModel("");
-      form.setFieldValue("model", "");
+    if (fallback) {
+      form.setFieldValue("provider", fallback.id);
     }
-  }, [
-    current_stt_provider,
-    current_stt_model,
-    configuredProviders,
-    handleSelectModel,
-    form,
-  ]);
+  }, [configuredProviders, current_stt_provider, form]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -155,8 +148,28 @@ export function SelectProviderAndModel() {
           <form.Field
             name="provider"
             listeners={{
-              onChange: () => {
-                form.setFieldValue("model", "");
+              onChange: ({ value }) => {
+                if (value === "custom") {
+                  const lastModel = getLastUsedModel("stt", value);
+                  form.setFieldValue("model", lastModel ?? "");
+                  return;
+                }
+
+                const models = (
+                  configuredProviders[value as ProviderId]?.models ?? []
+                ).filter((m) => m.isDownloaded);
+
+                const lastModel = getLastUsedModel("stt", value);
+                const lastModelAvailable =
+                  lastModel && models.some((m) => m.id === lastModel);
+
+                if (lastModelAvailable) {
+                  form.setFieldValue("model", lastModel);
+                } else if (models.length > 0) {
+                  form.setFieldValue("model", models[0].id);
+                } else {
+                  form.setFieldValue("model", "");
+                }
               },
             }}
           >
@@ -262,7 +275,7 @@ export function SelectProviderAndModel() {
                     >
                       <SelectValue placeholder="Select a model" />
                       {isConfigured && <HealthStatusIndicator />}
-                      {isConfigured && health.status !== "pending" && (
+                      {isConfigured && health.status === "success" && (
                         <Check className="-mr-1 h-4 w-4 shrink-0 text-green-600" />
                       )}
                     </SelectTrigger>
@@ -342,7 +355,7 @@ function useConfiguredMapping(): Record<
 
   return Object.fromEntries(
     PROVIDERS.map((provider) => {
-      const config = configuredProviders[provider.id] as
+      const config = configuredProviders[providerRowId("stt", provider.id)] as
         | AIProviderStorage
         | undefined;
       const baseUrl = String(config?.base_url || provider.baseUrl || "").trim();

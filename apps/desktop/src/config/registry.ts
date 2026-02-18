@@ -12,6 +12,7 @@ export type ConfigKey =
   | "notification_event"
   | "respect_dnd"
   | "ignored_platforms"
+  | "mic_active_threshold"
   | "current_stt_provider"
   | "current_stt_model"
   | "ai_language"
@@ -20,7 +21,8 @@ export type ConfigKey =
   | "telemetry_consent"
   | "current_llm_provider"
   | "current_llm_model"
-  | "timezone";
+  | "timezone"
+  | "week_start";
 
 type ConfigValueType<K extends ConfigKey> =
   (typeof CONFIG_REGISTRY)[K]["default"];
@@ -70,6 +72,14 @@ export const CONFIG_REGISTRY = {
     default: [] as string[],
     sideEffect: async (value: string[], _) => {
       await detectCommands.setIgnoredBundleIds(value);
+    },
+  },
+
+  mic_active_threshold: {
+    key: "mic_active_threshold",
+    default: 15,
+    sideEffect: async (value: number, _) => {
+      await detectCommands.setMicActiveThreshold(value);
     },
   },
 
@@ -144,5 +154,10 @@ export const CONFIG_REGISTRY = {
   timezone: {
     key: "timezone",
     default: undefined as string | undefined,
+  },
+
+  week_start: {
+    key: "week_start",
+    default: undefined as "sunday" | "monday" | undefined,
   },
 } satisfies Record<ConfigKey, ConfigDefinition>;

@@ -8,6 +8,7 @@ mod supervisor;
 use ext::*;
 use store::*;
 
+#[cfg(target_os = "macos")]
 use tauri::Manager;
 use tauri_plugin_permissions::{Permission, PermissionsPluginExt};
 use tauri_plugin_windows::{AppWindow, WindowsPluginExt};
@@ -99,10 +100,12 @@ pub async fn main() {
         .plugin(tauri_plugin_path2::init())
         .plugin(tauri_plugin_pdf::init())
         .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_mcp::init())
         .plugin(tauri_plugin_misc::init())
         .plugin(tauri_plugin_template::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_detect::init())
+        .plugin(tauri_plugin_dock::init())
         .plugin(tauri_plugin_extensions::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_notify::init())
@@ -116,9 +119,11 @@ pub async fn main() {
         .plugin(tauri_plugin_windows::init())
         .plugin(tauri_plugin_js::init())
         .plugin(tauri_plugin_flag::init())
+        .plugin(tauri_plugin_relay::init())
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .plugin(tauri_plugin_listener::init())
         .plugin(tauri_plugin_listener2::init())
+        .plugin(tauri_plugin_tantivy::init())
         .plugin(tauri_plugin_audio_priority::init())
         .plugin(tauri_plugin_local_stt::init(
             tauri_plugin_local_stt::InitOptions {
@@ -177,9 +182,18 @@ pub async fn main() {
             }
 
             {
+                use tauri_plugin_tray::HyprMenuItem;
+                app_handle.on_menu_event(|app, event| {
+                    if let Ok(item) = HyprMenuItem::try_from(event.id().clone()) {
+                        item.handle(app);
+                    }
+                });
+            }
+
+            {
                 use tauri_plugin_settings::SettingsPluginExt;
                 if let Ok(base) = app_handle.settings().global_base()
-                    && let Err(e) = agents::write_agents_file(&base)
+                    && let Err(e) = agents::write_agents_file(base.as_std_path())
                 {
                     tracing::error!("failed to write AGENTS.md: {}", e);
                 }
@@ -229,29 +243,28 @@ pub async fn main() {
 
     {
         let app_handle = app.handle().clone();
-        if app.get_onboarding_needed().unwrap_or(true) {
-            AppWindow::Main.hide(&app_handle).unwrap();
-            AppWindow::Onboarding.show(&app_handle).unwrap();
-        } else {
-            AppWindow::Onboarding.destroy(&app_handle).unwrap();
-            AppWindow::Main.show(&app_handle).unwrap();
-        }
+        AppWindow::Main.show(&app_handle).unwrap();
     }
 
     #[cfg(target_os = "macos")]
     hypr_intercept::setup_force_quit_handler();
 
+    #[cfg(target_os = "macos")]
+    {
+        let handle = app.handle().clone();
+        hypr_intercept::set_close_handler(move || {
+            for (_, window) in handle.webview_windows() {
+                let _ = window.close();
+            }
+            let _ = handle.set_activation_policy(tauri::ActivationPolicy::Accessory);
+        });
+    }
+
     #[allow(unused_variables)]
     app.run(move |app, event| match event {
         #[cfg(target_os = "macos")]
         tauri::RunEvent::Reopen { .. } => {
-            if app.get_onboarding_needed().unwrap_or(true) {
-                AppWindow::Main.hide(&app).unwrap();
-                AppWindow::Onboarding.show(&app).unwrap();
-            } else {
-                AppWindow::Onboarding.destroy(&app).unwrap();
-                AppWindow::Main.show(&app).unwrap();
-            }
+            AppWindow::Main.show(&app).unwrap();
         }
         #[cfg(target_os = "macos")]
         tauri::RunEvent::ExitRequested { api, .. } => {

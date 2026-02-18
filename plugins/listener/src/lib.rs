@@ -7,7 +7,7 @@ mod error;
 mod events;
 mod ext;
 
-pub use error::*;
+pub use error::{DegradedError, Error, Result};
 pub use events::*;
 pub use ext::*;
 

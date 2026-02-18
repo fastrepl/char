@@ -13,7 +13,12 @@ extension NotificationManager {
     let (effectView, backgroundView) = createEffectView(container: container)
 
     let notification = NotificationInstance(
-      payload: payload, panel: panel, clickableView: clickableView)
+      payload: payload,
+      panel: panel,
+      clickableView: clickableView,
+      creationIndex: nextCreationIndex
+    )
+    nextCreationIndex += 1
     clickableView.notification = notification
     notification.progressBar = backgroundView
 
@@ -23,6 +28,14 @@ extension NotificationManager {
 
     clickableView.addSubview(container)
     panel.contentView = clickableView
+    if isMacOS26() {
+      panel.contentView?.wantsLayer = true
+      panel.contentView?.layer?.cornerRadius = Layout.cornerRadius
+      panel.contentView?.layer?.masksToBounds = true
+      if #available(macOS 11.0, *) {
+        panel.contentView?.layer?.cornerCurve = .continuous
+      }
+    }
 
     setupContent(effectView: effectView, container: container, notification: notification)
 
@@ -32,6 +45,7 @@ extension NotificationManager {
     showWithAnimation(
       notification: notification, screen: screen, timeoutSeconds: payload.timeoutSeconds)
     ensureGlobalMouseMonitor()
+    ensureNativeNotificationMonitor()
   }
 
   func setupContent(

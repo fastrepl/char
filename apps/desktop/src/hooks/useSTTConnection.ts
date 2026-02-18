@@ -1,11 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-import { commands as localSttCommands } from "@hypr/plugin-local-stt";
+import {
+  commands as localSttCommands,
+  type SupportedSttModel,
+} from "@hypr/plugin-local-stt";
 import type { AIProviderStorage } from "@hypr/store";
 
 import { useAuth } from "../auth";
 import { useBillingAccess } from "../billing";
+import { providerRowId } from "../components/settings/ai/shared";
 import { ProviderId } from "../components/settings/ai/stt/shared";
 import { env } from "../env";
 import * as settings from "../store/tinybase/store/settings";
@@ -22,7 +26,7 @@ export const useSTTConnection = () => {
 
   const providerConfig = settings.UI.useRow(
     "ai_providers",
-    current_stt_provider ?? "",
+    current_stt_provider ? providerRowId("stt", current_stt_provider) : "",
     settings.STORE_ID,
   ) as AIProviderStorage | undefined;
 
@@ -44,6 +48,13 @@ export const useSTTConnection = () => {
         return null;
       }
 
+      const downloaded = await localSttCommands.isModelDownloaded(
+        current_stt_model as SupportedSttModel,
+      );
+      if (downloaded.status !== "ok" || !downloaded.data) {
+        return { status: "not_downloaded" as const, connection: null };
+      }
+
       const servers = await localSttCommands.getServers();
 
       if (servers.status !== "ok") {
@@ -57,7 +68,7 @@ export const useSTTConnection = () => {
 
       if (server?.status === "ready" && server.url) {
         return {
-          status: "ready",
+          status: "ready" as const,
           connection: {
             provider: current_stt_provider!,
             model: current_stt_model,
@@ -94,7 +105,7 @@ export const useSTTConnection = () => {
       return {
         provider: current_stt_provider,
         model: current_stt_model,
-        baseUrl: baseUrl ?? new URL("/stt", env.VITE_AI_URL).toString(),
+        baseUrl: baseUrl ?? new URL("/stt", env.VITE_API_URL).toString(),
         apiKey: auth.session.access_token,
       };
     }
@@ -125,5 +136,6 @@ export const useSTTConnection = () => {
     conn: connection,
     local,
     isLocalModel,
+    isCloudModel,
   };
 };

@@ -1,4 +1,5 @@
 import { Icon } from "@iconify-icon/react";
+import { Facehash } from "facehash";
 import { Building2, Mail } from "lucide-react";
 
 import { commands as openerCommands } from "@hypr/plugin-opener2";
@@ -6,7 +7,6 @@ import { Button } from "@hypr/ui/components/ui/button";
 import { Input } from "@hypr/ui/components/ui/input";
 
 import * as main from "../../../../store/tinybase/store/main";
-import { getInitials } from "./shared";
 
 export function OrganizationDetailsColumn({
   selectedOrganizationId,
@@ -77,13 +77,15 @@ export function OrganizationDetailsColumn({
                           onClick={() => onPersonClick?.(humanId)}
                         >
                           <div className="flex flex-col items-center text-center gap-3">
-                            <div className="w-12 h-12 rounded-full bg-neutral-200 flex items-center justify-center shrink-0">
-                              <span className="text-sm font-medium text-neutral-600">
-                                {getInitials(
-                                  (human.name as string) ||
-                                    (human.email as string),
+                            <div className="rounded-full bg-amber-50">
+                              <Facehash
+                                name={String(
+                                  human.name || human.email || humanId,
                                 )}
-                              </span>
+                                size={48}
+                                interactive={false}
+                                showInitial={false}
+                              />
                             </div>
                             <div className="w-full">
                               <div className="font-semibold text-sm truncate">

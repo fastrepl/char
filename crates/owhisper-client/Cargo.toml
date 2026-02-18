@@ -11,6 +11,7 @@ argmax = ["hypr-audio-utils"]
 hypr-audio-utils = { workspace = true, optional = true }
 hypr-language = { workspace = true }
 hypr-ws-client = { workspace = true }
+soniox = { workspace = true }
 
 owhisper-interface = { workspace = true }
 

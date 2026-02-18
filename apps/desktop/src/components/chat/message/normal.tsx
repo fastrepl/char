@@ -1,8 +1,7 @@
 import { BrainIcon, CheckIcon, CopyIcon, RotateCcwIcon } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Streamdown } from "streamdown";
 
-import type { ToolPartType } from "../../../chat/tools";
 import type { HyprUIMessage } from "../../../chat/types";
 import { hasRenderableContent } from "../shared";
 import { Disclosure, MessageBubble, MessageContainer } from "./shared";
@@ -27,13 +26,28 @@ export function NormalMessage({
 }) {
   const isUser = message.role === "user";
   const [copied, setCopied] = useState(false);
+  const copiedResetTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copiedResetTimeoutRef.current !== null) {
+        window.clearTimeout(copiedResetTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleCopy = useCallback(async () => {
     const text = getMessageText(message);
     try {
       await navigator.clipboard.writeText(text);
+      if (copiedResetTimeoutRef.current !== null) {
+        window.clearTimeout(copiedResetTimeoutRef.current);
+      }
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      copiedResetTimeoutRef.current = window.setTimeout(() => {
+        setCopied(false);
+        copiedResetTimeoutRef.current = null;
+      }, 2000);
     } catch {
       // ignore
     }
@@ -87,12 +101,7 @@ function Part({ part }: { part: Part }) {
     return null;
   }
 
-  if (part.type.startsWith("tool-")) {
-    const toolPart = part as Extract<Part, { type: ToolPartType }>;
-    return <Tool part={toolPart} />;
-  }
-
-  return <pre>{JSON.stringify(part, null, 2)}</pre>;
+  return <Tool part={part} />;
 }
 
 function Reasoning({ part }: { part: Extract<Part, { type: "reasoning" }> }) {
@@ -117,42 +126,62 @@ function Reasoning({ part }: { part: Extract<Part, { type: "reasoning" }> }) {
   );
 }
 
-function Text({ part }: { part: Extract<Part, { type: "text" }> }) {
-  const components = {
-    h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => {
-      return (
-        <h2 className="text-lg font-bold pt-2">
-          {props.children as React.ReactNode}
-        </h2>
-      );
-    },
-    ul: (props: React.HTMLAttributes<HTMLUListElement>) => {
-      return (
-        <ul className="list-disc list-inside flex flex-col gap-1.5">
-          {props.children as React.ReactNode}
-        </ul>
-      );
-    },
-    ol: (props: React.HTMLAttributes<HTMLOListElement>) => {
-      return (
-        <ol className="list-decimal list-inside flex flex-col gap-1.5">
-          {props.children as React.ReactNode}
-        </ol>
-      );
-    },
-    li: (props: React.HTMLAttributes<HTMLLIElement>) => {
-      return <li className="list-item">{props.children as React.ReactNode}</li>;
-    },
-  } as const;
+const chatComponents = {
+  h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => {
+    return (
+      <h1 className="text-base font-semibold mt-3 first:mt-0 mb-1">
+        {props.children as React.ReactNode}
+      </h1>
+    );
+  },
+  h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => {
+    return (
+      <h2 className="text-base font-semibold mt-3 first:mt-0 mb-1">
+        {props.children as React.ReactNode}
+      </h2>
+    );
+  },
+  h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => {
+    return (
+      <h3 className="text-sm font-semibold mt-2 first:mt-0 mb-1">
+        {props.children as React.ReactNode}
+      </h3>
+    );
+  },
+  ul: (props: React.HTMLAttributes<HTMLUListElement>) => {
+    return (
+      <ul className="list-disc pl-5 mb-1">
+        {props.children as React.ReactNode}
+      </ul>
+    );
+  },
+  ol: (props: React.HTMLAttributes<HTMLOListElement>) => {
+    return (
+      <ol className="list-decimal pl-5 mb-1">
+        {props.children as React.ReactNode}
+      </ol>
+    );
+  },
+  li: (props: React.HTMLAttributes<HTMLLIElement>) => {
+    return <li className="mb-1">{props.children as React.ReactNode}</li>;
+  },
+  p: (props: React.HTMLAttributes<HTMLParagraphElement>) => {
+    return (
+      <p className="mb-1.5 last:mb-0">{props.children as React.ReactNode}</p>
+    );
+  },
+} as const;
 
+function Text({ part }: { part: Extract<Part, { type: "text" }> }) {
   const isAnimating = part.state !== "done";
 
   return (
     <Streamdown
-      components={components}
+      components={chatComponents}
       className="px-0.5 py-1"
       caret="block"
       isAnimating={isAnimating}
+      linkSafety={{ enabled: false }}
     >
       {part.text}
     </Streamdown>

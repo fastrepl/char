@@ -1,13 +1,8 @@
-import { AlertCircleIcon, ArrowRightIcon, CheckIcon } from "lucide-react";
+import { AlertCircleIcon, CheckIcon } from "lucide-react";
 
 import { cn } from "@hypr/utils";
 
-import { usePermissions } from "../../hooks/usePermissions";
-import { Route } from "../../routes/app/onboarding/_layout.index";
-import { getBack, getNext, type StepProps } from "./config";
-import { OnboardingContainer } from "./shared";
-
-export const STEP_ID_PERMISSIONS = "permissions" as const;
+import { usePermission } from "../../hooks/usePermissions";
 
 function PermissionBlock({
   name,
@@ -25,136 +20,88 @@ function PermissionBlock({
   const isAuthorized = status === "authorized";
 
   return (
-    <div
+    <button
+      onClick={onAction}
+      disabled={isPending || isAuthorized}
       className={cn([
-        "flex items-center justify-between rounded-xl py-3 px-4",
+        "flex flex-1 basis-0 min-w-0 items-center gap-2.5 rounded-xl py-2 px-3 text-left transition-all",
         isAuthorized
           ? "border border-neutral-200"
-          : "border border-red-200 bg-red-50",
+          : "border border-red-200 bg-red-50 hover:bg-red-100/60 active:scale-[0.98]",
+        isPending && "opacity-50 cursor-not-allowed",
       ])}
+      aria-label={
+        isAuthorized
+          ? `${name} permission granted`
+          : `Request ${name.toLowerCase()} permission`
+      }
     >
-      <div className="flex flex-col gap-1">
-        <div
+      <div
+        className={cn([
+          "size-6 shrink-0 flex items-center justify-center rounded-md",
+          isAuthorized
+            ? "bg-stone-100 text-stone-600"
+            : "bg-linear-to-t from-red-600 to-red-500 text-white",
+        ])}
+      >
+        {isAuthorized ? (
+          <CheckIcon className="size-3.5" />
+        ) : (
+          <AlertCircleIcon className="size-3.5" />
+        )}
+      </div>
+      <div className="min-w-0">
+        <span
           className={cn([
-            "flex items-center gap-2",
-            !isAuthorized ? "text-red-500" : "text-neutral-900",
+            "text-sm font-medium",
+            isAuthorized ? "text-neutral-900" : "text-red-600",
           ])}
         >
-          {!isAuthorized && <AlertCircleIcon className="size-4" />}
-          <span className="text-sm font-medium">{name}</span>
-        </div>
-        <p className="text-xs text-neutral-500">
+          {name}
+        </span>
+        <p className="text-xs text-neutral-500 truncate hidden @[480px]:block">
           {isAuthorized ? description.authorized : description.unauthorized}
         </p>
       </div>
-      <button
-        onClick={onAction}
-        disabled={isPending || isAuthorized}
-        className={cn([
-          "size-8 flex items-center justify-center rounded-lg transition-all",
-          isAuthorized
-            ? "bg-stone-100 text-stone-800 opacity-50 cursor-not-allowed"
-            : "bg-linear-to-t from-red-600 to-red-500 text-white hover:scale-[1.05] active:scale-[0.95]",
-          isPending && "opacity-50 cursor-not-allowed",
-        ])}
-        aria-label={
-          isAuthorized
-            ? `${name} permission granted`
-            : `Request ${name.toLowerCase()} permission`
-        }
-      >
-        {isAuthorized ? (
-          <CheckIcon className="size-4" />
-        ) : (
-          <ArrowRightIcon className="size-4" />
-        )}
-      </button>
-    </div>
+    </button>
   );
 }
 
-export function Permissions({ onNavigate }: StepProps) {
-  const search = Route.useSearch();
-  const {
-    micPermissionStatus,
-    systemAudioPermissionStatus,
-    accessibilityPermissionStatus,
-    micPermission,
-    systemAudioPermission,
-    accessibilityPermission,
-    handleMicPermissionAction,
-    handleSystemAudioPermissionAction,
-    handleAccessibilityPermissionAction,
-  } = usePermissions();
+export function PermissionsSection() {
+  const mic = usePermission("microphone");
+  const systemAudio = usePermission("systemAudio");
 
-  const allPermissionsGranted =
-    micPermissionStatus.data === "authorized" &&
-    systemAudioPermissionStatus.data === "authorized" &&
-    accessibilityPermissionStatus.data === "authorized";
-
-  const backStep = getBack(search);
+  const handleAction = (perm: ReturnType<typeof usePermission>) => {
+    if (perm.status === "denied") {
+      perm.open();
+    } else {
+      perm.request();
+    }
+  };
 
   return (
-    <OnboardingContainer
-      title="Permissions needed for best experience"
-      onBack={
-        backStep ? () => onNavigate({ ...search, step: backStep }) : undefined
-      }
-    >
-      <div className="flex flex-col gap-4">
-        <PermissionBlock
-          name="Accessibility"
-          status={accessibilityPermissionStatus.data}
-          description={{
-            authorized: "Good to go :)",
-            unauthorized: "To sync mic inputs & mute from meetings",
-          }}
-          isPending={accessibilityPermission.isPending}
-          onAction={handleAccessibilityPermissionAction}
-        />
-
-        <PermissionBlock
-          name="Microphone"
-          status={micPermissionStatus.data}
-          description={{
-            authorized: "Good to go :)",
-            unauthorized: "To capture your voice",
-          }}
-          isPending={micPermission.isPending}
-          onAction={handleMicPermissionAction}
-        />
-
-        <PermissionBlock
-          name="System audio"
-          status={systemAudioPermissionStatus.data}
-          description={{
-            authorized: "Good to go :)",
-            unauthorized: "To capture what other people are saying",
-          }}
-          isPending={systemAudioPermission.isPending}
-          onAction={handleSystemAudioPermissionAction}
-        />
-      </div>
-
-      <button
-        onClick={() => {
-          const nextStep = getNext(search);
-          if (nextStep) {
-            onNavigate({ ...search, step: nextStep });
-          }
+    <div className="@container flex items-stretch gap-3">
+      <PermissionBlock
+        name="Microphone"
+        status={mic.status}
+        description={{
+          authorized: "Good to go :)",
+          unauthorized: "To capture your voice",
         }}
-        disabled={!allPermissionsGranted}
-        className={cn([
-          "w-full py-3 rounded-full text-sm font-medium duration-150",
-          allPermissionsGranted
-            ? "bg-linear-to-t from-stone-600 to-stone-500 text-white hover:scale-[1.01] active:scale-[0.99]"
-            : "bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-400 cursor-not-allowed",
-        ])}
-      >
-        {allPermissionsGranted
-          ? "Continue"
-          : "Need all permissions to continue"}
-      </button>
-    </OnboardingContainer>
+        isPending={mic.isPending}
+        onAction={() => handleAction(mic)}
+      />
+
+      <PermissionBlock
+        name="System audio"
+        status={systemAudio.status}
+        description={{
+          authorized: "Good to go :)",
+          unauthorized: "To capture what other people are saying",
+        }}
+        isPending={systemAudio.isPending}
+        onAction={() => handleAction(systemAudio)}
+      />
+    </div>
   );
 }

@@ -3,14 +3,19 @@ import { useEffect } from "react";
 import { DEFAULT_USER_ID } from "../../../utils";
 import type { Store } from "./main";
 
-export function useInitializeStore(store: Store): void {
+export function useInitializeStore(
+  store: Store,
+  persisters: { session: unknown; human: unknown; values: unknown },
+): void {
+  const { session, human, values } = persisters;
+
   useEffect(() => {
-    if (!store) {
+    if (!store || !session || !human || !values) {
       return;
     }
 
     initializeStore(store);
-  }, [store]);
+  }, [store, session, human, values]);
 }
 function initializeStore(store: Store): void {
   store.transaction(() => {
@@ -38,7 +43,7 @@ function initializeStore(store: Store): void {
       store.setRow("sessions", sessionId, {
         user_id: DEFAULT_USER_ID,
         created_at: now,
-        title: "Welcome to Hyprnote",
+        title: "Welcome to Char",
         raw_md: "",
       });
     }

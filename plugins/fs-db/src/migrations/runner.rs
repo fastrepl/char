@@ -68,6 +68,8 @@ mod tests {
             super::super::v1_0_2_nightly_14_extract_from_sqlite::Migrate.introduced_in();
         let repair_transcripts =
             super::super::v1_0_4_nightly_2_repair_transcripts::Migrate.introduced_in();
+        let event_sync_from_sqlite =
+            super::super::v1_0_7_nightly_1_events_sync::Migrate.introduced_in();
 
         struct Case {
             from: DetectedVersion,
@@ -125,6 +127,41 @@ mod tests {
                 from: DetectedVersion::FromFile(v("1.0.2-nightly.15")),
                 to: "1.0.4-nightly.2",
                 expected: vec![repair_transcripts],
+            },
+            Case {
+                from: DetectedVersion::FromFile(v("1.0.6-nightly.1")),
+                to: "1.0.7-nightly.1",
+                expected: vec![event_sync_from_sqlite],
+            },
+            Case {
+                from: DetectedVersion::FromFile(v("1.0.6")),
+                to: "1.0.7-nightly.1",
+                expected: vec![event_sync_from_sqlite],
+            },
+            Case {
+                from: DetectedVersion::FromFile(v("1.0.6")),
+                to: "1.0.7",
+                expected: vec![event_sync_from_sqlite],
+            },
+            Case {
+                from: DetectedVersion::FromFile(v("1.0.6-nightly.1")),
+                to: "1.0.7",
+                expected: vec![event_sync_from_sqlite],
+            },
+            Case {
+                from: DetectedVersion::FromFile(v("1.0.3")),
+                to: "1.0.7-nightly.1",
+                expected: vec![repair_transcripts, event_sync_from_sqlite],
+            },
+            Case {
+                from: DetectedVersion::FromFile(v("1.0.7-nightly.1")),
+                to: "1.0.7",
+                expected: vec![],
+            },
+            Case {
+                from: DetectedVersion::FromFile(v("1.0.5")),
+                to: "1.0.6",
+                expected: vec![],
             },
         ];
 

@@ -1,9 +1,4 @@
-use serde::Deserialize;
-
-#[derive(Deserialize)]
-pub struct Env {
-    pub openrouter_api_key: String,
-}
+pub use hypr_api_env::OpenRouterEnv as Env;
 
 pub struct ApiKey(pub String);
 

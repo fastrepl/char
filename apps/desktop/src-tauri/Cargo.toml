@@ -3,7 +3,7 @@ name = "desktop"
 version = "0.0.0"
 authors = ["you"]
 edition = "2024"
-description = "Hyprnote desktop App"
+description = "Char Desktop App"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -35,6 +35,7 @@ tauri-plugin-deep-link = { workspace = true }
 tauri-plugin-deeplink2 = { workspace = true }
 tauri-plugin-detect = { workspace = true }
 tauri-plugin-dialog = { workspace = true }
+tauri-plugin-dock = { workspace = true }
 tauri-plugin-extensions = { workspace = true }
 tauri-plugin-flag = { workspace = true }
 tauri-plugin-fs-db = { workspace = true }
@@ -49,6 +50,7 @@ tauri-plugin-js = { workspace = true }
 tauri-plugin-listener = { workspace = true }
 tauri-plugin-listener2 = { workspace = true }
 tauri-plugin-local-stt = { workspace = true }
+tauri-plugin-mcp = { workspace = true }
 tauri-plugin-misc = { workspace = true }
 tauri-plugin-network = { workspace = true }
 tauri-plugin-notification = { workspace = true }
@@ -62,6 +64,7 @@ tauri-plugin-pdf = { workspace = true }
 tauri-plugin-permissions = { workspace = true }
 tauri-plugin-prevent-default = { workspace = true }
 tauri-plugin-process = { workspace = true }
+tauri-plugin-relay = { workspace = true }
 tauri-plugin-screen = { workspace = true }
 tauri-plugin-sentry = { workspace = true }
 tauri-plugin-settings = { workspace = true }
@@ -92,8 +95,8 @@ tracing = { workspace = true }
 
 hypr-host = { workspace = true }
 
+hypr-supervisor = { workspace = true }
 ractor = { workspace = true }
-ractor-supervisor = { workspace = true }
 
 pico-args = "0.5"
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }

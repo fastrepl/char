@@ -25,6 +25,7 @@ owhisper-interface = { workspace = true }
 
 tauri = { workspace = true, features = ["specta", "test"] }
 
+camino = { workspace = true }
 specta = { workspace = true }
 tauri-specta = { workspace = true, features = ["derive", "typescript"] }
 

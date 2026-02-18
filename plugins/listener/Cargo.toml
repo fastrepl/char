@@ -29,7 +29,6 @@ hypr-device-monitor = { workspace = true }
 hypr-host = { workspace = true }
 hypr-intercept = { workspace = true }
 hypr-language = { workspace = true }
-hypr-llm = { workspace = true }
 hypr-mac = { workspace = true }
 hypr-vad-ext = { workspace = true }
 hypr-vad2 = { workspace = true }
@@ -63,8 +62,8 @@ uuid = { workspace = true, features = ["v4"] }
 hound = { workspace = true }
 vorbis_rs = { workspace = true }
 
-ractor = { workspace = true }
-ractor-supervisor = { workspace = true }
+hypr-supervisor = { workspace = true }
+ractor = { workspace = true, features = ["async-trait"] }
 
 futures-util = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }

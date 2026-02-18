@@ -7,13 +7,31 @@ pub enum Error {
     #[error(transparent)]
     Io(#[from] std::io::Error),
     #[error(transparent)]
-    Gix(#[from] gix::open::Error),
+    Gix(Box<gix::open::Error>),
     #[error(transparent)]
-    GixInit(#[from] gix::init::Error),
+    GixInit(Box<gix::init::Error>),
     #[error(transparent)]
-    GixDiscover(#[from] gix::discover::Error),
+    GixDiscover(Box<gix::discover::Error>),
     #[error("{0}")]
     Custom(String),
+}
+
+impl From<gix::open::Error> for Error {
+    fn from(e: gix::open::Error) -> Self {
+        Self::Gix(Box::new(e))
+    }
+}
+
+impl From<gix::init::Error> for Error {
+    fn from(e: gix::init::Error) -> Self {
+        Self::GixInit(Box::new(e))
+    }
+}
+
+impl From<gix::discover::Error> for Error {
+    fn from(e: gix::discover::Error) -> Self {
+        Self::GixDiscover(Box::new(e))
+    }
 }
 
 impl Serialize for Error {

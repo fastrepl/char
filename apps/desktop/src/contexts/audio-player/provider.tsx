@@ -96,12 +96,15 @@ export function AudioPlayerProvider({
     let audioContext: AudioContext | null = null;
 
     const handleReady = async () => {
+      const dur = ws.getDuration();
+      if (dur && isFinite(dur)) {
+        setDuration(dur);
+      }
+
       const media = ws.getMediaElement();
       if (!media) {
         return;
       }
-
-      setDuration(media.duration);
 
       audioContext = new AudioContext();
       if (audioContext.state === "suspended") {
@@ -128,10 +131,17 @@ export function AudioPlayerProvider({
       setCurrentTime(ws.getCurrentTime());
     };
 
+    const handleDecode = (dur: number) => {
+      if (dur && isFinite(dur)) {
+        setDuration(dur);
+      }
+    };
+
     const handleDestroy = () => {
       setState("stopped");
     };
 
+    ws.on("decode", handleDecode);
     ws.on("ready", handleReady);
     ws.on("audioprocess", handleAudioprocess);
     ws.on("timeupdate", handleTimeupdate);

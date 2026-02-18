@@ -21,7 +21,7 @@ pub enum Feature {
 impl Feature {
     pub fn strategy(&self) -> FlagStrategy {
         match self {
-            Feature::Chat => FlagStrategy::Debug,
+            Feature::Chat => FlagStrategy::Hardcoded(true),
         }
     }
 }

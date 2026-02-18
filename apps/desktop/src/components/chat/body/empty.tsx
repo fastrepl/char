@@ -15,11 +15,11 @@ export function ChatBodyEmpty({
   }, [openNew]);
 
   const handleOpenChatShortcuts = useCallback(() => {
-    openNew({ type: "chat_shortcuts" });
+    openNew({ type: "ai", state: { tab: "shortcuts" } });
   }, [openNew]);
 
   const handleOpenPrompts = useCallback(() => {
-    openNew({ type: "prompts" });
+    openNew({ type: "ai", state: { tab: "prompts" } });
   }, [openNew]);
 
   if (!isModelConfigured) {
@@ -38,7 +38,7 @@ export function ChatBodyEmpty({
           </p>
           <button
             onClick={handleGoToSettings}
-            className="inline-flex w-fit items-center gap-1.5 px-3 py-1.5 text-xs text-neutral-700 bg-linear-to-b from-white to-stone-50 hover:from-neutral-50 hover:to-stone-100 rounded-full border border-neutral-300 transition-colors"
+            className="inline-flex w-fit items-center gap-1.5 px-3 py-1.5 text-xs text-neutral-700 bg-white hover:bg-neutral-100 rounded-full border border-neutral-300 transition-colors"
           >
             <SparklesIcon size={12} />
             Open AI Settings
@@ -63,14 +63,14 @@ export function ChatBodyEmpty({
         <div className="flex flex-wrap gap-1.5">
           <button
             onClick={handleOpenChatShortcuts}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-neutral-700 bg-linear-to-b from-white to-stone-50 hover:from-neutral-50 hover:to-stone-100 rounded-full border border-neutral-300 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-neutral-700 bg-white hover:bg-neutral-100 rounded-full border border-neutral-300 transition-colors"
           >
             <MessageSquareIcon size={12} />
             Shortcuts
           </button>
           <button
             onClick={handleOpenPrompts}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-neutral-700 bg-linear-to-b from-white to-stone-50 hover:from-neutral-50 hover:to-stone-100 rounded-full border border-neutral-300 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-neutral-700 bg-white hover:bg-neutral-100 rounded-full border border-neutral-300 transition-colors"
           >
             <SparklesIcon size={12} />
             Prompts

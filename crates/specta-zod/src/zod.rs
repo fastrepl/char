@@ -64,9 +64,9 @@ fn export_named_datatype(
     datatype(s, types, &ndt.inner, false)?;
     s.push_str(";\n");
 
-    write!(
+    writeln!(
         s,
-        "export type {} = z.infer<typeof {}Schema>;\n",
+        "export type {} = z.infer<typeof {}Schema>;",
         name,
         to_camel_case(name)
     )?;
@@ -294,7 +294,7 @@ fn enum_type(s: &mut String, types: &TypeCollection, e: &EnumType) -> Result<(),
 fn enum_variant(
     s: &mut String,
     types: &TypeCollection,
-    name: &Cow<'static, str>,
+    name: &str,
     fields: &EnumVariants,
     repr: &EnumRepr,
 ) -> Result<(), Error> {

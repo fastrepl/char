@@ -18,6 +18,7 @@ export type IncomingEvent = {
   description?: string;
   recurrence_series_id?: string;
   has_recurrence_rules: boolean;
+  is_all_day: boolean;
 };
 
 export type IncomingParticipants = Map<string, EventParticipant[]>;

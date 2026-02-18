@@ -11,12 +11,15 @@ import { exchangeOAuthCode, exchangeOtpToken } from "@/functions/auth";
 const validateSearch = z.object({
   code: z.string().optional(),
   token_hash: z.string().optional(),
-  type: z.literal("email").optional(),
+  type: z.enum(["email", "recovery"]).optional(),
   flow: z.enum(["desktop", "web"]).default("desktop"),
   scheme: z.string().default("hyprnote"),
   redirect: z.string().optional(),
   access_token: z.string().optional(),
   refresh_token: z.string().optional(),
+  error: z.string().optional(),
+  error_code: z.string().optional(),
+  error_description: z.string().optional(),
 });
 
 export const Route = createFileRoute("/_view/callback/auth")({
@@ -27,9 +30,14 @@ export const Route = createFileRoute("/_view/callback/auth")({
   }),
   beforeLoad: async ({ search }) => {
     if (search.flow === "web" && search.code) {
-      const result = await exchangeOAuthCode({ data: { code: search.code } });
+      const result = await exchangeOAuthCode({
+        data: { code: search.code, flow: "web" },
+      });
 
       if (result.success) {
+        if (search.type === "recovery") {
+          throw redirect({ to: "/update-password/" });
+        }
         throw redirect({ to: search.redirect || "/app/account/" });
       } else {
         console.error(result.error);
@@ -37,7 +45,9 @@ export const Route = createFileRoute("/_view/callback/auth")({
     }
 
     if (search.flow === "desktop" && search.code) {
-      const result = await exchangeOAuthCode({ data: { code: search.code } });
+      const result = await exchangeOAuthCode({
+        data: { code: search.code, flow: "desktop" },
+      });
 
       if (result.success) {
         throw redirect({
@@ -55,31 +65,48 @@ export const Route = createFileRoute("/_view/callback/auth")({
     }
 
     if (search.token_hash && search.type) {
-      const result = await exchangeOtpToken({
-        data: {
-          token_hash: search.token_hash,
-          type: search.type,
-        },
-      });
+      if (search.type === "recovery") {
+        const result = await exchangeOtpToken({
+          data: {
+            token_hash: search.token_hash,
+            type: search.type,
+            flow: search.flow,
+          },
+        });
 
-      if (result.success) {
-        if (search.flow === "web") {
-          throw redirect({ to: search.redirect || "/app/account/" });
-        }
-
-        if (search.flow === "desktop") {
-          throw redirect({
-            to: "/callback/auth/",
-            search: {
-              flow: "desktop",
-              scheme: search.scheme,
-              access_token: result.access_token,
-              refresh_token: result.refresh_token,
-            },
-          });
+        if (result.success) {
+          throw redirect({ to: "/update-password/" });
+        } else {
+          console.error(result.error);
         }
       } else {
-        console.error(result.error);
+        const result = await exchangeOtpToken({
+          data: {
+            token_hash: search.token_hash,
+            type: search.type,
+            flow: search.flow,
+          },
+        });
+
+        if (result.success) {
+          if (search.flow === "web") {
+            throw redirect({ to: search.redirect || "/app/account/" });
+          }
+
+          if (search.flow === "desktop") {
+            throw redirect({
+              to: "/callback/auth/",
+              search: {
+                flow: "desktop",
+                scheme: search.scheme,
+                access_token: result.access_token,
+                refresh_token: result.refresh_token,
+              },
+            });
+          }
+        } else {
+          console.error(result.error);
+        }
       }
     }
   },
@@ -145,10 +172,39 @@ function Component() {
   };
 
   useEffect(() => {
-    if (search.flow === "web") {
+    if (search.flow === "web" && !search.error) {
       navigate({ to: search.redirect || "/app/account/" });
     }
   }, [search, navigate]);
+
+  if (search.error) {
+    return (
+      <div className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white flex items-center justify-center p-6">
+        <div className="max-w-md w-full text-center flex flex-col gap-8">
+          <div className="flex flex-col gap-3">
+            <h1 className="text-3xl font-serif tracking-tight text-stone-600">
+              Sign-in failed
+            </h1>
+            <p className="text-neutral-600">
+              {search.error_description
+                ? search.error_description.replaceAll("+", " ")
+                : "Something went wrong during sign-in"}
+            </p>
+          </div>
+
+          <a
+            href={`/auth?flow=${search.flow}&scheme=${search.scheme}`}
+            className={cn([
+              "w-full h-12 flex items-center justify-center text-base font-medium transition-all cursor-pointer",
+              "bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
+            ])}
+          >
+            Try again
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   if (search.flow === "desktop") {
     const hasTokens = search.access_token && search.refresh_token;
@@ -176,7 +232,7 @@ function Component() {
                   "bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
                 ])}
               >
-                Open Hyprnote
+                Open Char
               </button>
 
               <button

@@ -1,4 +1,5 @@
 import DOMPurify from "dompurify";
+import { Facehash } from "facehash";
 import { useCallback, useMemo } from "react";
 
 import { cn } from "@hypr/utils";
@@ -6,9 +7,14 @@ import { cn } from "@hypr/utils";
 import { type SearchResult } from "../../../../contexts/search/ui";
 import * as main from "../../../../store/tinybase/store/main";
 import { type TabInput, useTabs } from "../../../../store/zustand/tabs";
-import { getInitials } from "../../body/contacts/shared";
 
-export function SearchResultItem({ result }: { result: SearchResult }) {
+export function SearchResultItem({
+  result,
+  isSelected,
+}: {
+  result: SearchResult;
+  isSelected: boolean;
+}) {
   const openCurrent = useTabs((state) => state.openCurrent);
 
   const handleClick = useCallback(() => {
@@ -19,17 +25,33 @@ export function SearchResultItem({ result }: { result: SearchResult }) {
   }, [openCurrent, result]);
 
   if (result.type === "human") {
-    return <HumanSearchResultItem result={result} onClick={handleClick} />;
+    return (
+      <HumanSearchResultItem
+        result={result}
+        onClick={handleClick}
+        isSelected={isSelected}
+      />
+    );
   }
 
   if (result.type === "organization") {
     return (
-      <OrganizationSearchResultItem result={result} onClick={handleClick} />
+      <OrganizationSearchResultItem
+        result={result}
+        onClick={handleClick}
+        isSelected={isSelected}
+      />
     );
   }
 
   if (result.type === "session") {
-    return <SessionSearchResultItem result={result} onClick={handleClick} />;
+    return (
+      <SessionSearchResultItem
+        result={result}
+        onClick={handleClick}
+        isSelected={isSelected}
+      />
+    );
   }
 
   return null;
@@ -38,9 +60,11 @@ export function SearchResultItem({ result }: { result: SearchResult }) {
 function HumanSearchResultItem({
   result,
   onClick,
+  isSelected,
 }: {
   result: SearchResult;
   onClick: () => void;
+  isSelected: boolean;
 }) {
   const sanitizedTitle = useMemo(
     () =>
@@ -53,6 +77,7 @@ function HumanSearchResultItem({
 
   return (
     <button
+      data-result-id={result.id}
       onClick={onClick}
       className={cn([
         "w-full px-3 py-2",
@@ -60,16 +85,16 @@ function HumanSearchResultItem({
         "hover:bg-neutral-100",
         "rounded-lg transition-colors",
         "text-left",
+        isSelected && "bg-neutral-100",
       ])}
     >
-      <div
-        className={cn([
-          "shrink-0 w-8 h-8 rounded-full bg-neutral-200 flex items-center justify-center",
-        ])}
-      >
-        <span className={cn(["text-xs font-medium text-neutral-600"])}>
-          {getInitials(result.title)}
-        </span>
+      <div className="shrink-0 rounded-full bg-amber-50">
+        <Facehash
+          name={result.title || result.id}
+          size={32}
+          interactive={false}
+          showInitial={false}
+        />
       </div>
       <div className={cn(["flex-1 min-w-0"])}>
         <div
@@ -86,9 +111,11 @@ function HumanSearchResultItem({
 function OrganizationSearchResultItem({
   result,
   onClick,
+  isSelected,
 }: {
   result: SearchResult;
   onClick: () => void;
+  isSelected: boolean;
 }) {
   const humanIds = main.UI.useSliceRowIds(
     main.INDEXES.humansByOrg,
@@ -110,6 +137,7 @@ function OrganizationSearchResultItem({
 
   return (
     <button
+      data-result-id={result.id}
       onClick={onClick}
       className={cn([
         "w-full px-3 py-2",
@@ -117,6 +145,7 @@ function OrganizationSearchResultItem({
         "hover:bg-neutral-100",
         "rounded-lg transition-colors",
         "text-left",
+        isSelected && "bg-neutral-100",
       ])}
     >
       <div className={cn(["flex-1 min-w-0"])}>
@@ -137,9 +166,11 @@ function OrganizationSearchResultItem({
 function SessionSearchResultItem({
   result,
   onClick,
+  isSelected,
 }: {
   result: SearchResult;
   onClick: () => void;
+  isSelected: boolean;
 }) {
   const displayTitle = useMemo(() => {
     const sanitized = DOMPurify.sanitize(result.titleHighlighted, {
@@ -212,6 +243,7 @@ function SessionSearchResultItem({
 
   return (
     <button
+      data-result-id={result.id}
       onClick={onClick}
       className={cn([
         "w-full px-3 py-2",
@@ -220,6 +252,7 @@ function SessionSearchResultItem({
         "rounded-lg transition-colors",
         "text-left",
         "min-w-0",
+        isSelected && "bg-neutral-100",
       ])}
     >
       <div
@@ -247,10 +280,16 @@ function getTab(result: SearchResult): TabInput | null {
     return { type: "sessions", id: result.id };
   }
   if (result.type === "human") {
-    return { type: "humans", id: result.id };
+    return {
+      type: "contacts",
+      state: { selectedPerson: result.id, selectedOrganization: null },
+    };
   }
   if (result.type === "organization") {
-    return { type: "organizations", id: result.id };
+    return {
+      type: "contacts",
+      state: { selectedOrganization: result.id, selectedPerson: null },
+    };
   }
 
   return null;

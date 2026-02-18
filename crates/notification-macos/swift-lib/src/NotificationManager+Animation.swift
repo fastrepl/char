@@ -5,7 +5,7 @@ extension NotificationManager {
     notification: NotificationInstance, screen: NSScreen, timeoutSeconds: Double
   ) {
     let screenRect = screen.visibleFrame
-    let finalX = screenRect.maxX - panelWidth() - Layout.rightMargin + Layout.buttonOverhang
+    let finalX = screenRect.maxX - panelWidth() - Layout.rightMargin + buttonOverhang()
     let y = notification.panel.frame.minY
 
     notification.panel.setFrame(

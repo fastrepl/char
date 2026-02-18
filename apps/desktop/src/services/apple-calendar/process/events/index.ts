@@ -1,4 +1,8 @@
-export { type EventsSyncResult, executeForEventsSync } from "./execute";
+export {
+  type EventsSyncResult,
+  executeForEventsSync,
+  syncSessionEmbeddedEvents,
+} from "./execute";
 export { syncEvents } from "./sync";
 export type {
   EventId,

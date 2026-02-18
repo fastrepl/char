@@ -22,6 +22,8 @@ macro_rules! define_notification_callback {
         }
 
         #[unsafe(no_mangle)]
+        /// # Safety
+        /// `key_ptr` must be a valid, non-null pointer to a null-terminated C string.
         pub unsafe extern "C" fn $extern_fn(key_ptr: *const c_char) {
             if let Some(cb) = $static_name.lock().unwrap().as_ref() {
                 let key = unsafe { CStr::from_ptr(key_ptr) }

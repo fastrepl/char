@@ -7,7 +7,7 @@ import {
   useMemo,
 } from "react";
 
-import { getRpcCanStartTrial } from "@hypr/api-client";
+import { canStartTrial as canStartTrialApi } from "@hypr/api-client";
 import { createClient } from "@hypr/api-client/client";
 import {
   commands as authCommands,
@@ -91,7 +91,7 @@ export function BillingProvider({ children }: { children: ReactNode }) {
         return false;
       }
       const client = createClient({ baseUrl: env.VITE_API_URL, headers });
-      const { data, error } = await getRpcCanStartTrial({ client });
+      const { data, error } = await canStartTrialApi({ client });
       if (error) {
         return false;
       }

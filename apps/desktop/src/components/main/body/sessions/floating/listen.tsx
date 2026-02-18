@@ -6,9 +6,9 @@ import { Spinner } from "@hypr/ui/components/ui/spinner";
 
 import { useListener } from "../../../../../contexts/listener";
 import { useShell } from "../../../../../contexts/shell";
+import { useSessionEvent } from "../../../../../hooks/tinybase";
 import { useEventCountdown } from "../../../../../hooks/useEventCountdown";
 import { useStartListening } from "../../../../../hooks/useStartListening";
-import * as main from "../../../../../store/tinybase/store/main";
 import { type Tab, useTabs } from "../../../../../store/zustand/tabs";
 import { RecordingIcon, useListenButtonState } from "../shared";
 import { OptionsMenu } from "./options-menu";
@@ -162,7 +162,7 @@ function SplitMeetingButtons({
       {!isNarrow && (
         <FloatingButton
           onClick={onJoin}
-          className="justify-center gap-2 h-10 px-3 lg:px-4 bg-linear-to-b from-white to-neutral-50 hover:from-neutral-50 hover:to-neutral-100 text-neutral-800 border-neutral-200 shadow-[0_4px_14px_rgba(0,0,0,0.1)]"
+          className="justify-center gap-2 h-10 px-3 lg:px-4 bg-white hover:bg-neutral-100 text-neutral-800 border-neutral-200 shadow-[0_4px_14px_rgba(0,0,0,0.1)]"
         >
           <span>Join</span>
           {getMeetingIcon()}
@@ -178,7 +178,7 @@ function SplitMeetingButtons({
         <FloatingButton
           onClick={onStartListening}
           disabled={disabled}
-          className="justify-center gap-2 pl-3 pr-8 lg:pl-4 lg:pr-10 bg-linear-to-b from-stone-700 to-stone-800 hover:from-stone-600 hover:to-stone-700 text-white border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)]"
+          className="justify-center gap-2 pl-3 pr-8 lg:pl-4 lg:pr-10 bg-stone-800 hover:bg-stone-700 text-white border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)]"
           tooltip={
             warningMessage
               ? {
@@ -242,7 +242,7 @@ function ListenSplitButton({
         <FloatingButton
           onClick={onPrimaryClick}
           disabled={disabled}
-          className="justify-center gap-2 pl-3 pr-8 lg:pl-4 lg:pr-10 bg-linear-to-b from-stone-700 to-stone-800 hover:from-stone-600 hover:to-stone-700 text-white border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)]"
+          className="justify-center gap-2 pl-3 pr-8 lg:pl-4 lg:pr-10 bg-stone-800 hover:bg-stone-700 text-white border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)]"
           tooltip={
             warningMessage
               ? {
@@ -303,18 +303,8 @@ function detectMeetingType(
 }
 
 function useRemoteMeeting(sessionId: string): RemoteMeeting | null {
-  const eventId = main.UI.useCell(
-    "sessions",
-    sessionId,
-    "event_id",
-    main.STORE_ID,
-  );
-  const meetingLink = main.UI.useCell(
-    "events",
-    eventId ?? "",
-    "meeting_link",
-    main.STORE_ID,
-  );
+  const event = useSessionEvent(sessionId);
+  const meetingLink = event?.meeting_link ?? null;
 
   if (!meetingLink) {
     return null;

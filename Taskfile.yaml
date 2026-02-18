@@ -3,14 +3,15 @@ dotenv: [".env"]
 includes:
   web:
     taskfile: ./apps/web
-  api:
-    taskfile: ./apps/api
 
 tasks:
   py:init: POETRY_VIRTUALENVS_IN_PROJECT=true poetry install --no-cache --no-interaction --all-extras
   py:run: poetry run python3 {{.CLI_ARGS}}
 
-  stripe: stripe listen --skip-verify --forward-to http://localhost:5000/webhook/stripe
+  stripe:
+    cmds:
+      - stripe listen --print-secret | tr -d '\r\n' | (echo -n 'STRIPE_WEBHOOK_SECRET="'; cat; echo '"') > .env.stripe
+      - stripe listen --skip-verify --forward-to http://localhost:8788/webhook/stripe
   bacon: bacon {{.CLI_ARGS}}
   stat: btop -f hyprnote -u 500 --preset 1
 
@@ -143,8 +144,3 @@ tasks:
       - supabase start -x realtime,logflare
       - task: supabase-env
       - supabase migration up --local
-
-  stripe:
-    cmds:
-      - stripe listen --print-secret | tr -d '\r\n' | xargs -I{} sh -c 'printf "STRIPE_WEBHOOK_SECRET=\"{}\"\n" > .env.stripe'
-      - stripe listen --skip-verify --forward-to http://localhost:8787/webhook/stripe

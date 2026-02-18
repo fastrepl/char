@@ -1,14 +1,28 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
+  BookOpen,
+  Building2,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   ChevronUp,
+  FileText,
+  History,
+  LayoutTemplate,
+  Map,
   Menu,
+  MessageCircle,
   PanelLeft,
   PanelLeftClose,
+  X,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { cn } from "@hypr/utils";
+
 import { SearchTrigger } from "@/components/search";
+import { useBlogToc } from "@/hooks/use-blog-toc";
 import { useDocsDrawer } from "@/hooks/use-docs-drawer";
 import { useHandbookDrawer } from "@/hooks/use-handbook-drawer";
 import { getPlatformCTA, usePlatform } from "@/hooks/use-platform";
@@ -28,9 +42,8 @@ function getMaxWidthClass(pathname: string): string {
 
 const featuresList = [
   { to: "/product/ai-notetaking", label: "AI Notetaking" },
-  { to: "/product/ai-assistant", label: "AI Chat" },
   { to: "/product/search", label: "Searchable Notes" },
-  { to: "/gallery/templates", label: "Custom Templates" },
+  { to: "/gallery?type=template", label: "Custom Templates" },
   { to: "/product/markdown", label: "Markdown Files" },
   { to: "/product/flexible-ai", label: "Flexible AI" },
   { to: "/opensource", label: "Open Source" },
@@ -42,13 +55,28 @@ const solutionsList = [
   { to: "/product/api", label: "For Developers" },
 ];
 
-const resourcesList = [
-  { to: "/blog/", label: "Blog" },
-  { to: "/gallery/templates", label: "Meeting Templates" },
-  { to: "/changelog/", label: "Changelog" },
-  { to: "/roadmap/", label: "Roadmap" },
-  { to: "/company-handbook/", label: "Company Handbook" },
-  { to: "https://discord.gg/hyprnote", label: "Community", external: true },
+const resourcesList: {
+  to: string;
+  label: string;
+  icon: LucideIcon;
+  external?: boolean;
+}[] = [
+  { to: "/blog/", label: "Blog", icon: FileText },
+  { to: "/docs/", label: "Documentation", icon: BookOpen },
+  {
+    to: "/gallery?type=template",
+    label: "Meeting Templates",
+    icon: LayoutTemplate,
+  },
+  { to: "/changelog/", label: "Changelog", icon: History },
+  { to: "/roadmap/", label: "Roadmap", icon: Map },
+  { to: "/company-handbook/", label: "Company Handbook", icon: Building2 },
+  {
+    to: "https://discord.gg/hyprnote",
+    label: "Community",
+    icon: MessageCircle,
+    external: true,
+  },
 ];
 
 export function Header() {
@@ -63,8 +91,12 @@ export function Header() {
   const isDocsPage = router.location.pathname.startsWith("/docs");
   const isHandbookPage =
     router.location.pathname.startsWith("/company-handbook");
+  const isBlogArticlePage =
+    router.location.pathname.startsWith("/blog/") &&
+    router.location.pathname !== "/blog/";
   const docsDrawer = useDocsDrawer();
   const handbookDrawer = useHandbookDrawer();
+  const blogToc = useBlogToc();
   const lastScrollY = useRef(0);
 
   useEffect(() => {
@@ -136,6 +168,9 @@ export function Header() {
             <SearchTrigger variant="mobile" />
           </div>
         )}
+        {isBlogArticlePage && blogToc && blogToc.toc.length > 0 && (
+          <BlogTocSubBar blogToc={blogToc} maxWidthClass={maxWidthClass} />
+        )}
       </header>
 
       {/* Spacer to account for fixed header */}
@@ -143,7 +178,9 @@ export function Header() {
         className={
           isDocsPage || isHandbookPage
             ? "h-17.25 md:h-17.25 max-md:h-[calc(69px+52px)]"
-            : "h-17.25"
+            : isBlogArticlePage && blogToc && blogToc.toc.length > 0
+              ? "h-[calc(69px+44px)] sm:h-17.25"
+              : "h-17.25"
         }
       />
 
@@ -194,10 +231,10 @@ function LeftNav({
       />
       <Logo />
       <Link
-        to="/about/"
-        className="hidden sm:block text-sm text-neutral-600 hover:text-neutral-800 transition-all hover:underline decoration-dotted"
+        to="/why-hyprnote/"
+        className="hidden md:block text-sm text-neutral-600 hover:text-neutral-800 transition-all hover:underline decoration-dotted"
       >
-        Why Hyprnote
+        Why Char
       </Link>
       <ProductDropdown
         isProductOpen={isProductOpen}
@@ -282,7 +319,7 @@ function Logo() {
       to="/"
       className="font-semibold text-2xl font-serif hover:scale-105 transition-transform mr-4"
     >
-      <img src="/api/images/hyprnote/logo.svg" alt="Hyprnote" className="h-6" />
+      Char
     </Link>
   );
 }
@@ -380,7 +417,7 @@ function ResourcesDropdown({
         {isResourcesOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
       </button>
       {isResourcesOpen && (
-        <div className="absolute top-full left-0 pt-2 w-48 z-50">
+        <div className="absolute top-full left-0 pt-2 w-56 z-50">
           <div className="bg-white border border-neutral-200 rounded-xs shadow-lg py-2">
             <div className="px-3 py-2">
               {resourcesList.map((link) =>
@@ -391,8 +428,9 @@ function ResourcesDropdown({
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => setIsResourcesOpen(false)}
-                    className="py-2 text-sm text-neutral-700 flex items-center group"
+                    className="py-2 text-sm text-neutral-700 flex items-center gap-2 group"
                   >
+                    <link.icon size={16} className="text-neutral-400" />
                     <span className="group-hover:underline decoration-dotted">
                       {link.label}
                     </span>
@@ -402,8 +440,9 @@ function ResourcesDropdown({
                     key={link.to}
                     to={link.to}
                     onClick={() => setIsResourcesOpen(false)}
-                    className="py-2 text-sm text-neutral-700 flex items-center group"
+                    className="py-2 text-sm text-neutral-700 flex items-center gap-2 group"
                   >
+                    <link.icon size={16} className="text-neutral-400" />
                     <span className="group-hover:underline decoration-dotted">
                       {link.label}
                     </span>
@@ -466,7 +505,13 @@ function MobileNav({
   return (
     <div className="sm:hidden flex items-center gap-3">
       {!hideCTA && (
-        <CTAButton platformCTA={platformCTA} platform={platform} mobile />
+        <div
+          className={cn("transition-opacity duration-200 ease-out", [
+            isMenuOpen ? "opacity-0" : "opacity-100",
+          ])}
+        >
+          <CTAButton platformCTA={platformCTA} platform={platform} mobile />
+        </div>
       )}
       <button
         onClick={() => {
@@ -484,7 +529,11 @@ function MobileNav({
         aria-label={isMenuOpen ? "Close menu" : "Open menu"}
         aria-expanded={isMenuOpen}
       >
-        <Menu className="text-neutral-600" size={16} />
+        {isMenuOpen ? (
+          <X className="text-neutral-600" size={16} />
+        ) : (
+          <Menu className="text-neutral-600" size={16} />
+        )}
       </button>
     </div>
   );
@@ -593,11 +642,11 @@ function MobileMenuLinks({
   return (
     <div className="flex flex-col gap-4">
       <Link
-        to="/about/"
+        to="/why-hyprnote/"
         onClick={() => setIsMenuOpen(false)}
         className="block text-base text-neutral-700 hover:text-neutral-900 transition-colors"
       >
-        Why Hyprnote
+        Why Char
       </Link>
       <MobileProductSection
         isProductOpen={isProductOpen}
@@ -676,8 +725,9 @@ function MobileResourcesSection({
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setIsMenuOpen(false)}
-                className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors py-1"
+                className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors py-1 flex items-center gap-2"
               >
+                <link.icon size={14} className="text-neutral-400" />
                 {link.label}
               </a>
             ) : (
@@ -685,8 +735,9 @@ function MobileResourcesSection({
                 key={link.to}
                 to={link.to}
                 onClick={() => setIsMenuOpen(false)}
-                className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors py-1"
+                className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors py-1 flex items-center gap-2"
               >
+                <link.icon size={14} className="text-neutral-400" />
                 {link.label}
               </Link>
             ),
@@ -707,16 +758,18 @@ function MobileFeaturesList({
       <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
         Features
       </div>
-      {featuresList.map((link) => (
-        <Link
-          key={link.to}
-          to={link.to}
-          onClick={() => setIsMenuOpen(false)}
-          className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors py-1"
-        >
-          {link.label}
-        </Link>
-      ))}
+      <div className="flex flex-col gap-2 pb-4">
+        {featuresList.map((link) => (
+          <Link
+            key={link.to}
+            to={link.to}
+            onClick={() => setIsMenuOpen(false)}
+            className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors py-1"
+          >
+            {link.label}
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }
@@ -731,16 +784,83 @@ function MobileSolutionsList({
       <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
         Solutions
       </div>
-      {solutionsList.map((link) => (
-        <Link
-          key={link.to}
-          to={link.to}
-          onClick={() => setIsMenuOpen(false)}
-          className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors py-1"
+      <div className="flex flex-col gap-2">
+        {solutionsList.map((link) => (
+          <Link
+            key={link.to}
+            to={link.to}
+            onClick={() => setIsMenuOpen(false)}
+            className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors py-1"
+          >
+            {link.label}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BlogTocSubBar({
+  blogToc,
+  maxWidthClass,
+}: {
+  blogToc: NonNullable<ReturnType<typeof useBlogToc>>;
+  maxWidthClass: string;
+}) {
+  const { toc, activeId, scrollToHeading } = blogToc;
+  const activeIndex = toc.findIndex((item) => item.id === activeId);
+  const activeItem = activeIndex >= 0 ? toc[activeIndex] : toc[0];
+
+  const goPrev = () => {
+    const prevIndex = Math.max(0, activeIndex - 1);
+    scrollToHeading(toc[prevIndex].id);
+  };
+
+  const goNext = () => {
+    const nextIndex = Math.min(toc.length - 1, activeIndex + 1);
+    scrollToHeading(toc[nextIndex].id);
+  };
+
+  return (
+    <div
+      className={`${maxWidthClass} mx-auto border-x border-neutral-100 border-t border-t-neutral-50 sm:hidden`}
+    >
+      <div className="flex items-center h-11 px-2">
+        <button
+          onClick={goPrev}
+          disabled={activeIndex <= 0}
+          className={cn([
+            "shrink-0 p-1.5 rounded-md transition-colors cursor-pointer",
+            activeIndex <= 0
+              ? "text-neutral-200"
+              : "text-neutral-500 hover:text-stone-700 hover:bg-stone-50",
+          ])}
         >
-          {link.label}
-        </Link>
-      ))}
+          <ChevronLeft size={14} />
+        </button>
+        <button
+          onClick={() => {
+            if (activeItem) scrollToHeading(activeItem.id);
+          }}
+          className="flex-1 min-w-0 px-2 cursor-pointer"
+        >
+          <p className="text-sm text-stone-700 font-medium truncate text-center">
+            {activeItem?.text}
+          </p>
+        </button>
+        <button
+          onClick={goNext}
+          disabled={activeIndex >= toc.length - 1}
+          className={cn([
+            "shrink-0 p-1.5 rounded-md transition-colors cursor-pointer",
+            activeIndex >= toc.length - 1
+              ? "text-neutral-200"
+              : "text-neutral-500 hover:text-stone-700 hover:bg-stone-50",
+          ])}
+        >
+          <ChevronRight size={14} />
+        </button>
+      </div>
     </div>
   );
 }
@@ -755,11 +875,11 @@ function MobileMenuCTAs({
   setIsMenuOpen: (open: boolean) => void;
 }) {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-row sticky bottom-4 gap-3">
       <Link
         to="/auth/"
         onClick={() => setIsMenuOpen(false)}
-        className="block w-full px-4 py-3 text-center text-sm text-neutral-700 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+        className="block w-full px-4 py-3 text-center text-sm text-neutral-700 border border-neutral-200 bg-white rounded-lg hover:bg-neutral-50 transition-colors"
       >
         Get started
       </Link>

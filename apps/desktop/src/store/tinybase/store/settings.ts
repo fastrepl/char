@@ -45,6 +45,10 @@ export const SETTINGS_MAPPING = {
       type: "string",
       path: ["notification", "ignored_platforms"],
     },
+    mic_active_threshold: {
+      type: "number",
+      path: ["notification", "mic_active_threshold"],
+    },
     current_llm_provider: {
       type: "string",
       path: ["ai", "current_llm_provider"],
@@ -64,6 +68,10 @@ export const SETTINGS_MAPPING = {
     timezone: {
       type: "string",
       path: ["general", "timezone"],
+    },
+    week_start: {
+      type: "string",
+      path: ["general", "week_start"],
     },
   },
   tables: {

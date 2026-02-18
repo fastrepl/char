@@ -3,6 +3,11 @@ import { create } from "zustand";
 import { wrapSliceWithLogging } from "../shared";
 import { type BasicActions, type BasicState, createBasicSlice } from "./basic";
 import {
+  type ChatModeActions,
+  type ChatModeState,
+  createChatModeSlice,
+} from "./chat-mode";
+import {
   createLifecycleSlice,
   type LifecycleActions,
   lifecycleMiddleware,
@@ -33,21 +38,24 @@ import {
 } from "./restore";
 import { createStateUpdaterSlice, type StateBasicActions } from "./state";
 
+export type { ChatEvent, ChatMode } from "./chat-mode";
 export type { SettingsState, SettingsTab, Tab, TabInput } from "./schema";
-export { isSameTab, rowIdfromTab, uniqueIdfromTab } from "./schema";
+export { isSameTab, uniqueIdfromTab } from "./schema";
 export { restorePinnedTabsToStore, restoreRecentlyOpenedToStore };
 
 type State = BasicState &
   NavigationState &
   LifecycleState &
   RestoreState &
-  RecentlyOpenedState;
+  RecentlyOpenedState &
+  ChatModeState;
 type Actions = BasicActions &
   StateBasicActions &
   NavigationActions &
   LifecycleActions &
   RestoreActions &
-  RecentlyOpenedActions;
+  RecentlyOpenedActions &
+  ChatModeActions;
 type Store = State & Actions;
 
 export const useTabs = create<Store>()(
@@ -71,6 +79,7 @@ export const useTabs = create<Store>()(
               "recentlyOpened",
               createRecentlyOpenedSlice(set, get),
             ),
+            ...wrapSliceWithLogging("chatMode", createChatModeSlice(set, get)),
           })),
         ),
       ),

@@ -1,11 +1,10 @@
 import { Icon } from "@iconify-icon/react";
 import MuxPlayer, { type MuxPlayerRefAttributes } from "@mux/mux-player-react";
-import { useFeatureFlagVariantKey } from "@posthog/react";
 import { useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { allArticles } from "content-collections";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { cn } from "@hypr/utils";
 
@@ -27,61 +26,33 @@ import { useAnalytics } from "@/hooks/use-posthog";
 
 const MUX_PLAYBACK_ID = "bpcBHf4Qv5FbhwWD02zyFDb24EBuEuTPHKFUrZEktULQ";
 
-// Hero A/B test variants
-const HERO_VARIANTS = {
-  control: {
-    title: "Take Meeting Notes With AI of Your Choice",
-    subtitle:
-      "The only AI note-taker that lets you choose your preferred STT and LLM provider",
-    valueProps: [
-      {
-        title: "No forced stack",
-        description:
-          "Use our managed cloud, bring your own API keys, or run fully local models.",
-      },
-      {
-        title: "You own your data",
-        description:
-          "Plain markdown files on your device. Works with Obsidian, Notion, or any tool.",
-      },
-      {
-        title: "Just works",
-        description:
-          "A simple, familiar notepad with real-time transcription and AI summaries.",
-      },
-    ],
-  },
-  variant_a: {
-    title: "AI Notepad for Meetings—No Strings Attached.",
-    subtitle: "Own your data. Pick your AI provider. No bots. No lock-in",
-    valueProps: [
-      {
-        title: "No forced stack",
-        description:
-          "Choose your preferred STT and LLM provider. Use our managed service, bring your own Key, or run local models.",
-      },
-      {
-        title: "Files over apps",
-        description:
-          "Unlike other AI note-takers that lock your history in their app, Hyprnote saves notes as markdown files on your device.",
-      },
-      {
-        title: "Private by design",
-        description:
-          "System audio capture—no bot joins your calls, no calendar permissions needed. Data stays on your device.",
-      },
-    ],
-  },
-} as const;
-
-type HeroVariant = keyof typeof HERO_VARIANTS;
+const heroContent = {
+  title: "AI Notepad for Meetings\u2014No Strings Attached.",
+  subtitle: "No forced cloud. No data held hostage. No bots in your meetings.",
+  valueProps: [
+    {
+      title: "Zero lock-in",
+      description:
+        "Choose your preferred STT and LLM provider. Cloud or local.",
+    },
+    {
+      title: "You own your data",
+      description: "Plain markdown files on your device. Works with any tool.",
+    },
+    {
+      title: "Just works",
+      description:
+        "A simple, familiar notepad, real-time transcription, and AI summaries.",
+    },
+  ],
+};
 
 const mainFeatures = [
   {
     icon: "mdi:text-box-outline",
     title: "Real-time transcription",
     description:
-      "While you take notes, Hyprnote listens and generates a live transcript",
+      "While you take notes, Char listens and generates a live transcript",
     image: "/api/images/hyprnote/transcript.jpg",
     muxPlaybackId: "rbkYuZpGJGLHx023foq9DCSt3pY1RegJU5PvMCkRE3rE",
     link: "/product/ai-notetaking/#transcription",
@@ -90,7 +61,7 @@ const mainFeatures = [
     icon: "mdi:file-document-outline",
     title: "AI summary",
     description:
-      "Hyprnote combines your notes and the transcript to create a perfect summary",
+      "Char combines your notes and the transcript to create a perfect summary",
     image: "/api/images/hyprnote/summary.jpg",
     muxPlaybackId: "lKr5l1fWGNnRqOehiz15mV79VHtFOCiuO9urmgqs6V8",
     link: "/product/ai-notetaking/#summaries",
@@ -121,7 +92,7 @@ const mainFeatures = [
 ];
 
 const activeFeatureIndices = mainFeatures.map((_, i) => i);
-const FEATURES_AUTO_ADVANCE_DURATION = 5000;
+const FEATURES_AUTO_ADVANCE_DURATION = 8000;
 
 export const Route = createFileRoute("/_view/")({
   component: Component,
@@ -190,10 +161,9 @@ function Component() {
 
 function YCombinatorBanner() {
   return (
-    <a
-      href="https://www.ycombinator.com/companies/hyprnote"
-      target="_blank"
-      rel="noopener noreferrer"
+    <Link
+      to="/blog/$slug/"
+      params={{ slug: "hyprnote-is-now-char" }}
       className="group"
     >
       <div
@@ -205,17 +175,9 @@ function YCombinatorBanner() {
           "hover:bg-stone-50 transition-all",
         ])}
       >
-        <span className="group-hover:font-medium">Backed by</span>
-        <Image
-          src="/icons/yc_stone.svg"
-          alt="Y Combinator"
-          width={16}
-          height={16}
-          className="h-4 w-4 inline-block group-hover:scale-105"
-        />
-        <span className="group-hover:font-medium">Y Combinator</span>
+        <span className="group-hover:font-medium">Hyprnote is now Char.</span>
       </div>
-    </a>
+    </Link>
   );
 }
 
@@ -232,25 +194,11 @@ function HeroSection({
   const { track } = useAnalytics();
   const [shake, setShake] = useState(false);
 
-  const flagVariant = useFeatureFlagVariantKey("hero-ab-test");
-
-  const variant = useMemo(() => {
-    if (typeof flagVariant !== "string" || !(flagVariant in HERO_VARIANTS)) {
-      return "control";
-    }
-    return flagVariant as HeroVariant;
-  }, [flagVariant]);
-
-  const heroContent = HERO_VARIANTS[variant];
-
   useEffect(() => {
-    if (variant) {
-      track("hero_section_viewed", {
-        variant,
-        timestamp: new Date().toISOString(),
-      });
-    }
-  }, [variant, track]);
+    track("hero_section_viewed", {
+      timestamp: new Date().toISOString(),
+    });
+  }, [track]);
 
   const mutation = useMutation({
     mutationFn: async (email: string) => {
@@ -262,7 +210,6 @@ function HeroSection({
         platform: platform,
         timestamp: new Date().toISOString(),
         email: email,
-        hero_variant: variant,
       });
 
       await addContact({
@@ -835,9 +782,9 @@ export function HowItWorksSection() {
         <div className="border-r border-neutral-100 flex flex-col overflow-clip">
           <div className="p-8 flex flex-col gap-4">
             <p className="text-lg font-serif text-neutral-600 leading-relaxed">
-              <span className="font-semibold">While you take notes,</span>{" "}
-              Hyprnote listens and keeps track of everything that happens during
-              the meeting.
+              <span className="font-semibold">While you take notes,</span> Char
+              listens and keeps track of everything that happens during the
+              meeting.
             </p>
           </div>
           <div className="flex-1 flex items-end justify-center px-8 pb-0 bg-stone-50/30">
@@ -868,7 +815,7 @@ export function HowItWorksSection() {
           <div className="p-8 flex flex-col gap-4">
             <p className="text-lg font-serif text-neutral-600 leading-relaxed">
               <span className="font-semibold">After the meeting is over,</span>{" "}
-              Hyprnote combines your notes with transcripts to create a perfect
+              Char combines your notes with transcripts to create a perfect
               summary.
             </p>
           </div>
@@ -957,9 +904,9 @@ export function HowItWorksSection() {
         <div className="border-b border-neutral-100">
           <div className="p-6 pb-2">
             <p className="text-base font-serif text-neutral-600 leading-relaxed mb-4">
-              <span className="font-semibold">While you take notes,</span>{" "}
-              Hyprnote listens and keeps track of everything that happens during
-              the meeting.
+              <span className="font-semibold">While you take notes,</span> Char
+              listens and keeps track of everything that happens during the
+              meeting.
             </p>
           </div>
           <div className="px-6 pb-0 bg-stone-50/30 overflow-clip">
@@ -993,7 +940,7 @@ export function HowItWorksSection() {
           <div className="p-6 pb-2">
             <p className="text-base font-serif text-neutral-600 leading-relaxed mb-4">
               <span className="font-semibold">After the meeting is over,</span>{" "}
-              Hyprnote combines your notes with transcripts to create a perfect
+              Char combines your notes with transcripts to create a perfect
               summary.
             </p>
           </div>
@@ -1173,7 +1120,7 @@ export function MainFeaturesSection({
         <div className="mb-6 mx-auto size-28 shadow-xl border border-neutral-100 flex justify-center items-center rounded-4xl bg-transparent">
           <Image
             src="/api/images/hyprnote/icon.png"
-            alt="Hyprnote"
+            alt="Char"
             width={96}
             height={96}
             className="size-24 rounded-3xl border border-neutral-100"
@@ -1213,11 +1160,20 @@ function FeaturesMobileCarousel({
   scrollToFeature: (index: number) => void;
   progress: number;
 }) {
+  const isSwiping = useRef(false);
+
   return (
     <div className="max-[800px]:block hidden">
       <div
         ref={featuresScrollRef}
         className="overflow-x-auto scrollbar-hide snap-x snap-mandatory"
+        onTouchStart={() => {
+          isSwiping.current = true;
+          onIndexChange(selectedFeature);
+        }}
+        onTouchEnd={() => {
+          isSwiping.current = false;
+        }}
         onScroll={(e) => {
           const container = e.currentTarget;
           const scrollLeft = container.scrollLeft;
@@ -1232,8 +1188,21 @@ function FeaturesMobileCarousel({
           {mainFeatures.map((feature, index) => (
             <div key={index} className="w-full shrink-0 snap-center">
               <div className="border-y border-neutral-100 overflow-hidden flex flex-col">
-                <div className="aspect-video border-b border-neutral-100 overflow-hidden">
-                  {feature.image ? (
+                <Link
+                  to={feature.link}
+                  className={cn([
+                    "aspect-video border-b border-neutral-100 overflow-hidden relative block",
+                    (feature.image || feature.muxPlaybackId) &&
+                      "bg-neutral-100",
+                  ])}
+                >
+                  {feature.muxPlaybackId ? (
+                    <MobileFeatureVideo
+                      playbackId={feature.muxPlaybackId}
+                      alt={`${feature.title} feature`}
+                      isActive={selectedFeature === index}
+                    />
+                  ) : feature.image ? (
                     <Image
                       src={feature.image}
                       alt={`${feature.title} feature`}
@@ -1246,9 +1215,13 @@ function FeaturesMobileCarousel({
                       className="w-full h-full object-cover"
                     />
                   )}
-                </div>
+                </Link>
                 <div className="p-6">
-                  <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Icon
+                      icon={feature.icon}
+                      className="text-2xl text-stone-600"
+                    />
                     <h3 className="text-lg font-serif text-stone-600">
                       {feature.title}
                     </h3>
@@ -1285,6 +1258,64 @@ function FeaturesMobileCarousel({
           </button>
         ))}
       </div>
+    </div>
+  );
+}
+
+function MobileFeatureVideo({
+  playbackId,
+  alt,
+  isActive,
+}: {
+  playbackId: string;
+  alt: string;
+  isActive: boolean;
+}) {
+  const playerRef = useRef<MuxPlayerRefAttributes>(null);
+  const thumbnailUrl = `https://image.mux.com/${playbackId}/thumbnail.jpg?width=1920&height=1080&fit_mode=smartcrop`;
+
+  useEffect(() => {
+    const player = playerRef.current;
+    if (!player) return;
+
+    if (isActive) {
+      player.play()?.catch(() => {
+        // Autoplay blocked or player not ready - fail silently
+      });
+    } else {
+      player.pause();
+      player.currentTime = 0;
+    }
+  }, [isActive]);
+
+  return (
+    <div className="w-full h-full relative">
+      <img
+        src={thumbnailUrl}
+        alt={alt}
+        className={cn([
+          "w-full h-full object-contain absolute inset-0 transition-opacity duration-300",
+          isActive ? "opacity-0" : "opacity-100",
+        ])}
+      />
+      <MuxPlayer
+        ref={playerRef}
+        playbackId={playbackId}
+        muted
+        loop
+        playsInline
+        maxResolution="1080p"
+        minResolution="720p"
+        className={cn([
+          "w-full h-full object-contain transition-opacity duration-300",
+          isActive ? "opacity-100" : "opacity-0",
+        ])}
+        style={
+          {
+            "--controls": "none",
+          } as React.CSSProperties & { [key: `--${string}`]: string }
+        }
+      />
     </div>
   );
 }
@@ -1447,7 +1478,7 @@ export function TemplatesSection() {
           A template for every meeting
         </h2>
         <p className="text-neutral-600">
-          Hyprnote adapts to how you work with customizable templates for any
+          Char adapts to how you work with customizable templates for any
           meeting type
         </p>
       </div>
@@ -1457,7 +1488,8 @@ export function TemplatesSection() {
 
       <div className="text-center py-8 border-t border-neutral-100">
         <Link
-          to="/templates/"
+          to="/gallery/"
+          search={{ type: "template" }}
           className={cn([
             "inline-flex items-center gap-2",
             "text-stone-600 hover:text-stone-800",
@@ -1493,16 +1525,14 @@ function TemplatesMobileView() {
           <p className="text-sm text-neutral-600 mb-4">
             {category.description}
           </p>
-          <div className="flex flex-wrap gap-2">
-            {category.templates.map((template) => (
+          <div className="text-left">
+            {category.templates.map((template, i) => (
               <span
                 key={template}
-                className={cn([
-                  "text-xs px-3 py-1.5 rounded-full",
-                  "bg-stone-100 text-stone-700",
-                ])}
+                className="text-[11px] font-mono text-stone-400"
               >
                 {template}
+                {i < category.templates.length - 1 ? ", " : ""}
               </span>
             ))}
           </div>
@@ -1533,16 +1563,14 @@ function TemplatesDesktopView() {
           <p className="text-sm text-neutral-600 mb-4">
             {category.description}
           </p>
-          <div className="flex flex-wrap gap-2">
-            {category.templates.map((template) => (
+          <div className="text-left">
+            {category.templates.map((template, i) => (
               <span
                 key={template}
-                className={cn([
-                  "text-xs px-3 py-1.5 rounded-full",
-                  "bg-stone-100 text-stone-700",
-                ])}
+                className="text-[11px] font-mono text-stone-400"
               >
                 {template}
+                {i < category.templates.length - 1 ? ", " : ""}
               </span>
             ))}
           </div>
@@ -1563,7 +1591,7 @@ function FAQSection() {
         </div>
 
         <FAQ>
-          <FAQItem question="What languages does Hyprnote support?">
+          <FAQItem question="What languages does Char support?">
             45+ languages including English, Spanish, French, German, Japanese,
             Mandarin, and more.
           </FAQItem>
@@ -1573,20 +1601,20 @@ function FAQSection() {
             summarized notes.
           </FAQItem>
 
-          <FAQItem question="Does Hyprnote train AI models on my data?">
-            No. Hyprnote does not use your recordings, transcripts, or notes to
+          <FAQItem question="Does Char train AI models on my data?">
+            No. Char does not use your recordings, transcripts, or notes to
             train AI models. When using cloud providers, your data is processed
-            according to their privacy policies, but Hyprnote itself never
-            collects or uses your data for training.
+            according to their privacy policies, but Char itself never collects
+            or uses your data for training.
           </FAQItem>
 
-          <FAQItem question="Is Hyprnote safe?">
-            Hyprnote doesn't store your conversations. Every meeting audio,
+          <FAQItem question="Is Char safe?">
+            Char doesn't store your conversations. Every meeting audio,
             transcript, and note is a file on your computer. You decide if your
             data ever leaves your device.
           </FAQItem>
 
-          <FAQItem question="How is Hyprnote different from other AI note-takers?">
+          <FAQItem question="How is Char different from other AI note-takers?">
             Plain markdown files instead of proprietary databases. System audio
             capture instead of meeting bots. Your choice of AI provider instead
             of vendor lock-in. Open source instead of a black box.
@@ -1625,10 +1653,10 @@ function ManifestoSection() {
                 you and your team.
               </p>
               <p>
-                Hyprnote exists to preserve what makes us human: conversations
-                that spark ideas, collaborations that move work forward. We
-                build tools that amplify human agency, not replace it. No ghost
-                bots. No silent note lurkers. Just people, thinking together.
+                Char exists to preserve what makes us human: conversations that
+                spark ideas, collaborations that move work forward. We build
+                tools that amplify human agency, not replace it. No ghost bots.
+                No silent note lurkers. Just people, thinking together.
               </p>
               <p>
                 We stand with those who value real connection and purposeful
@@ -1656,7 +1684,7 @@ function ManifestoSection() {
             <div className="flex flex-col gap-4">
               <div>
                 <p className="text-base text-neutral-600 font-medium italic font-serif">
-                  Hyprnote
+                  Char
                 </p>
                 <p className="text-sm text-neutral-500">
                   John Jeong, Yujong Lee
@@ -1666,7 +1694,7 @@ function ManifestoSection() {
               <div>
                 <Image
                   src="/api/images/hyprnote/signature-dark.svg"
-                  alt="Hyprnote Signature"
+                  alt="Char Signature"
                   width={124}
                   height={60}
                   layout="constrained"
@@ -1682,8 +1710,7 @@ function ManifestoSection() {
 }
 
 function BlogSection() {
-  const sortedArticles = allArticles
-    .filter((a) => import.meta.env.DEV || a.published !== false)
+  const sortedArticles = [...allArticles]
     .sort((a, b) => {
       const aDate = a.date;
       const bDate = b.date;
@@ -1702,7 +1729,7 @@ function BlogSection() {
           Latest from our blog
         </h2>
         <p className="text-neutral-600 max-w-lg mx-auto">
-          Insights, updates, and stories from the Hyprnote team
+          Insights, updates, and stories from the Char team
         </p>
       </div>
 
@@ -1710,7 +1737,7 @@ function BlogSection() {
         {sortedArticles.map((article) => {
           const ogImage =
             article.coverImage ||
-            `https://hyprnote.com/og?type=blog&title=${encodeURIComponent(article.title)}${article.author ? `&author=${encodeURIComponent(article.author)}` : ""}${article.date ? `&date=${encodeURIComponent(new Date(article.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }))}` : ""}&v=1`;
+            `https://hyprnote.com/og?type=blog&title=${encodeURIComponent(article.title ?? "")}${article.author.length > 0 ? `&author=${encodeURIComponent(article.author.join(", "))}` : ""}${article.date ? `&date=${encodeURIComponent(new Date(article.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }))}` : ""}&v=1`;
 
           return (
             <Link
@@ -1828,7 +1855,7 @@ export function CTASection({
         <div className="mb-4 size-40 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[48px] bg-transparent">
           <Image
             src="/api/images/hyprnote/icon.png"
-            alt="Hyprnote"
+            alt="Char"
             width={144}
             height={144}
             className="size-36 mx-auto rounded-[40px] border border-neutral-100"

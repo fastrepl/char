@@ -1,5 +1,5 @@
+use hypr_supervisor::dynamic::DynamicSupervisorMsg;
 use ractor::{ActorCell, ActorRef};
-use ractor_supervisor::dynamic::DynamicSupervisorMsg;
 use std::collections::HashMap;
 use tauri::{Manager, Wry};
 use tokio_util::sync::CancellationToken;

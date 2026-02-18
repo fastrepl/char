@@ -7,6 +7,7 @@ import {
 } from "@supabase/supabase-js";
 import { useMutation } from "@tanstack/react-query";
 import { getVersion } from "@tauri-apps/api/app";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { version as osVersion, platform } from "@tauri-apps/plugin-os";
 import {
   createContext,
@@ -49,7 +50,7 @@ type AuthTokenHandlers = {
 
 type AuthUtils = {
   getHeaders: () => Record<string, string> | null;
-  getAvatarUrl: () => Promise<string>;
+  getAvatarUrl: () => Promise<string | null>;
 };
 
 export type AuthContextType = AuthState &
@@ -70,10 +71,9 @@ export function useAuth() {
 }
 
 async function clearInvalidSession(
-  client: SupabaseClient,
+  _client: SupabaseClient,
   setSession: (session: Session | null) => void,
 ): Promise<void> {
-  void client.auth.stopAutoRefresh();
   await clearAuthStorage();
   setSession(null);
 }
@@ -193,13 +193,65 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log(
+        `[auth] onAuthStateChange: ${event}`,
+        session ? `expires_at=${session.expires_at}` : "no session",
+      );
       void trackAuthEvent(event, session);
       setSession(session);
     });
 
     return () => {
       subscription.unsubscribe();
-      void supabase?.auth.stopAutoRefresh();
+    };
+  }, []);
+
+  // Tauri's visibilitychange event is broken (always reports "visible" on Windows,
+  // only fires on minimize/maximize on macOS — not when hidden behind other windows).
+  // The Supabase SDK relies on visibilitychange to start/stop its auto-refresh ticker,
+  // which can cause sessions to expire during inactivity when the window is hidden.
+  // We bypass this by running the ticker continuously and using Tauri's native
+  // onFocusChanged for immediate recovery after sleep/hibernate.
+  // See: https://supabase.com/docs/guides/auth/sessions
+  // See: https://github.com/tauri-apps/tauri/issues/10592
+  useEffect(() => {
+    if (!supabase) {
+      return;
+    }
+
+    const client = supabase;
+
+    // startAutoRefresh() removes the SDK's visibilitychange listener and
+    // runs the refresh ticker continuously (checks storage every 30s,
+    // only makes a network call when the token is near expiry).
+    console.log("[auth] startAutoRefresh: mounting continuous ticker");
+    void client.auth.startAutoRefresh();
+
+    let unlisten: (() => void) | undefined;
+    let cancelled = false;
+    void getCurrentWindow()
+      .onFocusChanged(({ payload: focused }) => {
+        console.log(`[auth] onFocusChanged: focused=${focused}`);
+        if (focused) {
+          // Restart the ticker on window focus to trigger an immediate refresh
+          // check, recovering stale sessions after sleep/hibernate.
+          console.log("[auth] startAutoRefresh: window regained focus");
+          void client.auth.startAutoRefresh();
+        }
+      })
+      .then((fn) => {
+        if (cancelled) {
+          fn();
+        } else {
+          unlisten = fn;
+        }
+      });
+
+    return () => {
+      console.log("[auth] stopAutoRefresh: unmounting");
+      cancelled = true;
+      unlisten?.();
+      void client.auth.stopAutoRefresh();
     };
   }, []);
 
@@ -284,7 +336,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const email = session?.user.email;
 
     if (!email) {
-      return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23e0e0e0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='48' fill='%23666'%3E%3F%3C/text%3E%3C/svg%3E";
+      return null;
     }
 
     const address = email.trim().toLowerCase();
@@ -294,7 +346,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 
-    return `https://gravatar.com/avatar/${hash}`;
+    return `https://gravatar.com/avatar/${hash}?d=404`;
   }, [session]);
 
   const value = useMemo(

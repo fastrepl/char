@@ -1,5 +1,18 @@
 import Cocoa
 
+class ShadowContainerView: NSView {
+  override func layout() {
+    super.layout()
+    let pathRect = bounds.insetBy(dx: 0.5, dy: 0.5)
+    layer?.shadowPath = CGPath(
+      roundedRect: pathRect,
+      cornerWidth: Layout.cornerRadius,
+      cornerHeight: Layout.cornerRadius,
+      transform: nil
+    )
+  }
+}
+
 class NotificationBackgroundView: NSView {
   let bgLayer = CALayer()
   let borderLayer = CALayer()
@@ -15,6 +28,20 @@ class NotificationBackgroundView: NSView {
   var isProgressHidden: Bool = false {
     didSet {
       progressLayer.isHidden = isProgressHidden
+    }
+  }
+
+  func makeBackgroundOpaque() {
+    bgLayer.backgroundColor = NSColor(calibratedWhite: 0.92, alpha: 1.0).cgColor
+    layer?.cornerRadius = Layout.cornerRadius
+    bgLayer.cornerRadius = Layout.cornerRadius
+    borderLayer.cornerRadius = Layout.cornerRadius
+    borderLayer.borderWidth = 1.5
+    borderLayer.borderColor = NSColor(calibratedWhite: 0.75, alpha: 0.5).cgColor
+    if #available(macOS 11.0, *) {
+      layer?.cornerCurve = .continuous
+      bgLayer.cornerCurve = .continuous
+      borderLayer.cornerCurve = .continuous
     }
   }
 

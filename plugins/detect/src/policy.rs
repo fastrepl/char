@@ -1,4 +1,4 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashSet};
 
 use hypr_notification_interface::NotificationKey;
 
@@ -8,9 +8,10 @@ pub enum MicEventType {
     Stopped,
 }
 
+// We intentionally don't include the "already listening" reason here; that filtering should be done by the consumer side.
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SkipReason {
-    HyprnoteListening,
     DoNotDisturb,
     AllAppsFiltered,
 }
@@ -95,7 +96,6 @@ pub fn default_ignored_bundle_ids() -> Vec<String> {
 
 pub struct PolicyContext<'a> {
     pub apps: &'a [hypr_detect::InstalledApp],
-    pub is_listening: bool,
     pub is_dnd: bool,
     pub event_type: MicEventType,
 }
@@ -106,19 +106,23 @@ pub struct PolicyResult {
 }
 
 pub struct MicNotificationPolicy {
-    pub skip_when_listening: bool,
     pub respect_dnd: bool,
     pub ignored_categories: Vec<AppCategory>,
-    pub user_ignored_bundle_ids: Vec<String>,
+    pub user_ignored_bundle_ids: HashSet<String>,
 }
 
 impl MicNotificationPolicy {
-    pub fn evaluate(&self, ctx: &PolicyContext) -> Result<PolicyResult, SkipReason> {
-        if self.skip_when_listening && ctx.is_listening {
-            return Err(SkipReason::HyprnoteListening);
-        }
+    pub fn should_track_app(&self, app_id: &str) -> bool {
+        AppCategory::find_category(app_id).is_none()
+            && !self.user_ignored_bundle_ids.contains(app_id)
+    }
 
-        if self.respect_dnd && ctx.is_dnd {
+    fn filter_apps(
+        &self,
+        apps: &[hypr_detect::InstalledApp],
+        is_dnd: bool,
+    ) -> Result<Vec<hypr_detect::InstalledApp>, SkipReason> {
+        if self.respect_dnd && is_dnd {
             return Err(SkipReason::DoNotDisturb);
         }
 
@@ -128,17 +132,11 @@ impl MicNotificationPolicy {
             .flat_map(|cat| cat.bundle_ids().iter().copied())
             .collect();
 
-        let filtered_apps: Vec<_> = ctx
-            .apps
+        let filtered_apps: Vec<_> = apps
             .iter()
             .filter(|app| {
-                if self.user_ignored_bundle_ids.contains(&app.id) {
-                    return false;
-                }
-                if ignored_from_categories.contains(app.id.as_str()) {
-                    return false;
-                }
-                true
+                !self.user_ignored_bundle_ids.contains(&app.id)
+                    && !ignored_from_categories.contains(app.id.as_str())
             })
             .cloned()
             .collect();
@@ -146,6 +144,12 @@ impl MicNotificationPolicy {
         if filtered_apps.is_empty() {
             return Err(SkipReason::AllAppsFiltered);
         }
+
+        Ok(filtered_apps)
+    }
+
+    pub fn evaluate(&self, ctx: &PolicyContext) -> Result<PolicyResult, SkipReason> {
+        let filtered_apps = self.filter_apps(ctx.apps, ctx.is_dnd)?;
 
         let notification_key = match ctx.event_type {
             MicEventType::Started => {
@@ -166,10 +170,9 @@ impl MicNotificationPolicy {
 impl Default for MicNotificationPolicy {
     fn default() -> Self {
         Self {
-            skip_when_listening: true,
             respect_dnd: false,
             ignored_categories: AppCategory::all().to_vec(),
-            user_ignored_bundle_ids: Vec::new(),
+            user_ignored_bundle_ids: HashSet::new(),
         }
     }
 }
@@ -202,63 +205,5 @@ mod tests {
             Some(AppCategory::Hyprnote)
         );
         assert_eq!(AppCategory::find_category("com.zoom.us"), None);
-    }
-
-    #[test]
-    fn test_skip_when_listening() {
-        let policy = MicNotificationPolicy {
-            skip_when_listening: true,
-            ignored_categories: vec![],
-            ..Default::default()
-        };
-
-        let apps = vec![hypr_detect::InstalledApp {
-            id: "com.zoom.us".to_string(),
-            name: "Zoom".to_string(),
-        }];
-
-        let ctx = PolicyContext {
-            apps: &apps,
-            is_listening: true,
-            is_dnd: false,
-            event_type: MicEventType::Started,
-        };
-
-        assert!(matches!(
-            policy.evaluate(&ctx),
-            Err(SkipReason::HyprnoteListening)
-        ));
-
-        let ctx_not_listening = PolicyContext {
-            apps: &apps,
-            is_listening: false,
-            is_dnd: false,
-            event_type: MicEventType::Started,
-        };
-
-        assert!(policy.evaluate(&ctx_not_listening).is_ok());
-    }
-
-    #[test]
-    fn test_skip_when_listening_disabled() {
-        let policy = MicNotificationPolicy {
-            skip_when_listening: false,
-            ignored_categories: vec![],
-            ..Default::default()
-        };
-
-        let apps = vec![hypr_detect::InstalledApp {
-            id: "com.zoom.us".to_string(),
-            name: "Zoom".to_string(),
-        }];
-
-        let ctx = PolicyContext {
-            apps: &apps,
-            is_listening: true,
-            is_dnd: false,
-            event_type: MicEventType::Started,
-        };
-
-        assert!(policy.evaluate(&ctx).is_ok());
     }
 }
