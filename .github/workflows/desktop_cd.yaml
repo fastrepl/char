@@ -89,6 +89,7 @@ jobs:
           lfs: true
           fetch-depth: 0
           fetch-tags: true
+          submodules: recursive
       - run: git fetch --tags --force
       - uses: ./.github/actions/macos_tcc
       - run: ./scripts/version.sh "./apps/desktop/src-tauri/tauri.conf.json" "${{ needs.compute-version.outputs.version }}"
@@ -206,6 +207,7 @@ jobs:
           lfs: true
           fetch-depth: 0
           fetch-tags: true
+          submodules: recursive
       - run: git fetch --tags --force
       - run: ./scripts/version.sh "./apps/desktop/src-tauri/tauri.conf.json" "${{ needs.compute-version.outputs.version }}"
       - uses: ./.github/actions/install_desktop_deps
