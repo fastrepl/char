@@ -104,7 +104,11 @@ function LeftSidebar() {
           />
         </div>
       </div>
-      <div className="self-center -ml-px">
+      <motion.div
+        className="self-center -ml-px"
+        animate={{ opacity: isOpen ? 0 : 1 }}
+        transition={{ duration: 0.2 }}
+      >
         <div
           className={cn([
             "flex items-center justify-center",
@@ -131,7 +135,7 @@ function LeftSidebar() {
             />
           </motion.svg>
         </div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }
