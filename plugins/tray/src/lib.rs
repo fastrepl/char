@@ -35,6 +35,11 @@ fn setup_update_listeners(app: &tauri::AppHandle) {
     });
 
     let handle = app.clone();
+    tauri_plugin_updater2::UpdateDownloadFailedEvent::listen(app, move |_event| {
+        let _ = menu_items::TrayCheckUpdate::set_state(&handle, UpdateMenuState::CheckForUpdate);
+    });
+
+    let handle = app.clone();
     tauri_plugin_updater2::UpdatedEvent::listen(app, move |_event| {
         let _ = menu_items::TrayCheckUpdate::set_state(&handle, UpdateMenuState::CheckForUpdate);
     });
