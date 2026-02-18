@@ -35,28 +35,31 @@ export function OrganizationDetailsColumn({
     <div className="flex-1 flex flex-col">
       {selectedOrgData && selectedOrganizationId ? (
         <>
-          <div className="px-6 py-4 border-b border-neutral-200">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-neutral-200 flex items-center justify-center">
-                <Building2 className="h-6 w-6 text-neutral-600" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <EditableOrganizationNameField
-                      organizationId={selectedOrganizationId}
-                    />
-                    <p className="text-sm text-neutral-500 mt-1">
-                      {peopleInOrg?.length ?? 0}{" "}
-                      {(peopleInOrg?.length ?? 0) === 1 ? "person" : "people"}
-                    </p>
-                  </div>
-                </div>
-              </div>
+          <div className="flex items-center justify-center py-6 border-b border-neutral-200">
+            <div className="w-16 h-16 rounded-full bg-neutral-200 flex items-center justify-center">
+              <Building2 className="h-8 w-8 text-neutral-600" />
             </div>
           </div>
 
           <div className="flex-1 overflow-y-auto">
+            <div className="border-b border-neutral-200">
+              <div className="flex items-center px-4 py-3 border-b border-neutral-200">
+                <div className="w-28 text-sm text-neutral-500">Name</div>
+                <div className="flex-1">
+                  <EditableOrganizationNameField
+                    organizationId={selectedOrganizationId}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center px-4 py-3">
+                <div className="w-28 text-sm text-neutral-500">People</div>
+                <div className="flex-1 text-base">
+                  {peopleInOrg?.length ?? 0}{" "}
+                  {(peopleInOrg?.length ?? 0) === 1 ? "person" : "people"}
+                </div>
+              </div>
+            </div>
+
             <div className="p-6">
               <h3 className="text-sm font-medium text-neutral-600 mb-4">
                 People

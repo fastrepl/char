@@ -4,6 +4,7 @@ import {
   CircleMinus,
   FileText,
   Pin,
+  Plus,
   SearchIcon,
 } from "lucide-react";
 import React, { useCallback, useState } from "react";
@@ -214,41 +215,18 @@ export function DetailsColumn({
     <div className="flex-1 flex flex-col h-full">
       {selectedPersonData && selectedHumanId ? (
         <>
-          <div className="px-6 py-4 border-b border-neutral-200">
-            <div className="flex items-start gap-4">
-              <div className="rounded-full bg-amber-50">
-                <Facehash
-                  name={String(
-                    selectedPersonData.name ||
-                      selectedPersonData.email ||
-                      selectedHumanId,
-                  )}
-                  size={48}
-                  interactive={false}
-                  showInitial={false}
-                />
-              </div>
-              <div className="flex-1">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <EditablePersonNameField personId={selectedHumanId} />
-                    <Button
-                      onClick={handleTogglePin}
-                      variant="ghost"
-                      size="sm"
-                      className={
-                        isPinned ? "text-blue-600" : "text-neutral-400"
-                      }
-                      aria-label={isPinned ? "Unpin contact" : "Pin contact"}
-                    >
-                      <Pin
-                        className="size-4"
-                        fill={isPinned ? "currentColor" : "none"}
-                      />
-                    </Button>
-                  </div>
-                </div>
-              </div>
+          <div className="flex items-center justify-center py-6 border-b border-neutral-200">
+            <div className="rounded-full bg-amber-50">
+              <Facehash
+                name={String(
+                  selectedPersonData.name ||
+                    selectedPersonData.email ||
+                    selectedHumanId,
+                )}
+                size={64}
+                interactive={false}
+                showInitial={false}
+              />
             </div>
           </div>
 
@@ -305,6 +283,24 @@ export function DetailsColumn({
             )}
 
             <div className="border-b border-neutral-200">
+              <div className="flex items-center px-4 py-3 border-b border-neutral-200">
+                <div className="w-28 text-sm text-neutral-500">Name</div>
+                <div className="flex-1 flex items-center gap-2">
+                  <EditablePersonNameField personId={selectedHumanId} />
+                  <Button
+                    onClick={handleTogglePin}
+                    variant="ghost"
+                    size="sm"
+                    className={isPinned ? "text-blue-600" : "text-neutral-400"}
+                    aria-label={isPinned ? "Unpin contact" : "Pin contact"}
+                  >
+                    <Pin
+                      className="size-4"
+                      fill={isPinned ? "currentColor" : "none"}
+                    />
+                  </Button>
+                </div>
+              </div>
               <EditablePersonJobTitleField personId={selectedHumanId} />
 
               <div className="flex items-center px-4 py-3 border-b border-neutral-200">
@@ -549,7 +545,7 @@ function EditablePersonMemoField({ personId }: { personId: string }) {
           value={(value as string) || ""}
           onChange={handleChange}
           placeholder="Add notes about this contact..."
-          className="border-none shadow-none p-2 min-h-[80px] text-base focus-visible:ring-0 focus-visible:ring-offset-0 resize-none"
+          className="border-none shadow-none px-0 py-2 min-h-[80px] text-base focus-visible:ring-0 focus-visible:ring-offset-0 resize-none"
           rows={3}
         />
       </div>
@@ -584,8 +580,8 @@ function EditPersonOrganizationSelector({ personId }: { personId: string }) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <div className="inline-flex items-center cursor-pointer hover:bg-neutral-50 py-1 rounded-lg transition-colors">
-          {organization ? (
+        <div className="-mx-2 inline-flex items-center cursor-pointer hover:bg-neutral-50 px-2 py-1 rounded-lg transition-colors">
+          {organization?.name ? (
             <div className="flex items-center">
               <span className="text-base">{organization.name}</span>
               <span className="ml-2 text-neutral-400 group">
@@ -599,8 +595,9 @@ function EditPersonOrganizationSelector({ personId }: { personId: string }) {
               </span>
             </div>
           ) : (
-            <span className="text-neutral-400 text-base">
-              Select organization
+            <span className="flex items-center gap-1 text-neutral-400 text-base">
+              <Plus className="size-4" />
+              Add organization
             </span>
           )}
         </div>
