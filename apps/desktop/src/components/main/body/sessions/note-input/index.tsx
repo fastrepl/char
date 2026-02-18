@@ -549,6 +549,14 @@ export const NoteInput = forwardRef<
       editor.view.dispatch(editor.state.tr);
     } catch {
       // editor may already be destroyed
+      return;
+    }
+
+    if (query) {
+      requestAnimationFrame(() => {
+        const el = editor.view.dom.querySelector(".search-result-current");
+        el?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
     }
   }, [
     editor,
