@@ -6,6 +6,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import type { ContactsSelection } from "@hypr/plugin-windows";
 import { cn } from "@hypr/utils";
 
+import { useNativeContextMenu } from "../../../../hooks/useNativeContextMenu";
 import * as main from "../../../../store/tinybase/store/main";
 import { ColumnHeader, getInitials, type SortOption } from "./shared";
 
@@ -16,9 +17,13 @@ type ContactItem =
 export function ContactsListColumn({
   selected,
   setSelected,
+  onDeletePerson,
+  onDeleteOrganization,
 }: {
   selected: ContactsSelection | null;
   setSelected: (value: ContactsSelection | null) => void;
+  onDeletePerson: (id: string) => void;
+  onDeleteOrganization: (id: string) => void;
 }) {
   const [showNewPerson, setShowNewPerson] = useState(false);
   const [searchValue, setSearchValue] = useState("");
@@ -267,6 +272,7 @@ export function ContactsListColumn({
                       onClick={() =>
                         setSelected({ type: "person", id: item.id })
                       }
+                      onDelete={onDeletePerson}
                     />
                   ) : (
                     <OrganizationItem
@@ -275,6 +281,7 @@ export function ContactsListColumn({
                       onClick={() =>
                         setSelected({ type: "organization", id: item.id })
                       }
+                      onDelete={onDeleteOrganization}
                     />
                   )}
                 </Reorder.Item>
@@ -290,6 +297,7 @@ export function ContactsListColumn({
                     active={isActive(item)}
                     humanId={item.id}
                     onClick={() => setSelected({ type: "person", id: item.id })}
+                    onDelete={onDeletePerson}
                   />
                 ) : (
                   <OrganizationItem
@@ -299,6 +307,7 @@ export function ContactsListColumn({
                     onClick={() =>
                       setSelected({ type: "organization", id: item.id })
                     }
+                    onDelete={onDeleteOrganization}
                   />
                 ),
               )}
@@ -314,6 +323,7 @@ export function ContactsListColumn({
                 active={isActive(item)}
                 humanId={item.id}
                 onClick={() => setSelected({ type: "person", id: item.id })}
+                onDelete={onDeletePerson}
               />
             ) : (
               <OrganizationItem
@@ -323,6 +333,7 @@ export function ContactsListColumn({
                 onClick={() =>
                   setSelected({ type: "organization", id: item.id })
                 }
+                onDelete={onDeleteOrganization}
               />
             ),
           )}
@@ -336,10 +347,12 @@ function PersonItem({
   humanId,
   active,
   onClick,
+  onDelete,
 }: {
   humanId: string;
   active: boolean;
   onClick: () => void;
+  onDelete?: (id: string) => void;
 }) {
   const person = main.UI.useRow("humans", humanId, main.STORE_ID);
   const isPinned = Boolean(person.pinned);
@@ -347,6 +360,14 @@ function PersonItem({
   const personEmail = String(person.email ?? "");
 
   const store = main.UI.useStore(main.STORE_ID);
+
+  const showContextMenu = useNativeContextMenu([
+    {
+      id: "delete-person",
+      text: "Delete Contact",
+      action: () => onDelete?.(humanId),
+    },
+  ]);
 
   const handleTogglePin = useCallback(
     (e: React.MouseEvent) => {
@@ -384,6 +405,7 @@ function PersonItem({
       role="button"
       tabIndex={0}
       onClick={onClick}
+      onContextMenu={showContextMenu}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
@@ -428,10 +450,12 @@ function OrganizationItem({
   organizationId,
   active,
   onClick,
+  onDelete,
 }: {
   organizationId: string;
   active: boolean;
   onClick: () => void;
+  onDelete?: (id: string) => void;
 }) {
   const organization = main.UI.useRow(
     "organizations",
@@ -440,6 +464,14 @@ function OrganizationItem({
   );
   const isPinned = Boolean(organization.pinned);
   const store = main.UI.useStore(main.STORE_ID);
+
+  const showContextMenu = useNativeContextMenu([
+    {
+      id: "delete-org",
+      text: "Delete Organization",
+      action: () => onDelete?.(organizationId),
+    },
+  ]);
 
   const handleTogglePin = useCallback(
     (e: React.MouseEvent) => {
@@ -485,6 +517,7 @@ function OrganizationItem({
       role="button"
       tabIndex={0}
       onClick={onClick}
+      onContextMenu={showContextMenu}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();

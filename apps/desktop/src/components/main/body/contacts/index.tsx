@@ -144,14 +144,18 @@ function ContactView({ tab }: { tab: Extract<Tab, { type: "contacts" }> }) {
   return (
     <ResizablePanelGroup direction="horizontal" className="h-full">
       <ResizablePanel defaultSize={30} minSize={20} maxSize={40}>
-        <ContactsListColumn selected={selected} setSelected={setSelected} />
+        <ContactsListColumn
+          selected={selected}
+          setSelected={setSelected}
+          onDeletePerson={handleDeletePerson}
+          onDeleteOrganization={handleDeleteOrganization}
+        />
       </ResizablePanel>
       <ResizableHandle />
       <ResizablePanel defaultSize={70} minSize={40}>
         {selected?.type === "organization" ? (
           <OrganizationDetailsColumn
             selectedOrganizationId={selected.id}
-            handleDeleteOrganization={handleDeleteOrganization}
             onPersonClick={(personId) =>
               setSelected({ type: "person", id: personId })
             }
@@ -159,7 +163,6 @@ function ContactView({ tab }: { tab: Extract<Tab, { type: "contacts" }> }) {
         ) : (
           <DetailsColumn
             selectedHumanId={selected?.type === "person" ? selected.id : null}
-            handleDeletePerson={handleDeletePerson}
             handleSessionClick={handleSessionClick}
           />
         )}

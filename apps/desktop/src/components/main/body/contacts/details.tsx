@@ -21,11 +21,9 @@ import * as main from "../../../../store/tinybase/store/main";
 
 export function DetailsColumn({
   selectedHumanId,
-  handleDeletePerson,
   handleSessionClick,
 }: {
   selectedHumanId?: string | null;
-  handleDeletePerson: (id: string) => void;
   handleSessionClick: (id: string) => void;
 }) {
   const selectedPersonData = main.UI.useRow(
@@ -252,7 +250,7 @@ export function DetailsColumn({
               </div>
             )}
 
-            <div className="border-b border-neutral-200">
+            <div>
               <div className="flex items-center px-4 py-3 border-b border-neutral-200">
                 <div className="w-28 text-sm text-neutral-500">Name</div>
                 <div className="flex-1">
@@ -324,39 +322,6 @@ export function DetailsColumn({
                     No related notes found
                   </p>
                 )}
-              </div>
-            </div>
-
-            <div className="p-6">
-              <div className="border border-red-200 rounded-lg overflow-hidden">
-                <div className="bg-red-50 px-4 py-3 border-b border-red-200">
-                  <h3 className="text-sm font-semibold text-red-900">
-                    Danger Zone
-                  </h3>
-                </div>
-                <div className="bg-white p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-neutral-900">
-                        Delete this contact
-                      </p>
-                      <p className="text-xs text-neutral-500 mt-1">
-                        This action cannot be undone
-                      </p>
-                    </div>
-                    <Button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleDeletePerson(selectedHumanId);
-                      }}
-                      variant="destructive"
-                      size="sm"
-                    >
-                      Delete Contact
-                    </Button>
-                  </div>
-                </div>
               </div>
             </div>
 

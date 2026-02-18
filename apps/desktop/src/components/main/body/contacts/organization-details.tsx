@@ -10,11 +10,9 @@ import * as main from "../../../../store/tinybase/store/main";
 
 export function OrganizationDetailsColumn({
   selectedOrganizationId,
-  handleDeleteOrganization,
   onPersonClick,
 }: {
   selectedOrganizationId?: string | null;
-  handleDeleteOrganization: (id: string) => void;
   onPersonClick?: (personId: string) => void;
 }) {
   const selectedOrgData = main.UI.useRow(
@@ -42,7 +40,7 @@ export function OrganizationDetailsColumn({
           </div>
 
           <div className="flex-1 overflow-y-auto">
-            <div className="border-b border-neutral-200">
+            <div>
               <div className="flex items-center px-4 py-3 border-b border-neutral-200">
                 <div className="w-28 text-sm text-neutral-500">Name</div>
                 <div className="flex-1">
@@ -51,18 +49,16 @@ export function OrganizationDetailsColumn({
                   />
                 </div>
               </div>
-              <div className="flex items-center px-4 py-3">
-                <div className="w-28 text-sm text-neutral-500">People</div>
-                <div className="flex-1 text-base">
-                  {peopleInOrg?.length ?? 0}{" "}
-                  {(peopleInOrg?.length ?? 0) === 1 ? "person" : "people"}
-                </div>
-              </div>
             </div>
 
             <div className="p-6">
               <h3 className="text-sm font-medium text-neutral-600 mb-4">
                 People
+                <span className="text-neutral-400 font-normal">
+                  {" "}
+                  &middot; {peopleInOrg?.length ?? 0}{" "}
+                  {(peopleInOrg?.length ?? 0) === 1 ? "member" : "members"}
+                </span>
               </h3>
               <div className="overflow-y-auto" style={{ maxHeight: "55vh" }}>
                 {(peopleInOrg?.length ?? 0) > 0 ? (
@@ -147,39 +143,6 @@ export function OrganizationDetailsColumn({
                     No people in this organization
                   </p>
                 )}
-              </div>
-            </div>
-
-            <div className="p-6">
-              <div className="border border-red-200 rounded-lg overflow-hidden">
-                <div className="bg-red-50 px-4 py-3 border-b border-red-200">
-                  <h3 className="text-sm font-semibold text-red-900">
-                    Danger Zone
-                  </h3>
-                </div>
-                <div className="bg-white p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-neutral-900">
-                        Delete this organization
-                      </p>
-                      <p className="text-xs text-neutral-500 mt-1">
-                        This action cannot be undone
-                      </p>
-                    </div>
-                    <Button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleDeleteOrganization(selectedOrganizationId);
-                      }}
-                      variant="destructive"
-                      size="sm"
-                    >
-                      Delete Organization
-                    </Button>
-                  </div>
-                </div>
               </div>
             </div>
 
