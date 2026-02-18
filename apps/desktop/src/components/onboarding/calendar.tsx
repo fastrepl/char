@@ -7,11 +7,12 @@ import { CalendarSelection } from "../main/body/calendar/calendar-selection";
 import { OnboardingButton } from "./shared";
 
 function AppleCalendarList() {
-  const { groups, handleToggle } = useAppleCalendarSelection();
+  const { groups, handleToggle, isLoading } = useAppleCalendarSelection();
   return (
     <CalendarSelection
       groups={groups}
       onToggle={handleToggle}
+      isLoading={isLoading}
       className="border rounded-lg"
     />
   );
