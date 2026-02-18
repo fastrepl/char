@@ -10,11 +10,9 @@ import * as main from "../../../../store/tinybase/store/main";
 
 export function OrganizationDetailsColumn({
   selectedOrganizationId,
-  handleDeleteOrganization,
   onPersonClick,
 }: {
   selectedOrganizationId?: string | null;
-  handleDeleteOrganization: (id: string) => void;
   onPersonClick?: (personId: string) => void;
 }) {
   const selectedOrgData = main.UI.useRow(
@@ -35,31 +33,32 @@ export function OrganizationDetailsColumn({
     <div className="flex-1 flex flex-col">
       {selectedOrgData && selectedOrganizationId ? (
         <>
-          <div className="px-6 py-4 border-b border-neutral-200">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-neutral-200 flex items-center justify-center">
-                <Building2 className="h-6 w-6 text-neutral-600" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <EditableOrganizationNameField
-                      organizationId={selectedOrganizationId}
-                    />
-                    <p className="text-sm text-neutral-500 mt-1">
-                      {peopleInOrg?.length ?? 0}{" "}
-                      {(peopleInOrg?.length ?? 0) === 1 ? "person" : "people"}
-                    </p>
-                  </div>
-                </div>
-              </div>
+          <div className="flex items-center justify-center py-6 border-b border-neutral-200">
+            <div className="w-16 h-16 rounded-full bg-neutral-200 flex items-center justify-center">
+              <Building2 className="h-8 w-8 text-neutral-600" />
             </div>
           </div>
 
           <div className="flex-1 overflow-y-auto">
+            <div>
+              <div className="flex items-center px-4 py-3 border-b border-neutral-200">
+                <div className="w-28 text-sm text-neutral-500">Name</div>
+                <div className="flex-1">
+                  <EditableOrganizationNameField
+                    organizationId={selectedOrganizationId}
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="p-6">
               <h3 className="text-sm font-medium text-neutral-600 mb-4">
                 People
+                <span className="text-neutral-400 font-normal">
+                  {" "}
+                  &middot; {peopleInOrg?.length ?? 0}{" "}
+                  {(peopleInOrg?.length ?? 0) === 1 ? "member" : "members"}
+                </span>
               </h3>
               <div className="overflow-y-auto" style={{ maxHeight: "55vh" }}>
                 {(peopleInOrg?.length ?? 0) > 0 ? (
@@ -147,39 +146,6 @@ export function OrganizationDetailsColumn({
               </div>
             </div>
 
-            <div className="p-6">
-              <div className="border border-red-200 rounded-lg overflow-hidden">
-                <div className="bg-red-50 px-4 py-3 border-b border-red-200">
-                  <h3 className="text-sm font-semibold text-red-900">
-                    Danger Zone
-                  </h3>
-                </div>
-                <div className="bg-white p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-neutral-900">
-                        Delete this organization
-                      </p>
-                      <p className="text-xs text-neutral-500 mt-1">
-                        This action cannot be undone
-                      </p>
-                    </div>
-                    <Button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleDeleteOrganization(selectedOrganizationId);
-                      }}
-                      variant="destructive"
-                      size="sm"
-                    >
-                      Delete Organization
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <div className="pb-96" />
           </div>
         </>
@@ -220,7 +186,7 @@ function EditableOrganizationNameField({
       value={(value as string) || ""}
       onChange={handleChange}
       placeholder="Organization name"
-      className="border-none shadow-none p-0 h-8 text-lg font-semibold focus-visible:ring-0 focus-visible:ring-offset-0"
+      className="border-none shadow-none p-0 h-7 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
     />
   );
 }

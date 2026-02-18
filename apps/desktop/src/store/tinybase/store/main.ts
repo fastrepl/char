@@ -112,6 +112,7 @@ export const StoreComponent = () => {
           },
         )
         .setQueryDefinition(QUERIES.visibleHumans, "humans", ({ select }) => {
+          select("created_at");
           select("name");
           select("email");
           select("org_id");
@@ -124,7 +125,10 @@ export const StoreComponent = () => {
           QUERIES.visibleOrganizations,
           "organizations",
           ({ select }) => {
+            select("created_at");
             select("name");
+            select("pinned");
+            select("pin_order");
           },
         )
         .setQueryDefinition(
@@ -403,6 +407,7 @@ interface _QueryResultRows {
     folder_id: string;
   };
   visibleHumans: {
+    created_at: string;
     name: string;
     email: string;
     org_id: string;
@@ -412,7 +417,10 @@ interface _QueryResultRows {
     pin_order: number;
   };
   visibleOrganizations: {
+    created_at: string;
     name: string;
+    pinned: boolean;
+    pin_order: number;
   };
   visibleTemplates: {
     title: string;
