@@ -19545,7 +19545,6 @@ dependencies = [
  "tauri-plugin-clipboard-manager",
  "tauri-plugin-dialog",
  "tauri-plugin-misc",
- "tauri-plugin-updater",
  "tauri-plugin-updater2",
  "tauri-plugin-windows",
  "tauri-specta",

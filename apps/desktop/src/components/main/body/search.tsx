@@ -168,16 +168,14 @@ function ExpandedSearch({ onBlur }: { onBlur?: () => void }) {
                 openNew({
                   type: "contacts",
                   state: {
-                    selectedPerson: item.id,
-                    selectedOrganization: null,
+                    selected: { type: "person", id: item.id },
                   },
                 });
               } else if (item.type === "organization") {
                 openNew({
                   type: "contacts",
                   state: {
-                    selectedOrganization: item.id,
-                    selectedPerson: null,
+                    selected: { type: "organization", id: item.id },
                   },
                 });
               }
