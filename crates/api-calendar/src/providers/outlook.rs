@@ -87,7 +87,7 @@ impl OutlookAdapter {
 
         Ok(ListEventsResult {
             events,
-            next_page_token: None,
+            next_page_token: response.odata_next_link,
         })
     }
 
@@ -159,18 +159,29 @@ impl OutlookAdapter {
 fn convert_to_outlook_datetime(
     dt: &crate::routes::calendar::EventDateTime,
 ) -> Result<hypr_outlook_calendar::DateTimeTimeZone, CalendarError> {
-    let date_time = if let Some(ref date_time_str) = dt.date_time {
-        date_time_str.clone()
-    } else if let Some(ref date_str) = dt.date {
-        format!("{date_str}T00:00:00")
-    } else {
-        return Err(CalendarError::BadRequest(
-            "Either date or dateTime must be provided".into(),
-        ));
-    };
+    if let Some(ref date_time_str) = dt.date_time {
+        let parsed = chrono::DateTime::parse_from_rfc3339(date_time_str)
+            .map_err(|e| CalendarError::BadRequest(format!("Invalid dateTime: {e}")))?;
 
-    Ok(hypr_outlook_calendar::DateTimeTimeZone {
-        date_time,
-        time_zone: dt.time_zone.clone(),
-    })
+        let time_zone = dt
+            .time_zone
+            .clone()
+            .unwrap_or_else(|| parsed.timezone().to_string());
+
+        let local = parsed.naive_local().format("%Y-%m-%dT%H:%M:%S").to_string();
+
+        Ok(hypr_outlook_calendar::DateTimeTimeZone {
+            date_time: local,
+            time_zone: Some(time_zone),
+        })
+    } else if let Some(ref date_str) = dt.date {
+        Ok(hypr_outlook_calendar::DateTimeTimeZone {
+            date_time: format!("{date_str}T00:00:00"),
+            time_zone: dt.time_zone.clone(),
+        })
+    } else {
+        Err(CalendarError::BadRequest(
+            "Either date or dateTime must be provided".into(),
+        ))
+    }
 }
