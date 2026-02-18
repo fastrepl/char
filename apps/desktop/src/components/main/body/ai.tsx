@@ -1,6 +1,7 @@
 import {
   AudioLinesIcon,
   BookText,
+  BrainIcon,
   MessageSquare,
   Plus,
   Search,
@@ -22,6 +23,7 @@ import * as main from "../../../store/tinybase/store/main";
 import { type Tab, useTabs } from "../../../store/zustand/tabs";
 import { LLM } from "../../settings/ai/llm";
 import { STT } from "../../settings/ai/stt";
+import { SettingsMemory } from "../../settings/memory";
 import { StandardTabWrapper } from "./index";
 import { useWebResources } from "./resource-list";
 import { type TabItem, TabItemBase } from "./shared";
@@ -32,7 +34,8 @@ type AITabKey =
   | "intelligence"
   | "templates"
   | "shortcuts"
-  | "prompts";
+  | "prompts"
+  | "memory";
 
 export const TabItemAI: TabItem<Extract<Tab, { type: "ai" }>> = ({
   tab,
@@ -50,6 +53,7 @@ export const TabItemAI: TabItem<Extract<Tab, { type: "ai" }>> = ({
     templates: "Templates",
     shortcuts: "Shortcuts",
     prompts: "Prompts",
+    memory: "Memory",
   };
   const suffix =
     labelMap[(tab.state.tab as AITabKey) ?? "transcription"] ?? "STT";
@@ -129,6 +133,11 @@ function AIView({ tab }: { tab: Extract<Tab, { type: "ai" }> }) {
       icon: <SparklesIcon size={14} />,
       disabled: true,
     },
+    {
+      key: "memory",
+      label: "Memory",
+      icon: <BrainIcon size={14} />,
+    },
   ];
 
   return (
@@ -163,6 +172,7 @@ function AIView({ tab }: { tab: Extract<Tab, { type: "ai" }> }) {
           {activeTab === "templates" && <TemplatesContent />}
           {activeTab === "shortcuts" && <ShortcutsContent />}
           {activeTab === "prompts" && <PromptsContent />}
+          {activeTab === "memory" && <SettingsMemory />}
         </div>
         {!atStart && <ScrollFadeOverlay position="top" />}
         {!atEnd && <ScrollFadeOverlay position="bottom" />}

@@ -13,6 +13,7 @@ import {
   mappingMentionSchema,
   mappingSessionParticipantSchema,
   mappingTagSessionSchema,
+  memorySchema,
   organizationSchema,
   promptSchema,
   sessionSchema,
@@ -41,6 +42,7 @@ export const tableSchemaForTinybase = {
   } as const satisfies InferTinyBaseSchema<typeof transcriptSchema>,
   humans: {
     user_id: { type: "string" },
+    created_at: { type: "string" },
     name: { type: "string" },
     email: { type: "string" },
     org_id: { type: "string" },
@@ -52,7 +54,10 @@ export const tableSchemaForTinybase = {
   } as const satisfies InferTinyBaseSchema<typeof humanSchema>,
   organizations: {
     user_id: { type: "string" },
+    created_at: { type: "string" },
     name: { type: "string" },
+    pinned: { type: "boolean" },
+    pin_order: { type: "number" },
   } as const satisfies InferTinyBaseSchema<typeof organizationSchema>,
   calendars: {
     user_id: { type: "string" },
@@ -142,6 +147,12 @@ export const tableSchemaForTinybase = {
     title: { type: "string" },
     content: { type: "string" },
   } as const satisfies InferTinyBaseSchema<typeof chatShortcutSchema>,
+  memories: {
+    user_id: { type: "string" },
+    type: { type: "string" },
+    text: { type: "string" },
+    created_at: { type: "string" },
+  } as const satisfies InferTinyBaseSchema<typeof memorySchema>,
 } as const satisfies TablesSchema;
 
 export const valueSchemaForTinybase = {

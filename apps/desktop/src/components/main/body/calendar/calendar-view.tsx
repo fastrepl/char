@@ -145,7 +145,7 @@ export function CalendarView() {
         <div
           className={cn([
             "flex items-center justify-between",
-            "px-2 pt-1 pb-1 border-b border-neutral-200",
+            "py-2 pl-3 pr-1 h-12 border-b border-neutral-200",
           ])}
         >
           <div className="flex items-center gap-2">
@@ -158,7 +158,7 @@ export function CalendarView() {
                 <CalendarCogIcon className="h-4 w-4" />
               </Button>
             )}
-            <h2 className="text-lg font-semibold text-neutral-900">
+            <h2 className="text-sm font-medium text-neutral-900">
               {isMonthView
                 ? format(currentMonth, "MMMM yyyy")
                 : days.length > 0
@@ -202,8 +202,11 @@ export function CalendarView() {
             <div
               key={`${day}-${i}`}
               className={cn([
-                "text-center text-xs font-medium text-neutral-500",
+                "text-center text-xs font-medium",
                 "py-2",
+                day === "Sat" || day === "Sun"
+                  ? "text-neutral-400"
+                  : "text-neutral-900",
               ])}
             >
               {day}

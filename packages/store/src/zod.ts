@@ -4,6 +4,7 @@ import { jsonObject, type ToStorageType } from "./shared";
 
 export const humanSchema = z.object({
   user_id: z.string(),
+  created_at: z.preprocess((val) => val ?? undefined, z.string().optional()),
   name: z.string(),
   email: z.string(),
   org_id: z.string(),
@@ -89,7 +90,10 @@ export const calendarSchema = z.object({
 
 export const organizationSchema = z.object({
   user_id: z.string(),
+  created_at: z.preprocess((val) => val ?? undefined, z.string().optional()),
   name: z.string(),
+  pinned: z.preprocess((val) => val ?? false, z.boolean()),
+  pin_order: z.preprocess((val) => val ?? undefined, z.number().optional()),
 });
 
 export const sessionSchema = z.object({
@@ -190,6 +194,13 @@ export const chatShortcutSchema = z.object({
   user_id: z.string(),
   title: z.string(),
   content: z.string(),
+});
+
+export const memorySchema = z.object({
+  user_id: z.string(),
+  type: z.string(),
+  text: z.string(),
+  created_at: z.string(),
 });
 
 export const enhancedNoteSchema = z.object({
@@ -298,6 +309,7 @@ export type TemplateSection = z.infer<typeof templateSectionSchema>;
 export type ChatGroup = z.infer<typeof chatGroupSchema>;
 export type ChatMessage = z.infer<typeof chatMessageSchema>;
 export type ChatShortcut = z.infer<typeof chatShortcutSchema>;
+export type Memory = z.infer<typeof memorySchema>;
 export type EnhancedNote = z.infer<typeof enhancedNoteSchema>;
 export type Prompt = z.infer<typeof promptSchema>;
 export type AIProvider = z.infer<typeof aiProviderSchema>;
@@ -314,6 +326,7 @@ export type HumanStorage = ToStorageType<typeof humanSchema>;
 export type OrganizationStorage = ToStorageType<typeof organizationSchema>;
 export type PromptStorage = ToStorageType<typeof promptSchema>;
 export type ChatShortcutStorage = ToStorageType<typeof chatShortcutSchema>;
+export type MemoryStorage = ToStorageType<typeof memorySchema>;
 export type EventStorage = ToStorageType<typeof eventSchema>;
 export type MappingSessionParticipantStorage = ToStorageType<
   typeof mappingSessionParticipantSchema
