@@ -103,8 +103,16 @@ export function DayCell({
           className={cn([
             "text-sm font-medium mb-1 w-7 h-7 flex items-center justify-center rounded-full",
             today && "bg-neutral-900 text-white",
-            !today && isCurrentMonth && "text-neutral-900",
-            !today && !isCurrentMonth && "text-neutral-400",
+            !today && !isCurrentMonth && "text-neutral-300",
+            !today &&
+              isCurrentMonth &&
+              (day.getDay() === 0 || day.getDay() === 6) &&
+              "text-neutral-400",
+            !today &&
+              isCurrentMonth &&
+              day.getDay() !== 0 &&
+              day.getDay() !== 6 &&
+              "text-neutral-900",
           ])}
         >
           {format(day, "d")}
