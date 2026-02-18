@@ -1,3 +1,4 @@
+import { Facehash } from "facehash";
 import { Building2, CornerDownLeft, Pin } from "lucide-react";
 import { Reorder } from "motion/react";
 import React, { useCallback, useMemo, useState } from "react";
@@ -8,7 +9,7 @@ import { cn } from "@hypr/utils";
 
 import { useNativeContextMenu } from "../../../../hooks/useNativeContextMenu";
 import * as main from "../../../../store/tinybase/store/main";
-import { ColumnHeader, getInitials, type SortOption } from "./shared";
+import { ColumnHeader, type SortOption } from "./shared";
 
 type ContactItem =
   | { kind: "person"; id: string }
@@ -417,10 +418,13 @@ function PersonItem({
         active ? "border-neutral-500 bg-neutral-100" : "border-transparent",
       ])}
     >
-      <div className="shrink-0 w-8 h-8 rounded-full bg-neutral-200 flex items-center justify-center">
-        <span className="text-xs font-medium text-neutral-600">
-          {getInitials(personName || personEmail)}
-        </span>
+      <div className="shrink-0 rounded-full bg-amber-50">
+        <Facehash
+          name={String(personName || personEmail || humanId)}
+          size={32}
+          interactive={false}
+          showInitial={false}
+        />
       </div>
       <div className="flex-1 min-w-0">
         <div className="font-medium truncate flex items-center gap-1">
