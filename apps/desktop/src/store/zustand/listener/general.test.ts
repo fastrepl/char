@@ -39,35 +39,7 @@ describe("General Listener Slice", () => {
       const sessionId = "session-456";
       const { handleBatchResponseStreamed, getSessionMode } = store.getState();
 
-      const mockResponse = {
-        type: "Results" as const,
-        start: 0,
-        duration: 5,
-        is_final: false,
-        speech_final: false,
-        from_finalize: false,
-        channel: {
-          alternatives: [
-            {
-              transcript: "test",
-              words: [],
-              confidence: 0.9,
-            },
-          ],
-        },
-        metadata: {
-          request_id: "test-request",
-          model_info: {
-            name: "test-model",
-            version: "1.0",
-            arch: "test-arch",
-          },
-          model_uuid: "test-uuid",
-        },
-        channel_index: [0],
-      };
-
-      handleBatchResponseStreamed(sessionId, mockResponse, 0.5);
+      handleBatchResponseStreamed(sessionId, [], 0.5);
       expect(getSessionMode(sessionId)).toBe("running_batch");
     });
   });
@@ -78,35 +50,7 @@ describe("General Listener Slice", () => {
       const { handleBatchResponseStreamed, clearBatchSession } =
         store.getState();
 
-      const mockResponse = {
-        type: "Results" as const,
-        start: 0,
-        duration: 5,
-        is_final: false,
-        speech_final: false,
-        from_finalize: false,
-        channel: {
-          alternatives: [
-            {
-              transcript: "test",
-              words: [],
-              confidence: 0.9,
-            },
-          ],
-        },
-        metadata: {
-          request_id: "test-request",
-          model_info: {
-            name: "test-model",
-            version: "1.0",
-            arch: "test-arch",
-          },
-          model_uuid: "test-uuid",
-        },
-        channel_index: [0],
-      };
-
-      handleBatchResponseStreamed(sessionId, mockResponse, 0.5);
+      handleBatchResponseStreamed(sessionId, [], 0.5);
       expect(store.getState().batch[sessionId]).toEqual({
         percentage: 0.5,
         isComplete: false,

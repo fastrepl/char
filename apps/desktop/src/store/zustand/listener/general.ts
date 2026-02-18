@@ -15,7 +15,6 @@ import {
   type SessionLifecycleEvent,
   type SessionParams,
   type SessionProgressEvent,
-  type StreamResponse,
 } from "@hypr/plugin-listener";
 import {
   type BatchParams,
@@ -26,7 +25,7 @@ import { commands as settingsCommands } from "@hypr/plugin-settings";
 
 import { fromResult } from "../../../effect";
 import { buildSessionPath } from "../../tinybase/persister/shared/paths";
-import type { BatchActions, BatchState } from "./batch";
+import type { BatchActions, BatchPersistCallback, BatchState } from "./batch";
 import type { HandlePersistCallback, TranscriptActions } from "./transcript";
 
 type LiveSessionStatus = "inactive" | "active" | "finalizing";
@@ -65,7 +64,7 @@ export type GeneralActions = {
   setMuted: (value: boolean) => void;
   runBatch: (
     params: BatchParams,
-    options?: { handlePersist?: HandlePersistCallback; sessionId?: string },
+    options?: { handlePersist?: BatchPersistCallback; sessionId?: string },
   ) => Promise<void>;
   getSessionMode: (sessionId: string) => SessionMode;
 };
@@ -311,9 +310,11 @@ export const createGeneralSlice = <
             };
           }),
         );
-      } else if (payload.type === "stream_response") {
-        const response = payload.response;
-        get().handleTranscriptResponse(response as unknown as StreamResponse);
+      } else if (payload.type === "transcript_update") {
+        get().handleTranscriptUpdate(
+          payload.new_final_words,
+          payload.partial_words,
+        );
       } else if (payload.type === "mic_muted") {
         set((state) =>
           mutate(state, (draft) => {
@@ -529,7 +530,7 @@ export const createGeneralSlice = <
           if (payload.type === "batchProgress") {
             get().handleBatchResponseStreamed(
               sessionId,
-              payload.response,
+              payload.words,
               payload.percentage,
             );
 

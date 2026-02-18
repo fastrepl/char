@@ -1,9 +1,8 @@
 import { TriangleAlert } from "lucide-react";
-import { type RefObject, useCallback, useMemo, useRef, useState } from "react";
+import { type RefObject, useCallback, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import type { DegradedError } from "@hypr/plugin-listener";
-import type { RuntimeSpeakerHint } from "@hypr/transcript";
 import { cn } from "@hypr/utils";
 
 import { useAudioPlayer } from "../../../../../../../contexts/audio-player/provider";
@@ -43,44 +42,7 @@ export function TranscriptContainer({
   const editable =
     sessionMode === "inactive" && Object.keys(operations ?? {}).length > 0;
 
-  const partialWordsByChannel = useListener(
-    (state) => state.partialWordsByChannel,
-  );
-  const partialHintsByChannel = useListener(
-    (state) => state.partialHintsByChannel,
-  );
-
-  const partialWords = useMemo(
-    () => Object.values(partialWordsByChannel).flat(),
-    [partialWordsByChannel],
-  );
-
-  const partialHints = useMemo(() => {
-    const channelIndices = Object.keys(partialWordsByChannel)
-      .map(Number)
-      .sort((a, b) => a - b);
-
-    const offsetByChannel = new Map<number, number>();
-    let currentOffset = 0;
-    for (const channelIndex of channelIndices) {
-      offsetByChannel.set(channelIndex, currentOffset);
-      currentOffset += partialWordsByChannel[channelIndex]?.length ?? 0;
-    }
-
-    const reindexedHints: RuntimeSpeakerHint[] = [];
-    for (const channelIndex of channelIndices) {
-      const hints = partialHintsByChannel[channelIndex] ?? [];
-      const offset = offsetByChannel.get(channelIndex) ?? 0;
-      for (const hint of hints) {
-        reindexedHints.push({
-          ...hint,
-          wordIndex: hint.wordIndex + offset,
-        });
-      }
-    }
-
-    return reindexedHints;
-  }, [partialWordsByChannel, partialHintsByChannel]);
+  const partialWords = useListener((state) => state.partialWords);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(
@@ -167,11 +129,7 @@ export function TranscriptContainer({
                   ? partialWords
                   : []
               }
-              partialHints={
-                index === transcriptIds.length - 1 && currentActive
-                  ? partialHints
-                  : []
-              }
+              partialHints={[]}
               operations={operations}
             />
             {index < transcriptIds.length - 1 && <TranscriptSeparator />}

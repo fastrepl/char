@@ -18930,6 +18930,7 @@ dependencies = [
  "tokio-stream",
  "tokio-util",
  "tracing",
+ "transcript",
  "url",
  "uuid",
  "vad-ext",
@@ -18961,6 +18962,7 @@ dependencies = [
  "tokio",
  "tokio-stream",
  "tracing",
+ "transcript",
 ]
 
 [[package]]
@@ -20987,6 +20989,17 @@ dependencies = [
  "whisper",
  "whisper-local",
  "ws-utils",
+]
+
+[[package]]
+name = "transcript"
+version = "0.1.0"
+dependencies = [
+ "owhisper-interface",
+ "serde",
+ "serde_json",
+ "specta",
+ "uuid",
 ]
 
 [[package]]

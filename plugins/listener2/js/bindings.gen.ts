@@ -73,22 +73,16 @@ batchEvent: "plugin:listener2:batch-event"
 
 export type BatchAlternatives = { transcript: string; confidence: number; words?: BatchWord[] }
 export type BatchChannel = { alternatives: BatchAlternatives[] }
-export type BatchEvent = { type: "batchStarted"; session_id: string } | { type: "batchResponse"; session_id: string; response: BatchResponse } | { type: "batchProgress"; session_id: string; response: StreamResponse; percentage: number } | { type: "batchFailed"; session_id: string; error: string }
+export type BatchEvent = { type: "batchStarted"; session_id: string } | { type: "batchResponse"; session_id: string; response: BatchResponse } | { type: "batchProgress"; session_id: string; words: TranscriptWord[]; percentage: number } | { type: "batchFailed"; session_id: string; error: string }
 export type BatchParams = { session_id: string; provider: BatchProvider; file_path: string; model?: string | null; base_url: string; api_key: string; languages?: string[]; keywords?: string[] }
 export type BatchProvider = "deepgram" | "soniox" | "assemblyai" | "am"
 export type BatchResponse = { metadata: JsonValue; results: BatchResults }
 export type BatchResults = { channels: BatchChannel[] }
 export type BatchWord = { word: string; start: number; end: number; confidence: number; speaker: number | null; punctuated_word: string | null }
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
-export type StreamAlternatives = { transcript: string; words: StreamWord[]; confidence: number; languages?: string[] }
-export type StreamChannel = { alternatives: StreamAlternatives[] }
-export type StreamExtra = { started_unix_millis: number }
-export type StreamMetadata = { request_id: string; model_info: StreamModelInfo; model_uuid: string; extra?: StreamExtra }
-export type StreamModelInfo = { name: string; version: string; arch: string }
-export type StreamResponse = { type: "Results"; start: number; duration: number; is_final: boolean; speech_final: boolean; from_finalize: boolean; channel: StreamChannel; metadata: StreamMetadata; channel_index: number[] } | { type: "Metadata"; request_id: string; created: string; duration: number; channels: number } | { type: "SpeechStarted"; channel: number[]; timestamp: number } | { type: "UtteranceEnd"; channel: number[]; last_word_end: number } | { type: "Error"; error_code: number | null; error_message: string; provider: string }
-export type StreamWord = { word: string; start: number; end: number; confidence: number; speaker: number | null; punctuated_word: string | null; language: string | null }
 export type Subtitle = { tokens: Token[] }
 export type Token = { text: string; start_time: number; end_time: number; speaker: string | null }
+export type TranscriptWord = { id: string; text: string; start_ms: number; end_ms: number; channel: number; speaker: number | null }
 export type VttWord = { text: string; start_ms: number; end_ms: number; speaker: string | null }
 
 /** tauri-specta globals **/

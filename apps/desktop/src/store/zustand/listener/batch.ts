@@ -1,14 +1,19 @@
 import type { StoreApi } from "zustand";
 
-import type { BatchResponse, StreamResponse } from "@hypr/plugin-listener2";
+import type { BatchResponse } from "@hypr/plugin-listener2";
+import type { TranscriptWord } from "@hypr/plugin-listener2";
 
 import {
   ChannelProfile,
   type RuntimeSpeakerHint,
   type WordLike,
 } from "../../../utils/segment";
-import type { HandlePersistCallback } from "./transcript";
 import { transformWordEntries } from "./utils";
+
+export type BatchPersistCallback = (
+  words: WordLike[],
+  hints: RuntimeSpeakerHint[],
+) => void;
 
 export type BatchPhase = "importing" | "transcribing";
 
@@ -22,7 +27,7 @@ export type BatchState = {
       phase?: BatchPhase;
     }
   >;
-  batchPersist: Record<string, HandlePersistCallback>;
+  batchPersist: Record<string, BatchPersistCallback>;
 };
 
 export type BatchActions = {
@@ -30,12 +35,12 @@ export type BatchActions = {
   handleBatchResponse: (sessionId: string, response: BatchResponse) => void;
   handleBatchResponseStreamed: (
     sessionId: string,
-    response: StreamResponse,
+    words: TranscriptWord[],
     percentage: number,
   ) => void;
   handleBatchFailed: (sessionId: string, error: string) => void;
   clearBatchSession: (sessionId: string) => void;
-  setBatchPersist: (sessionId: string, callback: HandlePersistCallback) => void;
+  setBatchPersist: (sessionId: string, callback: BatchPersistCallback) => void;
   clearBatchPersist: (sessionId: string) => void;
 };
 
@@ -83,27 +88,31 @@ export const createBatchSlice = <T extends BatchState>(
     });
   },
 
-  handleBatchResponseStreamed: (sessionId, response, percentage) => {
+  handleBatchResponseStreamed: (sessionId, words, percentage) => {
     const persist = get().batchPersist[sessionId];
 
-    if (persist && response.type === "Results") {
-      const channelIndex = response.channel_index[0];
-      const alternative = response.channel.alternatives[0];
+    if (persist && words.length > 0) {
+      const wordLikes: WordLike[] = words.map((w) => ({
+        text: w.text,
+        start_ms: w.start_ms,
+        end_ms: w.end_ms,
+        channel: w.channel,
+      }));
 
-      if (channelIndex !== undefined && alternative) {
-        const [words, hints] = transformWordEntries(
-          alternative.words,
-          alternative.transcript,
-          channelIndex,
-        );
+      const hints: RuntimeSpeakerHint[] = words
+        .filter((w) => w.speaker !== null)
+        .map((w, i) => ({
+          wordIndex: i,
+          data: {
+            type: "provider_speaker_index" as const,
+            speaker_index: w.speaker!,
+          },
+        }));
 
-        if (words.length > 0) {
-          persist(words, hints);
-        }
-      }
+      persist(wordLikes, hints);
     }
 
-    const isComplete = response.type === "Results" && response.from_finalize;
+    const isComplete = percentage >= 1;
 
     set((state) => ({
       ...state,

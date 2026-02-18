@@ -14,6 +14,7 @@ use owhisper_interface::{ControlMessage, MixedMessage};
 
 use super::session::session_span;
 use crate::{DegradedError, SessionDataEvent, SessionErrorEvent, SessionProgressEvent};
+use hypr_transcript::accumulator::TranscriptAccumulator;
 
 use adapters::spawn_rx_task;
 
@@ -50,6 +51,7 @@ pub struct ListenerState {
     tx: ChannelSender,
     rx_task: tokio::task::JoinHandle<()>,
     shutdown_tx: Option<tokio::sync::oneshot::Sender<()>>,
+    accumulator: TranscriptAccumulator,
 }
 
 pub(super) enum ChannelSender {
@@ -120,6 +122,7 @@ impl Actor for ListenerActor {
                 tx,
                 rx_task,
                 shutdown_tx: Some(shutdown_tx),
+                accumulator: TranscriptAccumulator::new(),
             };
 
             Ok(state)
@@ -137,6 +140,17 @@ impl Actor for ListenerActor {
             let _ = shutdown_tx.send(());
             let _ = (&mut state.rx_task).await;
         }
+
+        let flush = state.accumulator.flush();
+        if !flush.new_final_words.is_empty() {
+            let _ = (SessionDataEvent::TranscriptUpdate {
+                session_id: state.args.session_id.clone(),
+                new_final_words: flush.new_final_words,
+                partial_words: flush.partial_words,
+            })
+            .emit(&state.args.app);
+        }
+
         Ok(())
     }
 
@@ -207,6 +221,18 @@ impl Actor for ListenerActor {
                         response.remap_channel_index(1, 2);
                     }
                     crate::actors::ChannelMode::MicAndSpeaker => {}
+                }
+
+                if let Some(update) = state.accumulator.process(&response) {
+                    if let Err(error) = (SessionDataEvent::TranscriptUpdate {
+                        session_id: state.args.session_id.clone(),
+                        new_final_words: update.new_final_words,
+                        partial_words: update.partial_words,
+                    })
+                    .emit(&state.args.app)
+                    {
+                        tracing::error!(?error, "transcript_update_emit_failed");
+                    }
                 }
 
                 if let Err(error) = (SessionDataEvent::StreamResponse {

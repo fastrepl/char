@@ -12,14 +12,14 @@ import {
   updateTranscriptHints,
   updateTranscriptWords,
 } from "../store/transcript/utils";
-import type { HandlePersistCallback } from "../store/zustand/listener/transcript";
+import type { BatchPersistCallback } from "../store/zustand/listener/batch";
 import { type Tab, useTabs } from "../store/zustand/tabs";
 import { id } from "../utils";
 import { useKeywords } from "./useKeywords";
 import { useSTTConnection } from "./useSTTConnection";
 
 type RunOptions = {
-  handlePersist?: HandlePersistCallback;
+  handlePersist?: BatchPersistCallback;
   model?: string;
   baseUrl?: string;
   apiKey?: string;
@@ -99,10 +99,10 @@ export const useRunBatch = (sessionId: string) => {
         speaker_hints: "[]",
       });
 
-      const handlePersist: HandlePersistCallback | undefined =
+      const handlePersist: BatchPersistCallback | undefined =
         options?.handlePersist;
 
-      const persist =
+      const persist: BatchPersistCallback =
         handlePersist ??
         ((words, hints) => {
           if (words.length === 0) {

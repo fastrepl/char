@@ -19,6 +19,7 @@ tauri-plugin-settings = { workspace = true }
 hypr-audio-utils = { workspace = true }
 hypr-host = { workspace = true }
 hypr-language = { workspace = true }
+hypr-transcript = { workspace = true }
 
 owhisper-client = { workspace = true, features = ["argmax"] }
 owhisper-interface = { workspace = true }

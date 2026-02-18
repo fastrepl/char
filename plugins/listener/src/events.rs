@@ -1,5 +1,7 @@
 use owhisper_interface::stream::StreamResponse;
 
+use hypr_transcript::accumulator::TranscriptWord;
+
 #[macro_export]
 macro_rules! common_event_derives {
     ($item:item) => {
@@ -79,6 +81,12 @@ common_event_derives! {
         StreamResponse {
             session_id: String,
             response: Box<StreamResponse>,
+        },
+        #[serde(rename = "transcript_update")]
+        TranscriptUpdate {
+            session_id: String,
+            new_final_words: Vec<TranscriptWord>,
+            partial_words: Vec<TranscriptWord>,
         },
     }
 }

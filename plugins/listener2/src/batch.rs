@@ -3,6 +3,7 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use futures_util::StreamExt;
+use hypr_transcript::accumulator::TranscriptAccumulator;
 use owhisper_client::{
     AdapterKind, ArgmaxAdapter, AssemblyAIAdapter, DashScopeAdapter, DeepgramAdapter,
     ElevenLabsAdapter, FireworksAdapter, GladiaAdapter, HyprnoteAdapter, MistralAdapter,
@@ -84,19 +85,35 @@ pub struct BatchArgs {
 pub struct BatchState {
     pub app: tauri::AppHandle,
     pub session_id: String,
+    accumulator: TranscriptAccumulator,
     rx_task: tokio::task::JoinHandle<()>,
     shutdown_tx: Option<tokio::sync::oneshot::Sender<()>>,
 }
 
 impl BatchState {
-    fn emit_streamed_response(
-        &self,
-        response: StreamResponse,
+    fn emit_words(
+        &mut self,
+        response: &StreamResponse,
         percentage: f64,
     ) -> Result<(), ActorProcessingErr> {
-        BatchEvent::BatchResponseStreamed {
+        if let Some(update) = self.accumulator.process(response) {
+            if !update.new_final_words.is_empty() {
+                BatchEvent::BatchTranscriptWords {
+                    session_id: self.session_id.clone(),
+                    words: update.new_final_words,
+                    percentage,
+                }
+                .emit(&self.app)?;
+            }
+        }
+        Ok(())
+    }
+
+    fn flush_words(&mut self, percentage: f64) -> Result<(), ActorProcessingErr> {
+        let update = self.accumulator.flush();
+        BatchEvent::BatchTranscriptWords {
             session_id: self.session_id.clone(),
-            response,
+            words: update.new_final_words,
             percentage,
         }
         .emit(&self.app)?;
@@ -142,6 +159,7 @@ impl Actor for BatchActor {
         let state = BatchState {
             app: args.app,
             session_id: args.session_id,
+            accumulator: TranscriptAccumulator::new(),
             rx_task,
             shutdown_tx: Some(shutdown_tx),
         };
@@ -173,15 +191,7 @@ impl Actor for BatchActor {
                 percentage,
             } => {
                 tracing::info!("batch stream response received");
-
-                let is_final = matches!(
-                    response.as_ref(),
-                    StreamResponse::TranscriptResponse { is_final, .. } if *is_final
-                );
-
-                if is_final {
-                    state.emit_streamed_response(*response, percentage)?;
-                }
+                state.emit_words(&response, percentage)?;
             }
 
             BatchMsg::StreamStartFailed(error) => {
@@ -198,6 +208,7 @@ impl Actor for BatchActor {
 
             BatchMsg::StreamEnded => {
                 tracing::info!("batch_stream_ended");
+                state.flush_words(1.0)?;
                 myself.stop(None);
             }
         }
