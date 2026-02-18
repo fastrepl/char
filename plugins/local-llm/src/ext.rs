@@ -2,7 +2,6 @@ use std::{future::Future, path::PathBuf};
 
 use tauri::{Manager, Runtime, ipc::Channel};
 use tauri_plugin_store2::Store2PluginExt;
-use tauri_specta::Event;
 
 use hypr_download_interface::DownloadProgress;
 use hypr_file::download_file_parallel;
@@ -12,10 +11,6 @@ pub trait LocalLlmPluginExt<R: Runtime> {
 
     fn models_dir(&self) -> PathBuf;
     fn api_base(&self) -> impl Future<Output = Option<String>>;
-
-    fn is_server_running(&self) -> impl Future<Output = bool>;
-    fn start_server(&self) -> impl Future<Output = Result<String, crate::Error>>;
-    fn stop_server(&self) -> impl Future<Output = Result<(), crate::Error>>;
 
     fn list_downloaded_model(
         &self,
@@ -89,13 +84,6 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
         }
 
         Ok(true)
-    }
-
-    #[tracing::instrument(skip_all)]
-    async fn is_server_running(&self) -> bool {
-        let state = self.state::<crate::SharedState>();
-        let s = state.lock().await;
-        s.server.is_some()
     }
 
     #[tracing::instrument(skip_all)]
@@ -193,51 +181,6 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
         }
 
         Ok(models)
-    }
-
-    #[tracing::instrument(skip_all)]
-    async fn start_server(&self) -> Result<String, crate::Error> {
-        if self.is_server_running().await {
-            return Err(crate::Error::ServerAlreadyRunning);
-        }
-
-        let current_selection = self.get_current_model_selection()?;
-        let model_path = current_selection.file_path(&self.models_dir());
-
-        let model_manager = crate::ModelManager::builder()
-            .model_path(model_path)
-            .build();
-        let state = self.state::<crate::SharedState>();
-
-        let handle = self.app_handle().clone();
-        let emitter = move |event: crate::LLMEvent| {
-            let _ = event.emit(&handle);
-        };
-
-        let server_state = crate::ServerState::new(emitter, model_manager);
-        let server = crate::server::run_server(server_state).await?;
-        tokio::time::sleep(std::time::Duration::from_millis(100)).await;
-
-        let api_base = format!("http://{}", &server.addr);
-
-        {
-            let mut s = state.lock().await;
-            s.api_base = Some(api_base.clone());
-            s.server = Some(server);
-        }
-
-        Ok(api_base)
-    }
-
-    #[tracing::instrument(skip_all)]
-    async fn stop_server(&self) -> Result<(), crate::Error> {
-        let state = self.state::<crate::SharedState>();
-        let mut s = state.lock().await;
-
-        if let Some(server) = s.server.take() {
-            let _ = server.shutdown.send(());
-        }
-        Ok(())
     }
 
     #[tracing::instrument(skip_all)]

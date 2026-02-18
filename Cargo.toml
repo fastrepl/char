@@ -74,9 +74,6 @@ hypr-intercept = { path = "crates/intercept", package = "intercept" }
 hypr-jina = { path = "crates/jina", package = "jina" }
 hypr-kyutai = { path = "crates/kyutai", package = "kyutai" }
 hypr-language = { path = "crates/language", package = "language" }
-hypr-llama = { path = "crates/llama", package = "llama" }
-hypr-llm = { path = "crates/llm", package = "llm" }
-hypr-llm-interface = { path = "crates/llm-interface", package = "llm-interface" }
 hypr-llm-proxy = { path = "crates/llm-proxy", package = "llm-proxy" }
 hypr-llm-types = { path = "crates/llm-types", package = "llm-types" }
 hypr-loops = { path = "crates/loops", package = "loops" }
