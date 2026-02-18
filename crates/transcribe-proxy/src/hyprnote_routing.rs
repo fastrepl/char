@@ -265,4 +265,92 @@ mod tests {
         assert_eq!(chain[1], Provider::Deepgram);
         assert_eq!(chain[2], Provider::ElevenLabs);
     }
+
+    fn default_available() -> HashSet<Provider> {
+        make_available_providers(&[Provider::Deepgram, Provider::Soniox])
+    }
+
+    fn langs(codes: &[&str]) -> Vec<Language> {
+        codes.iter().map(|c| c.parse().unwrap()).collect()
+    }
+
+    #[test]
+    fn test_deepgram_first_for_excellent_quality_languages() {
+        let router = HyprnoteRouter::default();
+        let available = default_available();
+
+        for code in ["en", "es", "fr", "it", "ja", "de"] {
+            let selected = router.select_provider(&langs(&[code]), &available);
+            assert_eq!(
+                selected,
+                Some(Provider::Deepgram),
+                "Deepgram should be selected first for high-quality language: {code}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_soniox_first_for_languages_with_better_quality() {
+        let router = HyprnoteRouter::default();
+        let available = default_available();
+
+        for code in ["zh", "ko"] {
+            let selected = router.select_provider(&langs(&[code]), &available);
+            assert_eq!(
+                selected,
+                Some(Provider::Soniox),
+                "Soniox should win on quality for: {code}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_deepgram_first_for_supported_multi_languages() {
+        let router = HyprnoteRouter::default();
+        let available = default_available();
+
+        let deepgram_multi_combos: &[&[&str]] = &[&["en", "es"], &["en", "de"], &["en", "fr"]];
+
+        for combo in deepgram_multi_combos {
+            let selected = router.select_provider(&langs(combo), &available);
+            assert_eq!(
+                selected,
+                Some(Provider::Deepgram),
+                "Deepgram should be selected for multi-language combo: {combo:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_soniox_fallback_for_unsupported_deepgram_multi() {
+        let router = HyprnoteRouter::default();
+        let available = default_available();
+
+        let soniox_combos: &[&[&str]] = &[&["ko", "en"], &["en", "ko"]];
+
+        for combo in soniox_combos {
+            let selected = router.select_provider(&langs(combo), &available);
+            assert_eq!(
+                selected,
+                Some(Provider::Soniox),
+                "Soniox should be the fallback for language combo: {combo:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_soniox_always_in_fallback_chain() {
+        let router = HyprnoteRouter::default();
+        let available = default_available();
+
+        let all_combos: &[&[&str]] = &[&["en"], &["ko"], &["en", "de"], &["ko", "en"], &["zh"]];
+
+        for combo in all_combos {
+            let chain = router.select_provider_chain(&langs(combo), &available);
+            assert!(
+                chain.contains(&Provider::Soniox),
+                "Soniox should always be in the fallback chain for: {combo:?}"
+            );
+        }
+    }
 }
