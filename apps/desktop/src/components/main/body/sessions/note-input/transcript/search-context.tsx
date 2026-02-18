@@ -9,6 +9,8 @@ import {
 } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
+import { useShortcutKeys } from "../../../../../../hooks/useShortcutRegistry";
+
 interface SearchContextValue {
   query: string;
   isVisible: boolean;
@@ -117,8 +119,10 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     setIsVisible(false);
   }, []);
 
+  const transcriptSearchKeys = useShortcutKeys("transcript_search");
+
   useHotkeys(
-    "mod+f",
+    transcriptSearchKeys,
     (event) => {
       event.preventDefault();
       const container = ensureContainer();
@@ -132,6 +136,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       preventDefault: true,
       enableOnFormTags: true,
       enableOnContentEditable: true,
+      enabled: !!transcriptSearchKeys,
     },
     [ensureContainer],
   );

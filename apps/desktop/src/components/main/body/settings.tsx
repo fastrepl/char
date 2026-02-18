@@ -17,6 +17,7 @@ import {
 import { cn } from "@hypr/utils";
 
 import { useSettingsNavigation } from "../../../hooks/useSettingsNavigation";
+import { useShortcutKeys } from "../../../hooks/useShortcutRegistry";
 import {
   type SettingsTab,
   type Tab,
@@ -100,8 +101,11 @@ function SettingsView({ tab }: { tab: Extract<Tab, { type: "settings" }> }) {
 
   const currentIndex = SECTIONS.findIndex((s) => s.id === activeTab);
 
+  const prevPanelTabKeys = useShortcutKeys("prev_panel_tab");
+  const nextPanelTabKeys = useShortcutKeys("next_panel_tab");
+
   useHotkeys(
-    "ctrl+alt+left",
+    prevPanelTabKeys,
     () => {
       if (currentIndex > 0) {
         setActiveTab(SECTIONS[currentIndex - 1].id);
@@ -111,12 +115,13 @@ function SettingsView({ tab }: { tab: Extract<Tab, { type: "settings" }> }) {
       preventDefault: true,
       enableOnFormTags: true,
       enableOnContentEditable: true,
+      enabled: !!prevPanelTabKeys,
     },
     [currentIndex, setActiveTab],
   );
 
   useHotkeys(
-    "ctrl+alt+right",
+    nextPanelTabKeys,
     () => {
       if (currentIndex < SECTIONS.length - 1) {
         setActiveTab(SECTIONS[currentIndex + 1].id);
@@ -126,6 +131,7 @@ function SettingsView({ tab }: { tab: Extract<Tab, { type: "settings" }> }) {
       preventDefault: true,
       enableOnFormTags: true,
       enableOnContentEditable: true,
+      enabled: !!nextPanelTabKeys,
     },
     [currentIndex, setActiveTab],
   );

@@ -8,6 +8,7 @@ import { cn } from "@hypr/utils";
 
 import { useAudioPlayer } from "../../../../../../../contexts/audio-player/provider";
 import { useListener } from "../../../../../../../contexts/listener";
+import { useShortcutKeys } from "../../../../../../../hooks/useShortcutRegistry";
 import * as main from "../../../../../../../store/tinybase/store/main";
 import { TranscriptEmptyState } from "../empty-state";
 import {
@@ -102,8 +103,10 @@ export function TranscriptContainer({
   const currentMs = time.current * 1000;
   const isPlaying = playerState === "playing";
 
+  const playPauseKeys = useShortcutKeys("play_pause_audio");
+
   useHotkeys(
-    "space",
+    playPauseKeys,
     (e) => {
       e.preventDefault();
       if (playerState === "playing") {
@@ -114,7 +117,7 @@ export function TranscriptContainer({
         start();
       }
     },
-    { enableOnFormTags: false },
+    { enableOnFormTags: false, enabled: !!playPauseKeys },
   );
 
   usePlaybackAutoScroll(containerRef, currentMs, isPlaying);

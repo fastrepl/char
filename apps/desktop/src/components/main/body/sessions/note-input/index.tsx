@@ -20,6 +20,7 @@ import { cn } from "@hypr/utils";
 
 import { useListener } from "../../../../../contexts/listener";
 import { useScrollPreservation } from "../../../../../hooks/useScrollPreservation";
+import { useShortcutKeys } from "../../../../../hooks/useShortcutRegistry";
 import { type Tab, useTabs } from "../../../../../store/zustand/tabs";
 import { type EditorView } from "../../../../../store/zustand/tabs/schema";
 import { useCaretNearBottom } from "../caret-position-context";
@@ -293,8 +294,20 @@ function useTabShortcuts({
   currentTab: EditorView;
   handleTabChange: (view: EditorView) => void;
 }) {
+  const switchToEnhancedKeys = useShortcutKeys("switch_to_enhanced");
+  const switchToRawKeys = useShortcutKeys("switch_to_raw");
+  const switchToTranscriptKeys = useShortcutKeys("switch_to_transcript");
+  const prevPanelTabKeys = useShortcutKeys("prev_panel_tab");
+  const nextPanelTabKeys = useShortcutKeys("next_panel_tab");
+
+  const scopedOptions = {
+    preventDefault: true,
+    enableOnFormTags: true,
+    enableOnContentEditable: true,
+  };
+
   useHotkeys(
-    "alt+s",
+    switchToEnhancedKeys,
     () => {
       const enhancedTabs = editorTabs.filter((t) => t.type === "enhanced");
       if (enhancedTabs.length === 0) return;
@@ -309,48 +322,36 @@ function useTabShortcuts({
         handleTabChange(enhancedTabs[0]);
       }
     },
-    {
-      preventDefault: true,
-      enableOnFormTags: true,
-      enableOnContentEditable: true,
-    },
+    { ...scopedOptions, enabled: !!switchToEnhancedKeys },
     [currentTab, editorTabs, handleTabChange],
   );
 
   useHotkeys(
-    "alt+m",
+    switchToRawKeys,
     () => {
       const rawTab = editorTabs.find((t) => t.type === "raw");
       if (rawTab && currentTab.type !== "raw") {
         handleTabChange(rawTab);
       }
     },
-    {
-      preventDefault: true,
-      enableOnFormTags: true,
-      enableOnContentEditable: true,
-    },
+    { ...scopedOptions, enabled: !!switchToRawKeys },
     [currentTab, editorTabs, handleTabChange],
   );
 
   useHotkeys(
-    "alt+t",
+    switchToTranscriptKeys,
     () => {
       const transcriptTab = editorTabs.find((t) => t.type === "transcript");
       if (transcriptTab && currentTab.type !== "transcript") {
         handleTabChange(transcriptTab);
       }
     },
-    {
-      preventDefault: true,
-      enableOnFormTags: true,
-      enableOnContentEditable: true,
-    },
+    { ...scopedOptions, enabled: !!switchToTranscriptKeys },
     [currentTab, editorTabs, handleTabChange],
   );
 
   useHotkeys(
-    "ctrl+alt+left",
+    prevPanelTabKeys,
     () => {
       const currentIndex = editorTabs.findIndex(
         (t) =>
@@ -363,16 +364,12 @@ function useTabShortcuts({
         handleTabChange(editorTabs[currentIndex - 1]);
       }
     },
-    {
-      preventDefault: true,
-      enableOnFormTags: true,
-      enableOnContentEditable: true,
-    },
+    { ...scopedOptions, enabled: !!prevPanelTabKeys },
     [currentTab, editorTabs, handleTabChange],
   );
 
   useHotkeys(
-    "ctrl+alt+right",
+    nextPanelTabKeys,
     () => {
       const currentIndex = editorTabs.findIndex(
         (t) =>
@@ -385,11 +382,7 @@ function useTabShortcuts({
         handleTabChange(editorTabs[currentIndex + 1]);
       }
     },
-    {
-      preventDefault: true,
-      enableOnFormTags: true,
-      enableOnContentEditable: true,
-    },
+    { ...scopedOptions, enabled: !!nextPanelTabKeys },
     [currentTab, editorTabs, handleTabChange],
   );
 }

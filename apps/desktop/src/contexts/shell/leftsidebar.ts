@@ -1,6 +1,8 @@
 import { useCallback, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
+import { useShortcutKeys } from "../../hooks/useShortcutRegistry";
+
 export function useLeftSidebar() {
   const [expanded, setExpanded] = useState(true);
   const [showDevtool, setShowDevtool] = useState(false);
@@ -13,13 +15,16 @@ export function useLeftSidebar() {
     setShowDevtool((prev) => !prev);
   }, []);
 
+  const toggleSidebarKeys = useShortcutKeys("toggle_sidebar");
+
   useHotkeys(
-    "mod+\\",
+    toggleSidebarKeys,
     toggleExpanded,
     {
       preventDefault: true,
       enableOnFormTags: true,
       enableOnContentEditable: true,
+      enabled: !!toggleSidebarKeys,
     },
     [toggleExpanded],
   );

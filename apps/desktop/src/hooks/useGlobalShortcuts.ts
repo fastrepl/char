@@ -1,21 +1,17 @@
-import { useQuery } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useShallow } from "zustand/shallow";
-
-import { commands as shortcutCommands } from "@hypr/plugin-shortcut";
 
 import { useNewNote, useNewNoteAndListen } from "../components/main/shared";
 import { useListener } from "../contexts/listener";
 import { useShell } from "../contexts/shell";
 import { useTabs } from "../store/zustand/tabs";
+import { useShortcutRegistry } from "./useShortcutRegistry";
 
 export function useGlobalShortcuts() {
-  const { data: shortcuts } = useQuery({
-    queryKey: ["shortcuts", "all"],
-    queryFn: () => shortcutCommands.getAllShortcuts(),
-    staleTime: Number.POSITIVE_INFINITY,
-  });
+  const { shortcuts, keysMap } = useShortcutRegistry();
+
+  const k = useCallback((id: string) => keysMap.get(id) ?? "", [keysMap]);
 
   const {
     tabs,
@@ -58,14 +54,17 @@ export function useGlobalShortcuts() {
     openNew({ type: "empty" });
   }, [openNew]);
 
+  const ready = keysMap.size > 0;
+
   const hotkeysOptions = {
     preventDefault: true,
     enableOnFormTags: true as const,
     enableOnContentEditable: true,
+    enabled: ready,
   };
 
   useHotkeys(
-    "mod+n",
+    k("new_note"),
     () => {
       if (currentTab?.type === "empty") {
         newNoteCurrent();
@@ -77,10 +76,12 @@ export function useGlobalShortcuts() {
     [currentTab, newNote, newNoteCurrent],
   );
 
-  useHotkeys("mod+t", () => newEmptyTab(), hotkeysOptions, [newEmptyTab]);
+  useHotkeys(k("new_empty_tab"), () => newEmptyTab(), hotkeysOptions, [
+    newEmptyTab,
+  ]);
 
   useHotkeys(
-    "mod+w",
+    k("close_tab"),
     async () => {
       if (currentTab) {
         const isCurrentTabListening =
@@ -111,8 +112,17 @@ export function useGlobalShortcuts() {
     ],
   );
 
+  const selectTabKeys = useMemo(
+    () =>
+      [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        .map((i) => k(`select_tab_${i}`))
+        .filter(Boolean)
+        .join(", "),
+    [k],
+  );
+
   useHotkeys(
-    "mod+1, mod+2, mod+3, mod+4, mod+5, mod+6, mod+7, mod+8, mod+9",
+    selectTabKeys,
     (event) => {
       const key = event.key;
       const targetIndex =
@@ -126,19 +136,22 @@ export function useGlobalShortcuts() {
     [tabs, select],
   );
 
-  useHotkeys("mod+alt+left", () => selectPrev(), hotkeysOptions, [selectPrev]);
-  useHotkeys("mod+alt+right", () => selectNext(), hotkeysOptions, [selectNext]);
-  useHotkeys("mod+shift+t", () => restoreLastClosedTab(), hotkeysOptions, [
-    restoreLastClosedTab,
-  ]);
+  useHotkeys(k("prev_tab"), () => selectPrev(), hotkeysOptions, [selectPrev]);
+  useHotkeys(k("next_tab"), () => selectNext(), hotkeysOptions, [selectNext]);
   useHotkeys(
-    "mod+shift+c",
+    k("restore_closed_tab"),
+    () => restoreLastClosedTab(),
+    hotkeysOptions,
+    [restoreLastClosedTab],
+  );
+  useHotkeys(
+    k("open_calendar"),
     () => openNew({ type: "calendar" }),
     hotkeysOptions,
     [openNew],
   );
   useHotkeys(
-    "mod+shift+o",
+    k("open_contacts"),
     () =>
       openNew({
         type: "contacts",
@@ -147,29 +160,38 @@ export function useGlobalShortcuts() {
     hotkeysOptions,
     [openNew],
   );
-  useHotkeys("mod+shift+comma", () => openNew({ type: "ai" }), hotkeysOptions, [
-    openNew,
-  ]);
   useHotkeys(
-    "mod+shift+l",
+    k("open_ai_settings"),
+    () => openNew({ type: "ai" }),
+    hotkeysOptions,
+    [openNew],
+  );
+  useHotkeys(
+    k("open_folders"),
     () => openNew({ type: "folders", id: null }),
     hotkeysOptions,
     [openNew],
   );
-  useHotkeys("mod+shift+f", () => openNew({ type: "search" }), hotkeysOptions, [
-    openNew,
-  ]);
-  useHotkeys("mod+shift+n", () => newNoteAndListen(), hotkeysOptions, [
-    newNoteAndListen,
-  ]);
   useHotkeys(
-    "mod+j",
+    k("open_search"),
+    () => openNew({ type: "search" }),
+    hotkeysOptions,
+    [openNew],
+  );
+  useHotkeys(
+    k("new_note_and_listen"),
+    () => newNoteAndListen(),
+    hotkeysOptions,
+    [newNoteAndListen],
+  );
+  useHotkeys(
+    k("toggle_chat"),
     () => transitionChatMode({ type: "TOGGLE" }),
     hotkeysOptions,
     [transitionChatMode],
   );
   useHotkeys(
-    "mod+,",
+    k("open_settings"),
     () => openNew({ type: "settings" }),
     { ...hotkeysOptions, splitKey: "|" },
     [openNew],

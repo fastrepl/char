@@ -6,6 +6,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 
 import { cn } from "@hypr/utils";
 
+import { useShortcutKeys } from "../../../../hooks/useShortcutRegistry";
 import { restoreSessionData } from "../../../../store/tinybase/store/deleteSession";
 import * as main from "../../../../store/tinybase/store/main";
 import { useTabs } from "../../../../store/zustand/tabs";
@@ -213,8 +214,10 @@ export function UndoDeleteKeyboardHandler() {
     return groups[groups.length - 1];
   }, [groups]);
 
+  const undoDeleteKeys = useShortcutKeys("undo_delete");
+
   useHotkeys(
-    "mod+z",
+    undoDeleteKeys,
     () => {
       if (latestGroup) {
         restoreGroup(latestGroup);
@@ -224,6 +227,7 @@ export function UndoDeleteKeyboardHandler() {
       preventDefault: true,
       enableOnFormTags: true,
       enableOnContentEditable: true,
+      enabled: !!undoDeleteKeys,
     },
     [latestGroup, restoreGroup],
   );

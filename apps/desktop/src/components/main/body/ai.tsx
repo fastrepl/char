@@ -20,6 +20,7 @@ import {
 import { cn } from "@hypr/utils";
 
 import { useSettingsNavigation } from "../../../hooks/useSettingsNavigation";
+import { useShortcutKeys } from "../../../hooks/useShortcutRegistry";
 import * as main from "../../../store/tinybase/store/main";
 import { type Tab, useTabs } from "../../../store/zustand/tabs";
 import { LLM } from "../../settings/ai/llm";
@@ -107,8 +108,11 @@ function AIView({ tab }: { tab: Extract<Tab, { type: "ai" }> }) {
   ];
   const currentIndex = enabledMenuKeys.indexOf(activeTab);
 
+  const prevPanelTabKeys = useShortcutKeys("prev_panel_tab");
+  const nextPanelTabKeys = useShortcutKeys("next_panel_tab");
+
   useHotkeys(
-    "ctrl+alt+left",
+    prevPanelTabKeys,
     () => {
       if (currentIndex > 0) {
         setActiveTab(enabledMenuKeys[currentIndex - 1]);
@@ -118,12 +122,13 @@ function AIView({ tab }: { tab: Extract<Tab, { type: "ai" }> }) {
       preventDefault: true,
       enableOnFormTags: true,
       enableOnContentEditable: true,
+      enabled: !!prevPanelTabKeys,
     },
     [currentIndex, setActiveTab],
   );
 
   useHotkeys(
-    "ctrl+alt+right",
+    nextPanelTabKeys,
     () => {
       if (currentIndex >= 0 && currentIndex < enabledMenuKeys.length - 1) {
         setActiveTab(enabledMenuKeys[currentIndex + 1]);
@@ -133,6 +138,7 @@ function AIView({ tab }: { tab: Extract<Tab, { type: "ai" }> }) {
       preventDefault: true,
       enableOnFormTags: true,
       enableOnContentEditable: true,
+      enabled: !!nextPanelTabKeys,
     },
     [currentIndex, setActiveTab],
   );
