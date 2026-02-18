@@ -92,7 +92,6 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
           submodules: recursive
-      - run: git fetch --tags --force
       - run: |
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
           git fetch --tags --force
@@ -213,7 +212,6 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
           submodules: recursive
-      - run: git fetch --tags --force
       - run: |
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
           git fetch --tags --force
