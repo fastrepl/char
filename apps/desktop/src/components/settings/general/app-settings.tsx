@@ -65,16 +65,12 @@ function SettingRow({
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <div data-settings-item className="flex items-center justify-between gap-4">
+    <div className="flex items-center justify-between gap-4">
       <div className="flex-1">
         <h3 className="text-sm font-medium mb-1">{title}</h3>
         <p className="text-xs text-neutral-600">{description}</p>
       </div>
-      <Switch
-        data-settings-activate
-        checked={checked}
-        onCheckedChange={onChange}
-      />
+      <Switch checked={checked} onCheckedChange={onChange} />
     </div>
   );
 }
