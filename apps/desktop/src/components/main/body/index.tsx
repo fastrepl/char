@@ -808,7 +808,7 @@ function useScrollActiveTabIntoView(tabs: Tab[]) {
   return setTabRef;
 }
 
-function useNewEmptyTab(){
+function useNewEmptyTab() {
   const openNew = useTabs((state) => state.openNew);
 
   const handler = useCallback(() => {

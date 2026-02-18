@@ -5,9 +5,9 @@ import { useShallow } from "zustand/shallow";
 
 import { commands as shortcutCommands } from "@hypr/plugin-shortcut";
 
+import { useNewNote, useNewNoteAndListen } from "../components/main/shared";
 import { useListener } from "../contexts/listener";
 import { useShell } from "../contexts/shell";
-import { useNewNote, useNewNoteAndListen } from "../components/main/shared";
 import { useTabs } from "../store/zustand/tabs";
 
 export function useGlobalShortcuts() {
@@ -77,12 +77,7 @@ export function useGlobalShortcuts() {
     [currentTab, newNote, newNoteCurrent],
   );
 
-  useHotkeys(
-    "mod+t",
-    () => newEmptyTab(),
-    hotkeysOptions,
-    [newEmptyTab],
-  );
+  useHotkeys("mod+t", () => newEmptyTab(), hotkeysOptions, [newEmptyTab]);
 
   useHotkeys(
     "mod+w",
@@ -133,18 +128,40 @@ export function useGlobalShortcuts() {
 
   useHotkeys("mod+alt+left", () => selectPrev(), hotkeysOptions, [selectPrev]);
   useHotkeys("mod+alt+right", () => selectNext(), hotkeysOptions, [selectNext]);
-  useHotkeys("mod+shift+t", () => restoreLastClosedTab(), hotkeysOptions, [restoreLastClosedTab]);
-  useHotkeys("mod+shift+c", () => openNew({ type: "calendar" }), hotkeysOptions, [openNew]);
+  useHotkeys("mod+shift+t", () => restoreLastClosedTab(), hotkeysOptions, [
+    restoreLastClosedTab,
+  ]);
   useHotkeys(
-    "mod+shift+o",
-    () => openNew({ type: "contacts", state: { selectedOrganization: null, selectedPerson: null } }),
+    "mod+shift+c",
+    () => openNew({ type: "calendar" }),
     hotkeysOptions,
     [openNew],
   );
-  useHotkeys("mod+shift+comma", () => openNew({ type: "ai" }), hotkeysOptions, [openNew]);
-  useHotkeys("mod+shift+l", () => openNew({ type: "folders", id: null }), hotkeysOptions, [openNew]);
-  useHotkeys("mod+shift+f", () => openNew({ type: "search" }), hotkeysOptions, [openNew]);
-  useHotkeys("mod+shift+n", () => newNoteAndListen(), hotkeysOptions, [newNoteAndListen]);
+  useHotkeys(
+    "mod+shift+o",
+    () =>
+      openNew({
+        type: "contacts",
+        state: { selectedOrganization: null, selectedPerson: null },
+      }),
+    hotkeysOptions,
+    [openNew],
+  );
+  useHotkeys("mod+shift+comma", () => openNew({ type: "ai" }), hotkeysOptions, [
+    openNew,
+  ]);
+  useHotkeys(
+    "mod+shift+l",
+    () => openNew({ type: "folders", id: null }),
+    hotkeysOptions,
+    [openNew],
+  );
+  useHotkeys("mod+shift+f", () => openNew({ type: "search" }), hotkeysOptions, [
+    openNew,
+  ]);
+  useHotkeys("mod+shift+n", () => newNoteAndListen(), hotkeysOptions, [
+    newNoteAndListen,
+  ]);
   useHotkeys(
     "mod+j",
     () => transitionChatMode({ type: "TOGGLE" }),

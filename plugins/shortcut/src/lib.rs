@@ -9,9 +9,7 @@ const PLUGIN_NAME: &str = "shortcut";
 fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
     tauri_specta::Builder::<R>::new()
         .plugin_name(PLUGIN_NAME)
-        .commands(tauri_specta::collect_commands![
-            commands::get_all_shortcuts,
-        ])
+        .commands(tauri_specta::collect_commands![commands::get_all_shortcuts,])
 }
 
 pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
