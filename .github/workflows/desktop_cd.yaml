@@ -201,7 +201,7 @@ jobs:
     if: ${{ inputs.channel != 'staging' && !cancelled() && (needs.cn-draft.result == 'success' || needs.cn-draft.result == 'skipped') }}
     permissions:
       contents: write
-    runs-on: depot-ubuntu-24.04-8
+    runs-on: depot-ubuntu-24.04-arm-8
     defaults:
       run:
         shell: bash

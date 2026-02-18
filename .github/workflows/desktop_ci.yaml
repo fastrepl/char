@@ -29,7 +29,7 @@ jobs:
           - platform: "macos"
             runner: "depot-macos-14"
           - platform: "linux"
-            runner: "depot-ubuntu-22.04-8"
+            runner: "depot-ubuntu-22.04-arm-8"
           - platform: "windows"
             runner: "windows-latest"
     runs-on: ${{ matrix.runner }}
