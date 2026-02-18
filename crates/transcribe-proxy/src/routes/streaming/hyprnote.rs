@@ -1,9 +1,7 @@
-use std::str::FromStr;
-
 use owhisper_client::{
-    AdapterKind, AssemblyAIAdapter, Auth, DashScopeAdapter, DeepgramAdapter, DeepgramModel,
-    ElevenLabsAdapter, FireworksAdapter, GladiaAdapter, MistralAdapter, OpenAIAdapter, Provider,
-    RealtimeSttAdapter, SonioxAdapter, is_meta_model,
+    AssemblyAIAdapter, Auth, DashScopeAdapter, DeepgramAdapter, ElevenLabsAdapter,
+    FireworksAdapter, GladiaAdapter, MistralAdapter, OpenAIAdapter, Provider, RealtimeSttAdapter,
+    SonioxAdapter,
 };
 use owhisper_interface::ListenParams;
 
@@ -12,6 +10,7 @@ use crate::provider_selector::SelectedProvider;
 use crate::query_params::QueryParams;
 use crate::relay::WebSocketProxy;
 use crate::routes::AppState;
+use crate::routes::model_resolution::resolve_model;
 
 use super::AnalyticsContext;
 use super::common::{ProxyBuildError, finalize_proxy_builder, parse_param};
@@ -97,33 +96,6 @@ fn build_response_transformer(
         }
 
         serde_json::to_string(&responses).ok()
-    }
-}
-
-fn should_override_deepgram_model(model: &str, languages: &[hypr_language::Language]) -> bool {
-    if let Ok(parsed_model) = DeepgramModel::from_str(model) {
-        !languages
-            .iter()
-            .all(|lang| parsed_model.supports_language(lang))
-    } else {
-        false
-    }
-}
-
-fn resolve_model(provider: Provider, listen_params: &mut ListenParams) {
-    let needs_resolution = match &listen_params.model {
-        None => true,
-        Some(m) if is_meta_model(m) => true,
-        Some(model) if provider == Provider::Deepgram => {
-            should_override_deepgram_model(model, &listen_params.languages)
-        }
-        _ => false,
-    };
-
-    if needs_resolution {
-        listen_params.model = AdapterKind::from(provider)
-            .recommended_model_live(&listen_params.languages)
-            .map(|m| m.to_string());
     }
 }
 

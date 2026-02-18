@@ -1,6 +1,7 @@
 pub mod batch;
 pub mod callback;
 mod error;
+mod model_resolution;
 pub mod status;
 pub mod streaming;
 
