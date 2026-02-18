@@ -29,7 +29,7 @@ fn resolve_session_dir<R: tauri::Runtime>(
         .settings()
         .cached_vault_base()
         .map_err(|e| e.to_string())?;
-    Ok(find_session_dir(&base.join("sessions"), session_id))
+    Ok(find_session_dir(&base.join("sessions").into_std_path_buf(), session_id))
 }
 
 #[tauri::command]
@@ -53,9 +53,10 @@ pub(crate) async fn write_json_batch<R: tauri::Runtime>(
         .iter()
         .filter_map(|(_, path)| {
             std::path::Path::new(path)
-                .strip_prefix(&base)
+                .strip_prefix(base.as_std_path())
                 .ok()
-                .map(|p| p.to_string_lossy().to_string())
+                .and_then(|p| p.to_str())
+                .map(|s| s.to_string())
         })
         .collect();
 
@@ -88,9 +89,10 @@ pub(crate) async fn write_document_batch<R: tauri::Runtime>(
         .iter()
         .filter_map(|(_, path)| {
             std::path::Path::new(path)
-                .strip_prefix(&base)
+                .strip_prefix(base.as_std_path())
                 .ok()
-                .map(|p| p.to_string_lossy().to_string())
+                .and_then(|p| p.to_str())
+                .map(|s| s.to_string())
         })
         .collect();
 
@@ -283,7 +285,7 @@ pub(crate) async fn scan_and_read<R: tauri::Runtime>(
     spawn_blocking!({
         Ok(crate::scan::scan_and_read(
             &PathBuf::from(&scan_dir),
-            &base,
+            base.as_std_path(),
             &file_patterns,
             recursive,
             path_filter.as_deref(),
@@ -301,11 +303,7 @@ pub(crate) async fn chat_dir<R: tauri::Runtime>(
         .settings()
         .cached_vault_base()
         .map_err(|e| e.to_string())?;
-    Ok(base
-        .join("chats")
-        .join(&chat_group_id)
-        .to_string_lossy()
-        .to_string())
+    Ok(base.join("chats").join(&chat_group_id).to_string())
 }
 
 #[tauri::command]
@@ -318,7 +316,7 @@ pub(crate) async fn entity_dir<R: tauri::Runtime>(
         .settings()
         .cached_vault_base()
         .map_err(|e| e.to_string())?;
-    Ok(base.join(&dir_name).to_string_lossy().to_string())
+    Ok(base.join(&dir_name).to_string())
 }
 
 #[tauri::command]

@@ -214,6 +214,8 @@ tokio-stream = "0.1.17"
 tokio-tungstenite = "0.28"
 tokio-util = "0.7.15"
 
+camino = "1"
+
 anyhow = "1"
 approx = "0.5.1"
 backon = "1.6.0"
