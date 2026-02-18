@@ -20,6 +20,7 @@ pub enum Internal2STTMessage {
 pub struct Internal2STTArgs {
     pub model_type: WhisperModel,
     pub model_cache_dir: PathBuf,
+    pub cactus_model_path: Option<PathBuf>,
 }
 
 pub struct Internal2STTState {
@@ -51,9 +52,12 @@ impl Actor for Internal2STTActor {
         let Internal2STTArgs {
             model_type,
             model_cache_dir,
+            cactus_model_path,
         } = args;
 
-        let model_path = resolve_cactus_model_path(&model_cache_dir);
+        let model_path = cactus_model_path
+            .filter(|p| p.exists())
+            .unwrap_or_else(|| resolve_cactus_model_path(&model_cache_dir));
 
         let cactus_service = HandleError::new(
             hypr_transcribe_cactus::TranscribeService::builder()

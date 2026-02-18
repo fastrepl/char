@@ -85,7 +85,7 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
             ));
         }
 
-        if matches!(server_type, ServerType::Internal) && !self.is_model_downloaded(&model).await? {
+        if matches!(server_type, ServerType::External) && !self.is_model_downloaded(&model).await? {
             return Err(crate::Error::ModelNotDownloaded);
         }
 
@@ -103,7 +103,9 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
                     _ => return Err(crate::Error::UnsupportedModelType),
                 };
 
-                start_internal2_server(&supervisor, cache_dir, whisper_model).await
+                let cactus_model_path = read_cactus_model_path(self.manager);
+                start_internal2_server(&supervisor, cache_dir, whisper_model, cactus_model_path)
+                    .await
             }
             ServerType::External => {
                 let data_dir = self.models_dir();
@@ -456,12 +458,14 @@ async fn start_internal2_server(
     supervisor: &supervisor::SupervisorRef,
     cache_dir: PathBuf,
     model: hypr_whisper_local_model::WhisperModel,
+    cactus_model_path: Option<PathBuf>,
 ) -> Result<String, crate::Error> {
     supervisor::start_internal2_stt(
         supervisor,
         internal2::Internal2STTArgs {
             model_cache_dir: cache_dir,
             model_type: model,
+            cactus_model_path,
         },
     )
     .await
@@ -541,6 +545,22 @@ async fn start_external_server<R: Runtime, T: Manager<R>>(
         .await
         .and_then(|info| info.url)
         .ok_or_else(|| crate::Error::ServerStartFailed("empty_health".to_string()))
+}
+
+fn read_cactus_model_path<R: Runtime, T: Manager<R>>(manager: &T) -> Option<PathBuf> {
+    use tauri_plugin_settings::SettingsPluginExt;
+
+    let settings_path = manager.settings().settings_path().ok()?;
+    let content = std::fs::read_to_string(settings_path.as_std_path()).ok()?;
+    let json: serde_json::Value = serde_json::from_str(&content).ok()?;
+    let path_str = json.pointer("/ai/cactus_model_path")?.as_str()?;
+
+    if path_str.is_empty() {
+        return None;
+    }
+
+    let path = PathBuf::from(path_str);
+    if path.exists() { Some(path) } else { None }
 }
 
 async fn internal2_health() -> Option<ServerInfo> {

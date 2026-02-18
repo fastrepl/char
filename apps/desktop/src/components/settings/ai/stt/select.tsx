@@ -205,16 +205,7 @@ export function SelectProviderAndModel() {
                 );
               }
 
-              const allModels = configuredProviders?.[providerId]?.models ?? [];
-              const models = allModels.filter((model) => {
-                if (model.id === "cloud") {
-                  return true;
-                }
-                if (model.id.startsWith("Quantized")) {
-                  return model.isDownloaded;
-                }
-                return true;
-              });
+              const models = configuredProviders?.[providerId]?.models ?? [];
 
               return (
                 <div className="flex-3 min-w-0">
@@ -302,14 +293,11 @@ function useConfiguredMapping(): Record<
 
   const isAppleSilicon = targetArch.data === "aarch64";
 
-  const [p2, p3, whisperLargeV3, qSmall, qSmallEn, qLargeTurbo] = useQueries({
+  const [p2, p3, whisperLargeV3] = useQueries({
     queries: [
       sttModelQueries.isDownloaded("am-parakeet-v2"),
       sttModelQueries.isDownloaded("am-parakeet-v3"),
       sttModelQueries.isDownloaded("am-whisper-large-v3"),
-      sttModelQueries.isDownloaded("QuantizedSmall"),
-      sttModelQueries.isDownloaded("QuantizedSmallEn"),
-      sttModelQueries.isDownloaded("QuantizedLargeTurbo"),
     ],
   });
 
@@ -337,20 +325,7 @@ function useConfiguredMapping(): Record<
           { id: "cloud", isDownloaded: billing.isPro },
         ];
 
-        models.push(
-          {
-            id: "QuantizedSmall",
-            isDownloaded: qSmall.data ?? false,
-          },
-          {
-            id: "QuantizedSmallEn",
-            isDownloaded: qSmallEn.data ?? false,
-          },
-          {
-            id: "QuantizedLargeTurbo",
-            isDownloaded: qLargeTurbo.data ?? false,
-          },
-        );
+        models.push({ id: "cactus", isDownloaded: true });
 
         if (isAppleSilicon) {
           models.push(

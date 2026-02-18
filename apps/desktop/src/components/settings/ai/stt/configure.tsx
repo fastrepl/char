@@ -22,6 +22,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@hypr/ui/components/ui/accordion";
+import { Input } from "@hypr/ui/components/ui/input";
 import { cn } from "@hypr/utils";
 
 import { useBillingAccess } from "../../../../billing";
@@ -68,6 +69,82 @@ export function ConfigureProviders() {
           ),
         )}
       </Accordion>
+      <CactusExperimentalSection />
+    </div>
+  );
+}
+
+function CactusExperimentalSection() {
+  const modelPath = settings.UI.useValue(
+    "cactus_model_path",
+    settings.STORE_ID,
+  );
+
+  const handleSetModelPath = settings.UI.useSetValueCallback(
+    "cactus_model_path",
+    (path: string) => path,
+    [],
+    settings.STORE_ID,
+  );
+
+  const handleSelectProvider = settings.UI.useSetValueCallback(
+    "current_stt_provider",
+    (provider: string) => provider,
+    [],
+    settings.STORE_ID,
+  );
+
+  const handleSelectModel = settings.UI.useSetValueCallback(
+    "current_stt_model",
+    (model: string) => model,
+    [],
+    settings.STORE_ID,
+  );
+
+  const active = useListener((state) => state.live.status !== "inactive");
+
+  const handleUseCactus = useCallback(() => {
+    if (active) return;
+    handleSelectProvider("hyprnote");
+    handleSelectModel("cactus");
+  }, [active, handleSelectProvider, handleSelectModel]);
+
+  return (
+    <div
+      className={cn([
+        "rounded-xl border-2 border-dashed bg-neutral-50 p-4",
+        "flex flex-col gap-3",
+      ])}
+    >
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-medium">Cactus</span>
+        <span className="text-xs text-neutral-500 font-light border border-neutral-300 rounded-full px-2">
+          Experimental
+        </span>
+      </div>
+      <p className="text-xs text-neutral-500">
+        Use a local Cactus model for transcription. Set the path to the model
+        directory on disk.
+      </p>
+      <Input
+        value={modelPath ?? ""}
+        onChange={(e) => handleSetModelPath(e.target.value)}
+        placeholder="/path/to/cactus-model"
+        className="text-xs font-mono"
+      />
+      <button
+        onClick={handleUseCactus}
+        disabled={active || !modelPath}
+        className={cn([
+          "w-fit h-8.5 px-4 rounded-full text-xs font-mono text-center",
+          "bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900",
+          "shadow-xs hover:shadow-md hover:scale-[102%] active:scale-[98%]",
+          "transition-all duration-150",
+          "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-xs",
+        ])}
+      >
+        Use Cactus
+      </button>
     </div>
   );
 }
@@ -133,22 +210,6 @@ function HyprProviderCard({
             </a>
             <div className="flex-1 border-t border-dashed border-neutral-300" />
           </div>
-
-          <HyprProviderLocalRow
-            model="QuantizedSmall"
-            displayName="Whisper Small"
-            description="Multilingual. Good balance of speed and accuracy."
-          />
-          <HyprProviderLocalRow
-            model="QuantizedSmallEn"
-            displayName="Whisper Small (English)"
-            description="English only. Optimized for English transcription."
-          />
-          <HyprProviderLocalRow
-            model="QuantizedLargeTurbo"
-            displayName="Whisper Large Turbo"
-            description="Multilingual. Best accuracy, larger download."
-          />
 
           {isAppleSilicon && (
             <>

@@ -65,6 +65,10 @@ export const SETTINGS_MAPPING = {
       type: "string",
       path: ["ai", "current_stt_model"],
     },
+    cactus_model_path: {
+      type: "string",
+      path: ["ai", "cactus_model_path"],
+    },
     timezone: {
       type: "string",
       path: ["general", "timezone"],

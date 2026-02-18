@@ -85,9 +85,7 @@ export const displayModelId = (model: string) => {
     }
   }
 
-  if (model === "QuantizedSmall") return "Whisper Small";
-  if (model === "QuantizedSmallEn") return "Whisper Small (English)";
-  if (model === "QuantizedLargeTurbo") return "Whisper Large Turbo";
+  if (model === "cactus") return "Cactus";
 
   return model;
 };
