@@ -101,45 +101,44 @@ function AIView({ tab }: { tab: Extract<Tab, { type: "ai" }> }) {
     [updateAiTabState, tab],
   );
 
-
   const menuItems: Array<{
     key: AITabKey;
     label: string;
     icon: React.ReactNode;
     disabled?: boolean;
   }> = [
-      {
-        key: "transcription",
-        label: "Transcription",
-        icon: <AudioLinesIcon size={14} />,
-      },
-      {
-        key: "intelligence",
-        label: "Intelligence",
-        icon: <SparklesIcon size={14} />,
-      },
-      {
-        key: "templates",
-        label: "Templates",
-        icon: <BookText size={14} />,
-      },
-      {
-        key: "shortcuts",
-        label: "Shortcuts",
-        icon: <MessageSquare size={14} />,
-      },
-      {
-        key: "prompts",
-        label: "Prompts",
-        icon: <SparklesIcon size={14} />,
-        disabled: true,
-      },
-      {
-        key: "memory",
-        label: "Memory",
-        icon: <BrainIcon size={14} />,
-      },
-    ];
+    {
+      key: "transcription",
+      label: "Transcription",
+      icon: <AudioLinesIcon size={14} />,
+    },
+    {
+      key: "intelligence",
+      label: "Intelligence",
+      icon: <SparklesIcon size={14} />,
+    },
+    {
+      key: "templates",
+      label: "Templates",
+      icon: <BookText size={14} />,
+    },
+    {
+      key: "shortcuts",
+      label: "Shortcuts",
+      icon: <MessageSquare size={14} />,
+    },
+    {
+      key: "prompts",
+      label: "Prompts",
+      icon: <SparklesIcon size={14} />,
+      disabled: true,
+    },
+    {
+      key: "memory",
+      label: "Memory",
+      icon: <BrainIcon size={14} />,
+    },
+  ];
 
   return (
     <div className="flex flex-col flex-1 w-full overflow-hidden">
