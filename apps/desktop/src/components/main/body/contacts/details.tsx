@@ -3,7 +3,6 @@ import {
   Building2,
   CircleMinus,
   FileText,
-  Pin,
   Plus,
   SearchIcon,
 } from "lucide-react";
@@ -34,8 +33,6 @@ export function DetailsColumn({
     selectedHumanId ?? "",
     main.STORE_ID,
   );
-  const isPinned = selectedPersonData.pinned as boolean | undefined;
-
   const mappingIdsByHuman = main.UI.useSliceRowIds(
     main.INDEXES.sessionsByHuman,
     selectedHumanId ?? "",
@@ -110,33 +107,6 @@ export function DetailsColumn({
   }, [duplicates, allHumans]);
 
   const store = main.UI.useStore(main.STORE_ID);
-
-  const handleTogglePin = useCallback(() => {
-    if (!store || !selectedHumanId) return;
-
-    const currentPinned = store.getCell("humans", selectedHumanId, "pinned");
-    if (currentPinned) {
-      store.setPartialRow("humans", selectedHumanId, {
-        pinned: false,
-        pin_order: 0,
-      });
-    } else {
-      const allHumans = store.getTable("humans");
-      const allOrgs = store.getTable("organizations");
-      const maxHumanOrder = Object.values(allHumans).reduce((max, h) => {
-        const order = (h.pin_order as number | undefined) ?? 0;
-        return Math.max(max, order);
-      }, 0);
-      const maxOrgOrder = Object.values(allOrgs).reduce((max, o) => {
-        const order = (o.pin_order as number | undefined) ?? 0;
-        return Math.max(max, order);
-      }, 0);
-      store.setPartialRow("humans", selectedHumanId, {
-        pinned: true,
-        pin_order: Math.max(maxHumanOrder, maxOrgOrder) + 1,
-      });
-    }
-  }, [store, selectedHumanId]);
 
   const handleMergeContacts = useCallback(
     (duplicateId: string) => {
@@ -285,30 +255,17 @@ export function DetailsColumn({
             <div className="border-b border-neutral-200">
               <div className="flex items-center px-4 py-3 border-b border-neutral-200">
                 <div className="w-28 text-sm text-neutral-500">Name</div>
-                <div className="flex-1 flex items-center gap-2">
+                <div className="flex-1">
                   <EditablePersonNameField personId={selectedHumanId} />
-                  <Button
-                    onClick={handleTogglePin}
-                    variant="ghost"
-                    size="sm"
-                    className={isPinned ? "text-blue-600" : "text-neutral-400"}
-                    aria-label={isPinned ? "Unpin contact" : "Pin contact"}
-                  >
-                    <Pin
-                      className="size-4"
-                      fill={isPinned ? "currentColor" : "none"}
-                    />
-                  </Button>
                 </div>
               </div>
               <EditablePersonJobTitleField personId={selectedHumanId} />
 
               <div className="flex items-center px-4 py-3 border-b border-neutral-200">
-                <div className="w-28 text-sm text-neutral-500">Name</div>
+                <div className="w-28 text-sm text-neutral-500">Company</div>
                 <div className="flex-1">
-                  <EditablePersonNameField personId={selectedHumanId} />
+                  <EditPersonOrganizationSelector personId={selectedHumanId} />
                 </div>
-              </div>
               </div>
 
               <EditablePersonEmailField personId={selectedHumanId} />
