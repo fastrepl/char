@@ -349,8 +349,7 @@ mod tests {
     }
 
     const TEST_LANG_CODES: &[&str] = &[
-        "en", "es", "fr", "de", "it", "ja", "ko", "zh", "ar", "hi", "pt", "ru", "nl", "sv",
-        "vi",
+        "en", "es", "fr", "de", "it", "ja", "ko", "zh", "ar", "hi", "pt", "ru", "nl", "sv", "vi",
     ];
 
     #[derive(Debug, Clone)]
