@@ -49,7 +49,17 @@ impl ModelSelection {
     }
 }
 
-#[derive(Debug, Eq, Hash, PartialEq, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
+#[derive(
+    Debug,
+    Eq,
+    Hash,
+    PartialEq,
+    Clone,
+    serde::Serialize,
+    serde::Deserialize,
+    specta::Type,
+    strum::Display,
+)]
 pub enum SupportedModel {
     Llama3p2_3bQ4,
     Gemma3_4bQ4,

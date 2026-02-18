@@ -120,7 +120,11 @@ impl AmModel {
         output_path: impl AsRef<std::path::Path>,
         progress_callback: F,
     ) -> Result<(), crate::Error> {
-        hypr_file::download_file_parallel(self.tar_url(), output_path, progress_callback).await?;
+        let url = hypr_api_asset_client::resolve_model(&self.to_string())
+            .await
+            .map(|a| a.url)
+            .unwrap_or_else(|_| self.tar_url().to_owned());
+        hypr_file::download_file_parallel(url, output_path, progress_callback).await?;
         Ok(())
     }
 }

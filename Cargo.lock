@@ -336,6 +336,7 @@ dependencies = [
 name = "am"
 version = "0.1.0"
 dependencies = [
+ "api-asset-client",
  "dirs 6.0.0",
  "download-interface",
  "file",
@@ -18977,6 +18978,7 @@ dependencies = [
 name = "tauri-plugin-local-llm"
 version = "0.1.0"
 dependencies = [
+ "api-asset-client",
  "async-openai",
  "async-stream",
  "axum 0.8.8",

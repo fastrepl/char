@@ -147,7 +147,12 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
                 }
             };
 
-            if let Err(e) = download_file_parallel(m.model_url(), path, callback).await {
+            let url = hypr_api_asset_client::resolve_model(&m.to_string())
+                .await
+                .map(|a| a.url)
+                .unwrap_or_else(|_| m.model_url().to_owned());
+
+            if let Err(e) = download_file_parallel(url, path, callback).await {
                 tracing::error!("model_download_error: {}", e);
                 let _ = channel.send(-1);
             }

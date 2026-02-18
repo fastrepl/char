@@ -8,6 +8,7 @@ hf-hub = "0.4.3"
 tokio = { workspace = true, features = ["rt", "macros"] }
 
 [dependencies]
+hypr-api-asset-client = { workspace = true }
 hypr-download-interface = { workspace = true }
 hypr-file = { workspace = true }
 
