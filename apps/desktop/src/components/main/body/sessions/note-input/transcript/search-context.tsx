@@ -31,7 +31,7 @@ function getMatchingElements(
   container: HTMLElement | null,
   query: string,
 ): HTMLElement[] {
-  if (!container || !query) {
+  if (!container || !query.trim()) {
     return [];
   }
 
