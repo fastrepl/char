@@ -207,13 +207,11 @@ impl DynamicSupervisorState {
     fn track_global_restart(&mut self, child_id: &str) -> Result<(), ActorProcessingErr> {
         let now = Instant::now();
 
-        if let Some(reset_after) = self.options.reset_after {
-            if let Some(latest) = self.restart_log.last() {
-                if now.duration_since(latest.timestamp) >= reset_after {
+        if let Some(reset_after) = self.options.reset_after
+            && let Some(latest) = self.restart_log.last()
+                && now.duration_since(latest.timestamp) >= reset_after {
                     self.restart_log.clear();
                 }
-            }
-        }
 
         self.restart_log.push(RestartLogEntry {
             _child_id: child_id.to_string(),
@@ -243,11 +241,10 @@ impl DynamicSupervisorState {
                 last_fail: now,
             });
 
-        if let Some(threshold) = spec.reset_after {
-            if now.duration_since(entry.last_fail) >= threshold {
+        if let Some(threshold) = spec.reset_after
+            && now.duration_since(entry.last_fail) >= threshold {
                 entry.restart_count = 0;
             }
-        }
 
         entry.restart_count += 1;
         entry.last_fail = now;
@@ -344,11 +341,10 @@ async fn handle_spawn_child(
         tokio::time::sleep(Duration::from_millis(10)).await;
     }
 
-    if let Some(max) = state.options.max_children {
-        if state.active_children.len() >= max {
+    if let Some(max) = state.options.max_children
+        && state.active_children.len() >= max {
             return Err(SupervisorError::MaxChildrenExceeded.into());
         }
-    }
 
     let result = spec.spawn_fn.call(myself.get_cell(), spec.id.clone()).await;
 
