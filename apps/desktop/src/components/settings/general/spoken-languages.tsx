@@ -101,7 +101,7 @@ export function SpokenLanguagesView({
   };
 
   return (
-    <div data-settings-item>
+    <div>
       <h3 className="text-sm font-medium mb-1">Spoken languages</h3>
       <p className="text-xs text-neutral-600 mb-3">
         Add other languages you use other than the main language

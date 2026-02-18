@@ -255,11 +255,19 @@ export const generalSchema = z.object({
   week_start: z.string().optional(),
 });
 
-export const aiProviderSchema = z.object({
-  type: z.enum(["stt", "llm"]),
-  base_url: z.string(),
-  api_key: z.string(),
-});
+export const aiProviderSchema = z
+  .object({
+    type: z.enum(["stt", "llm"]),
+    base_url: z.url().min(1),
+    api_key: z.string(),
+  })
+  .refine(
+    (data) => !data.base_url.startsWith("https:") || data.api_key.length > 0,
+    {
+      message: "API key is required for HTTPS URLs",
+      path: ["api_key"],
+    },
+  );
 
 export type ProviderSpeakerIndexHint = z.infer<
   typeof providerSpeakerIndexSchema
