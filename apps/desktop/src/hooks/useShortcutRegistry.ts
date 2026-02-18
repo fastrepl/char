@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
+import type { DependencyList } from "react";
 import { useMemo } from "react";
+import { type Options, useHotkeys } from "react-hotkeys-hook";
 
 import {
   commands as shortcutCommands,
@@ -24,4 +26,14 @@ export function useShortcutRegistry() {
 export function useShortcutKeys(id: ShortcutId): string {
   const { keysMap } = useShortcutRegistry();
   return keysMap.get(id) ?? "";
+}
+
+export function useScopedShortcut(
+  id: ShortcutId,
+  handler: (e: KeyboardEvent) => void,
+  options?: Omit<Options, "enabled">,
+  deps?: DependencyList,
+): void {
+  const keys = useShortcutKeys(id);
+  useHotkeys(keys, handler, { ...options, enabled: !!keys }, deps ?? []);
 }

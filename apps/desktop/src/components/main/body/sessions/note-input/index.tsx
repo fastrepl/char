@@ -8,7 +8,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 import type { TiptapEditor } from "@hypr/tiptap/editor";
@@ -20,7 +19,7 @@ import { cn } from "@hypr/utils";
 
 import { useListener } from "../../../../../contexts/listener";
 import { useScrollPreservation } from "../../../../../hooks/useScrollPreservation";
-import { useShortcutKeys } from "../../../../../hooks/useShortcutRegistry";
+import { useScopedShortcut } from "../../../../../hooks/useShortcutRegistry";
 import * as main from "../../../../../store/tinybase/store/main";
 import {
   parseTranscriptWords,
@@ -675,20 +674,14 @@ function useTabShortcuts({
   currentTab: EditorView;
   handleTabChange: (view: EditorView) => void;
 }) {
-  const switchToEnhancedKeys = useShortcutKeys("switch_to_enhanced");
-  const switchToRawKeys = useShortcutKeys("switch_to_raw");
-  const switchToTranscriptKeys = useShortcutKeys("switch_to_transcript");
-  const prevPanelTabKeys = useShortcutKeys("prev_panel_tab");
-  const nextPanelTabKeys = useShortcutKeys("next_panel_tab");
-
   const scopedOptions = {
     preventDefault: true,
     enableOnFormTags: true,
     enableOnContentEditable: true,
   };
 
-  useHotkeys(
-    switchToEnhancedKeys,
+  useScopedShortcut(
+    "switch_to_enhanced",
     () => {
       const enhancedTabs = editorTabs.filter((t) => t.type === "enhanced");
       if (enhancedTabs.length === 0) return;
@@ -703,36 +696,36 @@ function useTabShortcuts({
         handleTabChange(enhancedTabs[0]);
       }
     },
-    { ...scopedOptions, enabled: !!switchToEnhancedKeys },
+    scopedOptions,
     [currentTab, editorTabs, handleTabChange],
   );
 
-  useHotkeys(
-    switchToRawKeys,
+  useScopedShortcut(
+    "switch_to_raw",
     () => {
       const rawTab = editorTabs.find((t) => t.type === "raw");
       if (rawTab && currentTab.type !== "raw") {
         handleTabChange(rawTab);
       }
     },
-    { ...scopedOptions, enabled: !!switchToRawKeys },
+    scopedOptions,
     [currentTab, editorTabs, handleTabChange],
   );
 
-  useHotkeys(
-    switchToTranscriptKeys,
+  useScopedShortcut(
+    "switch_to_transcript",
     () => {
       const transcriptTab = editorTabs.find((t) => t.type === "transcript");
       if (transcriptTab && currentTab.type !== "transcript") {
         handleTabChange(transcriptTab);
       }
     },
-    { ...scopedOptions, enabled: !!switchToTranscriptKeys },
+    scopedOptions,
     [currentTab, editorTabs, handleTabChange],
   );
 
-  useHotkeys(
-    prevPanelTabKeys,
+  useScopedShortcut(
+    "prev_panel_tab",
     () => {
       const currentIndex = editorTabs.findIndex(
         (t) =>
@@ -745,12 +738,12 @@ function useTabShortcuts({
         handleTabChange(editorTabs[currentIndex - 1]);
       }
     },
-    { ...scopedOptions, enabled: !!prevPanelTabKeys },
+    scopedOptions,
     [currentTab, editorTabs, handleTabChange],
   );
 
-  useHotkeys(
-    nextPanelTabKeys,
+  useScopedShortcut(
+    "next_panel_tab",
     () => {
       const currentIndex = editorTabs.findIndex(
         (t) =>
@@ -763,7 +756,7 @@ function useTabShortcuts({
         handleTabChange(editorTabs[currentIndex + 1]);
       }
     },
-    { ...scopedOptions, enabled: !!nextPanelTabKeys },
+    scopedOptions,
     [currentTab, editorTabs, handleTabChange],
   );
 }

@@ -9,7 +9,7 @@ import {
 } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
-import { useShortcutKeys } from "../../../../../../hooks/useShortcutRegistry";
+import { useScopedShortcut } from "../../../../../../hooks/useShortcutRegistry";
 
 export interface SearchOptions {
   caseSensitive: boolean;
@@ -246,10 +246,8 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     setShowReplace((prev) => !prev);
   }, []);
 
-  const transcriptSearchKeys = useShortcutKeys("transcript_search");
-
-  useHotkeys(
-    transcriptSearchKeys,
+  useScopedShortcut(
+    "transcript_search",
     (event) => {
       event.preventDefault();
       setIsVisible((prev) => !prev);
@@ -258,7 +256,6 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       preventDefault: true,
       enableOnFormTags: true,
       enableOnContentEditable: true,
-      enabled: !!transcriptSearchKeys,
     },
     [],
   );

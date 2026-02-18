@@ -12,7 +12,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 
-import { useShortcutKeys } from "../../hooks/useShortcutRegistry";
+import { useScopedShortcut } from "../../hooks/useShortcutRegistry";
 import type {
   SearchDocument,
   SearchEntityType,
@@ -190,13 +190,10 @@ export function SearchUIProvider({ children }: { children: React.ReactNode }) {
     focusImplRef.current = impl;
   }, []);
 
-  const focusSearchKeys = useShortcutKeys("focus_search");
-
-  useHotkeys(focusSearchKeys, () => focus(), {
+  useScopedShortcut("focus_search", () => focus(), {
     preventDefault: true,
     enableOnFormTags: true,
     enableOnContentEditable: true,
-    enabled: !!focusSearchKeys,
   });
 
   useHotkeys(
