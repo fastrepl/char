@@ -93,6 +93,14 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Updater2<'a, R, M> {
     }
 
     pub async fn download(&self, version: &str) -> Result<(), crate::Error> {
+        if self.get_cached_update_bytes(version).is_ok() {
+            let _ = UpdateReadyEvent {
+                version: version.to_string(),
+            }
+            .emit(self.manager.app_handle());
+            return Ok(());
+        }
+
         use tauri_plugin_fs_db::FsDbPluginExt;
         if let Err(e) = self.manager.fs_db().ensure_version_file() {
             tracing::warn!("failed_to_ensure_version_file: {}", e);

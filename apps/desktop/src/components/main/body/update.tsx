@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { type UnlistenFn } from "@tauri-apps/api/event";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { useCallback, useEffect, useState } from "react";
@@ -8,7 +7,7 @@ import { Button } from "@hypr/ui/components/ui/button";
 import { cn } from "@hypr/utils";
 
 export function Update() {
-  const { show, version } = useUpdate();
+  const { version } = useUpdate();
 
   const handleInstallUpdate = useCallback(async () => {
     if (!version) {
@@ -18,7 +17,7 @@ export function Update() {
     await relaunch();
   }, [version]);
 
-  if (!show) {
+  if (!version) {
     return null;
   }
 
@@ -38,38 +37,14 @@ export function Update() {
 }
 
 function useUpdate() {
-  const [show, setShow] = useState(false);
-
-  const { data, refetch } = useQuery({
-    refetchInterval: 60 * 60 * 1000,
-    queryKey: ["pending-update"],
-    queryFn: async () => {
-      const result = await commands.check();
-      if (result.status !== "ok" || !result.data) {
-        return null;
-      }
-
-      const version = result.data;
-
-      const downloadResult = await commands.download(version);
-      if (downloadResult.status !== "ok") {
-        return null;
-      }
-
-      return version;
-    },
-  });
+  const [version, setVersion] = useState<string | null>(null);
 
   useEffect(() => {
-    setShow(!!data);
-  }, [data]);
-
-  useEffect(() => {
-    let unlisten: null | UnlistenFn = null;
+    let unlisten: UnlistenFn | null = null;
 
     void events.updateReadyEvent
-      .listen(({ payload: { version: _ } }) => {
-        void refetch();
+      .listen(({ payload }) => {
+        setVersion(payload.version);
       })
       .then((f) => {
         unlisten = f;
@@ -77,9 +52,8 @@ function useUpdate() {
 
     return () => {
       unlisten?.();
-      unlisten = null;
     };
-  }, [refetch]);
+  }, []);
 
-  return { show, version: data };
+  return { version };
 }

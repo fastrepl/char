@@ -27,8 +27,11 @@ fn setup_update_listeners(app: &tauri::AppHandle) {
     });
 
     let handle = app.clone();
-    tauri_plugin_updater2::UpdateReadyEvent::listen(app, move |_event| {
-        let _ = menu_items::TrayCheckUpdate::set_state(&handle, UpdateMenuState::RestartToApply);
+    tauri_plugin_updater2::UpdateReadyEvent::listen(app, move |event| {
+        let _ = menu_items::TrayCheckUpdate::set_state(
+            &handle,
+            UpdateMenuState::RestartToApply(event.payload.version.clone()),
+        );
     });
 
     let handle = app.clone();
