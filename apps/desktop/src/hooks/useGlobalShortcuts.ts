@@ -2,6 +2,8 @@ import { useCallback, useMemo } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useShallow } from "zustand/shallow";
 
+import type { ShortcutId } from "@hypr/plugin-shortcut";
+
 import { useNewNote, useNewNoteAndListen } from "../components/main/shared";
 import { useListener } from "../contexts/listener";
 import { useShell } from "../contexts/shell";
@@ -11,7 +13,7 @@ import { useShortcutRegistry } from "./useShortcutRegistry";
 export function useGlobalShortcuts() {
   const { shortcuts, keysMap } = useShortcutRegistry();
 
-  const k = useCallback((id: string) => keysMap.get(id) ?? "", [keysMap]);
+  const k = useCallback((id: ShortcutId) => keysMap.get(id) ?? "", [keysMap]);
 
   const {
     tabs,
@@ -112,10 +114,22 @@ export function useGlobalShortcuts() {
     ],
   );
 
+  const selectTabIds: ShortcutId[] = [
+    "select_tab_1",
+    "select_tab_2",
+    "select_tab_3",
+    "select_tab_4",
+    "select_tab_5",
+    "select_tab_6",
+    "select_tab_7",
+    "select_tab_8",
+    "select_tab_9",
+  ];
+
   const selectTabKeys = useMemo(
     () =>
-      [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        .map((i) => k(`select_tab_${i}`))
+      selectTabIds
+        .map((id) => k(id))
         .filter(Boolean)
         .join(", "),
     [k],

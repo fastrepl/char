@@ -1,7 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-import { commands as shortcutCommands } from "@hypr/plugin-shortcut";
+import {
+  commands as shortcutCommands,
+  type ShortcutId,
+} from "@hypr/plugin-shortcut";
 
 export function useShortcutRegistry() {
   const { data: shortcuts } = useQuery({
@@ -11,14 +14,14 @@ export function useShortcutRegistry() {
   });
 
   const keysMap = useMemo(() => {
-    if (!shortcuts) return new Map<string, string>();
+    if (!shortcuts) return new Map<ShortcutId, string>();
     return new Map(shortcuts.map((s) => [s.id, s.keys]));
   }, [shortcuts]);
 
   return { shortcuts, keysMap };
 }
 
-export function useShortcutKeys(id: string): string {
+export function useShortcutKeys(id: ShortcutId): string {
   const { keysMap } = useShortcutRegistry();
   return keysMap.get(id) ?? "";
 }
