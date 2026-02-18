@@ -545,6 +545,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "api-asset-client"
+version = "0.1.0"
+dependencies = [
+ "reqwest 0.13.2",
+ "serde",
+ "thiserror 2.0.18",
+ "tokio",
+]
+
+[[package]]
 name = "api-auth"
 version = "0.1.0"
 dependencies = [
@@ -19006,6 +19016,7 @@ name = "tauri-plugin-local-stt"
 version = "0.1.0"
 dependencies = [
  "am",
+ "api-asset-client",
  "audio-utils",
  "axum 0.8.8",
  "axum-extra",

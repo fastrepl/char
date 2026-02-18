@@ -38,6 +38,7 @@ tower = { workspace = true }
 
 [dependencies]
 hypr-am = { workspace = true }
+hypr-api-asset-client = { workspace = true }
 hypr-audio-utils = { workspace = true }
 hypr-download-interface = { workspace = true }
 hypr-file = { workspace = true }

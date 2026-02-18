@@ -261,8 +261,13 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
                 let task = tokio::spawn(async move {
                     let callback = create_progress_callback(model_for_task.clone());
 
+                    let url = hypr_api_asset_client::resolve_model(&m.to_string())
+                        .await
+                        .map(|a| a.url)
+                        .unwrap_or_else(|_| m.tar_url().to_owned());
+
                     let result = download_file_parallel_cancellable(
-                        m.tar_url(),
+                        url,
                         &tar_path,
                         callback,
                         Some(token_clone),
@@ -321,8 +326,13 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
                 let task = tokio::spawn(async move {
                     let callback = create_progress_callback(model_for_task.clone());
 
+                    let url = hypr_api_asset_client::resolve_model(&m.to_string())
+                        .await
+                        .map(|a| a.url)
+                        .unwrap_or_else(|_| m.model_url().to_owned());
+
                     let result = download_file_parallel_cancellable(
-                        m.model_url(),
+                        url,
                         &model_path,
                         callback,
                         Some(token_clone),
