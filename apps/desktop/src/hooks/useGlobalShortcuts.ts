@@ -169,7 +169,7 @@ export function useGlobalShortcuts() {
     () =>
       openNew({
         type: "contacts",
-        state: { selectedOrganization: null, selectedPerson: null },
+        state: { selected: null },
       }),
     hotkeysOptions,
     [openNew],
