@@ -6,8 +6,8 @@ use tauri_specta::Event;
 
 use owhisper_client::{
     AdapterKind, ArgmaxAdapter, AssemblyAIAdapter, DashScopeAdapter, DeepgramAdapter,
-    ElevenLabsAdapter, FireworksAdapter, GladiaAdapter, MistralAdapter, OpenAIAdapter,
-    RealtimeSttAdapter, SonioxAdapter,
+    ElevenLabsAdapter, FireworksAdapter, GladiaAdapter, HyprnoteAdapter, MistralAdapter,
+    OpenAIAdapter, RealtimeSttAdapter, SonioxAdapter,
 };
 use owhisper_interface::stream::Extra;
 use owhisper_interface::{ControlMessage, MixedMessage};
@@ -95,6 +95,12 @@ pub(super) async fn spawn_rx_task(
         }
         (AdapterKind::Mistral, true) => {
             spawn_rx_task_dual_with_adapter::<MistralAdapter>(args, myself).await
+        }
+        (AdapterKind::Hyprnote, false) => {
+            spawn_rx_task_single_with_adapter::<HyprnoteAdapter>(args, myself).await
+        }
+        (AdapterKind::Hyprnote, true) => {
+            spawn_rx_task_dual_with_adapter::<HyprnoteAdapter>(args, myself).await
         }
     }?;
 

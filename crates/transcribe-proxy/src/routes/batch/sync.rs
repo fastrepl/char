@@ -149,7 +149,9 @@ pub(super) async fn transcribe_with_provider(
 
     let file_path = temp_file.path();
     let provider = selected.provider();
-    let api_base = provider.default_api_base();
+    let api_base = selected
+        .upstream_url()
+        .unwrap_or(provider.default_api_base());
     let api_key = selected.api_key();
 
     macro_rules! batch_transcribe {
