@@ -48,6 +48,8 @@ jobs:
       - uses: ./.github/actions/rust_install
         with:
           platform: ${{ matrix.platform }}
+      - if: matrix.platform == 'macos'
+        run: echo "SDKROOT=$(xcrun --sdk macosx --show-sdk-path)" >> $GITHUB_ENV
       - run: cargo check -p desktop
       - run: cargo test -p desktop
         if: matrix.platform != 'windows'

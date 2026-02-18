@@ -103,6 +103,7 @@ jobs:
       - uses: ./.github/actions/rust_install
         with:
           platform: macos
+      - run: echo "SDKROOT=$(xcrun --sdk macosx --show-sdk-path)" >> $GITHUB_ENV
       - uses: ./.github/actions/pnpm_install
       - run: pnpm -F ui build
       - if: ${{ matrix.include_am }}
