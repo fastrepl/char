@@ -1,5 +1,6 @@
-import { Building2, CornerDownLeft, User } from "lucide-react";
-import React, { useState } from "react";
+import { Building2, CornerDownLeft, Pin, User } from "lucide-react";
+import { Reorder } from "motion/react";
+import React, { useCallback, useMemo, useState } from "react";
 
 import { cn } from "@hypr/utils";
 
@@ -17,22 +18,41 @@ export function OrganizationsColumn({
 }) {
   const [showNewOrg, setShowNewOrg] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const { organizationIds, sortOption, setSortOption } =
+  const { pinnedIds, unpinnedIds, sortOption, setSortOption } =
     useSortedOrganizationIds();
 
   const allOrgs = main.UI.useTable("organizations", main.STORE_ID);
+  const store = main.UI.useStore(main.STORE_ID);
 
-  const filteredOrganizationIds = React.useMemo(() => {
-    if (!searchValue.trim()) {
-      return organizationIds;
-    }
-
-    return organizationIds.filter((id) => {
-      const org = allOrgs[id];
-      const nameLower = (org?.name ?? "").toLowerCase();
-      return nameLower.includes(searchValue.toLowerCase());
+  const filteredPinnedIds = useMemo(() => {
+    if (!searchValue.trim()) return pinnedIds;
+    const q = searchValue.toLowerCase();
+    return pinnedIds.filter((id) => {
+      const nameLower = (allOrgs[id]?.name ?? "").toLowerCase();
+      return nameLower.includes(q);
     });
-  }, [organizationIds, searchValue, allOrgs]);
+  }, [pinnedIds, searchValue, allOrgs]);
+
+  const filteredUnpinnedIds = useMemo(() => {
+    if (!searchValue.trim()) return unpinnedIds;
+    const q = searchValue.toLowerCase();
+    return unpinnedIds.filter((id) => {
+      const nameLower = (allOrgs[id]?.name ?? "").toLowerCase();
+      return nameLower.includes(q);
+    });
+  }, [unpinnedIds, searchValue, allOrgs]);
+
+  const handleReorderPinned = useCallback(
+    (newOrder: string[]) => {
+      if (!store) return;
+      store.transaction(() => {
+        newOrder.forEach((id, index) => {
+          store.setCell("organizations", id, "pin_order", index);
+        });
+      });
+    },
+    [store],
+  );
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -62,7 +82,31 @@ export function OrganizationsColumn({
               onCancel={() => setShowNewOrg(false)}
             />
           )}
-          {filteredOrganizationIds.map((orgId) => (
+          {filteredPinnedIds.length > 0 && (
+            <Reorder.Group
+              axis="y"
+              values={filteredPinnedIds}
+              onReorder={handleReorderPinned}
+              className="flex flex-col"
+            >
+              {filteredPinnedIds.map((orgId) => (
+                <Reorder.Item key={orgId} value={orgId}>
+                  <OrganizationItem
+                    organizationId={orgId}
+                    isSelected={selectedOrganization === orgId}
+                    isViewingDetails={
+                      isViewingOrgDetails && selectedOrganization === orgId
+                    }
+                    setSelectedOrganization={setSelectedOrganization}
+                  />
+                </Reorder.Item>
+              ))}
+            </Reorder.Group>
+          )}
+          {filteredPinnedIds.length > 0 && filteredUnpinnedIds.length > 0 && (
+            <div className="h-px bg-neutral-200 mx-3 my-1" />
+          )}
+          {filteredUnpinnedIds.map((orgId) => (
             <OrganizationItem
               key={orgId}
               organizationId={orgId}
@@ -115,7 +159,7 @@ function useSortedOrganizationIds() {
     main.STORE_ID,
   );
 
-  const organizationIds =
+  const sortedIds =
     sortOption === "alphabetical"
       ? alphabeticalIds
       : sortOption === "reverse-alphabetical"
@@ -124,7 +168,22 @@ function useSortedOrganizationIds() {
           ? newestIds
           : oldestIds;
 
-  return { organizationIds, sortOption, setSortOption };
+  const allOrgs = main.UI.useTable("organizations", main.STORE_ID);
+
+  const { pinnedIds, unpinnedIds } = useMemo(() => {
+    const pinned = sortedIds.filter((id) => allOrgs[id]?.pinned);
+    const unpinned = sortedIds.filter((id) => !allOrgs[id]?.pinned);
+
+    const sortedPinned = [...pinned].sort((a, b) => {
+      const orderA = (allOrgs[a]?.pin_order as number | undefined) ?? Infinity;
+      const orderB = (allOrgs[b]?.pin_order as number | undefined) ?? Infinity;
+      return orderA - orderB;
+    });
+
+    return { pinnedIds: sortedPinned, unpinnedIds: unpinned };
+  }, [sortedIds, allOrgs]);
+
+  return { pinnedIds, unpinnedIds, sortOption, setSortOption };
 }
 
 function OrganizationItem({
@@ -143,6 +202,39 @@ function OrganizationItem({
     organizationId,
     main.STORE_ID,
   );
+  const isPinned = Boolean(organization.pinned);
+  const store = main.UI.useStore(main.STORE_ID);
+
+  const handleTogglePin = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (!store) return;
+
+      const currentPinned = store.getCell(
+        "organizations",
+        organizationId,
+        "pinned",
+      );
+      if (currentPinned) {
+        store.setPartialRow("organizations", organizationId, {
+          pinned: false,
+          pin_order: undefined,
+        });
+      } else {
+        const allOrgs = store.getTable("organizations");
+        const maxOrder = Object.values(allOrgs).reduce((max, o) => {
+          const order = (o.pin_order as number | undefined) ?? 0;
+          return Math.max(max, order);
+        }, 0);
+        store.setPartialRow("organizations", organizationId, {
+          pinned: true,
+          pin_order: maxOrder + 1,
+        });
+      }
+    },
+    [store, organizationId],
+  );
+
   if (!organization) {
     return null;
   }
@@ -155,13 +247,33 @@ function OrganizationItem({
         isSelected && isViewingDetails ? "border-black" : "border-transparent",
       ])}
     >
-      <button
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => setSelectedOrganization(organizationId)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setSelectedOrganization(organizationId);
+          }
+        }}
         className="w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-neutral-100 transition-colors rounded-md"
       >
         <Building2 className="h-4 w-4 text-neutral-500 shrink-0" />
-        <p className="truncate">{organization.name}</p>
-      </button>
+        <p className="flex-1 truncate">{organization.name}</p>
+        <button
+          onClick={handleTogglePin}
+          className={cn([
+            "shrink-0 p-1 rounded-xs transition-colors",
+            isPinned
+              ? "text-blue-600 hover:text-blue-700"
+              : "text-neutral-300 opacity-0 group-hover:opacity-100 hover:text-neutral-500",
+          ])}
+          aria-label={isPinned ? "Unpin organization" : "Pin organization"}
+        >
+          <Pin className="size-3.5" fill={isPinned ? "currentColor" : "none"} />
+        </button>
+      </div>
     </div>
   );
 }

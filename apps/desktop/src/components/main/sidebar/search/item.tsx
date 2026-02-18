@@ -282,13 +282,13 @@ function getTab(result: SearchResult): TabInput | null {
   if (result.type === "human") {
     return {
       type: "contacts",
-      state: { selectedPerson: result.id, selectedOrganization: null },
+      state: { selected: { type: "person", id: result.id } },
     };
   }
   if (result.type === "organization") {
     return {
       type: "contacts",
-      state: { selectedOrganization: result.id, selectedPerson: null },
+      state: { selected: { type: "organization", id: result.id } },
     };
   }
 
