@@ -562,6 +562,7 @@ dependencies = [
  "chrono",
  "google-calendar",
  "nango",
+ "outlook-calendar",
  "sentry",
  "serde",
  "serde_json",
