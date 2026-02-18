@@ -1,6 +1,6 @@
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use cactus::{CompleteOptions, Language, Message, Model, TranscribeOptions, Transcriber};
+use cactus::{CompleteOptions, Message, Model, TranscribeOptions, Transcriber};
 
 fn llm_model() -> Model {
     let path = std::env::var("CACTUS_LLM_MODEL")
@@ -10,7 +10,7 @@ fn llm_model() -> Model {
 
 fn stt_model() -> Model {
     let path = std::env::var("CACTUS_STT_MODEL")
-        .unwrap_or_else(|_| "/tmp/cactus-models/whisper-small".into());
+        .unwrap_or_else(|_| "/tmp/cactus-model/moonshine-base-cactus".into());
     Model::new(&path).unwrap()
 }
 
@@ -173,7 +173,7 @@ fn test_transcribe_pcm() {
 fn test_transcribe_with_language() {
     let model = stt_model();
     let options = TranscribeOptions {
-        language: Some(Language::En),
+        language: Some("en".parse().unwrap()),
         temperature: Some(0.0),
         ..Default::default()
     };

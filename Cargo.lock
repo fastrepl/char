@@ -2783,6 +2783,7 @@ dependencies = [
  "cactus-sys",
  "data",
  "futures-util",
+ "language",
  "llm-types",
  "serde",
  "serde_json",
@@ -17529,7 +17530,6 @@ dependencies = [
  "serde_json",
  "thiserror 2.0.18",
  "tokio",
- "urlencoding",
 ]
 
 [[package]]
@@ -19585,7 +19585,6 @@ dependencies = [
  "tauri-plugin-clipboard-manager",
  "tauri-plugin-dialog",
  "tauri-plugin-misc",
- "tauri-plugin-updater",
  "tauri-plugin-updater2",
  "tauri-plugin-windows",
  "tauri-specta",
@@ -20868,6 +20867,7 @@ dependencies = [
  "cactus",
  "data",
  "futures-util",
+ "language",
  "owhisper-interface",
  "serde_json",
  "serde_qs",

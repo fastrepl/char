@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 cactus-sys = { path = "../cactus-sys" }
+hypr-language = { workspace = true }
 hypr-llm-types = { workspace = true }
 
 futures-util = { workspace = true }

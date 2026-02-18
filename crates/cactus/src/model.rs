@@ -13,9 +13,9 @@ unsafe impl Sync for Model {}
 
 impl Model {
     pub fn new(model_path: impl AsRef<Path>) -> Result<Self> {
-        let path = CString::new(model_path.as_ref().to_str().unwrap_or(""))?;
+        let path = CString::new(model_path.as_ref().to_string_lossy().into_owned())?;
 
-        let raw = unsafe { cactus_sys::cactus_init(path.as_ptr(), std::ptr::null()) };
+        let raw = unsafe { cactus_sys::cactus_init(path.as_ptr(), std::ptr::null(), false) };
 
         let handle =
             NonNull::new(raw).ok_or_else(|| Error::from_ffi_or("cactus_init returned null"))?;

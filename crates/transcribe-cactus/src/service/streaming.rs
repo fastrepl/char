@@ -14,7 +14,7 @@ use axum::{
     http::{Request, StatusCode},
     response::{IntoResponse, Response},
 };
-use futures_util::{SinkExt, StreamExt};
+use futures_util::{SinkExt, StreamExt, stream::SplitSink};
 use tower::Service;
 
 use hypr_audio_utils::bytes_to_f32_samples;
@@ -27,6 +27,32 @@ use owhisper_interface::{ControlMessage, ListenParams};
 use super::batch;
 
 const SAMPLE_RATE: u32 = 16_000;
+
+type WsSender = SplitSink<WebSocket, Message>;
+
+async fn send_ws(sender: &mut WsSender, value: &StreamResponse) -> bool {
+    let payload = match serde_json::to_string(value) {
+        Ok(payload) => payload,
+        Err(error) => {
+            tracing::warn!("failed to serialize ws response: {error}");
+            return false;
+        }
+    };
+
+    sender.send(Message::Text(payload.into())).await.is_ok()
+}
+
+async fn send_ws_best_effort(sender: &mut WsSender, value: &StreamResponse) {
+    let payload = match serde_json::to_string(value) {
+        Ok(payload) => payload,
+        Err(error) => {
+            tracing::warn!("failed to serialize ws response: {error}");
+            return;
+        }
+    };
+
+    let _ = sender.send(Message::Text(payload.into())).await;
+}
 
 #[derive(Clone)]
 pub struct TranscribeService {
@@ -54,7 +80,9 @@ impl TranscribeServiceBuilder {
 
     pub fn build(self) -> TranscribeService {
         TranscribeService {
-            model_path: self.model_path.unwrap(),
+            model_path: self
+                .model_path
+                .expect("TranscribeServiceBuilder requires model_path"),
             connection_manager: self.connection_manager.unwrap_or_default(),
         }
     }
@@ -131,18 +159,12 @@ impl Service<Request<Body>> for TranscribeService {
     }
 }
 
-struct TranscribeResult {
-    confirmed: String,
-    pending: String,
-    language: Option<String>,
-    confidence: f32,
+struct TimedResult {
+    result: hypr_cactus::StreamResult,
     chunk_duration: f64,
 }
 
-enum TranscriberEvent {
-    Result(TranscribeResult),
-    Error(String),
-}
+type TranscriberEvent = Result<TimedResult, String>;
 
 async fn handle_websocket(
     socket: WebSocket,
@@ -156,16 +178,15 @@ async fn handle_websocket(
     let total_channels = (params.channels as i32).max(1);
     let channel_index = vec![0, total_channels];
 
-    let language = params
-        .languages
-        .first()
-        .and_then(|l| l.iso639_code().parse::<hypr_cactus::Language>().ok());
+    let languages = params.languages.clone();
+
+    let chunk_size_ms = params.chunk_size_ms.unwrap_or(300).clamp(100, 2000);
 
     let (audio_tx, audio_rx) = tokio::sync::mpsc::channel::<Vec<f32>>(64);
     let (event_tx, mut event_rx) = tokio::sync::mpsc::channel::<TranscriberEvent>(64);
 
     let transcribe_handle = std::thread::spawn(move || {
-        run_transcriber(model_path, language, audio_rx, event_tx);
+        run_transcriber(model_path, languages, chunk_size_ms, audio_rx, event_tx);
     });
 
     let mut last_confirmed_sent = String::new();
@@ -173,11 +194,17 @@ async fn handle_websocket(
     let mut audio_offset = 0.0f64;
     let mut segment_start = 0.0f64;
     let mut speech_started = false;
-    let mut last_word_end = 0.0f64;
 
-    let mut last_pending = String::new();
-    let mut last_language: Option<String> = None;
-    let mut last_confidence = 0.0f64;
+    struct Pending {
+        text: String,
+        language: Option<String>,
+        confidence: f64,
+    }
+    let mut pending = Pending {
+        text: String::new(),
+        language: None,
+        confidence: 0.0,
+    };
 
     loop {
         tokio::select! {
@@ -189,63 +216,65 @@ async fn handle_websocket(
                 let Some(event) = event else { break };
 
                 match event {
-                    TranscriberEvent::Error(error_message) => {
-                        let error_resp = StreamResponse::ErrorResponse {
+                    Err(error_message) => {
+                        send_ws_best_effort(&mut ws_sender, &StreamResponse::ErrorResponse {
                             error_code: None,
                             error_message,
                             provider: "cactus".to_string(),
-                        };
-                        let msg = Message::Text(serde_json::to_string(&error_resp).unwrap().into());
-                        let _ = ws_sender.send(msg).await;
+                        })
+                        .await;
                         break;
                     }
-                    TranscriberEvent::Result(result) => {
-                        audio_offset += result.chunk_duration;
+                    Ok(TimedResult { result, chunk_duration }) => {
+                        audio_offset += chunk_duration;
 
                         let duration = audio_offset - segment_start;
                         let confidence = result.confidence as f64;
                         let confirmed_text = result.confirmed.trim();
 
-                        last_pending = result.pending.clone();
-                        last_language = result.language.clone();
-                        last_confidence = confidence;
+                        pending.text = result.pending.clone();
+                        pending.language = result.language.clone();
+                        pending.confidence = confidence;
 
                         if !confirmed_text.is_empty() && confirmed_text != last_confirmed_sent {
                             if !speech_started {
-                                speech_started = true;
-                                let started = StreamResponse::SpeechStartedResponse {
+                                if !send_ws(
+                                    &mut ws_sender,
+                                    &StreamResponse::SpeechStartedResponse {
                                     channel: vec![0],
                                     timestamp: segment_start,
-                                };
-                                let msg = Message::Text(serde_json::to_string(&started).unwrap().into());
-                                if ws_sender.send(msg).await.is_err() { break; }
+                                    },
+                                )
+                                .await
+                                {
+                                    break;
+                                }
                             }
 
                             tracing::info!(text = confirmed_text, "cactus_confirmed_text");
-                            let response = build_transcript_response(
-                                confirmed_text,
-                                segment_start,
-                                duration,
-                                confidence,
-                                result.language.as_deref(),
-                                true,
-                                true,
-                                false,
-                                &metadata,
-                                &channel_index,
-                            );
-
-                            let msg = Message::Text(serde_json::to_string(&response).unwrap().into());
-                            if ws_sender.send(msg).await.is_err() { break; }
-
-                            last_word_end = segment_start + duration;
-
-                            let utterance_end = StreamResponse::UtteranceEndResponse {
+                            if !send_ws(
+                                &mut ws_sender,
+                                &build_transcript_response(
+                                confirmed_text, segment_start, duration, confidence,
+                                result.language.as_deref(), true, true, false,
+                                &metadata, &channel_index,
+                                ),
+                            )
+                            .await
+                            {
+                                break;
+                            }
+                            if !send_ws(
+                                &mut ws_sender,
+                                &StreamResponse::UtteranceEndResponse {
                                 channel: vec![0],
-                                last_word_end,
-                            };
-                            let msg = Message::Text(serde_json::to_string(&utterance_end).unwrap().into());
-                            if ws_sender.send(msg).await.is_err() { break; }
+                                last_word_end: segment_start + duration,
+                                },
+                            )
+                            .await
+                            {
+                                break;
+                            }
 
                             last_confirmed_sent.clear();
                             last_confirmed_sent.push_str(confirmed_text);
@@ -256,37 +285,40 @@ async fn handle_websocket(
                         }
 
                         let pending_text = result.pending.trim();
-                        if pending_text.is_empty() {
-                            continue;
-                        }
-                        if pending_text == last_pending_sent || pending_text == last_confirmed_sent {
+                        if pending_text.is_empty()
+                            || pending_text == last_pending_sent
+                            || pending_text == last_confirmed_sent
+                        {
                             continue;
                         }
 
                         if !speech_started {
                             speech_started = true;
-                            let started = StreamResponse::SpeechStartedResponse {
+                            if !send_ws(
+                                &mut ws_sender,
+                                &StreamResponse::SpeechStartedResponse {
                                 channel: vec![0],
                                 timestamp: segment_start,
-                            };
-                            let msg = Message::Text(serde_json::to_string(&started).unwrap().into());
-                            if ws_sender.send(msg).await.is_err() { break; }
+                                },
+                            )
+                            .await
+                            {
+                                break;
+                            }
                         }
 
-                        let response = build_transcript_response(
-                            pending_text,
-                            segment_start,
-                            duration,
-                            confidence,
-                            result.language.as_deref(),
-                            false,
-                            false,
-                            false,
-                            &metadata,
-                            &channel_index,
-                        );
-                        let msg = Message::Text(serde_json::to_string(&response).unwrap().into());
-                        if ws_sender.send(msg).await.is_err() { break; }
+                        if !send_ws(
+                            &mut ws_sender,
+                            &build_transcript_response(
+                            pending_text, segment_start, duration, confidence,
+                            result.language.as_deref(), false, false, false,
+                            &metadata, &channel_index,
+                            ),
+                        )
+                        .await
+                        {
+                            break;
+                        }
                         last_pending_sent.clear();
                         last_pending_sent.push_str(pending_text);
                     }
@@ -314,37 +346,37 @@ async fn handle_websocket(
                     IncomingMessage::Audio(AudioExtract::End) => break,
                     IncomingMessage::Control(ControlMessage::KeepAlive) => {}
                     IncomingMessage::Control(ControlMessage::Finalize) => {
-                        let pending_text = last_pending.trim().to_string();
+                        let pending_text = pending.text.trim().to_string();
                         if !pending_text.is_empty() {
                             let duration = audio_offset - segment_start;
-                            let response = build_transcript_response(
-                                &pending_text,
-                                segment_start,
-                                duration,
-                                last_confidence,
-                                last_language.as_deref(),
-                                true,
-                                true,
-                                true,
-                                &metadata,
-                                &channel_index,
-                            );
-                            let msg = Message::Text(serde_json::to_string(&response).unwrap().into());
-                            if ws_sender.send(msg).await.is_err() { break; }
-
-                            last_word_end = segment_start + duration;
-                            let utterance_end = StreamResponse::UtteranceEndResponse {
+                            if !send_ws(
+                                &mut ws_sender,
+                                &build_transcript_response(
+                                &pending_text, segment_start, duration, pending.confidence,
+                                pending.language.as_deref(), true, true, true,
+                                &metadata, &channel_index,
+                                ),
+                            )
+                            .await
+                            {
+                                break;
+                            }
+                            if !send_ws(
+                                &mut ws_sender,
+                                &StreamResponse::UtteranceEndResponse {
                                 channel: vec![0],
-                                last_word_end,
-                            };
-                            let msg = Message::Text(serde_json::to_string(&utterance_end).unwrap().into());
-                            if ws_sender.send(msg).await.is_err() { break; }
-
+                                last_word_end: segment_start + duration,
+                                },
+                            )
+                            .await
+                            {
+                                break;
+                            }
                             segment_start = audio_offset;
                             speech_started = false;
                             last_confirmed_sent.clear();
                             last_pending_sent.clear();
-                            last_pending.clear();
+                            pending.text.clear();
                         }
                     }
                     IncomingMessage::Control(ControlMessage::CloseStream) => break,
@@ -357,21 +389,24 @@ async fn handle_websocket(
     drop(audio_tx);
     let _ = transcribe_handle.join();
 
-    let terminal = StreamResponse::TerminalResponse {
-        request_id: metadata.request_id.clone(),
-        created: format_timestamp_now(),
-        duration: audio_offset,
-        channels: total_channels as u32,
-    };
-    let msg = Message::Text(serde_json::to_string(&terminal).unwrap().into());
-    let _ = ws_sender.send(msg).await;
+    send_ws_best_effort(
+        &mut ws_sender,
+        &StreamResponse::TerminalResponse {
+            request_id: metadata.request_id.clone(),
+            created: format_timestamp_now(),
+            duration: audio_offset,
+            channels: total_channels as u32,
+        },
+    )
+    .await;
 
     let _ = ws_sender.close().await;
 }
 
 fn run_transcriber(
     model_path: PathBuf,
-    language: Option<hypr_cactus::Language>,
+    languages: Vec<hypr_language::Language>,
+    chunk_size_ms: u32,
     mut audio_rx: tokio::sync::mpsc::Receiver<Vec<f32>>,
     event_tx: tokio::sync::mpsc::Sender<TranscriberEvent>,
 ) {
@@ -382,16 +417,13 @@ fn run_transcriber(
             m
         }
         Err(e) => {
-            let _ = event_tx.blocking_send(TranscriberEvent::Error(format!(
-                "failed to load model: {}",
-                e
-            )));
+            let _ = event_tx.blocking_send(Err(format!("failed to load model: {e}")));
             return;
         }
     };
 
     let options = hypr_cactus::TranscribeOptions {
-        language,
+        language: hypr_cactus::constrain_to(&languages),
         ..Default::default()
     };
 
@@ -401,63 +433,88 @@ fn run_transcriber(
             t
         }
         Err(e) => {
-            let _ = event_tx.blocking_send(TranscriberEvent::Error(format!(
-                "failed to create transcriber: {}",
-                e
-            )));
+            let _ = event_tx.blocking_send(Err(format!("failed to create transcriber: {e}")));
             return;
         }
     };
 
+    let samples_per_chunk = (SAMPLE_RATE as usize * chunk_size_ms as usize) / 1000;
+    let mut buffer: Vec<f32> = Vec::with_capacity(samples_per_chunk * 2);
     let mut chunk_count = 0u64;
+    let mut aborted = false;
 
     while let Some(samples) = audio_rx.blocking_recv() {
-        let chunk_duration = samples.len() as f64 / SAMPLE_RATE as f64;
+        buffer.extend_from_slice(&samples);
 
-        let result = match transcriber.process_f32(&samples) {
-            Ok(r) => r,
-            Err(e) => {
-                let _ = event_tx.blocking_send(TranscriberEvent::Error(format!(
-                    "transcription error: {}",
-                    e
-                )));
-                break;
+        while buffer.len() >= samples_per_chunk {
+            let chunk: Vec<f32> = buffer.drain(..samples_per_chunk).collect();
+
+            match process_transcriber_chunk(&mut transcriber, &chunk, &mut chunk_count) {
+                Ok(timed) => {
+                    if event_tx.blocking_send(Ok(timed)).is_err() {
+                        aborted = true;
+                        break;
+                    }
+                }
+                Err(msg) => {
+                    let _ = event_tx.blocking_send(Err(msg));
+                    aborted = true;
+                    break;
+                }
             }
-        };
-
-        chunk_count += 1;
-
-        if chunk_count % 50 == 1 {
-            tracing::info!(
-                chunk_count,
-                confirmed_len = result.confirmed.len(),
-                pending_len = result.pending.len(),
-                "cactus_process_status"
-            );
         }
 
-        let msg = TranscriberEvent::Result(TranscribeResult {
-            confirmed: result.confirmed,
-            pending: result.pending,
-            language: result.language,
-            confidence: result.confidence,
-            chunk_duration,
-        });
-
-        if event_tx.blocking_send(msg).is_err() {
+        if aborted {
             break;
         }
     }
 
-    if let Ok(final_result) = transcriber.stop() {
-        let _ = event_tx.blocking_send(TranscriberEvent::Result(TranscribeResult {
-            confirmed: final_result.confirmed,
-            pending: final_result.pending,
-            language: final_result.language,
-            confidence: final_result.confidence,
+    if !aborted && !buffer.is_empty() {
+        match process_transcriber_chunk(&mut transcriber, &buffer, &mut chunk_count) {
+            Ok(timed) => {
+                let _ = event_tx.blocking_send(Ok(timed));
+            }
+            Err(msg) => {
+                let _ = event_tx.blocking_send(Err(msg));
+                return;
+            }
+        }
+    }
+
+    if let Ok(result) = transcriber.stop() {
+        let _ = event_tx.blocking_send(Ok(TimedResult {
+            result,
             chunk_duration: 0.0,
         }));
     }
+}
+
+fn process_transcriber_chunk(
+    transcriber: &mut hypr_cactus::Transcriber<'_>,
+    samples: &[f32],
+    chunk_count: &mut u64,
+) -> TranscriberEvent {
+    let chunk_duration = samples.len() as f64 / SAMPLE_RATE as f64;
+
+    let result = transcriber
+        .process_f32(samples)
+        .map_err(|e| format!("transcription error: {e}"))?;
+
+    *chunk_count += 1;
+
+    if *chunk_count % 50 == 1 {
+        tracing::info!(
+            chunk_count,
+            confirmed_len = result.confirmed.len(),
+            pending_len = result.pending.len(),
+            "cactus_process_status"
+        );
+    }
+
+    Ok(TimedResult {
+        result,
+        chunk_duration,
+    })
 }
 
 enum IncomingMessage {
@@ -639,8 +696,8 @@ mod tests {
     use std::time::Duration;
 
     use super::*;
-    use axum::{Router, error_handling::HandleError, http::StatusCode};
     use axum::extract::ws::Message;
+    use axum::{Router, error_handling::HandleError, http::StatusCode};
     use futures_util::{SinkExt, StreamExt};
     use tokio_tungstenite::{connect_async, tungstenite::Message as WsMessage};
 
@@ -856,21 +913,26 @@ mod tests {
     // cargo test -p transcribe-cactus e2e_streaming -- --ignored --nocapture
     #[ignore = "requires local cactus model files"]
     #[test]
-    fn e2e_streaming_transcriber_with_real_model_inference() {
-        let model_path =
-            std::env::var("CACTUS_STT_MODEL").unwrap_or_else(|_| "/tmp/cactus-model".to_string());
+    fn e2e_streaming() {
+        let model_path = std::env::var("CACTUS_STT_MODEL")
+            .unwrap_or_else(|_| "/tmp/cactus-model/moonshine-base-cactus".to_string());
         let model_path = PathBuf::from(model_path);
-        assert!(model_path.exists(), "model not found: {}", model_path.display());
+        assert!(
+            model_path.exists(),
+            "model not found: {}",
+            model_path.display()
+        );
 
         let (audio_tx, audio_rx) = tokio::sync::mpsc::channel::<Vec<f32>>(64);
         let (event_tx, mut event_rx) = tokio::sync::mpsc::channel::<TranscriberEvent>(64);
 
+        let chunk_size_ms = 300u32;
         let handle = std::thread::spawn(move || {
-            run_transcriber(model_path, None, audio_rx, event_tx);
+            run_transcriber(model_path, vec![], chunk_size_ms, audio_rx, event_tx);
         });
 
         let samples = bytes_to_f32_samples(hypr_data::english_1::AUDIO);
-        let chunk_size = 16_000; // 1s per chunk
+        let chunk_size = 8_000; // 500ms per incoming chunk (transcriber uses 300ms internally)
         let total_chunks = (samples.len() + chunk_size - 1) / chunk_size;
         let audio_duration = samples.len() as f64 / 16_000.0;
         println!(
@@ -886,10 +948,19 @@ mod tests {
             for (i, chunk) in samples.chunks(chunk_size).enumerate() {
                 audio_tx.blocking_send(chunk.to_vec()).expect("send failed");
                 if i % 20 == 0 {
-                    println!("[{:>6.1}s] sent chunk {}/{}", t0.elapsed().as_secs_f64(), i, total_chunks);
+                    println!(
+                        "[{:>6.1}s] sent chunk {}/{}",
+                        t0.elapsed().as_secs_f64(),
+                        i,
+                        total_chunks
+                    );
                 }
             }
-            println!("[{:>6.1}s] all {} chunks sent", t0.elapsed().as_secs_f64(), total_chunks);
+            println!(
+                "[{:>6.1}s] all {} chunks sent",
+                t0.elapsed().as_secs_f64(),
+                total_chunks
+            );
         });
 
         let t0 = std::time::Instant::now();
@@ -897,7 +968,7 @@ mod tests {
         let mut event_count = 0u32;
         while let Some(event) = event_rx.blocking_recv() {
             match event {
-                TranscriberEvent::Result(r) => {
+                Ok(TimedResult { result: r, .. }) => {
                     let confirmed = r.confirmed.trim();
                     let pending = r.pending.trim();
                     if !confirmed.is_empty() || !pending.is_empty() {
@@ -916,14 +987,19 @@ mod tests {
                     }
                     event_count += 1;
                 }
-                TranscriberEvent::Error(e) => panic!("streaming error: {e}"),
+                Err(e) => panic!("streaming error: {e}"),
             }
         }
 
         sender.join().expect("sender thread panicked");
         handle.join().expect("transcriber thread panicked");
         let elapsed = t0.elapsed().as_secs_f64();
-        println!("\n--- FULL TRANSCRIPT ({:.1}s audio, {:.1}s wall, {:.1}x realtime) ---", audio_duration, elapsed, elapsed / audio_duration);
+        println!(
+            "\n--- FULL TRANSCRIPT ({:.1}s audio, {:.1}s wall, {:.1}x realtime) ---",
+            audio_duration,
+            elapsed,
+            elapsed / audio_duration
+        );
         println!("{full_transcript}");
         println!("--- END ({event_count} events) ---\n");
         assert!(!full_transcript.is_empty(), "expected non-empty transcript");
@@ -939,7 +1015,7 @@ mod tests {
             .expect("failed to create tokio runtime");
         rt.block_on(async {
             let model_path = std::env::var("CACTUS_STT_MODEL")
-                .unwrap_or_else(|_| "/tmp/cactus-model".to_string());
+                .unwrap_or_else(|_| "/tmp/cactus-model/moonshine-base-cactus".to_string());
             let model_path = PathBuf::from(model_path);
             assert!(model_path.exists(), "model not found: {}", model_path.display());
 
@@ -962,7 +1038,7 @@ mod tests {
             });
 
             let ws_url = format!(
-                "ws://{}/v1/listen?channels=1&sample_rate=16000",
+                "ws://{}/v1/listen?channels=1&sample_rate=16000&chunk_size_ms=300",
                 addr
             );
             let (ws_stream, _) = connect_async(&ws_url).await.expect("ws connect failed");
