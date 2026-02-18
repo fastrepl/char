@@ -532,6 +532,33 @@ export const NoteInput = forwardRef<
     search?.close();
   }, [currentTab]);
 
+  useEffect(() => {
+    if (!editor?.storage?.searchAndReplace) return;
+
+    const isEditorTab =
+      currentTab.type !== "transcript" && currentTab.type !== "attachments";
+    const query = isEditorTab && search?.isVisible ? (search.query ?? "") : "";
+
+    editor.storage.searchAndReplace.searchTerm = query;
+    editor.storage.searchAndReplace.caseSensitive =
+      search?.caseSensitive ?? false;
+    editor.storage.searchAndReplace.resultIndex =
+      search?.currentMatchIndex ?? 0;
+
+    try {
+      editor.view.dispatch(editor.state.tr);
+    } catch {
+      // editor may already be destroyed
+    }
+  }, [
+    editor,
+    currentTab.type,
+    search?.isVisible,
+    search?.query,
+    search?.caseSensitive,
+    search?.currentMatchIndex,
+  ]);
+
   const store = main.UI.useStore(main.STORE_ID);
   const indexes = main.UI.useIndexes(main.STORE_ID);
   const checkpoints = main.UI.useCheckpoints(main.STORE_ID);
