@@ -451,7 +451,6 @@ impl AdapterKind {
     ) -> Option<&'static str> {
         match self {
             Self::Deepgram => DeepgramAdapter::recommended_model_live(languages),
-            Self::Hyprnote => None,
             _ => None,
         }
     }
