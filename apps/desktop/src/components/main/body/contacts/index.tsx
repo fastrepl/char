@@ -122,11 +122,24 @@ function ContactView({ tab }: { tab: Extract<Tab, { type: "contacts" }> }) {
     main.STORE_ID,
   );
 
+  const allOrgIds = main.UI.useResultSortedRowIds(
+    main.QUERIES.visibleOrganizations,
+    "name",
+    false,
+    0,
+    undefined,
+    main.STORE_ID,
+  );
+
   useEffect(() => {
-    if (!selected && allHumanIds.length > 0) {
-      setSelected({ type: "person", id: allHumanIds[0] });
+    if (!selected) {
+      if (allHumanIds.length > 0) {
+        setSelected({ type: "person", id: allHumanIds[0] });
+      } else if (allOrgIds.length > 0) {
+        setSelected({ type: "organization", id: allOrgIds[0] });
+      }
     }
-  }, [allHumanIds, selected, setSelected]);
+  }, [allHumanIds, allOrgIds, selected, setSelected]);
 
   return (
     <ResizablePanelGroup direction="horizontal" className="h-full">
