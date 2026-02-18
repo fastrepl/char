@@ -15,11 +15,7 @@ impl<C: HttpClient> OutlookCalendarClient<C> {
     }
 
     pub async fn list_calendars(&self) -> Result<ListCalendarsResponse, Error> {
-        let bytes = self
-            .http
-            .get("/me/calendars")
-            .await
-            .map_err(Error::Http)?;
+        let bytes = self.http.get("/me/calendars").await.map_err(Error::Http)?;
         let response: ListCalendarsResponse = serde_json::from_slice(&bytes)?;
         Ok(response)
     }
@@ -27,8 +23,7 @@ impl<C: HttpClient> OutlookCalendarClient<C> {
     pub async fn list_events(&self, req: ListEventsRequest) -> Result<ListEventsResponse, Error> {
         let calendar_id = &req.calendar_id;
 
-        let use_calendar_view =
-            req.start_date_time.is_some() && req.end_date_time.is_some();
+        let use_calendar_view = req.start_date_time.is_some() && req.end_date_time.is_some();
 
         let base_path = if use_calendar_view {
             format!("/me/calendars/{calendar_id}/calendarView")
