@@ -1,6 +1,8 @@
 use std::io::Write;
 use std::path::Path;
 
+use hypr_audio_utils::Source;
+
 use axum::{
     Json,
     http::StatusCode,
@@ -69,21 +71,16 @@ fn transcribe_batch(
     let model =
         hypr_cactus::Model::new(model_path).map_err(|e| format!("failed to load model: {}", e))?;
 
-    let language = params
-        .languages
-        .first()
-        .and_then(|l| l.iso639_code().parse::<hypr_cactus::Language>().ok());
-
     let options = hypr_cactus::TranscribeOptions {
-        language,
+        language: hypr_cactus::constrain_to(&params.languages),
         ..Default::default()
     };
+
+    let total_duration = audio_duration_secs(temp_file.path());
 
     let cactus_response = model
         .transcribe_file(temp_file.path(), &options)
         .map_err(|e| format!("transcription failed: {}", e))?;
-
-    let total_duration = cactus_response.total_time_ms / 1000.0;
     let transcript = cactus_response.response.trim().to_string();
     let confidence = cactus_response.confidence as f64;
     let words = build_batch_words(&transcript, total_duration, confidence);
@@ -142,6 +139,19 @@ fn build_batch_words(transcript: &str, total_duration: f64, confidence: f64) -> 
             punctuated_word: Some(w.to_string()),
         })
         .collect()
+}
+
+fn audio_duration_secs(path: &Path) -> f64 {
+    let Ok(source) = hypr_audio_utils::source_from_path(path) else {
+        return 0.0;
+    };
+    if let Some(d) = source.total_duration() {
+        return d.as_secs_f64();
+    }
+    let sample_rate = source.sample_rate() as f64;
+    let channels = source.channels().max(1) as f64;
+    let count = source.count() as f64;
+    count / channels / sample_rate
 }
 
 fn content_type_to_extension(content_type: &str) -> &'static str {

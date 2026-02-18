@@ -18,7 +18,13 @@ pub fn constrain_to(languages: &[Language]) -> Option<Language> {
     match languages {
         [] => None,
         [single] => Some(single.clone()),
-        _ => None,
+        _ => {
+            tracing::warn!(
+                ?languages,
+                "multi-language constraint unsupported by cactus FFI; falling back to auto-detect"
+            );
+            None
+        }
     }
 }
 
@@ -33,18 +39,16 @@ pub struct TranscribeOptions {
 }
 
 fn build_whisper_prompt(options: &TranscribeOptions) -> String {
-    let lang = options
+    let lang_token = options
         .language
         .as_ref()
-        .map(|l| l.iso639_code())
-        .unwrap_or("en");
+        .map(|l| format!("<|{}|>", l.iso639_code()))
+        .unwrap_or_default();
     match &options.initial_prompt {
-        Some(p) => {
-            format!(
-                "<|startofprev|>{p}<|startoftranscript|><|{lang}|><|transcribe|><|notimestamps|>"
-            )
-        }
-        None => format!("<|startoftranscript|><|{lang}|><|transcribe|><|notimestamps|>"),
+        Some(p) => format!(
+            "<|startofprev|>{p}<|startoftranscript|>{lang_token}<|transcribe|><|notimestamps|>"
+        ),
+        None => format!("<|startoftranscript|>{lang_token}<|transcribe|><|notimestamps|>"),
     }
 }
 

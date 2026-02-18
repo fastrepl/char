@@ -18,7 +18,7 @@ use futures_util::{SinkExt, StreamExt, stream::SplitSink};
 use tower::Service;
 
 use hypr_audio_utils::bytes_to_f32_samples;
-use hypr_ws_utils::ConnectionManager;
+use hypr_ws_utils::{ConnectionGuard, ConnectionManager};
 use owhisper_interface::stream::{
     Alternatives, Channel, Extra, Metadata, ModelInfo, StreamResponse, Word,
 };
@@ -126,11 +126,11 @@ impl Service<Request<Body>> for TranscribeService {
                     }
                 };
 
-                let _guard = connection_manager.acquire_connection();
+                let guard = connection_manager.acquire_connection();
 
                 Ok(ws_upgrade
                     .on_upgrade(move |socket| async move {
-                        handle_websocket(socket, params, model_path).await;
+                        handle_websocket(socket, params, model_path, guard).await;
                     })
                     .into_response())
             } else {
@@ -166,7 +166,12 @@ struct TimedResult {
 
 type TranscriberEvent = Result<TimedResult, String>;
 
-async fn handle_websocket(socket: WebSocket, params: ListenParams, model_path: PathBuf) {
+async fn handle_websocket(
+    socket: WebSocket,
+    params: ListenParams,
+    model_path: PathBuf,
+    guard: ConnectionGuard,
+) {
     let (mut ws_sender, mut ws_receiver) = socket.split();
 
     let metadata = build_session_metadata(&model_path);
@@ -203,6 +208,10 @@ async fn handle_websocket(socket: WebSocket, params: ListenParams, model_path: P
 
     loop {
         tokio::select! {
+            _ = guard.cancelled() => {
+                tracing::info!("cactus_websocket_cancelled_by_new_connection");
+                break;
+            }
             event = event_rx.recv() => {
                 let Some(event) = event else { break };
 
@@ -378,6 +387,7 @@ async fn handle_websocket(socket: WebSocket, params: ListenParams, model_path: P
     }
 
     drop(audio_tx);
+    drop(event_rx);
     let _ = transcribe_handle.join();
 
     send_ws_best_effort(
