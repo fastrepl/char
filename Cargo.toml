@@ -201,6 +201,7 @@ futures-channel = "0.3.31"
 futures-core = "0.3.31"
 futures-util = "0.3.31"
 hypr-supervisor = { path = "crates/supervisor", package = "supervisor" }
+pin-project = "1"
 ractor = "0.15.10"
 rayon = "1.11"
 reqwest = "0.13"

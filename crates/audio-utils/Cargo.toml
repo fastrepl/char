@@ -7,6 +7,7 @@ edition = "2024"
 bytes = { workspace = true }
 futures-util = { workspace = true }
 hypr-audio-interface = { workspace = true }
+pin-project = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 

@@ -5,6 +5,7 @@ use cpal::{
 use dasp::sample::ToSample;
 use futures_channel::mpsc;
 use futures_util::{Stream, StreamExt};
+use pin_project::pin_project;
 use std::pin::Pin;
 
 use crate::AsyncSource;
@@ -189,15 +190,19 @@ impl MicInput {
     }
 }
 
+#[pin_project(PinnedDrop)]
 pub struct MicStream {
     drop_tx: std::sync::mpsc::Sender<()>,
     config: cpal::SupportedStreamConfig,
+    #[pin]
     receiver: Pin<Box<dyn Stream<Item = f32> + Send + Sync>>,
 }
 
-impl Drop for MicStream {
-    fn drop(&mut self) {
-        self.drop_tx.send(()).unwrap();
+#[pin_project::pinned_drop]
+impl PinnedDrop for MicStream {
+    fn drop(self: std::pin::Pin<&mut Self>) {
+        let this = self.project();
+        this.drop_tx.send(()).unwrap();
     }
 }
 
@@ -205,10 +210,10 @@ impl Stream for MicStream {
     type Item = f32;
 
     fn poll_next(
-        mut self: std::pin::Pin<&mut Self>,
+        self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
     ) -> std::task::Poll<Option<Self::Item>> {
-        self.receiver.as_mut().poll_next_unpin(cx)
+        self.project().receiver.poll_next(cx)
     }
 }
 
