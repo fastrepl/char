@@ -132,6 +132,7 @@ jobs:
             --exclude tauri-plugin-permissions \
             --exclude tauri-plugin-screen \
             --exclude tauri-plugin-settings \
+            --exclude tauri-plugin-shortcut \
             --exclude tauri-plugin-sfx \
             --exclude tauri-plugin-sidecar2 \
             --exclude tauri-plugin-store2 \
