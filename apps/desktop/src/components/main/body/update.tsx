@@ -1,4 +1,5 @@
 import { type UnlistenFn } from "@tauri-apps/api/event";
+import { message } from "@tauri-apps/plugin-dialog";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { useCallback, useEffect, useState } from "react";
 
@@ -13,8 +14,15 @@ export function Update() {
     if (!version) {
       return;
     }
-    await commands.install(version);
-    await relaunch();
+    const result = await commands.install(version);
+    if (result.status === "ok") {
+      await relaunch();
+    } else {
+      await message(`Failed to install update: ${result.error}`, {
+        title: "Update Failed",
+        kind: "error",
+      });
+    }
   }, [version]);
 
   if (!version) {
