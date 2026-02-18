@@ -7,7 +7,6 @@ import {
   UserIcon,
 } from "lucide-react";
 import { useCallback, useRef } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 
 import { Button } from "@hypr/ui/components/ui/button";
 import {
@@ -16,8 +15,6 @@ import {
 } from "@hypr/ui/components/ui/scroll-fade";
 import { cn } from "@hypr/utils";
 
-import { useSettingsNavigation } from "../../../hooks/useSettingsNavigation";
-import { useShortcutKeys } from "../../../hooks/useShortcutRegistry";
 import {
   type SettingsTab,
   type Tab,
@@ -98,45 +95,6 @@ function SettingsView({ tab }: { tab: Extract<Tab, { type: "settings" }> }) {
     },
     [updateSettingsTabState, tab],
   );
-
-  const currentIndex = SECTIONS.findIndex((s) => s.id === activeTab);
-
-  const prevPanelTabKeys = useShortcutKeys("prev_panel_tab");
-  const nextPanelTabKeys = useShortcutKeys("next_panel_tab");
-
-  useHotkeys(
-    prevPanelTabKeys,
-    () => {
-      if (currentIndex > 0) {
-        setActiveTab(SECTIONS[currentIndex - 1].id);
-      }
-    },
-    {
-      preventDefault: true,
-      enableOnFormTags: true,
-      enableOnContentEditable: true,
-      enabled: !!prevPanelTabKeys,
-    },
-    [currentIndex, setActiveTab],
-  );
-
-  useHotkeys(
-    nextPanelTabKeys,
-    () => {
-      if (currentIndex < SECTIONS.length - 1) {
-        setActiveTab(SECTIONS[currentIndex + 1].id);
-      }
-    },
-    {
-      preventDefault: true,
-      enableOnFormTags: true,
-      enableOnContentEditable: true,
-      enabled: !!nextPanelTabKeys,
-    },
-    [currentIndex, setActiveTab],
-  );
-
-  useSettingsNavigation(ref, activeTab);
 
   const renderContent = () => {
     switch (activeTab) {

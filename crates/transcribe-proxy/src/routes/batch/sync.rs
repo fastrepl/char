@@ -19,7 +19,17 @@ use crate::provider_selector::SelectedProvider;
 use crate::query_params::QueryParams;
 
 use super::super::AppState;
+use super::super::model_resolution::resolve_model;
 use super::write_to_temp_file;
+
+fn resolve_listen_params_for_provider(
+    provider: Provider,
+    listen_params: &ListenParams,
+) -> ListenParams {
+    let mut resolved_params = listen_params.clone();
+    resolve_model(provider, &mut resolved_params);
+    resolved_params
+}
 
 pub(super) async fn handle_hyprnote_batch(
     state: &AppState,
@@ -59,11 +69,12 @@ pub(super) async fn handle_hyprnote_batch(
 
     for (attempt, selected) in provider_chain.iter().enumerate() {
         let provider = selected.provider();
+        let provider_listen_params = resolve_listen_params_for_provider(provider, &listen_params);
         providers_tried.push(provider);
 
         match transcribe_with_retry(
             selected,
-            listen_params.clone(),
+            provider_listen_params,
             body.clone(),
             content_type,
             &retry_config,
@@ -149,7 +160,9 @@ pub(super) async fn transcribe_with_provider(
 
     let file_path = temp_file.path();
     let provider = selected.provider();
-    let api_base = provider.default_api_base();
+    let api_base = selected
+        .upstream_url()
+        .unwrap_or(provider.default_api_base());
     let api_key = selected.api_key();
 
     macro_rules! batch_transcribe {
@@ -181,4 +194,28 @@ pub(super) async fn transcribe_with_provider(
     };
 
     result.map_err(|e| format!("{:?}", e))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use hypr_language::ISO639;
+
+    #[test]
+    fn test_resolve_listen_params_for_provider_resolves_meta_model_per_provider() {
+        let params = ListenParams {
+            model: Some("cloud".to_string()),
+            languages: vec![ISO639::En.into()],
+            ..Default::default()
+        };
+
+        let deepgram_params = resolve_listen_params_for_provider(Provider::Deepgram, &params);
+        assert!(deepgram_params.model.is_some());
+        assert_ne!(deepgram_params.model.as_deref(), Some("cloud"));
+
+        let soniox_params = resolve_listen_params_for_provider(Provider::Soniox, &params);
+        assert_eq!(soniox_params.model, None);
+
+        assert_eq!(params.model.as_deref(), Some("cloud"));
+    }
 }

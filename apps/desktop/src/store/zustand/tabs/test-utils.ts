@@ -36,8 +36,7 @@ export const createContactsTab = (
   pinned: overrides.pinned ?? false,
   slotId: id(),
   state: {
-    selectedOrganization: null,
-    selectedPerson: null,
+    selected: null,
     ...overrides.state,
   },
 });

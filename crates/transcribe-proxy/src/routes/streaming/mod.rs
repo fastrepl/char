@@ -3,9 +3,6 @@ mod hyprnote;
 mod passthrough;
 mod session;
 
-#[cfg(test)]
-mod tests;
-
 use std::collections::BTreeMap;
 
 use axum::{

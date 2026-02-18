@@ -1,6 +1,7 @@
 import {
   AudioLinesIcon,
   BookText,
+  BrainIcon,
   MessageSquare,
   Plus,
   Search,
@@ -9,7 +10,6 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 
 import type { ChatShortcut } from "@hypr/store";
 import { Button } from "@hypr/ui/components/ui/button";
@@ -19,12 +19,11 @@ import {
 } from "@hypr/ui/components/ui/scroll-fade";
 import { cn } from "@hypr/utils";
 
-import { useSettingsNavigation } from "../../../hooks/useSettingsNavigation";
-import { useShortcutKeys } from "../../../hooks/useShortcutRegistry";
 import * as main from "../../../store/tinybase/store/main";
 import { type Tab, useTabs } from "../../../store/zustand/tabs";
 import { LLM } from "../../settings/ai/llm";
 import { STT } from "../../settings/ai/stt";
+import { SettingsMemory } from "../../settings/memory";
 import { StandardTabWrapper } from "./index";
 import { useWebResources } from "./resource-list";
 import { type TabItem, TabItemBase } from "./shared";
@@ -35,7 +34,8 @@ type AITabKey =
   | "intelligence"
   | "templates"
   | "shortcuts"
-  | "prompts";
+  | "prompts"
+  | "memory";
 
 export const TabItemAI: TabItem<Extract<Tab, { type: "ai" }>> = ({
   tab,
@@ -53,6 +53,7 @@ export const TabItemAI: TabItem<Extract<Tab, { type: "ai" }>> = ({
     templates: "Templates",
     shortcuts: "Shortcuts",
     prompts: "Prompts",
+    memory: "Memory",
   };
   const suffix =
     labelMap[(tab.state.tab as AITabKey) ?? "transcription"] ?? "STT";
@@ -100,51 +101,6 @@ function AIView({ tab }: { tab: Extract<Tab, { type: "ai" }> }) {
     [updateAiTabState, tab],
   );
 
-  const enabledMenuKeys: AITabKey[] = [
-    "transcription",
-    "intelligence",
-    "templates",
-    "shortcuts",
-  ];
-  const currentIndex = enabledMenuKeys.indexOf(activeTab);
-
-  const prevPanelTabKeys = useShortcutKeys("prev_panel_tab");
-  const nextPanelTabKeys = useShortcutKeys("next_panel_tab");
-
-  useHotkeys(
-    prevPanelTabKeys,
-    () => {
-      if (currentIndex > 0) {
-        setActiveTab(enabledMenuKeys[currentIndex - 1]);
-      }
-    },
-    {
-      preventDefault: true,
-      enableOnFormTags: true,
-      enableOnContentEditable: true,
-      enabled: !!prevPanelTabKeys,
-    },
-    [currentIndex, setActiveTab],
-  );
-
-  useHotkeys(
-    nextPanelTabKeys,
-    () => {
-      if (currentIndex >= 0 && currentIndex < enabledMenuKeys.length - 1) {
-        setActiveTab(enabledMenuKeys[currentIndex + 1]);
-      }
-    },
-    {
-      preventDefault: true,
-      enableOnFormTags: true,
-      enableOnContentEditable: true,
-      enabled: !!nextPanelTabKeys,
-    },
-    [currentIndex, setActiveTab],
-  );
-
-  useSettingsNavigation(ref, activeTab);
-
   const menuItems: Array<{
     key: AITabKey;
     label: string;
@@ -176,6 +132,11 @@ function AIView({ tab }: { tab: Extract<Tab, { type: "ai" }> }) {
       label: "Prompts",
       icon: <SparklesIcon size={14} />,
       disabled: true,
+    },
+    {
+      key: "memory",
+      label: "Memory",
+      icon: <BrainIcon size={14} />,
     },
   ];
 
@@ -211,6 +172,7 @@ function AIView({ tab }: { tab: Extract<Tab, { type: "ai" }> }) {
           {activeTab === "templates" && <TemplatesContent />}
           {activeTab === "shortcuts" && <ShortcutsContent />}
           {activeTab === "prompts" && <PromptsContent />}
+          {activeTab === "memory" && <SettingsMemory />}
         </div>
         {!atStart && <ScrollFadeOverlay position="top" />}
         {!atEnd && <ScrollFadeOverlay position="bottom" />}

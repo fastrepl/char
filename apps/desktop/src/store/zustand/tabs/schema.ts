@@ -4,6 +4,7 @@ import type {
   ChangelogState,
   ChatShortcutsState,
   ChatState,
+  ContactsSelection,
   ContactsState,
   EditorView,
   ExtensionsState,
@@ -20,6 +21,7 @@ export type {
   ChangelogState,
   ChatShortcutsState,
   ChatState,
+  ContactsSelection,
   ContactsState,
   EditorView,
   ExtensionsState,
@@ -130,8 +132,7 @@ export const getDefaultState = (tab: TabInput): Tab => {
         ...base,
         type: "contacts",
         state: tab.state ?? {
-          selectedOrganization: null,
-          selectedPerson: null,
+          selected: null,
         },
       };
     case "templates":

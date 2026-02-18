@@ -39,6 +39,7 @@ async fn app() -> Router {
     let llm_config =
         hypr_llm_proxy::LlmProxyConfig::new(&env.llm).with_analytics(analytics.clone());
     let stt_config = hypr_transcribe_proxy::SttProxyConfig::new(&env.stt, &env.supabase)
+        .with_hyprnote_routing(hypr_transcribe_proxy::HyprnoteRoutingConfig::default())
         .with_analytics(analytics);
 
     let stt_rate_limit = rate_limit::RateLimitState::builder()

@@ -61,7 +61,7 @@ function PermissionRow({
   };
 
   return (
-    <div data-settings-item className="flex items-center justify-between gap-4">
+    <div className="flex items-center justify-between gap-4">
       <div className="flex-1">
         <div
           className={cn([
@@ -103,7 +103,6 @@ function PermissionRow({
         </div>
       </div>
       <Button
-        data-settings-activate
         variant={isAuthorized ? "outline" : "default"}
         size="icon"
         onClick={handleButtonClick}
@@ -132,6 +131,7 @@ export function Permissions() {
   const mic = usePermission("microphone");
   const systemAudio = usePermission("systemAudio");
   const accessibility = usePermission("accessibility");
+  const contacts = usePermission("contacts");
 
   return (
     <div>
@@ -163,6 +163,15 @@ export function Permissions() {
           onRequest={accessibility.request}
           onReset={accessibility.reset}
           onOpen={accessibility.open}
+        />
+        <PermissionRow
+          title="Contacts"
+          description="Required to match meeting participants with your contacts"
+          status={contacts.status}
+          isPending={contacts.isPending}
+          onRequest={contacts.request}
+          onReset={contacts.reset}
+          onOpen={contacts.open}
         />
       </div>
     </div>
