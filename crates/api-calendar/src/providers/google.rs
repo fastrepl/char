@@ -76,14 +76,7 @@ impl GoogleAdapter {
             page_token: req.page_token,
             single_events: req.single_events,
             order_by,
-            show_deleted: None,
-            show_hidden_invitations: None,
-            updated_min: None,
-            i_cal_uid: None,
-            q: None,
-            sync_token: None,
-            time_zone: None,
-            event_types: None,
+            ..Default::default()
         };
 
         let response = self
@@ -123,31 +116,14 @@ impl GoogleAdapter {
                     attendees
                         .into_iter()
                         .map(|a| hypr_google_calendar::Attendee {
-                            id: None,
                             email: Some(a.email),
                             display_name: a.display_name,
-                            organizer: None,
-                            is_self: None,
-                            resource: None,
                             optional: a.optional,
-                            response_status: None,
-                            comment: None,
-                            additional_guests: None,
+                            ..Default::default()
                         })
                         .collect()
                 }),
-                recurrence: None,
-                transparency: None,
-                visibility: None,
-                color_id: None,
-                conference_data: None,
-                reminders: None,
-                guests_can_invite_others: None,
-                guests_can_modify: None,
-                guests_can_see_other_guests: None,
-                source: None,
-                extended_properties: None,
-                event_type: None,
+                ..Default::default()
             },
         };
 

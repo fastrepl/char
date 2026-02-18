@@ -113,10 +113,11 @@ async fn app() -> Router {
             auth::require_auth,
         ));
 
-    let calendar_config = hypr_api_calendar::CalendarConfig::builder()
-        .google()
-        .outlook()
-        .build();
+    let calendar_config = hypr_api_calendar::CalendarConfig {
+        google: true,
+        outlook: true,
+        ..Default::default()
+    };
 
     let integration_routes = Router::new()
         .nest("/calendar", hypr_api_calendar::router(calendar_config))

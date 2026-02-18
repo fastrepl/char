@@ -2,17 +2,11 @@ use std::sync::Arc;
 
 use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
-use hypr_api_nango::{GoogleCalendar, NangoConnection, NangoConnectionError};
+use hypr_api_nango::{GoogleCalendar, NangoConnection, NangoConnectionError, OutlookCalendar};
 
 use crate::error::CalendarError;
 use crate::providers::google::GoogleAdapter;
 use crate::providers::outlook::OutlookAdapter;
-
-struct OutlookCalendarIntegration;
-
-impl hypr_api_nango::NangoIntegrationId for OutlookCalendarIntegration {
-    const ID: &'static str = "outlook-calendar";
-}
 
 pub struct ListCalendarsResult {
     pub calendars: Vec<serde_json::Value>,
@@ -27,43 +21,10 @@ pub struct CreateEventResult {
     pub event: serde_json::Value,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct CalendarConfig {
-    google: bool,
-    outlook: bool,
-}
-
-impl CalendarConfig {
-    pub fn builder() -> CalendarConfigBuilder {
-        CalendarConfigBuilder {
-            google: false,
-            outlook: false,
-        }
-    }
-}
-
-pub struct CalendarConfigBuilder {
-    google: bool,
-    outlook: bool,
-}
-
-impl CalendarConfigBuilder {
-    pub fn google(mut self) -> Self {
-        self.google = true;
-        self
-    }
-
-    pub fn outlook(mut self) -> Self {
-        self.outlook = true;
-        self
-    }
-
-    pub fn build(self) -> CalendarConfig {
-        CalendarConfig {
-            google: self.google,
-            outlook: self.outlook,
-        }
-    }
+    pub google: bool,
+    pub outlook: bool,
 }
 
 pub enum CalendarClient {
@@ -121,8 +82,7 @@ impl<S: Send + Sync> FromRequestParts<S> for CalendarClient {
         }
 
         if config.outlook {
-            match NangoConnection::<OutlookCalendarIntegration>::from_request_parts(parts, state)
-                .await
+            match NangoConnection::<OutlookCalendar>::from_request_parts(parts, state).await
             {
                 Ok(conn) => {
                     return Ok(CalendarClient::Outlook(OutlookAdapter::new(

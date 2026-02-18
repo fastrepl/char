@@ -173,7 +173,7 @@ pub enum LocationType {
     Unknown,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DateTimeTimeZone {
     pub date_time: String,
@@ -199,7 +199,7 @@ pub struct ResponseStatus {
     pub time: Option<DateTime<Utc>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Attendee {
     #[serde(default, rename = "type")]
@@ -249,7 +249,7 @@ pub struct OutlookGeoCoordinates {
     pub altitude_accuracy: Option<f64>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Location {
     #[serde(default)]
@@ -469,6 +469,7 @@ pub struct ListEventsResponse {
     pub value: Vec<Event>,
 }
 
+#[derive(Default)]
 pub struct ListEventsRequest {
     pub calendar_id: String,
     pub start_date_time: Option<DateTime<Utc>>,
@@ -485,11 +486,14 @@ pub struct CreateEventRequest {
     pub event: CreateEventBody,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateEventBody {
+    #[serde(default)]
     pub subject: String,
+    #[serde(default)]
     pub start: DateTimeTimeZone,
+    #[serde(default)]
     pub end: DateTimeTimeZone,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub body: Option<ItemBody>,

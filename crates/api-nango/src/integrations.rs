@@ -13,3 +13,9 @@ pub struct GoogleDrive;
 impl NangoIntegrationId for GoogleDrive {
     const ID: &'static str = "google-drive";
 }
+
+pub struct OutlookCalendar;
+
+impl NangoIntegrationId for OutlookCalendar {
+    const ID: &'static str = "outlook-calendar";
+}

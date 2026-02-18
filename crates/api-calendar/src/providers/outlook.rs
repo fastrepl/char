@@ -67,10 +67,8 @@ impl OutlookAdapter {
             start_date_time,
             end_date_time,
             top: req.max_results,
-            skip: None,
-            filter: None,
-            select: None,
             order_by,
+            ..Default::default()
         };
 
         let response = self
@@ -110,38 +108,21 @@ impl OutlookAdapter {
                 }),
                 location: req.location.map(|l| hypr_outlook_calendar::Location {
                     display_name: Some(l),
-                    location_type: None,
-                    unique_id: None,
-                    unique_id_type: None,
-                    address: None,
-                    coordinates: None,
+                    ..Default::default()
                 }),
                 attendees: req.attendees.map(|attendees| {
                     attendees
                         .into_iter()
                         .map(|a| hypr_outlook_calendar::Attendee {
-                            type_: None,
-                            status: None,
                             email_address: Some(hypr_outlook_calendar::EmailAddress {
                                 name: a.display_name,
                                 address: Some(a.email),
                             }),
+                            ..Default::default()
                         })
                         .collect()
                 }),
-                is_all_day: None,
-                importance: None,
-                sensitivity: None,
-                show_as: None,
-                categories: None,
-                recurrence: None,
-                is_online_meeting: None,
-                online_meeting_provider: None,
-                is_reminder_on: None,
-                reminder_minutes_before_start: None,
-                response_requested: None,
-                allow_new_time_proposals: None,
-                hide_attendees: None,
+                ..Default::default()
             },
         };
 
