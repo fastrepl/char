@@ -203,7 +203,7 @@ export const memorySchema = z.object({
   created_at: z.string(),
 });
 
-export const enhancedNoteSchema= z.object({
+export const enhancedNoteSchema = z.object({
   user_id: z.string(),
   session_id: z.string(),
   content: z.string(),
@@ -310,7 +310,7 @@ export type ChatGroup = z.infer<typeof chatGroupSchema>;
 export type ChatMessage = z.infer<typeof chatMessageSchema>;
 export type ChatShortcut = z.infer<typeof chatShortcutSchema>;
 export type Memory = z.infer<typeof memorySchema>;
-export type EnhancedNote= z.infer<typeof enhancedNoteSchema>;
+export type EnhancedNote = z.infer<typeof enhancedNoteSchema>;
 export type Prompt = z.infer<typeof promptSchema>;
 export type AIProvider = z.infer<typeof aiProviderSchema>;
 export type General = z.infer<typeof generalSchema>;
@@ -327,7 +327,7 @@ export type OrganizationStorage = ToStorageType<typeof organizationSchema>;
 export type PromptStorage = ToStorageType<typeof promptSchema>;
 export type ChatShortcutStorage = ToStorageType<typeof chatShortcutSchema>;
 export type MemoryStorage = ToStorageType<typeof memorySchema>;
-export type EventStorage= ToStorageType<typeof eventSchema>;
+export type EventStorage = ToStorageType<typeof eventSchema>;
 export type MappingSessionParticipantStorage = ToStorageType<
   typeof mappingSessionParticipantSchema
 >;
