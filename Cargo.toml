@@ -101,10 +101,7 @@ hypr-template-app-legacy = { path = "crates/template-app-legacy", package = "tem
 hypr-template-eval = { path = "crates/template-eval", package = "template-eval" }
 hypr-template-support = { path = "crates/template-support", package = "template-support" }
 hypr-tiptap = { path = "crates/tiptap", package = "tiptap" }
-hypr-transcribe-aws = { path = "crates/transcribe-aws", package = "transcribe-aws" }
-hypr-transcribe-azure = { path = "crates/transcribe-azure", package = "transcribe-azure" }
 hypr-transcribe-deepgram = { path = "crates/transcribe-deepgram", package = "transcribe-deepgram" }
-hypr-transcribe-gcp = { path = "crates/transcribe-gcp", package = "transcribe-gcp" }
 hypr-transcribe-moonshine = { path = "crates/transcribe-moonshine", package = "transcribe-moonshine" }
 hypr-transcribe-openai = { path = "crates/transcribe-openai", package = "transcribe-openai" }
 hypr-transcribe-proxy = { path = "crates/transcribe-proxy", package = "transcribe-proxy" }
