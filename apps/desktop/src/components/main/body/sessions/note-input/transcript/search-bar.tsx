@@ -1,17 +1,109 @@
-import { ChevronDownIcon, ChevronUpIcon, XIcon } from "lucide-react";
+import {
+  ALargeSmallIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  ReplaceAllIcon,
+  ReplaceIcon,
+  WholeWordIcon,
+  XIcon,
+} from "lucide-react";
 import { useEffect, useRef } from "react";
 
+import { Kbd } from "@hypr/ui/components/ui/kbd";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@hypr/ui/components/ui/tooltip";
 import { cn } from "@hypr/utils";
 
 import { useTranscriptSearch } from "./search-context";
 
+function ToggleButton({
+  active,
+  onClick,
+  tooltip,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  tooltip: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          onClick={onClick}
+          className={cn([
+            "p-0.5 rounded-sm transition-colors",
+            active
+              ? "bg-neutral-300 text-neutral-700"
+              : "text-neutral-400 hover:bg-neutral-200 hover:text-neutral-500",
+          ])}
+        >
+          {children}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="bottom" className="flex items-center gap-2">
+        {tooltip}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+function IconButton({
+  onClick,
+  disabled,
+  tooltip,
+  children,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  tooltip: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  const btn = (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={cn([
+        "p-0.5 rounded-sm transition-colors",
+        disabled
+          ? "text-neutral-300 cursor-not-allowed"
+          : "hover:bg-neutral-200 text-neutral-500",
+      ])}
+    >
+      {children}
+    </button>
+  );
+
+  if (disabled) return btn;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{btn}</TooltipTrigger>
+      <TooltipContent side="bottom" className="flex items-center gap-2">
+        {tooltip}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 export function SearchBar() {
   const search = useTranscriptSearch();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const replaceInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    inputRef.current?.focus();
-  }, [inputRef]);
+    searchInputRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    if (search?.showReplace) {
+      replaceInputRef.current?.focus();
+    }
+  }, [search?.showReplace]);
 
   if (!search) {
     return null;
@@ -25,9 +117,19 @@ export function SearchBar() {
     onNext,
     onPrev,
     close,
+    caseSensitive,
+    wholeWord,
+    showReplace,
+    replaceQuery,
+    toggleCaseSensitive,
+    toggleWholeWord,
+    toggleReplace,
+    setReplaceQuery,
+    replaceCurrent,
+    replaceAll,
   } = search;
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
       if (e.shiftKey) {
@@ -38,67 +140,139 @@ export function SearchBar() {
     }
   };
 
+  const handleReplaceKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (e.metaKey || e.ctrlKey) {
+        replaceAll();
+      } else {
+        replaceCurrent();
+      }
+    }
+  };
+
   const displayCount =
     totalMatches > 0 ? `${currentMatchIndex + 1}/${totalMatches}` : "0/0";
 
   return (
-    <div className="w-full pt-1 pr-1">
-      <div
-        className={cn([
-          "flex h-7 items-center gap-2 px-2.5",
-          "rounded-lg border border-neutral-200 bg-white shadow-xs",
-        ])}
-      >
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-1.5 h-7 px-2 rounded-lg bg-neutral-100">
         <input
-          ref={inputRef}
+          ref={searchInputRef}
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Search in transcript..."
-          className={cn([
-            "flex-1 h-full px-2 text-sm",
-            "bg-neutral-100 border border-neutral-200 rounded-xs",
-            "focus:outline-hidden focus:border-neutral-400",
-          ])}
+          onKeyDown={handleSearchKeyDown}
+          placeholder="Search..."
+          className="flex-1 min-w-0 h-full bg-transparent text-xs placeholder:text-neutral-400 focus:outline-hidden"
         />
-        <span className="text-xs text-neutral-600 whitespace-nowrap min-w-12 text-right">
+        <div className="flex items-center gap-0.5">
+          <ToggleButton
+            active={caseSensitive}
+            onClick={toggleCaseSensitive}
+            tooltip="Match case"
+          >
+            <ALargeSmallIcon className="size-3.5" />
+          </ToggleButton>
+          <ToggleButton
+            active={wholeWord}
+            onClick={toggleWholeWord}
+            tooltip="Match whole word"
+          >
+            <WholeWordIcon className="size-3.5" />
+          </ToggleButton>
+          <ToggleButton
+            active={showReplace}
+            onClick={toggleReplace}
+            tooltip={
+              <>
+                <span>Replace</span>
+                <Kbd className="animate-kbd-press">⌘ H</Kbd>
+              </>
+            }
+          >
+            <ReplaceIcon className="size-3.5" />
+          </ToggleButton>
+        </div>
+        <span className="text-[10px] text-neutral-400 whitespace-nowrap tabular-nums">
           {displayCount}
         </span>
-        <button
-          onClick={onPrev}
-          disabled={totalMatches === 0}
-          className={cn([
-            "p-1.5 rounded-xs transition-colors",
-            totalMatches > 0
-              ? "hover:bg-neutral-200 text-neutral-700"
-              : "text-neutral-400 cursor-not-allowed",
-          ])}
-          title="Previous match (Shift+Enter)"
-        >
-          <ChevronUpIcon className="w-4 h-4" />
-        </button>
-        <button
-          onClick={onNext}
-          disabled={totalMatches === 0}
-          className={cn([
-            "p-1.5 rounded-xs transition-colors",
-            totalMatches > 0
-              ? "hover:bg-neutral-200 text-neutral-700"
-              : "text-neutral-400 cursor-not-allowed",
-          ])}
-          title="Next match (Enter)"
-        >
-          <ChevronDownIcon className="w-4 h-4" />
-        </button>
-        <button
+        <div className="flex items-center">
+          <IconButton
+            onClick={onPrev}
+            disabled={totalMatches === 0}
+            tooltip={
+              <>
+                <span>Previous match</span>
+                <Kbd className="animate-kbd-press">⇧ ↵</Kbd>
+              </>
+            }
+          >
+            <ChevronUpIcon className="size-3.5" />
+          </IconButton>
+          <IconButton
+            onClick={onNext}
+            disabled={totalMatches === 0}
+            tooltip={
+              <>
+                <span>Next match</span>
+                <Kbd className="animate-kbd-press">↵</Kbd>
+              </>
+            }
+          >
+            <ChevronDownIcon className="size-3.5" />
+          </IconButton>
+        </div>
+        <IconButton
           onClick={close}
-          className="p-1.5 rounded-xs hover:bg-neutral-200 text-neutral-700 transition-colors"
-          title="Close (Escape)"
+          tooltip={
+            <>
+              <span>Close</span>
+              <Kbd className="animate-kbd-press">Esc</Kbd>
+            </>
+          }
         >
-          <XIcon className="w-4 h-4" />
-        </button>
+          <XIcon className="size-3.5" />
+        </IconButton>
       </div>
+
+      {showReplace && (
+        <div className="flex items-center gap-1.5 h-7 px-2 rounded-lg bg-neutral-100">
+          <input
+            ref={replaceInputRef}
+            type="text"
+            value={replaceQuery}
+            onChange={(e) => setReplaceQuery(e.target.value)}
+            onKeyDown={handleReplaceKeyDown}
+            placeholder="Replace with..."
+            className="flex-1 min-w-0 h-full bg-transparent text-xs placeholder:text-neutral-400 focus:outline-hidden"
+          />
+          <div className="flex items-center gap-0.5">
+            <IconButton
+              onClick={replaceCurrent}
+              tooltip={
+                <>
+                  <span>Replace</span>
+                  <Kbd className="animate-kbd-press">↵</Kbd>
+                </>
+              }
+            >
+              <ReplaceIcon className="size-3.5" />
+            </IconButton>
+            <IconButton
+              onClick={replaceAll}
+              tooltip={
+                <>
+                  <span>Replace all</span>
+                  <Kbd className="animate-kbd-press">⌘ ↵</Kbd>
+                </>
+              }
+            >
+              <ReplaceAllIcon className="size-3.5" />
+            </IconButton>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

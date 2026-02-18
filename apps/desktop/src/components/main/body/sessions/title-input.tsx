@@ -10,6 +10,11 @@ import {
   useState,
 } from "react";
 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@hypr/ui/components/ui/tooltip";
 import { cn } from "@hypr/utils";
 
 import { useTitleGenerating } from "../../../../hooks/useTitleGenerating";
@@ -326,20 +331,25 @@ const GenerateButton = memo(function GenerateButton({
   onGenerateTitle: () => void;
 }) {
   return (
-    <button
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onGenerateTitle();
-      }}
-      onMouseDown={(e) => e.preventDefault()}
-      className={cn([
-        "shrink-0",
-        "text-muted-foreground hover:text-foreground",
-        "opacity-50 hover:opacity-100 transition-opacity",
-      ])}
-    >
-      <SparklesIcon className="w-4 h-4" />
-    </button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onGenerateTitle();
+          }}
+          onMouseDown={(e) => e.preventDefault()}
+          className={cn([
+            "shrink-0",
+            "text-muted-foreground hover:text-foreground",
+            "opacity-50 hover:opacity-100 transition-opacity",
+          ])}
+        >
+          <SparklesIcon className="w-4 h-4" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="bottom">Regenerate title</TooltipContent>
+    </Tooltip>
   );
 });

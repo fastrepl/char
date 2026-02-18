@@ -23,11 +23,7 @@ import { type TabItem, TabItemBase } from "../shared";
 import { CaretPositionProvider } from "./caret-position-context";
 import { FloatingActionButton } from "./floating";
 import { NoteInput } from "./note-input";
-import { SearchBar } from "./note-input/transcript/search-bar";
-import {
-  SearchProvider,
-  useTranscriptSearch,
-} from "./note-input/transcript/search-context";
+import { SearchProvider } from "./note-input/transcript/search-context";
 import { OuterHeader } from "./outer-header";
 import { useCurrentNoteTab, useHasTranscript } from "./shared";
 import { TitleInput } from "./title-input";
@@ -186,9 +182,7 @@ function TabContentNoteInner({
   tab: Extract<Tab, { type: "sessions" }>;
   showTimeline: boolean;
 }) {
-  const search = useTranscriptSearch();
-  const showSearchBar = search?.isVisible ?? false;
-  const titleInputRef = React.useRef<HTMLInputElement>(null);
+  const titleInputRef= React.useRef<HTMLInputElement>(null);
   const noteInputRef = React.useRef<{
     editor: import("@hypr/tiptap/editor").TiptapEditor | null;
   }>(null);
@@ -238,11 +232,7 @@ function TabContentNoteInner({
       >
         <div className="flex flex-col h-full">
           <div className="pl-2 pr-1">
-            {showSearchBar ? (
-              <SearchBar />
-            ) : (
-              <OuterHeader sessionId={tab.id} currentView={currentView} />
-            )}
+            <OuterHeader sessionId={tab.id} currentView={currentView} />
           </div>
           <div className="mt-2 px-3 shrink-0">
             <TitleInput
