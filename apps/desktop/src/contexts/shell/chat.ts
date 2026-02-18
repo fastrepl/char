@@ -1,5 +1,3 @@
-import { useHotkeys } from "react-hotkeys-hook";
-
 import { useChatContext } from "../../store/zustand/chat-context";
 import { useTabs } from "../../store/zustand/tabs";
 
@@ -11,17 +9,6 @@ export function useChatMode() {
 
   const groupId = useChatContext((state) => state.groupId);
   const setGroupId = useChatContext((state) => state.setGroupId);
-
-  useHotkeys(
-    "mod+j",
-    () => transitionChatMode({ type: "TOGGLE" }),
-    {
-      preventDefault: true,
-      enableOnFormTags: true,
-      enableOnContentEditable: true,
-    },
-    [transitionChatMode],
-  );
 
   return {
     mode,

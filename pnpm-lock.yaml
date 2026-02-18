@@ -246,6 +246,9 @@ importers:
       '@hypr/plugin-sfx':
         specifier: workspace:*
         version: link:../../plugins/sfx
+      '@hypr/plugin-shortcut':
+        specifier: workspace:*
+        version: link:../../plugins/shortcut
       '@hypr/plugin-store2':
         specifier: workspace:*
         version: link:../../plugins/store2
@@ -1875,6 +1878,12 @@ importers:
         version: 2.10.1
 
   plugins/sfx:
+    dependencies:
+      '@tauri-apps/api':
+        specifier: ^2.10.1
+        version: 2.10.1
+
+  plugins/shortcut:
     dependencies:
       '@tauri-apps/api':
         specifier: ^2.10.1

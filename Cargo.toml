@@ -185,6 +185,7 @@ tauri-plugin-permissions = { path = "plugins/permissions" }
 tauri-plugin-relay = { path = "plugins/relay" }
 tauri-plugin-screen = { path = "plugins/screen" }
 tauri-plugin-settings = { path = "plugins/settings" }
+tauri-plugin-shortcut = { path = "plugins/shortcut" }
 tauri-plugin-sfx = { path = "plugins/sfx" }
 tauri-plugin-sidecar2 = { path = "plugins/sidecar2" }
 tauri-plugin-store2 = { path = "plugins/store2" }

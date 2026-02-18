@@ -70,6 +70,7 @@
     "@hypr/plugin-permissions": "workspace:*",
     "@hypr/plugin-screen": "workspace:*",
     "@hypr/plugin-settings": "workspace:*",
+    "@hypr/plugin-shortcut": "workspace:*",
     "@hypr/plugin-sfx": "workspace:*",
     "@hypr/plugin-store2": "workspace:*",
     "@hypr/plugin-tantivy": "workspace:*",
