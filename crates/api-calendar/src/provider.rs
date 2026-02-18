@@ -82,8 +82,7 @@ impl<S: Send + Sync> FromRequestParts<S> for CalendarClient {
         }
 
         if config.outlook {
-            match NangoConnection::<OutlookCalendar>::from_request_parts(parts, state).await
-            {
+            match NangoConnection::<OutlookCalendar>::from_request_parts(parts, state).await {
                 Ok(conn) => {
                     return Ok(CalendarClient::Outlook(OutlookAdapter::new(
                         conn.into_http(),
