@@ -115,7 +115,6 @@ async fn app() -> Router {
 
     let calendar_config = hypr_api_calendar::CalendarConfig {
         google: true,
-        outlook: true,
         ..Default::default()
     };
 
