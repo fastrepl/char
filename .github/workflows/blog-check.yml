@@ -1,4 +1,4 @@
-name: Blog Slop Check
+name: Blog Check
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ on:
       - "apps/web/content/articles/**"
 
 jobs:
-  slop-check:
+  blog-check:
     if: startsWith(github.head_ref, 'blog/')
     runs-on: ubuntu-latest
     permissions:
@@ -41,9 +41,16 @@ jobs:
         if: steps.changed-files.outputs.has_files == 'true'
         run: npm install ai @ai-sdk/anthropic zod
 
+      - name: Run grammar check
+        if: steps.changed-files.outputs.has_files == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CHANGED_FILES: ${{ steps.changed-files.outputs.files }}
+        run: |
+          node .github/scripts/grammar-check.mjs
+
       - name: Run slop check
         if: steps.changed-files.outputs.has_files == 'true'
-        id: slop-check
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           CHANGED_FILES: ${{ steps.changed-files.outputs.files }}
@@ -56,7 +63,9 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const comment = fs.readFileSync('slop-check-results.md', 'utf8');
+            const grammarResults = fs.readFileSync('grammar-check-results.md', 'utf8');
+            const slopResults = fs.readFileSync('slop-check-results.md', 'utf8');
+            const comment = `${grammarResults}\n\n---\n\n${slopResults}`;
 
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
@@ -66,10 +75,10 @@ jobs:
 
             const botComment = comments.find(c =>
               c.user.type === 'Bot' &&
-              c.body.includes('<!-- slop-check-bot -->')
+              c.body.includes('<!-- blog-check-bot -->')
             );
 
-            const body = `<!-- slop-check-bot -->\n${comment}`;
+            const body = `<!-- blog-check-bot -->\n${comment}`;
 
             if (botComment) {
               await github.rest.issues.updateComment({
