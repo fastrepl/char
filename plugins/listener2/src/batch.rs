@@ -272,6 +272,7 @@ async fn spawn_batch_task(
         AdapterKind::Hyprnote => {
             spawn_batch_task_with_adapter::<HyprnoteAdapter>(args, myself).await
         }
+        AdapterKind::Cactus => spawn_argmax_streaming_batch_task(args, myself).await,
     }
 }
 

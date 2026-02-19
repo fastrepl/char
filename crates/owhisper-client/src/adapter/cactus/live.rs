@@ -4,13 +4,13 @@ use owhisper_interface::stream::StreamResponse;
 
 use super::CactusAdapter;
 use crate::adapter::RealtimeSttAdapter;
-use crate::adapter::deepgram_compat::build_listen_ws_url;
 use crate::adapter::argmax::keywords::ArgmaxKeywordStrategy;
 use crate::adapter::argmax::language::ArgmaxLanguageStrategy;
+use crate::adapter::deepgram_compat::build_listen_ws_url;
 
 impl RealtimeSttAdapter for CactusAdapter {
     fn provider_name(&self) -> &'static str {
-        "argmax"
+        "cactus"
     }
 
     fn is_supported_languages(
