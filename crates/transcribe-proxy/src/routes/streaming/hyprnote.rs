@@ -1,4 +1,3 @@
-use std::collections::HashSet;
 use std::sync::Arc;
 
 use owhisper_client::{
@@ -188,14 +187,6 @@ fn build_channel_split_proxy(
         request = request.with_header(name, value);
     }
 
-    let control_types: HashSet<&'static str> =
-        provider.control_message_types().iter().copied().collect();
-    let control_message_types = if control_types.is_empty() {
-        None
-    } else {
-        Some(Arc::new(control_types))
-    };
-
     let initial_msg: Option<crate::relay::InitialMessage> = initial_message.map(|m| Arc::new(m));
     let response_transformer: Option<crate::relay::ResponseTransformer> =
         Some(Arc::new(build_response_transformer(provider)));
@@ -203,7 +194,6 @@ fn build_channel_split_proxy(
 
     Ok(StreamingProxy::ChannelSplit(ChannelSplitProxy::new(
         request,
-        control_message_types,
         initial_msg,
         response_transformer,
         config.connect_timeout,
@@ -230,14 +220,6 @@ fn build_session_channel_split_proxy(
     let mic_request = tokio_tungstenite::tungstenite::ClientRequestBuilder::new(mic_uri);
     let spk_request = tokio_tungstenite::tungstenite::ClientRequestBuilder::new(spk_uri);
 
-    let control_types: HashSet<&'static str> =
-        provider.control_message_types().iter().copied().collect();
-    let control_message_types = if control_types.is_empty() {
-        None
-    } else {
-        Some(Arc::new(control_types))
-    };
-
     let response_transformer: Option<crate::relay::ResponseTransformer> =
         Some(Arc::new(build_response_transformer(provider)));
     let on_close = build_on_close_callback(config, provider, &analytics_ctx);
@@ -246,7 +228,6 @@ fn build_session_channel_split_proxy(
         ChannelSplitProxy::with_split_requests(
             mic_request,
             spk_request,
-            control_message_types,
             None,
             response_transformer,
             config.connect_timeout,

@@ -14,10 +14,7 @@ use tokio_tungstenite::{
 
 use owhisper_client::Provider;
 
-use super::types::{
-    ControlMessageTypes, InitialMessage, OnCloseCallback, ResponseTransformer, convert,
-    is_control_message,
-};
+use super::types::{InitialMessage, OnCloseCallback, ResponseTransformer, convert};
 
 const SAMPLE_BYTES: usize = 2;
 const FRAME_BYTES: usize = SAMPLE_BYTES * 2;
@@ -35,16 +32,32 @@ fn deinterleave(interleaved: &[u8]) -> (Vec<u8>, Vec<u8>) {
     (ch0, ch1)
 }
 
+fn stamp_results_object(
+    obj: &mut serde_json::Map<String, serde_json::Value>,
+    channel: i32,
+    total: i32,
+) {
+    if obj.get("type").and_then(|t| t.as_str()) == Some("Results") {
+        obj.insert(
+            "channel_index".to_string(),
+            serde_json::json!([channel, total]),
+        );
+    }
+}
+
 fn stamp_channel_index(text: &str, channel: i32, total: i32) -> Option<String> {
     let mut value: serde_json::Value = serde_json::from_str(text).ok()?;
 
-    if let Some(obj) = value.as_object_mut() {
-        if obj.get("type").and_then(|t| t.as_str()) == Some("Results") {
-            obj.insert(
-                "channel_index".to_string(),
-                serde_json::json!([channel, total]),
-            );
+    match &mut value {
+        serde_json::Value::Object(obj) => stamp_results_object(obj, channel, total),
+        serde_json::Value::Array(arr) => {
+            for item in arr {
+                if let Some(obj) = item.as_object_mut() {
+                    stamp_results_object(obj, channel, total);
+                }
+            }
         }
+        _ => {}
     }
 
     serde_json::to_string(&value).ok()
@@ -54,7 +67,6 @@ fn stamp_channel_index(text: &str, channel: i32, total: i32) -> Option<String> {
 pub struct ChannelSplitProxy {
     mic_request: ClientRequestBuilder,
     spk_request: ClientRequestBuilder,
-    control_message_types: Option<ControlMessageTypes>,
     initial_message: Option<InitialMessage>,
     response_transformer: Option<ResponseTransformer>,
     connect_timeout: Duration,
@@ -64,7 +76,6 @@ pub struct ChannelSplitProxy {
 impl ChannelSplitProxy {
     pub fn new(
         upstream_request: ClientRequestBuilder,
-        control_message_types: Option<ControlMessageTypes>,
         initial_message: Option<InitialMessage>,
         response_transformer: Option<ResponseTransformer>,
         connect_timeout: Duration,
@@ -73,7 +84,6 @@ impl ChannelSplitProxy {
         Self::with_split_requests(
             upstream_request.clone(),
             upstream_request,
-            control_message_types,
             initial_message,
             response_transformer,
             connect_timeout,
@@ -84,7 +94,6 @@ impl ChannelSplitProxy {
     pub fn with_split_requests(
         mic_request: ClientRequestBuilder,
         spk_request: ClientRequestBuilder,
-        control_message_types: Option<ControlMessageTypes>,
         initial_message: Option<InitialMessage>,
         response_transformer: Option<ResponseTransformer>,
         connect_timeout: Duration,
@@ -93,7 +102,6 @@ impl ChannelSplitProxy {
         Self {
             mic_request,
             spk_request,
-            control_message_types,
             initial_message,
             response_transformer,
             connect_timeout,
@@ -145,7 +153,6 @@ impl ChannelSplitProxy {
             client_socket,
             mic_upstream,
             spk_upstream,
-            self.control_message_types.clone(),
             self.initial_message.clone(),
             self.response_transformer.clone(),
         )
@@ -168,7 +175,6 @@ impl ChannelSplitProxy {
         client_socket: WebSocket,
         mic_upstream: WebSocketStream<MaybeTlsStream<tokio::net::TcpStream>>,
         spk_upstream: WebSocketStream<MaybeTlsStream<tokio::net::TcpStream>>,
-        control_message_types: Option<ControlMessageTypes>,
         initial_message: Option<InitialMessage>,
         response_transformer: Option<ResponseTransformer>,
     ) {
@@ -212,17 +218,12 @@ impl ChannelSplitProxy {
                                     }
                                 }
                                 Message::Text(text) => {
-                                    let is_control = control_message_types
-                                        .as_ref()
-                                        .is_some_and(|types| is_control_message(text.as_bytes(), types));
-                                    if is_control {
-                                        let tung = TungsteniteMessage::Text(text.to_string().into());
-                                        if mic_tx.send(tung.clone()).await.is_err()
-                                            || spk_tx.send(tung).await.is_err()
-                                        {
-                                            let _ = shutdown_tx.send(());
-                                            break;
-                                        }
+                                    let tung = TungsteniteMessage::Text(text.to_string().into());
+                                    if mic_tx.send(tung.clone()).await.is_err()
+                                        || spk_tx.send(tung).await.is_err()
+                                    {
+                                        let _ = shutdown_tx.send(());
+                                        break;
                                     }
                                 }
                                 Message::Close(frame) => {
@@ -389,6 +390,16 @@ mod tests {
         let result = stamp_channel_index(input, 1, 2).unwrap();
         let parsed: serde_json::Value = serde_json::from_str(&result).unwrap();
         assert!(parsed.get("channel_index").is_none());
+    }
+
+    #[test]
+    fn test_stamp_channel_index_array() {
+        let input = r#"[{"type":"Results","start":0.0},{"type":"Results","start":1.0},{"type":"Metadata"}]"#;
+        let result = stamp_channel_index(input, 0, 2).unwrap();
+        let parsed: Vec<serde_json::Value> = serde_json::from_str(&result).unwrap();
+        assert_eq!(parsed[0]["channel_index"], serde_json::json!([0, 2]));
+        assert_eq!(parsed[1]["channel_index"], serde_json::json!([0, 2]));
+        assert!(parsed[2].get("channel_index").is_none());
     }
 
     #[test]
