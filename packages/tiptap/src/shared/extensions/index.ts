@@ -97,8 +97,8 @@ export const getExtensions = (
     HTMLAttributes: { class: "tiptap-image" },
   }),
   Underline.extend({
-    renderMarkdown(node: any, helpers: any) {
-      return helpers.renderChildren(node);
+    renderMarkdown(_node, helpers) {
+      return helpers.renderChildren(_node);
     },
   }),
   Placeholder.configure({
