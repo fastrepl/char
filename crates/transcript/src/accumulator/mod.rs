@@ -1,3 +1,20 @@
+//! # Transcript-as-Oracle Accumulator
+//!
+//! The transcript string in each ASR response is the **sole source of truth**
+//! for word boundaries. Tokens are sub-word fragments with timing metadata;
+//! the transcript tells us which fragments belong to the same word.
+//!
+//! ## Two-level design
+//!
+//! **Within a response** — `assemble` aligns tokens to the transcript via
+//! `spacing_from_transcript`. A space in the transcript means "new word";
+//! no space means "same word." No timing heuristics.
+//!
+//! **Across responses** — `stitch` handles the one case where no transcript
+//! spans both sides: when a provider splits a word across two final responses
+//! (e.g. Korean particles like "시스템" + "을" → "시스템을"). This uses a
+//! timing-based heuristic because no cross-response transcript exists.
+
 mod channel;
 mod words;
 

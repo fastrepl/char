@@ -19,9 +19,13 @@ pub struct TranscriptUpdate {
 
 // ── Assembly ─────────────────────────────────────────────────────────────────
 
-/// Assemble raw ASR tokens into merged `TranscriptWord`s, recovering spacing
-/// from the transcript string. Adjacent tokens without a space prefix and
-/// within 120ms are merged (handles split punctuation/contractions).
+/// Assemble raw ASR tokens into merged `TranscriptWord`s.
+///
+/// The transcript string is the **sole oracle** for word boundaries within a
+/// single response. `spacing_from_transcript` aligns each token to the
+/// transcript; a space prefix means "new word", no space means "same word."
+/// Adjacent tokens without a space prefix are unconditionally merged —
+/// no timing heuristics.
 pub(super) fn assemble(raw: &[Word], transcript: &str, channel: i32) -> Vec<TranscriptWord> {
     let spaced = spacing_from_transcript(raw, transcript);
     let mut result: Vec<TranscriptWord> = Vec::new();
@@ -30,10 +34,7 @@ pub(super) fn assemble(raw: &[Word], transcript: &str, channel: i32) -> Vec<Tran
         let start_ms = (w.start * 1000.0).round() as i64;
         let end_ms = (w.end * 1000.0).round() as i64;
 
-        let should_merge = !text.starts_with(' ')
-            && result
-                .last()
-                .map_or(false, |prev| start_ms - prev.end_ms <= 120);
+        let should_merge = !text.starts_with(' ') && result.last().is_some();
 
         if should_merge {
             let last = result.last_mut().unwrap();
@@ -57,6 +58,12 @@ pub(super) fn assemble(raw: &[Word], transcript: &str, channel: i32) -> Vec<Tran
     result
 }
 
+/// Align each token to the transcript string and recover its spacing.
+///
+/// The transcript is the oracle: if a token is found in the transcript, the
+/// whitespace between the previous match and this one is prepended verbatim.
+/// If a token cannot be found (ASR/transcript mismatch), a space is forced
+/// so it becomes a separate word — "unknown = word boundary."
 fn spacing_from_transcript(raw: &[Word], transcript: &str) -> Vec<String> {
     let mut result = Vec::with_capacity(raw.len());
     let mut pos = 0;
@@ -76,7 +83,13 @@ fn spacing_from_transcript(raw: &[Word], transcript: &str) -> Vec<String> {
                 result.push(format!("{}{trimmed}", &transcript[pos..abs]));
                 pos = abs + trimmed.len();
             }
-            None => result.push(text.to_string()),
+            None => {
+                let mut fallback = text.to_string();
+                if !fallback.starts_with(' ') {
+                    fallback.insert(0, ' ');
+                }
+                result.push(fallback);
+            }
         }
     }
 
@@ -93,12 +106,12 @@ pub(super) fn dedup(words: Vec<TranscriptWord>, watermark: i64) -> Vec<Transcrip
         .collect()
 }
 
-/// Stitch a held-back word with the front of a new batch, then hold back
-/// the last word for the next boundary. ASR can split tokens across responses;
-/// this lets us re-join them before emitting.
+/// Cross-response word boundary handling — the one place where a timing
+/// heuristic is unavoidable, because no transcript spans both responses.
 ///
-/// Does NOT enforce spacing — callers apply `ensure_space_prefix` at output time,
-/// so that `should_stitch` can still inspect raw spacing to decide merges.
+/// Holds back the last word of each finalized batch so it can be merged
+/// with the first word of the next batch if the provider split a word
+/// across responses (common with Korean particles, contractions, etc.).
 pub(super) fn stitch(
     held: Option<TranscriptWord>,
     mut words: Vec<TranscriptWord>,
@@ -207,10 +220,17 @@ mod tests {
     }
 
     #[test]
-    fn spacing_falls_back_to_raw_when_not_found() {
+    fn spacing_forces_word_boundary_on_unfound_token() {
         let raw = vec![raw_word("Hello", 0.0, 0.5)];
         let spaced = spacing_from_transcript(&raw, "completely different");
-        assert_eq!(spaced, ["Hello"]);
+        assert_eq!(spaced, [" Hello"]);
+    }
+
+    #[test]
+    fn spacing_preserves_no_space_at_transcript_start() {
+        let raw = vec![raw_word("기", 0.0, 0.1), raw_word("간", 0.2, 0.3)];
+        let spaced = spacing_from_transcript(&raw, "기간");
+        assert_eq!(spaced, ["기", "간"]);
     }
 
     // ── assemble ─────────────────────────────────────────────────────────
@@ -225,17 +245,57 @@ mod tests {
     }
 
     #[test]
-    fn assemble_does_not_merge_distant_tokens() {
-        let raw = vec![raw_word(" Hello", 0.0, 0.5), raw_word("world", 1.0, 1.5)];
+    fn assemble_does_not_merge_spaced_tokens() {
+        let raw = vec![raw_word(" Hello", 0.0, 0.5), raw_word(" world", 0.51, 1.0)];
         let words = assemble(&raw, " Hello world", 0);
         assert_eq!(words.len(), 2);
     }
 
     #[test]
-    fn assemble_does_not_merge_spaced_tokens() {
-        let raw = vec![raw_word(" Hello", 0.0, 0.5), raw_word(" world", 0.51, 1.0)];
-        let words = assemble(&raw, " Hello world", 0);
+    fn assemble_separates_unfound_tokens() {
+        let raw = vec![raw_word("Hello", 0.0, 0.5), raw_word("world", 0.51, 0.6)];
+        let words = assemble(&raw, "completely different text", 0);
         assert_eq!(words.len(), 2);
+        assert!(words[0].text.starts_with(' '));
+        assert!(words[1].text.starts_with(' '));
+    }
+
+    #[test]
+    fn assemble_merges_cjk_syllables_with_large_gap() {
+        // Korean "있는데" split into syllables with gaps well above 120 ms.
+        // The transcript confirms they form one word (no space between them).
+        let raw = vec![
+            raw_word("있는", 0.0, 0.3),
+            raw_word("데", 0.54, 0.66), // 240 ms gap
+            raw_word(",", 0.84, 0.9),   // punctuation attached
+        ];
+        let words = assemble(&raw, " 있는데,", 0);
+        assert_eq!(
+            words.len(),
+            1,
+            "syllables in same CJK word must merge: {words:?}"
+        );
+        assert_eq!(words[0].text, " 있는데,");
+        assert_eq!(words[0].end_ms, 900);
+    }
+
+    #[test]
+    fn assemble_splits_cjk_words_at_transcript_space_boundary() {
+        // "있는데 학습과" – two Korean words separated by a space in the transcript.
+        let raw = vec![
+            raw_word("있는", 0.0, 0.3),
+            raw_word("데", 0.54, 0.66),
+            raw_word("학습", 1.0, 1.3),
+            raw_word("과", 1.54, 1.66),
+        ];
+        let words = assemble(&raw, " 있는데 학습과", 0);
+        assert_eq!(
+            words.len(),
+            2,
+            "space in transcript must split words: {words:?}"
+        );
+        assert_eq!(words[0].text, " 있는데");
+        assert_eq!(words[1].text, " 학습과");
     }
 
     // ── dedup ────────────────────────────────────────────────────────────
