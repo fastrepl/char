@@ -14,6 +14,7 @@ export function useNativeContextMenu(items: MenuItemDef[]) {
   const showMenu = useCallback(
     async (e: MouseEvent) => {
       e.preventDefault();
+      e.stopPropagation();
 
       const menuItems = await Promise.all(
         items.map((item) =>

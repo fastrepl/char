@@ -22,5 +22,6 @@ hypr-vvad = { workspace = true }
 silero-rs = { workspace = true }
 
 futures-util = { workspace = true }
+pin-project = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 tracing = { workspace = true }

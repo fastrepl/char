@@ -3,23 +3,12 @@ import { useState } from "react";
 
 import { Button } from "@hypr/ui/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@hypr/ui/components/ui/select";
-
-export const getInitials = (name?: string | null) => {
-  if (!name) {
-    return "?";
-  }
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-};
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@hypr/ui/components/ui/dropdown-menu";
 
 export type SortOption =
   | "alphabetical"
@@ -35,28 +24,44 @@ export function SortDropdown({
   setSortOption: (option: SortOption) => void;
 }) {
   return (
-    <Select
-      value={sortOption}
-      onValueChange={(value: SortOption) => setSortOption(value)}
-    >
-      <SelectTrigger className="h-8 w-8 p-0" aria-label="Sort options">
-        <ArrowDownUp size={16} />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="alphabetical" className="text-xs">
-          A-Z
-        </SelectItem>
-        <SelectItem value="reverse-alphabetical" className="text-xs">
-          Z-A
-        </SelectItem>
-        <SelectItem value="oldest" className="text-xs">
-          Oldest
-        </SelectItem>
-        <SelectItem value="newest" className="text-xs">
-          Newest
-        </SelectItem>
-      </SelectContent>
-    </Select>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button size="icon" variant="ghost" aria-label="Sort options">
+          <ArrowDownUp size={16} />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuRadioGroup
+          value={sortOption}
+          onValueChange={(value) => setSortOption(value as SortOption)}
+        >
+          <DropdownMenuRadioItem
+            value="alphabetical"
+            className="text-xs cursor-pointer"
+          >
+            A-Z
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem
+            value="reverse-alphabetical"
+            className="text-xs cursor-pointer"
+          >
+            Z-A
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem
+            value="oldest"
+            className="text-xs cursor-pointer"
+          >
+            Oldest
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem
+            value="newest"
+            className="text-xs cursor-pointer"
+          >
+            Newest
+          </DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -67,6 +72,8 @@ export function ColumnHeader({
   onAdd,
   searchValue,
   onSearchChange,
+  showSearch: showSearchProp,
+  onShowSearchChange,
 }: {
   title: string;
   sortOption?: SortOption;
@@ -74,8 +81,12 @@ export function ColumnHeader({
   onAdd: () => void;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
+  showSearch?: boolean;
+  onShowSearchChange?: (show: boolean) => void;
 }) {
-  const [showSearch, setShowSearch] = useState(false);
+  const [showSearchInternal, setShowSearchInternal] = useState(false);
+  const showSearch = showSearchProp ?? showSearchInternal;
+  const setShowSearch = onShowSearchChange ?? setShowSearchInternal;
 
   const handleSearchToggle = () => {
     if (showSearch) {

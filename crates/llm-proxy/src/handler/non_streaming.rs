@@ -8,12 +8,13 @@ use axum::{
 
 use crate::analytics::GenerationEvent;
 
-use super::{AppState, ProxyError, spawn_analytics_report};
+use super::{AnalyticsContext, AppState, ProxyError, spawn_analytics_report};
 
 pub(super) async fn handle_non_stream_response(
     state: AppState,
     response: reqwest::Response,
     start_time: Instant,
+    analytics_ctx: AnalyticsContext,
 ) -> Response {
     let status = response.status();
     let http_status = status.as_u16();
@@ -53,6 +54,8 @@ pub(super) async fn handle_non_stream_response(
         });
 
         let event = GenerationEvent {
+            fingerprint: analytics_ctx.fingerprint,
+            user_id: analytics_ctx.user_id,
             generation_id: metadata.generation_id,
             model: metadata.model.unwrap_or_default(),
             input_tokens: metadata.input_tokens,

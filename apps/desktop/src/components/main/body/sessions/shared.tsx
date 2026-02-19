@@ -87,6 +87,7 @@ export function useListenButtonState(sessionId: string) {
 
   const localServerStatus = local.data?.status ?? "unavailable";
   const isLocalServerLoading = localServerStatus === "loading";
+  const isLocalModelNotDownloaded = localServerStatus === "not_downloaded";
 
   const isOfflineWithCloudModel = !isOnline && !isLocalModel;
 
@@ -95,11 +96,14 @@ export function useListenButtonState(sessionId: string) {
     !sttConnection ||
     batching ||
     isLocalServerLoading ||
+    isLocalModelNotDownloaded ||
     isOfflineWithCloudModel;
 
   let warningMessage = "";
   if (lastError) {
     warningMessage = `Session failed: ${lastError}`;
+  } else if (isLocalModelNotDownloaded) {
+    warningMessage = "Selected model is not downloaded.";
   } else if (isLocalServerLoading) {
     warningMessage = "Local STT server is starting up...";
   } else if (isOfflineWithCloudModel) {

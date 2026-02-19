@@ -11,6 +11,6 @@ directml = ["ort/directml"]
 load-dynamic = ["ort/load-dynamic"]
 
 [dependencies]
-ndarray = "0.16"
-ort = { version = "=2.0.0-rc.10", features = ["ndarray"] }
+ndarray = "0.17"
+ort = { version = "=2.0.0-rc.11", features = ["ndarray"] }
 thiserror = { workspace = true }

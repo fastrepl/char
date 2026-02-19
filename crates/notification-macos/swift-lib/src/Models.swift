@@ -21,6 +21,10 @@ struct NotificationPayload: Codable {
   let participants: [Participant]?
   let eventDetails: EventDetails?
   let actionLabel: String?
+
+  var isPersistent: Bool {
+    return timeoutSeconds <= 0
+  }
 }
 
 enum ParticipantStatusDisplay {

@@ -101,7 +101,7 @@ export function Data() {
     <div>
       <StyledStreamdown className="text-neutral-500">
         {
-          "Import data from other apps. Read more about [import](https://hyprnote.com/docs/data#import) and [export](https://hyprnote.com/docs/data#export)."
+          "Import data from other apps. Read more about [import](https://hyprnote.com/docs/data/#import) and [export](https://hyprnote.com/docs/data/#export)."
         }
       </StyledStreamdown>
 

@@ -139,13 +139,31 @@ async function generateTemplateIfNeeded(params: {
     const schema = z.object({ sections: z.array(templateSectionSchema) });
     const userPrompt = await getUserPrompt(args, store);
 
-    try {
-      const template = await generateText({
-        model,
-        temperature: 0,
-        output: Output.object({ schema }),
-        abortSignal: signal,
-        prompt: `Analyze this meeting content and suggest appropriate section headings for a comprehensive summary.
+    const result = await generateStructuredOutput({
+      model,
+      schema,
+      signal,
+      prompt: createTemplatePrompt(userPrompt, schema),
+    });
+
+    if (!result) {
+      return null;
+    }
+
+    return result.sections.map((s) => ({
+      title: s.title,
+      description: s.description ?? null,
+    }));
+  } else {
+    return args.template.sections;
+  }
+}
+
+function createTemplatePrompt(
+  userPrompt: string,
+  schema: z.ZodObject<any>,
+): string {
+  return `Analyze this meeting content and suggest appropriate section headings for a comprehensive summary.
   The sections should cover the main themes and topics discussed.
   Generate around 5-7 sections based on the content depth.
   Give me in bullet points.
@@ -160,22 +178,50 @@ async function generateTemplateIfNeeded(params: {
   ${JSON.stringify(z.toJSONSchema(schema))}
   ---
 
-  IMPORTANT: Start with '{', NO \`\`\`json. (I will directly parse it with JSON.parse())`,
+  IMPORTANT: Start with '{', NO \`\`\`json. (I will directly parse it with JSON.parse())`;
+}
+
+async function generateStructuredOutput<T extends z.ZodTypeAny>(params: {
+  model: LanguageModel;
+  schema: T;
+  signal: AbortSignal;
+  prompt: string;
+}): Promise<z.infer<T> | null> {
+  const { model, schema, signal, prompt } = params;
+
+  try {
+    const result = await generateText({
+      model,
+      temperature: 0,
+      output: Output.object({ schema }),
+      abortSignal: signal,
+      prompt,
+    });
+
+    if (!result.output) {
+      return null;
+    }
+
+    return result.output as z.infer<T>;
+  } catch (error) {
+    try {
+      const fallbackResult = await generateText({
+        model,
+        temperature: 0,
+        abortSignal: signal,
+        prompt,
       });
 
-      if (!template.output) {
+      const jsonMatch = fallbackResult.text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
         return null;
       }
 
-      return template.output.sections.map((s) => ({
-        title: s.title,
-        description: s.description ?? null,
-      }));
+      const parsed = JSON.parse(jsonMatch[0]);
+      return schema.parse(parsed);
     } catch {
       return null;
     }
-  } else {
-    return args.template.sections;
   }
 }
 

@@ -42,6 +42,7 @@ export function ChatTrigger({
   return createPortal(
     <button
       ref={buttonRef}
+      data-chat-trigger
       onClick={onClick}
       className={cn([
         "fixed right-4 z-40",
@@ -54,7 +55,7 @@ export function ChatTrigger({
         shouldHide
           ? "bottom-0 translate-y-[85%]"
           : showTimeline
-            ? "bottom-[62px]"
+            ? "bottom-[68px]"
             : "bottom-4",
       ])}
     >

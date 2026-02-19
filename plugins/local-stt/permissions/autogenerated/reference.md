@@ -9,6 +9,7 @@ Default permissions for the plugin
 - `allow-is-model-downloading`
 - `allow-download-model`
 - `allow-cancel-download`
+- `allow-delete-model`
 - `allow-start-server`
 - `allow-stop-server`
 - `allow-get-servers`
@@ -46,6 +47,32 @@ Enables the cancel_download command without any pre-configured scope.
 <td>
 
 Denies the cancel_download command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`local-stt:allow-delete-model`
+
+</td>
+<td>
+
+Enables the delete_model command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`local-stt:deny-delete-model`
+
+</td>
+<td>
+
+Denies the delete_model command without any pre-configured scope.
 
 </td>
 </tr>

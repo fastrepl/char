@@ -1,6 +1,6 @@
 # Admin Interface
 
-The admin interface at `/admin` provides content management capabilities for the Hyprnote website.
+The admin interface at `/admin` provides content management capabilities for the Char website.
 
 ## Authentication
 
@@ -55,48 +55,24 @@ Complete flow from editing to publication:
 **1. User Edits a Published Article**
 - Open `/admin/collections` and select a published article
 - Make changes in the editor
+- Auto-save runs every 60 seconds, or save manually with ⌘S / Save button
 
-**2. User Clicks "Save"**
+**2. Save Creates a PR**
 - Creates a new branch `blog/{slug}-{timestamp}` (or uses existing one)
-- Commits with `ready_for_review: false` in frontmatter
-- Creates/updates PR to `main`
+- Creates a non-draft PR to `main`, ready to merge
+- Assigns `harshikaalagh-netizen` as reviewer on PR creation
+- A banner appears in the editor linking to the PR
 
 **3. GitHub Actions Trigger**
 - `blog-auto-format.yml` - Auto-formats MDX files with dprint, commits changes back to branch
 - `blog-grammar-check.yml` - Runs AI grammar check (Anthropic), posts suggestions as PR comment
-- `blog-slack-notify.yml` - Sends Slack notification (green border):
-  ```
-  ✏️ @user made changes to *Article Title*
-  ```
 
 **4. User Continues Editing (Optional)**
-- Each "Save" updates the same PR branch
-- Each push triggers workflows again
+- Each save updates the same PR branch
+- Each push triggers the grammar check again
 
-**5. User Clicks "Submit for Review"**
-- Updates frontmatter to `ready_for_review: true`
-- Adds `ComputelessComputer` as PR reviewer
-
-**6. GitHub Actions Trigger Again**
-- Slack notification changes to (blue border):
-  ```
-  👀 *Article submitted for review*
-  @john please review
-  ```
-
-**7. Reviewer Merges PR**
+**5. Reviewer Merges PR**
 - Article goes live on the website
-
-**Slack Notification Summary:**
-
-| Action | `ready_for_review` | Slack Message | Border |
-|--------|-------------------|---------------|--------|
-| New Article | `false` | "🚀 ready to publish a new article" | Green |
-| Save (edit) | `false` | "✏️ made changes" | Green |
-| Submit for Review | `true` | "👀 submitted for review" @john | Blue |
-| Unpublish | n/a | "⚠️ wants to unpublish" | Amber |
-
-Slack messages include **Preview**, **View PR**, and **Merge** action buttons.
 
 ## API Endpoints
 
@@ -129,7 +105,6 @@ All API endpoints require admin authentication (bypassed in development mode).
 - `POST /api/admin/content/save` - Save content (creates PR for published articles)
 - `POST /api/admin/content/create` - Create new content file
 - `POST /api/admin/content/publish` - Publish/unpublish an article
-- `POST /api/admin/content/submit-for-review` - Submit article for editorial review
 - `POST /api/admin/content/rename` - Rename a content file
 - `POST /api/admin/content/duplicate` - Duplicate a content file
 - `POST /api/admin/content/delete` - Delete a content file

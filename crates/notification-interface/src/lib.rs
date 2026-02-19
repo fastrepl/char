@@ -1,9 +1,68 @@
+use std::collections::BTreeSet;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize, specta::Type)]
 pub enum NotificationEvent {
     Confirm,
     Accept,
     Dismiss,
     Timeout,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum NotificationKey {
+    MicStarted { apps: BTreeSet<String> },
+    MicStopped { apps: BTreeSet<String> },
+    CalendarEvent { event_id: String },
+    Custom(String),
+}
+
+impl NotificationKey {
+    pub fn mic_started(app_bundle_ids: impl IntoIterator<Item = String>) -> Self {
+        Self::MicStarted {
+            apps: app_bundle_ids.into_iter().collect(),
+        }
+    }
+
+    pub fn mic_stopped(app_bundle_ids: impl IntoIterator<Item = String>) -> Self {
+        Self::MicStopped {
+            apps: app_bundle_ids.into_iter().collect(),
+        }
+    }
+
+    pub fn calendar_event(event_id: impl Into<String>) -> Self {
+        Self::CalendarEvent {
+            event_id: event_id.into(),
+        }
+    }
+
+    pub fn to_dedup_key(&self) -> String {
+        match self {
+            Self::MicStarted { apps } => {
+                let sorted: Vec<_> = apps.iter().cloned().collect();
+                format!("mic-started:{}", sorted.join(","))
+            }
+            Self::MicStopped { apps } => {
+                let sorted: Vec<_> = apps.iter().cloned().collect();
+                format!("mic-stopped:{}", sorted.join(","))
+            }
+            Self::CalendarEvent { event_id } => {
+                format!("event:{event_id}")
+            }
+            Self::Custom(s) => s.clone(),
+        }
+    }
+}
+
+impl From<String> for NotificationKey {
+    fn from(s: String) -> Self {
+        Self::Custom(s)
+    }
+}
+
+impl From<&str> for NotificationKey {
+    fn from(s: &str) -> Self {
+        Self::Custom(s.to_string())
+    }
 }
 
 #[derive(
@@ -52,6 +111,10 @@ pub struct Notification {
 impl Notification {
     pub fn builder() -> NotificationBuilder {
         NotificationBuilder::default()
+    }
+
+    pub fn is_persistent(&self) -> bool {
+        self.timeout.is_none()
     }
 }
 

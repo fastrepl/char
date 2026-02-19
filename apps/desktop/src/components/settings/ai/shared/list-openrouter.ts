@@ -5,6 +5,9 @@ import {
   extractMetadataMap,
   fetchJson,
   type InputModality,
+  isDateSnapshot,
+  isNonChatModel,
+  isOldModel,
   type ListModelsResult,
   type ModelIgnoreReason,
   partition,
@@ -59,11 +62,20 @@ export async function listOpenRouterModels(
     if (hasCommonIgnoreKeywords(model)) {
       reasons.push("common_keyword");
     }
+    if (isNonChatModel(model.id)) {
+      reasons.push("not_chat_model");
+    }
     if (!supportsTextInput(model)) {
       reasons.push("no_text_input");
     }
     if (!supportsToolUse(model)) {
       reasons.push("no_tool");
+    }
+    if (isOldModel(model.id)) {
+      reasons.push("old_model");
+    }
+    if (isDateSnapshot(model.id)) {
+      reasons.push("date_snapshot");
     }
     return reasons.length > 0 ? reasons : null;
   };

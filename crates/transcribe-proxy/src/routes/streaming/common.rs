@@ -23,17 +23,33 @@ pub fn parse_param<T: std::str::FromStr>(params: &QueryParams, key: &str, defaul
 
 macro_rules! finalize_proxy_builder {
     ($builder:expr, $provider:expr, $config:expr) => {
+        finalize_proxy_builder!(
+            $builder,
+            $provider,
+            $config,
+            super::AnalyticsContext {
+                fingerprint: None,
+                user_id: None,
+            }
+        )
+    };
+    ($builder:expr, $provider:expr, $config:expr, $analytics_ctx:expr) => {
         match &$config.analytics {
             Some(analytics) => {
                 let analytics = analytics.clone();
                 let provider_name = format!("{:?}", $provider).to_lowercase();
+                let analytics_ctx: super::AnalyticsContext = $analytics_ctx;
                 $builder
                     .on_close(move |duration| {
                         let analytics = analytics.clone();
                         let provider_name = provider_name.clone();
+                        let fingerprint = analytics_ctx.fingerprint.clone();
+                        let user_id = analytics_ctx.user_id.clone();
                         async move {
                             analytics
                                 .report_stt($crate::analytics::SttEvent {
+                                    fingerprint,
+                                    user_id,
                                     provider: provider_name,
                                     duration,
                                 })
@@ -53,6 +69,7 @@ pub fn build_proxy_with_url(
     selected: &SelectedProvider,
     upstream_url: &str,
     config: &SttProxyConfig,
+    analytics_ctx: super::AnalyticsContext,
 ) -> Result<WebSocketProxy, crate::ProxyError> {
     let provider = selected.provider();
     let builder = WebSocketProxy::builder()
@@ -61,5 +78,5 @@ pub fn build_proxy_with_url(
         .control_message_types(provider.control_message_types())
         .apply_auth(selected);
 
-    finalize_proxy_builder!(builder, provider, config)
+    finalize_proxy_builder!(builder, provider, config, analytics_ctx)
 }

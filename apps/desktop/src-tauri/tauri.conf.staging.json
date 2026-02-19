@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Hyprnote Staging",
+  "productName": "Char Staging",
   "mainBinaryName": "hyprnote-staging",
   "identifier": "com.hyprnote.staging",
   "plugins": {
@@ -21,7 +21,7 @@
     ],
     "macOS": {
       "dmg": {
-        "background": "assets/dmg-background-nightly.png"
+        "background": "assets/dmg-background-staging.png"
       }
     }
   }
