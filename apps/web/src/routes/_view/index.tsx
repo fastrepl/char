@@ -27,6 +27,7 @@ import { cn } from "@hypr/utils";
 import { DownloadButton } from "@/components/download-button";
 import { GitHubOpenSource } from "@/components/github-open-source";
 import { GithubStars } from "@/components/github-stars";
+import { HeroInterface } from "@/components/hero-interface";
 import { Image } from "@/components/image";
 import { LogoCloud } from "@/components/logo-cloud";
 import { FAQ, FAQItem } from "@/components/mdx-jobs";
@@ -137,7 +138,7 @@ function Component() {
     >
       <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
         <YCombinatorBanner />
-        <HeroParagraphSection onVideoExpand={setExpandedVideo} />
+        <HeroSection heroInputRef={heroInputRef} />
         <SlashSeparator />
         <HowItWorksSection />
         <SlashSeparator />
@@ -189,10 +190,8 @@ function YCombinatorBanner() {
 }
 
 function HeroSection({
-  onVideoExpand,
   heroInputRef,
 }: {
-  onVideoExpand: (id: string) => void;
   heroInputRef: React.RefObject<HTMLInputElement | null>;
 }) {
   const platform = usePlatform();
@@ -260,7 +259,7 @@ function HeroSection({
   }, [heroContext, handleTrigger]);
 
   return (
-    <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
+    <div className="bg-linear-to-b from-stone-50/30 to-stone-100">
       <div className="flex flex-col items-center text-center">
         <section
           id="hero"
@@ -382,21 +381,9 @@ function HeroSection({
           )}
         </section>
 
-        <div className="relative aspect-video w-full max-w-4xl border-t border-neutral-100 md:hidden overflow-hidden">
-          <VideoThumbnail
-            playbackId={MUX_PLAYBACK_ID}
-            onPlay={() => onVideoExpand(MUX_PLAYBACK_ID)}
-          />
-        </div>
-
         <div className="w-full">
-          <ValuePropsGrid valueProps={heroContent.valueProps} />
-          <div className="relative aspect-video w-full border-t border-neutral-100 hidden md:block overflow-hidden">
-            <VideoThumbnail
-              playbackId={MUX_PLAYBACK_ID}
-              onPlay={() => onVideoExpand(MUX_PLAYBACK_ID)}
-            />
-          </div>
+          {/* <ValuePropsGrid valueProps={heroContent.valueProps} /> */}
+          <HeroInterface />
         </div>
       </div>
     </div>
@@ -1488,7 +1475,9 @@ export function AISection() {
                 JJ
               </div>
               <div className="flex flex-col gap-0.5 min-w-0 overflow-hidden">
-                <p className="text-xs text-neutral-400">John Jeong's progress</p>
+                <p className="text-xs text-neutral-400">
+                  John Jeong's progress
+                </p>
                 <div className="relative h-5">
                   <AnimatePresence mode="wait">
                     <motion.p

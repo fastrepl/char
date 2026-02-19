@@ -1,6 +1,7 @@
 import { Icon } from "@iconify-icon/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@hypr/utils";
 
@@ -21,6 +22,39 @@ export const Route = createFileRoute("/_view/product/ai-assistant")({
   }),
 });
 
+const FEATURES = [
+  {
+    title: "Ask about past conversations",
+    description:
+      "Query your entire conversation history to refresh your memory. Find decisions, action items, or specific topics discussed in previous meetings\u2014all in natural language.",
+    icon: "mdi:message-question",
+  },
+  {
+    title: "Execute workflows and tasks",
+    description:
+      "Describe what you want to do, and let your AI assistant handle the rest. Automate follow-up tasks across your tools without manual data entry.",
+    icon: "mdi:workflow",
+  },
+  {
+    title: "Chat during meetings",
+    description:
+      "Get instant answers from the current transcript and past meeting context.",
+    icon: "mdi:chat",
+  },
+  {
+    title: "Improve with every transcription",
+    description:
+      "Your AI assistant learns from every interaction, adapting to your preferences and continuously improving transcription accuracy and summary quality.",
+    icon: "mdi:brain",
+  },
+  {
+    title: "Deep Research based on your meetings",
+    description:
+      "Search through past conversations, extract key insights, and understand context before you join.",
+    icon: "mdi:magnify",
+  },
+];
+
 function Component() {
   return (
     <div
@@ -30,11 +64,11 @@ function Component() {
       <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
         <HeroSection />
         <SlashSeparator />
-        <BeforeMeetingSection />
+        <ScrollFeatureSection />
         <SlashSeparator />
-        <DuringMeetingSection />
+        <ExtensionsSection />
         <SlashSeparator />
-        <AfterMeetingSection />
+        <TemplatesSection />
         <SlashSeparator />
         <CTASection />
       </div>
@@ -75,161 +109,525 @@ function HeroSection() {
   );
 }
 
-function BeforeMeetingSection() {
+const HEADER_HEIGHT = 69;
+
+function ScrollFeatureSection() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const pinnedRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const container = containerRef.current;
+      const pinned = pinnedRef.current;
+      if (!container || !pinned) return;
+
+      const rect = container.getBoundingClientRect();
+      const viewH = window.innerHeight - HEADER_HEIGHT;
+      const containerH = container.offsetHeight;
+
+      const scrolledPast = HEADER_HEIGHT - rect.top;
+      const maxScroll = containerH - viewH;
+
+      if (scrolledPast <= 0) {
+        pinned.style.position = "absolute";
+        pinned.style.top = "0px";
+        pinned.style.bottom = "auto";
+        pinned.style.left = "0";
+        pinned.style.right = "0";
+        pinned.style.width = "";
+        pinned.style.height = `${viewH}px`;
+      } else if (scrolledPast >= maxScroll) {
+        pinned.style.position = "absolute";
+        pinned.style.top = "auto";
+        pinned.style.bottom = "0px";
+        pinned.style.left = "0";
+        pinned.style.right = "0";
+        pinned.style.width = "";
+        pinned.style.height = `${viewH}px`;
+      } else {
+        pinned.style.position = "fixed";
+        pinned.style.top = `${HEADER_HEIGHT}px`;
+        pinned.style.bottom = "auto";
+        pinned.style.left = `${rect.left}px`;
+        pinned.style.right = "auto";
+        pinned.style.width = `${container.offsetWidth}px`;
+        pinned.style.height = `${viewH}px`;
+      }
+
+      const progress = Math.max(0, Math.min(1, scrolledPast / maxScroll));
+      const index = Math.min(
+        Math.floor(progress * FEATURES.length),
+        FEATURES.length - 1,
+      );
+      setActiveIndex(index);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    onScroll();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  });
+
   return (
-    <section id="before-meeting">
-      <div className="text-center font-medium text-neutral-600 uppercase tracking-wide py-6 font-serif">
-        Before meetings
-      </div>
-
-      <div className="border-t border-neutral-100">
-        <div className="grid md:grid-cols-2">
-          <div className="p-8 border-b md:border-b-0 md:border-r border-neutral-100">
-            <Icon icon="mdi:magnify" className="text-3xl text-stone-600 mb-4" />
-            <h3 className="text-xl font-serif text-stone-600 mb-3">
-              Deep research with chat
-            </h3>
-            <p className="text-neutral-600 mb-4 leading-relaxed">
-              Chat with your AI assistant to learn more about the people you're
-              meeting with. Search through past conversations, extract key
-              insights, and understand context before you join.
-            </p>
-            <ul className="flex flex-col gap-2">
-              <li className="flex items-start gap-2">
-                <Icon
-                  icon="mdi:check"
-                  className="text-stone-600 shrink-0 mt-0.5"
-                />
-                <span className="text-sm text-neutral-600">
-                  "What did we discuss last time with Sarah?"
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Icon
-                  icon="mdi:check"
-                  className="text-stone-600 shrink-0 mt-0.5"
-                />
-                <span className="text-sm text-neutral-600">
-                  "What are the client's main concerns?"
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Icon
-                  icon="mdi:check"
-                  className="text-stone-600 shrink-0 mt-0.5"
-                />
-                <span className="text-sm text-neutral-600">
-                  "Show me all action items from previous meetings"
-                </span>
-              </li>
-            </ul>
+    <>
+      {/* Desktop */}
+      <div
+        ref={containerRef}
+        className="hidden md:block relative border-t border-neutral-100"
+        style={{ height: `${FEATURES.length * 100}vh` }}
+      >
+        <div ref={pinnedRef} className="grid grid-cols-2 bg-white">
+          <div className="flex flex-col justify-center px-12 lg:px-16 border-r border-neutral-100">
+            <div className="flex flex-col gap-2">
+              {FEATURES.map((feature, index) => (
+                <motion.div
+                  key={feature.title}
+                  animate={{
+                    opacity: index === activeIndex ? 1 : 0.25,
+                  }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  className="py-4 cursor-default"
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <Icon
+                      icon={feature.icon}
+                      className={cn([
+                        "text-2xl transition-colors duration-400",
+                        index === activeIndex
+                          ? "text-stone-600"
+                          : "text-stone-400",
+                      ])}
+                    />
+                    <h3 className="text-xl font-serif text-stone-600">
+                      {feature.title}
+                    </h3>
+                  </div>
+                  <AnimatePresence>
+                    {index === activeIndex && (
+                      <motion.p
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                        className="text-neutral-600 leading-relaxed pl-9 overflow-hidden"
+                      >
+                        {feature.description}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              ))}
+            </div>
           </div>
 
-          <div className="p-8 border-b md:border-b-0 border-neutral-100">
-            <Icon
-              icon="mdi:file-document-edit"
-              className="text-3xl text-stone-600 mb-4"
-            />
-            <h3 className="text-xl font-serif text-stone-600 mb-3">
-              Generate custom templates
-            </h3>
-            <p className="text-neutral-600 mb-4 leading-relaxed">
-              Create tailored meeting templates on the spot. Ask your AI
-              assistant to generate agendas, question lists, or note structures
-              specific to your meeting type.
-            </p>
-            <ul className="flex flex-col gap-2">
-              <li className="flex items-start gap-2">
-                <Icon
-                  icon="mdi:check"
-                  className="text-stone-600 shrink-0 mt-0.5"
-                />
-                <span className="text-sm text-neutral-600">
-                  "Create a customer discovery template"
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Icon
-                  icon="mdi:check"
-                  className="text-stone-600 shrink-0 mt-0.5"
-                />
-                <span className="text-sm text-neutral-600">
-                  "Generate questions for a technical interview"
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Icon
-                  icon="mdi:check"
-                  className="text-stone-600 shrink-0 mt-0.5"
-                />
-                <span className="text-sm text-neutral-600">
-                  "Build an agenda for our quarterly review"
-                </span>
-              </li>
-            </ul>
+          <div className="flex items-center justify-center p-12 lg:p-16">
+            <FeatureVisual activeIndex={activeIndex} />
           </div>
         </div>
-
-        <div className="p-8 border-t border-neutral-100">
-          <Icon
-            icon="mdi:message-question"
-            className="text-3xl text-stone-600 mb-4"
-          />
-          <h3 className="text-xl font-serif text-stone-600 mb-3">
-            Ask about past conversations
-          </h3>
-          <p className="text-neutral-600 leading-relaxed max-w-3xl">
-            Query your entire conversation history to refresh your memory. Find
-            decisions, action items, or specific topics discussed in previous
-            meetings—all in natural language.
-          </p>
-        </div>
       </div>
-    </section>
+
+      {/* Mobile */}
+      <div className="md:hidden">
+        {FEATURES.map((feature, index) => (
+          <div
+            key={feature.title}
+            className={cn([
+              "border-b border-neutral-100 px-6 py-10",
+              index === 0 && "border-t",
+            ])}
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <Icon icon={feature.icon} className="text-2xl text-stone-600" />
+              <h3 className="text-lg font-serif text-stone-600">
+                {feature.title}
+              </h3>
+            </div>
+            <p className="text-neutral-600 leading-relaxed mb-6">
+              {feature.description}
+            </p>
+            <div className="flex justify-center">
+              <FeatureVisual activeIndex={index} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
   );
 }
 
-function DuringMeetingSection() {
+function FeatureVisual({ activeIndex }: { activeIndex: number }) {
+  const panelConfigs = [
+    {
+      a: {
+        icon: "mdi:magnify",
+        label: "Search",
+        color: "bg-blue-50 text-blue-600 border-blue-200",
+      },
+      b: (
+        <div className="flex flex-col gap-3">
+          <div className="rounded-xl bg-neutral-50 border border-neutral-200 px-4 py-3">
+            <p className="text-sm text-neutral-500 mb-1">You</p>
+            <p className="text-sm text-stone-700">
+              What did Sarah say about the timeline?
+            </p>
+          </div>
+          <div className="rounded-xl bg-stone-50 border border-stone-200 px-4 py-3">
+            <p className="text-sm text-stone-500 mb-1">Char</p>
+            <p className="text-sm text-stone-700">
+              In your Oct 12 meeting, Sarah mentioned the deadline is Q1 2026
+              with a soft launch in December.
+            </p>
+          </div>
+        </div>
+      ),
+      c: (
+        <div className="flex items-center gap-2">
+          <div className="size-2 rounded-full bg-blue-400" />
+          <span className="text-xs text-neutral-500">
+            3 meetings referenced
+          </span>
+        </div>
+      ),
+      d: (
+        <div className="flex flex-col gap-1.5">
+          {[
+            "Weekly Sync — Oct 12",
+            "1:1 with Sarah — Oct 10",
+            "Sprint Planning — Oct 8",
+          ].map((m) => (
+            <div
+              key={m}
+              className="flex items-center gap-2 text-xs text-neutral-500"
+            >
+              <Icon
+                icon="mdi:calendar-outline"
+                className="text-sm text-neutral-400"
+              />
+              <span>{m}</span>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      a: {
+        icon: "mdi:workflow",
+        label: "Workflow",
+        color: "bg-green-50 text-green-600 border-green-200",
+      },
+      b: (
+        <div className="flex flex-col gap-3">
+          <div className="rounded-xl bg-neutral-50 border border-neutral-200 px-4 py-3">
+            <p className="text-sm text-stone-700">
+              Create a Jira ticket for the mobile bug and assign to Sarah
+            </p>
+          </div>
+          <div className="rounded-xl border border-neutral-200 bg-white p-3">
+            <div className="flex items-center gap-2 text-xs text-neutral-500 mb-2">
+              <Icon icon="logos:jira" className="text-sm" />
+              <span>ENG-247</span>
+              <span className="rounded-full bg-green-100 px-2 py-0.5 text-[11px] text-green-700">
+                Created
+              </span>
+            </div>
+            <p className="text-sm font-medium text-stone-700">
+              Mobile UI bug fix
+            </p>
+            <div className="mt-2 flex items-center gap-2 text-xs text-neutral-500">
+              <div className="size-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px]">
+                S
+              </div>
+              <span>Sarah</span>
+            </div>
+          </div>
+        </div>
+      ),
+      c: (
+        <div className="flex items-center gap-3">
+          {[
+            { icon: "simple-icons:jira", label: "Jira" },
+            { icon: "simple-icons:slack", label: "Slack" },
+            { icon: "simple-icons:googlecalendar", label: "Calendar" },
+          ].map((item) => (
+            <div
+              key={item.label}
+              className="flex items-center gap-1.5 text-xs text-neutral-500"
+            >
+              <Icon icon={item.icon} className="text-sm" />
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+      ),
+      d: (
+        <div className="flex items-center gap-2 text-xs">
+          <Icon icon="mdi:check-circle" className="text-green-500 text-sm" />
+          <span className="text-green-700">Task created successfully</span>
+        </div>
+      ),
+    },
+    {
+      a: {
+        icon: "mdi:record-circle",
+        label: "Live",
+        color: "bg-red-50 text-red-500 border-red-200",
+      },
+      b: (
+        <div className="flex flex-col gap-3">
+          <div className="rounded-xl bg-neutral-50 border border-neutral-200 px-4 py-3">
+            <div className="flex flex-col gap-2 text-sm">
+              <div>
+                <span className="font-medium text-stone-700">Sarah: </span>
+                <span className="text-neutral-600">
+                  The API changes will need at least two sprints...
+                </span>
+              </div>
+              <div>
+                <span className="font-medium text-stone-700">Ben: </span>
+                <span className="text-neutral-600">
+                  I can start on the auth module this week.
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="rounded-xl bg-stone-50 border border-stone-200 px-4 py-3">
+            <p className="text-sm text-stone-500 mb-1">Char</p>
+            <p className="text-sm text-stone-700">
+              Ben committed to auth module this week. Sarah estimates 2 sprints
+              for full API.
+            </p>
+          </div>
+        </div>
+      ),
+      c: (
+        <div className="flex items-center gap-2">
+          <div className="size-2 rounded-full bg-red-400 animate-pulse" />
+          <span className="text-xs text-red-600">Recording in progress</span>
+        </div>
+      ),
+      d: (
+        <div className="flex items-center gap-2 text-xs text-neutral-500">
+          <Icon icon="mdi:clock-outline" className="text-sm" />
+          <span>23 min elapsed</span>
+        </div>
+      ),
+    },
+    {
+      a: {
+        icon: "mdi:brain",
+        label: "Learning",
+        color: "bg-purple-50 text-purple-600 border-purple-200",
+      },
+      b: (
+        <div className="flex flex-col gap-3">
+          <div className="rounded-xl bg-neutral-50 border border-neutral-200 px-4 py-3">
+            <p className="text-xs text-neutral-400 mb-1">Before</p>
+            <p className="text-sm text-neutral-500 line-through decoration-neutral-300">
+              the team talked about doing stuff with the dashboard and some api
+              things
+            </p>
+          </div>
+          <div className="rounded-xl bg-stone-50 border border-stone-200 px-4 py-3">
+            <p className="text-xs text-stone-400 mb-1">After</p>
+            <p className="text-sm text-stone-700">
+              The team agreed to prioritize the dashboard redesign and begin API
+              migration in Sprint 14.
+            </p>
+          </div>
+        </div>
+      ),
+      c: (
+        <div className="flex items-center gap-2">
+          <Icon icon="mdi:trending-up" className="text-sm text-purple-500" />
+          <span className="text-xs text-neutral-500">
+            Quality improving over time
+          </span>
+        </div>
+      ),
+      d: (
+        <div className="flex gap-3">
+          {[
+            { label: "Accuracy", value: "94%" },
+            { label: "Adapted", value: "12x" },
+          ].map((stat) => (
+            <div key={stat.label} className="text-xs">
+              <span className="text-stone-700 font-medium">{stat.value}</span>
+              <span className="text-neutral-400 ml-1">{stat.label}</span>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      a: {
+        icon: "mdi:magnify",
+        label: "Research",
+        color: "bg-amber-50 text-amber-600 border-amber-200",
+      },
+      b: (
+        <div className="flex flex-col gap-3">
+          <div className="rounded-xl border border-neutral-200 bg-white p-3">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="size-8 rounded-full bg-stone-200 flex items-center justify-center text-xs text-stone-600">
+                JK
+              </div>
+              <div>
+                <p className="text-sm font-medium text-stone-700">John Kim</p>
+                <p className="text-xs text-neutral-500">Product Manager</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              {["Q4 roadmap", "Mobile launch", "Budget review"].map((t) => (
+                <span
+                  key={t}
+                  className="text-[11px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200"
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-xl bg-stone-50 border border-stone-200 px-4 py-3">
+            <p className="text-sm text-stone-700">
+              Last 3 meetings focused on mobile launch timeline. John prefers
+              concise bullet-point summaries.
+            </p>
+          </div>
+        </div>
+      ),
+      c: (
+        <div className="flex items-center gap-2">
+          <Icon
+            icon="mdi:file-search-outline"
+            className="text-sm text-amber-500"
+          />
+          <span className="text-xs text-neutral-500">
+            5 past meetings analyzed
+          </span>
+        </div>
+      ),
+      d: (
+        <div className="flex flex-col gap-1.5">
+          {[
+            "Key decision: Mobile-first approach",
+            "Open item: Budget approval pending",
+          ].map((insight) => (
+            <div
+              key={insight}
+              className="flex items-start gap-2 text-xs text-neutral-600"
+            >
+              <Icon
+                icon="mdi:lightbulb-outline"
+                className="text-sm text-amber-500 shrink-0 mt-0.5"
+              />
+              <span>{insight}</span>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+  ];
+
+  const config = panelConfigs[activeIndex];
+
   return (
-    <section id="during-meeting">
+    <div className="w-full max-w-[420px]">
+      <div className="grid grid-cols-[140px_1fr] grid-rows-[auto_auto] gap-3">
+        <div className="col-span-1 row-span-1 flex flex-col gap-3">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`a-${activeIndex}`}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className={cn([
+                "rounded-xl border px-3 py-2.5 flex items-center gap-2",
+                config.a.color,
+              ])}
+            >
+              <Icon icon={config.a.icon} className="text-base" />
+              <span className="text-xs font-medium">{config.a.label}</span>
+            </motion.div>
+          </AnimatePresence>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`c-${activeIndex}`}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.3, ease: "easeOut", delay: 0.15 }}
+              className="rounded-xl border border-neutral-200 bg-white px-3 py-2.5"
+            >
+              {config.c}
+            </motion.div>
+          </AnimatePresence>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`d-${activeIndex}`}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.3, ease: "easeOut", delay: 0.2 }}
+              className="rounded-xl border border-neutral-200 bg-white px-3 py-2.5"
+            >
+              {config.d}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        <div className="col-span-1 row-span-1">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`b-${activeIndex}`}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.35, ease: "easeOut", delay: 0.05 }}
+              className="rounded-2xl border border-neutral-200 bg-white p-4 h-full"
+            >
+              {config.b}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ExtensionsSection() {
+  return (
+    <section>
       <div className="text-center font-medium text-neutral-600 uppercase tracking-wide py-6 font-serif">
-        During meetings
+        Realtime insights
       </div>
 
       <div className="border-t border-neutral-100">
-        <div className="grid md:grid-cols-2">
-          <div className="p-8 border-b md:border-b-0 md:border-r border-neutral-100">
-            <Icon icon="mdi:chat" className="text-3xl text-stone-600 mb-4" />
-            <h3 className="text-xl font-serif text-stone-600 mb-3">
-              Ask questions in realtime
-            </h3>
-            <p className="text-neutral-600 leading-relaxed">
-              Type questions to your AI assistant during the meeting without
-              interrupting the conversation. Get instant answers from the
-              current transcript and past meeting context.
-            </p>
-          </div>
-
-          <div className="p-8 border-b md:border-b-0 border-neutral-100">
-            <Icon
-              icon="mdi:lightbulb-on"
-              className="text-3xl text-stone-600 mb-4"
-            />
-            <h3 className="text-xl font-serif text-stone-600 mb-3">
-              Realtime insights via{" "}
-              <Link
-                to="/product/extensions/"
-                className="text-stone-600 hover:text-stone-800 underline decoration-dotted underline-offset-2"
-              >
-                extensions
-              </Link>
-            </h3>
-            <p className="text-neutral-600 mb-4 leading-relaxed">
-              AI-powered extensions provide live assistance during your meeting.
-              Built on our extension framework, these tools adapt to your needs
-              in realtime.
-            </p>
-          </div>
+        <div className="p-8">
+          <Icon
+            icon="mdi:lightbulb-on"
+            className="text-3xl text-stone-600 mb-4"
+          />
+          <h3 className="text-xl font-serif text-stone-600 mb-3">
+            Realtime insights via{" "}
+            <Link
+              to="/product/extensions/"
+              className="text-stone-600 hover:text-stone-800 underline decoration-dotted underline-offset-2"
+            >
+              extensions
+            </Link>
+          </h3>
+          <p className="text-neutral-600 mb-4 leading-relaxed max-w-3xl">
+            AI-powered extensions provide live assistance during your meeting.
+            Built on our extension framework, these tools adapt to your needs in
+            realtime.
+          </p>
         </div>
 
         <div className="border-t border-neutral-100">
@@ -295,245 +693,38 @@ function DuringMeetingSection() {
   );
 }
 
-function AfterMeetingSection() {
-  const slides = [
-    {
-      prompt:
-        "Add a Jira ticket for the mobile UI bug and assign it to Sarah today",
-      card: (
-        <div
-          className="w-full max-w-[420px] rounded-2xl border border-neutral-200 bg-white p-4"
-          dir="ltr"
-        >
-          <div className="flex flex-row items-center gap-2 text-xs text-neutral-500">
-            <Icon icon="logos:jira" className="text-base" />
-            <span>ENG-247</span>
-            <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[11px] text-stone-600">
-              Todo
-            </span>
-          </div>
-          <div className="mt-2 text-sm font-medium text-stone-700">
-            Mobile UI bug fix
-          </div>
-          <p className="mt-1 text-xs text-neutral-500">
-            Fix the mobile UI bug discussed in today's meeting. Check responsive
-            layout on iOS devices.
-          </p>
-          <div className="mt-3 flex flex-row items-center gap-2 text-xs text-neutral-500">
-            <div className="h-6 w-6 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px]">
-              S
-            </div>
-            <span>Sarah</span>
-          </div>
-        </div>
-      ),
-      toolbar: "simple-icons:jira",
-    },
-    {
-      prompt: "Send the summary to #engineering and update the Q4 roadmap now",
-      card: (
-        <div
-          className="w-full max-w-[420px] rounded-[18px] border border-neutral-200 bg-white px-4 py-4 text-sm text-neutral-700 mt-1"
-          dir="ltr"
-        >
-          <div className="flex items-center gap-2 text-xs text-neutral-500">
-            <Icon icon="logos:slack-icon" className="text-sm" />
-            <span>#engineering</span>
-            <span>·</span>
-            <span>2:15 PM</span>
-          </div>
-          <div className="mt-2">
-            <p className="font-medium text-neutral-700">Jessica Lee</p>
-            <p className="text-[12px] text-neutral-600">
-              Meeting summary attached as a file for review, including key
-              decisions, action items, and next steps for the Q4 rollout.
-            </p>
-            <div className="mt-2 inline-flex items-center gap-2 rounded-md border border-neutral-200 bg-white px-2 py-1 text-xs text-neutral-600">
-              <Icon icon="mdi:file-outline" className="text-sm" />
-              <span>meeting-summary.pdf</span>
-            </div>
-          </div>
-        </div>
-      ),
-      toolbar: "simple-icons:slack",
-    },
-    {
-      prompt:
-        "Schedule a follow-up next week with the client and share the agenda",
-      card: (
-        <div
-          className="w-full max-w-[420px] rounded-[18px] border border-neutral-200 bg-white px-4 py-4 text-sm text-neutral-700 mt-1"
-          dir="ltr"
-        >
-          <div className="flex items-center gap-2 text-xs text-neutral-500">
-            <Icon icon="logos:google-calendar" className="text-sm" />
-            <span>Mon, 9:30 AM</span>
-            <span>·</span>
-            <span>30 min</span>
-          </div>
-          <div className="mt-2">
-            <p className="font-medium text-neutral-700">Follow-up meeting</p>
-            <p className="text-xs text-neutral-600">
-              2 guests · 1 yes, 1 awaiting
-            </p>
-            <div className="mt-2 flex items-center gap-2 text-xs text-neutral-500">
-              <div className="size-5 rounded-full bg-stone-200 flex items-center justify-center text-[10px] text-stone-600">
-                A
-              </div>
-              <span>John Smith</span>
-            </div>
-            <div className="mt-1 flex items-center gap-2 text-xs text-neutral-500">
-              <div className="size-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px]">
-                M
-              </div>
-              <span>Mudit Jain</span>
-            </div>
-          </div>
-        </div>
-      ),
-      toolbar: "simple-icons:googlecalendar",
-    },
-  ];
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [progress, setProgress] = useState(0);
+const TEMPLATE_PROMPTS = [
+  "Create a customer discovery template",
+  "Generate questions for a technical interview",
+  "Build an agenda for our quarterly review",
+];
 
-  useEffect(() => {
-    const interval = window.setInterval(() => {
-      setProgress((current) => {
-        const next = current + 2;
-        if (next >= 100) {
-          setActiveIndex(
-            (prevIndex) => (prevIndex - 1 + slides.length) % slides.length,
-          );
-          return 0;
-        }
-        return next;
-      });
-    }, 80);
-
-    return () => window.clearInterval(interval);
-  }, [slides.length]);
-
-  const activeSlide = slides[activeIndex];
-
+function TemplatesSection() {
   return (
-    <section id="after-meeting" dir="ltr">
-      <div className="text-center font-medium text-neutral-600 uppercase tracking-wide py-6 font-serif">
-        After meetings
+    <section className="py-16 px-6 lg:px-8">
+      <div className="text-center max-w-3xl mx-auto mb-12">
+        <h3 className="text-2xl font-serif text-stone-700 mb-4">
+          Generate custom templates
+        </h3>
+        <p className="text-neutral-600 leading-relaxed">
+          Create tailored meeting templates on the spot. Ask your AI assistant
+          to generate agendas, question lists, or note structures specific to
+          your meeting type.
+        </p>
       </div>
 
-      <div className="border-t border-neutral-100">
-        <div className="grid md:grid-cols-2">
-          <div className="p-8 border-b md:border-b-0 md:border-r border-neutral-100">
-            <Icon
-              icon="mdi:workflow"
-              className="text-3xl text-stone-600 mb-4"
-            />
-            <h3 className="text-xl font-serif text-stone-600 mb-3">
-              Execute workflows with natural language
-            </h3>
-            <p className="text-neutral-600 mb-4 leading-relaxed">
-              Describe what you want to do, and let your AI assistant handle the
-              rest. Automate follow-up tasks across your tools without manual
-              data entry.
-            </p>
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col items-center gap-1 h-[236px]">
-                <div
-                  className="max-w-[420px] rounded-[18px] border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm text-neutral-700 text-center"
-                  style={{
-                    fontFamily:
-                      '"SF Pro", -apple-system, BlinkMacSystemFont, sans-serif',
-                  }}
-                >
-                  "{activeSlide.prompt}"
-                </div>
-                <div className="h-5 w-px border-l-2 border-dotted border-neutral-300" />
-                <div className="w-full flex justify-center" dir="ltr">
-                  {activeSlide.card}
-                </div>
-              </div>
-              <div
-                className="flex flex-row items-center justify-center gap-2 text-center"
-                dir="ltr"
-              >
-                {slides.map((slide, index) => (
-                  <button
-                    key={slide.prompt}
-                    type="button"
-                    className="h-10 min-w-12 rounded-[12px] border border-neutral-200 text-neutral-600 flex items-center justify-center px-2 bg-stone-50 hover:text-stone-700 transition-colors"
-                    onClick={() => {
-                      setProgress(0);
-                      setActiveIndex(index);
-                    }}
-                    style={{
-                      background:
-                        index === activeIndex
-                          ? `linear-gradient(90deg, rgba(0,0,0,0.08) ${progress}%, rgba(0,0,0,0.02) ${progress}%)`
-                          : undefined,
-                    }}
-                  >
-                    <Icon
-                      icon={slide.toolbar}
-                      className="text-base"
-                      color="currentColor"
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
+      <div className="grid md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+        {TEMPLATE_PROMPTS.map((prompt) => (
+          <div
+            key={prompt}
+            className={cn([
+              "rounded-2xl border border-neutral-200 bg-neutral-50/50",
+              "px-5 py-4 text-sm text-stone-600",
+            ])}
+          >
+            {prompt}
           </div>
-
-          <div className="p-8 border-b md:border-b-0 border-neutral-100">
-            <Icon icon="mdi:brain" className="text-3xl text-stone-600 mb-4" />
-            <h3 className="text-xl font-serif text-stone-600 mb-3">
-              Learns and adapts with memory
-            </h3>
-            <p className="text-neutral-600 leading-relaxed">
-              Your AI assistant builds memory from your interactions. It
-              remembers preferences, learns from edits you make to summaries,
-              and continuously improves its assistance based on your patterns.
-            </p>
-            <ul className="flex flex-col gap-3 mt-4">
-              <li className="flex items-start gap-3">
-                <Icon
-                  icon="mdi:check-circle"
-                  className="text-stone-600 shrink-0 mt-0.5"
-                />
-                <span className="text-sm text-neutral-600">
-                  Remembers your meeting preferences and formats
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <Icon
-                  icon="mdi:check-circle"
-                  className="text-stone-600 shrink-0 mt-0.5"
-                />
-                <span className="text-sm text-neutral-600">
-                  Learns from your edits to improve future summaries
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <Icon
-                  icon="mdi:check-circle"
-                  className="text-stone-600 shrink-0 mt-0.5"
-                />
-                <span className="text-sm text-neutral-600">
-                  Adapts to your workflow and tool preferences
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <Icon
-                  icon="mdi:check-circle"
-                  className="text-stone-600 shrink-0 mt-0.5"
-                />
-                <span className="text-sm text-neutral-600">
-                  Builds context about your team and projects over time
-                </span>
-              </li>
-            </ul>
-          </div>
-        </div>
+        ))}
       </div>
     </section>
   );
