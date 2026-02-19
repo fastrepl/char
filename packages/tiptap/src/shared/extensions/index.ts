@@ -96,11 +96,7 @@ export const getExtensions = (
     allowBase64: true,
     HTMLAttributes: { class: "tiptap-image" },
   }),
-  Underline.extend({
-    renderMarkdown(_node, helpers) {
-      return helpers.renderChildren(_node);
-    },
-  }),
+  Underline,
   Placeholder.configure({
     placeholder:
       placeholderComponent ??
