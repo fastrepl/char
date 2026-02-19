@@ -96,21 +96,61 @@ function extractBase64ImageNodes(json: JSONContent): Base64ImageNode[] {
   return results;
 }
 
+function isEmptyNode(node: JSONContent): boolean {
+  if (node.type === "text") {
+    return !node.text || node.text.trim() === "";
+  }
+  if (node.type === "paragraph") {
+    return !node.content || node.content.every(isEmptyNode);
+  }
+  if (node.type === "image") {
+    return false;
+  }
+  if (!node.content || node.content.length === 0) {
+    return true;
+  }
+  return node.content.every(isEmptyNode);
+}
+
 function clean(node: JSONContent): void {
   if (node.type === "text" && node.text) {
     node.text = node.text.replace(/\u00a0/g, " ");
   }
+
   if (node.content) {
-    node.content = node.content.filter(
-      (node) => !(node.type === "paragraph" && !node.content),
-    );
     for (const child of node.content) {
       clean(child);
     }
-    if (node.type === "table") {
+
+    if (node.type === "listItem") {
+      node.content = node.content.filter((child) => !isEmptyNode(child));
+      if (node.content.length === 0) {
+        node.content = [{ type: "paragraph" }];
+      }
+    } else if (
+      node.type === "orderedList" ||
+      node.type === "bulletList" ||
+      node.type === "taskList"
+    ) {
+      node.content = node.content.filter(
+        (child) => child.type !== "listItem" || !isEmptyNode(child),
+      );
+    } else if (node.type === "table") {
       node.content = node.content.filter(
         (row) => row.type !== "tableRow" || !isEmptyTableRow(row),
       );
+      promoteTableHeader(node);
+    } else if (node.type === "doc") {
+      node.content = node.content.filter(
+        (child) => !isEmptyNode(child),
+      );
+    } else {
+      node.content = node.content.filter(
+        (child) => !(child.type === "paragraph" && isEmptyNode(child)),
+      );
+      if (node.content.length === 0) {
+        node.content = [{ type: "paragraph" }];
+      }
     }
   }
 }
@@ -128,6 +168,50 @@ function isEmptyTableRow(row: JSONContent): boolean {
       );
     });
   });
+}
+
+function promoteTableHeader(table: JSONContent): void {
+  if (!table.content || table.content.length === 0) return;
+  const firstRow = table.content[0];
+  if (!firstRow.content) return;
+  const hasHeaderCells = firstRow.content.some(
+    (cell) => cell.type === "tableHeader",
+  );
+  if (hasHeaderCells) return;
+  for (const cell of firstRow.content) {
+    if (cell.type === "tableCell") {
+      cell.type = "tableHeader";
+    }
+  }
+}
+
+function cleanGoogleRedirectUrls(node: JSONContent): void {
+  if (node.marks) {
+    for (const mark of node.marks) {
+      if (mark.type === "link" && typeof mark.attrs?.href === "string") {
+        mark.attrs.href = resolveGoogleRedirect(mark.attrs.href);
+      }
+    }
+  }
+  if (node.content) {
+    for (const child of node.content) {
+      cleanGoogleRedirectUrls(child);
+    }
+  }
+}
+
+function resolveGoogleRedirect(url: string): string {
+  try {
+    const parsed = new URL(url);
+    if (
+      parsed.hostname === "www.google.com" &&
+      parsed.pathname === "/url"
+    ) {
+      const target = parsed.searchParams.get("q");
+      if (target) return target;
+    }
+  } catch {}
+  return url;
 }
 
 function extractTitle(html: string): string | null {
@@ -237,6 +321,7 @@ export const Route = createFileRoute("/api/admin/import/google-docs")({
             Markdown,
           ]);
           clean(rawJson);
+          cleanGoogleRedirectUrls(rawJson);
 
           const base64Images = extractBase64ImageNodes(rawJson);
           if (base64Images.length > 0) {
