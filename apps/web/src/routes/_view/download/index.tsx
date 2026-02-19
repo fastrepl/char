@@ -165,6 +165,22 @@ function Component() {
                   platform="linux-deb-nightly"
                   beta={true}
                 />
+                <DownloadCard
+                  iconName="simple-icons:linux"
+                  spec="Linux ARM (AppImage)"
+                  downloadUrl="/download/nightly/linux-appimage-aarch64"
+                  available={false}
+                  platform="linux-appimage-aarch64-nightly"
+                  beta={true}
+                />
+                <DownloadCard
+                  iconName="simple-icons:linux"
+                  spec="Linux ARM (.deb)"
+                  downloadUrl="/download/nightly/linux-deb-aarch64"
+                  available={false}
+                  platform="linux-deb-aarch64-nightly"
+                  beta={true}
+                />
               </div>
 
               {isMacDesktop && (

@@ -62,6 +62,9 @@ function DownloadButtons() {
       return `https://desktop2.hyprnote.com/download/latest/dmg-x86_64?channel=${channel}`;
     }
     if (platformName === "linux") {
+      if (targetArch === "aarch64") {
+        return `https://desktop2.hyprnote.com/download/latest/appimage-aarch64?channel=${channel}`;
+      }
       return `https://desktop2.hyprnote.com/download/latest/appimage-x86_64?channel=${channel}`;
     }
     return null;
