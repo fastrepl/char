@@ -12,6 +12,7 @@ import "@hypr/tiptap/styles.css";
 
 import "./blog-editor.css";
 import { ClipNode } from "./clip-embed";
+import { EmbedBlockNode } from "./embed-block";
 import { GoogleDocsImport } from "./google-docs-import";
 import { BlogImage } from "./image-with-alt";
 import { Toolbar } from "./toolbar";
@@ -76,6 +77,7 @@ const BlogEditor = forwardRef<{ editor: TiptapEditor | null }, BlogEditorProps>(
         ),
         Markdown,
         ClipNode,
+        EmbedBlockNode,
       ],
       [onImageUpload],
     );
