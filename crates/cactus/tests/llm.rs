@@ -36,7 +36,10 @@ fn test_complete() {
 #[test]
 fn test_complete_streaming() {
     let model = llm_model();
-    let messages = vec![Message::user("Say hello")];
+    let messages = vec![
+        Message::system("Answer in one word only."),
+        Message::user("What is 2+2?"),
+    ];
     let options = CompleteOptions {
         max_tokens: Some(20),
         temperature: Some(0.0),
