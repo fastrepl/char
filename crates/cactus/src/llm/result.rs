@@ -10,7 +10,11 @@ where
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct CompletionResult {
-    #[serde(default, rename = "response", deserialize_with = "deserialize_null_as_default")]
+    #[serde(
+        default,
+        rename = "response",
+        deserialize_with = "deserialize_null_as_default"
+    )]
     pub text: String,
     #[serde(default)]
     pub cloud_handoff: bool,
