@@ -221,9 +221,15 @@ function extractTitle(html: string): string | null {
 
 function removeGoogleDocsComments(html: string): string {
   html = html.replace(/<a[^>]+href="#cmnt_ref\d+"[^>]*>\[\w+\]<\/a>/gi, "");
-  html = html.replace(/<sup><a[^>]+href="#cmnt\d+"[^>]*>\[\w+\]<\/a><\/sup>/gi, "");
+  html = html.replace(
+    /<sup><a[^>]+href="#cmnt\d+"[^>]*>\[\w+\]<\/a><\/sup>/gi,
+    "",
+  );
   html = html.replace(/<a[^>]+href="#cmnt\d+"[^>]*>\[\w+\]<\/a>/gi, "");
-  html = html.replace(/<div[^>]*>\s*<p[^>]*><a[^>]+href="#cmnt_ref\d+"[^>]*>[\s\S]*?<\/div>/gi, "");
+  html = html.replace(
+    /<div[^>]*>\s*<p[^>]*><a[^>]+href="#cmnt_ref\d+"[^>]*>[\s\S]*?<\/div>/gi,
+    "",
+  );
   return html;
 }
 
