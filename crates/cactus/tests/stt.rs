@@ -14,7 +14,7 @@ fn test_transcribe_file() {
     let options = TranscribeOptions::default();
 
     let r = model
-        .transcribe_file(data::english_1::AUDIO_PATH, &options)
+        .transcribe_file(hypr_data::english_1::AUDIO_PATH, &options)
         .unwrap();
 
     assert!(!r.text.is_empty());
@@ -29,7 +29,7 @@ fn test_transcribe_pcm() {
     let options = TranscribeOptions::default();
 
     let r = model
-        .transcribe_pcm(data::english_1::AUDIO, &options)
+        .transcribe_pcm(hypr_data::english_1::AUDIO, &options)
         .unwrap();
 
     assert!(!r.text.is_empty());
@@ -48,7 +48,7 @@ fn test_transcribe_with_language() {
     };
 
     let r = model
-        .transcribe_file(data::english_1::AUDIO_PATH, &options)
+        .transcribe_file(hypr_data::english_1::AUDIO_PATH, &options)
         .unwrap();
     assert!(!r.text.is_empty());
     println!("en transcription: {:?}", r.text);
@@ -59,7 +59,7 @@ fn test_transcribe_with_language() {
 #[test]
 fn test_stream_transcriber() {
     let model = stt_model();
-    let pcm = data::english_1::AUDIO;
+    let pcm = hypr_data::english_1::AUDIO;
     let options = TranscribeOptions::default();
 
     let mut transcriber = Transcriber::new(&model, &options, CloudConfig::default()).unwrap();
