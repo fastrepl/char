@@ -2,6 +2,7 @@ use std::{
     future::Future,
     path::{Path, PathBuf},
     pin::Pin,
+    sync::Arc,
     task::{Context, Poll},
 };
 
@@ -159,13 +160,6 @@ impl Service<Request<Body>> for TranscribeService {
     }
 }
 
-struct TimedResult {
-    result: hypr_cactus::StreamResult,
-    chunk_duration: f64,
-}
-
-type TranscriberEvent = Result<TimedResult, String>;
-
 async fn handle_websocket(
     socket: WebSocket,
     params: ListenParams,
@@ -178,16 +172,35 @@ async fn handle_websocket(
     let total_channels = (params.channels as i32).max(1);
     let channel_index = vec![0, total_channels];
 
-    let languages = params.languages.clone();
-
     let chunk_size_ms = 300;
 
-    let (audio_tx, audio_rx) = tokio::sync::mpsc::channel::<Vec<f32>>(64);
-    let (event_tx, mut event_rx) = tokio::sync::mpsc::channel::<TranscriberEvent>(64);
+    let model = match hypr_cactus::Model::new(&model_path) {
+        Ok(m) => m,
+        Err(e) => {
+            send_ws_best_effort(
+                &mut ws_sender,
+                &StreamResponse::ErrorResponse {
+                    error_code: None,
+                    error_message: format!("failed to load model: {e}"),
+                    provider: "cactus".to_string(),
+                },
+            )
+            .await;
+            return;
+        }
+    };
 
-    let transcribe_handle = std::thread::spawn(move || {
-        run_transcriber(model_path, languages, chunk_size_ms, audio_rx, event_tx);
-    });
+    let options = hypr_cactus::TranscribeOptions {
+        language: hypr_cactus::constrain_to(&params.languages),
+        ..Default::default()
+    };
+
+    let (audio_tx, mut event_rx, _cancel_token) = hypr_cactus::transcribe_stream(
+        Arc::new(model),
+        options,
+        chunk_size_ms,
+        SAMPLE_RATE,
+    );
 
     let mut last_confirmed_sent = String::new();
     let mut last_pending_sent = String::new();
@@ -212,21 +225,21 @@ async fn handle_websocket(
                 tracing::info!("cactus_websocket_cancelled_by_new_connection");
                 break;
             }
-            event = event_rx.recv() => {
+            event = event_rx.next() => {
                 let Some(event) = event else { break };
 
                 match event {
-                    Err(error_message) => {
+                    Err(e) => {
                         send_ws_best_effort(&mut ws_sender, &StreamResponse::ErrorResponse {
                             error_code: None,
-                            error_message,
+                            error_message: e.to_string(),
                             provider: "cactus".to_string(),
                         })
                         .await;
                         break;
                     }
-                    Ok(TimedResult { result, chunk_duration }) => {
-                        audio_offset += chunk_duration;
+                    Ok(hypr_cactus::TranscribeEvent { result, chunk_duration_secs }) => {
+                        audio_offset += chunk_duration_secs;
 
                         let duration = audio_offset - segment_start;
                         let confidence = result.confidence as f64;
@@ -388,7 +401,6 @@ async fn handle_websocket(
 
     drop(audio_tx);
     drop(event_rx);
-    let _ = transcribe_handle.join();
 
     send_ws_best_effort(
         &mut ws_sender,
@@ -404,99 +416,6 @@ async fn handle_websocket(
     let _ = ws_sender.close().await;
 }
 
-fn run_transcriber(
-    model_path: PathBuf,
-    languages: Vec<hypr_language::Language>,
-    chunk_size_ms: u32,
-    mut audio_rx: tokio::sync::mpsc::Receiver<Vec<f32>>,
-    event_tx: tokio::sync::mpsc::Sender<TranscriberEvent>,
-) {
-    let model = match hypr_cactus::Model::new(&model_path) {
-        Ok(m) => m,
-        Err(e) => {
-            let _ = event_tx.blocking_send(Err(format!("failed to load model: {e}")));
-            return;
-        }
-    };
-
-    let options = hypr_cactus::TranscribeOptions {
-        language: hypr_cactus::constrain_to(&languages),
-        ..Default::default()
-    };
-
-    let mut transcriber = match hypr_cactus::Transcriber::new(&model, &options) {
-        Ok(t) => t,
-        Err(e) => {
-            let _ = event_tx.blocking_send(Err(format!("failed to create transcriber: {e}")));
-            return;
-        }
-    };
-
-    let samples_per_chunk = (SAMPLE_RATE as usize * chunk_size_ms as usize) / 1000;
-    let mut buffer: Vec<f32> = Vec::with_capacity(samples_per_chunk * 2);
-    let mut aborted = false;
-
-    while let Some(samples) = audio_rx.blocking_recv() {
-        buffer.extend_from_slice(&samples);
-
-        while buffer.len() >= samples_per_chunk {
-            let chunk: Vec<f32> = buffer.drain(..samples_per_chunk).collect();
-
-            match process_transcriber_chunk(&mut transcriber, &chunk) {
-                Ok(timed) => {
-                    if event_tx.blocking_send(Ok(timed)).is_err() {
-                        aborted = true;
-                        break;
-                    }
-                }
-                Err(msg) => {
-                    let _ = event_tx.blocking_send(Err(msg));
-                    aborted = true;
-                    break;
-                }
-            }
-        }
-
-        if aborted {
-            break;
-        }
-    }
-
-    if !aborted && !buffer.is_empty() {
-        match process_transcriber_chunk(&mut transcriber, &buffer) {
-            Ok(timed) => {
-                let _ = event_tx.blocking_send(Ok(timed));
-            }
-            Err(msg) => {
-                let _ = event_tx.blocking_send(Err(msg));
-                return;
-            }
-        }
-    }
-
-    if let Ok(result) = transcriber.stop() {
-        let _ = event_tx.blocking_send(Ok(TimedResult {
-            result,
-            chunk_duration: 0.0,
-        }));
-    }
-}
-
-fn process_transcriber_chunk(
-    transcriber: &mut hypr_cactus::Transcriber<'_>,
-    samples: &[f32],
-) -> TranscriberEvent {
-    let chunk_duration = samples.len() as f64 / SAMPLE_RATE as f64;
-
-    let result = transcriber
-        .process_f32(samples)
-        .map_err(|e| format!("transcription error: {e}"))?;
-
-    Ok(TimedResult {
-        result,
-        chunk_duration,
-    })
-}
 
 enum IncomingMessage {
     Audio(AudioExtract),
@@ -925,16 +844,19 @@ mod tests {
             model_path.display()
         );
 
-        let (audio_tx, audio_rx) = tokio::sync::mpsc::channel::<Vec<f32>>(64);
-        let (event_tx, mut event_rx) = tokio::sync::mpsc::channel::<TranscriberEvent>(64);
-
+        let model = hypr_cactus::Model::new(&model_path).expect("failed to load model");
+        let options = hypr_cactus::TranscribeOptions::default();
         let chunk_size_ms = 300u32;
-        let handle = std::thread::spawn(move || {
-            run_transcriber(model_path, vec![], chunk_size_ms, audio_rx, event_tx);
-        });
+
+        let (audio_tx, mut event_stream, _cancel) = hypr_cactus::transcribe_stream(
+            Arc::new(model),
+            options,
+            chunk_size_ms,
+            SAMPLE_RATE,
+        );
 
         let samples = bytes_to_f32_samples(hypr_data::english_1::AUDIO);
-        let chunk_size = 8_000; // 500ms per incoming chunk (transcriber uses 300ms internally)
+        let chunk_size = 8_000;
         let total_chunks = (samples.len() + chunk_size - 1) / chunk_size;
         let audio_duration = samples.len() as f64 / 16_000.0;
         println!(
@@ -965,12 +887,17 @@ mod tests {
             );
         });
 
+        let rt = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("failed to create tokio runtime");
+
         let t0 = std::time::Instant::now();
         let mut full_transcript = String::new();
         let mut event_count = 0u32;
-        while let Some(event) = event_rx.blocking_recv() {
+        while let Some(event) = rt.block_on(event_stream.next()) {
             match event {
-                Ok(TimedResult { result: r, .. }) => {
+                Ok(hypr_cactus::TranscribeEvent { result: r, .. }) => {
                     let confirmed = r.confirmed.trim();
                     let pending = r.pending.trim();
                     if !confirmed.is_empty() || !pending.is_empty() {
@@ -994,7 +921,6 @@ mod tests {
         }
 
         sender.join().expect("sender thread panicked");
-        handle.join().expect("transcriber thread panicked");
         let elapsed = t0.elapsed().as_secs_f64();
         println!(
             "\n--- FULL TRANSCRIPT ({:.1}s audio, {:.1}s wall, {:.1}x realtime) ---",
