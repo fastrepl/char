@@ -95,7 +95,7 @@ fn test_complete_streaming_early_stop() {
 #[ignore]
 #[test]
 fn test_complete_multi_turn() {
-    let model = llm_model();
+    let mut model = llm_model();
     let options = CompleteOptions {
         max_tokens: Some(30),
         temperature: Some(0.0),

@@ -64,6 +64,7 @@ hypr-frontmatter = { path = "crates/frontmatter", package = "frontmatter" }
 hypr-gbnf = { path = "crates/gbnf", package = "gbnf" }
 hypr-gguf = { path = "crates/gguf", package = "gguf" }
 hypr-google-calendar = { path = "crates/google-calendar", package = "google-calendar" }
+hypr-hf = { path = "crates/hf", package = "hf" }
 hypr-google-drive = { path = "crates/google-drive", package = "google-drive" }
 hypr-granola = { path = "crates/granola", package = "granola" }
 hypr-host = { path = "crates/host", package = "host" }
@@ -308,6 +309,7 @@ silero-rs = { git = "https://github.com/emotechlab/silero-rs", rev = "193542c", 
 vorbis_rs = "0.5.5"
 
 deepgram = { version = "0.7", default-features = false }
+hf-hub = { git = "https://github.com/huggingface/hf-hub", rev = "5510260", default-features = false, features = ["tokio"] }
 libsql = "0.9.24"
 
 block2 = "0.6"
