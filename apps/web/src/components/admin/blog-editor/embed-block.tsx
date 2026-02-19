@@ -78,7 +78,9 @@ function EmbedBlockNodeView({
                 e.target.style.height = "auto";
                 e.target.style.height = `${e.target.scrollHeight}px`;
               }}
-              placeholder={'<iframe src="..." />\n<CtaCard />\n<Callout type="note">...</Callout>'}
+              placeholder={
+                '<iframe src="..." />\n<CtaCard />\n<Callout type="note">...</Callout>'
+              }
               className="w-full px-3 py-2 text-sm font-mono bg-white border border-neutral-200 rounded resize-none focus:outline-none focus:border-blue-500 min-h-[80px]"
               onKeyDown={handleKeyDown}
               rows={3}
