@@ -97,37 +97,8 @@ export const getExtensions = (
     HTMLAttributes: { class: "tiptap-image" },
   }),
   Underline.extend({
-    addProseMirrorPlugins() {
-      return [
-        new Plugin({
-          key: new PluginKey("stripUnderlineFromLinks"),
-          appendTransaction(transactions, _oldState, newState) {
-            if (!transactions.some((tr) => tr.docChanged)) return null;
-
-            const { tr } = newState;
-            let hasChanges = false;
-
-            newState.doc.descendants((node, pos) => {
-              if (node.isText && node.marks.length > 0) {
-                const hasLink = node.marks.some((m) => m.type.name === "link");
-                const hasUnderline = node.marks.some(
-                  (m) => m.type.name === "underline",
-                );
-                if (hasLink && hasUnderline) {
-                  tr.removeMark(
-                    pos,
-                    pos + node.nodeSize,
-                    newState.schema.marks.underline,
-                  );
-                  hasChanges = true;
-                }
-              }
-            });
-
-            return hasChanges ? tr : null;
-          },
-        }),
-      ];
+    renderMarkdown(node: any, helpers: any) {
+      return helpers.renderChildren(node);
     },
   }),
   Placeholder.configure({
