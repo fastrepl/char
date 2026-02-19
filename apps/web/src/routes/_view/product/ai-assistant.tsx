@@ -1,6 +1,5 @@
 import { Icon } from "@iconify-icon/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CheckIcon } from "lucide-react";
 import {
   AnimatePresence,
   motion,
@@ -9,9 +8,11 @@ import {
 } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
+import { DancingSticks } from "@hypr/ui/components/ui/dancing-sticks";
 import { cn } from "@hypr/utils";
 
 import { MockChatInput } from "@/components/mock-chat-input";
+import { MockWindow } from "@/components/mock-window";
 import { SlashSeparator } from "@/components/slash-separator";
 
 export const Route = createFileRoute("/_view/product/ai-assistant")({
@@ -77,7 +78,7 @@ function Component() {
         <SlashSeparator />
         <TemplatesSection />
         <SlashSeparator />
-        <GrowsWithYouSection />
+        <HowItWorksSection />
         <SlashSeparator />
         <CTASection />
       </div>
@@ -860,7 +861,6 @@ function FeatureVisual({ activeIndex }: { activeIndex: number }) {
 function ExtensionsSection() {
   return (
     <section>
-
       <div className="flex flex-col justify-center items-center border-t border-neutral-100">
         <div className="p-8 pt-16">
           <h2 className="md:text-4xl text-2xl text-stone-600 tracking-wide font-serif text-center pb-8">
@@ -878,14 +878,14 @@ function ExtensionsSection() {
             realtime.
           </p>
           <div className="mt-6 text-center">
-              <Link
-                to="/product/extensions/"
-                className="inline-flex items-center gap-2 text-stone-600 hover:text-stone-800 font-medium"
-              >
-                Learn more about extensions
-                <Icon icon="mdi:arrow-right" className="text-lg" />
-              </Link>
-            </div>
+            <Link
+              to="/product/extensions/"
+              className="inline-flex items-center gap-2 text-stone-600 hover:text-stone-800 font-medium"
+            >
+              Learn more about extensions
+              <Icon icon="mdi:arrow-right" className="text-lg" />
+            </Link>
+          </div>
         </div>
 
         <div className="">
@@ -934,7 +934,6 @@ function ExtensionsSection() {
                 </p>
               </div>
             </div>
-
           </div>
         </div>
       </div>
@@ -952,7 +951,7 @@ function TemplatesSection() {
   return (
     <section className="pt-16 pb-16 px-6 lg:px-8">
       <div className="text-center max-w-3xl mx-auto mb-12">
-      <h2 className="md:text-4xl text-2xl text-stone-600 tracking-wide font-serif text-center pb-8">
+        <h2 className="md:text-4xl text-2xl text-stone-600 tracking-wide font-serif text-center pb-8">
           Generate custom templates
         </h2>
         <p className="text-neutral-600 leading-relaxed">
@@ -979,127 +978,336 @@ function TemplatesSection() {
   );
 }
 
-function GrowsWithYouSection() {
+function HowItWorksSection() {
+  const [typedText1, setTypedText1] = useState("");
+  const [typedText2, setTypedText2] = useState("");
+  const [enhancedLines, setEnhancedLines] = useState(0);
+  const [activeTab, setActiveTab] = useState<
+    "notes" | "summary" | "transcription"
+  >("notes");
+
+  const text1 = "metrisc w/ john";
+  const text2 = "stakehlder mtg";
+
+  useEffect(() => {
+    const runAnimation = () => {
+      setTypedText1("");
+      setTypedText2("");
+      setEnhancedLines(0);
+      setActiveTab("notes");
+
+      let currentIndex1 = 0;
+      setTimeout(() => {
+        const interval1 = setInterval(() => {
+          if (currentIndex1 < text1.length) {
+            setTypedText1(text1.slice(0, currentIndex1 + 1));
+            currentIndex1++;
+          } else {
+            clearInterval(interval1);
+
+            let currentIndex2 = 0;
+            const interval2 = setInterval(() => {
+              if (currentIndex2 < text2.length) {
+                setTypedText2(text2.slice(0, currentIndex2 + 1));
+                currentIndex2++;
+              } else {
+                clearInterval(interval2);
+
+                setTimeout(() => {
+                  setActiveTab("summary");
+
+                  setTimeout(() => {
+                    setEnhancedLines(1);
+                    setTimeout(() => {
+                      setEnhancedLines(2);
+                      setTimeout(() => {
+                        setEnhancedLines(3);
+                        setTimeout(() => {
+                          setEnhancedLines(4);
+                          setTimeout(() => {
+                            setEnhancedLines(5);
+                            setTimeout(() => {
+                              setEnhancedLines(6);
+                              setTimeout(() => {
+                                setEnhancedLines(7);
+                                setTimeout(() => runAnimation(), 2000);
+                              }, 800);
+                            }, 800);
+                          }, 800);
+                        }, 800);
+                      }, 800);
+                    }, 800);
+                  }, 300);
+                }, 800);
+              }
+            }, 50);
+          }
+        }, 50);
+      }, 500);
+    };
+
+    runAnimation();
+  }, []);
+
   return (
     <section>
       <div className="flex flex-col items-center gap-4 pt-16 pb-8 text-center px-4">
-        <h2 className="md:text-4xl text-2xl text-stone-600 tracking-wide font-serif pb-4">
-          Char grows with you
+        <h2 className="md:text-4xl text-2xl text-neutral-700 tracking-wide font-serif">
+          How Char works
         </h2>
         <p className="text-md text-neutral-500 mx-auto max-w-xl pb-4">
-          Add people from meetings in contacts, grow knowledge about your chats
-          and context of previous meetings
+          We believe that file is more important than software. All saves
+          locally, in plain markdown
+          <span className="text-neutral-400">.md</span>
         </p>
-        <Link
-          to="/product/mini-apps/"
-          className="text-md underline text-neutral-600 hover:text-neutral-800 flex items-center gap-1"
+      </div>
+      <div className="flex justify-center pt-8 sm:pt-16 px-4 sm:px-8 overflow-hidden">
+        <MockWindow
+          showAudioIndicator={activeTab === "notes"}
+          audioIndicatorColor="#ef4444"
+          headerClassName={activeTab === "notes" ? "bg-red-100" : undefined}
         >
-          Explore all features
-          <Icon icon="mdi:arrow-top-right" className="text-sm" />
-        </Link>
+          <div className="flex border-b border-neutral-200 text-sm">
+            {(["notes", "summary", "transcription"] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={cn([
+                  "px-4 py-2 transition-colors",
+                  activeTab === tab
+                    ? "text-neutral-900 border-b-2 border-neutral-900"
+                    : "text-neutral-400 hover:text-neutral-600",
+                ])}
+              >
+                {tab === "notes"
+                  ? "Your Notes"
+                  : tab === "summary"
+                    ? "Summary"
+                    : "Transcription"}
+              </button>
+            ))}
+          </div>
+
+          <div className="p-6 h-75 overflow-hidden">
+            {activeTab === "notes" && (
+              <div>
+                <div className="text-neutral-700">ui update - moble</div>
+                <div className="text-neutral-700">api</div>
+                <div className="text-neutral-700 mt-4">new dash - urgnet</div>
+                <div className="text-neutral-700">a/b tst next wk</div>
+                <div className="text-neutral-700 mt-4">
+                  {typedText1}
+                  {typedText1 && typedText1.length < text1.length && (
+                    <span className="animate-pulse">|</span>
+                  )}
+                </div>
+                <div className="text-neutral-700">
+                  {typedText2}
+                  {typedText2 && typedText2.length < text2.length && (
+                    <span className="animate-pulse">|</span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === "summary" && (
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <h4
+                    className={cn([
+                      "text-lg font-semibold text-stone-700 transition-opacity duration-500",
+                      enhancedLines >= 1 ? "opacity-100" : "opacity-0",
+                    ])}
+                  >
+                    Mobile UI Update and API Adjustments
+                  </h4>
+                  <ul className="flex flex-col gap-2 text-neutral-700 list-disc pl-5">
+                    <li
+                      className={cn([
+                        "transition-opacity duration-500",
+                        enhancedLines >= 2 ? "opacity-100" : "opacity-0",
+                      ])}
+                    >
+                      Sarah presented the new mobile UI update, which includes a
+                      streamlined navigation bar and improved button placements
+                      for better accessibility.
+                    </li>
+                    <li
+                      className={cn([
+                        "transition-opacity duration-500",
+                        enhancedLines >= 3 ? "opacity-100" : "opacity-0",
+                      ])}
+                    >
+                      Ben confirmed that API adjustments are needed to support
+                      dynamic UI changes, particularly for fetching personalized
+                      user data more efficiently.
+                    </li>
+                    <li
+                      className={cn([
+                        "transition-opacity duration-500",
+                        enhancedLines >= 4 ? "opacity-100" : "opacity-0",
+                      ])}
+                    >
+                      The UI update will be implemented in phases, starting with
+                      core navigation improvements. Ben will ensure API
+                      modifications are completed before development begins.
+                    </li>
+                  </ul>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <h4
+                    className={cn([
+                      "font-semibold text-stone-700 transition-opacity duration-500",
+                      enhancedLines >= 5 ? "opacity-100" : "opacity-0",
+                    ])}
+                  >
+                    New Dashboard – Urgent Priority
+                  </h4>
+                  <ul className="flex flex-col gap-2 text-sm text-neutral-700 list-disc pl-5">
+                    <li
+                      className={cn([
+                        "transition-opacity duration-500",
+                        enhancedLines >= 6 ? "opacity-100" : "opacity-0",
+                      ])}
+                    >
+                      Alice emphasized that the new analytics dashboard must be
+                      prioritized due to increasing stakeholder demand.
+                    </li>
+                    <li
+                      className={cn([
+                        "transition-opacity duration-500",
+                        enhancedLines >= 7 ? "opacity-100" : "opacity-0",
+                      ])}
+                    >
+                      The new dashboard will feature real-time user engagement
+                      metrics and a customizable reporting system.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "transcription" && (
+              <div className="flex flex-col gap-3 text-sm">
+                <div className="text-neutral-700">
+                  <span className="font-medium text-neutral-900">Sarah:</span>{" "}
+                  So the mobile UI update is looking good. We've streamlined the
+                  nav bar and improved button placements.
+                </div>
+                <div className="text-neutral-700">
+                  <span className="font-medium text-neutral-900">Ben:</span>{" "}
+                  I'll need to adjust the API to support dynamic UI changes,
+                  especially for personalized user data.
+                </div>
+                <div className="text-neutral-700">
+                  <span className="font-medium text-neutral-900">Alice:</span>{" "}
+                  The new dashboard is urgent. Stakeholders have been asking
+                  about it every day.
+                </div>
+                <div className="text-neutral-700">
+                  <span className="font-medium text-neutral-900">Mark:</span> We
+                  should align the dashboard launch with our marketing push next
+                  quarter.
+                </div>
+              </div>
+            )}
+          </div>
+        </MockWindow>
       </div>
 
-      <div className="grid md:grid-cols-2 border-t border-neutral-200">
-        <div className="flex flex-col border-b md:border-b-0 md:border-r border-neutral-200">
-          <div className="p-8">
-            <h3 className="text-2xl font-serif text-stone-600 mb-3">
-              Your contacts in one place
-            </h3>
-            <p className="text-md text-neutral-600 leading-relaxed mb-4">
-              Import contacts and watch them come alive with context once you
-              actually meet.
-            </p>
-            <ul className="flex flex-col gap-3">
-              <li className="flex items-start gap-3">
-                <CheckIcon className="text-green-600 shrink-0 mt-0.5 size-5" />
-                <span className="text-md text-neutral-600">
-                  All your chats linked
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckIcon className="text-green-600 shrink-0 mt-0.5 size-5" />
-                <span className="text-md text-neutral-600">
-                  Generated summary from meetings
-                </span>
-              </li>
-            </ul>
+      <div className="flex flex-col md:flex-row md:h-80 border-t border-neutral-200 divide-y md:divide-x divide-neutral-200 md:*:w-1/3 *:w-full *:px-8 *:lg:pt-16 *:pt-8 *:pb-8">
+        <div className="flex flex-col justify-between">
+          <div className="flex h-20 items-center justify-left gap-6">
+            <Icon icon="mdi:wifi-off" className="text-2xl text-stone-600" />
+            <div className="flex item-center py-2 px-2 bg-red-100 rounded-md border border-red-300">
+              <DancingSticks
+                amplitude={1}
+                height={24}
+                width={120}
+                color="#ef4444"
+              />
+            </div>
           </div>
-          <div className="overflow-hidden mt-auto bg-gradient-to-b from-white to-stone-100">
-            <img
-              src="/contact_human.webp"
-              alt="Contacts interface"
-              className="w-full h-auto object-contain"
-            />
+          <div className="flex flex-col gap-2 md:gap-4">
+            <h4 className="text-lg font-serif text-stone-700">
+              Use local models or use Your Own key
+            </h4>
+            <p className="text-md text-neutral-500">
+              Char works with various transcription models right on your device,
+              even without internet.
+            </p>
           </div>
         </div>
 
-        <div className="flex flex-col">
-          <div className="p-8">
-            <h3 className="text-2xl font-serif text-stone-600 mb-3">
-              Calendar
-            </h3>
-            <p className="text-md text-neutral-600 leading-relaxed mb-4">
-              Connect your calendar for intelligent meeting preparation and
-              automatic note organization.
-            </p>
-            <ul className="flex flex-col gap-3">
-              <li className="flex items-start gap-3">
-                <CheckIcon className="text-green-600 shrink-0 mt-0.5 size-5" />
-                <span className="text-md text-neutral-600">
-                  Automatic meeting linking
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckIcon className="text-green-600 shrink-0 mt-0.5 size-5" />
-                <span className="text-md text-neutral-600">
-                  Pre-meeting context and preparation
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckIcon className="text-green-600 shrink-0 mt-0.5 size-5" />
-                <span className="text-md text-neutral-600">
-                  Timeline view with notes
-                </span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="flex items-center justify-center px-8 py-8 overflow-hidden mt-auto bg-gradient-to-b from-white to-stone-100">
-            <div className="max-w-lg w-full bg-white border-2 border-stone-200 rounded-lg p-6 shadow-lg">
-              <div className="flex items-start gap-4 mb-4">
+        <div className="group flex flex-col gap-8 sm:gap-4 justify-between">
+          <div className="flex md:min-h-20 items-center justify-left gap-6">
+            <div className="relative flex w-full lg:h-full h-16 items-center justify-center py-2 px-2 rounded-md border-2 border-dashed border-green-300">
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-gray-100">
                 <Icon
-                  icon="mdi:calendar"
-                  className="text-2xl text-stone-700 shrink-0 mt-1"
+                  icon="mdi:file-upload"
+                  className="text-2xl text-stone-600"
                 />
-                <div className="flex-1">
-                  <h4 className="text-lg font-serif text-stone-600 mb-1">
-                    Weekly Team Sync
-                  </h4>
-                  <p className="text-sm text-neutral-600">
-                    Today at 10:00 AM · 30 minutes
-                  </p>
-                </div>
-                <button className="px-3 py-1 text-xs bg-stone-600 text-white rounded-full">
-                  Start Recording
-                </button>
               </div>
-              <div className="flex flex-col gap-3">
-                <div>
-                  <h5 className="text-sm font-medium text-stone-600 mb-2">
-                    Last meeting context
-                  </h5>
-                  <div className="p-3 bg-stone-50 border border-stone-300 rounded text-xs">
-                    <div className="font-medium text-stone-900 mb-1">
-                      Jan 8, 2025 - Weekly Team Sync
-                    </div>
-                    <p className="text-stone-800">
-                      Discussed Q1 roadmap, decided to prioritize mobile app.
-                      Sarah to review designs by Jan 15.
-                    </p>
-                  </div>
+
+              <div className="absolute lg:bottom-1/4 lg:right-1/4 lg:translate-x-[5%] lg:-translate-y-[5%] rotate-8 group-hover:translate-x-[10%] group-hover:translate-y-[10%] group-hover:-translate-y-[50%] group-hover:rotate-6 transition-all duration-500 ease-out flex flex-row items-center gap-2 pl-2 pr-4 py-2 rounded-md bg-gray-100 border border-gray-300 shadow-lg text-nowrap">
+                <img
+                  src="/icons/grabbed-cursor.svg"
+                  className="absolute top-1/2 left-1/2 w-8 h-8"
+                  alt=""
+                />
+                <Icon
+                  icon="mdi:file-outline"
+                  className="text-2xl text-stone-600"
+                />
+                <div className="flex flex-col">
+                  <p className="text-md text-neutral-600">
+                    Meeting.12.03.26-11.32.wav
+                  </p>
+                  <p className="text-sm text-neutral-300">14:30:25</p>
                 </div>
               </div>
             </div>
+          </div>
+          <div className="flex flex-col gap-2 md:gap-4">
+            <h4 className="text-lg font-serif text-stone-700">
+              Upload records or existing transcripts
+            </h4>
+            <p className="text-md text-neutral-500">
+              Drag and drop audio files or paste existing transcripts to
+              generate summaries instantly.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col justify-between gap-8 sm:gap-4">
+          <div className="flex items-center">
+            <div className="flex items-center justify-between gap-2 md:gap-3 rounded-xl bg-gradient-to-t from-white to-stone-100 border border-neutral-200 shadow-lg px-4 py-3 text-nowrap w-full">
+              <div className="flex items-center gap-2 md:gap-3">
+                <Icon
+                  icon="mdi:video"
+                  className="text-xl text-stone-500 shrink-0"
+                />
+                <div className="flex flex-col gap-0.5">
+                  <p className="text-xs text-neutral-400">1-1 with Joanna</p>
+                  <p className="text-sm font-medium text-neutral-500">
+                    AI Notetaker joined the call.
+                  </p>
+                </div>
+              </div>
+              <button className="ml-2 shrink-0 text-neutral-300 hover:text-neutral-500 transition-colors">
+                <Icon icon="mdi:close" className="text-base" />
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2 md:gap-4">
+            <h4 className="text-lg font-serif text-stone-700">
+              No bot on calls
+            </h4>
+            <p className="text-md text-neutral-500">
+              Char connects right to your system audio and captures every word
+              perfectly, no faceless bots join your meetings.
+            </p>
           </div>
         </div>
       </div>
