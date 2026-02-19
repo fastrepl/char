@@ -219,6 +219,14 @@ function extractTitle(html: string): string | null {
   return null;
 }
 
+function removeGoogleDocsComments(html: string): string {
+  html = html.replace(/<a[^>]+href="#cmnt_ref\d+"[^>]*>\[\w+\]<\/a>/gi, "");
+  html = html.replace(/<sup><a[^>]+href="#cmnt\d+"[^>]*>\[\w+\]<\/a><\/sup>/gi, "");
+  html = html.replace(/<a[^>]+href="#cmnt\d+"[^>]*>\[\w+\]<\/a>/gi, "");
+  html = html.replace(/<div[^>]*>\s*<p[^>]*><a[^>]+href="#cmnt_ref\d+"[^>]*>[\s\S]*?<\/div>/gi, "");
+  return html;
+}
+
 function removeTabTitleFromContent(html: string): string {
   const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
   if (!bodyMatch) {
@@ -310,6 +318,7 @@ export const Route = createFileRoute("/api/admin/import/google-docs")({
           const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
           let bodyContent = bodyMatch ? bodyMatch[1] : html;
           bodyContent = bodyContent.replace(/&nbsp;/g, " ");
+          bodyContent = removeGoogleDocsComments(bodyContent);
 
           const rawJson: JSONContent = generateJSON(bodyContent, [
             ...shared.getExtensions(),
