@@ -141,9 +141,7 @@ function clean(node: JSONContent): void {
       );
       promoteTableHeader(node);
     } else if (node.type === "doc") {
-      node.content = node.content.filter(
-        (child) => !isEmptyNode(child),
-      );
+      node.content = node.content.filter((child) => !isEmptyNode(child));
     } else {
       node.content = node.content.filter(
         (child) => !(child.type === "paragraph" && isEmptyNode(child)),
@@ -203,10 +201,7 @@ function cleanGoogleRedirectUrls(node: JSONContent): void {
 function resolveGoogleRedirect(url: string): string {
   try {
     const parsed = new URL(url);
-    if (
-      parsed.hostname === "www.google.com" &&
-      parsed.pathname === "/url"
-    ) {
+    if (parsed.hostname === "www.google.com" && parsed.pathname === "/url") {
       const target = parsed.searchParams.get("q");
       if (target) return target;
     }
