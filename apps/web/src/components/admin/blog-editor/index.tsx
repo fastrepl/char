@@ -63,12 +63,14 @@ export function useBlogEditor({
       ).map((ext) =>
         ext.name === "underline"
           ? ext.extend({
-                      renderMarkdown(
-                    _node: Record<string, unknown>,
-                    helpers: { renderChildren: (node: Record<string, unknown>) => string },
-                  ) {
-                    return helpers.renderChildren(_node);
-                  },
+              renderMarkdown(
+                _node: Record<string, unknown>,
+                helpers: {
+                  renderChildren: (node: Record<string, unknown>) => string;
+                },
+              ) {
+                return helpers.renderChildren(_node);
+              },
             })
           : ext,
       ),
