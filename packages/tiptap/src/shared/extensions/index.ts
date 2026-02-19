@@ -109,9 +109,7 @@ export const getExtensions = (
 
             newState.doc.descendants((node, pos) => {
               if (node.isText && node.marks.length > 0) {
-                const hasLink = node.marks.some(
-                  (m) => m.type.name === "link",
-                );
+                const hasLink = node.marks.some((m) => m.type.name === "link");
                 const hasUnderline = node.marks.some(
                   (m) => m.type.name === "underline",
                 );
