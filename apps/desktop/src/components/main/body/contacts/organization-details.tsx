@@ -5,8 +5,10 @@ import { Building2, Mail } from "lucide-react";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 import { Button } from "@hypr/ui/components/ui/button";
 import { Input } from "@hypr/ui/components/ui/input";
+import { cn } from "@hypr/utils";
 
 import * as main from "../../../../store/tinybase/store/main";
+import { getContactBgClass } from "./shared";
 
 export function OrganizationDetailsColumn({
   selectedOrganizationId,
@@ -76,7 +78,14 @@ export function OrganizationDetailsColumn({
                           onClick={() => onPersonClick?.(humanId)}
                         >
                           <div className="flex flex-col items-center text-center gap-3">
-                            <div className="rounded-full bg-amber-50">
+                            <div
+                              className={cn([
+                                "shrink-0 rounded-full",
+                                getContactBgClass(
+                                  String(human.name || human.email || humanId),
+                                ),
+                              ])}
+                            >
                               <Facehash
                                 name={String(
                                   human.name || human.email || humanId,
@@ -84,6 +93,13 @@ export function OrganizationDetailsColumn({
                                 size={48}
                                 interactive={false}
                                 showInitial={false}
+                                colorClasses={[
+                                  getContactBgClass(
+                                    String(
+                                      human.name || human.email || humanId,
+                                    ),
+                                  ),
+                                ]}
                               />
                             </div>
                             <div className="w-full">
