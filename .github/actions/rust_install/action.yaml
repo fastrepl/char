@@ -48,6 +48,16 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ github.token }}
+    - if: inputs.platform == 'linux'
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ steps.toolchain.outputs.channel }}
+        components: ${{ steps.toolchain.outputs.components }}
+    - if: inputs.platform == 'linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libasound2-dev
+      shell: bash
     - if: inputs.platform == 'linux-x86_64'
       uses: dtolnay/rust-toolchain@master
       with:
