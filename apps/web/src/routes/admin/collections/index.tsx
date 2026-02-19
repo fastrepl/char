@@ -1,7 +1,6 @@
 import { MDXContent } from "@content-collections/mdx/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import type { JSONContent } from "@tiptap/react";
 import { allArticles } from "content-collections";
 import {
   AlertTriangleIcon,
@@ -2721,45 +2720,8 @@ const FileEditor = React.forwardRef<
   const [autoSaveCountdown, setAutoSaveCountdown] = useState<number | null>(
     null,
   );
-  const lastSavedContentRef = useRef(fileContent?.content || "");
-  const lastSavedMetadataRef = useRef<ArticleMetadata>({
-    meta_title: fileContent?.meta_title || "",
-    display_title: fileContent?.display_title || "",
-    meta_description: fileContent?.meta_description || "",
-    author: fileContent?.author || [],
-    date: fileContent?.date || "",
-    coverImage: fileContent?.coverImage || "",
-    featured: fileContent?.featured || false,
-    category: fileContent?.category || "",
-  });
   const autoSaveIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const onSaveRef = useRef(onSave);
-  const contentRef = useRef(content);
-  const metadataRef = useRef<ArticleMetadata>(lastSavedMetadataRef.current);
-
-  const hasMetadataChanged = useCallback((currentMetadata: ArticleMetadata) => {
-    const saved = lastSavedMetadataRef.current;
-    return (
-      currentMetadata.meta_title !== saved.meta_title ||
-      currentMetadata.display_title !== saved.display_title ||
-      currentMetadata.meta_description !== saved.meta_description ||
-      JSON.stringify(currentMetadata.author) !== JSON.stringify(saved.author) ||
-      currentMetadata.date !== saved.date ||
-      currentMetadata.coverImage !== saved.coverImage ||
-      currentMetadata.featured !== saved.featured ||
-      currentMetadata.category !== saved.category
-    );
-  }, []);
-
-  const handleContentChange = useCallback(
-    (newContent: string) => {
-      setContent(newContent);
-      const contentChanged = newContent !== lastSavedContentRef.current;
-      const metadataChanged = hasMetadataChanged(metadataRef.current);
-      setHasUnsavedChanges(contentChanged || metadataChanged);
-    },
-    [hasMetadataChanged],
-  );
 
   const handleImageUpload = useCallback(
     async (file: File): Promise<{ url: string; attachmentId: string }> => {
@@ -2798,7 +2760,10 @@ const FileEditor = React.forwardRef<
 
   const editor = useBlogEditor({
     content: fileContent?.content || "",
-    onUpdate: handleContentChange,
+    onUpdate: (markdown) => {
+      setContent(markdown);
+      setHasUnsavedChanges(true);
+    },
     onImageUpload: handleImageUpload,
   });
 
@@ -2840,6 +2805,7 @@ const FileEditor = React.forwardRef<
         if (data.frontmatter.coverImage)
           setCoverImage(data.frontmatter.coverImage);
       }
+      setHasUnsavedChanges(true);
     },
   });
 
@@ -2909,20 +2875,12 @@ const FileEditor = React.forwardRef<
     setCoverImage(fileContent?.coverImage || "");
     setFeatured(fileContent?.featured || false);
     setCategory(fileContent?.category || "");
-    lastSavedContentRef.current = newContent;
-    lastSavedMetadataRef.current = {
-      meta_title: fileContent?.meta_title || "",
-      display_title: fileContent?.display_title || "",
-      meta_description: fileContent?.meta_description || "",
-      author: fileContent?.author || [],
-      date: fileContent?.date || "",
-      coverImage: fileContent?.coverImage || "",
-      featured: fileContent?.featured || false,
-      category: fileContent?.category || "",
-    };
     setHasUnsavedChanges(false);
     if (editor) {
-      editor.commands.setContent(newContent, { contentType: "markdown" });
+      editor.commands.setContent(newContent, {
+        contentType: "markdown",
+        emitUpdate: false,
+      });
     }
   }, [filePath, fileContent, pendingPRData?.hasPendingPR, editor]);
 
@@ -2950,32 +2908,8 @@ const FileEditor = React.forwardRef<
   ]);
 
   useEffect(() => {
-    const currentMetadata = getMetadata();
-    metadataRef.current = currentMetadata;
-    const metadataChanged = hasMetadataChanged(currentMetadata);
-    const contentChanged = content !== lastSavedContentRef.current;
-    setHasUnsavedChanges(metadataChanged || contentChanged);
-  }, [
-    metaTitle,
-    displayTitle,
-    metaDescription,
-    author,
-    date,
-    coverImage,
-    featured,
-    category,
-    getMetadata,
-    hasMetadataChanged,
-    content,
-  ]);
-
-  useEffect(() => {
     onSaveRef.current = onSave;
   }, [onSave]);
-
-  useEffect(() => {
-    contentRef.current = content;
-  }, [content]);
 
   useEffect(() => {
     if (!hasUnsavedChanges) {
@@ -2993,8 +2927,6 @@ const FileEditor = React.forwardRef<
       setAutoSaveCountdown((prev) => {
         if (prev === null || prev <= 1) {
           onSaveRef.current({ isAutoSave: true });
-          lastSavedContentRef.current = contentRef.current;
-          lastSavedMetadataRef.current = { ...metadataRef.current };
           setHasUnsavedChanges(false);
           return null;
         }
@@ -3015,8 +2947,6 @@ const FileEditor = React.forwardRef<
       if ((e.metaKey || e.ctrlKey) && e.key === "s") {
         e.preventDefault();
         onSaveRef.current();
-        lastSavedContentRef.current = contentRef.current;
-        lastSavedMetadataRef.current = { ...metadataRef.current };
         setHasUnsavedChanges(false);
         setAutoSaveCountdown(null);
         if (autoSaveIntervalRef.current) {
@@ -3091,23 +3021,29 @@ const FileEditor = React.forwardRef<
 
   const selectedAuthors = AUTHORS.filter((a) => author.includes(a.name));
 
+  const dirty = <T,>(setter: React.Dispatch<React.SetStateAction<T>>) =>
+    ((value: React.SetStateAction<T>) => {
+      setter(value);
+      setHasUnsavedChanges(true);
+    }) as React.Dispatch<React.SetStateAction<T>>;
+
   const metadataHandlers: MetadataHandlers = {
     metaTitle,
-    onMetaTitleChange: setMetaTitle,
+    onMetaTitleChange: dirty(setMetaTitle),
     displayTitle,
-    onDisplayTitleChange: setDisplayTitle,
+    onDisplayTitleChange: dirty(setDisplayTitle),
     metaDescription,
-    onMetaDescriptionChange: setMetaDescription,
+    onMetaDescriptionChange: dirty(setMetaDescription),
     author,
-    onAuthorChange: setAuthor,
+    onAuthorChange: dirty(setAuthor),
     date,
-    onDateChange: setDate,
+    onDateChange: dirty(setDate),
     coverImage,
-    onCoverImageChange: setCoverImage,
+    onCoverImageChange: dirty(setCoverImage),
     featured,
-    onFeaturedChange: setFeatured,
+    onFeaturedChange: dirty(setFeatured),
     category,
-    onCategoryChange: setCategory,
+    onCategoryChange: dirty(setCategory),
   };
 
   const renderPreview = () => (
