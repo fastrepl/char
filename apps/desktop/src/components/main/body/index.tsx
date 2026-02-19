@@ -189,10 +189,7 @@ function Header({ tabs }: { tabs: Tab[] }) {
                 <PanelLeftOpenIcon size={16} className="text-neutral-600" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent
-              side="bottom"
-              className="flex items-center gap-2 bg-white/80 backdrop-blur-sm text-neutral-700 border border-neutral-200/50 shadow-lg"
-            >
+            <TooltipContent side="bottom" className="flex items-center gap-2">
               <span>Toggle sidebar</span>
               <Kbd className="animate-kbd-press">⌘ \</Kbd>
             </TooltipContent>
@@ -979,7 +976,7 @@ function useTabsShortcuts() {
     () =>
       openNew({
         type: "contacts",
-        state: { selectedOrganization: null, selectedPerson: null },
+        state: { selected: null },
       }),
     {
       preventDefault: true,

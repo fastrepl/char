@@ -70,12 +70,13 @@ windowDestroyed: "plugin:windows:window-destroyed"
 /** user-defined types **/
 
 export type AiState = { tab: AiTab | null }
-export type AiTab = "transcription" | "intelligence" | "templates" | "shortcuts" | "prompts"
+export type AiTab = "transcription" | "intelligence" | "templates" | "shortcuts" | "prompts" | "memory"
 export type AppWindow = { type: "main" } | { type: "control" }
 export type ChangelogState = { previous: string | null; current: string }
 export type ChatShortcutsState = { isWebMode: boolean | null; selectedMineId: string | null; selectedWebIndex: number | null }
 export type ChatState = { groupId: string | null; initialMessage: string | null }
-export type ContactsState = { selectedOrganization: string | null; selectedPerson: string | null }
+export type ContactsSelection = { type: "person"; id: string } | { type: "organization"; id: string }
+export type ContactsState = { selected: ContactsSelection | null }
 export type EditorView = { type: "raw" } | { type: "transcript" } | { type: "enhanced"; id: string } | { type: "attachments" }
 export type ExtensionsState = { selectedExtension: string | null }
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>

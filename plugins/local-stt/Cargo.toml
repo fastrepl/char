@@ -10,9 +10,9 @@ description = ""
 [features]
 default = []
 whisper-cpp = ["dep:hypr-transcribe-whisper-local", "dep:hypr-whisper-local"]
-coreml = ["whisper-cpp", "hypr-transcribe-whisper-local/coreml", "hypr-transcribe-moonshine/coreml"]
-directml = ["whisper-cpp", "hypr-transcribe-whisper-local/directml", "hypr-transcribe-moonshine/directml"]
-cuda = ["whisper-cpp", "hypr-transcribe-whisper-local/cuda", "hypr-transcribe-moonshine/cuda"]
+coreml = ["whisper-cpp", "hypr-transcribe-whisper-local/coreml"]
+directml = ["whisper-cpp", "hypr-transcribe-whisper-local/directml"]
+cuda = ["whisper-cpp", "hypr-transcribe-whisper-local/cuda"]
 hipblas = ["whisper-cpp", "hypr-transcribe-whisper-local/hipblas"]
 openblas = ["whisper-cpp", "hypr-transcribe-whisper-local/openblas"]
 metal = ["whisper-cpp", "hypr-transcribe-whisper-local/metal"]
@@ -43,8 +43,6 @@ hypr-download-interface = { workspace = true }
 hypr-file = { workspace = true }
 hypr-host = { workspace = true }
 hypr-language = { workspace = true, features = ["whisper"] }
-hypr-transcribe-moonshine = { workspace = true }
-
 hypr-transcribe-whisper-local = { workspace = true, optional = true }
 hypr-whisper-local = { workspace = true, optional = true }
 hypr-whisper-local-model = { workspace = true }
@@ -84,3 +82,6 @@ ractor = { workspace = true, features = ["async-trait"] }
 
 port-killer = "0.1.0"
 port_check = "0.3.0"
+
+[target.'cfg(target_arch = "aarch64")'.dependencies]
+hypr-transcribe-cactus = { workspace = true }

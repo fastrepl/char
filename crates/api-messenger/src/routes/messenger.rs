@@ -22,6 +22,7 @@ pub struct SlackSendRequest {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct TeamsSendRequest {
     pub team_id: String,
     pub channel_id: String,

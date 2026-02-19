@@ -87,6 +87,26 @@ jobs:
           platform: debian-x86_64
           output: hyprnote-linux-x86_64.deb
           key: ${{ secrets.CN_API_KEY }}
+      - id: download-linux-appimage-aarch64
+        continue-on-error: true
+        uses: ./.github/actions/cn_download
+        with:
+          app: ${{ env.CN_APPLICATION }}
+          version: ${{ needs.parse.outputs.version }}
+          channel: ${{ needs.parse.outputs.channel }}
+          platform: appimage-aarch64
+          output: hyprnote-linux-aarch64.AppImage
+          key: ${{ secrets.CN_API_KEY }}
+      - id: download-linux-deb-aarch64
+        continue-on-error: true
+        uses: ./.github/actions/cn_download
+        with:
+          app: ${{ env.CN_APPLICATION }}
+          version: ${{ needs.parse.outputs.version }}
+          channel: ${{ needs.parse.outputs.channel }}
+          platform: debian-aarch64
+          output: hyprnote-linux-aarch64.deb
+          key: ${{ secrets.CN_API_KEY }}
       - id: check-downloads
         run: |
           MACOS_OK="false"
@@ -94,7 +114,7 @@ jobs:
           if [[ "${{ steps.download-macos-aarch64.outputs.success }}" == "true" && "${{ steps.download-macos-x86_64.outputs.success }}" == "true" ]]; then
             MACOS_OK="true"
           fi
-          if [[ "${{ steps.download-linux-appimage.outputs.success }}" == "true" && "${{ steps.download-linux-deb.outputs.success }}" == "true" ]]; then
+          if [[ "${{ steps.download-linux-appimage.outputs.success }}" == "true" && "${{ steps.download-linux-deb.outputs.success }}" == "true" && "${{ steps.download-linux-appimage-aarch64.outputs.success }}" == "true" && "${{ steps.download-linux-deb-aarch64.outputs.success }}" == "true" ]]; then
             LINUX_OK="true"
           fi
           if [[ "$MACOS_OK" == "false" && "$LINUX_OK" == "false" ]]; then
@@ -111,6 +131,8 @@ jobs:
             ${{ steps.check-downloads.outputs.macos == 'true' && 'hyprnote-macos-x86_64.dmg' || '' }}
             ${{ steps.check-downloads.outputs.linux == 'true' && 'hyprnote-linux-x86_64.AppImage' || '' }}
             ${{ steps.check-downloads.outputs.linux == 'true' && 'hyprnote-linux-x86_64.deb' || '' }}
+            ${{ steps.check-downloads.outputs.linux == 'true' && 'hyprnote-linux-aarch64.AppImage' || '' }}
+            ${{ steps.check-downloads.outputs.linux == 'true' && 'hyprnote-linux-aarch64.deb' || '' }}
       - id: artifacts
         run: |
           ARTIFACTS=""
@@ -119,9 +141,9 @@ jobs:
           fi
           if [[ "${{ steps.check-downloads.outputs.linux }}" == "true" ]]; then
             if [[ -n "$ARTIFACTS" ]]; then
-              ARTIFACTS="$ARTIFACTS,hyprnote-linux-x86_64.AppImage,hyprnote-linux-x86_64.deb"
+              ARTIFACTS="$ARTIFACTS,hyprnote-linux-x86_64.AppImage,hyprnote-linux-x86_64.deb,hyprnote-linux-aarch64.AppImage,hyprnote-linux-aarch64.deb"
             else
-              ARTIFACTS="hyprnote-linux-x86_64.AppImage,hyprnote-linux-x86_64.deb"
+              ARTIFACTS="hyprnote-linux-x86_64.AppImage,hyprnote-linux-x86_64.deb,hyprnote-linux-aarch64.AppImage,hyprnote-linux-aarch64.deb"
             fi
           fi
           if [[ -z "$ARTIFACTS" ]]; then

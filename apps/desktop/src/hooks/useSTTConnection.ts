@@ -14,6 +14,8 @@ import { ProviderId } from "../components/settings/ai/stt/shared";
 import { env } from "../env";
 import * as settings from "../store/tinybase/store/settings";
 
+let cactusStarting = false;
+
 export const useSTTConnection = () => {
   const auth = useAuth();
   const billing = useBillingAccess();
@@ -34,7 +36,8 @@ export const useSTTConnection = () => {
     current_stt_provider === "hyprnote" &&
     !!current_stt_model &&
     (current_stt_model.startsWith("am-") ||
-      current_stt_model.startsWith("Quantized"));
+      current_stt_model.startsWith("Quantized") ||
+      current_stt_model === "cactus");
 
   const isCloudModel =
     current_stt_provider === "hyprnote" && current_stt_model === "cloud";
@@ -48,11 +51,15 @@ export const useSTTConnection = () => {
         return null;
       }
 
-      const downloaded = await localSttCommands.isModelDownloaded(
-        current_stt_model as SupportedSttModel,
-      );
-      if (downloaded.status !== "ok" || !downloaded.data) {
-        return { status: "not_downloaded" as const, connection: null };
+      const isCactus = current_stt_model === "cactus";
+
+      if (!isCactus) {
+        const downloaded = await localSttCommands.isModelDownloaded(
+          current_stt_model as SupportedSttModel,
+        );
+        if (downloaded.status !== "ok" || !downloaded.data) {
+          return { status: "not_downloaded" as const, connection: null };
+        }
       }
 
       const servers = await localSttCommands.getServers();
@@ -61,10 +68,23 @@ export const useSTTConnection = () => {
         return null;
       }
 
-      const isInternalModel = current_stt_model.startsWith("Quantized");
+      const isInternalModel =
+        current_stt_model.startsWith("Quantized") || isCactus;
       const server = isInternalModel
         ? servers.data.internal
         : servers.data.external;
+
+      if (isCactus && server?.status !== "ready") {
+        if (!cactusStarting) {
+          cactusStarting = true;
+          localSttCommands
+            .startServer("QuantizedSmall" as SupportedSttModel)
+            .finally(() => {
+              cactusStarting = false;
+            });
+        }
+        return { status: "loading" as const, connection: null };
+      }
 
       if (server?.status === "ready" && server.url) {
         return {

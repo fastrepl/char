@@ -112,6 +112,7 @@ export const StoreComponent = () => {
           },
         )
         .setQueryDefinition(QUERIES.visibleHumans, "humans", ({ select }) => {
+          select("created_at");
           select("name");
           select("email");
           select("org_id");
@@ -124,7 +125,10 @@ export const StoreComponent = () => {
           QUERIES.visibleOrganizations,
           "organizations",
           ({ select }) => {
+            select("created_at");
             select("name");
+            select("pinned");
+            select("pin_order");
           },
         )
         .setQueryDefinition(
@@ -197,6 +201,16 @@ export const StoreComponent = () => {
             where("user_id", (param("user_id") as string) ?? "");
           },
           { user_id: "" },
+        )
+        .setQueryDefinition(
+          QUERIES.visibleVocabs,
+          "memories",
+          ({ select, where }) => {
+            select("text");
+            select("type");
+            select("created_at");
+            where("type", "vocab");
+          },
         ),
     [],
   )!;
@@ -350,6 +364,7 @@ export const QUERIES = {
   visibleHumans: "visibleHumans",
   visibleTemplates: "visibleTemplates",
   visibleChatShortcuts: "visibleChatShortcuts",
+  visibleVocabs: "visibleVocabs",
   sessionParticipantsWithDetails: "sessionParticipantsWithDetails",
   sessionRecordingTimes: "sessionRecordingTimes",
   enabledAppleCalendars: "enabledAppleCalendars",
@@ -403,6 +418,7 @@ interface _QueryResultRows {
     folder_id: string;
   };
   visibleHumans: {
+    created_at: string;
     name: string;
     email: string;
     org_id: string;
@@ -412,7 +428,10 @@ interface _QueryResultRows {
     pin_order: number;
   };
   visibleOrganizations: {
+    created_at: string;
     name: string;
+    pinned: boolean;
+    pin_order: number;
   };
   visibleTemplates: {
     title: string;
@@ -447,6 +466,11 @@ interface _QueryResultRows {
     description: string;
     sections: string;
     user_id: string;
+  };
+  visibleVocabs: {
+    text: string;
+    type: string;
+    created_at: string;
   };
 }
 

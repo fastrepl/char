@@ -231,6 +231,8 @@ const changelog = defineCollection({
       "dmg-aarch64": `${baseUrl}/hyprnote-macos-aarch64.dmg`,
       "appimage-x86_64": `${baseUrl}/hyprnote-linux-x86_64.AppImage`,
       "deb-x86_64": `${baseUrl}/hyprnote-linux-x86_64.deb`,
+      "appimage-aarch64": `${baseUrl}/hyprnote-linux-aarch64.AppImage`,
+      "deb-aarch64": `${baseUrl}/hyprnote-linux-aarch64.deb`,
     };
 
     return {

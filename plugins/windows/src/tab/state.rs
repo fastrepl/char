@@ -20,9 +20,18 @@ crate::common_derives! {
 }
 
 crate::common_derives! {
+    #[serde(tag = "type")]
+    pub enum ContactsSelection {
+        #[serde(rename = "person")]
+        Person { id: String },
+        #[serde(rename = "organization")]
+        Organization { id: String },
+    }
+}
+
+crate::common_derives! {
     pub struct ContactsState {
-        pub selected_organization: Option<String>,
-        pub selected_person: Option<String>,
+        pub selected: Option<ContactsSelection>,
     }
 }
 
@@ -76,6 +85,8 @@ crate::common_derives! {
         Shortcuts,
         #[serde(rename = "prompts")]
         Prompts,
+        #[serde(rename = "memory")]
+        Memory,
     }
 }
 
