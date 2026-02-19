@@ -253,6 +253,7 @@ struct InputAudioBufferAppend {
 }
 
 #[derive(Debug, Serialize)]
+#[allow(dead_code)]
 struct InputAudioBufferCommit {
     #[serde(rename = "type")]
     event_type: String,

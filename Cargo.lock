@@ -434,7 +434,7 @@ version = "1.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "40c48f72fd53cd289104fc64099abca73db4166ad86ea0b4341abe65af83dadc"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -445,7 +445,7 @@ checksum = "291e6a250ff86cd4a820112fb8898808a366d8f9f58ce16d1f538353ad55747d"
 dependencies = [
  "anstyle",
  "once_cell_polyfill",
- "windows-sys 0.61.2",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -1612,57 +1612,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "aws-sdk-transcribe"
-version = "1.101.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "395e0b70cbc834ecf9bfc7f124d62d1d234b244939ab34684986c10715f69019"
-dependencies = [
- "aws-credential-types",
- "aws-runtime",
- "aws-smithy-async",
- "aws-smithy-http 0.63.5",
- "aws-smithy-json 0.62.4",
- "aws-smithy-observability",
- "aws-smithy-runtime",
- "aws-smithy-runtime-api",
- "aws-smithy-types",
- "aws-types",
- "bytes",
- "fastrand",
- "http 0.2.12",
- "http 1.4.0",
- "regex-lite",
- "tracing",
-]
-
-[[package]]
-name = "aws-sdk-transcribestreaming"
-version = "1.99.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aaa06c3a4aff6e9c1d31a8c27aab9dfd7d03a00ff123264fd1b3d40790f79d0a"
-dependencies = [
- "aws-credential-types",
- "aws-runtime",
- "aws-sigv4",
- "aws-smithy-async",
- "aws-smithy-eventstream",
- "aws-smithy-http 0.63.5",
- "aws-smithy-json 0.62.4",
- "aws-smithy-observability",
- "aws-smithy-runtime",
- "aws-smithy-runtime-api",
- "aws-smithy-types",
- "aws-types",
- "bytes",
- "fastrand",
- "http 0.2.12",
- "http 1.4.0",
- "http-body-util",
- "regex-lite",
- "tracing",
-]
-
-[[package]]
 name = "aws-sigv4"
 version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1760,7 +1709,6 @@ version = "0.63.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d619373d490ad70966994801bc126846afaa0d1ee920697a031f0cf63f2568e7"
 dependencies = [
- "aws-smithy-eventstream",
  "aws-smithy-runtime-api",
  "aws-smithy-types",
  "bytes",
@@ -2066,27 +2014,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be5eb007b7cacc6c660343e96f650fedf4b5a77512399eb952ca6642cf8d13f7"
 
 [[package]]
-name = "azure-speech"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4fabb161834638ebb98698e15d1eb7957a1266873330bb29dc12ba26e19c945f"
-dependencies = [
- "async-trait",
- "futures-util",
- "os_info",
- "pin-project-lite",
- "serde",
- "serde_json",
- "ssml",
- "tokio",
- "tokio-stream",
- "tokio-websockets",
- "tracing",
- "url",
- "uuid",
-]
-
-[[package]]
 name = "backoff"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2294,26 +2221,6 @@ name = "bindgen"
 version = "0.71.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5f58bf3d7db68cfbac37cfc485a8d711e87e064c3d0fe0435b92f7a407f9d6b3"
-dependencies = [
- "bitflags 2.11.0",
- "cexpr",
- "clang-sys",
- "itertools 0.13.0",
- "log",
- "prettyplease",
- "proc-macro2",
- "quote",
- "regex",
- "rustc-hash 2.1.1",
- "shlex",
- "syn 2.0.116",
-]
-
-[[package]]
-name = "bindgen"
-version = "0.72.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "993776b509cfb49c750f11b8f07a46fa23e0a1386ffc01fb1e7d343efc387895"
 dependencies = [
  "bitflags 2.11.0",
  "cexpr",
@@ -3408,7 +3315,7 @@ version = "3.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "faf9468729b8cbcea668e36183cb69d317348c2e08e994829fb56ebfdfbaac34"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
@@ -4891,7 +4798,7 @@ dependencies = [
  "libc",
  "option-ext",
  "redox_users 0.5.2",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -5452,7 +5359,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -8428,174 +8335,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "google-cloud-auth"
-version = "0.22.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7314c5dcd0feb905728aa809f46d10a58587be2bdd90f3003e09bcef05e919dc"
-dependencies = [
- "async-trait",
- "base64 0.22.1",
- "bon 3.9.0",
- "google-cloud-gax",
- "http 1.4.0",
- "reqwest 0.12.28",
- "rustc_version 0.4.1",
- "rustls 0.23.36",
- "rustls-pemfile",
- "serde",
- "serde_json",
- "thiserror 2.0.18",
- "time",
- "tokio",
-]
-
-[[package]]
-name = "google-cloud-gax"
-version = "0.24.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58148fad34ed71d986c8e3244c1575793445d211bee643740066e3a2388f4319"
-dependencies = [
- "base64 0.22.1",
- "bytes",
- "futures",
- "google-cloud-rpc",
- "google-cloud-wkt",
- "http 1.4.0",
- "pin-project",
- "rand 0.9.2",
- "serde",
- "serde_json",
- "thiserror 2.0.18",
- "tokio",
-]
-
-[[package]]
-name = "google-cloud-gax-internal"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd98433cb4b63ad67dc3dabf605b8d81b60532ab4a0f11454e5e50c4b7de28b6"
-dependencies = [
- "bytes",
- "google-cloud-auth",
- "google-cloud-gax",
- "google-cloud-rpc",
- "http 1.4.0",
- "http-body-util",
- "percent-encoding",
- "reqwest 0.12.28",
- "rustc_version 0.4.1",
- "serde",
- "serde_json",
- "thiserror 2.0.18",
- "tokio",
-]
-
-[[package]]
-name = "google-cloud-location"
-version = "0.4.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d5cd87c00a682e0240814960e3e1997f1ca169fc0287c29c809ab005eab28d63"
-dependencies = [
- "async-trait",
- "bytes",
- "google-cloud-gax",
- "google-cloud-gax-internal",
- "google-cloud-wkt",
- "lazy_static",
- "reqwest 0.12.28",
- "serde",
- "serde_json",
- "serde_with",
- "tracing",
-]
-
-[[package]]
-name = "google-cloud-longrunning"
-version = "0.25.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "950cd494f916958b45e8c86b7778c89fcbdcda51c9ca3f93a0805ffccd2cfbaa"
-dependencies = [
- "async-trait",
- "bytes",
- "google-cloud-gax",
- "google-cloud-gax-internal",
- "google-cloud-rpc",
- "google-cloud-wkt",
- "lazy_static",
- "reqwest 0.12.28",
- "serde",
- "serde_json",
- "serde_with",
- "tracing",
-]
-
-[[package]]
-name = "google-cloud-lro"
-version = "0.3.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9433e5b1307fe9c8ae5c096da1e9ffc06725ced30f473fac8468ded9af2a0db3"
-dependencies = [
- "google-cloud-gax",
- "google-cloud-longrunning",
- "google-cloud-rpc",
- "google-cloud-wkt",
- "serde",
- "tokio",
-]
-
-[[package]]
-name = "google-cloud-rpc"
-version = "0.4.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94b443385571575a4552687a9072c4c8b7778e3f3c03fe95f3caf8df1a5e4ef2"
-dependencies = [
- "bytes",
- "google-cloud-wkt",
- "serde",
- "serde_json",
- "serde_with",
-]
-
-[[package]]
-name = "google-cloud-speech-v2"
-version = "0.4.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aac5d1dc7feac872180096b62f6ad460bb241e64a7fc8dab994627b53d6deb17"
-dependencies = [
- "async-trait",
- "bytes",
- "google-cloud-gax",
- "google-cloud-gax-internal",
- "google-cloud-location",
- "google-cloud-longrunning",
- "google-cloud-lro",
- "google-cloud-rpc",
- "google-cloud-wkt",
- "lazy_static",
- "reqwest 0.12.28",
- "serde",
- "serde_json",
- "serde_with",
- "tracing",
-]
-
-[[package]]
-name = "google-cloud-wkt"
-version = "0.5.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2c101cb6257433b87908b91b9d16df9288c7dd0fb8c700f2c8e53cfc23ca13e"
-dependencies = [
- "base64 0.22.1",
- "bytes",
- "serde",
- "serde_json",
- "serde_with",
- "thiserror 2.0.18",
- "time",
- "url",
-]
-
-[[package]]
 name = "google-drive"
 version = "0.1.0"
 dependencies = [
@@ -10124,7 +9863,7 @@ dependencies = [
  "portable-atomic",
  "portable-atomic-util",
  "serde_core",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -11646,9 +11385,9 @@ dependencies = [
 
 [[package]]
 name = "native-tls"
-version = "0.2.17"
+version = "0.2.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f809093c63eb54651a1e6c19e0224c0c3c12793ef25d3800c625af2efed61d1"
+checksum = "465500e14ea162429d264d44189adc38b199b62b1c21eea9f69e4b73cb03bbf2"
 dependencies = [
  "libc",
  "log",
@@ -11903,7 +11642,7 @@ version = "0.50.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7957b9740744892f114936ab4a57b3f487491bbeafaf8083688b16841a4240e5"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -12853,7 +12592,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7d8fae84b431384b68627d0f9b3b1245fcf9f46f6c0e3dc902e9dce64edd1967"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.45.0",
 ]
 
 [[package]]
@@ -14118,7 +13857,7 @@ version = "0.13.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be769465445e8c1474e9c5dac2018218498557af32d9ed057325ec9a41ae81bf"
 dependencies = [
- "heck 0.5.0",
+ "heck 0.4.1",
  "itertools 0.14.0",
  "log",
  "multimap",
@@ -15448,7 +15187,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.11.0",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -15555,7 +15294,7 @@ dependencies = [
  "security-framework 3.6.0",
  "security-framework-sys",
  "webpki-root-certs",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -16604,12 +16343,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "simdutf8"
-version = "0.1.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3a9fe34e3e7a50316060351f37187a3f546bce95496156754b601a5fa71b76e"
-
-[[package]]
 name = "similar"
 version = "2.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -16773,7 +16506,7 @@ version = "0.8.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c1c97747dbf44bb1ca44a561ece23508e99cb592e862f22222dcf42f51d1e451"
 dependencies = [
- "heck 0.5.0",
+ "heck 0.4.1",
  "proc-macro2",
  "quote",
  "syn 2.0.116",
@@ -17195,12 +16928,6 @@ dependencies = [
  "http-body-util",
  "pin-project-lite",
 ]
-
-[[package]]
-name = "ssml"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7c763fb3c520986754dff6ae17e02aece206fe338bed1582894f1f1108ecdee2"
 
 [[package]]
 name = "stable_deref_trait"
@@ -19764,7 +19491,7 @@ dependencies = [
  "getrandom 0.4.1",
  "once_cell",
  "rustix 1.1.3",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -20272,7 +19999,6 @@ dependencies = [
  "futures-core",
  "pin-project-lite",
  "tokio",
- "tokio-util",
 ]
 
 [[package]]
@@ -20343,29 +20069,6 @@ dependencies = [
  "futures-sink",
  "pin-project-lite",
  "tokio",
-]
-
-[[package]]
-name = "tokio-websockets"
-version = "0.11.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9fcaf159b4e7a376b05b5bfd77bfd38f3324f5fce751b4213bfc7eaa47affb4e"
-dependencies = [
- "base64 0.22.1",
- "bytes",
- "futures-core",
- "futures-sink",
- "http 1.4.0",
- "httparse",
- "rand 0.9.2",
- "ring",
- "rustls-pki-types",
- "sha1_smol",
- "simdutf8",
- "tokio",
- "tokio-rustls 0.26.4",
- "tokio-util",
- "webpki-roots 0.26.11",
 ]
 
 [[package]]
@@ -20718,77 +20421,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "transcribe-aws"
-version = "0.1.0"
-dependencies = [
- "async-stream",
- "audio-utils",
- "aws-config",
- "aws-sdk-transcribe",
- "aws-sdk-transcribestreaming",
- "aws-smithy-runtime-api",
- "aws-smithy-types",
- "axum 0.8.8",
- "bytes",
- "data",
- "futures-util",
- "owhisper-config",
- "owhisper-interface",
- "serde",
- "serde_json",
- "thiserror 2.0.18",
- "tokio",
- "tokio-stream",
- "tokio-tungstenite 0.28.0",
- "tower 0.5.3",
- "tracing",
-]
-
-[[package]]
-name = "transcribe-azure"
-version = "0.1.0"
-dependencies = [
- "async-stream",
- "axum 0.8.8",
- "azure-speech",
- "bytes",
- "data",
- "futures-util",
- "serde",
- "serde_json",
- "thiserror 2.0.18",
- "tokio",
- "tokio-stream",
- "tokio-tungstenite 0.28.0",
- "tower 0.5.3",
- "tracing",
-]
-
-[[package]]
-name = "transcribe-cactus"
-version = "0.1.0"
-dependencies = [
- "audio-utils",
- "axum 0.8.8",
- "bytes",
- "cactus",
- "data",
- "futures-util",
- "language",
- "owhisper-interface",
- "serde_json",
- "serde_qs",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "tokio-tungstenite 0.28.0",
- "tower 0.5.3",
- "tracing",
- "uuid",
- "ws-utils",
-]
-
-[[package]]
 name = "transcribe-deepgram"
 version = "0.1.0"
 dependencies = [
@@ -20813,26 +20445,6 @@ dependencies = [
  "tower 0.5.3",
  "tracing",
  "url",
-]
-
-[[package]]
-name = "transcribe-gcp"
-version = "0.1.0"
-dependencies = [
- "async-stream",
- "axum 0.8.8",
- "bytes",
- "data",
- "futures-util",
- "google-cloud-speech-v2",
- "serde",
- "serde_json",
- "thiserror 2.0.18",
- "tokio",
- "tokio-stream",
- "tokio-tungstenite 0.28.0",
- "tower 0.5.3",
- "tracing",
 ]
 
 [[package]]
@@ -21986,7 +21598,6 @@ checksum = "b672338555252d43fd2240c714dc444b8c6fb0a5c5335e65a07bba7742735ddb"
 dependencies = [
  "getrandom 0.4.1",
  "js-sys",
- "rand 0.9.2",
  "serde_core",
  "sha1_smol",
  "wasm-bindgen",
@@ -22835,7 +22446,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
