@@ -17875,7 +17875,6 @@ dependencies = [
  "url",
  "uuid",
  "vad-ext",
- "vad2",
  "vorbis_rs",
 ]
 
@@ -18811,20 +18810,6 @@ dependencies = [
  "serde",
  "specta",
  "utoipa",
-]
-
-[[package]]
-name = "ten-vad-rs"
-version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2cd081e2be8ae77e8f2a69bfa5c34d1931de1c79a32879ba02d93c55e084a5f"
-dependencies = [
- "log",
- "ndarray",
- "ort",
- "rubato 0.16.2",
- "rustfft",
- "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -20815,21 +20800,10 @@ dependencies = [
  "rodio",
  "serde",
  "silero",
- "swift-rs 1.0.7 (git+https://github.com/yujonglee/swift-rs?rev=41a1605)",
  "thiserror 2.0.18",
  "tokio",
  "tracing",
  "vad3",
- "vvad",
-]
-
-[[package]]
-name = "vad2"
-version = "0.1.0"
-dependencies = [
- "serde",
- "ten-vad-rs",
- "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -20837,6 +20811,7 @@ name = "vad3"
 version = "0.1.0"
 dependencies = [
  "earshot",
+ "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -20969,14 +20944,6 @@ checksum = "fb067e4cbd1ff067d1df46c9194b5de0e98efd2810bbc95c5d5e5f25a3231150"
 dependencies = [
  "cc",
  "libc",
-]
-
-[[package]]
-name = "vvad"
-version = "0.1.0"
-dependencies = [
- "earshot",
- "thiserror 2.0.18",
 ]
 
 [[package]]

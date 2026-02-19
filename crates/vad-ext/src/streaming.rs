@@ -1,5 +1,5 @@
 use hypr_audio_utils::f32_to_i16_samples;
-use hypr_vvad::VoiceActivityDetector;
+use hypr_vad3::VoiceActivityDetector;
 
 #[derive(Clone, Debug)]
 pub struct VadConfig {

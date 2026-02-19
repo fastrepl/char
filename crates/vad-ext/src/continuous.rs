@@ -11,7 +11,7 @@ use pin_project::pin_project;
 use silero_rs::{VadConfig, VadSession, VadTransition};
 
 #[derive(Debug, Clone)]
-pub enum VadStreamItem {
+pub(crate) enum VadStreamItem {
     AudioSamples(Vec<f32>),
     SpeechStart {
         timestamp_ms: usize,
@@ -31,7 +31,7 @@ pub struct AudioChunk {
 }
 
 #[pin_project]
-pub struct ContinuousVadStream<S: AsyncSource> {
+pub(crate) struct ContinuousVadStream<S: AsyncSource> {
     source: S,
     vad_session: VadSession,
     chunk_samples: usize,
@@ -40,7 +40,7 @@ pub struct ContinuousVadStream<S: AsyncSource> {
 }
 
 impl<S: AsyncSource> ContinuousVadStream<S> {
-    pub fn new(source: S, mut config: VadConfig) -> Result<Self, crate::Error> {
+    pub(crate) fn new(source: S, mut config: VadConfig) -> Result<Self, crate::Error> {
         config.sample_rate = source.sample_rate() as usize;
 
         // https://github.com/emotechlab/silero-rs/blob/26a6460/src/lib.rs#L775
@@ -161,10 +161,6 @@ impl<S: AsyncSource> Stream for ContinuousVadStream<S> {
 }
 
 pub trait VadExt: AsyncSource + Sized {
-    fn with_vad(self, config: VadConfig) -> ContinuousVadStream<Self> {
-        ContinuousVadStream::new(self, config).unwrap()
-    }
-
     fn speech_chunks(
         self,
         redemption_time: Duration,
@@ -180,21 +176,23 @@ pub trait VadExt: AsyncSource + Sized {
             ..Default::default()
         };
 
-        self.with_vad(config).filter_map(|item| {
-            future::ready(match item {
-                Ok(VadStreamItem::SpeechEnd {
-                    samples,
-                    start_timestamp_ms,
-                    end_timestamp_ms,
-                }) => Some(Ok(AudioChunk {
-                    samples,
-                    start_timestamp_ms,
-                    end_timestamp_ms,
-                })),
-                Ok(_) => None,
-                Err(e) => Some(Err(e)),
+        ContinuousVadStream::new(self, config)
+            .unwrap()
+            .filter_map(|item| {
+                future::ready(match item {
+                    Ok(VadStreamItem::SpeechEnd {
+                        samples,
+                        start_timestamp_ms,
+                        end_timestamp_ms,
+                    }) => Some(Ok(AudioChunk {
+                        samples,
+                        start_timestamp_ms,
+                        end_timestamp_ms,
+                    })),
+                    Ok(_) => None,
+                    Err(e) => Some(Err(e)),
+                })
             })
-        })
     }
 }
 
