@@ -1,5 +1,6 @@
 mod argmax;
 pub(crate) mod assemblyai;
+mod cactus;
 mod dashscope;
 pub mod deepgram;
 mod deepgram_compat;
@@ -18,6 +19,7 @@ mod url_builder;
 
 pub use argmax::*;
 pub use assemblyai::*;
+pub use cactus::*;
 pub use dashscope::*;
 pub use deepgram::*;
 pub use elevenlabs::*;
@@ -356,6 +358,8 @@ pub enum AdapterKind {
     Mistral,
     #[strum(serialize = "hyprnote")]
     Hyprnote,
+    #[strum(serialize = "cactus")]
+    Cactus,
 }
 
 impl AdapterKind {
@@ -371,6 +375,11 @@ impl AdapterKind {
         }
 
         if is_local_argmax(base_url) {
+            if let Some(model) = _model {
+                if model.contains("cactus") {
+                    return Self::Cactus;
+                }
+            }
             return Self::Argmax;
         }
 
@@ -398,7 +407,7 @@ impl AdapterKind {
             Self::DashScope => DashScopeAdapter::language_support_live(languages),
             Self::Argmax => ArgmaxAdapter::language_support_live(languages, model),
             Self::Mistral => MistralAdapter::language_support_live(languages),
-            Self::Hyprnote => LanguageSupport::Supported {
+            Self::Hyprnote | Self::Cactus => LanguageSupport::Supported {
                 quality: LanguageQuality::NoData,
             },
         }
@@ -423,7 +432,7 @@ impl AdapterKind {
             Self::DashScope => DashScopeAdapter::language_support_batch(languages),
             Self::Argmax => ArgmaxAdapter::language_support_batch(languages, model),
             Self::Mistral => MistralAdapter::language_support_batch(languages),
-            Self::Hyprnote => LanguageSupport::Supported {
+            Self::Hyprnote | Self::Cactus => LanguageSupport::Supported {
                 quality: LanguageQuality::NoData,
             },
         }

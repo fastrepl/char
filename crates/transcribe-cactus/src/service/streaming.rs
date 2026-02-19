@@ -337,7 +337,7 @@ async fn handle_websocket(
                     }
                 };
 
-                match process_incoming_message(&msg) {
+                match process_incoming_message(&msg, params.channels) {
                     IncomingMessage::Audio(AudioExtract::Samples(s)) if !s.is_empty() => {
                         if audio_tx.send(s).await.is_err() {
                             break;
@@ -509,13 +509,34 @@ enum AudioExtract {
     End,
 }
 
-fn process_incoming_message(msg: &Message) -> IncomingMessage {
+fn deinterleave_and_mix(data: &[u8]) -> Vec<f32> {
+    let samples: Vec<i16> = data
+        .chunks_exact(2)
+        .map(|chunk| i16::from_le_bytes([chunk[0], chunk[1]]))
+        .collect();
+
+    let mut mic = Vec::with_capacity(samples.len() / 2);
+    let mut speaker = Vec::with_capacity(samples.len() / 2);
+
+    for chunk in samples.chunks_exact(2) {
+        mic.push(chunk[0] as f32 / 32768.0);
+        speaker.push(chunk[1] as f32 / 32768.0);
+    }
+
+    hypr_audio_utils::mix_audio_f32(&mic, &speaker)
+}
+
+fn process_incoming_message(msg: &Message, channels: u8) -> IncomingMessage {
     match msg {
         Message::Binary(data) => {
             if data.is_empty() {
                 return IncomingMessage::Audio(AudioExtract::Empty);
             }
-            IncomingMessage::Audio(AudioExtract::Samples(bytes_to_f32_samples(data)))
+            if channels >= 2 {
+                IncomingMessage::Audio(AudioExtract::Samples(deinterleave_and_mix(data)))
+            } else {
+                IncomingMessage::Audio(AudioExtract::Samples(bytes_to_f32_samples(data)))
+            }
         }
         Message::Text(data) => {
             if let Ok(ctrl) = serde_json::from_str::<ControlMessage>(data) {
@@ -685,7 +706,7 @@ mod tests {
     #[test]
     fn control_message_finalize_parsed() {
         let msg = Message::Text(r#"{"type":"Finalize"}"#.into());
-        match process_incoming_message(&msg) {
+        match process_incoming_message(&msg, 1) {
             IncomingMessage::Control(ControlMessage::Finalize) => {}
             other => panic!(
                 "expected Finalize, got {:?}",
@@ -697,7 +718,7 @@ mod tests {
     #[test]
     fn control_message_keep_alive_parsed() {
         let msg = Message::Text(r#"{"type":"KeepAlive"}"#.into());
-        match process_incoming_message(&msg) {
+        match process_incoming_message(&msg, 1) {
             IncomingMessage::Control(ControlMessage::KeepAlive) => {}
             other => panic!(
                 "expected KeepAlive, got {:?}",
@@ -709,7 +730,7 @@ mod tests {
     #[test]
     fn control_message_close_stream_parsed() {
         let msg = Message::Text(r#"{"type":"CloseStream"}"#.into());
-        match process_incoming_message(&msg) {
+        match process_incoming_message(&msg, 1) {
             IncomingMessage::Control(ControlMessage::CloseStream) => {}
             other => panic!(
                 "expected CloseStream, got {:?}",
@@ -723,7 +744,7 @@ mod tests {
         let chunk = owhisper_interface::ListenInputChunk::End;
         let json = serde_json::to_string(&chunk).unwrap();
         let msg = Message::Text(json.into());
-        match process_incoming_message(&msg) {
+        match process_incoming_message(&msg, 1) {
             IncomingMessage::Audio(AudioExtract::End) => {}
             other => panic!(
                 "expected Audio(End), got {:?}",
@@ -735,7 +756,7 @@ mod tests {
     #[test]
     fn close_frame_yields_end() {
         let msg = Message::Close(None);
-        match process_incoming_message(&msg) {
+        match process_incoming_message(&msg, 1) {
             IncomingMessage::Audio(AudioExtract::End) => {}
             other => panic!(
                 "expected Audio(End), got {:?}",
