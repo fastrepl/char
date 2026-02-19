@@ -20,6 +20,7 @@ fn test_complete() {
     let options = CompleteOptions {
         max_tokens: Some(20),
         temperature: Some(0.0),
+        confidence_threshold: Some(0.0),
         ..Default::default()
     };
 
@@ -39,6 +40,7 @@ fn test_complete_streaming() {
     let options = CompleteOptions {
         max_tokens: Some(20),
         temperature: Some(0.0),
+        confidence_threshold: Some(0.0),
         ..Default::default()
     };
 
@@ -69,6 +71,7 @@ fn test_complete_streaming_early_stop() {
     let messages = vec![Message::user("Count from 1 to 100")];
     let options = CompleteOptions {
         max_tokens: Some(200),
+        confidence_threshold: Some(0.0),
         ..Default::default()
     };
 
@@ -99,6 +102,7 @@ fn test_complete_multi_turn() {
     let options = CompleteOptions {
         max_tokens: Some(30),
         temperature: Some(0.0),
+        confidence_threshold: Some(0.0),
         ..Default::default()
     };
 
