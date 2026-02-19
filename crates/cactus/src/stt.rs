@@ -72,7 +72,7 @@ impl Model {
                 self.raw_handle(),
                 path.map_or(std::ptr::null(), |p| p.as_ptr()),
                 prompt_c.as_ptr(),
-                buf.as_mut_ptr() as *mut i8,
+                buf.as_mut_ptr() as *mut std::ffi::c_char,
                 buf.len(),
                 options_c.as_ptr(),
                 None,
@@ -155,7 +155,7 @@ impl<'a> Transcriber<'a> {
                 self.raw_handle()?,
                 pcm.as_ptr(),
                 pcm.len(),
-                buf.as_mut_ptr() as *mut i8,
+                buf.as_mut_ptr() as *mut std::ffi::c_char,
                 buf.len(),
             )
         };
@@ -199,7 +199,7 @@ impl<'a> Transcriber<'a> {
         let rc = unsafe {
             cactus_sys::cactus_stream_transcribe_stop(
                 self.raw_handle()?,
-                buf.as_mut_ptr() as *mut i8,
+                buf.as_mut_ptr() as *mut std::ffi::c_char,
                 buf.len(),
             )
         };
@@ -229,7 +229,7 @@ impl Drop for Transcriber<'_> {
         unsafe {
             cactus_sys::cactus_stream_transcribe_stop(
                 handle.as_ptr(),
-                buf.as_mut_ptr() as *mut i8,
+                buf.as_mut_ptr() as *mut std::ffi::c_char,
                 buf.len(),
             );
         }

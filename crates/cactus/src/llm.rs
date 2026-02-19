@@ -143,7 +143,7 @@ impl Model {
             cactus_sys::cactus_complete(
                 self.raw_handle(),
                 messages_c.as_ptr(),
-                buf.as_mut_ptr().cast::<i8>(),
+                buf.as_mut_ptr().cast::<std::ffi::c_char>(),
                 buf.len(),
                 options_c.as_ptr(),
                 std::ptr::null(),

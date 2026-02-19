@@ -72,14 +72,13 @@ hypr-http = { path = "crates/http", package = "hypr-http-utils" }
 hypr-importer-core = { path = "crates/importer-core", package = "importer-core" }
 hypr-intercept = { path = "crates/intercept", package = "intercept" }
 hypr-jina = { path = "crates/jina", package = "jina" }
-hypr-kyutai = { path = "crates/kyutai", package = "kyutai" }
 hypr-language = { path = "crates/language", package = "language" }
+hypr-llm-cactus = { path = "crates/llm-cactus", package = "llm-cactus" }
 hypr-llm-proxy = { path = "crates/llm-proxy", package = "llm-proxy" }
 hypr-llm-types = { path = "crates/llm-types", package = "llm-types" }
 hypr-loops = { path = "crates/loops", package = "loops" }
 hypr-mac = { path = "crates/mac", package = "mac" }
 hypr-mcp = { path = "crates/mcp", package = "mcp" }
-hypr-moonshine = { path = "crates/moonshine", package = "moonshine" }
 hypr-nango = { path = "crates/nango", package = "nango" }
 hypr-notch = { path = "crates/notch", package = "notch" }
 hypr-notification = { path = "crates/notification", package = "notification" }
@@ -106,7 +105,6 @@ hypr-template-support = { path = "crates/template-support", package = "template-
 hypr-tiptap = { path = "crates/tiptap", package = "tiptap" }
 hypr-transcribe-cactus = { path = "crates/transcribe-cactus", package = "transcribe-cactus" }
 hypr-transcribe-deepgram = { path = "crates/transcribe-deepgram", package = "transcribe-deepgram" }
-hypr-transcribe-moonshine = { path = "crates/transcribe-moonshine", package = "transcribe-moonshine" }
 hypr-transcribe-openai = { path = "crates/transcribe-openai", package = "transcribe-openai" }
 hypr-transcribe-proxy = { path = "crates/transcribe-proxy", package = "transcribe-proxy" }
 hypr-transcribe-whisper-local = { path = "crates/transcribe-whisper-local", package = "transcribe-whisper-local" }

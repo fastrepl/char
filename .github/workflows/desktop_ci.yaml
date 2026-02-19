@@ -82,8 +82,6 @@ jobs:
             --exclude whisper \
             --exclude whisper-local \
             --exclude whisper-local-model \
-            --exclude moonshine \
-            --exclude kyutai \
             --exclude vad2 \
             --exclude vad3 \
             --exclude vvad \
