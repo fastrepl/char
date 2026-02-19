@@ -6,14 +6,13 @@ author: "John Jeong"
 category: "Engineering"
 date: "2025-12-02"
 ---
-
 Documentation is not the same thing as blogging.
 
 Docs are a product.
 
 People rely on them to unblock themselves, integrate with you, debug issues, and understand how your system actually works.
 
-So the tools you'd use for blog posts don't always work for docs.
+The tools you'd use for blog posts don't always work for docs.
 
 Docs need structure.
 
@@ -23,11 +22,11 @@ Docs need versioning, API examples, sidebars, and searchable knowledge.
 
 But they also need to be maintainable by a real team — engineers, PMs, support, devrel — not just whoever has access to the CMS.
 
-This post is my honest breakdown of what tools you should consider in 2025 if you're building developer documentation from scratch.
+This post breaks down what tools you should consider in 2025 if you're building developer documentation from scratch.
 
 ## There Are Really Only Five Kinds of Docs Systems
 
-No matter what marketing pages say, every modern docs system falls into one of these:
+Every modern docs system falls into one of these:
 
 1. **Pure File-Based (MD/MDX)**  
     → Docusaurus, Nextra, Mintlify Open Source, MkDocs, Astro + MDX
@@ -45,8 +44,6 @@ No matter what marketing pages say, every modern docs system falls into one of t
     → Your own framework + components (what many top devtools do)
 
 Each has a different cost model, maintenance profile, and failure mode.
-
-Let's break them down.
 
 ## 1. Pure File-Based Docs (MDX) — The Default for Technical Teams
 
@@ -79,13 +76,7 @@ This is the modern "docs-as-code" standard.
 
 ### When to Use It
 
-You're a technical team.
-
-You want control.
-
-You don't want to introduce complexity prematurely.
-
-You don't have 15 PMs writing docs every day.
+You're a technical team. You want control. You don't want to introduce complexity prematurely. You don't have 15 PMs writing docs every day.
 
 For 80% of startups, file-based MDX docs will be the right answer.
 
@@ -117,11 +108,9 @@ These tools give you a visual UI for editing docs while still using Markdown/MDX
 
 ### When to Use It
 
-Your PMs, DevRel, Support, or Marketing team needs to contribute regularly.
+Your PMs, DevRel, Support, or Marketing team needs to contribute regularly, but you want to maintain the "content lives in Git" principle.
 
-But you want to maintain the "content lives in Git" principle.
-
-This is the "best of both worlds" middle layer.
+This is the middle ground between full control and ease of use.
 
 ## 3. Headless CMS for Docs — Powerful but Often Overkill
 
@@ -140,13 +129,11 @@ Using Sanity, Payload, or Contentful to power docs.
 - Schema migrations become a real job
 - Docs UI is never as natural as MDX
 - Lock-in increases each quarter
-- You are now maintaining a CMS backend forever
+- You maintain a CMS backend forever
 
 ### When to Use It
 
-You're big.
-
-You have multiple products, multiple locales, and multiple teams updating docs.
+You're big. You have multiple products, multiple locales, and multiple teams updating docs.
 
 Think Stripe-level documentation needs.
 
@@ -176,32 +163,32 @@ Examples:
 - Proprietary content format (exports are messy)
 - Limited MDX component support
 - Outgrows you once you want custom layouts
-- You become dependent on their roadmap
+- You depend on their roadmap
 
 ### When to Use It
 
 You need docs fast, your team is mixed-technical, and you don't mind platform reliance.
 
-This works well for teams in a hurry or companies that don't have deep frontend capabilities.
+This works well for teams in a hurry or companies without strong frontend capabilities.
 
 ## 5. Custom In-Product Docs — The Future for Some Teams
 
-Many modern companies (Linear, Raycast, Warp, Replit) are increasingly embedding docs directly into their product or creating heavily customized documentation systems:
+Many modern companies (Linear, Raycast, Warp, Replit) are embedding docs directly into their product or creating heavily customized documentation systems:
 
 - React/MDX component libraries
 - Interactive playgrounds
 - Copyable codeblocks
 - Live components
-- Search that ties into product data
+- Search tied to product data
 - Custom navigation patterns
 - AI-assisted docs generation / contextual help
 
 ### Pros
 
 - Total control
-- Can be integrated tightly with your app
+- Tight integration with your app
 - Interactive demos, live sandboxes, code runners
-- Enables future AI-native experiences
+- Enables AI-native experiences
 - Perfect branding
 
 ### Cons
@@ -216,9 +203,7 @@ You're building a developer platform and your docs are part of your differentiat
 
 This is the final evolution stage.
 
-## So… Which Should You Use in 2025? (Decision Guide)
-
-Here's the simplest way to not overthink it:
+## Which Should You Use in 2025?
 
 **If your writers are engineers** → use file-based MDX docs.
 
@@ -226,11 +211,11 @@ You'll ship faster than with any CMS.
 
 **If non-engineers need to edit** → add Keystatic/Tina.
 
-Do not jump to a headless CMS.
+Don't jump to a headless CMS.
 
 **If you're large with multiple products + locales** → consider Sanity/Payload.
 
-But only when structure becomes real pain.
+But only when structure becomes a real problem.
 
 **If you need something live tomorrow** → GitBook/Mintlify Cloud.
 
@@ -256,7 +241,7 @@ The simplest version?
 
 A folder per version in Git.
 
-A CMS makes this a nightmare.
+A CMS makes this painful.
 
 ### 3. Search matters more than design
 
@@ -283,11 +268,7 @@ We're building our docs on:
 - Keystatic layer as our team grows
 - Future: interactive "live notebooks" tied to Char
 
-The principle is simple:
-
-**Docs are code.**
-
-And the best way to maintain code is with tools you already love.
+The principle: docs are code. The best way to maintain code is with tools you already love.
 
 ---
 

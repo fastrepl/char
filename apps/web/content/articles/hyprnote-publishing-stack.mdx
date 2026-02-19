@@ -6,16 +6,15 @@ author: "John Jeong"
 category: "Engineering"
 date: "2025-12-03"
 ---
-
 Most teams pick a CMS. We ended up building a publishing system.
 
-Not because we wanted to. But because every CMS we evaluated pushed us away from the way we actually work.
+Every CMS we evaluated pushed us away from the way we actually work.
 
-We're a deeply technical team. We write in our IDEs. We think in Git. We move fast. We rewrite things without ceremony. We treat documentation and blog posts as part of the product, not accessories to it.
+We're a technical team. We write in our IDEs. We think in Git. We move fast. We rewrite things without ceremony. We treat documentation and blog posts as part of the product, not accessories to it.
 
-So when we looked at the landscape — WYSIWYG editors, headless CMS platforms, Git-based CMS layers, hosted docs systems — every option either slowed us down or boxed us in.
+When we looked at the options — WYSIWYG editors, headless CMS platforms, Git-based CMS layers, hosted docs systems — every option either slowed us down or boxed us in.
 
-So we did the simplest thing: we built our publishing system the same way we build Char.
+We did the simplest thing: we built our publishing system the same way we build Char.
 
 This post breaks down exactly how it works, why it works, and why I expect it to outlive most CMS platforms people are betting on today.
 
@@ -41,15 +40,13 @@ This gives us:
 - no vendor lock-in
 - everything versioned forever
 
-It's the same model used by Vercel, Supabase, Astro, Deno, Expo, and most modern open-source developer tools.
-
-There's a reason they all use it: content ages better in plain text than in a proprietary editor.
+Vercel, Supabase, Astro, Deno, Expo, and most modern open-source developer tools use this model. Content ages better in plain text than in a proprietary editor.
 
 ## 2. The Framework: TanStack Start + MDX
 
 Most teams default to Next.js, but we're building on TanStack Start, because:
 
-- it's hyper-minimal
+- it's minimal
 - it's type-safe
 - it's extremely fast
 - it plays perfectly with MDX
@@ -64,7 +61,7 @@ Using MDX inside Start gave us:
 - zero-CMS layout control
 - instantaneous rebuilds
 - per-route SEO overrides
-- OG image generation that "just works"
+- OG image generation that works
 
 Docs, blog posts, legal pages — they're all the same format, with different components.
 
@@ -72,7 +69,7 @@ Minimalism is a feature.
 
 ## 3. The Editorial Workflow: GitHub PRs
 
-We don't need a CMS workflow because GitHub already solved that problem at global scale:
+We don't need a CMS workflow because GitHub already solved that problem at scale:
 
 - branches = drafts
 - PRs = editorial review
@@ -82,9 +79,9 @@ We don't need a CMS workflow because GitHub already solved that problem at globa
 - GitHub Actions = validation
 - merge = publish
 
-It's not "content management." It's just engineering.
+It's not "content management." It's engineering.
 
-And engineering workflows are better than every CMS workflow on the market.
+Engineering workflows are better than every CMS workflow on the market.
 
 ## 4. The Image Pipeline: Supabase + GitHub
 
@@ -92,7 +89,7 @@ WYSIWYG editors make image uploading easy, but they hide the backend complexity.
 
 We want the convenience and the control.
 
-So here's our stack:
+Our stack:
 
 - GitHub drag-and-drop for inline screenshots
 - Supabase buckets for structured assets (covers, OG images, diagrams)
@@ -101,13 +98,13 @@ So here's our stack:
 - no proprietary storage formats
 - zero lock-in
 
-It takes seconds to add an image. And the image will still exist in 10 years.
+It takes seconds to add an image. The image will still exist in 10 years.
 
 Try that with a SaaS CMS.
 
 ## 5. Custom MDX Components: Our Secret Weapon
 
-The moment content becomes code, every document becomes a canvas. We built a small but powerful set of MDX components:
+When content becomes code, every document becomes a canvas. We built a small but powerful set of MDX components:
 
 - `<Figure />`
 - `<Aside />`
@@ -127,9 +124,9 @@ These are reusable across:
 - internal playbooks
 - product updates
 
-This means the UI of our content is not dictated by a CMS. It's dictated by design.
+The UI of our content is dictated by design, not by a CMS.
 
-And because it's MDX, these components can become intelligent later: interactive, stateful, contextual, personalized, AI-enhanced.
+Because it's MDX, these components can become intelligent later: interactive, stateful, contextual, personalized, AI-enhanced.
 
 CMS platforms can't do that without becoming full application frameworks.
 
@@ -145,7 +142,7 @@ We experimented with:
 - custom embeddings
 - hybrid search models
 
-We eventually settled on a layered approach:
+We settled on a layered approach:
 
 - Pagefind for ultra-fast static search
 - route-level metadata for semantic indexing
@@ -202,7 +199,7 @@ The entire pipeline feels quiet. No noise. No abstractions. No ceremony.
 
 ## 8. Why This Stack Will Outlive Most CMS Platforms
 
-Most CMSs die in one of three ways:
+Most CMSs fail in a few ways:
 
 - company shuts down
 - pricing changes
@@ -212,7 +209,7 @@ Most CMSs die in one of three ways:
 - customers hit scaling edges
 - platform pivots (e.g., Notion, Sanity, Contentful over time)
 
-But some primitives don't die:
+Some primitives don't fail:
 
 - Markdown
 - MDX
@@ -225,9 +222,9 @@ But some primitives don't die:
 - HTTP
 - build systems
 
-Our publishing system is built entirely on primitives that have survived 20+ years of architectural churn.
+Our publishing system is built entirely on primitives that have survived 20+ years of architectural changes.
 
-No matter what happens to the FE ecosystem next — Turbo, SSR, islands, React Server Components, Deno, Bun, something totally new — content in plain text will always be readable, migratable, and alive.
+No matter what happens to the FE ecosystem next — Turbo, SSR, islands, React Server Components, Deno, Bun, something new — content in plain text will always be readable, migratable, and alive.
 
 That's future-proofing.
 
@@ -241,7 +238,7 @@ CMS platforms want content to live inside a black box. We want content to live i
 
 ### (2) Minimize moving parts. More components = more failure.
 
-Every new system is a maintenance burden. We keep our stack embarrassingly simple.
+Every new system is a maintenance burden. We keep our stack simple.
 
 ### (3) Writing should feel like thinking. Not like filling out a form.
 

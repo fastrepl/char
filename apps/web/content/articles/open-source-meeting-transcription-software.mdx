@@ -7,7 +7,6 @@ coverImage: "/api/images/blog/open-source-meeting-transcription-software/cover.p
 category: "Comparisons"
 date: "2025-10-23"
 ---
-
 Looking for meeting transcription tools that you can fork, fix, and make your own? Then this article is for you.
 
 We'll review the only three open-source meeting transcription software that give you complete control over your meeting data. Inspect every line of code, modify any component, own your data forever.
@@ -33,9 +32,9 @@ We'll review the only three open-source meeting transcription software that give
 
 [Char](/) is a local-first AI notepad that combines manual note-taking with real-time transcription.
 
-The interface feels like Apple Notes, which is intentional. You open it and immediately start typing. No list of past meetings to navigate, no calendar integration to set up. Just a blank canvas that's ready when you are.
+The interface feels like Apple Notes, which is intentional. You open it and immediately start typing. No list of past meetings to navigate, no calendar integration to set up. Just a blank canvas ready for your input.
 
-While you're writing, Char is listening to both your microphone and system audio. Once the meeting ends, it enhances your manual notes into actionable AI summaries based on your chosen template.
+While you're writing, Char listens to both your microphone and system audio. Once the meeting ends, it enhances your manual notes into actionable AI summaries based on your chosen template.
 
 **Available as:** Native Mac app (desktop application, Windows coming soon)
 
@@ -44,7 +43,7 @@ While you're writing, Char is listening to both your microphone and system audio
 #### Top Features
 
 - **Local-first transcription with Whisper models:** Choose from Tiny, Base, or V3 Large Turbo models that run entirely on your device. No cloud processing required for transcription.
-- **Custom HyperLLM-V1 for meeting summaries:** Open source, 1.1GB model specifically trained for meeting summarization. Runs locally and outperforms generic cloud models.
+- **Custom HyperLLM-V1 for meeting summaries:** Open source, 1.1GB model built for meeting summarization. Runs locally and outperforms generic cloud models.
 - **Bot-free meeting capture:** Records system audio and microphone directly without joining as a participant. Works with any platform—Zoom, Teams, Meet, or in-person meetings.
 - **Open source transparency (GPL-3.0):** Full code available on GitHub for security audits and customization. Verify exactly how your data is processed.
 - **Manual notes + AI transcription:** Combines what you type during meetings with full transcript for context-aware summaries. Your judgment guides the AI.
@@ -59,7 +58,7 @@ While you're writing, Char is listening to both your microphone and system audio
 - Only tool that combines your typed notes with transcripts
 - HyperLLM-V1 built specifically for summarization, not generic AI
 - Cleanest interface, no security warnings, simplest setup
-- Offers autonomy controls to adjust how much AI modifies your notes vs sticking to what you wrote
+- Offers autonomy controls to adjust how much AI modifies your notes
 - Purpose-built for meeting transcription, not adapted from dictation
 
 #### Cons
@@ -111,7 +110,7 @@ Core features (unlimited transcription, AI summaries) free forever. Pro adds adv
 
 Free for individuals under MIT license.
 
-Pricing details for organizational and enterprise tiers aren't publicly disclosed, which may be a consideration for budget-conscious teams.
+Organizational and enterprise tiers don't have publicly disclosed pricing, which may be a consideration for budget-conscious teams.
 
 ### 3. Amical
 
@@ -144,7 +143,7 @@ Pricing details for organizational and enterprise tiers aren't publicly disclose
 
 #### Cons
 
-- In active development toward first stable release - expect bugs
+- In active development toward first stable release—expect bugs
 - Meeting transcription features less mature than Char or Meetily
 - macOS is primary focus; Windows support exists but less polished
 - App not notarized, causing security warnings
@@ -152,7 +151,7 @@ Pricing details for organizational and enterprise tiers aren't publicly disclose
 
 #### Pricing
 
-Completely free with no paid tiers, which may limit its use for organizations requiring dedicated assistance.
+Completely free with no paid tiers.
 
 ## Final Verdict: Which Open-Source Transcription Tool Should You Choose?
 
@@ -160,7 +159,7 @@ For most developers and privacy-conscious professionals, **Char** is the clear c
 
 The code is open source (GPL-3.0), so you can verify exactly how your data is processed. Need enterprise deployment? Self-host it on your own infrastructure. Want to modify the summarization logic? Fork it and make it yours.
 
-Most importantly, it just works. No complex setup, no security warnings to bypass, no dependencies.
+Most importantly, it works without complex setup, security warnings, or dependencies.
 
 Ready to try it? [Download Char for macOS](/download) or [check out the source code on GitHub](https://github.com/fastrepl/char).
 
@@ -178,7 +177,7 @@ You need a reasonably modern machine. For Char, an M-series Mac is ideal, though
 
 ### 3. Can I use these tools offline?
 
-Yes, that's the whole point. All three can transcribe meetings completely offline using local AI models. You only need internet if you choose to use cloud AI providers for enhanced summaries.
+Yes. All three can transcribe meetings completely offline using local AI models. You only need internet if you choose to use cloud AI providers for enhanced summaries.
 
 ### 4. How accurate is the transcription?
 
@@ -186,7 +185,7 @@ With larger Whisper models, accuracy is typically 90-95% for clear English audio
 
 ### 5. What about HIPAA, GDPR, and compliance?
 
-Because processing happens locally by default, these tools dramatically simplify compliance. Your data doesn't leave your device, which means you're not transmitting protected information to third-party processors. This makes HIPAA, GDPR, SOC 2, and other frameworks much easier to satisfy.
+Because processing happens locally by default, these tools simplify compliance. Your data doesn't leave your device, which means you're not transmitting protected information to third-party processors. This makes HIPAA, GDPR, SOC 2, and other frameworks much easier to satisfy.
 
 For organizations needing formal compliance documentation, both Char and Meetily offer enterprise plans with dedicated support.
 

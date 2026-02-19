@@ -6,12 +6,11 @@ author: "John Jeong"
 category: "Char Weekly"
 date: "2026-02-01"
 ---
-
 This was a big week for Char. We shipped our v1.0.2 stable release, introduced a new Git plugin, and made several quality-of-life improvements that make the app feel more polished and reliable.
 
 ## v1.0.2 Stable Release
 
-The headline of the week is the v1.0.2 stable release. This is a significant milestone that brings together months of work from our nightly builds into a polished, production-ready release.
+The v1.0.2 stable release brings together months of work from our nightly builds into a polished, production-ready release.
 
 The standout feature is Acoustic Echo Cancellation (AEC). Previously, we relied on heuristics-based mic-only mode to avoid feedback loops when recording both microphone and speaker audio. AEC eliminates that complexity entirely. You can now record both audio sources simultaneously without worrying about echo or feedback.
 
@@ -19,17 +18,17 @@ We also shipped PDF export with a beautiful metadata cover page. When you export
 
 Table support landed in the editor. You can now insert and edit tables directly in your notes, which is particularly useful for meeting minutes with action items or comparison notes.
 
-Other highlights from v1.0.2 include sleep detection that automatically stops recording when you close your laptop lid, a redesigned settings panel, and improved authentication that persists across app updates so you don't have to re-login after every update.
+Other improvements in v1.0.2 include sleep detection that automatically stops recording when you close your laptop lid, a redesigned settings panel, and improved authentication that persists across app updates so you don't have to re-login after every update.
 
 ## Git Plugin
 
-We introduced a new Git plugin built on top of gix, a pure Rust implementation of Git. This is foundational work that will enable future features around version control and collaboration.
+We introduced a new Git plugin built on top of gix, a pure Rust implementation of Git. This work enables future features around version control and collaboration.
 
-The plugin provides core Git operations with a modular architecture. While it's not user-facing yet, it's an important building block for what's coming next.
+The plugin provides core Git operations with a modular architecture. It's not user-facing yet, but it's a building block for what comes next.
 
 ## Persistent Pinned Tabs
 
-Pinned tabs now persist across app restarts. If you pin a session tab, it stays pinned when you reopen the app. This sounds simple, but it's one of those small improvements that makes a big difference in daily use.
+Pinned tabs now persist across app restarts. If you pin a session tab, it stays pinned when you reopen the app. This is one of those small improvements that makes a difference in daily use.
 
 ## Smarter Notification Filtering
 
@@ -45,4 +44,4 @@ We also fixed timeline sorting to use event start time as a fallback, improved t
 
 We're continuing to polish the experience and work on some exciting features we're not ready to announce yet. If you're on the nightly channel, you'll see these improvements land incrementally. If you're on stable, v1.0.2 is available now.
 
-As always, you can download the latest version from our [changelog](/changelog) or let the app auto-update.
+You can download the latest version from our [changelog](/changelog) or let the app auto-update.
