@@ -1,3 +1,6 @@
+use std::collections::HashSet;
+use std::sync::Arc;
+
 use owhisper_client::{
     AssemblyAIAdapter, Auth, DashScopeAdapter, DeepgramAdapter, ElevenLabsAdapter,
     FireworksAdapter, GladiaAdapter, MistralAdapter, OpenAIAdapter, Provider, RealtimeSttAdapter,
@@ -7,13 +10,15 @@ use owhisper_interface::ListenParams;
 
 use crate::config::SttProxyConfig;
 use crate::provider_selector::SelectedProvider;
-use crate::query_params::QueryParams;
-use crate::relay::WebSocketProxy;
+use crate::query_params::{QueryParams, QueryValue};
+use crate::relay::{ChannelSplitProxy, WebSocketProxy};
 use crate::routes::AppState;
 use crate::routes::model_resolution::resolve_model;
 
 use super::AnalyticsContext;
-use super::common::{ProxyBuildError, finalize_proxy_builder, parse_param};
+use super::common::{
+    ProxyBuildError, build_on_close_callback, finalize_proxy_builder, parse_param,
+};
 use super::session::init_session;
 
 fn build_listen_params(params: &QueryParams) -> ListenParams {
@@ -99,18 +104,38 @@ fn build_response_transformer(
     }
 }
 
+pub enum StreamingProxy {
+    Single(WebSocketProxy),
+    ChannelSplit(ChannelSplitProxy),
+}
+
 fn build_proxy_with_adapter(
     selected: &SelectedProvider,
     client_params: &QueryParams,
     config: &SttProxyConfig,
     api_base: &str,
     analytics_ctx: AnalyticsContext,
-) -> Result<WebSocketProxy, crate::ProxyError> {
+) -> Result<StreamingProxy, crate::ProxyError> {
     let provider = selected.provider();
     let mut listen_params = build_listen_params(client_params);
     let channels: u8 = parse_param(client_params, "channels", 1);
+    if channels > 2 {
+        return Err(crate::ProxyError::InvalidRequest(
+            "channels must be 1 or 2".to_string(),
+        ));
+    }
 
     resolve_model(provider, &mut listen_params);
+
+    if channels > 1 && !provider.supports_native_multichannel() {
+        return build_channel_split_proxy(
+            selected,
+            config,
+            api_base,
+            &listen_params,
+            analytics_ctx,
+        );
+    }
 
     let upstream_url =
         build_upstream_url_with_adapter(provider, api_base, &listen_params, channels);
@@ -133,7 +158,101 @@ fn build_proxy_with_adapter(
         builder = builder.initial_message(msg);
     }
 
-    finalize_proxy_builder!(builder, provider, config, analytics_ctx)
+    let proxy = finalize_proxy_builder!(builder, provider, config, analytics_ctx)?;
+    Ok(StreamingProxy::Single(proxy))
+}
+
+fn build_channel_split_proxy(
+    selected: &SelectedProvider,
+    config: &SttProxyConfig,
+    api_base: &str,
+    listen_params: &ListenParams,
+    analytics_ctx: AnalyticsContext,
+) -> Result<StreamingProxy, crate::ProxyError> {
+    let provider = selected.provider();
+    let upstream_url = build_upstream_url_with_adapter(provider, api_base, listen_params, 1);
+
+    let initial_message =
+        build_initial_message_with_adapter(provider, Some(selected.api_key()), listen_params, 1);
+
+    let uri: axum::http::Uri =
+        upstream_url
+            .as_str()
+            .parse()
+            .map_err(|e: axum::http::uri::InvalidUri| {
+                crate::ProxyError::InvalidRequest(e.to_string())
+            })?;
+
+    let mut request = tokio_tungstenite::tungstenite::ClientRequestBuilder::new(uri);
+    if let Some((name, value)) = provider.build_auth_header(selected.api_key()) {
+        request = request.with_header(name, value);
+    }
+
+    let control_types: HashSet<&'static str> =
+        provider.control_message_types().iter().copied().collect();
+    let control_message_types = if control_types.is_empty() {
+        None
+    } else {
+        Some(Arc::new(control_types))
+    };
+
+    let initial_msg: Option<crate::relay::InitialMessage> = initial_message.map(|m| Arc::new(m));
+    let response_transformer: Option<crate::relay::ResponseTransformer> =
+        Some(Arc::new(build_response_transformer(provider)));
+    let on_close = build_on_close_callback(config, provider, &analytics_ctx);
+
+    Ok(StreamingProxy::ChannelSplit(ChannelSplitProxy::new(
+        request,
+        control_message_types,
+        initial_msg,
+        response_transformer,
+        config.connect_timeout,
+        on_close,
+    )))
+}
+
+fn build_session_channel_split_proxy(
+    selected: &SelectedProvider,
+    config: &SttProxyConfig,
+    url_mic: &str,
+    url_spk: &str,
+    analytics_ctx: AnalyticsContext,
+) -> Result<StreamingProxy, crate::ProxyError> {
+    let provider = selected.provider();
+
+    let mic_uri: axum::http::Uri = url_mic.parse().map_err(|e: axum::http::uri::InvalidUri| {
+        crate::ProxyError::InvalidRequest(e.to_string())
+    })?;
+    let spk_uri: axum::http::Uri = url_spk.parse().map_err(|e: axum::http::uri::InvalidUri| {
+        crate::ProxyError::InvalidRequest(e.to_string())
+    })?;
+
+    let mic_request = tokio_tungstenite::tungstenite::ClientRequestBuilder::new(mic_uri);
+    let spk_request = tokio_tungstenite::tungstenite::ClientRequestBuilder::new(spk_uri);
+
+    let control_types: HashSet<&'static str> =
+        provider.control_message_types().iter().copied().collect();
+    let control_message_types = if control_types.is_empty() {
+        None
+    } else {
+        Some(Arc::new(control_types))
+    };
+
+    let response_transformer: Option<crate::relay::ResponseTransformer> =
+        Some(Arc::new(build_response_transformer(provider)));
+    let on_close = build_on_close_callback(config, provider, &analytics_ctx);
+
+    Ok(StreamingProxy::ChannelSplit(
+        ChannelSplitProxy::with_split_requests(
+            mic_request,
+            spk_request,
+            control_message_types,
+            None,
+            response_transformer,
+            config.connect_timeout,
+            on_close,
+        ),
+    ))
 }
 
 fn build_proxy_with_url_and_transformer(
@@ -141,7 +260,7 @@ fn build_proxy_with_url_and_transformer(
     upstream_url: &str,
     config: &SttProxyConfig,
     analytics_ctx: AnalyticsContext,
-) -> Result<WebSocketProxy, crate::ProxyError> {
+) -> Result<StreamingProxy, crate::ProxyError> {
     let provider = selected.provider();
     let builder = WebSocketProxy::builder()
         .upstream_url(upstream_url)
@@ -150,7 +269,8 @@ fn build_proxy_with_url_and_transformer(
         .response_transformer(build_response_transformer(provider))
         .apply_auth(selected);
 
-    finalize_proxy_builder!(builder, provider, config, analytics_ctx)
+    let proxy = finalize_proxy_builder!(builder, provider, config, analytics_ctx)?;
+    Ok(StreamingProxy::Single(proxy))
 }
 
 pub async fn build_proxy(
@@ -158,7 +278,7 @@ pub async fn build_proxy(
     selected: &SelectedProvider,
     params: &QueryParams,
     analytics_ctx: AnalyticsContext,
-) -> Result<WebSocketProxy, ProxyBuildError> {
+) -> Result<StreamingProxy, ProxyBuildError> {
     let provider = selected.provider();
     let api_base = selected
         .upstream_url()
@@ -175,16 +295,33 @@ pub async fn build_proxy(
                     analytics_ctx,
                 )?)
             } else {
-                let url = init_session(state, selected, header_name, params)
-                    .await
+                let channels: u8 = parse_param(params, "channels", 1);
+                if channels > 1 && !provider.supports_native_multichannel() {
+                    let mut mono_params = params.clone();
+                    mono_params.insert("channels".to_string(), QueryValue::Single("1".to_string()));
+                    let (url_mic, url_spk) = tokio::try_join!(
+                        init_session(state, selected, header_name, &mono_params),
+                        init_session(state, selected, header_name, &mono_params),
+                    )
                     .map_err(ProxyBuildError::SessionInitFailed)?;
-                let proxy = build_proxy_with_url_and_transformer(
-                    selected,
-                    &url,
-                    &state.config,
-                    analytics_ctx,
-                )?;
-                Ok(proxy)
+                    Ok(build_session_channel_split_proxy(
+                        selected,
+                        &state.config,
+                        &url_mic,
+                        &url_spk,
+                        analytics_ctx,
+                    )?)
+                } else {
+                    let url = init_session(state, selected, header_name, params)
+                        .await
+                        .map_err(ProxyBuildError::SessionInitFailed)?;
+                    Ok(build_proxy_with_url_and_transformer(
+                        selected,
+                        &url,
+                        &state.config,
+                        analytics_ctx,
+                    )?)
+                }
             }
         }
         _ => Ok(build_proxy_with_adapter(

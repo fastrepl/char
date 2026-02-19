@@ -1,7 +1,12 @@
+use std::pin::Pin;
+use std::sync::Arc;
+
+use owhisper_client::Provider;
+
 use crate::config::SttProxyConfig;
 use crate::provider_selector::SelectedProvider;
 use crate::query_params::QueryParams;
-use crate::relay::WebSocketProxy;
+use crate::relay::{OnCloseCallback, WebSocketProxy};
 
 pub enum ProxyBuildError {
     SessionInitFailed(String),
@@ -64,6 +69,35 @@ macro_rules! finalize_proxy_builder {
 }
 
 pub(super) use finalize_proxy_builder;
+
+pub fn build_on_close_callback(
+    config: &SttProxyConfig,
+    provider: Provider,
+    analytics_ctx: &super::AnalyticsContext,
+) -> Option<OnCloseCallback> {
+    let analytics = config.analytics.as_ref()?;
+    let analytics = analytics.clone();
+    let provider_name = format!("{:?}", provider).to_lowercase();
+    let fingerprint = analytics_ctx.fingerprint.clone();
+    let user_id = analytics_ctx.user_id.clone();
+
+    Some(Arc::new(move |duration: std::time::Duration| {
+        let analytics = analytics.clone();
+        let provider_name = provider_name.clone();
+        let fingerprint = fingerprint.clone();
+        let user_id = user_id.clone();
+        Box::pin(async move {
+            analytics
+                .report_stt(crate::analytics::SttEvent {
+                    fingerprint,
+                    user_id,
+                    provider: provider_name,
+                    duration,
+                })
+                .await;
+        }) as Pin<Box<dyn std::future::Future<Output = ()> + Send>>
+    }))
+}
 
 pub fn build_proxy_with_url(
     selected: &SelectedProvider,

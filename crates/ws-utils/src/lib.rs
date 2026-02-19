@@ -9,7 +9,7 @@ use futures_util::{Stream, StreamExt, stream::SplitStream};
 use pin_project::pin_project;
 use tokio::sync::mpsc::{Receiver, channel};
 
-use hypr_audio_utils::{bytes_to_f32_samples, mix_audio_f32};
+use hypr_audio_utils::{bytes_to_f32_samples, deinterleave_stereo_bytes, mix_audio_f32};
 use owhisper_interface::ListenInputChunk;
 
 enum AudioProcessResult {
@@ -17,23 +17,6 @@ enum AudioProcessResult {
     DualSamples { mic: Vec<f32>, speaker: Vec<f32> },
     Empty,
     End,
-}
-
-fn deinterleave_audio(data: &[u8]) -> (Vec<f32>, Vec<f32>) {
-    let samples: Vec<i16> = data
-        .chunks_exact(2)
-        .map(|chunk| i16::from_le_bytes([chunk[0], chunk[1]]))
-        .collect();
-
-    let mut mic = Vec::with_capacity(samples.len() / 2);
-    let mut speaker = Vec::with_capacity(samples.len() / 2);
-
-    for chunk in samples.chunks_exact(2) {
-        mic.push(chunk[0] as f32 / 32768.0);
-        speaker.push(chunk[1] as f32 / 32768.0);
-    }
-
-    (mic, speaker)
 }
 
 fn process_ws_message(message: Message, channels: Option<u32>) -> AudioProcessResult {
@@ -45,7 +28,7 @@ fn process_ws_message(message: Message, channels: Option<u32>) -> AudioProcessRe
 
             match channels {
                 Some(2) => {
-                    let (mic, speaker) = deinterleave_audio(&data);
+                    let (mic, speaker) = deinterleave_stereo_bytes(&data);
                     AudioProcessResult::DualSamples { mic, speaker }
                 }
                 _ => AudioProcessResult::Samples(bytes_to_f32_samples(&data)),
