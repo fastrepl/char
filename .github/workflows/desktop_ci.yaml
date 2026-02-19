@@ -67,7 +67,6 @@ jobs:
             --exclude apple-note \
             --exclude notification-linux \
             --exclude am \
-            --exclude am2 \
             --exclude aec \
             --exclude agc \
             --exclude whisper \
