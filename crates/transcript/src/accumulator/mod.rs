@@ -182,15 +182,6 @@ mod tests {
         words
     }
 
-    fn load_fixture(name: &str) -> Vec<StreamResponse> {
-        let raw = match name {
-            "deepgram_1" => include_str!("fixtures/deepgram_1.json"),
-            "soniox_1" => include_str!("fixtures/soniox_1.json"),
-            _ => panic!("unknown fixture: {name}"),
-        };
-        serde_json::from_str(raw).expect("fixture must parse as StreamResponse[]")
-    }
-
     fn assert_valid_output(words: &[TranscriptWord]) {
         assert!(!words.is_empty(), "must produce words");
 
@@ -420,13 +411,19 @@ mod tests {
         assert!(acc.process(&ignored).is_none());
     }
 
-    #[test]
-    fn deepgram_fixture_produces_valid_output() {
-        assert_valid_output(&replay(&load_fixture("deepgram_1")));
+    macro_rules! fixture_test {
+        ($test_name:ident, $file:literal) => {
+            #[test]
+            fn $test_name() {
+                let responses: Vec<StreamResponse> =
+                    serde_json::from_str(include_str!(concat!("fixtures/", $file, ".json")))
+                        .expect("fixture must parse as StreamResponse[]");
+                assert_valid_output(&replay(&responses));
+            }
+        };
     }
 
-    #[test]
-    fn soniox_fixture_produces_valid_output() {
-        assert_valid_output(&replay(&load_fixture("soniox_1")));
-    }
+    fixture_test!(deepgram_fixture_produces_valid_output, "deepgram_1");
+    fixture_test!(soniox_fixture_produces_valid_output, "soniox_1");
+    fixture_test!(soniox_korean_fixture_produces_valid_output, "soniox_2");
 }
