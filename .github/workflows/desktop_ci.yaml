@@ -73,7 +73,7 @@ jobs:
             --exclude whisper-local \
             --exclude whisper-local-model \
             --exclude vad2 \
-            --exclude vad3 \
+            --exclude vad \
             --exclude vvad \
             --exclude vad-ext \
             --exclude onnx \

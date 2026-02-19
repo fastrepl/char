@@ -20788,6 +20788,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "vad"
+version = "0.1.0"
+dependencies = [
+ "earshot",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "vad-ext"
 version = "0.1.0"
 dependencies = [
@@ -20803,15 +20811,7 @@ dependencies = [
  "thiserror 2.0.18",
  "tokio",
  "tracing",
- "vad3",
-]
-
-[[package]]
-name = "vad3"
-version = "0.1.0"
-dependencies = [
- "earshot",
- "thiserror 2.0.18",
+ "vad",
 ]
 
 [[package]]

@@ -1,5 +1,5 @@
-pub use earshot;
-use earshot::VoiceActivityProfile;
+pub use ::earshot;
+use ::earshot::VoiceActivityProfile;
 
 pub const FRAME_10MS: usize = 160;
 pub const FRAME_20MS: usize = 320;
@@ -10,13 +10,13 @@ pub const FRAME_30MS: usize = 480;
 pub struct VadError;
 
 pub struct VoiceActivityDetector {
-    inner: earshot::VoiceActivityDetector,
+    inner: ::earshot::VoiceActivityDetector,
 }
 
 impl VoiceActivityDetector {
     pub fn new() -> Self {
         Self {
-            inner: earshot::VoiceActivityDetector::new(VoiceActivityProfile::QUALITY),
+            inner: ::earshot::VoiceActivityDetector::new(VoiceActivityProfile::QUALITY),
         }
     }
 

@@ -14,7 +14,7 @@ thiserror = { workspace = true }
 
 hypr-audio-interface = { workspace = true }
 hypr-audio-utils = { workspace = true }
-hypr-vad3 = { workspace = true }
+hypr-vad = { workspace = true, features = ["earshot"] }
 silero-rs = { workspace = true }
 
 futures-util = { workspace = true }
