@@ -1,5 +1,5 @@
 use axum::extract::ws::Message;
-use hypr_audio_utils::bytes_to_f32_samples;
+use hypr_audio_utils::{bytes_to_f32_samples, deinterleave_stereo_bytes};
 use owhisper_interface::ControlMessage;
 
 pub(super) enum IncomingMessage {
@@ -14,23 +14,6 @@ pub(super) enum AudioExtract {
     End,
 }
 
-fn deinterleave(data: &[u8]) -> (Vec<f32>, Vec<f32>) {
-    let samples: Vec<i16> = data
-        .chunks_exact(2)
-        .map(|chunk| i16::from_le_bytes([chunk[0], chunk[1]]))
-        .collect();
-
-    let mut ch0 = Vec::with_capacity(samples.len() / 2);
-    let mut ch1 = Vec::with_capacity(samples.len() / 2);
-
-    for chunk in samples.chunks_exact(2) {
-        ch0.push(chunk[0] as f32 / 32768.0);
-        ch1.push(chunk[1] as f32 / 32768.0);
-    }
-
-    (ch0, ch1)
-}
-
 pub(super) fn process_incoming_message(msg: &Message, channels: u8) -> IncomingMessage {
     match msg {
         Message::Binary(data) => {
@@ -38,7 +21,7 @@ pub(super) fn process_incoming_message(msg: &Message, channels: u8) -> IncomingM
                 return IncomingMessage::Audio(AudioExtract::Empty);
             }
             if channels >= 2 {
-                let (ch0, ch1) = deinterleave(data);
+                let (ch0, ch1) = deinterleave_stereo_bytes(data);
                 IncomingMessage::Audio(AudioExtract::Dual { ch0, ch1 })
             } else {
                 IncomingMessage::Audio(AudioExtract::Mono(bytes_to_f32_samples(data)))
