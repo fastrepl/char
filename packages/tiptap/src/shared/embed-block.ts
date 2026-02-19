@@ -73,13 +73,10 @@ export const EmbedBlockNode = Node.create({
 
   parseMarkdown: (token: Record<string, string>) => {
     const raw = token.raw || token.text || "";
-    if (looksLikeEmbedCode(raw)) {
-      return {
-        type: "embedBlock",
-        attrs: { content: raw.trim() },
-      };
-    }
-    return false;
+    return {
+      type: "embedBlock",
+      attrs: { content: raw.trim() },
+    };
   },
 
   renderMarkdown: (node: { attrs?: { content?: string } }) => {
