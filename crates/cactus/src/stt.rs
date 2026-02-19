@@ -1,8 +1,7 @@
 use std::ffi::CString;
 use std::marker::PhantomData;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::ptr::NonNull;
-use std::sync::Arc;
 
 use hypr_language::Language;
 use tokio_stream::wrappers::ReceiverStream;
@@ -253,7 +252,7 @@ pub struct TranscribeEvent {
 }
 
 pub fn transcribe_stream(
-    model: Arc<Model>,
+    model_path: PathBuf,
     options: TranscribeOptions,
     chunk_size_ms: u32,
     sample_rate: u32,
@@ -269,7 +268,7 @@ pub fn transcribe_stream(
 
     std::thread::spawn(move || {
         run_transcribe_worker(
-            model,
+            model_path,
             options,
             chunk_size_ms,
             sample_rate,
@@ -284,7 +283,7 @@ pub fn transcribe_stream(
 }
 
 fn run_transcribe_worker(
-    model: Arc<Model>,
+    model_path: PathBuf,
     options: TranscribeOptions,
     chunk_size_ms: u32,
     sample_rate: u32,
@@ -292,6 +291,14 @@ fn run_transcribe_worker(
     event_tx: tokio::sync::mpsc::Sender<Result<TranscribeEvent>>,
     cancellation_token: CancellationToken,
 ) {
+    let model = match Model::new(&model_path) {
+        Ok(m) => m,
+        Err(e) => {
+            let _ = event_tx.blocking_send(Err(e));
+            return;
+        }
+    };
+
     let mut transcriber = match Transcriber::new(&model, &options) {
         Ok(t) => t,
         Err(e) => {

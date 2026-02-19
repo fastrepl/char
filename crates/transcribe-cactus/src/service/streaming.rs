@@ -2,7 +2,6 @@ use std::{
     future::Future,
     path::{Path, PathBuf},
     pin::Pin,
-    sync::Arc,
     task::{Context, Poll},
 };
 
@@ -174,29 +173,13 @@ async fn handle_websocket(
 
     let chunk_size_ms = 300;
 
-    let model = match hypr_cactus::Model::new(&model_path) {
-        Ok(m) => m,
-        Err(e) => {
-            send_ws_best_effort(
-                &mut ws_sender,
-                &StreamResponse::ErrorResponse {
-                    error_code: None,
-                    error_message: format!("failed to load model: {e}"),
-                    provider: "cactus".to_string(),
-                },
-            )
-            .await;
-            return;
-        }
-    };
-
     let options = hypr_cactus::TranscribeOptions {
         language: hypr_cactus::constrain_to(&params.languages),
         ..Default::default()
     };
 
-    let (audio_tx, mut event_rx, _cancel_token) =
-        hypr_cactus::transcribe_stream(Arc::new(model), options, chunk_size_ms, SAMPLE_RATE);
+    let (audio_tx, mut event_rx, cancel_token) =
+        hypr_cactus::transcribe_stream(model_path, options, chunk_size_ms, SAMPLE_RATE);
 
     let mut last_confirmed_sent = String::new();
     let mut last_pending_sent = String::new();
@@ -219,6 +202,7 @@ async fn handle_websocket(
         tokio::select! {
             _ = guard.cancelled() => {
                 tracing::info!("cactus_websocket_cancelled_by_new_connection");
+                cancel_token.cancel();
                 break;
             }
             event = event_rx.next() => {
@@ -839,12 +823,11 @@ mod tests {
             model_path.display()
         );
 
-        let model = hypr_cactus::Model::new(&model_path).expect("failed to load model");
         let options = hypr_cactus::TranscribeOptions::default();
         let chunk_size_ms = 300u32;
 
         let (audio_tx, mut event_stream, _cancel) =
-            hypr_cactus::transcribe_stream(Arc::new(model), options, chunk_size_ms, SAMPLE_RATE);
+            hypr_cactus::transcribe_stream(model_path.clone(), options, chunk_size_ms, SAMPLE_RATE);
 
         let samples = bytes_to_f32_samples(hypr_data::english_1::AUDIO);
         let chunk_size = 8_000;
