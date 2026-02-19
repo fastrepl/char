@@ -68,13 +68,11 @@ const issueSchema = z.object({
   score: z.object({
     directness: z
       .number()
-      .min(1)
-      .max(10)
-      .describe("Statements or announcements?"),
-    rhythm: z.number().min(1).max(10).describe("Varied or metronomic?"),
-    trust: z.number().min(1).max(10).describe("Respects reader intelligence?"),
-    authenticity: z.number().min(1).max(10).describe("Sounds human?"),
-    density: z.number().min(1).max(10).describe("Anything cuttable?"),
+      .describe("Score from 1 to 10: Statements or announcements?"),
+    rhythm: z.number().describe("Score from 1 to 10: Varied or metronomic?"),
+    trust: z.number().describe("Score from 1 to 10: Respects reader intelligence?"),
+    authenticity: z.number().describe("Score from 1 to 10: Sounds human?"),
+    density: z.number().describe("Score from 1 to 10: Anything cuttable?"),
   }),
   summary: z
     .string()
