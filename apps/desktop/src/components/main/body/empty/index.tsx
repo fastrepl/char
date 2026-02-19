@@ -1,5 +1,6 @@
 import { AppWindowIcon } from "lucide-react";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 
 import { Kbd } from "@hypr/ui/components/ui/kbd";
 import { cn } from "@hypr/utils";
@@ -8,6 +9,7 @@ import { type Tab, useTabs } from "../../../../store/zustand/tabs";
 import { useNewNote } from "../../shared";
 import { StandardTabWrapper } from "../index";
 import { type TabItem, TabItemBase } from "../shared";
+import { OpenNoteDialog } from "./open-note-dialog";
 
 export const TabItemEmpty: TabItem<Extract<Tab, { type: "empty" }>> = ({
   tab,
@@ -52,6 +54,8 @@ export function TabContentEmpty({
 function EmptyView() {
   const newNote = useNewNote({ behavior: "current" });
   const openCurrent = useTabs((state) => state.openCurrent);
+  const [openNoteDialogOpen, setOpenNoteDialogOpen] = useState(false);
+
   const openCalendar = useCallback(
     () => openCurrent({ type: "calendar" }),
     [openCurrent],
@@ -68,33 +72,59 @@ function EmptyView() {
     () => openCurrent({ type: "ai" }),
     [openCurrent],
   );
+  const openAdvancedSearch = useCallback(
+    () => openCurrent({ type: "search" }),
+    [openCurrent],
+  );
+
+  useHotkeys(
+    "mod+o",
+    () => setOpenNoteDialogOpen(true),
+    { preventDefault: true, enableOnFormTags: true },
+    [setOpenNoteDialogOpen],
+  );
 
   return (
     <div className="flex flex-col items-center justify-center h-full gap-6 mb-12 text-neutral-600">
       <div className="flex flex-col gap-1 text-center min-w-[280px]">
         <ActionItem label="New Note" shortcut={["⌘", "N"]} onClick={newNote} />
         <ActionItem
-          label="Calendar"
-          shortcut={["⌘", "⇧", "C"]}
-          onClick={openCalendar}
+          label="Open Note"
+          shortcut={["⌘", "O"]}
+          onClick={() => setOpenNoteDialogOpen(true)}
         />
+        <div className="h-px bg-neutral-200 my-1" />
         <ActionItem
           label="Contacts"
           shortcut={["⌘", "⇧", "O"]}
           onClick={openContacts}
         />
+        <ActionItem
+          label="Calendar"
+          shortcut={["⌘", "⇧", "C"]}
+          onClick={openCalendar}
+        />
+        <ActionItem
+          label="Advanced Search"
+          shortcut={["⌘", "⇧", "F"]}
+          onClick={openAdvancedSearch}
+        />
         <div className="h-px bg-neutral-200 my-1" />
         <ActionItem
-          label="Settings"
+          label="AI Settings"
+          shortcut={["⌘", "⇧", ","]}
+          onClick={openAiSettings}
+        />
+        <ActionItem
+          label="App Settings"
           shortcut={["⌘", ","]}
           onClick={openSettings}
         />
-        <ActionItem
-          label="AI Settings"
-          shortcut={["⌘", "⇧", "A"]}
-          onClick={openAiSettings}
-        />
       </div>
+      <OpenNoteDialog
+        open={openNoteDialogOpen}
+        onOpenChange={setOpenNoteDialogOpen}
+      />
     </div>
   );
 }

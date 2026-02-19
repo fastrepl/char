@@ -7,6 +7,7 @@ use std::{
 
 use futures_util::{Stream, StreamExt, future};
 use hypr_audio_interface::AsyncSource;
+use pin_project::pin_project;
 use silero_rs::{VadConfig, VadSession, VadTransition};
 
 #[derive(Debug, Clone)]
@@ -29,6 +30,7 @@ pub struct AudioChunk {
     pub end_timestamp_ms: usize,
 }
 
+#[pin_project]
 pub struct ContinuousVadStream<S: AsyncSource> {
     source: S,
     vad_session: VadSession,
@@ -56,7 +58,7 @@ impl<S: AsyncSource> ContinuousVadStream<S> {
     }
 }
 
-impl<S: AsyncSource + Unpin> Stream for ContinuousVadStream<S> {
+impl<S: AsyncSource> Stream for ContinuousVadStream<S> {
     type Item = Result<VadStreamItem, crate::Error>;
 
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
@@ -159,10 +161,7 @@ impl<S: AsyncSource + Unpin> Stream for ContinuousVadStream<S> {
 }
 
 pub trait VadExt: AsyncSource + Sized {
-    fn with_vad(self, config: VadConfig) -> ContinuousVadStream<Self>
-    where
-        Self: Unpin,
-    {
+    fn with_vad(self, config: VadConfig) -> ContinuousVadStream<Self> {
         ContinuousVadStream::new(self, config).unwrap()
     }
 
@@ -171,7 +170,7 @@ pub trait VadExt: AsyncSource + Sized {
         redemption_time: Duration,
     ) -> impl Stream<Item = Result<AudioChunk, crate::Error>>
     where
-        Self: Unpin + 'static,
+        Self: 'static,
     {
         let config = VadConfig {
             redemption_time,

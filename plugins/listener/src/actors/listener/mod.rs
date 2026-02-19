@@ -12,8 +12,8 @@ use tracing::Instrument;
 use owhisper_interface::stream::StreamResponse;
 use owhisper_interface::{ControlMessage, MixedMessage};
 
-use super::root::session_span;
-use crate::{SessionDataEvent, SessionErrorEvent, SessionProgressEvent};
+use super::session::session_span;
+use crate::{DegradedError, SessionDataEvent, SessionErrorEvent, SessionProgressEvent};
 
 use adapters::spawn_rx_task;
 
@@ -187,7 +187,15 @@ impl Actor for ListenerActor {
                         ),
                     })
                     .emit(&state.args.app);
-                    myself.stop(Some(format!("{}: {}", provider, error_message)));
+                    let degraded = match *error_code {
+                        Some(401) | Some(403) => DegradedError::AuthenticationFailed {
+                            provider: provider.clone(),
+                        },
+                        _ => DegradedError::StreamError {
+                            message: format!("{}: {}", provider, error_message),
+                        },
+                    };
+                    stop_with_degraded_error(&myself, degraded);
                     return Ok(());
                 }
 
@@ -213,17 +221,22 @@ impl Actor for ListenerActor {
 
             ListenerMsg::StreamError(error) => {
                 tracing::info!("listen_stream_error: {}", error);
-                myself.stop(None);
+                stop_with_degraded_error(&myself, DegradedError::StreamError { message: error });
             }
 
             ListenerMsg::StreamEnded => {
                 tracing::info!("listen_stream_ended");
-                myself.stop(None);
+                stop_with_degraded_error(
+                    &myself,
+                    DegradedError::UpstreamUnavailable {
+                        message: "stream ended".to_string(),
+                    },
+                );
             }
 
             ListenerMsg::StreamTimeout(elapsed) => {
                 tracing::info!("listen_stream_timeout: {}", elapsed);
-                myself.stop(None);
+                stop_with_degraded_error(&myself, DegradedError::ConnectionTimeout);
             }
         }
         Ok(())
@@ -248,4 +261,9 @@ impl Actor for ListenerActor {
         }
         Ok(())
     }
+}
+
+fn stop_with_degraded_error(myself: &ActorRef<ListenerMsg>, error: DegradedError) {
+    let reason = serde_json::to_string(&error).ok();
+    myself.stop(reason);
 }

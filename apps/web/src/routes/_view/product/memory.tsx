@@ -6,7 +6,7 @@ export const Route = createFileRoute("/_view/product/memory")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "Memory - Hyprnote" },
+      { title: "Memory - Char" },
       {
         name: "description",
         content:
@@ -30,8 +30,8 @@ function Component() {
               Your memory layer
             </h1>
             <p className="text-lg sm:text-xl text-neutral-600 mb-8 max-w-2xl mx-auto">
-              Hyprnote connects all your meetings and conversations. The more
-              you use it, the more it knows about you, your team, and your work.
+              Char connects all your meetings and conversations. The more you
+              use it, the more it knows about you, your team, and your work.
             </p>
 
             <div className="mt-8">

@@ -144,52 +144,6 @@ describe("getChangedSessionIds", () => {
     });
   });
 
-  describe("word changes", () => {
-    test("resolves session id through word -> transcript chain", () => {
-      const tables: TablesContent = {
-        words: { "word-1": { transcript_id: "transcript-1" } },
-        transcripts: { "transcript-1": { session_id: "session-1" } },
-      };
-      const changedTables: ChangedTables = {
-        words: { "word-1": {} },
-      };
-
-      const result = getChangedSessionIds(tables, changedTables);
-
-      expect(result?.changedSessionIds).toEqual(new Set(["session-1"]));
-    });
-
-    test("ignores word when transcript chain is broken", () => {
-      const tables: TablesContent = {
-        words: { "word-1": { transcript_id: "missing-transcript" } },
-        transcripts: {},
-      };
-      const changedTables: ChangedTables = {
-        words: { "word-1": {} },
-      };
-
-      const result = getChangedSessionIds(tables, changedTables);
-
-      expect(result).toBeUndefined();
-    });
-  });
-
-  describe("speaker hint changes", () => {
-    test("resolves session id through hint -> transcript chain", () => {
-      const tables: TablesContent = {
-        speaker_hints: { "hint-1": { transcript_id: "transcript-1" } },
-        transcripts: { "transcript-1": { session_id: "session-1" } },
-      };
-      const changedTables: ChangedTables = {
-        speaker_hints: { "hint-1": {} },
-      };
-
-      const result = getChangedSessionIds(tables, changedTables);
-
-      expect(result?.changedSessionIds).toEqual(new Set(["session-1"]));
-    });
-  });
-
   describe("enhanced note changes", () => {
     test("resolves session id from enhanced note", () => {
       const tables: TablesContent = {

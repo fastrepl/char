@@ -23,11 +23,13 @@ tauri-specta = { workspace = true, features = ["derive", "typescript"] }
 serde = { workspace = true }
 specta = { workspace = true }
 
+chrono = { workspace = true }
+chrono-tz = { workspace = true }
 hypr-db-parser = { workspace = true }
 hypr-frontmatter = { workspace = true }
 hypr-tiptap = { workspace = true }
 hypr-version = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
-tokio = { workspace = true, features = ["rt"] }
+tokio = { workspace = true, features = ["rt", "fs"] }
 uuid = { workspace = true }

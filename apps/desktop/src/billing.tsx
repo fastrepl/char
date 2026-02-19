@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { jwtDecode } from "jwt-decode";
 import {
   createContext,
   type ReactNode,
@@ -8,27 +7,48 @@ import {
   useMemo,
 } from "react";
 
-import { getRpcCanStartTrial } from "@hypr/api-client";
+import { canStartTrial as canStartTrialApi } from "@hypr/api-client";
 import { createClient } from "@hypr/api-client/client";
+import {
+  commands as authCommands,
+  type Claims,
+  type SubscriptionStatus,
+} from "@hypr/plugin-auth";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 
 import { useAuth } from "./auth";
 import { env } from "./env";
 import { getScheme } from "./utils";
 
-export function getEntitlementsFromToken(accessToken: string): string[] {
-  try {
-    const decoded = jwtDecode<{ entitlements?: string[] }>(accessToken);
-    return decoded.entitlements ?? [];
-  } catch {
-    return [];
+type TokenInfo = Omit<Claims, "sub"> & {
+  trialEnd: Date | null;
+};
+
+const DEFAULT_TOKEN_INFO: TokenInfo = {
+  entitlements: [],
+  subscription_status: null,
+  trialEnd: null,
+};
+
+async function getInfoFromToken(accessToken: string): Promise<TokenInfo> {
+  const result = await authCommands.decodeClaims(accessToken);
+  if (result.status === "error") {
+    return DEFAULT_TOKEN_INFO;
   }
+  const { sub, trial_end, ...rest } = result.data;
+  return {
+    ...rest,
+    trialEnd: trial_end ? new Date(trial_end * 1000) : null,
+  };
 }
 
 type BillingContextValue = {
   entitlements: string[];
+  subscriptionStatus: SubscriptionStatus | null;
   isPro: boolean;
-  canStartTrial: boolean;
+  isTrialing: boolean;
+  trialDaysRemaining: number | null;
+  canStartTrial: { data: boolean; isPending: boolean };
   upgradeToPro: () => void;
 };
 
@@ -39,17 +59,28 @@ const BillingContext = createContext<BillingContextValue | null>(null);
 export function BillingProvider({ children }: { children: ReactNode }) {
   const auth = useAuth();
 
-  const entitlements = useMemo(() => {
-    if (!auth?.session?.access_token) {
-      return [];
-    }
-    return getEntitlementsFromToken(auth.session.access_token);
-  }, [auth?.session?.access_token]);
+  const tokenInfoQuery = useQuery({
+    queryKey: ["tokenInfo", auth?.session?.access_token ?? ""],
+    queryFn: () => getInfoFromToken(auth!.session!.access_token),
+    enabled: !!auth?.session?.access_token,
+  });
 
-  const isPro = useMemo(
-    () => entitlements.includes("hyprnote_pro"),
-    [entitlements],
-  );
+  const tokenInfo = tokenInfoQuery.data ?? DEFAULT_TOKEN_INFO;
+  const entitlements = tokenInfo.entitlements ?? [];
+  const subscriptionStatus = tokenInfo.subscription_status ?? null;
+  const isPro = entitlements.includes("hyprnote_pro");
+  const isTrialing = subscriptionStatus === "trialing";
+
+  const trialDaysRemaining = useMemo(() => {
+    if (!tokenInfo.trialEnd) {
+      return null;
+    }
+    const secondsRemaining = (tokenInfo.trialEnd.getTime() - Date.now()) / 1000;
+    if (secondsRemaining <= 0) {
+      return 0;
+    }
+    return Math.ceil(secondsRemaining / (24 * 60 * 60));
+  }, [tokenInfo.trialEnd]);
 
   const canTrialQuery = useQuery({
     enabled: !!auth?.session && !isPro,
@@ -60,7 +91,7 @@ export function BillingProvider({ children }: { children: ReactNode }) {
         return false;
       }
       const client = createClient({ baseUrl: env.VITE_API_URL, headers });
-      const { data, error } = await getRpcCanStartTrial({ client });
+      const { data, error } = await canStartTrialApi({ client });
       if (error) {
         return false;
       }
@@ -68,7 +99,13 @@ export function BillingProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const canStartTrial = isPro ? false : (canTrialQuery.data ?? true);
+  const canStartTrial = useMemo(
+    () => ({
+      data: isPro ? false : (canTrialQuery.data ?? false),
+      isPending: canTrialQuery.isPending,
+    }),
+    [isPro, canTrialQuery.data, canTrialQuery.isPending],
+  );
 
   const upgradeToPro = useCallback(async () => {
     const scheme = await getScheme();
@@ -81,11 +118,22 @@ export function BillingProvider({ children }: { children: ReactNode }) {
   const value = useMemo<BillingContextValue>(
     () => ({
       entitlements,
+      subscriptionStatus,
       isPro,
+      isTrialing,
+      trialDaysRemaining,
       canStartTrial,
       upgradeToPro,
     }),
-    [entitlements, isPro, canStartTrial, upgradeToPro],
+    [
+      entitlements,
+      subscriptionStatus,
+      isPro,
+      isTrialing,
+      trialDaysRemaining,
+      canStartTrial,
+      upgradeToPro,
+    ],
   );
 
   return (

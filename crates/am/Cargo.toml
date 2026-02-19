@@ -11,7 +11,7 @@ tokio = { workspace = true, features = ["rt", "macros"] }
 hypr-download-interface = { workspace = true }
 hypr-file = { workspace = true }
 
-reqwest = { workspace = true, features = ["json"] }
+reqwest = { workspace = true, features = ["json", "query"] }
 tracing = { workspace = true }
 
 dirs = { workspace = true }

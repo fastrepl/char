@@ -15,6 +15,17 @@ type SessionMetaWithFolder = {
   folderPath: string;
 };
 
+function tryParseJson(
+  value: string | undefined,
+): Record<string, unknown> | undefined {
+  if (!value) return undefined;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return undefined;
+  }
+}
+
 type MetaItem = [SessionMetaJson, string];
 
 type BuildContext = {
@@ -40,7 +51,7 @@ export function tablesToSessionMetaMap(
         user_id: session.user_id ?? "",
         created_at: session.created_at ?? "",
         title: session.title ?? "",
-        event_id: session.event_id || undefined,
+        event: tryParseJson(session.event_json),
         participants: participantsBySession.get(session.id) ?? [],
         tags: tagsBySession.get(session.id),
       },
@@ -80,7 +91,7 @@ function collectSessionMetas(ctx: BuildContext): MetaItem[] {
         user_id: session.user_id ?? "",
         created_at: session.created_at ?? "",
         title: session.title ?? "",
-        event_id: session.event_id || undefined,
+        event: tryParseJson(session.event_json),
         participants: participantsBySession.get(session.id) ?? [],
         tags: tagsBySession.get(session.id),
       };

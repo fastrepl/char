@@ -36,7 +36,9 @@ const config = defineConfig(() => ({
     }),
     viteReact(),
     generateSitemap(getSitemap()),
-    netlify({ dev: { images: { enabled: true } } }),
+    process.env.SKIP_NETLIFY === "1"
+      ? null
+      : netlify({ dev: { images: { enabled: true } } }),
   ],
   ssr: {
     noExternal: [

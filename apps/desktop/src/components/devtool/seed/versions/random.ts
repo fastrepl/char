@@ -51,6 +51,7 @@ const buildRandomData = (fixtureCalendars?: AppleCalendar[]) => {
     humanIds,
     { min: 1, max: 3 },
     {
+      events,
       eventsByHuman,
       eventLinkProbability: 0.6,
     },

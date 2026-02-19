@@ -41,7 +41,7 @@ describe("Basic Tab Actions", () => {
     });
   });
 
-  test("openCurrent replaces active tab and closes all duplicates", () => {
+  test("openCurrent switches to existing tab instead of replacing active", () => {
     const session1 = createSessionTab({ active: false });
     const session2 = createSessionTab({ active: false });
     const session3 = createSessionTab({ active: false });
@@ -56,13 +56,13 @@ describe("Basic Tab Actions", () => {
     useTabs.getState().openCurrent(duplicateOfSession1);
 
     expect(useTabs.getState()).toMatchTabsInOrder([
-      { id: session2.id, active: false },
       { id: session1.id, active: true },
+      { id: session2.id, active: false },
+      { id: session3.id, active: false },
     ]);
-    expect(useTabs.getState()).toHaveLastHistoryEntry({ id: session1.id });
-    expect(useTabs.getState()).toHaveHistoryLength(2);
+    expect(useTabs.getState()).toHaveHistoryLength(1);
     expect(useTabs.getState()).toHaveNavigationState({
-      canGoBack: true,
+      canGoBack: false,
       canGoNext: false,
     });
   });

@@ -36,10 +36,10 @@ export const Route = createFileRoute("/_view/about")({
   },
   head: () => ({
     meta: [
-      { title: "Team - Hyprnote Press Kit" },
+      { title: "Team - Char Press Kit" },
       {
         name: "description",
-        content: "Meet the Hyprnote team and download team photos.",
+        content: "Meet the Char team and download team photos.",
       },
     ],
   }),
@@ -120,7 +120,7 @@ function HeroSection() {
           About
         </h1>
         <p className="text-lg sm:text-xl text-neutral-600">
-          Learn about Hyprnote, meet our team, and discover the story behind our
+          Learn about Char, meet our team, and discover the story behind our
           privacy-first note-taking platform.
         </p>
       </div>
@@ -660,14 +660,14 @@ function StoryDetail({ onClose }: { onClose: () => void }) {
       <div ref={scrollRef} className="p-4 overflow-y-auto">
         <div className="prose prose-stone max-w-none">
           <h2 className="text-3xl font-serif text-stone-600 mb-4">
-            How We Landed on Hyprnote
+            How We Landed on Char
           </h2>
           <p className="text-base text-neutral-500 italic mb-8">
             Our story and what we believe
           </p>
 
           <p className="text-base text-neutral-600 leading-relaxed mb-4">
-            Hyprnote didn't start as a note-app. We were actually building an AI
+            Char didn't start as a note-app. We were actually building an AI
             hardware toy for kids. It was fun, but for two people, hardware was
             too slow and too heavy. When we stepped back, we realized the thing
             we cared about wasn't the toy — it was helping people capture and
@@ -678,7 +678,7 @@ function StoryDetail({ onClose }: { onClose: () => void }) {
             At the same time, I was drowning in meetings and trying every AI
             notetaker out there. They were slow, distracting, or shipped every
             word to the cloud. None of them felt like something I'd trust or
-            enjoy using. That became the real beginning of Hyprnote.
+            enjoy using. That became the real beginning of Char.
           </p>
 
           <p className="text-base text-neutral-600 leading-relaxed mb-8">
@@ -700,7 +700,7 @@ function StoryDetail({ onClose }: { onClose: () => void }) {
           </p>
 
           <p className="text-base text-neutral-600 leading-relaxed mb-4">
-            Hyprnote exists to preserve what makes us human: conversations that
+            Char exists to preserve what makes us human: conversations that
             spark ideas and collaboration that moves work forward. We build
             tools that amplify human agency, not replace it. No ghost bots. No
             silent note lurkers. Just people, thinking together.
@@ -714,8 +714,8 @@ function StoryDetail({ onClose }: { onClose: () => void }) {
             Where we are now
           </h3>
           <p className="text-base text-neutral-600 leading-relaxed mb-8">
-            Hyprnote today is the result of that reset. A fast, private,
-            local-first notetaker built for people like us: meeting-heavy,
+            Char today is the result of that reset. A fast, private, local-first
+            notetaker built for people like us: meeting-heavy,
             privacy-conscious, and tired of complicated tools. It stays on your
             device. It respects your data. And it helps you think better, not
             attend meetings on autopilot.
@@ -730,7 +730,7 @@ function StoryDetail({ onClose }: { onClose: () => void }) {
           <div className="flex flex-col gap-2">
             <div>
               <p className="text-base text-neutral-600 font-medium italic font-serif">
-                Hyprnote
+                Char
               </p>
               <p className="text-sm text-neutral-500">John Jeong, Yujong Lee</p>
             </div>
@@ -738,7 +738,7 @@ function StoryDetail({ onClose }: { onClose: () => void }) {
             <div>
               <Image
                 src="/api/images/hyprnote/signature-dark.svg"
-                alt="Hyprnote Signature"
+                alt="Char Signature"
                 width={124}
                 height={60}
                 layout="constrained"
@@ -912,7 +912,7 @@ function PhotoDetail({
         />
 
         <p className="text-sm text-neutral-600">
-          Team photo from the Hyprnote team.
+          Team photo from the Char team.
         </p>
       </div>
     </>

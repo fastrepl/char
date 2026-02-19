@@ -14,11 +14,18 @@ import { useShallow } from "zustand/shallow";
 
 import { commands as flagCommands } from "@hypr/plugin-flag";
 import { Button } from "@hypr/ui/components/ui/button";
+import { Kbd } from "@hypr/ui/components/ui/kbd";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@hypr/ui/components/ui/tooltip";
 import { cn } from "@hypr/utils";
 
 import { useListener } from "../../../contexts/listener";
 import { useNotifications } from "../../../contexts/notifications";
 import { useShell } from "../../../contexts/shell";
+import { useNativeContextMenu } from "../../../hooks/useNativeContextMenu";
 import {
   type Tab,
   uniqueIdfromTab,
@@ -27,10 +34,12 @@ import {
 import { ChatFloatingButton } from "../../chat";
 import { NotificationBadge } from "../../ui/notification-badge";
 import { TrafficLights } from "../../window/traffic-lights";
-import { useNewNote } from "../shared";
+import { useNewNote, useNewNoteAndListen } from "../shared";
+import { TabContentSearch, TabItemSearch } from "./advanced-search";
 import { TabContentAI, TabItemAI } from "./ai";
 import { TabContentCalendar, TabItemCalendar } from "./calendar";
 import { TabContentChangelog, TabItemChangelog } from "./changelog";
+import { TabContentChat, TabItemChat } from "./chat";
 import { TabContentChatShortcut, TabItemChatShortcut } from "./chat-shortcuts";
 import { TabContentContact, TabItemContact } from "./contacts";
 import { TabContentEmpty, TabItemEmpty } from "./empty";
@@ -43,7 +52,7 @@ import {
 import { loadExtensionPanels } from "./extensions/registry";
 import { TabContentFolder, TabItemFolder } from "./folders";
 import { TabContentHuman, TabItemHuman } from "./humans";
-import { TabContentPrompt, TabItemPrompt } from "./prompts";
+import { TabContentOnboarding, TabItemOnboarding } from "./onboarding";
 import { Search } from "./search";
 import { TabContentNote, TabItemNote } from "./sessions";
 import { useCaretPosition } from "./sessions/caret-position-context";
@@ -81,6 +90,9 @@ function Header({ tabs }: { tabs: Tab[] }) {
   const { leftsidebar } = useShell();
   const isLinux = platform() === "linux";
   const notifications = useNotifications();
+  const currentTab = useTabs((state) => state.currentTab);
+  const isOnboarding = currentTab?.type === "onboarding";
+  const isSidebarHidden = isOnboarding || !leftsidebar.expanded;
   const {
     select,
     close,
@@ -134,10 +146,19 @@ function Header({ tabs }: { tabs: Tab[] }) {
 
   const tabsScrollContainerRef = useRef<HTMLDivElement>(null);
   const handleNewEmptyTab = useNewEmptyTab();
+  const handleNewNote = useNewNote({ behavior: "new" });
+  const handleNewNoteAndListen = useNewNoteAndListen();
+  const showNewTabMenu = useNativeContextMenu([
+    { id: "empty-tab", text: "Open Empty Tab", action: handleNewEmptyTab },
+    { id: "new-note", text: "Create New Note", action: handleNewNote },
+    {
+      id: "new-note-listen",
+      text: "Create and Start Listening",
+      action: handleNewNoteAndListen,
+    },
+  ]);
   const [isSearchManuallyExpanded, setIsSearchManuallyExpanded] =
     useState(false);
-  const { ref: rightContainerRef, hasSpace: hasSpaceForSearch } =
-    useHasSpaceForSearch();
   const scrollState = useScrollState(
     tabsScrollContainerRef,
     regularTabs.length,
@@ -151,42 +172,52 @@ function Header({ tabs }: { tabs: Tab[] }) {
       data-tauri-drag-region
       className={cn([
         "w-full h-9 flex items-center",
-        !leftsidebar.expanded && (isLinux ? "pl-3" : "pl-18"),
+        isSidebarHidden && (isLinux ? "pl-3" : "pl-20"),
       ])}
     >
-      {!leftsidebar.expanded && isLinux && <TrafficLights className="mr-2" />}
-      {!leftsidebar.expanded && (
+      {isSidebarHidden && isLinux && <TrafficLights className="mr-2" />}
+      {!leftsidebar.expanded && !isOnboarding && (
         <div className="relative">
-          <Button
-            size="icon"
-            variant="ghost"
-            className="shrink-0"
-            onClick={() => leftsidebar.setExpanded(true)}
-          >
-            <PanelLeftOpenIcon size={16} className="text-neutral-600" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="shrink-0"
+                onClick={() => leftsidebar.setExpanded(true)}
+              >
+                <PanelLeftOpenIcon size={16} className="text-neutral-600" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="flex items-center gap-2">
+              <span>Toggle sidebar</span>
+              <Kbd className="animate-kbd-press">⌘ \</Kbd>
+            </TooltipContent>
+          </Tooltip>
           <NotificationBadge show={notifications.shouldShowBadge} />
         </div>
       )}
 
-      <div className="flex items-center h-full shrink-0">
-        <Button
-          onClick={goBack}
-          disabled={!canGoBack}
-          variant="ghost"
-          size="icon"
-        >
-          <ArrowLeftIcon size={16} />
-        </Button>
-        <Button
-          onClick={goNext}
-          disabled={!canGoNext}
-          variant="ghost"
-          size="icon"
-        >
-          <ArrowRightIcon size={16} />
-        </Button>
-      </div>
+      {!isOnboarding && (
+        <div className="flex items-center h-full shrink-0">
+          <Button
+            onClick={goBack}
+            disabled={!canGoBack}
+            variant="ghost"
+            size="icon"
+          >
+            <ArrowLeftIcon size={16} />
+          </Button>
+          <Button
+            onClick={goNext}
+            disabled={!canGoNext}
+            variant="ghost"
+            size="icon"
+          >
+            <ArrowRightIcon size={16} />
+          </Button>
+        </div>
+      )}
 
       {listeningTab && (
         <div className="flex items-center h-full shrink-0 mr-1">
@@ -274,16 +305,20 @@ function Header({ tabs }: { tabs: Tab[] }) {
       </div>
 
       <div
-        ref={rightContainerRef}
         data-tauri-drag-region
         className="flex-1 flex h-full items-center justify-between"
       >
-        {!(isSearchManuallyExpanded && !hasSpaceForSearch) && (
+        {!isSearchManuallyExpanded && (
           <Button
-            onClick={handleNewEmptyTab}
+            onClick={isOnboarding ? undefined : handleNewEmptyTab}
+            onContextMenu={isOnboarding ? undefined : showNewTabMenu}
+            disabled={isOnboarding}
             variant="ghost"
             size="icon"
-            className="text-neutral-600"
+            className={cn([
+              "text-neutral-600",
+              isOnboarding && "opacity-40 cursor-not-allowed",
+            ])}
           >
             <PlusIcon size={16} />
           </Button>
@@ -291,10 +326,9 @@ function Header({ tabs }: { tabs: Tab[] }) {
 
         <div className="flex items-center gap-1 h-full ml-auto">
           <Update />
-          <Search
-            hasSpace={hasSpaceForSearch}
-            onManualExpandChange={setIsSearchManuallyExpanded}
-          />
+          {!isOnboarding && (
+            <Search onManualExpandChange={setIsSearchManuallyExpanded} />
+          )}
         </div>
       </div>
     </div>
@@ -386,48 +420,7 @@ function TabItem({
       />
     );
   }
-  if (tab.type === "templates") {
-    return (
-      <TabItemTemplate
-        tab={tab}
-        tabIndex={tabIndex}
-        handleCloseThis={handleClose}
-        handleSelectThis={handleSelect}
-        handleCloseOthers={handleCloseOthers}
-        handleCloseAll={handleCloseAll}
-        handlePinThis={handlePinThis}
-        handleUnpinThis={handleUnpinThis}
-      />
-    );
-  }
-  if (tab.type === "prompts") {
-    return (
-      <TabItemPrompt
-        tab={tab}
-        tabIndex={tabIndex}
-        handleCloseThis={handleClose}
-        handleSelectThis={handleSelect}
-        handleCloseOthers={handleCloseOthers}
-        handleCloseAll={handleCloseAll}
-        handlePinThis={handlePinThis}
-        handleUnpinThis={handleUnpinThis}
-      />
-    );
-  }
-  if (tab.type === "chat_shortcuts") {
-    return (
-      <TabItemChatShortcut
-        tab={tab}
-        tabIndex={tabIndex}
-        handleCloseThis={handleClose}
-        handleSelectThis={handleSelect}
-        handleCloseOthers={handleCloseOthers}
-        handleCloseAll={handleCloseAll}
-        handlePinThis={handlePinThis}
-        handleUnpinThis={handleUnpinThis}
-      />
-    );
-  }
+
   if (tab.type === "empty") {
     return (
       <TabItemEmpty
@@ -526,6 +519,76 @@ function TabItem({
       />
     );
   }
+  if (tab.type === "templates") {
+    return (
+      <TabItemTemplate
+        tab={tab}
+        tabIndex={tabIndex}
+        handleCloseThis={handleClose}
+        handleSelectThis={handleSelect}
+        handleCloseOthers={handleCloseOthers}
+        handleCloseAll={handleCloseAll}
+        handlePinThis={handlePinThis}
+        handleUnpinThis={handleUnpinThis}
+      />
+    );
+  }
+  if (tab.type === "chat_shortcuts") {
+    return (
+      <TabItemChatShortcut
+        tab={tab}
+        tabIndex={tabIndex}
+        handleCloseThis={handleClose}
+        handleSelectThis={handleSelect}
+        handleCloseOthers={handleCloseOthers}
+        handleCloseAll={handleCloseAll}
+        handlePinThis={handlePinThis}
+        handleUnpinThis={handleUnpinThis}
+      />
+    );
+  }
+  if (tab.type === "search") {
+    return (
+      <TabItemSearch
+        tab={tab}
+        tabIndex={tabIndex}
+        handleCloseThis={handleClose}
+        handleSelectThis={handleSelect}
+        handleCloseOthers={handleCloseOthers}
+        handleCloseAll={handleCloseAll}
+        handlePinThis={handlePinThis}
+        handleUnpinThis={handleUnpinThis}
+      />
+    );
+  }
+  if (tab.type === "chat_support") {
+    return (
+      <TabItemChat
+        tab={tab}
+        tabIndex={tabIndex}
+        handleCloseThis={handleClose}
+        handleSelectThis={handleSelect}
+        handleCloseOthers={handleCloseOthers}
+        handleCloseAll={handleCloseAll}
+        handlePinThis={handlePinThis}
+        handleUnpinThis={handleUnpinThis}
+      />
+    );
+  }
+  if (tab.type === "onboarding") {
+    return (
+      <TabItemOnboarding
+        tab={tab}
+        tabIndex={tabIndex}
+        handleCloseThis={handleClose}
+        handleSelectThis={handleSelect}
+        handleCloseOthers={handleCloseOthers}
+        handleCloseAll={handleCloseAll}
+        handlePinThis={handlePinThis}
+        handleUnpinThis={handleUnpinThis}
+      />
+    );
+  }
   return null;
 }
 
@@ -542,15 +605,7 @@ function ContentWrapper({ tab }: { tab: Tab }) {
   if (tab.type === "contacts") {
     return <TabContentContact tab={tab} />;
   }
-  if (tab.type === "templates") {
-    return <TabContentTemplate tab={tab} />;
-  }
-  if (tab.type === "prompts") {
-    return <TabContentPrompt tab={tab} />;
-  }
-  if (tab.type === "chat_shortcuts") {
-    return <TabContentChatShortcut tab={tab} />;
-  }
+
   if (tab.type === "empty") {
     return <TabContentEmpty tab={tab} />;
   }
@@ -571,6 +626,21 @@ function ContentWrapper({ tab }: { tab: Tab }) {
   }
   if (tab.type === "ai") {
     return <TabContentAI tab={tab} />;
+  }
+  if (tab.type === "templates") {
+    return <TabContentTemplate tab={tab} />;
+  }
+  if (tab.type === "chat_shortcuts") {
+    return <TabContentChatShortcut tab={tab} />;
+  }
+  if (tab.type === "search") {
+    return <TabContentSearch tab={tab} />;
+  }
+  if (tab.type === "chat_support") {
+    return <TabContentChat tab={tab} />;
+  }
+  if (tab.type === "onboarding") {
+    return <TabContentOnboarding tab={tab} />;
   }
   return null;
 }
@@ -601,11 +671,16 @@ function TabChatButton({
     return null;
   }
 
-  if (chat.mode === "RightPanelOpen") {
+  if (chat.mode === "RightPanelOpen" || chat.mode === "FullTab") {
     return null;
   }
 
-  if (currentTab?.type === "ai" || currentTab?.type === "settings") {
+  if (
+    currentTab?.type === "ai" ||
+    currentTab?.type === "settings" ||
+    currentTab?.type === "chat_support" ||
+    currentTab?.type === "onboarding"
+  ) {
     return null;
   }
 
@@ -656,14 +731,6 @@ function StandardTabChatButton({
   );
 }
 
-function useHasSpaceForSearch() {
-  const ref = useRef<HTMLDivElement>(null);
-  const { width = 0 } = useResizeObserver({
-    ref: ref as React.RefObject<HTMLDivElement>,
-  });
-  return { ref, hasSpace: width >= 220 };
-}
-
 function useScrollState(
   ref: React.RefObject<HTMLDivElement | null>,
   tabCount: number,
@@ -678,9 +745,10 @@ function useScrollState(
     if (!container) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = container;
+    const hasOverflow = scrollWidth > clientWidth + 1;
     const newState = {
-      atStart: scrollLeft <= 1,
-      atEnd: scrollLeft + clientWidth >= scrollWidth - 1,
+      atStart: !hasOverflow || scrollLeft <= 1,
+      atEnd: !hasOverflow || scrollLeft + clientWidth >= scrollWidth - 1,
     };
     setScrollState((prev) => {
       if (prev.atStart === newState.atStart && prev.atEnd === newState.atEnd) {
@@ -700,6 +768,7 @@ function useScrollState(
     if (!container) return;
 
     updateScrollState();
+    requestAnimationFrame(updateScrollState);
     container.addEventListener("scroll", updateScrollState);
 
     return () => {
@@ -768,9 +837,11 @@ function useTabsShortcuts() {
   const liveSessionId = useListener((state) => state.live.sessionId);
   const liveStatus = useListener((state) => state.live.status);
   const isListening = liveStatus === "active" || liveStatus === "finalizing";
+  const { chat } = useShell();
 
   const newNote = useNewNote({ behavior: "new" });
   const newNoteCurrent = useNewNote({ behavior: "current" });
+  const newNoteAndListen = useNewNoteAndListen();
   const newEmptyTab = useNewEmptyTab();
 
   useHotkeys(
@@ -814,6 +885,9 @@ function useTabsShortcuts() {
         } else if (currentTab.pinned) {
           unpin(currentTab);
         } else {
+          if (currentTab.type === "chat_support") {
+            chat.sendEvent({ type: "CLOSE" });
+          }
           close(currentTab);
         }
       }
@@ -830,6 +904,7 @@ function useTabsShortcuts() {
       isListening,
       liveSessionId,
       setPendingCloseConfirmationTab,
+      chat,
     ],
   );
 
@@ -901,7 +976,7 @@ function useTabsShortcuts() {
     () =>
       openNew({
         type: "contacts",
-        state: { selectedOrganization: null, selectedPerson: null },
+        state: { selected: null },
       }),
     {
       preventDefault: true,
@@ -912,7 +987,7 @@ function useTabsShortcuts() {
   );
 
   useHotkeys(
-    "mod+shift+a",
+    "mod+shift+comma",
     () => openNew({ type: "ai" }),
     {
       preventDefault: true,
@@ -931,6 +1006,28 @@ function useTabsShortcuts() {
       enableOnContentEditable: true,
     },
     [openNew],
+  );
+
+  useHotkeys(
+    "mod+shift+f",
+    () => openNew({ type: "search" }),
+    {
+      preventDefault: true,
+      enableOnFormTags: true,
+      enableOnContentEditable: true,
+    },
+    [openNew],
+  );
+
+  useHotkeys(
+    "mod+shift+n",
+    () => newNoteAndListen(),
+    {
+      preventDefault: true,
+      enableOnFormTags: true,
+      enableOnContentEditable: true,
+    },
+    [newNoteAndListen],
   );
 
   return {};

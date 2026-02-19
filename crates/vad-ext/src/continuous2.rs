@@ -4,10 +4,13 @@ use std::{
 };
 
 use futures_util::Stream;
+use pin_project::pin_project;
 
 use crate::{StreamingVad, VadConfig};
 
+#[pin_project]
 pub struct ContinuousVadMaskStream<S> {
+    #[pin]
     inner: S,
     vad: Option<StreamingVad>,
     cfg: VadConfig,
@@ -31,36 +34,34 @@ impl<S> ContinuousVadMaskStream<S> {
         self.cfg.amplitude_floor = floor;
         self
     }
+}
 
-    fn process_chunk(&mut self, chunk: &mut [f32]) {
-        if chunk.is_empty() {
-            return;
-        }
-
-        let vad = self
-            .vad
-            .get_or_insert_with(|| StreamingVad::with_config(chunk.len(), self.cfg.clone()));
-
-        vad.process_in_place(chunk, |frame, is_speech| {
-            if !is_speech {
-                frame.fill(0.0);
-            }
-        });
+fn process_chunk(vad: &mut Option<StreamingVad>, cfg: &VadConfig, chunk: &mut [f32]) {
+    if chunk.is_empty() {
+        return;
     }
+
+    let vad = vad.get_or_insert_with(|| StreamingVad::with_config(chunk.len(), cfg.clone()));
+
+    vad.process_in_place(chunk, |frame, is_speech| {
+        if !is_speech {
+            frame.fill(0.0);
+        }
+    });
 }
 
 impl<S, E> Stream for ContinuousVadMaskStream<S>
 where
-    S: Stream<Item = Result<Vec<f32>, E>> + Unpin,
+    S: Stream<Item = Result<Vec<f32>, E>>,
 {
     type Item = Result<Vec<f32>, E>;
 
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        let this = self.get_mut();
+        let this = self.project();
 
-        match Pin::new(&mut this.inner).poll_next(cx) {
+        match this.inner.poll_next(cx) {
             Poll::Ready(Some(Ok(mut chunk))) => {
-                this.process_chunk(&mut chunk);
+                process_chunk(this.vad, this.cfg, &mut chunk);
                 Poll::Ready(Some(Ok(chunk)))
             }
             other => other,
@@ -74,7 +75,7 @@ pub trait VadMaskExt: Sized {
 
 impl<S, E> VadMaskExt for S
 where
-    S: Stream<Item = Result<Vec<f32>, E>> + Sized + Unpin,
+    S: Stream<Item = Result<Vec<f32>, E>> + Sized,
 {
     fn mask_with_vad(self) -> ContinuousVadMaskStream<Self> {
         ContinuousVadMaskStream::new(self)

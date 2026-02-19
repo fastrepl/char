@@ -20,6 +20,10 @@ pub fn should_skip_path(relative_path: &str, path: &Path) -> bool {
         return true;
     }
 
+    if relative_path.starts_with("search_index") {
+        return true;
+    }
+
     if path
         .extension()
         .is_some_and(|ext| ext == "wav" || ext == "ogg" || ext == "tmp")
@@ -33,7 +37,8 @@ pub fn should_skip_path(relative_path: &str, path: &Path) -> bool {
 pub fn to_relative_path(path: &Path, base: &Path) -> String {
     path.strip_prefix(base)
         .unwrap_or(path)
-        .to_string_lossy()
+        .to_str()
+        .unwrap_or_default()
         .to_string()
 }
 
@@ -91,6 +96,18 @@ mod tests {
     fn test_skip_tmp_extension() {
         let path = PathBuf::from("/vault/temp/file.tmp");
         assert!(should_skip_path("temp/file.tmp", &path));
+    }
+
+    #[test]
+    fn test_skip_search_index() {
+        let path = PathBuf::from("/vault/search_index/abc123.fieldnorm");
+        assert!(should_skip_path("search_index/abc123.fieldnorm", &path));
+
+        let path = PathBuf::from("/vault/search_index/abc123.fast");
+        assert!(should_skip_path("search_index/abc123.fast", &path));
+
+        let path = PathBuf::from("/vault/search_index/abc123.term");
+        assert!(should_skip_path("search_index/abc123.term", &path));
     }
 
     #[test]

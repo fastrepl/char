@@ -87,7 +87,7 @@ const TOOL_NAMES: Record<string, string> = {
   figma: "Figma",
   slack: "Slack",
   github: "GitHub",
-  hyprnote: "Hyprnote",
+  hyprnote: "Char",
 };
 
 function ToolWithIcon({ tool }: { tool: string }) {
@@ -229,7 +229,7 @@ export function HyprnoteIcon() {
   return (
     <img
       src="/api/images/hyprnote/icon.png"
-      alt="Hyprnote"
+      alt="Char"
       className="inline-block align-middle size-4.5 mb-0.75 rounded-md"
     />
   );
@@ -258,6 +258,34 @@ export function Collapsible({
         {children}
       </div>
     </details>
+  );
+}
+
+export function FAQItem({
+  question,
+  children,
+}: {
+  question: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <details className="group last:border-b-0">
+      <summary className="cursor-pointer py-4 pr-8 font-medium text-neutral-800 hover:text-neutral-600 transition-colors flex items-start justify-between gap-4 list-none [&::-webkit-details-marker]:hidden">
+        <span>{question}</span>
+        <ChevronDown className="size-4 mt-1 shrink-0 text-neutral-400 group-open:rotate-180 transition-transform" />
+      </summary>
+      <div className="pb-4 text-neutral-600 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-2 [&_li]:pl-1 [&_p]:mb-3 [&_p:last-child]:mb-0">
+        {children}
+      </div>
+    </details>
+  );
+}
+
+export function FAQ({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded-lg border border-neutral-200 bg-neutral-50 divide-y divide-neutral-200 px-4">
+      {children}
+    </div>
   );
 }
 
@@ -370,5 +398,7 @@ export const jobsMdxComponents = {
   HyprnoteIcon,
   ChevronIcon,
   Collapsible,
+  FAQ,
+  FAQItem,
   CompanyStats,
 };

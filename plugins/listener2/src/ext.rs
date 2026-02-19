@@ -141,7 +141,7 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Listener2<'a, R, M> {
         let vtt = WebVttSubtitle::builder().cues(cues).build();
         vtt.export(&vtt_path).map_err(|e| e.to_string())?;
 
-        Ok(vtt_path.to_string_lossy().to_string())
+        Ok(vtt_path.to_string())
     }
 }
 

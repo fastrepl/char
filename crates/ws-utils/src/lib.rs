@@ -6,6 +6,7 @@ use std::task::{Context, Poll};
 
 use axum::extract::ws::{Message, WebSocket};
 use futures_util::{Stream, StreamExt, stream::SplitStream};
+use pin_project::pin_project;
 use tokio::sync::mpsc::{Receiver, channel};
 
 use hypr_audio_utils::{bytes_to_f32_samples, mix_audio_f32};
@@ -70,6 +71,7 @@ fn process_ws_message(message: Message, channels: Option<u32>) -> AudioProcessRe
     }
 }
 
+#[pin_project]
 pub struct WebSocketAudioSource {
     receiver: Option<SplitStream<WebSocket>>,
     sample_rate: u32,
@@ -91,18 +93,20 @@ impl WebSocketAudioSource {
 impl Stream for WebSocketAudioSource {
     type Item = f32;
 
-    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        let this = self.project();
+
         loop {
-            if self.buffer_idx < self.buffer.len() {
-                let sample = self.buffer[self.buffer_idx];
-                self.buffer_idx += 1;
+            if *this.buffer_idx < this.buffer.len() {
+                let sample = this.buffer[*this.buffer_idx];
+                *this.buffer_idx += 1;
                 return Poll::Ready(Some(sample));
             }
 
-            self.buffer.clear();
-            self.buffer_idx = 0;
+            this.buffer.clear();
+            *this.buffer_idx = 0;
 
-            let Some(receiver) = self.receiver.as_mut() else {
+            let Some(receiver) = this.receiver.as_mut() else {
                 return Poll::Ready(None);
             };
 
@@ -112,16 +116,16 @@ impl Stream for WebSocketAudioSource {
                         if samples.is_empty() {
                             continue;
                         }
-                        self.buffer.append(&mut samples);
-                        self.buffer_idx = 0;
+                        this.buffer.append(&mut samples);
+                        *this.buffer_idx = 0;
                     }
                     AudioProcessResult::DualSamples { mic, speaker } => {
                         let mut mixed = mix_audio_f32(&mic, &speaker);
                         if mixed.is_empty() {
                             continue;
                         }
-                        self.buffer.append(&mut mixed);
-                        self.buffer_idx = 0;
+                        this.buffer.append(&mut mixed);
+                        *this.buffer_idx = 0;
                     }
                     AudioProcessResult::Empty => continue,
                     AudioProcessResult::End => return Poll::Ready(None),
@@ -146,6 +150,7 @@ impl hypr_audio_interface::AsyncSource for WebSocketAudioSource {
 
 const AUDIO_CHANNEL_CAPACITY: usize = 1024;
 
+#[pin_project]
 pub struct ChannelAudioSource {
     receiver: Option<Receiver<Vec<f32>>>,
     sample_rate: u32,
@@ -167,18 +172,20 @@ impl ChannelAudioSource {
 impl Stream for ChannelAudioSource {
     type Item = f32;
 
-    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        let this = self.project();
+
         loop {
-            if self.buffer_idx < self.buffer.len() {
-                let sample = self.buffer[self.buffer_idx];
-                self.buffer_idx += 1;
+            if *this.buffer_idx < this.buffer.len() {
+                let sample = this.buffer[*this.buffer_idx];
+                *this.buffer_idx += 1;
                 return Poll::Ready(Some(sample));
             }
 
-            self.buffer.clear();
-            self.buffer_idx = 0;
+            this.buffer.clear();
+            *this.buffer_idx = 0;
 
-            let Some(receiver) = self.receiver.as_mut() else {
+            let Some(receiver) = this.receiver.as_mut() else {
                 return Poll::Ready(None);
             };
 
@@ -187,8 +194,8 @@ impl Stream for ChannelAudioSource {
                     if samples.is_empty() {
                         continue;
                     }
-                    self.buffer.append(&mut samples);
-                    self.buffer_idx = 0;
+                    this.buffer.append(&mut samples);
+                    *this.buffer_idx = 0;
                 }
                 Poll::Ready(None) => return Poll::Ready(None),
                 Poll::Pending => return Poll::Pending,

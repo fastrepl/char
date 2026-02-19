@@ -1,11 +1,11 @@
-use crate::{EnhanceTemplate, Participant, Session, Transcript, common_derives, filters};
+use crate::{EnhanceTemplate, Participant, Session, Transcript, common_derives};
+use hypr_askama_utils::filters;
 
 common_derives! {
     #[derive(askama::Template)]
     #[template(path = "enhance.system.md.jinja")]
     pub struct EnhanceSystem {
         pub language: Option<String>,
-        pub current_date: Option<String>,
     }
 }
 
@@ -30,14 +30,14 @@ mod tests {
         test_language_as_specified,
         EnhanceSystem {
             language: Some("ko".to_string()),
-            current_date: None,
         },
         |v| { v.contains("Korean") }
     );
 
     tpl_snapshot!(
         test_enhance_system_formatting,
-        EnhanceSystem { language: None, current_date: None },
+        EnhanceSystem { language: None },
+        fixed_date = "2025-01-01",
         @r#"
     # General Instructions
 

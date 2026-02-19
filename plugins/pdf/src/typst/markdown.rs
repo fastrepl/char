@@ -11,6 +11,8 @@ fn heading_level_to_equals(level: HeadingLevel) -> &'static str {
     }
 }
 
+use super::utils::escape_typst_string;
+
 pub fn markdown_to_typst(md: &str) -> String {
     let parser = Parser::new(md);
     let mut result = String::new();
@@ -81,7 +83,7 @@ pub fn markdown_to_typst(md: &str) -> String {
             }
 
             Event::Text(text) => {
-                result.push_str(&text);
+                result.push_str(&escape_typst_string(&text));
             }
 
             Event::SoftBreak => result.push('\n'),

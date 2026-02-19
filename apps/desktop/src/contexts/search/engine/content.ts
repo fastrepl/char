@@ -13,5 +13,10 @@ export function createSessionSearchableContent(
 export function createHumanSearchableContent(
   row: Record<string, unknown>,
 ): string {
-  return mergeContent([row.email, row.job_title, row.linkedin_username]);
+  return mergeContent([
+    row.email,
+    row.job_title,
+    row.linkedin_username,
+    row.memo,
+  ]);
 }

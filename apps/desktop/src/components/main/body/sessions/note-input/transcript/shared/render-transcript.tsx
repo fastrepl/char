@@ -1,13 +1,13 @@
 import { memo, useEffect, useMemo } from "react";
 
-import { cn } from "@hypr/utils";
-
-import * as main from "../../../../../../../store/tinybase/store/main";
-import {
+import type {
   PartialWord,
   RuntimeSpeakerHint,
   Segment,
-} from "../../../../../../../utils/segment";
+} from "@hypr/transcript";
+import { cn } from "@hypr/utils";
+
+import * as main from "../../../../../../../store/tinybase/store/main";
 import {
   defaultRenderLabelContext,
   SpeakerLabelManager,
@@ -155,8 +155,6 @@ const SegmentsList = memo(
     );
   },
   (prevProps, nextProps) => {
-    // Exclude `editable` and `operations` from comparison so toggling edit mode
-    // doesn't force the entire list to rerender. SegmentRenderer handles that instead.
     return (
       prevProps.transcriptId === nextProps.transcriptId &&
       prevProps.scrollElement === nextProps.scrollElement &&

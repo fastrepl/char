@@ -9,7 +9,13 @@ import { SearchResultItem } from "./item";
 const ITEMS_PER_PAGE = 3;
 const LOAD_MORE_STEP = 5;
 
-export function SearchResultGroup({ group }: { group: SearchGroup }) {
+export function SearchResultGroup({
+  group,
+  selectedId,
+}: {
+  group: SearchGroup;
+  selectedId: string | null;
+}) {
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
 
   if (group.totalCount === 0) {
@@ -30,7 +36,11 @@ export function SearchResultGroup({ group }: { group: SearchGroup }) {
       </div>
       <div>
         {visibleResults.map((result) => (
-          <SearchResultItem key={result.id} result={result} />
+          <SearchResultItem
+            key={result.id}
+            result={result}
+            isSelected={result.id === selectedId}
+          />
         ))}
       </div>
       {hasMore && (

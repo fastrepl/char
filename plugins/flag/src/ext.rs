@@ -1,4 +1,4 @@
-use crate::Feature;
+use crate::{Feature, FlagStrategy, ManagedState};
 
 pub struct Flag<'a, R: tauri::Runtime, M: tauri::Manager<R>> {
     manager: &'a M,
@@ -6,8 +6,39 @@ pub struct Flag<'a, R: tauri::Runtime, M: tauri::Manager<R>> {
 }
 
 impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Flag<'a, R, M> {
-    pub fn is_enabled(&self, feature: Feature) -> bool {
-        feature.is_enabled(self.manager)
+    pub async fn is_enabled(&self, feature: Feature) -> bool {
+        match feature.strategy() {
+            FlagStrategy::Debug => cfg!(debug_assertions),
+            FlagStrategy::Hardcoded(v) => v,
+            FlagStrategy::Posthog(key) => self.get_posthog_flag(key).await,
+        }
+    }
+
+    async fn get_posthog_flag(&self, key: &str) -> bool {
+        let state = self.manager.state::<ManagedState>();
+
+        let client = match &state.client {
+            Some(c) => c,
+            None => return false,
+        };
+
+        {
+            let cache = state.cache.read().await;
+            if let Some(ref flags) = *cache {
+                return flags.is_enabled(key);
+            }
+        }
+
+        let distinct_id = hypr_host::fingerprint();
+        match client.get_flags(&distinct_id, None).await {
+            Ok(flags) => {
+                let enabled = flags.is_enabled(key);
+                let mut cache = state.cache.write().await;
+                *cache = Some(flags);
+                enabled
+            }
+            Err(_) => false,
+        }
     }
 }
 
