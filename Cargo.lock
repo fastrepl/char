@@ -515,6 +515,7 @@ name = "api"
 version = "0.1.0"
 dependencies = [
  "analytics",
+ "api-asset",
  "api-auth",
  "api-calendar",
  "api-env",
@@ -543,6 +544,15 @@ dependencies = [
  "url",
  "utoipa",
  "vergen-gix",
+]
+
+[[package]]
+name = "api-asset"
+version = "0.1.0"
+dependencies = [
+ "axum 0.8.8",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
