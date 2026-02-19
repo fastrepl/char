@@ -325,7 +325,9 @@ function useConfiguredMapping(): Record<
           { id: "cloud", isDownloaded: billing.isPro },
         ];
 
-        models.push({ id: "cactus", isDownloaded: true });
+        if (isAppleSilicon) {
+          models.push({ id: "cactus", isDownloaded: true });
+        }
 
         if (isAppleSilicon) {
           models.push(

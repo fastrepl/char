@@ -6,10 +6,9 @@ use crate::response::CactusResponse;
 pub(crate) const RESPONSE_BUF_SIZE: usize = 64 * 1024;
 
 pub(crate) fn read_cstr_from_buf(buf: &[u8]) -> String {
-    unsafe {
-        let c_str = CStr::from_ptr(buf.as_ptr() as *const std::ffi::c_char);
-        c_str.to_string_lossy().into_owned()
-    }
+    CStr::from_bytes_until_nul(buf)
+        .map(|c| c.to_string_lossy().into_owned())
+        .unwrap_or_default()
 }
 
 pub(crate) fn parse_response_buf(buf: &[u8]) -> Result<CactusResponse> {
