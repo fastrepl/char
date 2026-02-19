@@ -64,10 +64,10 @@ export function MockChatInput({
         className,
       ])}
     >
-      <div className="flex-1 min-h-[24px] text-md text-stone-600">
+      <div className="flex-1 min-h-[24px] text-md text-stone-600 flex justify-start">
         {displayText}
         {isTyping && (
-          <span className="inline-block w-[2px] h-[14px] bg-stone-400 align-middle ml-[1px] animate-pulse" />
+          <span className="inline-block w-[2px] h-[24px] bg-blue-400 align-middle ml-[1px] animate-pulse" />
         )}
       </div>
 
