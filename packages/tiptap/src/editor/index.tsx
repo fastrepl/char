@@ -72,10 +72,19 @@ const Editor = forwardRef<{ editor: TiptapEditor | null }, EditorProps>(
 
     const extensions = useMemo(
       () => [
-        ...shared.getExtensions(placeholderComponent, fileHandlerConfig, extensionOptions),
+        ...shared.getExtensions(
+          placeholderComponent,
+          fileHandlerConfig,
+          extensionOptions,
+        ),
         ...(mentionConfig ? [mention(mentionConfig)] : []),
       ],
-      [mentionConfig, placeholderComponent, fileHandlerConfig, extensionOptions],
+      [
+        mentionConfig,
+        placeholderComponent,
+        fileHandlerConfig,
+        extensionOptions,
+      ],
     );
 
     const editorProps: Parameters<typeof useEditor>[0]["editorProps"] = useMemo(
