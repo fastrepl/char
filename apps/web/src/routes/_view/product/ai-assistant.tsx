@@ -183,8 +183,12 @@ function ScrollFeatureSection() {
     const containerH = container.offsetHeight;
     const viewH = window.innerHeight - HEADER_HEIGHT;
     const maxScroll = containerH - viewH;
+    const segmentSize = maxScroll / FEATURES.length;
     const targetScroll =
-      containerTop - HEADER_HEIGHT + (index / FEATURES.length) * maxScroll;
+      containerTop -
+      HEADER_HEIGHT +
+      (index / FEATURES.length) * maxScroll +
+      segmentSize * 0.1;
 
     window.scrollTo({ top: targetScroll, behavior: "smooth" });
   };
