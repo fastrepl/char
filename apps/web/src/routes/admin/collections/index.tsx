@@ -62,7 +62,7 @@ import { Spinner } from "@hypr/ui/components/ui/spinner";
 import { sonnerToast } from "@hypr/ui/components/ui/toast";
 import { cn } from "@hypr/utils";
 
-import BlogEditor from "@/components/admin/blog-editor";
+import BlogEditor, { useBlogEditor } from "@/components/admin/blog-editor";
 import { MediaSelectorModal } from "@/components/admin/media-selector-modal";
 import { defaultMDXComponents } from "@/components/mdx";
 import { fetchGitHubCredentials } from "@/functions/admin";
@@ -2732,66 +2732,33 @@ const FileEditor = React.forwardRef<
     featured: fileContent?.featured || false,
     category: fileContent?.category || "",
   });
-  const editorRef = useRef<{ editor: any } | null>(null);
   const autoSaveIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const onSaveRef = useRef(onSave);
   const contentRef = useRef(content);
   const metadataRef = useRef<ArticleMetadata>(lastSavedMetadataRef.current);
 
-  const slug = filePath.replace(/\.mdx$/, "").replace(/^articles\//, "");
+  const hasMetadataChanged = useCallback((currentMetadata: ArticleMetadata) => {
+    const saved = lastSavedMetadataRef.current;
+    return (
+      currentMetadata.meta_title !== saved.meta_title ||
+      currentMetadata.display_title !== saved.display_title ||
+      currentMetadata.meta_description !== saved.meta_description ||
+      JSON.stringify(currentMetadata.author) !== JSON.stringify(saved.author) ||
+      currentMetadata.date !== saved.date ||
+      currentMetadata.coverImage !== saved.coverImage ||
+      currentMetadata.featured !== saved.featured ||
+      currentMetadata.category !== saved.category
+    );
+  }, []);
 
-  const { mutate: importFromDocs, isPending: isImporting } = useMutation({
-    mutationFn: async (params: {
-      url: string;
-      title?: string;
-      author?: string | string[];
-      description?: string;
-      coverImage?: string;
-      slug?: string;
-    }) => {
-      const response = await fetch("/api/admin/import/google-docs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(params),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Import failed");
-      }
-      return response.json() as Promise<ImportResult>;
+  const handleContentChange = useCallback(
+    (newContent: string) => {
+      setContent(newContent);
+      const contentChanged = newContent !== lastSavedContentRef.current;
+      const metadataChanged = hasMetadataChanged(metadataRef.current);
+      setHasUnsavedChanges(contentChanged || metadataChanged);
     },
-    onSuccess: (data) => {
-      if (data.json) {
-        editorRef.current?.editor?.commands.setContent(data.json);
-        setHasUnsavedChanges(true);
-      }
-      if (data.frontmatter) {
-        if (data.frontmatter.meta_title)
-          setMetaTitle(data.frontmatter.meta_title);
-        if (data.frontmatter.display_title)
-          setDisplayTitle(data.frontmatter.display_title);
-        if (data.frontmatter.meta_description)
-          setMetaDescription(data.frontmatter.meta_description);
-        if (data.frontmatter.author) setAuthor([data.frontmatter.author]);
-        if (data.frontmatter.date) setDate(data.frontmatter.date);
-        if (data.frontmatter.coverImage)
-          setCoverImage(data.frontmatter.coverImage);
-      }
-    },
-  });
-
-  const handleGoogleDocsImport = useCallback(
-    (url: string) => {
-      importFromDocs({
-        url,
-        slug,
-        title: metaTitle,
-        author,
-        description: metaDescription,
-        coverImage,
-      });
-    },
-    [importFromDocs, slug, metaTitle, author, metaDescription, coverImage],
+    [hasMetadataChanged],
   );
 
   const handleImageUpload = useCallback(
@@ -2829,21 +2796,85 @@ const FileEditor = React.forwardRef<
     [],
   );
 
-  const handleMediaLibrarySelect = useCallback((publicUrl: string) => {
-    const editor = editorRef.current?.editor;
-    if (editor) {
-      editor
-        .chain()
-        .focus()
-        .insertContent({
-          type: "image",
-          attrs: { src: publicUrl },
-        })
-        .run();
-      setHasUnsavedChanges(true);
-    }
-    setIsMediaSelectorOpen(false);
-  }, []);
+  const editor = useBlogEditor({
+    content: fileContent?.content || "",
+    onUpdate: handleContentChange,
+    onImageUpload: handleImageUpload,
+  });
+
+  const slug = filePath.replace(/\.mdx$/, "").replace(/^articles\//, "");
+
+  const { mutate: importFromDocs, isPending: isImporting } = useMutation({
+    mutationFn: async (params: {
+      url: string;
+      title?: string;
+      author?: string | string[];
+      description?: string;
+      coverImage?: string;
+      slug?: string;
+    }) => {
+      const response = await fetch("/api/admin/import/google-docs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(params),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Import failed");
+      }
+      return response.json() as Promise<ImportResult>;
+    },
+    onSuccess: (data) => {
+      if (data.json) {
+        editor?.commands.setContent(data.json);
+        setHasUnsavedChanges(true);
+      }
+      if (data.frontmatter) {
+        if (data.frontmatter.meta_title)
+          setMetaTitle(data.frontmatter.meta_title);
+        if (data.frontmatter.display_title)
+          setDisplayTitle(data.frontmatter.display_title);
+        if (data.frontmatter.meta_description)
+          setMetaDescription(data.frontmatter.meta_description);
+        if (data.frontmatter.author) setAuthor([data.frontmatter.author]);
+        if (data.frontmatter.date) setDate(data.frontmatter.date);
+        if (data.frontmatter.coverImage)
+          setCoverImage(data.frontmatter.coverImage);
+      }
+    },
+  });
+
+  const handleGoogleDocsImport = useCallback(
+    (url: string) => {
+      importFromDocs({
+        url,
+        slug,
+        title: metaTitle,
+        author,
+        description: metaDescription,
+        coverImage,
+      });
+    },
+    [importFromDocs, slug, metaTitle, author, metaDescription, coverImage],
+  );
+
+  const handleMediaLibrarySelect = useCallback(
+    (publicUrl: string) => {
+      if (editor) {
+        editor
+          .chain()
+          .focus()
+          .insertContent({
+            type: "image",
+            attrs: { src: publicUrl },
+          })
+          .run();
+        setHasUnsavedChanges(true);
+      }
+      setIsMediaSelectorOpen(false);
+    },
+    [editor],
+  );
 
   const getMetadata = useCallback(
     (): ArticleMetadata => ({
@@ -2869,7 +2900,8 @@ const FileEditor = React.forwardRef<
   );
 
   useEffect(() => {
-    setContent(fileContent?.content || "");
+    const newContent = fileContent?.content || "";
+    setContent(newContent);
     setMetaTitle(fileContent?.meta_title || "");
     setDisplayTitle(fileContent?.display_title || "");
     setMetaDescription(fileContent?.meta_description || "");
@@ -2878,7 +2910,7 @@ const FileEditor = React.forwardRef<
     setCoverImage(fileContent?.coverImage || "");
     setFeatured(fileContent?.featured || false);
     setCategory(fileContent?.category || "");
-    lastSavedContentRef.current = fileContent?.content || "";
+    lastSavedContentRef.current = newContent;
     lastSavedMetadataRef.current = {
       meta_title: fileContent?.meta_title || "",
       display_title: fileContent?.display_title || "",
@@ -2890,7 +2922,10 @@ const FileEditor = React.forwardRef<
       category: fileContent?.category || "",
     };
     setHasUnsavedChanges(false);
-  }, [filePath, fileContent, pendingPRData?.hasPendingPR]);
+    if (editor) {
+      editor.commands.setContent(newContent, { contentType: "markdown" });
+    }
+  }, [filePath, fileContent, pendingPRData?.hasPendingPR, editor]);
 
   useEffect(() => {
     onDataChange({
@@ -2914,30 +2949,6 @@ const FileEditor = React.forwardRef<
     hasUnsavedChanges,
     autoSaveCountdown,
   ]);
-
-  const hasMetadataChanged = useCallback((currentMetadata: ArticleMetadata) => {
-    const saved = lastSavedMetadataRef.current;
-    return (
-      currentMetadata.meta_title !== saved.meta_title ||
-      currentMetadata.display_title !== saved.display_title ||
-      currentMetadata.meta_description !== saved.meta_description ||
-      JSON.stringify(currentMetadata.author) !== JSON.stringify(saved.author) ||
-      currentMetadata.date !== saved.date ||
-      currentMetadata.coverImage !== saved.coverImage ||
-      currentMetadata.featured !== saved.featured ||
-      currentMetadata.category !== saved.category
-    );
-  }, []);
-
-  const handleContentChange = useCallback(
-    (newContent: string) => {
-      setContent(newContent);
-      const contentChanged = newContent !== lastSavedContentRef.current;
-      const metadataChanged = hasMetadataChanged(metadataRef.current);
-      setHasUnsavedChanges(contentChanged || metadataChanged);
-    },
-    [hasMetadataChanged],
-  );
 
   useEffect(() => {
     const currentMetadata = getMetadata();
@@ -3188,12 +3199,9 @@ const FileEditor = React.forwardRef<
                 handlers={metadataHandlers}
               />
               <BlogEditor
-                ref={editorRef}
-                content={content}
-                onChange={handleContentChange}
+                editor={editor}
                 onGoogleDocsImport={handleGoogleDocsImport}
                 isImporting={isImporting}
-                onImageUpload={handleImageUpload}
                 onAddImageFromLibrary={() => setIsMediaSelectorOpen(true)}
                 showToolbar={false}
               />
@@ -3220,12 +3228,9 @@ const FileEditor = React.forwardRef<
       <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
         <ResizablePanel defaultSize={70} minSize={50}>
           <BlogEditor
-            ref={editorRef}
-            content={content}
-            onChange={handleContentChange}
+            editor={editor}
             onGoogleDocsImport={handleGoogleDocsImport}
             isImporting={isImporting}
-            onImageUpload={handleImageUpload}
             onAddImageFromLibrary={() => setIsMediaSelectorOpen(true)}
           />
         </ResizablePanel>
