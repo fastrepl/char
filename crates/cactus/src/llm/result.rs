@@ -1,7 +1,7 @@
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct CactusResponse {
-    #[serde(default)]
-    pub response: String,
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
+pub struct CompletionResult {
+    #[serde(default, rename = "response")]
+    pub text: String,
     #[serde(default)]
     pub confidence: f32,
     #[serde(default)]

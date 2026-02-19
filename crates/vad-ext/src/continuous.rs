@@ -12,10 +12,10 @@ use silero_rs::{VadConfig, VadSession, VadTransition};
 
 #[derive(Debug, Clone)]
 pub(crate) enum VadStreamItem {
+    #[allow(dead_code)]
     AudioSamples(Vec<f32>),
-    SpeechStart {
-        timestamp_ms: usize,
-    },
+    #[allow(dead_code)]
+    SpeechStart { timestamp_ms: usize },
     SpeechEnd {
         start_timestamp_ms: usize,
         end_timestamp_ms: usize,

@@ -2,7 +2,7 @@ use std::ffi::CString;
 use std::path::Path;
 
 use crate::error::{Error, Result};
-use crate::ffi_utils::{RESPONSE_BUF_SIZE, read_cstr_from_buf};
+use crate::ffi_utils::{RESPONSE_BUF_SIZE, parse_buf};
 use crate::model::Model;
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -54,6 +54,7 @@ impl Model {
         pcm: Option<&[u8]>,
         options: &VadOptions,
     ) -> Result<VadResult> {
+        let _guard = self.lock_inference();
         let options_c = CString::new(serde_json::to_string(options)?)?;
         let mut buf = vec![0u8; RESPONSE_BUF_SIZE];
 
@@ -74,11 +75,10 @@ impl Model {
         };
 
         if rc < 0 {
-            return Err(Error::from_ffi_or(format!("cactus_vad failed ({rc})")));
+            return Err(Error::Inference(format!("cactus_vad failed ({rc})")));
         }
 
-        let raw = read_cstr_from_buf(&buf);
-        let resp: RawVadResponse = serde_json::from_str(&raw)
+        let resp: RawVadResponse = parse_buf(&buf)
             .map_err(|e| Error::Inference(format!("failed to parse VAD response: {e}")))?;
 
         if !resp.success {
