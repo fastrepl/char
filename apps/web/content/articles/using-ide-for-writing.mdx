@@ -8,50 +8,31 @@ featured: true
 category: "Engineering"
 date: "2025-11-24"
 ---
-
 There's this quiet assumption in a lot of teams that "writing" should happen somewhere else. Some separate workspace. Some browser tab. Some editor UI designed to hide the machinery. Maybe that works for some people.
 
-But it never worked for us.
+We never adopted that model. We spend most of our waking hours inside an IDE. Zed, Cursor, VS Code, Neovim—pick your flavor. That's where we think, debug, rewrite, delete, and try again. So it always felt strange to open a WYSIWYG editor and suddenly pretend the way we work should change just because the output is letters instead of code.
 
-We spend most of our waking hours inside an IDE. Zed, Cursor, VS Code, Neovim—pick your flavor. That's our home. That's where we think, debug, rewrite, delete, and try again. So it always felt strange to open a WYSIWYG editor and suddenly pretend the way we work should change just because the output is letters instead of code.
-
-It's not just a workflow thing. It's a mindset thing.
+This isn't just a workflow preference. It changes how you approach writing itself.
 
 ## Writing Is Part of Building
 
-At Char everyone writes and everyone codes. There's no sharp line between the two. Writing lives next to version control, next to the app logic, next to everything else we ship. When you treat writing as something that belongs in the same world as code, a lot of decisions get simpler.
+At Char everyone writes and everyone codes. There's no sharp line between the two. Writing lives next to version control, next to the app logic, next to everything else we ship. When you treat writing as something that belongs in the same universe as code, a lot of decisions get simpler.
 
-For example: context switching disappears. I don't have to think, "Okay, now I'm leaving my environment to go write a blog post." I'm already here. I just open a new `.mdx` file and start typing. Cursor or Zed already knows my shortcuts, my theme, my keybindings, my muscle memory.
-
-It feels natural. It feels honest.
+Context switching disappears. I don't have to think, "Okay, now I'm leaving my environment to go write a blog post." I'm already here. I just open a new `.mdx` file and start typing. Cursor or Zed already knows my shortcuts, my theme, my keybindings, my muscle memory. It feels natural.
 
 ## WYSIWYG Tools Hide the Wrong Things
 
-WYSIWYG editors promise ease. Click here, bold there, drag an image, done. But once you try to do anything slightly unusual, they fall apart.
+WYSIWYG editors always promise ease. Click here, bold there, drag an image, done. But once you try to do anything slightly unusual, they fall apart. You start fighting the abstraction.
 
-You start fighting the abstraction.
+You want to add a custom callout, embed a component, adjust image borders, write MDX, leave inline comments for teammates, control spacing, or make the layout match the rest of the site. Suddenly you're clicking around a UI that was never meant for people who actually care what's happening under the hood. You end up debugging the editor itself.
 
-You want to:
-
-- add a custom callout
-- embed a component
-- adjust image borders
-- write MDX
-- leave inline comments for teammates
-- control spacing
-- make the layout match the rest of the site
-
-Suddenly you're clicking around a UI that was never meant for people who actually care what's happening under the hood. You end up debugging the editor itself.
-
-MDX is just easier. You write what you mean. You see what you wrote. Nothing forces your hand.
+MDX lets you write what you mean and see what you wrote. Nothing forces your hand.
 
 ## Markdown and MDX Are Not Barriers
 
-A lot of people think Markdown is something you need to "learn." But if you work in tech today, you already know it.
+A lot of people think Markdown is something you need to "learn." If you work in tech today, you already know it. You write `README.md` files, changelogs, and documentation. Most engineers can write Markdown faster than they can type into a WYSIWYG box.
 
-You write `README.md` files. You write changelogs. You write documentation. Most engineers can write Markdown faster than they can type into a WYSIWYG box.
-
-MDX just extends that. It lets you treat a blog post like a tiny interface:
+MDX extends that. It lets you treat a blog post like a tiny interface:
 
 ```jsx
 <figure src="image.jpg" caption="This is how it works" />
@@ -62,61 +43,29 @@ Things that would be impossible—or messy—in a visual editor are trivial when
 
 ## Content Becomes Code, Which Means It Scales
 
-This brings us to the real reason writing in an IDE works so well: version control. Every blog post, every line, every word is tracked. Reviewed. Diffed. Discussed.
+This is the real reason writing in an IDE works so well: version control. Every blog post, every line, every word is tracked, reviewed, diffed, and discussed.
 
-- **PRs become editorial workflows.**
-- **Comments become revision history.**
-- **Preview environments become draft URLs.**
+PRs become editorial workflows. Comments become revision history. Preview environments become draft URLs. Everything fits into the same mental model. You never have to worry that your CMS broke something silently, and you never have to trust a black box.
 
-Everything fits into the same mental model.
-
-You never have to worry that your CMS broke something silently. You never have to trust a black box.
-
-And if you ever want to migrate? You move the files. That's it.
-
-No database exports. No weird HTML blocks. No proprietary schemas.
+When you need to migrate, you move the files. That's it. No database exports, no weird HTML blocks, no proprietary schemas.
 
 ## The Downside: WYSIWYG Is Convenient (Until It Isn't)
 
-WYSIWYG editors do have a real advantage: convenience.
-
-- You drag in an image, and it uploads automatically.
-- You paste a screenshot, and it appears instantly.
-- You never think about storage buckets or public URLs.
+WYSIWYG editors do have a real advantage: convenience. You drag in an image and it uploads automatically. You paste a screenshot and it appears instantly. You never think about storage buckets or public URLs.
 
 For a lot of teams, that convenience becomes muscle memory. It's smooth, fast, and frankly nice.
 
-You can get the same convenience without giving up control.
+You can get the same convenience without giving up control. If you're already using GitHub plus an object store (Supabase Storage, S3, Cloudflare R2), you can drag-and-drop images directly into GitHub's web editor, upload them into your storage bucket, copy the public URL, and paste it into MDX. It takes seconds. Once you're used to it, it's not meaningfully slower than a WYSIWYG. The difference is that you own the flow and you're not trapped inside a CMS UI.
 
-If you're already using GitHub + an object store (Supabase Storage, S3, Cloudflare R2), you can:
-
-1. drag-and-drop images directly into GitHub's web editor
-2. or upload them into your storage bucket
-3. copy the public URL
-4. paste it into MDX
-
-It takes seconds. And once you're used to it, it's not meaningfully slower than a WYSIWYG. The difference is that **you own the flow** and you're not trapped inside a CMS UI.
-
-**WYSIWYG gives you convenience by locking you into its environment.**  
-**Git + MDX gives you convenience without the lock-in.**
+WYSIWYG gives you convenience by locking you into its environment. Git and MDX give you convenience without the lock-in.
 
 ## No Lock-In, No Surprises
 
-WYSIWYG editors are convenient in the beginning and painful later. They lock you into their structure, their parsing rules, their UI assumptions.
-
-But a folder of `.mdx` files? That lasts decades.
-
-It will outlive whatever CMS trend comes next.
-
-Your future self will thank you.
+WYSIWYG editors are convenient in the beginning and painful later. They lock you into their structure, their parsing rules, their UI assumptions. A folder of `.mdx` files lasts decades. It will outlive whatever CMS trend comes next.
 
 ## Writing Where You Think
 
-For me, writing in an IDE just feels right.
-
-It's quiet. It's fast. It respects your attention.
-
-There's no ceremony. No distractions. Just the ideas you're trying to express and the tools you already know how to use.
+For me, writing in an IDE just feels right. It's quiet and fast, and it respects your attention. There's no ceremony, no distractions. Just the ideas you're trying to express and the tools you already know how to use.
 
 Once you experience that kind of writing, it's hard to go back.
 
