@@ -335,6 +335,3 @@ rmcp = "0.14"
 rustls = { version = "0.23", default-features = false }
 sqlx = { version = "0.8", default-features = false }
 sysinfo = "0.38"
-
-[patch.crates-io]
-esaxx-rs = { git = "https://github.com/thewh1teagle/esaxx-rs.git", branch = "feat/dynamic-msvc-link" }
