@@ -1,5 +1,5 @@
 import { CalendarIcon, ExternalLinkIcon, SparklesIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 import NoteEditor from "@hypr/tiptap/editor";
@@ -105,6 +105,15 @@ export function TabContentChangelog({
   const scrollRef = useRef<HTMLDivElement>(null);
   const { atStart, atEnd } = useScrollFade(scrollRef);
 
+  const changelogExtensionOptions = useMemo(
+    () => ({
+      onLinkOpen: (url: string) => {
+        void openerCommands.openUrl(url, null);
+      },
+    }),
+    [],
+  );
+
   return (
     <StandardTabWrapper>
       <div className="flex flex-col h-full">
@@ -125,7 +134,11 @@ export function TabContentChangelog({
             {loading ? (
               <p className="text-neutral-500">Loading...</p>
             ) : content ? (
-              <NoteEditor initialContent={content} editable={false} />
+              <NoteEditor
+                initialContent={content}
+                editable={false}
+                extensionOptions={changelogExtensionOptions}
+              />
             ) : (
               <p className="text-neutral-500">
                 No changelog available for this version.

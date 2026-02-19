@@ -1,5 +1,6 @@
 import { forwardRef, useMemo } from "react";
 
+import { commands as openerCommands } from "@hypr/plugin-opener2";
 import { type JSONContent, TiptapEditor } from "@hypr/tiptap/editor";
 import NoteEditor from "@hypr/tiptap/editor";
 import { parseJsonContent } from "@hypr/tiptap/shared";
@@ -52,6 +53,15 @@ export const EnhancedEditor = forwardRef<
 
   const fileHandlerConfig = useMemo(() => ({ onImageUpload }), [onImageUpload]);
 
+  const extensionOptions = useMemo(
+    () => ({
+      onLinkOpen: (url: string) => {
+        void openerCommands.openUrl(url, null);
+      },
+    }),
+    [],
+  );
+
   return (
     <div className="h-full">
       <NoteEditor
@@ -62,6 +72,7 @@ export const EnhancedEditor = forwardRef<
         mentionConfig={mentionConfig}
         onNavigateToTitle={onNavigateToTitle}
         fileHandlerConfig={fileHandlerConfig}
+        extensionOptions={extensionOptions}
       />
     </div>
   );
