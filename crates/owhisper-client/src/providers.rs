@@ -311,6 +311,19 @@ impl Provider {
         }
     }
 
+    pub fn supports_native_multichannel(&self) -> bool {
+        match self {
+            Self::Deepgram | Self::Gladia => true,
+            Self::Soniox
+            | Self::AssemblyAI
+            | Self::Fireworks
+            | Self::OpenAI
+            | Self::ElevenLabs
+            | Self::DashScope
+            | Self::Mistral => false,
+        }
+    }
+
     pub fn control_message_types(&self) -> &'static [&'static str] {
         match self {
             Self::Deepgram => &["KeepAlive", "CloseStream", "Finalize"],

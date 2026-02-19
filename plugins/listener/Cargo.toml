@@ -31,7 +31,6 @@ hypr-intercept = { workspace = true }
 hypr-language = { workspace = true }
 hypr-mac = { workspace = true }
 hypr-vad-ext = { workspace = true }
-hypr-vad2 = { workspace = true }
 tauri-plugin-fs-sync = { workspace = true }
 
 owhisper-client = { workspace = true }

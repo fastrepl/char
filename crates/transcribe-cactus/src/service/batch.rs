@@ -81,7 +81,7 @@ fn transcribe_batch(
     let cactus_response = model
         .transcribe_file(temp_file.path(), &options)
         .map_err(|e| format!("transcription failed: {}", e))?;
-    let transcript = cactus_response.response.trim().to_string();
+    let transcript = cactus_response.text.trim().to_string();
     let confidence = cactus_response.confidence as f64;
     let words = build_batch_words(&transcript, total_duration, confidence);
 

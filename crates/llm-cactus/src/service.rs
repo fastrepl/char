@@ -82,9 +82,9 @@ impl Service<Request<Body>> for CompleteService {
             let messages = convert_messages(&request.messages);
             let options = build_options(&request);
 
-            let (stream, cancellation_token) =
+            let (stream, cancellation_token, _worker_handle) =
                 match hypr_cactus::complete_stream(&model, messages, options) {
-                    Ok(pair) => pair,
+                    Ok(tuple) => tuple,
                     Err(e) => {
                         return Ok(
                             (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
