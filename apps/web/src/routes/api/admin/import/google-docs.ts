@@ -198,20 +198,6 @@ function cleanGoogleRedirectUrls(node: JSONContent): void {
   }
 }
 
-function stripUnderlineFromLinks(node: JSONContent): void {
-  if (node.marks) {
-    const hasLink = node.marks.some((m) => m.type === "link");
-    if (hasLink) {
-      node.marks = node.marks.filter((m) => m.type !== "underline");
-    }
-  }
-  if (node.content) {
-    for (const child of node.content) {
-      stripUnderlineFromLinks(child);
-    }
-  }
-}
-
 function resolveGoogleRedirect(url: string): string {
   try {
     const parsed = new URL(url);
@@ -331,7 +317,6 @@ export const Route = createFileRoute("/api/admin/import/google-docs")({
           ]);
           clean(rawJson);
           cleanGoogleRedirectUrls(rawJson);
-          stripUnderlineFromLinks(rawJson);
 
           const base64Images = extractBase64ImageNodes(rawJson);
           if (base64Images.length > 0) {
