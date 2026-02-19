@@ -2825,9 +2825,8 @@ const FileEditor = React.forwardRef<
       return response.json() as Promise<ImportResult>;
     },
     onSuccess: (data) => {
-      if (data.json) {
-        editor?.commands.setContent(data.json);
-        setHasUnsavedChanges(true);
+      if (data.md) {
+        editor?.commands.setContent(data.md, { contentType: "markdown" });
       }
       if (data.frontmatter) {
         if (data.frontmatter.meta_title)
@@ -2836,7 +2835,7 @@ const FileEditor = React.forwardRef<
           setDisplayTitle(data.frontmatter.display_title);
         if (data.frontmatter.meta_description)
           setMetaDescription(data.frontmatter.meta_description);
-        if (data.frontmatter.author) setAuthor([data.frontmatter.author]);
+        if (data.frontmatter.author) setAuthor(data.frontmatter.author);
         if (data.frontmatter.date) setDate(data.frontmatter.date);
         if (data.frontmatter.coverImage)
           setCoverImage(data.frontmatter.coverImage);
@@ -3309,12 +3308,12 @@ function FileItem({
 
 interface ImportResult {
   success: boolean;
-  json?: JSONContent;
+  md?: string;
   frontmatter?: {
     meta_title: string;
     display_title: string;
     meta_description: string;
-    author: string;
+    author: string[];
     coverImage: string;
     featured: boolean;
     date: string;

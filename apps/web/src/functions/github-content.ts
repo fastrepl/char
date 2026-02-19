@@ -113,7 +113,7 @@ meta_description: ""
 author:
 - "John Jeong"
 featured: false
-category: "Case Study"
+category: "Product"
 date: "${today}"
 ---
 
