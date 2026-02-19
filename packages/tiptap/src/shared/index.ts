@@ -1,5 +1,6 @@
 export * from "./animation";
 export * from "./clip";
+export * from "./embed-block";
 export * from "./extensions";
 export * from "./hashtag";
 export * from "./schema-validation";

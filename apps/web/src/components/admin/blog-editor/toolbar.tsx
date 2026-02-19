@@ -5,6 +5,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CodeIcon,
+  CodeXmlIcon,
   FilmIcon,
   Heading1Icon,
   Heading2Icon,
@@ -438,6 +439,21 @@ export function Toolbar({
             </div>
           )}
         </div>
+
+        <ToolbarDivider />
+
+        <ToolbarButton
+          onClick={() => {
+            editor
+              .chain()
+              .focus()
+              .insertContent({ type: "embedBlock", attrs: { content: "" } })
+              .run();
+          }}
+          title="Insert Embed Block"
+        >
+          <CodeXmlIcon className="size-4" />
+        </ToolbarButton>
 
         <div className="flex-1" />
 
