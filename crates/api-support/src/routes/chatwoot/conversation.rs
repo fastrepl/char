@@ -6,6 +6,7 @@ use crate::state::AppState;
 
 #[derive(Debug, Deserialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
+#[allow(dead_code)]
 pub struct CreateConversationRequest {
     pub source_id: String,
     #[serde(default)]
