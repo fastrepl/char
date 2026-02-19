@@ -194,15 +194,13 @@
   }
 }
 
-/* Search result highlighting styles */
+/* Search result highlighting styles — matches transcript's bg-yellow-200/50 and bg-yellow-500 */
 .search-result {
-  background-color: #ffeb3b;
+  background-color: rgb(254 240 138 / 0.5);
   border-radius: 2px;
-  padding: 1px 0;
 }
 
 .search-result-current {
-  background-color: #31e054 !important;
+  background-color: rgb(234 179 8) !important;
   border-radius: 2px;
-  padding: 1px 0;
 }

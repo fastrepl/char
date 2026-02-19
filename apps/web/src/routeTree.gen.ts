@@ -148,7 +148,9 @@ import { Route as ApiAdminBlogUploadImageRouteImport } from './routes/api/admin/
 import { Route as ViewIntegrationsCategorySlugRouteImport } from './routes/_view/integrations/$category.$slug'
 import { Route as ViewGalleryTypeSlugRouteImport } from './routes/_view/gallery/$type.$slug'
 import { Route as ViewDownloadNightlyWindowsRouteImport } from './routes/_view/download/nightly/windows'
+import { Route as ViewDownloadNightlyLinuxDebAarch64RouteImport } from './routes/_view/download/nightly/linux-deb-aarch64'
 import { Route as ViewDownloadNightlyLinuxDebRouteImport } from './routes/_view/download/nightly/linux-deb'
+import { Route as ViewDownloadNightlyLinuxAppimageAarch64RouteImport } from './routes/_view/download/nightly/linux-appimage-aarch64'
 import { Route as ViewDownloadNightlyLinuxAppimageRouteImport } from './routes/_view/download/nightly/linux-appimage'
 import { Route as ViewDownloadNightlyAppleSiliconRouteImport } from './routes/_view/download/nightly/apple-silicon'
 import { Route as ViewDownloadNightlyAppleIntelRouteImport } from './routes/_view/download/nightly/apple-intel'
@@ -866,10 +868,22 @@ const ViewDownloadNightlyWindowsRoute =
     path: '/download/nightly/windows',
     getParentRoute: () => ViewRouteRoute,
   } as any)
+const ViewDownloadNightlyLinuxDebAarch64Route =
+  ViewDownloadNightlyLinuxDebAarch64RouteImport.update({
+    id: '/download/nightly/linux-deb-aarch64',
+    path: '/download/nightly/linux-deb-aarch64',
+    getParentRoute: () => ViewRouteRoute,
+  } as any)
 const ViewDownloadNightlyLinuxDebRoute =
   ViewDownloadNightlyLinuxDebRouteImport.update({
     id: '/download/nightly/linux-deb',
     path: '/download/nightly/linux-deb',
+    getParentRoute: () => ViewRouteRoute,
+  } as any)
+const ViewDownloadNightlyLinuxAppimageAarch64Route =
+  ViewDownloadNightlyLinuxAppimageAarch64RouteImport.update({
+    id: '/download/nightly/linux-appimage-aarch64',
+    path: '/download/nightly/linux-appimage-aarch64',
     getParentRoute: () => ViewRouteRoute,
   } as any)
 const ViewDownloadNightlyLinuxAppimageRoute =
@@ -1004,7 +1018,9 @@ export interface FileRoutesByFullPath {
   '/download/nightly/apple-intel': typeof ViewDownloadNightlyAppleIntelRoute
   '/download/nightly/apple-silicon': typeof ViewDownloadNightlyAppleSiliconRoute
   '/download/nightly/linux-appimage': typeof ViewDownloadNightlyLinuxAppimageRoute
+  '/download/nightly/linux-appimage-aarch64': typeof ViewDownloadNightlyLinuxAppimageAarch64Route
   '/download/nightly/linux-deb': typeof ViewDownloadNightlyLinuxDebRoute
+  '/download/nightly/linux-deb-aarch64': typeof ViewDownloadNightlyLinuxDebAarch64Route
   '/download/nightly/windows': typeof ViewDownloadNightlyWindowsRoute
   '/gallery/$type/$slug': typeof ViewGalleryTypeSlugRoute
   '/integrations/$category/$slug': typeof ViewIntegrationsCategorySlugRoute
@@ -1144,7 +1160,9 @@ export interface FileRoutesByTo {
   '/download/nightly/apple-intel': typeof ViewDownloadNightlyAppleIntelRoute
   '/download/nightly/apple-silicon': typeof ViewDownloadNightlyAppleSiliconRoute
   '/download/nightly/linux-appimage': typeof ViewDownloadNightlyLinuxAppimageRoute
+  '/download/nightly/linux-appimage-aarch64': typeof ViewDownloadNightlyLinuxAppimageAarch64Route
   '/download/nightly/linux-deb': typeof ViewDownloadNightlyLinuxDebRoute
+  '/download/nightly/linux-deb-aarch64': typeof ViewDownloadNightlyLinuxDebAarch64Route
   '/download/nightly/windows': typeof ViewDownloadNightlyWindowsRoute
   '/gallery/$type/$slug': typeof ViewGalleryTypeSlugRoute
   '/integrations/$category/$slug': typeof ViewIntegrationsCategorySlugRoute
@@ -1290,7 +1308,9 @@ export interface FileRoutesById {
   '/_view/download/nightly/apple-intel': typeof ViewDownloadNightlyAppleIntelRoute
   '/_view/download/nightly/apple-silicon': typeof ViewDownloadNightlyAppleSiliconRoute
   '/_view/download/nightly/linux-appimage': typeof ViewDownloadNightlyLinuxAppimageRoute
+  '/_view/download/nightly/linux-appimage-aarch64': typeof ViewDownloadNightlyLinuxAppimageAarch64Route
   '/_view/download/nightly/linux-deb': typeof ViewDownloadNightlyLinuxDebRoute
+  '/_view/download/nightly/linux-deb-aarch64': typeof ViewDownloadNightlyLinuxDebAarch64Route
   '/_view/download/nightly/windows': typeof ViewDownloadNightlyWindowsRoute
   '/_view/gallery/$type/$slug': typeof ViewGalleryTypeSlugRoute
   '/_view/integrations/$category/$slug': typeof ViewIntegrationsCategorySlugRoute
@@ -1436,7 +1456,9 @@ export interface FileRouteTypes {
     | '/download/nightly/apple-intel'
     | '/download/nightly/apple-silicon'
     | '/download/nightly/linux-appimage'
+    | '/download/nightly/linux-appimage-aarch64'
     | '/download/nightly/linux-deb'
+    | '/download/nightly/linux-deb-aarch64'
     | '/download/nightly/windows'
     | '/gallery/$type/$slug'
     | '/integrations/$category/$slug'
@@ -1576,7 +1598,9 @@ export interface FileRouteTypes {
     | '/download/nightly/apple-intel'
     | '/download/nightly/apple-silicon'
     | '/download/nightly/linux-appimage'
+    | '/download/nightly/linux-appimage-aarch64'
     | '/download/nightly/linux-deb'
+    | '/download/nightly/linux-deb-aarch64'
     | '/download/nightly/windows'
     | '/gallery/$type/$slug'
     | '/integrations/$category/$slug'
@@ -1721,7 +1745,9 @@ export interface FileRouteTypes {
     | '/_view/download/nightly/apple-intel'
     | '/_view/download/nightly/apple-silicon'
     | '/_view/download/nightly/linux-appimage'
+    | '/_view/download/nightly/linux-appimage-aarch64'
     | '/_view/download/nightly/linux-deb'
+    | '/_view/download/nightly/linux-deb-aarch64'
     | '/_view/download/nightly/windows'
     | '/_view/gallery/$type/$slug'
     | '/_view/integrations/$category/$slug'
@@ -2780,11 +2806,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ViewDownloadNightlyWindowsRouteImport
       parentRoute: typeof ViewRouteRoute
     }
+    '/_view/download/nightly/linux-deb-aarch64': {
+      id: '/_view/download/nightly/linux-deb-aarch64'
+      path: '/download/nightly/linux-deb-aarch64'
+      fullPath: '/download/nightly/linux-deb-aarch64'
+      preLoaderRoute: typeof ViewDownloadNightlyLinuxDebAarch64RouteImport
+      parentRoute: typeof ViewRouteRoute
+    }
     '/_view/download/nightly/linux-deb': {
       id: '/_view/download/nightly/linux-deb'
       path: '/download/nightly/linux-deb'
       fullPath: '/download/nightly/linux-deb'
       preLoaderRoute: typeof ViewDownloadNightlyLinuxDebRouteImport
+      parentRoute: typeof ViewRouteRoute
+    }
+    '/_view/download/nightly/linux-appimage-aarch64': {
+      id: '/_view/download/nightly/linux-appimage-aarch64'
+      path: '/download/nightly/linux-appimage-aarch64'
+      fullPath: '/download/nightly/linux-appimage-aarch64'
+      preLoaderRoute: typeof ViewDownloadNightlyLinuxAppimageAarch64RouteImport
       parentRoute: typeof ViewRouteRoute
     }
     '/_view/download/nightly/linux-appimage': {
@@ -2936,7 +2976,9 @@ interface ViewRouteRouteChildren {
   ViewDownloadNightlyAppleIntelRoute: typeof ViewDownloadNightlyAppleIntelRoute
   ViewDownloadNightlyAppleSiliconRoute: typeof ViewDownloadNightlyAppleSiliconRoute
   ViewDownloadNightlyLinuxAppimageRoute: typeof ViewDownloadNightlyLinuxAppimageRoute
+  ViewDownloadNightlyLinuxAppimageAarch64Route: typeof ViewDownloadNightlyLinuxAppimageAarch64Route
   ViewDownloadNightlyLinuxDebRoute: typeof ViewDownloadNightlyLinuxDebRoute
+  ViewDownloadNightlyLinuxDebAarch64Route: typeof ViewDownloadNightlyLinuxDebAarch64Route
   ViewDownloadNightlyWindowsRoute: typeof ViewDownloadNightlyWindowsRoute
   ViewGalleryTypeSlugRoute: typeof ViewGalleryTypeSlugRoute
   ViewIntegrationsCategorySlugRoute: typeof ViewIntegrationsCategorySlugRoute
@@ -3017,7 +3059,11 @@ const ViewRouteRouteChildren: ViewRouteRouteChildren = {
   ViewDownloadNightlyAppleIntelRoute: ViewDownloadNightlyAppleIntelRoute,
   ViewDownloadNightlyAppleSiliconRoute: ViewDownloadNightlyAppleSiliconRoute,
   ViewDownloadNightlyLinuxAppimageRoute: ViewDownloadNightlyLinuxAppimageRoute,
+  ViewDownloadNightlyLinuxAppimageAarch64Route:
+    ViewDownloadNightlyLinuxAppimageAarch64Route,
   ViewDownloadNightlyLinuxDebRoute: ViewDownloadNightlyLinuxDebRoute,
+  ViewDownloadNightlyLinuxDebAarch64Route:
+    ViewDownloadNightlyLinuxDebAarch64Route,
   ViewDownloadNightlyWindowsRoute: ViewDownloadNightlyWindowsRoute,
   ViewGalleryTypeSlugRoute: ViewGalleryTypeSlugRoute,
   ViewIntegrationsCategorySlugRoute: ViewIntegrationsCategorySlugRoute,
@@ -3105,13 +3151,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

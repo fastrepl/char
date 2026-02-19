@@ -70,7 +70,7 @@ windowDestroyed: "plugin:windows:window-destroyed"
 /** user-defined types **/
 
 export type AiState = { tab: AiTab | null }
-export type AiTab = "transcription" | "intelligence" | "templates" | "shortcuts" | "prompts"
+export type AiTab = "transcription" | "intelligence" | "templates" | "shortcuts" | "prompts" | "memory"
 export type AppWindow = { type: "main" } | { type: "control" }
 export type ChangelogState = { previous: string | null; current: string }
 export type ChatShortcutsState = { isWebMode: boolean | null; selectedMineId: string | null; selectedWebIndex: number | null }

@@ -7,13 +7,6 @@ exclude = ["/js", "/node_modules"]
 links = "tauri-plugin-local-llm"
 description = ""
 
-[features]
-default = []
-metal = ["hypr-llama/metal"]
-cuda = ["hypr-llama/cuda"]
-vulkan = ["hypr-llama/vulkan"]
-native = ["hypr-llama/native"]
-
 [build-dependencies]
 tauri-plugin = { workspace = true, features = ["build"] }
 
@@ -29,9 +22,6 @@ hypr-download-interface = { workspace = true }
 hypr-file = { workspace = true }
 hypr-gbnf = { workspace = true }
 hypr-gguf = { workspace = true }
-hypr-llama = { workspace = true }
-hypr-llm = { workspace = true }
-hypr-llm-interface = { workspace = true }
 
 tauri = { workspace = true, features = ["test"] }
 tauri-specta = { workspace = true, features = ["derive", "typescript"] }

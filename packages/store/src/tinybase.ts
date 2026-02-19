@@ -13,6 +13,7 @@ import {
   mappingMentionSchema,
   mappingSessionParticipantSchema,
   mappingTagSessionSchema,
+  memorySchema,
   organizationSchema,
   promptSchema,
   sessionSchema,
@@ -146,6 +147,12 @@ export const tableSchemaForTinybase = {
     title: { type: "string" },
     content: { type: "string" },
   } as const satisfies InferTinyBaseSchema<typeof chatShortcutSchema>,
+  memories: {
+    user_id: { type: "string" },
+    type: { type: "string" },
+    text: { type: "string" },
+    created_at: { type: "string" },
+  } as const satisfies InferTinyBaseSchema<typeof memorySchema>,
 } as const satisfies TablesSchema;
 
 export const valueSchemaForTinybase = {

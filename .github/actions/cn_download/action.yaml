@@ -9,7 +9,7 @@ inputs:
     description: "Release channel (stable, nightly)"
     required: true
   platform:
-    description: "Public platform (dmg-aarch64, dmg-x86_64, appimage-x86_64, debian-x86_64)"
+    description: "Public platform (dmg-aarch64, dmg-x86_64, appimage-x86_64, debian-x86_64, appimage-aarch64, debian-aarch64)"
     required: true
   output:
     description: "Output filename"

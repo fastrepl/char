@@ -205,16 +205,7 @@ export function SelectProviderAndModel() {
                 );
               }
 
-              const allModels = configuredProviders?.[providerId]?.models ?? [];
-              const models = allModels.filter((model) => {
-                if (model.id === "cloud") {
-                  return true;
-                }
-                if (model.id.startsWith("Quantized")) {
-                  return model.isDownloaded;
-                }
-                return true;
-              });
+              const models = configuredProviders?.[providerId]?.models ?? [];
 
               return (
                 <div className="flex-3 min-w-0">
@@ -333,6 +324,10 @@ function useConfiguredMapping(): Record<
         const models: Array<{ id: string; isDownloaded: boolean }> = [
           { id: "cloud", isDownloaded: billing.isPro },
         ];
+
+        if (isAppleSilicon) {
+          models.push({ id: "cactus", isDownloaded: true });
+        }
 
         if (isAppleSilicon) {
           models.push(

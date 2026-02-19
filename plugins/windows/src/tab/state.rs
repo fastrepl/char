@@ -85,6 +85,8 @@ crate::common_derives! {
         Shortcuts,
         #[serde(rename = "prompts")]
         Prompts,
+        #[serde(rename = "memory")]
+        Memory,
     }
 }
 

@@ -35,12 +35,6 @@ pub async fn list_supported_model() -> Result<Vec<ModelInfo>, String> {
 
 #[tauri::command]
 #[specta::specta]
-pub async fn is_server_running<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> bool {
-    app.is_server_running().await
-}
-
-#[tauri::command]
-#[specta::specta]
 pub async fn is_model_downloaded<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     model: crate::SupportedModel,
@@ -69,25 +63,6 @@ pub async fn download_model<R: tauri::Runtime>(
     app.download_model(model, channel)
         .await
         .map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-#[specta::specta]
-pub async fn start_server<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> Result<String, String> {
-    app.start_server().await.map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-#[specta::specta]
-pub async fn stop_server<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> Result<(), String> {
-    app.stop_server().await.map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-#[specta::specta]
-pub async fn restart_server<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> Result<String, String> {
-    app.stop_server().await.map_err(|e| e.to_string())?;
-    app.start_server().await.map_err(|e| e.to_string())
 }
 
 #[tauri::command]

@@ -156,6 +156,7 @@ impl hypr_audio_interface::AsyncSource for SpeakerStream {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use futures_util::StreamExt;
     use hypr_audio_interface::AsyncSource;
     use serial_test::serial;
     use std::sync::atomic::Ordering;

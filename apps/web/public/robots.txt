@@ -41,4 +41,4 @@ Disallow: /vs/
 # AI crawlers can find detailed content at /llms.txt
 
 # Sitemap location
-Sitemap: https://hyprnote.com/sitemap.xml
+Sitemap: https://char.com/sitemap.xml
