@@ -73,7 +73,8 @@ impl Model {
     }
 
     pub(crate) fn lock_inference(&self) -> InferenceGuard<'_> {
-        let guard = self.inference_lock
+        let guard = self
+            .inference_lock
             .lock()
             .unwrap_or_else(|e| e.into_inner());
         InferenceGuard {
