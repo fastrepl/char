@@ -326,7 +326,9 @@ Hyprnote is an AI-powered notepad designed for private meetings with complete on
                 .iter()
                 .map(|item| match item {
                     Response::TextDelta(text) => text.clone(),
-                    Response::Reasoning(reasoning) => reasoning.clone(),
+                    Response::Reasoning(reasoning) => {
+                        format!("<think>\n{}\n</think>\n", reasoning)
+                    }
                     _ => "".to_string(),
                 })
                 .collect::<String>();
