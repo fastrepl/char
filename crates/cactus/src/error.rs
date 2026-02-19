@@ -39,6 +39,9 @@ fn last_cactus_error() -> Option<String> {
         if ptr.is_null() {
             return None;
         }
+        // SAFETY: `cactus_get_last_error` returns a pointer to a valid,
+        // null-terminated C string owned by the C library. The null check
+        // above guards against null pointers.
         let s = std::ffi::CStr::from_ptr(ptr).to_string_lossy().into_owned();
         if s.is_empty() { None } else { Some(s) }
     }

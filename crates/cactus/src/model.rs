@@ -9,6 +9,9 @@ pub struct Model {
 }
 
 unsafe impl Send for Model {}
+// SAFETY: The underlying C++ model handle is protected by `std::mutex model_mutex`
+// on the C++ side, making concurrent `&Model` access (e.g. `stop()` from one thread
+// while inference runs on another) safe.
 unsafe impl Sync for Model {}
 
 impl Model {

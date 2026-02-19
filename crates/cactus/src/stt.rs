@@ -170,13 +170,8 @@ impl<'a> Transcriber<'a> {
     }
 
     pub fn process_samples(&mut self, samples: &[i16]) -> Result<StreamResult> {
-        let bytes = unsafe {
-            std::slice::from_raw_parts(
-                samples.as_ptr() as *const u8,
-                samples.len() * std::mem::size_of::<i16>(),
-            )
-        };
-        self.process(bytes)
+        let bytes: Vec<u8> = samples.iter().flat_map(|s| s.to_ne_bytes()).collect();
+        self.process(&bytes)
     }
 
     pub fn process_f32(&mut self, samples: &[f32]) -> Result<StreamResult> {

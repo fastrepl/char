@@ -43,10 +43,17 @@ unsafe extern "C" fn token_trampoline<F: FnMut(&str) -> bool>(
         return;
     }
 
-    unsafe {
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| unsafe {
         let state = &mut *(user_data as *mut CallbackState<F>);
         let chunk = CStr::from_ptr(token).to_string_lossy();
         if !(state.on_token)(&chunk) {
+            state.stopped = true;
+        }
+    }));
+
+    if result.is_err() {
+        unsafe {
+            let state = &mut *(user_data as *mut CallbackState<F>);
             state.stopped = true;
         }
     }
