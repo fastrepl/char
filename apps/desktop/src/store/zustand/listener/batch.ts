@@ -1,7 +1,7 @@
 import type { StoreApi } from "zustand";
 
 import type { BatchResponse } from "@hypr/plugin-listener2";
-import type { TranscriptWord } from "@hypr/plugin-listener2";
+import type { SpeakerHint, TranscriptWord } from "@hypr/plugin-listener2";
 
 import {
   ChannelProfile,
@@ -36,6 +36,7 @@ export type BatchActions = {
   handleBatchResponseStreamed: (
     sessionId: string,
     words: TranscriptWord[],
+    speakerHints: SpeakerHint[],
     percentage: number,
   ) => void;
   handleBatchFailed: (sessionId: string, error: string) => void;
@@ -88,7 +89,7 @@ export const createBatchSlice = <T extends BatchState>(
     });
   },
 
-  handleBatchResponseStreamed: (sessionId, words, percentage) => {
+  handleBatchResponseStreamed: (sessionId, words, speakerHints, percentage) => {
     const persist = get().batchPersist[sessionId];
 
     if (persist && words.length > 0) {
@@ -99,15 +100,16 @@ export const createBatchSlice = <T extends BatchState>(
         channel: w.channel,
       }));
 
-      const hints: RuntimeSpeakerHint[] = words
-        .filter((w) => w.speaker !== null)
-        .map((w, i) => ({
-          wordIndex: i,
+      const hints: RuntimeSpeakerHint[] = speakerHints.map((h) => {
+        const wordIndex = words.findIndex((w) => w.id === h.word_id);
+        return {
+          wordIndex: wordIndex >= 0 ? wordIndex : 0,
           data: {
             type: "provider_speaker_index" as const,
-            speaker_index: w.speaker!,
+            speaker_index: h.speaker_index,
           },
-        }));
+        };
+      });
 
       persist(wordLikes, hints);
     }

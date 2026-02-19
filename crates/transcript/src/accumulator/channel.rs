@@ -1,11 +1,11 @@
 use super::words::{
-    TranscriptWord, assign_id, dedup, ensure_space_prefix, splice, stitch, strip_overlap,
+    RawWord, SpeakerHint, TranscriptWord, dedup, finalize_words, splice, stitch, strip_overlap,
 };
 
 pub(super) struct ChannelState {
     watermark: i64,
-    held: Option<TranscriptWord>,
-    partials: Vec<TranscriptWord>,
+    held: Option<RawWord>,
+    partials: Vec<RawWord>,
 }
 
 impl ChannelState {
@@ -17,42 +17,36 @@ impl ChannelState {
         }
     }
 
-    pub(super) fn partials(&self) -> &[TranscriptWord] {
+    pub(super) fn partials(&self) -> &[RawWord] {
         &self.partials
     }
 
-    pub(super) fn apply_final(&mut self, words: Vec<TranscriptWord>) -> Vec<TranscriptWord> {
+    pub(super) fn apply_final(
+        &mut self,
+        words: Vec<RawWord>,
+    ) -> (Vec<TranscriptWord>, Vec<SpeakerHint>) {
         let response_end = words.last().map_or(0, |w| w.end_ms);
-        let new_words: Vec<_> = dedup(words, self.watermark)
-            .into_iter()
-            .map(assign_id)
-            .collect();
+        let new_words: Vec<_> = dedup(words, self.watermark);
 
         if new_words.is_empty() {
-            return vec![];
+            return (vec![], vec![]);
         }
 
         self.watermark = response_end;
         self.partials = strip_overlap(std::mem::take(&mut self.partials), response_end);
 
-        let (mut emitted, held) = stitch(self.held.take(), new_words);
+        let (emitted, held) = stitch(self.held.take(), new_words);
         self.held = held;
-        emitted.iter_mut().for_each(ensure_space_prefix);
-        emitted
+        finalize_words(emitted)
     }
 
-    pub(super) fn apply_partial(&mut self, words: Vec<TranscriptWord>) {
+    pub(super) fn apply_partial(&mut self, words: Vec<RawWord>) {
         self.partials = splice(&self.partials, words);
     }
 
-    pub(super) fn drain(&mut self) -> Vec<TranscriptWord> {
-        let mut result: Vec<_> = self.held.take().into_iter().collect();
-        result.extend(
-            std::mem::take(&mut self.partials)
-                .into_iter()
-                .map(assign_id),
-        );
-        result.iter_mut().for_each(ensure_space_prefix);
-        result
+    pub(super) fn drain(&mut self) -> (Vec<TranscriptWord>, Vec<SpeakerHint>) {
+        let mut raw: Vec<_> = self.held.take().into_iter().collect();
+        raw.extend(std::mem::take(&mut self.partials));
+        finalize_words(raw)
     }
 }

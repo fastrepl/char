@@ -1,6 +1,8 @@
 use owhisper_interface::stream::Word;
 use uuid::Uuid;
 
+// ── Public output types ─────────────────────────────────────────────────────
+
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
 pub struct TranscriptWord {
     pub id: String,
@@ -8,27 +10,78 @@ pub struct TranscriptWord {
     pub start_ms: i64,
     pub end_ms: i64,
     pub channel: i32,
-    pub speaker: Option<i32>,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
+pub struct PartialWord {
+    pub text: String,
+    pub start_ms: i64,
+    pub end_ms: i64,
+    pub channel: i32,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
+pub struct SpeakerHint {
+    pub word_id: String,
+    pub speaker_index: i32,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
 pub struct TranscriptUpdate {
     pub new_final_words: Vec<TranscriptWord>,
-    pub partial_words: Vec<TranscriptWord>,
+    pub speaker_hints: Vec<SpeakerHint>,
+    pub partial_words: Vec<PartialWord>,
+}
+
+// ── Internal pipeline type ──────────────────────────────────────────────────
+
+#[derive(Debug, Clone)]
+pub(super) struct RawWord {
+    pub(super) text: String,
+    pub(super) start_ms: i64,
+    pub(super) end_ms: i64,
+    pub(super) channel: i32,
+    pub(super) speaker: Option<i32>,
+}
+
+impl RawWord {
+    pub(super) fn to_final(self, id: String) -> (TranscriptWord, Option<SpeakerHint>) {
+        let hint = self.speaker.map(|speaker_index| SpeakerHint {
+            word_id: id.clone(),
+            speaker_index,
+        });
+        let word = TranscriptWord {
+            id,
+            text: self.text,
+            start_ms: self.start_ms,
+            end_ms: self.end_ms,
+            channel: self.channel,
+        };
+        (word, hint)
+    }
+
+    pub(super) fn to_partial(&self) -> PartialWord {
+        PartialWord {
+            text: self.text.clone(),
+            start_ms: self.start_ms,
+            end_ms: self.end_ms,
+            channel: self.channel,
+        }
+    }
 }
 
 // ── Assembly ─────────────────────────────────────────────────────────────────
 
-/// Assemble raw ASR tokens into merged `TranscriptWord`s.
+/// Assemble raw ASR tokens into merged `RawWord`s.
 ///
 /// The transcript string is the **sole oracle** for word boundaries within a
 /// single response. `spacing_from_transcript` aligns each token to the
 /// transcript; a space prefix means "new word", no space means "same word."
 /// Adjacent tokens without a space prefix are unconditionally merged —
 /// no timing heuristics.
-pub(super) fn assemble(raw: &[Word], transcript: &str, channel: i32) -> Vec<TranscriptWord> {
+pub(super) fn assemble(raw: &[Word], transcript: &str, channel: i32) -> Vec<RawWord> {
     let spaced = spacing_from_transcript(raw, transcript);
-    let mut result: Vec<TranscriptWord> = Vec::new();
+    let mut result: Vec<RawWord> = Vec::new();
 
     for (w, text) in raw.iter().zip(&spaced) {
         let start_ms = (w.start * 1000.0).round() as i64;
@@ -44,8 +97,7 @@ pub(super) fn assemble(raw: &[Word], transcript: &str, channel: i32) -> Vec<Tran
                 last.speaker = w.speaker;
             }
         } else {
-            result.push(TranscriptWord {
-                id: String::new(),
+            result.push(RawWord {
                 text: text.clone(),
                 start_ms,
                 end_ms,
@@ -99,7 +151,7 @@ fn spacing_from_transcript(raw: &[Word], transcript: &str) -> Vec<String> {
 // ── Pipeline stages ──────────────────────────────────────────────────────────
 
 /// Drop words already covered by the watermark (deduplication).
-pub(super) fn dedup(words: Vec<TranscriptWord>, watermark: i64) -> Vec<TranscriptWord> {
+pub(super) fn dedup(words: Vec<RawWord>, watermark: i64) -> Vec<RawWord> {
     words
         .into_iter()
         .skip_while(|w| w.end_ms <= watermark)
@@ -113,9 +165,9 @@ pub(super) fn dedup(words: Vec<TranscriptWord>, watermark: i64) -> Vec<Transcrip
 /// with the first word of the next batch if the provider split a word
 /// across responses (common with Korean particles, contractions, etc.).
 pub(super) fn stitch(
-    held: Option<TranscriptWord>,
-    mut words: Vec<TranscriptWord>,
-) -> (Vec<TranscriptWord>, Option<TranscriptWord>) {
+    held: Option<RawWord>,
+    mut words: Vec<RawWord>,
+) -> (Vec<RawWord>, Option<RawWord>) {
     if words.is_empty() {
         return (held.into_iter().collect(), None);
     }
@@ -133,10 +185,7 @@ pub(super) fn stitch(
 }
 
 /// Replace the time range covered by `incoming` within `existing`.
-pub(super) fn splice(
-    existing: &[TranscriptWord],
-    incoming: Vec<TranscriptWord>,
-) -> Vec<TranscriptWord> {
+pub(super) fn splice(existing: &[RawWord], incoming: Vec<RawWord>) -> Vec<RawWord> {
     let first_start = incoming.first().map_or(0, |w| w.start_ms);
     let last_end = incoming.last().map_or(0, |w| w.end_ms);
 
@@ -150,7 +199,7 @@ pub(super) fn splice(
 }
 
 /// Remove partials that overlap with the finalized time range.
-pub(super) fn strip_overlap(partials: Vec<TranscriptWord>, final_end: i64) -> Vec<TranscriptWord> {
+pub(super) fn strip_overlap(partials: Vec<RawWord>, final_end: i64) -> Vec<RawWord> {
     partials
         .into_iter()
         .filter(|w| w.start_ms > final_end)
@@ -159,28 +208,49 @@ pub(super) fn strip_overlap(partials: Vec<TranscriptWord>, final_end: i64) -> Ve
 
 // ── Word-level transforms ────────────────────────────────────────────────────
 
-pub(super) fn assign_id(mut w: TranscriptWord) -> TranscriptWord {
-    w.id = Uuid::new_v4().to_string();
-    w
-}
-
-pub(super) fn ensure_space_prefix(w: &mut TranscriptWord) {
+pub(super) fn ensure_space_prefix_raw(w: &mut RawWord) {
     if !w.text.starts_with(' ') {
         w.text.insert(0, ' ');
     }
 }
 
-fn should_stitch(tail: &TranscriptWord, head: &TranscriptWord) -> bool {
+pub(super) fn ensure_space_prefix_partial(w: &mut PartialWord) {
+    if !w.text.starts_with(' ') {
+        w.text.insert(0, ' ');
+    }
+}
+
+fn should_stitch(tail: &RawWord, head: &RawWord) -> bool {
     !head.text.starts_with(' ') && (head.start_ms - tail.end_ms) <= 300
 }
 
-fn merge_words(mut left: TranscriptWord, right: TranscriptWord) -> TranscriptWord {
+fn merge_words(mut left: RawWord, right: RawWord) -> RawWord {
     left.text.push_str(&right.text);
     left.end_ms = right.end_ms;
     if left.speaker.is_none() {
         left.speaker = right.speaker;
     }
     left
+}
+
+/// Convert a list of RawWords into finalized TranscriptWords + SpeakerHints.
+/// Assigns UUIDs, ensures space prefixes, and extracts speaker data.
+pub(super) fn finalize_words(mut words: Vec<RawWord>) -> (Vec<TranscriptWord>, Vec<SpeakerHint>) {
+    words.iter_mut().for_each(ensure_space_prefix_raw);
+
+    let mut final_words = Vec::with_capacity(words.len());
+    let mut hints = Vec::new();
+
+    for w in words {
+        let id = Uuid::new_v4().to_string();
+        let (word, hint) = w.to_final(id);
+        final_words.push(word);
+        if let Some(h) = hint {
+            hints.push(h);
+        }
+    }
+
+    (final_words, hints)
 }
 
 #[cfg(test)]
@@ -199,9 +269,8 @@ mod tests {
         }
     }
 
-    fn word(text: &str, start_ms: i64, end_ms: i64) -> TranscriptWord {
-        TranscriptWord {
-            id: Uuid::new_v4().to_string(),
+    fn word(text: &str, start_ms: i64, end_ms: i64) -> RawWord {
+        RawWord {
             text: text.to_string(),
             start_ms,
             end_ms,
@@ -262,12 +331,10 @@ mod tests {
 
     #[test]
     fn assemble_merges_cjk_syllables_with_large_gap() {
-        // Korean "있는데" split into syllables with gaps well above 120 ms.
-        // The transcript confirms they form one word (no space between them).
         let raw = vec![
             raw_word("있는", 0.0, 0.3),
-            raw_word("데", 0.54, 0.66), // 240 ms gap
-            raw_word(",", 0.84, 0.9),   // punctuation attached
+            raw_word("데", 0.54, 0.66),
+            raw_word(",", 0.84, 0.9),
         ];
         let words = assemble(&raw, " 있는데,", 0);
         assert_eq!(
@@ -281,7 +348,6 @@ mod tests {
 
     #[test]
     fn assemble_splits_cjk_words_at_transcript_space_boundary() {
-        // "있는데 학습과" – two Korean words separated by a space in the transcript.
         let raw = vec![
             raw_word("있는", 0.0, 0.3),
             raw_word("데", 0.54, 0.66),

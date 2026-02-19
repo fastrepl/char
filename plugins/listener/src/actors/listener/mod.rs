@@ -146,6 +146,7 @@ impl Actor for ListenerActor {
             let _ = (SessionDataEvent::TranscriptUpdate {
                 session_id: state.args.session_id.clone(),
                 new_final_words: flush.new_final_words,
+                speaker_hints: flush.speaker_hints,
                 partial_words: flush.partial_words,
             })
             .emit(&state.args.app);
@@ -227,6 +228,7 @@ impl Actor for ListenerActor {
                     if let Err(error) = (SessionDataEvent::TranscriptUpdate {
                         session_id: state.args.session_id.clone(),
                         new_final_words: update.new_final_words,
+                        speaker_hints: update.speaker_hints,
                         partial_words: update.partial_words,
                     })
                     .emit(&state.args.app)

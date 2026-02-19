@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
-import type { TranscriptWord } from "@hypr/plugin-listener";
+import type { SpeakerHint, TranscriptWord } from "@hypr/plugin-listener";
 
 import { useConfigValue } from "../config/use-config";
 import { useListener } from "../contexts/listener";
@@ -56,7 +56,10 @@ export function useStartListening(sessionId: string) {
       stt_model: conn.model,
     });
 
-    const handlePersist: HandlePersistCallback = (words: TranscriptWord[]) => {
+    const handlePersist: HandlePersistCallback = (
+      words: TranscriptWord[],
+      speakerHints: SpeakerHint[],
+    ) => {
       if (words.length === 0) {
         return;
       }
@@ -73,18 +76,16 @@ export function useStartListening(sessionId: string) {
           channel: w.channel,
         }));
 
-        const newHints: SpeakerHintWithId[] = words
-          .filter((w) => w.speaker !== null)
-          .map((w) => ({
-            id: id(),
-            word_id: w.id,
-            type: "provider_speaker_index",
-            value: JSON.stringify({
-              provider: conn.provider,
-              channel: w.channel,
-              speaker_index: w.speaker,
-            }),
-          }));
+        const newHints: SpeakerHintWithId[] = speakerHints.map((h) => ({
+          id: id(),
+          word_id: h.word_id,
+          type: "provider_speaker_index",
+          value: JSON.stringify({
+            provider: conn.provider,
+            channel: words.find((w) => w.id === h.word_id)?.channel ?? 0,
+            speaker_index: h.speaker_index,
+          }),
+        }));
 
         updateTranscriptWords(store, transcriptId, [
           ...existingWords,

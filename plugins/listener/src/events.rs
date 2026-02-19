@@ -1,6 +1,6 @@
 use owhisper_interface::stream::StreamResponse;
 
-use hypr_transcript::accumulator::TranscriptWord;
+use hypr_transcript::accumulator::{PartialWord, SpeakerHint, TranscriptWord};
 
 #[macro_export]
 macro_rules! common_event_derives {
@@ -86,7 +86,8 @@ common_event_derives! {
         TranscriptUpdate {
             session_id: String,
             new_final_words: Vec<TranscriptWord>,
-            partial_words: Vec<TranscriptWord>,
+            speaker_hints: Vec<SpeakerHint>,
+            partial_words: Vec<PartialWord>,
         },
     }
 }

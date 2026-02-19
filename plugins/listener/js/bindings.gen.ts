@@ -163,6 +163,12 @@ export type DegradedError =
   | { type: "upstream_unavailable"; message: string }
   | { type: "connection_timeout" }
   | { type: "stream_error"; message: string };
+export type PartialWord = {
+  text: string;
+  start_ms: number;
+  end_ms: number;
+  channel: number;
+};
 export type SessionDataEvent =
   | {
       type: "audio_amplitude";
@@ -176,7 +182,8 @@ export type SessionDataEvent =
       type: "transcript_update";
       session_id: string;
       new_final_words: TranscriptWord[];
-      partial_words: TranscriptWord[];
+      speaker_hints: SpeakerHint[];
+      partial_words: PartialWord[];
     };
 export type SessionErrorEvent =
   | {
@@ -206,6 +213,7 @@ export type SessionProgressEvent =
   | { type: "audio_ready"; session_id: string; device: string | null }
   | { type: "connecting"; session_id: string }
   | { type: "connected"; session_id: string; adapter: string };
+export type SpeakerHint = { word_id: string; speaker_index: number };
 export type State = "active" | "inactive" | "finalizing";
 export type StreamAlternatives = {
   transcript: string;
@@ -264,7 +272,6 @@ export type TranscriptWord = {
   start_ms: number;
   end_ms: number;
   channel: number;
-  speaker: number | null;
 };
 
 type __EventObj__<T> = {

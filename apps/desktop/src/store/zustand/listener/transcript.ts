@@ -1,14 +1,19 @@
 import { create as mutate } from "mutative";
 import type { StoreApi } from "zustand";
 
-import type { TranscriptWord } from "@hypr/plugin-listener";
+import type {
+  PartialWord,
+  SpeakerHint,
+  TranscriptWord,
+} from "@hypr/plugin-listener";
 
-import type { WordLike } from "../../../utils/segment";
-
-export type HandlePersistCallback = (words: TranscriptWord[]) => void;
+export type HandlePersistCallback = (
+  words: TranscriptWord[],
+  speakerHints: SpeakerHint[],
+) => void;
 
 export type TranscriptState = {
-  partialWords: WordLike[];
+  partialWords: PartialWord[];
   handlePersist?: HandlePersistCallback;
 };
 
@@ -16,7 +21,8 @@ export type TranscriptActions = {
   setTranscriptPersist: (callback?: HandlePersistCallback) => void;
   handleTranscriptUpdate: (
     newFinalWords: TranscriptWord[],
-    partialWords: TranscriptWord[],
+    speakerHints: SpeakerHint[],
+    partialWords: PartialWord[],
   ) => void;
   resetTranscript: () => void;
 };
@@ -25,15 +31,6 @@ const initialState: TranscriptState = {
   partialWords: [],
   handlePersist: undefined,
 };
-
-function transcriptWordToWordLike(w: TranscriptWord): WordLike {
-  return {
-    text: w.text,
-    start_ms: w.start_ms,
-    end_ms: w.end_ms,
-    channel: w.channel,
-  };
-}
 
 export const createTranscriptSlice = <
   T extends TranscriptState & TranscriptActions,
@@ -50,16 +47,16 @@ export const createTranscriptSlice = <
         }),
       );
     },
-    handleTranscriptUpdate: (newFinalWords, partialWords) => {
+    handleTranscriptUpdate: (newFinalWords, speakerHints, partialWords) => {
       const { handlePersist } = get();
 
       if (newFinalWords.length > 0) {
-        handlePersist?.(newFinalWords);
+        handlePersist?.(newFinalWords, speakerHints);
       }
 
       set((state) =>
         mutate(state, (draft) => {
-          draft.partialWords = partialWords.map(transcriptWordToWordLike);
+          draft.partialWords = partialWords;
         }),
       );
     },

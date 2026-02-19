@@ -22,15 +22,16 @@ use std::collections::BTreeMap;
 
 use owhisper_interface::stream::StreamResponse;
 
-pub use words::{TranscriptUpdate, TranscriptWord};
+pub use words::{PartialWord, SpeakerHint, TranscriptUpdate, TranscriptWord};
 
 use channel::ChannelState;
-use words::{assemble, ensure_space_prefix};
+use words::{assemble, ensure_space_prefix_partial};
 
-/// Accumulates streaming ASR responses into clean, deduplicated `TranscriptWord` sequences.
+/// Accumulates streaming ASR responses into clean, deduplicated transcript data.
 ///
 /// Each `process` call returns a `TranscriptUpdate` with:
 /// - `new_final_words`: words that became final since the last update (ready to persist)
+/// - `speaker_hints`: speaker associations for the newly finalized words
 /// - `partial_words`: current in-progress words across all channels (for live display)
 ///
 /// Call `flush` at session end to drain any held/partial words that were never finalized.
@@ -69,41 +70,46 @@ impl TranscriptAccumulator {
 
         let state = self.channels.entry(ch).or_insert_with(ChannelState::new);
 
-        let new_final_words = if is_final {
+        let (new_final_words, speaker_hints) = if is_final {
             state.apply_final(words)
         } else {
             state.apply_partial(words);
-            vec![]
+            (vec![], vec![])
         };
 
         Some(TranscriptUpdate {
             new_final_words,
+            speaker_hints,
             partial_words: self.all_partials(),
         })
     }
 
     pub fn flush(&mut self) -> TranscriptUpdate {
-        let new_final_words = self
-            .channels
-            .values_mut()
-            .flat_map(|state| state.drain())
-            .collect();
+        let mut new_final_words = Vec::new();
+        let mut speaker_hints = Vec::new();
+
+        for state in self.channels.values_mut() {
+            let (words, hints) = state.drain();
+            new_final_words.extend(words);
+            speaker_hints.extend(hints);
+        }
 
         TranscriptUpdate {
             new_final_words,
+            speaker_hints,
             partial_words: vec![],
         }
     }
 
-    fn all_partials(&self) -> Vec<TranscriptWord> {
-        let mut partials: Vec<TranscriptWord> = self
+    fn all_partials(&self) -> Vec<PartialWord> {
+        let mut partials: Vec<PartialWord> = self
             .channels
             .values()
-            .flat_map(|state| state.partials().iter().cloned())
+            .flat_map(|state| state.partials().iter().map(|w| w.to_partial()))
             .collect();
 
         if let Some(first) = partials.first_mut() {
-            ensure_space_prefix(first);
+            ensure_space_prefix_partial(first);
         }
 
         partials
@@ -183,6 +189,13 @@ mod tests {
     fn finalize(words: &[(&str, f64, f64)], transcript: &str) -> StreamResponse {
         let ws: Vec<_> = words.iter().map(|&(t, s, e)| (t, s, e, None)).collect();
         response(&ws, transcript, true, 0)
+    }
+
+    fn finalize_with_speakers(
+        words: &[(&str, f64, f64, Option<i32>)],
+        transcript: &str,
+    ) -> StreamResponse {
+        response(words, transcript, true, 0)
     }
 
     fn replay(responses: &[StreamResponse]) -> Vec<TranscriptWord> {
@@ -414,6 +427,7 @@ mod tests {
         let flushed = acc.flush();
         assert!(flushed.new_final_words.is_empty());
         assert!(flushed.partial_words.is_empty());
+        assert!(flushed.speaker_hints.is_empty());
     }
 
     #[test]
@@ -426,6 +440,45 @@ mod tests {
             channels: 1,
         };
         assert!(acc.process(&ignored).is_none());
+    }
+
+    #[test]
+    fn speaker_hints_extracted_from_final_words() {
+        let mut acc = TranscriptAccumulator::new();
+
+        let update = acc
+            .process(&finalize_with_speakers(
+                &[(" Hello", 0.1, 0.5, Some(0)), (" world", 0.6, 0.9, Some(1))],
+                " Hello world",
+            ))
+            .unwrap();
+
+        assert_eq!(update.new_final_words.len(), 1);
+        assert_eq!(update.speaker_hints.len(), 1);
+        assert_eq!(update.speaker_hints[0].speaker_index, 0);
+        assert_eq!(
+            update.speaker_hints[0].word_id,
+            update.new_final_words[0].id
+        );
+
+        let flushed = acc.flush();
+        assert_eq!(flushed.new_final_words.len(), 1);
+        assert_eq!(flushed.speaker_hints.len(), 1);
+        assert_eq!(flushed.speaker_hints[0].speaker_index, 1);
+    }
+
+    #[test]
+    fn no_speaker_hints_when_speaker_is_none() {
+        let mut acc = TranscriptAccumulator::new();
+
+        let update = acc
+            .process(&finalize(
+                &[(" Hello", 0.1, 0.5), (" world", 0.6, 0.9)],
+                " Hello world",
+            ))
+            .unwrap();
+
+        assert!(update.speaker_hints.is_empty());
     }
 
     macro_rules! fixture_test {

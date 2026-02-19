@@ -1,4 +1,4 @@
-use hypr_transcript::accumulator::TranscriptWord;
+use hypr_transcript::accumulator::{SpeakerHint, TranscriptWord};
 use owhisper_interface::batch::Response as BatchResponse;
 
 #[macro_export]
@@ -23,6 +23,7 @@ common_event_derives! {
         BatchTranscriptWords {
             session_id: String,
             words: Vec<TranscriptWord>,
+            speaker_hints: Vec<SpeakerHint>,
             percentage: f64,
         },
         #[serde(rename = "batchFailed")]

@@ -101,6 +101,7 @@ impl BatchState {
                 BatchEvent::BatchTranscriptWords {
                     session_id: self.session_id.clone(),
                     words: update.new_final_words,
+                    speaker_hints: update.speaker_hints,
                     percentage,
                 }
                 .emit(&self.app)?;
@@ -114,6 +115,7 @@ impl BatchState {
         BatchEvent::BatchTranscriptWords {
             session_id: self.session_id.clone(),
             words: update.new_final_words,
+            speaker_hints: update.speaker_hints,
             percentage,
         }
         .emit(&self.app)?;

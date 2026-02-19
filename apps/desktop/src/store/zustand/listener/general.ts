@@ -313,6 +313,7 @@ export const createGeneralSlice = <
       } else if (payload.type === "transcript_update") {
         get().handleTranscriptUpdate(
           payload.new_final_words,
+          payload.speaker_hints,
           payload.partial_words,
         );
       } else if (payload.type === "mic_muted") {
@@ -531,6 +532,7 @@ export const createGeneralSlice = <
             get().handleBatchResponseStreamed(
               sessionId,
               payload.words,
+              payload.speaker_hints,
               payload.percentage,
             );
 

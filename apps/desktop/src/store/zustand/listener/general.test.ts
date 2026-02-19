@@ -39,7 +39,7 @@ describe("General Listener Slice", () => {
       const sessionId = "session-456";
       const { handleBatchResponseStreamed, getSessionMode } = store.getState();
 
-      handleBatchResponseStreamed(sessionId, [], 0.5);
+      handleBatchResponseStreamed(sessionId, [], [], 0.5);
       expect(getSessionMode(sessionId)).toBe("running_batch");
     });
   });
@@ -50,7 +50,7 @@ describe("General Listener Slice", () => {
       const { handleBatchResponseStreamed, clearBatchSession } =
         store.getState();
 
-      handleBatchResponseStreamed(sessionId, [], 0.5);
+      handleBatchResponseStreamed(sessionId, [], [], 0.5);
       expect(store.getState().batch[sessionId]).toEqual({
         percentage: 0.5,
         isComplete: false,
