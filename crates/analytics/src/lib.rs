@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::time::Duration;
 
 mod error;
 mod outlit;
@@ -17,24 +18,62 @@ pub struct DeviceFingerprint(pub String);
 #[derive(Clone)]
 pub struct AuthenticatedUserId(pub String);
 
+struct PosthogState {
+    client: posthog_rs::Client,
+    local_eval: Option<LocalEvalState>,
+}
+
+struct LocalEvalState {
+    evaluator: posthog_rs::LocalEvaluator,
+    _poller: posthog_rs::AsyncFlagPoller,
+}
+
 struct LazyPosthogClient {
     api_key: String,
-    client: tokio::sync::OnceCell<posthog_rs::Client>,
+    personal_api_key: Option<String>,
+    state: tokio::sync::OnceCell<PosthogState>,
 }
 
 impl LazyPosthogClient {
-    fn new(api_key: impl Into<String>) -> Self {
+    fn new(api_key: String, personal_api_key: Option<String>) -> Self {
         Self {
-            api_key: api_key.into(),
-            client: tokio::sync::OnceCell::new(),
+            api_key,
+            personal_api_key,
+            state: tokio::sync::OnceCell::new(),
         }
     }
 
-    async fn get(&self) -> &posthog_rs::Client {
-        self.client
+    async fn get(&self) -> &PosthogState {
+        self.state
             .get_or_init(|| {
                 let key = self.api_key.clone();
-                async move { posthog_rs::client(ClientOptions::from(key.as_str())).await }
+                let personal_key = self.personal_api_key.clone();
+                async move {
+                    let client = posthog_rs::client(ClientOptions::from(key.as_str())).await;
+
+                    let local_eval = if let Some(personal_key) = personal_key {
+                        let cache = posthog_rs::FlagCache::new();
+                        let config = posthog_rs::LocalEvaluationConfig {
+                            personal_api_key: personal_key,
+                            project_api_key: key,
+                            api_host: "https://us.i.posthog.com".to_string(),
+                            poll_interval: Duration::from_secs(30),
+                            request_timeout: Duration::from_secs(10),
+                        };
+                        let mut poller = posthog_rs::AsyncFlagPoller::new(config, cache.clone());
+                        let _ = poller.load_flags().await;
+                        poller.start().await;
+                        let evaluator = posthog_rs::LocalEvaluator::new(cache);
+                        Some(LocalEvalState {
+                            evaluator,
+                            _poller: poller,
+                        })
+                    } else {
+                        None
+                    };
+
+                    PosthogState { client, local_eval }
+                }
             })
             .await
     }
@@ -48,13 +87,19 @@ pub struct AnalyticsClient {
 
 #[derive(Default)]
 pub struct AnalyticsClientBuilder {
-    posthog: Option<Arc<LazyPosthogClient>>,
+    posthog_key: Option<String>,
+    posthog_personal_key: Option<String>,
     outlit: Option<OutlitClient>,
 }
 
 impl AnalyticsClientBuilder {
     pub fn with_posthog(mut self, key: impl Into<String>) -> Self {
-        self.posthog = Some(Arc::new(LazyPosthogClient::new(key)));
+        self.posthog_key = Some(key.into());
+        self
+    }
+
+    pub fn with_local_evaluation(mut self, personal_api_key: impl Into<String>) -> Self {
+        self.posthog_personal_key = Some(personal_api_key.into());
         self
     }
 
@@ -64,8 +109,11 @@ impl AnalyticsClientBuilder {
     }
 
     pub fn build(self) -> AnalyticsClient {
+        let posthog = self
+            .posthog_key
+            .map(|key| Arc::new(LazyPosthogClient::new(key, self.posthog_personal_key)));
         AnalyticsClient {
-            posthog: self.posthog,
+            posthog,
             outlit: self.outlit,
         }
     }
@@ -80,12 +128,12 @@ impl AnalyticsClient {
         let distinct_id = distinct_id.into();
 
         if let Some(lazy) = &self.posthog {
-            let client = lazy.get().await;
+            let state = lazy.get().await;
             let mut event = Event::new(&payload.event, &distinct_id);
             for (key, value) in &payload.props {
                 let _ = event.insert_prop(key, value);
             }
-            client.capture(event).await?;
+            state.client.capture(event).await?;
         } else {
             tracing::info!("event: {:?}", payload);
         }
@@ -105,18 +153,19 @@ impl AnalyticsClient {
         let distinct_id = distinct_id.into();
 
         if let Some(lazy) = &self.posthog {
-            let client = lazy.get().await;
+            let state = lazy.get().await;
             let mut event = Event::new("$set", &distinct_id);
-            if !payload.set.is_empty() {
-                let _ = event.insert_prop("$set", &payload.set);
+            let mut set_props = payload.set.clone();
+            if let Some(ref email) = payload.email {
+                set_props.insert("email".to_string(), serde_json::json!(email));
+            }
+            if !set_props.is_empty() {
+                let _ = event.insert_prop("$set", &set_props);
             }
             if !payload.set_once.is_empty() {
                 let _ = event.insert_prop("$set_once", &payload.set_once);
             }
-            if let Some(ref email) = payload.email {
-                let _ = event.insert_prop("$email", email);
-            }
-            client.capture(event).await?;
+            state.client.capture(event).await?;
         } else {
             tracing::info!("set_properties: {:?}", payload);
         }
@@ -134,8 +183,21 @@ impl AnalyticsClient {
         distinct_id: &str,
     ) -> Result<bool, Error> {
         if let Some(lazy) = &self.posthog {
-            let client = lazy.get().await;
-            Ok(client
+            let state = lazy.get().await;
+
+            if let Some(local) = &state.local_eval {
+                match local
+                    .evaluator
+                    .evaluate_flag(flag_key, distinct_id, &HashMap::new())
+                {
+                    Ok(Some(FlagValue::Boolean(v))) => return Ok(v),
+                    Ok(Some(FlagValue::String(_))) => return Ok(true),
+                    Ok(None) | Err(_) => {}
+                }
+            }
+
+            Ok(state
+                .client
                 .is_feature_enabled(flag_key, distinct_id, None, None, None)
                 .await
                 .unwrap_or(false))
@@ -153,9 +215,25 @@ impl AnalyticsClient {
         group_properties: Option<HashMap<String, HashMap<String, serde_json::Value>>>,
     ) -> Result<Option<FlagValue>, Error> {
         if let Some(lazy) = &self.posthog {
-            let client = lazy.get().await;
-            Ok(client
-                .get_feature_flag(flag_key, distinct_id, None, person_properties, group_properties)
+            let state = lazy.get().await;
+
+            if let Some(local) = &state.local_eval {
+                let props = person_properties.as_ref().cloned().unwrap_or_default();
+                match local.evaluator.evaluate_flag(flag_key, distinct_id, &props) {
+                    Ok(value) => return Ok(value),
+                    Err(_) => {}
+                }
+            }
+
+            Ok(state
+                .client
+                .get_feature_flag(
+                    flag_key,
+                    distinct_id,
+                    None,
+                    person_properties,
+                    group_properties,
+                )
                 .await?)
         } else {
             tracing::info!("get_feature_flag: {} (no client)", flag_key);
@@ -169,8 +247,11 @@ impl AnalyticsClient {
         distinct_id: &str,
     ) -> Result<Option<serde_json::Value>, Error> {
         if let Some(lazy) = &self.posthog {
-            let client = lazy.get().await;
-            Ok(client.get_feature_flag_payload(flag_key, distinct_id).await?)
+            let state = lazy.get().await;
+            Ok(state
+                .client
+                .get_feature_flag_payload(flag_key, distinct_id)
+                .await?)
         } else {
             tracing::info!("get_feature_flag_payload: {} (no client)", flag_key);
             Ok(None)
@@ -187,7 +268,7 @@ impl AnalyticsClient {
         let anon_distinct_id = anon_distinct_id.into();
 
         if let Some(lazy) = &self.posthog {
-            let client = lazy.get().await;
+            let state = lazy.get().await;
             let mut event = Event::new("$identify", &user_id);
             let _ = event.insert_prop("$anon_distinct_id", &anon_distinct_id);
 
@@ -201,7 +282,7 @@ impl AnalyticsClient {
             if !payload.set_once.is_empty() {
                 let _ = event.insert_prop("$set_once", &payload.set_once);
             }
-            client.capture(event).await?;
+            state.client.capture(event).await?;
         } else {
             tracing::info!(
                 "identify: user_id={}, anon_distinct_id={}, payload={:?}",

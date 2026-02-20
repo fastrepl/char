@@ -31,6 +31,7 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use tauri::Manager;
 
     #[test]
     fn export_types() {
