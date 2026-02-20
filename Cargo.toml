@@ -89,7 +89,6 @@ hypr-openrouter = { path = "crates/openrouter", package = "openrouter" }
 hypr-openstatus = { path = "crates/openstatus", package = "openstatus" }
 hypr-outlook-calendar = { path = "crates/outlook-calendar", package = "outlook-calendar" }
 hypr-porkbun = { path = "crates/porkbun", package = "porkbun" }
-posthog-rs = "0.4"
 hypr-pyannote-cloud = { path = "crates/pyannote-cloud", package = "pyannote-cloud" }
 hypr-pyannote-local = { path = "crates/pyannote-local", package = "pyannote-local" }
 hypr-recall = { path = "crates/recall", package = "recall" }
@@ -119,8 +118,9 @@ hypr-whisper-local = { path = "crates/whisper-local", package = "whisper-local" 
 hypr-whisper-local-model = { path = "crates/whisper-local-model", package = "whisper-local-model" }
 hypr-ws-client = { path = "crates/ws-client", package = "ws-client" }
 hypr-ws-utils = { path = "crates/ws-utils", package = "ws-utils" }
+posthog-rs = "0.4"
 
-owhisper-client = { path = "crates/owhisper-client", package = "owhisper-client" }
+owhisper-client= { path = "crates/owhisper-client", package = "owhisper-client" }
 owhisper-config = { path = "crates/owhisper-config", package = "owhisper-config" }
 owhisper-interface = { path = "crates/owhisper-interface", package = "owhisper-interface" }
 soniox = { path = "crates/soniox", package = "soniox" }
