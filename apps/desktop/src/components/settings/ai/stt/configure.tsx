@@ -51,9 +51,7 @@ export function ConfigureProviders() {
           <HyprProviderCard
             providerId="hyprnote"
             providerName="Hyprnote"
-            icon={
-              <img src="/assets/icon.png" alt="Char" className="size-5" />
-            }
+            icon={<img src="/assets/icon.png" alt="Char" className="size-5" />}
             badge={PROVIDERS.find((p) => p.id === "hyprnote")?.badge}
           />
         </div>
