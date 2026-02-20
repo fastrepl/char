@@ -147,7 +147,8 @@ export function SettingsApp() {
                               description:
                                 "Always ready without manually launching.",
                               value: autostartField.state.value,
-                              onChange: (val) => autostartField.handleChange(val),
+                              onChange: (val) =>
+                                autostartField.handleChange(val),
                             }}
                             notificationDetect={{
                               title: "Auto-detect meetings",
