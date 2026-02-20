@@ -28,7 +28,12 @@ import { useBillingAccess } from "../../../../billing";
 import { useListener } from "../../../../contexts/listener";
 import { useLocalModelDownload } from "../../../../hooks/useLocalSttModel";
 import * as settings from "../../../../store/tinybase/store/settings";
-import { NonHyprProviderCard, StyledStreamdown } from "../shared";
+import {
+  HyprCloudCTAButton,
+  HyprProviderRow,
+  NonHyprProviderCard,
+  StyledStreamdown,
+} from "../shared";
 import { useSttSettings } from "./context";
 import { ProviderId, PROVIDERS } from "./shared";
 
@@ -46,14 +51,13 @@ export function ConfigureProviders() {
         value={accordionValue}
         onValueChange={setAccordionValue}
       >
-        <div ref={hyprAccordionRef}>
-          <HyprProviderCard
-            providerId="hyprnote"
-            providerName="Hyprnote"
-            icon={<img src="/assets/icon.png" alt="Char" className="size-5" />}
-            badge={PROVIDERS.find((p) => p.id === "hyprnote")?.badge}
-          />
-        </div>
+        <HyprProviderCard
+          ref={hyprAccordionRef}
+          providerId="hyprnote"
+          providerName="Hyprnote"
+          icon={<img src="/assets/icon.png" alt="Char" className="size-5" />}
+          badge={PROVIDERS.find((p) => p.id === "hyprnote")?.badge}
+        />
         {PROVIDERS.filter((provider) => provider.id !== "hyprnote").map(
           (provider) => (
             <NonHyprProviderCard
@@ -82,11 +86,13 @@ function ModelGroupLabel({ label }: { label: string }) {
 }
 
 function HyprProviderCard({
+  ref,
   providerId,
   providerName,
   icon,
   badge,
 }: {
+  ref?: React.Ref<HTMLDivElement | null>;
   providerId: ProviderId;
   providerName: string;
   icon: React.ReactNode;
@@ -118,6 +124,7 @@ function HyprProviderCard({
 
   return (
     <AccordionItem
+      ref={ref}
       value={providerId}
       className={cn([
         "rounded-xl border-2 bg-neutral-50",
@@ -282,19 +289,6 @@ function CactusModelPathRow() {
   );
 }
 
-function HyprProviderRow({ children }: { children: React.ReactNode }) {
-  return (
-    <div
-      className={cn([
-        "flex flex-col gap-3",
-        "py-2 px-3 rounded-md border bg-white",
-      ])}
-    >
-      {children}
-    </div>
-  );
-}
-
 function HyprProviderCloudRow() {
   const { isPro, canStartTrial, upgradeToPro } = useBillingAccess();
   const { shouldHighlightDownload } = useSttSettings();
@@ -322,44 +316,20 @@ function HyprProviderCloudRow() {
     }
   }, [isPro, upgradeToPro, handleSelectProvider, handleSelectModel]);
 
-  const showShimmer = shouldHighlightDownload && !isPro;
-
-  const buttonLabel = isPro
-    ? "Ready to use"
-    : canStartTrial.data
-      ? "Start Free Trial"
-      : "Upgrade to Pro";
-
   return (
     <HyprProviderRow>
       <div className="flex-1">
-        <span className="text-sm font-medium">Hyprnote Cloud (Beta)</span>
+        <span className="text-sm font-medium">Hyprnote Cloud</span>
         <p className="text-xs text-neutral-500">
           Use the Hyprnote Cloud API to transcribe your audio.
         </p>
       </div>
-      <button
+      <HyprCloudCTAButton
+        isPro={isPro}
+        canStartTrial={canStartTrial.data}
+        highlight={shouldHighlightDownload}
         onClick={handleClick}
-        className={cn([
-          "relative overflow-hidden w-fit h-8.5",
-          "px-4 rounded-full text-xs font-mono text-center",
-          "transition-all duration-150",
-          isPro
-            ? "bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900 shadow-xs hover:shadow-md"
-            : "bg-linear-to-t from-stone-600 to-stone-500 text-white shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
-        ])}
-      >
-        {showShimmer && (
-          <div
-            className={cn([
-              "absolute inset-0 -translate-x-full",
-              "bg-linear-to-r from-transparent via-white/20 to-transparent",
-              "animate-shimmer",
-            ])}
-          />
-        )}
-        <span className="relative z-10">{buttonLabel}</span>
-      </button>
+      />
     </HyprProviderRow>
   );
 }
@@ -574,7 +544,7 @@ function ProviderContext({ providerId }: { providerId: ProviderId }) {
     return null;
   }
 
-  return <StyledStreamdown className="mb-6">{content.trim()}</StyledStreamdown>;
+  return <StyledStreamdown className="mb-3">{content.trim()}</StyledStreamdown>;
 }
 
 function useSafeSelectModel() {

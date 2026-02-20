@@ -36,6 +36,7 @@ import { PROVIDERS } from "./shared";
 
 export function SelectProviderAndModel() {
   const configuredProviders = useConfiguredMapping();
+  const billing = useBillingAccess();
 
   const { current_llm_model, current_llm_provider } = useConfigValues([
     "current_llm_model",
@@ -117,18 +118,33 @@ export function SelectProviderAndModel() {
                   <SelectContent>
                     {PROVIDERS.map((provider) => {
                       const status = configuredProviders[provider.id];
+                      const requiresPro = requiresEntitlement(
+                        provider.requirements,
+                        "pro",
+                      );
+                      const locked = requiresPro && !billing.isPro;
 
                       return (
                         <SelectItem
                           key={provider.id}
                           value={provider.id}
-                          disabled={!status?.listModels}
+                          disabled={!status?.listModels || locked}
                         >
                           <div className="flex flex-col gap-0.5">
                             <div className="flex items-center gap-2">
                               {provider.icon}
                               <span>{provider.displayName}</span>
+                              {requiresPro ? (
+                                <span className="text-[10px] uppercase tracking-wide text-neutral-500 border border-neutral-200 rounded-full px-2 py-0.5">
+                                  Pro
+                                </span>
+                              ) : null}
                             </div>
+                            {locked ? (
+                              <span className="text-[11px] text-neutral-500">
+                                Upgrade to Pro to use this provider.
+                              </span>
+                            ) : null}
                           </div>
                         </SelectItem>
                       );
@@ -186,7 +202,6 @@ export function SelectProviderAndModel() {
 
 type ProviderStatus = {
   listModels?: () => Promise<ListModelsResult>;
-  proLocked: boolean;
 };
 
 function useConfiguredMapping(): Record<string, ProviderStatus> {
@@ -206,9 +221,6 @@ function useConfiguredMapping(): Record<string, ProviderStatus> {
         ).trim();
         const apiKey = String(config?.api_key || "").trim();
 
-        const proLocked =
-          requiresEntitlement(provider.requirements, "pro") && !billing.isPro;
-
         const eligible =
           getProviderSelectionBlockers(provider.requirements, {
             isAuthenticated: !!auth?.session,
@@ -217,7 +229,7 @@ function useConfiguredMapping(): Record<string, ProviderStatus> {
           }).length === 0;
 
         if (!eligible) {
-          return [provider.id, { listModels: undefined, proLocked }];
+          return [provider.id, { listModels: undefined }];
         }
 
         if (provider.id === "hyprnote") {
@@ -230,7 +242,7 @@ function useConfiguredMapping(): Record<string, ProviderStatus> {
               },
             },
           };
-          return [provider.id, { listModels: async () => result, proLocked }];
+          return [provider.id, { listModels: async () => result }];
         }
 
         let listModelsFunc: () => Promise<ListModelsResult>;
@@ -264,7 +276,7 @@ function useConfiguredMapping(): Record<string, ProviderStatus> {
             listModelsFunc = () => listGenericModels(baseUrl, apiKey);
         }
 
-        return [provider.id, { listModels: listModelsFunc, proLocked }];
+        return [provider.id, { listModels: listModelsFunc }];
       }),
     ) as Record<string, ProviderStatus>;
   }, [configuredProviders, auth, billing]);
