@@ -94,7 +94,7 @@ fn capture_loop(
     stop_signal: Arc<AtomicBool>,
 ) -> Result<()> {
     let mut mainloop = Mainloop::new().context("Failed to create PulseAudio mainloop")?;
-    let mut context = PaContext::new(&mainloop, "char-speaker-capture")
+    let mut context = PaContext::new(&mainloop, "hyprnote-speaker-capture")
         .context("Failed to create PulseAudio context")?;
 
     context
@@ -122,7 +122,7 @@ fn capture_loop(
 
     mainloop.lock();
 
-    let mut stream = PaStream::new(&mut context, "char-capture", &spec, None)
+    let mut stream = PaStream::new(&mut context, "hyprnote-capture", &spec, None)
         .context("Failed to create PulseAudio stream")?;
 
     stream

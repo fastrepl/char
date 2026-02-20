@@ -406,7 +406,7 @@ async fn meltdown(myself: ActorRef<SessionMsg>, state: &mut SessionState) {
 fn classify_connection_failure(base_url: &str) -> String {
     if base_url.contains("localhost") || base_url.contains("127.0.0.1") {
         "Local transcription server is not running".to_string()
-    } else if !base_url.contains("char.com") {
+    } else if !base_url.contains("hyprnote.com") {
         format!("Cannot reach transcription server at {}", base_url)
     } else {
         "Transcription service is temporarily unavailable".to_string()

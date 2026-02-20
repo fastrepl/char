@@ -42,7 +42,7 @@ pub async fn is_supported_languages_batch<R: tauri::Runtime>(
     model: Option<String>,
     languages: Vec<String>,
 ) -> Result<bool, String> {
-    if provider == "custom" || provider == "char" {
+    if provider == "custom" || provider == "hyprnote" {
         return Ok(true);
     }
 

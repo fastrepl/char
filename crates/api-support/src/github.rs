@@ -3,7 +3,7 @@ use crate::logs;
 use crate::state::AppState;
 
 const GITHUB_OWNER: &str = "fastrepl";
-const GITHUB_REPO: &str = "char";
+const GITHUB_REPO: &str = "hyprnote";
 
 pub(crate) struct BugReportInput<'a> {
     pub description: &'a str,

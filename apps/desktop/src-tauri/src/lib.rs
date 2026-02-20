@@ -28,7 +28,7 @@ pub async fn main() {
 
         if let Some(dsn) = dsn {
             let release =
-                option_env!("APP_VERSION").map(|v| format!("char-desktop@{}", v).into());
+                option_env!("APP_VERSION").map(|v| format!("hyprnote-desktop@{}", v).into());
 
             let client = sentry::init((
                 dsn,
@@ -41,7 +41,7 @@ pub async fn main() {
             ));
 
             sentry::configure_scope(|scope| {
-                scope.set_tag("service", "char-desktop");
+                scope.set_tag("service", "hyprnote-desktop");
                 scope.set_user(Some(sentry::User {
                     id: Some(hypr_host::fingerprint()),
                     ..Default::default()

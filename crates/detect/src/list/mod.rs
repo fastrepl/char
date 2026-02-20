@@ -33,7 +33,7 @@ pub fn list_mic_using_apps() -> Vec<InstalledApp> {
     };
 
     apps.into_iter()
-        .filter(|app| !app.id.to_lowercase().contains("char"))
+        .filter(|app| !app.id.to_lowercase().contains("hyprnote"))
         .collect()
 }
 

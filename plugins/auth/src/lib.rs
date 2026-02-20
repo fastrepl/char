@@ -74,7 +74,7 @@ mod test {
     fn test_parse_account_info() {
         let store_path = dirs::data_dir()
             .unwrap()
-            .join("char")
+            .join("hyprnote")
             .join("store.json");
 
         let store_content: serde_json::Value =

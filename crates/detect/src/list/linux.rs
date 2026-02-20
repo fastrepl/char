@@ -38,7 +38,7 @@ pub fn list_mic_using_apps() -> Vec<InstalledApp> {
         None => return apps,
     };
 
-    let mut context = match Context::new(&mainloop, "char-detect") {
+    let mut context = match Context::new(&mainloop, "hyprnote-detect") {
         Some(c) => c,
         None => return apps,
     };

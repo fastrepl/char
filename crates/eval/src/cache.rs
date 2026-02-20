@@ -9,7 +9,7 @@ use ureq::Agent;
 const CACHE_KEY_VERSION: u32 = 1;
 
 fn default_cache_dir() -> Option<PathBuf> {
-    dirs::cache_dir().map(|p| p.join("char").join("eval.cache"))
+    dirs::cache_dir().map(|p| p.join("hyprnote").join("eval.cache"))
 }
 
 /// State of the disk cache initialization.

@@ -30,7 +30,7 @@ fn setup_pulseaudio(stop_rx: &mpsc::Receiver<()>) -> Option<PulseAudioHandles> {
     if proplist
         .set_str(
             libpulse_binding::proplist::properties::APPLICATION_NAME,
-            "Char Device Monitor",
+            "Hyprnote Device Monitor",
         )
         .is_err()
     {
@@ -49,7 +49,7 @@ fn setup_pulseaudio(stop_rx: &mpsc::Receiver<()>) -> Option<PulseAudioHandles> {
     };
 
     let context =
-        match Context::new_with_proplist(&*mainloop.borrow(), "CharContext", &proplist) {
+        match Context::new_with_proplist(&*mainloop.borrow(), "HyprnoteContext", &proplist) {
             Some(c) => Rc::new(RefCell::new(c)),
             None => {
                 tracing::error!("Failed to create PulseAudio context");

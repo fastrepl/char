@@ -304,7 +304,7 @@ mod tests {
     fn test_md_to_md_3() {
         let input = r#"
 # Enhanced Meeting Notes
-## What Char Does
+## What Hyprnote Does
 - A smart notepad for people with back-to-back meetings.
 - Listens to the meeting so you don't have to write everything down.
 - Merges your notes and the transcript into a clean, context-aware summary.
@@ -325,15 +325,15 @@ mod tests {
 
 # Participants:
 
-* [John Jeong](mailto:john@char.com)
-* [Yujong Lee](mailto:yujonglee@char.com)
+* [John Jeong](mailto:john@hyprnote.com)
+* [Yujong Lee](mailto:yujonglee@hyprnote.com)
 
 # Meeting Transcript
 (No raw excerpt provided, utilized to generate the enhanced note)
 "#;
 
         insta::assert_snapshot!(md_to_md(input).unwrap().to_string(), @"
-        # What Char Does
+        # What Hyprnote Does
 
         - A smart notepad for people with back-to-back meetings.
         - Listens to the meeting so you don't have to write everything down.
@@ -366,8 +366,8 @@ mod tests {
 
         # Participants:
 
-        - [John Jeong](mailto:john@char.com)
-        - [Yujong Lee](mailto:yujonglee@char.com)
+        - [John Jeong](mailto:john@hyprnote.com)
+        - [Yujong Lee](mailto:yujonglee@hyprnote.com)
 
          
 
@@ -381,12 +381,12 @@ mod tests {
     #[test]
     fn test_md_to_md_4() {
         let input = r#"
-# Char: Enhanced Meeting Notes
+# Hyprnote: Enhanced Meeting Notes
 
-# Objective: Introduce Char as a smart notepad for enhanced meeting productivity.
+# Objective: Introduce Hyprnote as a smart notepad for enhanced meeting productivity.
 # Privacy & Performance: Built locally, prioritizing user data security and seamless experience.
 # Flexible & Extendable: Supports various use cases beyond sales, offering a simple and powerful solution.
-# Stay Connected: Promote Char through X and Discord.
+# Stay Connected: Promote Hyprnote through X and Discord.
 
 # Key Features:
 # - Offline transcription and note-taking.
@@ -406,7 +406,7 @@ mod tests {
     fn test_opinionated_md_to_html() {
         let input = r#"
 # Enhanced Meeting Notes
-## What Char Does
+## What Hyprnote Does
 - A smart notepad for people with back-to-back meetings.
 - Listens to the meeting so you don't have to write everything down.
 - Merges your notes and the transcript into a clean, context-aware summary.
@@ -427,7 +427,7 @@ mod tests {
 "#;
 
         insta::assert_snapshot!(opinionated_md_to_html(input).unwrap().to_string(), @r#"
-        <h1>What Char Does</h1>
+        <h1>What Hyprnote Does</h1>
         <ul>
         <li>A smart notepad for people with back-to-back meetings.</li>
         <li>Listens to the meeting so you don't have to write everything down.</li>

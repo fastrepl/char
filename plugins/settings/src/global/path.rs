@@ -16,7 +16,7 @@ fn resolve_app_folder(bundle_id: &str) -> &str {
     if cfg!(debug_assertions) || bundle_id == "com.hyprnote.staging" {
         bundle_id
     } else {
-        "char"
+        "hyprnote"
     }
 }
 

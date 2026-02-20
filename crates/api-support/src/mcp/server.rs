@@ -167,14 +167,14 @@ impl ServerHandler for SupportMcpServer {
                 .enable_prompts()
                 .build(),
             server_info: Implementation {
-                name: "char-support".to_string(),
+                name: "hyprnote-support".to_string(),
                 title: None,
                 version: env!("CARGO_PKG_VERSION").to_string(),
                 icons: None,
                 website_url: None,
             },
             instructions: Some(
-                "Char support server. Provides tools for GitHub issue management (search, create, comment) and Stripe billing operations (list subscriptions, billing portal). Always search before creating issues to avoid duplicates.".to_string(),
+                "Hyprnote support server. Provides tools for GitHub issue management (search, create, comment) and Stripe billing operations (list subscriptions, billing portal). Always search before creating issues to avoid duplicates.".to_string(),
             ),
         }
     }
@@ -187,7 +187,7 @@ impl ServerHandler for SupportMcpServer {
         Ok(ListPromptsResult {
             prompts: vec![Prompt::new(
                 "support_chat",
-                Some("System prompt for the Char support chat"),
+                Some("System prompt for the Hyprnote support chat"),
                 None::<Vec<PromptArgument>>,
             )],
             next_cursor: None,
