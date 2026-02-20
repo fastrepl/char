@@ -19817,6 +19817,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "transcript"
+version = "0.1.0"
+dependencies = [
+ "data",
+ "owhisper-interface",
+ "serde",
+ "serde_json",
+ "specta",
+ "uuid",
+]
+
+[[package]]
 name = "transpose"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
