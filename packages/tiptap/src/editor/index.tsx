@@ -10,7 +10,7 @@ import { useDebounceCallback } from "usehooks-ts";
 
 import "../../styles.css";
 import * as shared from "../shared";
-import type { FileHandlerConfig } from "../shared/extensions";
+import type { ExtensionOptions, FileHandlerConfig } from "../shared/extensions";
 import type { PlaceholderFunction } from "../shared/extensions/placeholder";
 import { isMentionActive, mention, type MentionConfig } from "./mention";
 
@@ -37,6 +37,7 @@ interface EditorProps {
   mentionConfig?: MentionConfig;
   placeholderComponent?: PlaceholderFunction;
   fileHandlerConfig?: FileHandlerConfig;
+  extensionOptions?: ExtensionOptions;
   onNavigateToTitle?: () => void;
 }
 
@@ -50,6 +51,7 @@ const Editor = forwardRef<{ editor: TiptapEditor | null }, EditorProps>(
       mentionConfig,
       placeholderComponent,
       fileHandlerConfig,
+      extensionOptions,
       onNavigateToTitle,
     } = props;
     const previousContentRef = useRef<JSONContent>(initialContent);
@@ -70,10 +72,19 @@ const Editor = forwardRef<{ editor: TiptapEditor | null }, EditorProps>(
 
     const extensions = useMemo(
       () => [
-        ...shared.getExtensions(placeholderComponent, fileHandlerConfig),
+        ...shared.getExtensions(
+          placeholderComponent,
+          fileHandlerConfig,
+          extensionOptions,
+        ),
         ...(mentionConfig ? [mention(mentionConfig)] : []),
       ],
-      [mentionConfig, placeholderComponent, fileHandlerConfig],
+      [
+        mentionConfig,
+        placeholderComponent,
+        fileHandlerConfig,
+        extensionOptions,
+      ],
     );
 
     const editorProps: Parameters<typeof useEditor>[0]["editorProps"] = useMemo(
