@@ -89,9 +89,7 @@ function matchesWithFallback(
 ): boolean {
   const colonIdx = targetKey.indexOf(":");
   if (colonIdx === -1) {
-    const sessionDay = dayFromDate(sessionEvent.started_at, timezone);
-    const candidateKey = `${sessionEvent.tracking_id}:${sessionDay}`;
-    return candidateKey === targetKey;
+    return false;
   }
 
   const targetTrackingId = targetKey.substring(0, colonIdx);
