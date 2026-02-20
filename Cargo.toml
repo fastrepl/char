@@ -46,6 +46,7 @@ hypr-audio-utils = { path = "crates/audio-utils", package = "audio-utils" }
 hypr-buffer = { path = "crates/buffer", package = "buffer" }
 hypr-bundle = { path = "crates/bundle", package = "bundle" }
 hypr-cactus = { path = "crates/cactus", package = "cactus" }
+hypr-cactus-model = { path = "crates/cactus-model", package = "cactus-model" }
 hypr-cactus-sys = { path = "crates/cactus-sys", package = "cactus-sys" }
 hypr-chatwoot = { path = "crates/chatwoot", package = "chatwoot" }
 hypr-data = { path = "crates/data", package = "data" }
@@ -232,6 +233,7 @@ isolang = "2.4"
 itertools = "0.14.0"
 jsonschema = "0.41"
 lazy_static = "1.5.0"
+moka = { version = "0.12", features = ["future"] }
 open = "5"
 regex = "1.12"
 schemars = "1"
@@ -273,6 +275,7 @@ async-stripe = { version = "1.0.0-rc.0" }
 async-stripe-billing = { version = "1.0.0-rc.1", default-features = false }
 async-stripe-core = { version = "1.0.0-rc.1", default-features = false }
 gbnf-validator = { git = "https://github.com/fastrepl/gbnf-validator", rev = "3dec055" }
+posthog-rs = "0.4.1"
 
 jsonwebtoken = { version = "10", features = ["rust_crypto"] }
 sentry = "=0.42.0"

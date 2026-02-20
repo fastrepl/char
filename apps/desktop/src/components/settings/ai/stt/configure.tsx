@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { arch, platform } from "@tauri-apps/plugin-os";
 import {
   AlertCircle,
   Download,
@@ -67,12 +66,162 @@ export function ConfigureProviders() {
           ),
         )}
       </Accordion>
-      <CactusExperimentalSection />
     </div>
   );
 }
 
-function CactusExperimentalSection() {
+function ModelGroupLabel({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-2 pt-1">
+      <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-widest shrink-0">
+        {label}
+      </span>
+      <div className="flex-1 border-t border-neutral-200" />
+    </div>
+  );
+}
+
+function HyprProviderCard({
+  providerId,
+  providerName,
+  icon,
+  badge,
+}: {
+  providerId: ProviderId;
+  providerName: string;
+  icon: React.ReactNode;
+  badge?: string | null;
+}) {
+  const supportedModels = useQuery({
+    queryKey: ["list-supported-models"],
+    queryFn: async () => {
+      const result = await localSttCommands.listSupportedModels();
+      return result.status === "ok" ? result.data : [];
+    },
+    staleTime: Infinity,
+  });
+
+  const argmaxModels =
+    supportedModels.data?.filter((m) => m.model_type === "argmax") ?? [];
+  const whispercppModels =
+    supportedModels.data?.filter((m) => m.model_type === "whispercpp") ?? [];
+  const cactusModels =
+    supportedModels.data?.filter((m) => m.model_type === "cactus") ?? [];
+
+  const hasLocalModels =
+    argmaxModels.length > 0 ||
+    whispercppModels.length > 0 ||
+    cactusModels.length > 0;
+
+  const providerDef = PROVIDERS.find((p) => p.id === providerId);
+  const isConfigured = providerDef?.requirements.length === 0;
+
+  return (
+    <AccordionItem
+      value={providerId}
+      className={cn([
+        "rounded-xl border-2 bg-neutral-50",
+        isConfigured ? "border-solid border-neutral-300" : "border-dashed",
+      ])}
+    >
+      <AccordionTrigger
+        className={cn(["capitalize gap-2 px-4 hover:no-underline"])}
+      >
+        <div className="flex items-center gap-2">
+          {icon}
+          <span>{providerName}</span>
+          {badge && (
+            <span className="text-xs text-neutral-500 font-light border border-neutral-300 rounded-full px-2">
+              {badge}
+            </span>
+          )}
+        </div>
+      </AccordionTrigger>
+      <AccordionContent className="px-4">
+        <ProviderContext providerId={providerId} />
+        <div className="flex flex-col gap-3">
+          <HyprProviderCloudRow />
+
+          {hasLocalModels && (
+            <>
+              <div className="flex items-center gap-3 py-2">
+                <div className="flex-1 border-t border-dashed border-neutral-300" />
+                <a
+                  href="https://hyprnote.com/docs/developers/local-models"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-neutral-400 hover:underline flex items-center gap-1"
+                >
+                  <span>or use on-device model</span>
+                  <HelpCircle className="size-3" />
+                </a>
+                <div className="flex-1 border-t border-dashed border-neutral-300" />
+              </div>
+
+              {argmaxModels.length > 0 && (
+                <>
+                  <ModelGroupLabel label="Argmax" />
+                  {argmaxModels.map((model) => (
+                    <HyprProviderLocalRow
+                      key={model.key as string}
+                      model={model.key}
+                      displayName={model.display_name}
+                      description={model.description}
+                    />
+                  ))}
+                </>
+              )}
+
+              {whispercppModels.length > 0 && (
+                <>
+                  <ModelGroupLabel label="WhisperCPP" />
+                  {whispercppModels.map((model) => (
+                    <HyprProviderLocalRow
+                      key={model.key as string}
+                      model={model.key}
+                      displayName={model.display_name}
+                      description={model.description}
+                    />
+                  ))}
+                </>
+              )}
+
+              {cactusModels.length > 0 && (
+                <>
+                  <ModelGroupLabel label="Cactus (Experimental)" />
+                  {cactusModels.map((model) => (
+                    <CactusDisabledRow
+                      key={model.key as string}
+                      displayName={model.display_name}
+                    />
+                  ))}
+                  <CactusModelPathRow />
+                </>
+              )}
+            </>
+          )}
+        </div>
+      </AccordionContent>
+    </AccordionItem>
+  );
+}
+
+function CactusDisabledRow({ displayName }: { displayName: string }) {
+  return (
+    <HyprProviderRow>
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium text-neutral-400">
+          {displayName}
+        </span>
+        <span className="text-[10px] text-neutral-400 border border-neutral-200 rounded-full px-2 py-0.5">
+          Coming soon
+        </span>
+      </div>
+    </HyprProviderRow>
+  );
+}
+
+function CactusModelPathRow() {
   const modelPath = settings.UI.useValue(
     "cactus_model_path",
     settings.STORE_ID,
@@ -108,22 +257,8 @@ function CactusExperimentalSection() {
   }, [active, handleSelectProvider, handleSelectModel]);
 
   return (
-    <div
-      className={cn([
-        "rounded-xl border-2 border-dashed bg-neutral-50 p-4",
-        "flex flex-col gap-3",
-      ])}
-    >
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium">Cactus</span>
-        <span className="text-xs text-neutral-500 font-light border border-neutral-300 rounded-full px-2">
-          Experimental
-        </span>
-      </div>
-      <p className="text-xs text-neutral-500">
-        Use a local Cactus model for transcription. Set the path to the model
-        directory on disk.
-      </p>
+    <HyprProviderRow>
+      <span className="text-xs text-neutral-500">Custom model path</span>
       <Input
         value={modelPath ?? ""}
         onChange={(e) => handleSetModelPath(e.target.value)}
@@ -143,94 +278,7 @@ function CactusExperimentalSection() {
       >
         Use Cactus
       </button>
-    </div>
-  );
-}
-
-function HyprProviderCard({
-  providerId,
-  providerName,
-  icon,
-  badge,
-}: {
-  providerId: ProviderId;
-  providerName: string;
-  icon: React.ReactNode;
-  badge?: string | null;
-}) {
-  const isMacos = platform() === "macos";
-  const targetArch = useQuery({
-    queryKey: ["target-arch"],
-    queryFn: () => arch(),
-    staleTime: Infinity,
-  });
-  const isAppleSilicon = isMacos && targetArch.data === "aarch64";
-
-  const providerDef = PROVIDERS.find((p) => p.id === providerId);
-  const isConfigured = providerDef?.requirements.length === 0;
-
-  return (
-    <AccordionItem
-      value={providerId}
-      className={cn([
-        "rounded-xl border-2 bg-neutral-50",
-        isConfigured ? "border-solid border-neutral-300" : "border-dashed",
-      ])}
-    >
-      <AccordionTrigger
-        className={cn(["capitalize gap-2 px-4 hover:no-underline"])}
-      >
-        <div className="flex items-center gap-2">
-          {icon}
-          <span>{providerName}</span>
-          {badge && (
-            <span className="text-xs text-neutral-500 font-light border border-neutral-300 rounded-full px-2">
-              {badge}
-            </span>
-          )}
-        </div>
-      </AccordionTrigger>
-      <AccordionContent className="px-4">
-        <ProviderContext providerId={providerId} />
-        <div className="flex flex-col gap-3">
-          <HyprProviderCloudRow />
-
-          <div className="flex items-center gap-3 py-2">
-            <div className="flex-1 border-t border-dashed border-neutral-300" />
-            <a
-              href="https://hyprnote.com/docs/developers/local-models"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-neutral-400 hover:underline flex items-center gap-1"
-            >
-              <span>or use on-device model</span>
-              <HelpCircle className="size-3" />
-            </a>
-            <div className="flex-1 border-t border-dashed border-neutral-300" />
-          </div>
-
-          {isAppleSilicon && (
-            <>
-              <HyprProviderLocalRow
-                model="am-parakeet-v2"
-                displayName="Parakeet v2"
-                description="English only. Works best for English."
-              />
-              <HyprProviderLocalRow
-                model="am-parakeet-v3"
-                displayName="Parakeet v3"
-                description="English and European languages."
-              />
-              <HyprProviderLocalRow
-                model="am-whisper-large-v3"
-                displayName="Whisper Large v3"
-                description="Broad coverage of languages."
-              />
-            </>
-          )}
-        </div>
-      </AccordionContent>
-    </AccordionItem>
+    </HyprProviderRow>
   );
 }
 
