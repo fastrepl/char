@@ -11,14 +11,16 @@ interface AppSettingsViewProps {
   autostart: SettingItem;
   notificationDetect: SettingItem;
   saveRecordings: SettingItem;
-  telemetryConsent: SettingItem;
+  telemetryUsage: SettingItem;
+  telemetryError: SettingItem;
 }
 
 export function AppSettingsView({
   autostart,
   notificationDetect,
   saveRecordings,
-  telemetryConsent,
+  telemetryUsage,
+  telemetryError,
 }: AppSettingsViewProps) {
   return (
     <div>
@@ -43,10 +45,16 @@ export function AppSettingsView({
           onChange={saveRecordings.onChange}
         />
         <SettingRow
-          title={telemetryConsent.title}
-          description={telemetryConsent.description}
-          checked={telemetryConsent.value}
-          onChange={telemetryConsent.onChange}
+          title={telemetryUsage.title}
+          description={telemetryUsage.description}
+          checked={telemetryUsage.value}
+          onChange={telemetryUsage.onChange}
+        />
+        <SettingRow
+          title={telemetryError.title}
+          description={telemetryError.description}
+          checked={telemetryError.value}
+          onChange={telemetryError.onChange}
         />
       </div>
     </div>
