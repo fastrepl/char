@@ -85,7 +85,7 @@ if (env.VITE_SENTRY_DSN) {
   Sentry.init({
     dsn: env.VITE_SENTRY_DSN,
     release: env.VITE_APP_VERSION
-      ? `hyprnote-desktop@${env.VITE_APP_VERSION}`
+      ? `char-desktop@${env.VITE_APP_VERSION}`
       : undefined,
     environment: import.meta.env.MODE,
     tracePropagationTargets: [env.VITE_API_URL],

@@ -26,9 +26,9 @@ export function ConfigureProviders() {
       >
         <HyprProviderCard
           providerId="hyprnote"
-          providerName="Hyprnote"
+          providerName="Char"
           icon={
-            <img src="/assets/icon.png" alt="Hyprnote" className="size-5" />
+            <img src="/assets/icon.png" alt="Char" className="size-5" />
           }
         />
         {PROVIDERS.filter((provider) => provider.id !== "hyprnote").map(

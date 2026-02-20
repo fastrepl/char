@@ -39,7 +39,7 @@ async fn app() -> Router {
     let llm_config =
         hypr_llm_proxy::LlmProxyConfig::new(&env.llm).with_analytics(analytics.clone());
     let stt_config = hypr_transcribe_proxy::SttProxyConfig::new(&env.stt, &env.supabase)
-        .with_hyprnote_routing(hypr_transcribe_proxy::HyprnoteRoutingConfig::default())
+        .with_hyprnote_routing(hypr_transcribe_proxy::CharRoutingConfig::default())
         .with_analytics(analytics);
 
     let stt_rate_limit = rate_limit::RateLimitState::builder()
@@ -275,7 +275,7 @@ fn main() -> std::io::Result<()> {
 
     let _guard = sentry::init(sentry::ClientOptions {
         dsn: env.sentry_dsn.as_ref().and_then(|s| s.parse().ok()),
-        release: option_env!("APP_VERSION").map(|v| format!("hyprnote-api@{}", v).into()),
+        release: option_env!("APP_VERSION").map(|v| format!("char-api@{}", v).into()),
         environment: Some(
             if cfg!(debug_assertions) {
                 "development"
@@ -295,7 +295,7 @@ fn main() -> std::io::Result<()> {
     });
 
     sentry::configure_scope(|scope| {
-        scope.set_tag("service", "hyprnote-api");
+        scope.set_tag("service", "char-api");
     });
 
     tracing_subscriber::registry()

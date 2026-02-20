@@ -18,7 +18,7 @@ pub enum SkipReason {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AppCategory {
-    Hyprnote,
+    Char,
     Dictation,
     IDE,
     ScreenRecording,
@@ -202,7 +202,7 @@ mod tests {
     fn test_app_category_find() {
         assert_eq!(
             AppCategory::find_category("com.hyprnote.dev"),
-            Some(AppCategory::Hyprnote)
+            Some(AppCategory::Char)
         );
         assert_eq!(AppCategory::find_category("com.zoom.us"), None);
     }

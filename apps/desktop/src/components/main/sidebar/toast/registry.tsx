@@ -140,13 +140,13 @@ export function createToastRegistry({
         icon: (
           <img
             src="/assets/hyprnote-pro.png"
-            alt="Hyprnote Pro"
+            alt="Char Pro"
             className="size-5"
           />
         ),
         title: "Sign in required",
         description:
-          "You have Hyprnote Pro models configured. Please sign in to use them.",
+          "You have Char Pro models configured. Please sign in to use them.",
         primaryAction: {
           label: "Sign in",
           onClick: onSignIn,
@@ -162,7 +162,7 @@ export function createToastRegistry({
         icon: (
           <img
             src="/assets/hyprnote-pro.png"
-            alt="Hyprnote Pro"
+            alt="Char Pro"
             className="size-5"
           />
         ),

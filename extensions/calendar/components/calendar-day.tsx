@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { format, getDay } from "date-fns";
-import { store } from "hyprnote";
+import { store } from "char";
 import { useEffect, useRef, useState } from "react";
 
 import { DayEvent } from "./day-event";

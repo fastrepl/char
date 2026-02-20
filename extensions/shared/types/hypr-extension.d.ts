@@ -1,5 +1,5 @@
 /**
- * Hyprnote Extension Runtime Types
+ * Char Extension Runtime Types
  *
  * AUTO-GENERATED - DO NOT EDIT MANUALLY
  * Run: deno task generate
@@ -462,8 +462,8 @@ declare module "@hypr/ui/components/ui/typewriter" {
   export const Typewriter: React.ComponentType<Record<string, unknown>>;
 }
 
-// hyprnote aggregate namespace
-declare module "hyprnote" {
+// char aggregate namespace
+declare module "char" {
   import type * as React from "react";
   import type * as _UI from "tinybase/ui-react/with-schemas";
   import type { TablesSchema, ValuesSchema } from "tinybase/with-schemas";

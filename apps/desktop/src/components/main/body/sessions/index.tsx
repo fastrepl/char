@@ -328,7 +328,7 @@ function StatusBanner({
             showTimeline ? "bottom-[76px]" : "bottom-6",
           ])}
         >
-          {skipReason || "Ask for consent when using Hyprnote"}
+          {skipReason || "Ask for consent when using Char"}
         </motion.div>
       )}
     </AnimatePresence>,

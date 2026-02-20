@@ -123,7 +123,7 @@ function ChatGroups({
         >
           <MessageCircle className="w-3.5 h-3.5 text-neutral-400 group-hover:text-neutral-600 transition-colors" />
           <h3 className="font-medium text-neutral-700 text-xs truncate">
-            {currentChatTitle || "Ask Hyprnote anything"}
+            {currentChatTitle || "Ask Char anything"}
           </h3>
           <ChevronDown
             className={cn([

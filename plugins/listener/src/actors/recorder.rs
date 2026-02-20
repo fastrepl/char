@@ -191,7 +191,7 @@ fn into_actor_err(err: hypr_audio_utils::Error) -> ActorProcessingErr {
 
 fn is_debug_mode() -> bool {
     cfg!(debug_assertions)
-        || std::env::var("HYPRNOTE_DEBUG")
+        || std::env::var("CHAR_DEBUG")
             .map(|v| !v.is_empty() && v != "0" && v != "false")
             .unwrap_or(false)
 }

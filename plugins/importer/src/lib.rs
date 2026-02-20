@@ -71,7 +71,7 @@ mod test {
         println!(
             "{:?}",
             importer
-                .run_import_dry(ImportSourceKind::HyprnoteV0Stable)
+                .run_import_dry(ImportSourceKind::CharV0Stable)
                 .await
                 .unwrap()
         );
@@ -79,7 +79,7 @@ mod test {
         println!(
             "{:?}",
             importer
-                .run_import_dry(ImportSourceKind::HyprnoteV0Nightly)
+                .run_import_dry(ImportSourceKind::CharV0Nightly)
                 .await
                 .unwrap()
         );

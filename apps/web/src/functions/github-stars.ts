@@ -10,7 +10,7 @@ function getSql() {
 
 function getGitHubHeaders(accept?: string): Record<string, string> {
   const headers: Record<string, string> = {
-    "User-Agent": "hyprnote-admin",
+    "User-Agent": "char-admin",
     Accept: accept || "application/vnd.github.v3+json",
   };
   if (env.GITHUB_TOKEN) {

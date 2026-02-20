@@ -546,7 +546,7 @@ mod tests {
     #[test]
     #[ignore]
     fn test_calculate_file_size_and_checksum() {
-        let base = "/Users/yujonglee/dev/hyprnote/.cache";
+        let base = "/Users/yujonglee/dev/char/.cache";
 
         fn walk_dir(dir: &std::path::Path) -> std::io::Result<()> {
             for entry in std::fs::read_dir(dir)? {

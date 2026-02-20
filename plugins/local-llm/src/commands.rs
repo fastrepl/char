@@ -15,7 +15,7 @@ pub async fn list_supported_model() -> Result<Vec<ModelInfo>, String> {
         ModelInfo {
             key: SupportedModel::HyprLLM,
             name: "HyprLLM".to_string(),
-            description: "Experimental model trained by the Hyprnote team.".to_string(),
+            description: "Experimental model trained by the Char team.".to_string(),
             size_bytes: SupportedModel::HyprLLM.model_size(),
         },
         ModelInfo {

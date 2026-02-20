@@ -34,9 +34,9 @@ type Provider = {
 const _PROVIDERS = [
   {
     id: "hyprnote",
-    displayName: "Hyprnote",
+    displayName: "Char",
     badge: "Recommended",
-    icon: <img src="/assets/icon.png" alt="Hyprnote" className="size-5" />,
+    icon: <img src="/assets/icon.png" alt="Char" className="size-5" />,
     baseUrl: new URL("/llm", env.VITE_API_URL).toString(),
     requirements: [
       { kind: "requires_auth" },

@@ -1,5 +1,5 @@
 ```bash
-# REPO="SOMEWHERE" ($HOME/repos/hyprnote inside Devin)
+# REPO="SOMEWHERE" ($HOME/repos/char inside Devin)
 infisical export \
   --env=dev \
   --secret-overriding=false \

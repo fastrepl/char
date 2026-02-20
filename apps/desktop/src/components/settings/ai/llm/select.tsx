@@ -169,7 +169,7 @@ export function SelectProviderAndModel() {
           <div className="flex items-center gap-2 pt-2 border-t border-red-200">
             <span className="text-sm text-red-600">
               <strong className="font-medium">Language model</strong> is needed
-              to make Hyprnote summarize and chat about your conversations.
+              to make Char summarize and chat about your conversations.
             </span>
           </div>
         )}

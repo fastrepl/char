@@ -42,7 +42,7 @@ mod tests {
 
     Current date: 2025-01-01
 
-    - You are a helpful AI meeting assistant in Hyprnote, an intelligent meeting platform that transcribes and analyzes meetings. Your purpose is to help users understand their meeting content better.
+    - You are a helpful AI meeting assistant in Char, an intelligent meeting platform that transcribes and analyzes meetings. Your purpose is to help users understand their meeting content better.
     - Always respond in English, unless the user explicitly asks for a different language.
     - Always keep your responses concise, professional, and directly relevant to the user's questions.
     - Your primary source of truth is the meeting transcript. Try to generate responses primarily from the transcript, and then the summary or other information (unless the user asks for something specific).
@@ -104,7 +104,7 @@ mod tests {
 
     Current date: 2025-01-01
 
-    - You are a helpful AI meeting assistant in Hyprnote, an intelligent meeting platform that transcribes and analyzes meetings. Your purpose is to help users understand their meeting content better.
+    - You are a helpful AI meeting assistant in Char, an intelligent meeting platform that transcribes and analyzes meetings. Your purpose is to help users understand their meeting content better.
     - Always respond in English, unless the user explicitly asks for a different language.
     - Always keep your responses concise, professional, and directly relevant to the user's questions.
     - Your primary source of truth is the meeting transcript. Try to generate responses primarily from the transcript, and then the summary or other information (unless the user asks for something specific).

@@ -66,7 +66,7 @@ const TOOL_CONFIG: Record<
   figma: { icon: "logos:figma" },
   slack: { icon: "logos:slack-icon" },
   github: { icon: "logos:github-icon" },
-  hyprnote: {
+  char: {
     image: {
       src: "/api/images/hyprnote/icon.png",
       className: "size-5 -mx-0.5 mb-0.5 rounded",
@@ -87,7 +87,7 @@ const TOOL_NAMES: Record<string, string> = {
   figma: "Figma",
   slack: "Slack",
   github: "GitHub",
-  hyprnote: "Char",
+  char: "Char",
 };
 
 function ToolWithIcon({ tool }: { tool: string }) {
@@ -225,7 +225,7 @@ export function GitHubMention({
   );
 }
 
-export function HyprnoteIcon() {
+export function CharIcon() {
   return (
     <img
       src="/api/images/hyprnote/icon.png"
@@ -302,7 +302,7 @@ export function CompanyStats() {
       <br />
       We're also backed by{" "}
       <a
-        href="https://www.ycombinator.com/companies/hyprnote"
+        href="https://www.ycombinator.com/companies/char"
         target="_blank"
         rel="noopener noreferrer"
         className="underline underline-offset-2 decoration-neutral-400 hover:decoration-neutral-600 transition-colors"
@@ -395,7 +395,7 @@ export const jobsMdxComponents = {
   GitToolStack,
   AnimatedJobText,
   GitHubMention,
-  HyprnoteIcon,
+  CharIcon,
   ChevronIcon,
   Collapsible,
   FAQ,

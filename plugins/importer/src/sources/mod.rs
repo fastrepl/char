@@ -8,7 +8,7 @@ use crate::types::{Collection, ImportSource, ImportSourceInfo, TransformKind};
 
 pub async fn import_all(source: &ImportSource) -> Result<Collection, crate::Error> {
     match source.transform {
-        TransformKind::HyprnoteV0 => hyprnote::v0::import_all_from_path(&source.path).await,
+        TransformKind::CharV0 => char::v0::import_all_from_path(&source.path).await,
         TransformKind::Granola => granola::import_all_from_path(&source.path).await,
         TransformKind::AsIs => as_is::load_data(&source.path),
     }

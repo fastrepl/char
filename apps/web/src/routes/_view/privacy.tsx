@@ -381,32 +381,32 @@ function PrivacyComparisonSection() {
   const comparisons = [
     {
       feature: "Audio processing",
-      hyprnote: "On your device",
+      char: "On your device",
       others: "Cloud servers",
     },
     {
       feature: "Data storage",
-      hyprnote: "Local only",
+      char: "Local only",
       others: "Their servers",
     },
     {
       feature: "AI training",
-      hyprnote: "Never",
+      char: "Never",
       others: "Often",
     },
     {
       feature: "Account required",
-      hyprnote: "No",
+      char: "No",
       others: "Yes",
     },
     {
       feature: "Data monetization",
-      hyprnote: "Never",
+      char: "Never",
       others: "Common",
     },
     {
       feature: "Source code",
-      hyprnote: "Open",
+      char: "Open",
       others: "Closed",
     },
   ];
@@ -449,7 +449,7 @@ function PrivacyComparisonSection() {
                         icon="mdi:check-circle"
                         className="text-lg text-green-600"
                       />
-                      {row.hyprnote}
+                      {row.char}
                     </span>
                   </td>
                   <td className="py-4 px-4 text-center text-neutral-500">

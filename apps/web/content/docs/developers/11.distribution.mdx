@@ -99,7 +99,7 @@ flatpak run --devel --command=sh com.hyprnote.Char
 
 # Inside the sandbox, you can inspect /app and run the binary directly
 ls /app/bin/
-/app/bin/hyprnote
+/app/bin/char
 ```
 
 ## Flathub Submission
@@ -135,11 +135,11 @@ Before submitting to Flathub, ensure:
 
    ```bash
    mkdir com.hyprnote.Char
-   cp /path/to/hyprnote/apps/desktop/flatpak/com.hyprnote.Char.yml com.hyprnote.Char/
-   cp /path/to/hyprnote/apps/desktop/flatpak/com.hyprnote.Char.desktop com.hyprnote.Char/
-   cp /path/to/hyprnote/apps/desktop/flatpak/com.hyprnote.Char.metainfo.xml com.hyprnote.Char/
-   cp /path/to/hyprnote/apps/desktop/flatpak/pnpm-sources.json com.hyprnote.Char/
-   cp /path/to/hyprnote/apps/desktop/flatpak/cargo-sources.json com.hyprnote.Char/
+   cp /path/to/char/apps/desktop/flatpak/com.hyprnote.Char.yml com.hyprnote.Char/
+   cp /path/to/char/apps/desktop/flatpak/com.hyprnote.Char.desktop com.hyprnote.Char/
+   cp /path/to/char/apps/desktop/flatpak/com.hyprnote.Char.metainfo.xml com.hyprnote.Char/
+   cp /path/to/char/apps/desktop/flatpak/pnpm-sources.json com.hyprnote.Char/
+   cp /path/to/char/apps/desktop/flatpak/cargo-sources.json com.hyprnote.Char/
    ```
 
 5. Update the manifest to use a git source instead of a local directory:

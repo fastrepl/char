@@ -206,7 +206,7 @@ export function LoginSection({ onContinue }: { onContinue: () => void }) {
         <input
           type="text"
           className="flex-1 px-4 py-3 text-xs font-mono outline-hidden bg-white"
-          placeholder="hyprnote://...?access_token=..."
+          placeholder="char://...?access_token=..."
           value={callbackUrl}
           onChange={(e) => setCallbackUrl(e.target.value)}
         />

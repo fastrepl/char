@@ -820,14 +820,14 @@ const contributions = [
     title: "Spread the Word",
     description: "Share Char with your network and community",
     icon: "mdi:share-variant",
-    link: "https://twitter.com/intent/tweet?text=Check%20out%20Hyprnote%20-%20open%20source%20AI%20meeting%20notes%20that%20run%20locally!%20https://hyprnote.com",
+    link: "https://twitter.com/intent/tweet?text=Check%20out%20Char%20-%20open%20source%20AI%20meeting%20notes%20that%20run%20locally!%20https://hyprnote.com",
     linkText: "Share on X",
   },
   {
     title: "Join Community",
     description: "Connect with other users and contributors",
     icon: "mdi:forum",
-    link: "https://discord.gg/Hyprnote",
+    link: "https://discord.gg/Char",
     linkText: "Join Discord",
   },
 ];

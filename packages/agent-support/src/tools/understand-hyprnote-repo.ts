@@ -1,11 +1,11 @@
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 
-import { understandHyprnoteRepo } from "../modal/understand";
+import { understandCharRepo } from "../modal/understand";
 
-export const understandHyprnoteRepoTool = tool(
+export const understandCharRepoTool = tool(
   async ({ request }: { request: string }) => {
-    const result = await understandHyprnoteRepo(request);
+    const result = await understandCharRepo(request);
     const lines = [
       `success: ${result.success}`,
       `executionTimeMs: ${result.executionTimeMs}`,
@@ -14,14 +14,14 @@ export const understandHyprnoteRepoTool = tool(
     return lines.join("\n");
   },
   {
-    name: "understandHyprnoteRepo",
+    name: "understandCharRepo",
     description:
-      "Analyze and understand the Hyprnote codebase using Claude CLI. Use this for questions about code structure, architecture, implementation details, or finding specific code. This tool is read-only and cannot make modifications.",
+      "Analyze and understand the Char codebase using Claude CLI. Use this for questions about code structure, architecture, implementation details, or finding specific code. This tool is read-only and cannot make modifications.",
     schema: z.object({
       request: z
         .string()
         .describe(
-          "The question or request about the Hyprnote codebase to investigate",
+          "The question or request about the Char codebase to investigate",
         ),
     }),
   },

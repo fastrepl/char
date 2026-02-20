@@ -9,7 +9,7 @@ pub use hypr_importer_core::ir::{
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, specta::Type, PartialEq, Eq, Hash)]
 #[serde(rename_all = "snake_case")]
 pub enum TransformKind {
-    HyprnoteV0,
+    CharV0,
     Granola,
     AsIs,
 }
@@ -18,8 +18,8 @@ pub enum TransformKind {
 #[serde(rename_all = "snake_case")]
 pub enum ImportSourceKind {
     Granola,
-    HyprnoteV0Stable,
-    HyprnoteV0Nightly,
+    CharV0Stable,
+    CharV0Nightly,
     AsIs,
 }
 
@@ -46,10 +46,10 @@ impl ImportSource {
             .join("com.hyprnote.stable")
             .join("db.sqlite");
         Some(Self {
-            kind: Some(ImportSourceKind::HyprnoteV0Stable),
-            transform: TransformKind::HyprnoteV0,
+            kind: Some(ImportSourceKind::CharV0Stable),
+            transform: TransformKind::CharV0,
             path,
-            name: "Hyprnote v0 - Stable".to_string(),
+            name: "Char v0 - Stable".to_string(),
         })
     }
 
@@ -58,10 +58,10 @@ impl ImportSource {
             .join("com.hyprnote.nightly")
             .join("db.sqlite");
         Some(Self {
-            kind: Some(ImportSourceKind::HyprnoteV0Nightly),
-            transform: TransformKind::HyprnoteV0,
+            kind: Some(ImportSourceKind::CharV0Nightly),
+            transform: TransformKind::CharV0,
             path,
-            name: "Hyprnote v0 - Nightly".to_string(),
+            name: "Char v0 - Nightly".to_string(),
         })
     }
 
@@ -81,8 +81,8 @@ impl ImportSource {
 
     pub fn info(&self) -> ImportSourceInfo {
         let (display_path, reveal_path) = match self.kind {
-            Some(ImportSourceKind::HyprnoteV0Stable)
-            | Some(ImportSourceKind::HyprnoteV0Nightly) => {
+            Some(ImportSourceKind::CharV0Stable)
+            | Some(ImportSourceKind::CharV0Nightly) => {
                 let parent = self.path.parent().unwrap_or(&self.path);
                 let display = parent
                     .file_name()
@@ -110,8 +110,8 @@ impl ImportSource {
 impl From<ImportSourceKind> for ImportSource {
     fn from(kind: ImportSourceKind) -> Self {
         match kind {
-            ImportSourceKind::HyprnoteV0Stable => Self::hyprnote_stable().unwrap(),
-            ImportSourceKind::HyprnoteV0Nightly => Self::hyprnote_nightly().unwrap(),
+            ImportSourceKind::CharV0Stable => Self::hyprnote_stable().unwrap(),
+            ImportSourceKind::CharV0Nightly => Self::hyprnote_nightly().unwrap(),
             ImportSourceKind::Granola => Self::granola().unwrap(),
             ImportSourceKind::AsIs => Self {
                 kind: Some(ImportSourceKind::AsIs),

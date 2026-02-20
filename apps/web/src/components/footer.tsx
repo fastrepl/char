@@ -262,7 +262,7 @@ function ResourcesLinks() {
         </li>
         <li>
           <a
-            href="mailto:support@hyprnote.com"
+            href="mailto:support@char.com"
             className="text-sm text-neutral-600 hover:text-stone-600 transition-colors inline-flex items-center gap-1 no-underline hover:underline hover:decoration-dotted"
           >
             Support

@@ -9,7 +9,7 @@ category: "Engineering"
 date: "2026-02-13"
 ---
 
-In the last two months, my two-person team spent over $5,000 running roughly 1,000 tasks in **[Devin](https://devin.ai/)**, the AI software engineer. This isn't vibe coding hype, or spinning up 10 Claude Code instances to burn tokens as fast as possible. This is what actually happened when we integrated AI agents into our real-world workflow while building Hyprnote.
+In the last two months, my two-person team spent over $5,000 running roughly 1,000 tasks in **[Devin](https://devin.ai/)**, the AI software engineer. This isn't vibe coding hype, or spinning up 10 Claude Code instances to burn tokens as fast as possible. This is what actually happened when we integrated AI agents into our real-world workflow while building Char.
 
 Here's what we learned.
 
@@ -45,7 +45,7 @@ John attached some PostHog docs and asked questions about what we're tracking an
 
 <Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=108" />
 
-Since we use GitHub as a CMS for Hyprnote, we can even update landing pages or blog content directly from Slack. John attached a PDF from an internal discussion, and Devin updated our docs based on the actual conversation we had.
+Since we use GitHub as a CMS for Char, we can even update landing pages or blog content directly from Slack. John attached a PDF from an internal discussion, and Devin updated our docs based on the actual conversation we had.
 
 <Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=132" />
 
@@ -69,7 +69,7 @@ Then we cloned the repository of a popular Chrome extension framework. Based on 
 
 This is work we'll likely merge, but I won't pull it into my IDE yet.
 
-**Example:** Someone asked whether Hyprnote could import data from Apple Notes. That feels like a feature we could support in the future, but it's not a core focus at the moment.
+**Example:** Someone asked whether Char could import data from Apple Notes. That feels like a feature we could support in the future, but it's not a core focus at the moment.
 
 We did research to see if there was any existing work on that. There was, so we cloned it, ported the test cases, and let Devin implement it. Tests passed, so we safely merged it for a future feature.
 
@@ -89,7 +89,7 @@ One interesting trick: we asked Devin to use the Claude CLI that we already inst
 
 ## Good Documentation Enables AI Agents to Ship Code Faster
 
-In Hyprnote, we focus on supporting multiple providers for language and speech model inference as part of our open-source effort. Early on, we spent time designing and documenting flexible, clean interfaces. This worked well for future contributions and community involvement.
+In Char, we focus on supporting multiple providers for language and speech model inference as part of our open-source effort. Early on, we spent time designing and documenting flexible, clean interfaces. This worked well for future contributions and community involvement.
 
 It turns out these same choices are incredibly helpful when working with coding agents.
 
@@ -121,7 +121,7 @@ If you're a developer, you know that once a codebase reaches a certain size and 
 
 ### Single-Prompt Migrations
 
-One common example is doing migrations that have clear documentation. In Hyprnote, we recently completed:
+One common example is doing migrations that have clear documentation. In Char, we recently completed:
 
 - **AI SDK version 6 migration** in a single prompt
 - **Tailwind v3 to v4 migration** in a single prompt
@@ -142,7 +142,7 @@ One way to do this is to ask Devin to make actual API calls. But there's a bette
 
 This is all very useful, but we're not doing migrations or receiving new guidelines every day. However, if you pair an agent with an automated linting tool, this approach can be applied daily.
 
-In Hyprnote, we have a large Rust codebase, and since Cargo Clippy is pretty good, we set up a GitHub Action to run Cargo Clippy daily and spawn Devin to apply any fixes based on the output.
+In Char, we have a large Rust codebase, and since Cargo Clippy is pretty good, we set up a GitHub Action to run Cargo Clippy daily and spawn Devin to apply any fixes based on the output.
 
 Since it takes a lot of time to run Clippy and Cargo check, we save a lot of time applying these guidelines or Clippy warnings in an async manner.
 

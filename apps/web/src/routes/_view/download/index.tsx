@@ -224,7 +224,7 @@ function Component() {
 
 function HomebrewCard() {
   const [copied, setCopied] = useState(false);
-  const command = "brew tap fastrepl/hyprnote && brew install hyprnote --cask";
+  const command = "brew tap fastrepl/char && brew install char --cask";
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(command);
@@ -276,7 +276,7 @@ function HomebrewCard() {
 function HomebrewNightlyCard() {
   const [copied, setCopied] = useState(false);
   const command =
-    "brew tap fastrepl/hyprnote && brew install char@nightly --cask";
+    "brew tap fastrepl/char && brew install char@nightly --cask";
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(command);

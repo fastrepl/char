@@ -11,7 +11,7 @@ export const getScheme = async (): Promise<string> => {
   const schemes: Record<string, string> = {
     "com.hyprnote.stable": "hyprnote",
     "com.hyprnote.nightly": "hyprnote-nightly",
-    "com.hyprnote.staging": "hyprnote-staging",
+    "com.hyprnote.staging": "char-staging",
     "com.hyprnote.dev": "hypr",
   };
   return schemes[id] ?? "hypr";
