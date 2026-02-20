@@ -482,18 +482,26 @@ mod tests {
     }
 
     macro_rules! fixture_test {
-        ($test_name:ident, $file:literal) => {
+        ($test_name:ident, $json:expr) => {
             #[test]
             fn $test_name() {
                 let responses: Vec<StreamResponse> =
-                    serde_json::from_str(include_str!(concat!("fixtures/", $file, ".json")))
-                        .expect("fixture must parse as StreamResponse[]");
+                    serde_json::from_str($json).expect("fixture must parse as StreamResponse[]");
                 assert_valid_output(&replay(&responses));
             }
         };
     }
 
-    fixture_test!(deepgram_fixture_produces_valid_output, "deepgram_1");
-    fixture_test!(soniox_fixture_produces_valid_output, "soniox_1");
-    fixture_test!(soniox_korean_fixture_produces_valid_output, "soniox_2");
+    fixture_test!(
+        deepgram_fixture_produces_valid_output,
+        hypr_data::english_1::DEEPGRAM_JSON
+    );
+    fixture_test!(
+        soniox_fixture_produces_valid_output,
+        hypr_data::english_1::SONIOX_JSON
+    );
+    fixture_test!(
+        soniox_korean_fixture_produces_valid_output,
+        hypr_data::korean_1::SONIOX_JSON
+    );
 }

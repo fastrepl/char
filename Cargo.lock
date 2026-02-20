@@ -19822,6 +19822,7 @@ dependencies = [
 name = "transcript"
 version = "0.1.0"
 dependencies = [
+ "data",
  "owhisper-interface",
  "serde",
  "serde_json",
