@@ -55,10 +55,14 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
     ) -> Result<bool, crate::Error> {
         match model {
             SupportedSttModel::Am(model) => Ok(model.is_downloaded(self.models_dir())?),
-            SupportedSttModel::Whisper(_model) => {
-                // TODO: replace with proper cactus model registry once models are hosted
-                let cactus_dir = self.models_dir().join("whisper-small");
-                Ok(cactus_dir.join("config.txt").exists())
+            SupportedSttModel::Whisper(model) => {
+                Ok(self.models_dir().join(model.file_name()).exists())
+            }
+            SupportedSttModel::Cactus(_) => {
+                #[cfg(target_arch = "aarch64")]
+                return Ok(read_cactus_model_path(self.manager).is_some());
+                #[cfg(not(target_arch = "aarch64"))]
+                Err(crate::Error::UnsupportedModelType)
             }
         }
     }
@@ -67,7 +71,7 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
     pub async fn start_server(&self, model: SupportedSttModel) -> Result<String, crate::Error> {
         let server_type = match &model {
             SupportedSttModel::Am(_) => ServerType::External,
-            SupportedSttModel::Whisper(_) => ServerType::Internal,
+            SupportedSttModel::Whisper(_) | SupportedSttModel::Cactus(_) => ServerType::Internal,
         };
 
         let current_info = match server_type {
@@ -378,6 +382,7 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
 
                 Ok(())
             }
+            SupportedSttModel::Cactus(_) => Err(crate::Error::UnsupportedModelType),
         }
     }
 
@@ -402,6 +407,7 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
                     let model_path = self.models_dir().join(m.file_name());
                     let _ = std::fs::remove_file(&model_path);
                 }
+                SupportedSttModel::Cactus(_) => {}
             }
 
             let _ = DownloadProgressPayload {
@@ -446,6 +452,7 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
                         .map_err(|e| crate::Error::ModelDeleteFailed(e.to_string()))?;
                 }
             }
+            SupportedSttModel::Cactus(_) => return Err(crate::Error::UnsupportedModelType),
         }
 
         Ok(())

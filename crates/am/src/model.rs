@@ -46,6 +46,14 @@ impl AmModel {
         }
     }
 
+    pub fn description(&self) -> &str {
+        match self {
+            AmModel::ParakeetV2 => "English only. Works best for English.",
+            AmModel::ParakeetV3 => "English and European languages.",
+            AmModel::WhisperLargeV3 => "Broad coverage of languages.",
+        }
+    }
+
     pub fn model_size_bytes(&self) -> u64 {
         match self {
             AmModel::ParakeetV2 => 476134400,

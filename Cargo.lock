@@ -2754,6 +2754,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "cactus-model"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "specta",
+]
+
+[[package]]
 name = "cactus-sys"
 version = "0.1.0"
 dependencies = [
@@ -18300,6 +18308,7 @@ dependencies = [
  "axum 0.8.8",
  "axum-extra",
  "backon",
+ "cactus-model",
  "data",
  "dirs 6.0.0",
  "download-interface",
