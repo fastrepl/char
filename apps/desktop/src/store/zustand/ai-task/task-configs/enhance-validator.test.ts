@@ -82,7 +82,9 @@ describe("createEnhanceValidator", () => {
   describe("preamble stripping", () => {
     it("accepts output with preamble text before heading", () => {
       const v = createEnhanceValidator(template);
-      expect(v("Here is the summary:\n# Data File Status and Upload Testing")).toEqual({
+      expect(
+        v("Here is the summary:\n# Data File Status and Upload Testing"),
+      ).toEqual({
         valid: true,
       });
     });

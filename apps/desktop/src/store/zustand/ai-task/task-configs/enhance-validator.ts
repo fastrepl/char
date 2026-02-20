@@ -82,10 +82,7 @@ function matchSectionHeading(title: string): EarlyValidatorFn {
 export function createEnhanceValidator(
   template: EnhanceTemplate | null,
 ): EarlyValidatorFn {
-  const steps: PipeStep[] = [
-    stripPreamble(),
-    requireH1(),
-  ];
+  const steps: PipeStep[] = [stripPreamble(), requireH1()];
 
   if (template?.sections?.length) {
     steps.push(matchSectionHeading(template.sections[0].title));
