@@ -1,4 +1,3 @@
-import { getCurrentWindow } from "@tauri-apps/api/window";
 import React, { createContext, useContext, useEffect, useRef } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/shallow";
@@ -74,26 +73,18 @@ const useHandleDetectEvents = (store: ListenerStore) => {
             return;
           }
 
-          void getCurrentWindow()
-            .isFocused()
-            .then((isFocused) => {
-              if (isFocused) {
-                return;
-              }
-
-              void notificationCommands.showNotification({
-                key: payload.key,
-                title: "Meeting in progress?",
-                message:
-                  "Noticed microphone usage for certain period of time. Start listening?",
-                timeout: { secs: 15, nanos: 0 },
-                event_id: null,
-                start_time: null,
-                participants: null,
-                event_details: null,
-                action_label: null,
-              });
-            });
+          void notificationCommands.showNotification({
+            key: payload.key,
+            title: "Meeting in progress?",
+            message:
+              "Noticed microphone usage for certain period of time. Start listening?",
+            timeout: { secs: 15, nanos: 0 },
+            event_id: null,
+            start_time: null,
+            participants: null,
+            event_details: null,
+            action_label: null,
+          });
         } else if (payload.type === "micStopped") {
           stop();
         } else if (payload.type === "sleepStateChanged") {
