@@ -94,6 +94,10 @@ function useSettingsForm() {
       void analyticsCommands.setProperties({
         set: {
           telemetry_usage_opt_out: value.telemetry_usage === false,
+        },
+      });
+      void analyticsCommands.setProperties({
+        set: {
           telemetry_error_opt_out: value.telemetry_error === false,
         },
       });
