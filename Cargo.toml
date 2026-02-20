@@ -119,7 +119,7 @@ hypr-whisper-local = { path = "crates/whisper-local", package = "whisper-local" 
 hypr-whisper-local-model = { path = "crates/whisper-local-model", package = "whisper-local-model" }
 hypr-ws-client = { path = "crates/ws-client", package = "ws-client" }
 hypr-ws-utils = { path = "crates/ws-utils", package = "ws-utils" }
-posthog-rs = "0.4"
+posthog-rs = "0.4.1"
 
 owhisper-client = { path = "crates/owhisper-client", package = "owhisper-client" }
 owhisper-config = { path = "crates/owhisper-config", package = "owhisper-config" }
@@ -275,7 +275,6 @@ async-stripe = { version = "1.0.0-rc.0" }
 async-stripe-billing = { version = "1.0.0-rc.1", default-features = false }
 async-stripe-core = { version = "1.0.0-rc.1", default-features = false }
 gbnf-validator = { git = "https://github.com/fastrepl/gbnf-validator", rev = "3dec055" }
-posthog-rs = "0.4.1"
 
 jsonwebtoken = { version = "10", features = ["rust_crypto"] }
 sentry = "=0.42.0"
