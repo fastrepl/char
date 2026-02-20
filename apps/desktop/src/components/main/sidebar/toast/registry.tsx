@@ -140,7 +140,7 @@ export function createToastRegistry({
         icon: (
           <img
             src="/assets/hyprnote-pro.png"
-            alt="Hyprnote Pro"
+            alt="Char Pro"
             className="size-5"
           />
         ),
@@ -162,7 +162,7 @@ export function createToastRegistry({
         icon: (
           <img
             src="/assets/hyprnote-pro.png"
-            alt="Hyprnote Pro"
+            alt="Char Pro"
             className="size-5"
           />
         ),

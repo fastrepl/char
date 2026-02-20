@@ -137,7 +137,7 @@ export function SettingsApp() {
                     {(telemetryConsentField) => (
                       <AppSettingsView
                         autostart={{
-                          title: "Start Hyprnote at login",
+                          title: "Start Char at login",
                           description:
                             "Always ready without manually launching.",
                           value: autostartField.state.value,
