@@ -13,9 +13,11 @@ export function normalizeForComparison(text: string): string {
     .trim();
 }
 
-function pipe(
-  ...fns: ((text: string) => { text: string } | { valid: false; feedback: string })[]
-): EarlyValidatorFn {
+type PipeStep = (
+  text: string,
+) => { text: string } | { valid: true } | { valid: false; feedback: string };
+
+function pipe(...fns: PipeStep[]): EarlyValidatorFn {
   return (text) => {
     let current = text;
     for (const fn of fns) {
@@ -80,7 +82,7 @@ function matchSectionHeading(title: string): EarlyValidatorFn {
 export function createEnhanceValidator(
   template: EnhanceTemplate | null,
 ): EarlyValidatorFn {
-  const steps: ((text: string) => { text: string } | { valid: false; feedback: string })[] = [
+  const steps: PipeStep[] = [
     stripPreamble(),
     requireH1(),
   ];
