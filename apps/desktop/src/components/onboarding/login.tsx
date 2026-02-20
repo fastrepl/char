@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { startTrial } from "@hypr/api-client";
 import { createClient } from "@hypr/api-client/client";
+
 import { useAuth } from "../../auth";
 import { useBillingAccess } from "../../billing";
 import { env } from "../../env";
