@@ -107,11 +107,7 @@ export function RevealInFinder({ sessionId }: { sessionId: string }) {
       disabled={isPending}
       className="cursor-pointer"
     >
-      {isPending ? (
-        <Loader2Icon className="animate-spin" />
-      ) : (
-        <SearchIcon />
-      )}
+      {isPending ? <Loader2Icon className="animate-spin" /> : <SearchIcon />}
       <span>{isPending ? "Revealing..." : "Reveal in Finder"}</span>
     </DropdownMenuItem>
   );
