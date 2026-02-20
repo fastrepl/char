@@ -6,7 +6,54 @@
 
 
 export const commands = {
-
+async loadSessionContent(sessionId: string) : Promise<Result<SessionContent, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:fs-db|load_session_content", { sessionId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async loadSessionTranscript(sessionId: string) : Promise<Result<SessionTranscript, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:fs-db|load_session_transcript", { sessionId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async loadSessionEnhancedNotes(sessionId: string) : Promise<Result<SessionEnhancedNotes, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:fs-db|load_session_enhanced_notes", { sessionId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async saveSessionContent(sessionId: string, rawMd: string) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:fs-db|save_session_content", { sessionId, rawMd }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async saveSessionTranscript(sessionId: string, transcript: TranscriptData) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:fs-db|save_session_transcript", { sessionId, transcript }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async saveSessionEnhancedNote(sessionId: string, note: EnhancedNoteData, filename: string) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:fs-db|save_session_enhanced_note", { sessionId, note, filename }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+}
 }
 
 /** user-defined events **/
@@ -19,7 +66,14 @@ export const commands = {
 
 /** user-defined types **/
 
-
+export type EnhancedNoteData = { id: string; sessionId: string; templateId?: string | null; position: number; title?: string | null; content: string }
+export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
+export type SessionContent = { rawMd: string | null }
+export type SessionEnhancedNotes = { notes: EnhancedNoteData[] }
+export type SessionTranscript = { transcripts: TranscriptData[] }
+export type SpeakerHint = { id: string; wordId: string; type: string; value: JsonValue }
+export type TranscriptData = { id: string; userId: string; createdAt: string; sessionId: string; startedAt: number; endedAt?: number | null; words: Word[]; speakerHints: SpeakerHint[] }
+export type Word = { id: string; text: string; startMs: number; endMs: number; channel: number; speaker?: string | null }
 
 /** tauri-specta globals **/
 

@@ -2,6 +2,7 @@ use owhisper_interface::{SpeakerIdentity, Word2};
 
 fn run(name: &str) {
     let raw_path = format!("src/{}/raw.json", name);
+    println!("cargo:rerun-if-changed={}", raw_path);
     let raw_content = std::fs::read_to_string(&raw_path).unwrap();
 
     let raw: serde_json::Value = serde_json::from_str(&raw_content).unwrap();
@@ -30,6 +31,8 @@ fn run(name: &str) {
 }
 
 fn main() {
+    println!("cargo:rerun-if-changed=build.rs");
+
     run("english_3");
     run("english_4");
     run("english_5");

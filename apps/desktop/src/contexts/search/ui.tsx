@@ -54,9 +54,11 @@ interface SearchUIContextValue {
   inputRef: React.RefObject<HTMLInputElement | null>;
   focus: () => void;
   setFocusImpl: (impl: () => void) => void;
+  selectedIndex: number;
+  setSelectedIndex: (index: number) => void;
 }
 
-const SCORE_PERCENTILE_THRESHOLD = 0.1;
+const SCORE_PERCENTILE_THRESHOLD = 0.2;
 
 const GROUP_TITLES: Record<SearchEntityType, string> = {
   session: "Sessions",
@@ -65,7 +67,7 @@ const GROUP_TITLES: Record<SearchEntityType, string> = {
 };
 
 function calculateDynamicThreshold(scores: number[]): number {
-  if (scores.length === 0) {
+  if (scores.length < 100) {
     return 0;
   }
 
@@ -114,7 +116,7 @@ function toGroup(type: SearchEntityType, results: SearchResult[]): SearchGroup {
   };
 }
 
-function groupSearchResults(
+export function groupSearchResults(
   hits: SearchHit[],
   query: string,
 ): GroupedSearchResults {
@@ -171,6 +173,7 @@ export function SearchUIProvider({ children }: { children: React.ReactNode }) {
   const [isSearching, setIsSearching] = useState(false);
   const [searchHits, setSearchHits] = useState<SearchHit[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const focusImplRef = useRef<(() => void) | null>(null);
 
@@ -191,6 +194,20 @@ export function SearchUIProvider({ children }: { children: React.ReactNode }) {
     enableOnFormTags: true,
     enableOnContentEditable: true,
   });
+
+  useHotkeys(
+    "Escape",
+    () => {
+      if (query.trim()) {
+        setQuery("");
+        setSelectedIndex(-1);
+      }
+    },
+    {
+      enableOnFormTags: true,
+      enableOnContentEditable: true,
+    },
+  );
 
   const resetSearchState = useCallback(() => {
     setSearchHits([]);
@@ -238,6 +255,10 @@ export function SearchUIProvider({ children }: { children: React.ReactNode }) {
     return groupSearchResults(searchHits, searchQuery);
   }, [searchHits, searchQuery]);
 
+  useEffect(() => {
+    setSelectedIndex(-1);
+  }, [results]);
+
   const value = useMemo(
     () => ({
       query,
@@ -250,8 +271,19 @@ export function SearchUIProvider({ children }: { children: React.ReactNode }) {
       inputRef,
       focus,
       setFocusImpl,
+      selectedIndex,
+      setSelectedIndex,
     }),
-    [query, filters, results, isSearching, isIndexing, focus, setFocusImpl],
+    [
+      query,
+      filters,
+      results,
+      isSearching,
+      isIndexing,
+      focus,
+      setFocusImpl,
+      selectedIndex,
+    ],
   );
 
   return (

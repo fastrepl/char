@@ -28,15 +28,15 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Listener<'a, R, M> {
     }
 
     #[tracing::instrument(skip_all)]
-    pub async fn get_state(&self) -> crate::fsm::State {
+    pub async fn get_state(&self) -> crate::State {
         if let Some(cell) = registry::where_is(RootActor::name()) {
             let actor: ActorRef<RootMsg> = cell.into();
             match call_t!(actor, RootMsg::GetState, 100) {
                 Ok(fsm_state) => fsm_state,
-                Err(_) => crate::fsm::State::Inactive,
+                Err(_) => crate::State::Inactive,
             }
         } else {
-            crate::fsm::State::Inactive
+            crate::State::Inactive
         }
     }
 

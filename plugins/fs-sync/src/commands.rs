@@ -10,7 +10,8 @@ use tauri_plugin_settings::SettingsPluginExt;
 use crate::FsSyncPluginExt;
 use crate::frontmatter::ParsedDocument;
 use crate::session::find_session_dir;
-use crate::types::{CleanupTarget, ListFoldersResult, ScanResult};
+use crate::session_content::load_session_content as load_session_content_from_fs;
+use crate::types::{CleanupTarget, ListFoldersResult, ScanResult, SessionContentData};
 
 macro_rules! spawn_blocking {
     ($body:expr) => {
@@ -28,7 +29,10 @@ fn resolve_session_dir<R: tauri::Runtime>(
         .settings()
         .cached_vault_base()
         .map_err(|e| e.to_string())?;
-    Ok(find_session_dir(&base.join("sessions"), session_id))
+    Ok(find_session_dir(
+        &base.join("sessions").into_std_path_buf(),
+        session_id,
+    ))
 }
 
 #[tauri::command]
@@ -52,9 +56,10 @@ pub(crate) async fn write_json_batch<R: tauri::Runtime>(
         .iter()
         .filter_map(|(_, path)| {
             std::path::Path::new(path)
-                .strip_prefix(&base)
+                .strip_prefix(base.as_std_path())
                 .ok()
-                .map(|p| p.to_string_lossy().to_string())
+                .and_then(|p| p.to_str())
+                .map(|s| s.to_string())
         })
         .collect();
 
@@ -87,9 +92,10 @@ pub(crate) async fn write_document_batch<R: tauri::Runtime>(
         .iter()
         .filter_map(|(_, path)| {
             std::path::Path::new(path)
-                .strip_prefix(&base)
+                .strip_prefix(base.as_std_path())
                 .ok()
-                .map(|p| p.to_string_lossy().to_string())
+                .and_then(|p| p.to_str())
+                .map(|s| s.to_string())
         })
         .collect();
 
@@ -248,6 +254,16 @@ pub(crate) async fn session_dir<R: tauri::Runtime>(
 
 #[tauri::command]
 #[specta::specta]
+pub(crate) async fn load_session_content<R: tauri::Runtime>(
+    app: tauri::AppHandle<R>,
+    session_id: String,
+) -> Result<SessionContentData, String> {
+    let session_dir = resolve_session_dir(&app, &session_id)?;
+    spawn_blocking!({ Ok(load_session_content_from_fs(&session_id, &session_dir)) })
+}
+
+#[tauri::command]
+#[specta::specta]
 pub(crate) async fn delete_session_folder<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     session_id: String,
@@ -272,7 +288,7 @@ pub(crate) async fn scan_and_read<R: tauri::Runtime>(
     spawn_blocking!({
         Ok(crate::scan::scan_and_read(
             &PathBuf::from(&scan_dir),
-            &base,
+            base.as_std_path(),
             &file_patterns,
             recursive,
             path_filter.as_deref(),
@@ -290,11 +306,7 @@ pub(crate) async fn chat_dir<R: tauri::Runtime>(
         .settings()
         .cached_vault_base()
         .map_err(|e| e.to_string())?;
-    Ok(base
-        .join("chats")
-        .join(&chat_group_id)
-        .to_string_lossy()
-        .to_string())
+    Ok(base.join("chats").join(&chat_group_id).to_string())
 }
 
 #[tauri::command]
@@ -307,7 +319,7 @@ pub(crate) async fn entity_dir<R: tauri::Runtime>(
         .settings()
         .cached_vault_base()
         .map_err(|e| e.to_string())?;
-    Ok(base.join(&dir_name).to_string_lossy().to_string())
+    Ok(base.join(&dir_name).to_string())
 }
 
 #[tauri::command]

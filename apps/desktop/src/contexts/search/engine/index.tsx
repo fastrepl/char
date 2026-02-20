@@ -1,5 +1,3 @@
-import { create, search as oramaSearch } from "@orama/orama";
-import { pluginQPS } from "@orama/plugin-qps";
 import {
   createContext,
   useCallback,
@@ -9,16 +7,17 @@ import {
   useState,
 } from "react";
 
+import { commands as tantivy } from "@hypr/plugin-tantivy";
+
 import { type Store as MainStore } from "../../../store/tinybase/store/main";
-import { buildOramaFilters } from "./filters";
+import { buildTantivyFilters } from "./filters";
 import { indexHumans, indexOrganizations, indexSessions } from "./indexing";
 import {
   createHumanListener,
   createOrganizationListener,
   createSessionListener,
 } from "./listeners";
-import type { Index, SearchFilters, SearchHit } from "./types";
-import { SEARCH_SCHEMA } from "./types";
+import type { SearchEntityType, SearchFilters, SearchHit } from "./types";
 import { normalizeQuery } from "./utils";
 
 export type {
@@ -44,7 +43,6 @@ export function SearchEngineProvider({
   store?: MainStore;
 }) {
   const [isIndexing, setIsIndexing] = useState(true);
-  const oramaInstance = useRef<Index | null>(null);
   const listenerIds = useRef<string[]>([]);
 
   useEffect(() => {
@@ -56,31 +54,24 @@ export function SearchEngineProvider({
       setIsIndexing(true);
 
       try {
-        const db = create({
-          schema: SEARCH_SCHEMA,
-          plugins: [pluginQPS()],
-        });
-
-        indexSessions(db, store);
-        indexHumans(db, store);
-        indexOrganizations(db, store);
-
-        oramaInstance.current = db;
+        await indexSessions(store);
+        await indexHumans(store);
+        await indexOrganizations(store);
 
         const listener1 = store.addRowListener(
           "sessions",
           null,
-          createSessionListener(oramaInstance.current),
+          createSessionListener(),
         );
         const listener2 = store.addRowListener(
           "humans",
           null,
-          createHumanListener(oramaInstance.current),
+          createHumanListener(),
         );
         const listener3 = store.addRowListener(
           "organizations",
           null,
-          createOrganizationListener(oramaInstance.current),
+          createOrganizationListener(),
         );
 
         listenerIds.current = [listener1, listener2, listener3];
@@ -107,30 +98,29 @@ export function SearchEngineProvider({
       filters: SearchFilters | null = null,
     ): Promise<SearchHit[]> => {
       const normalizedQuery = normalizeQuery(query);
-
-      if (normalizedQuery.length < 1) {
-        return [];
-      }
-
-      if (!oramaInstance.current) {
-        return [];
-      }
+      const tantivyFilters = buildTantivyFilters(filters);
 
       try {
-        const whereClause = buildOramaFilters(filters);
-
-        const searchResults = await oramaSearch(oramaInstance.current, {
-          term: normalizedQuery,
-          boost: {
-            title: 3,
-            content: 1,
-          },
-          limit: 100,
-          tolerance: 1,
-          ...(whereClause && { where: whereClause }),
+        const result = await tantivy.search({
+          query: normalizedQuery,
+          filters: tantivyFilters,
         });
 
-        return searchResults.hits as SearchHit[];
+        if (result.status === "error") {
+          console.error("Search failed:", result.error);
+          return [];
+        }
+
+        return result.data.hits.map((hit) => ({
+          score: hit.score,
+          document: {
+            id: hit.document.id,
+            type: hit.document.doc_type as SearchEntityType,
+            title: hit.document.title,
+            content: hit.document.content,
+            created_at: hit.document.created_at,
+          },
+        }));
       } catch (error) {
         console.error("Search failed:", error);
         return [];

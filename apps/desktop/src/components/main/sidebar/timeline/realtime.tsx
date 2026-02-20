@@ -1,11 +1,11 @@
 import { forwardRef, useEffect, useState } from "react";
 
-import type { Event } from "@hypr/store";
 import { safeParseDate } from "@hypr/utils";
 
+import { getSessionEvent } from "../../../../utils/session-event";
 import type {
-  EventsWithoutSessionTable,
-  SessionsWithMaybeEventTable,
+  TimelineEventsTable,
+  TimelineSessionsTable,
 } from "../../../../utils/timeline";
 
 export const CurrentTimeIndicator = forwardRef<HTMLDivElement>((_, ref) => (
@@ -33,8 +33,8 @@ export function useCurrentTimeMs() {
 }
 
 export function useSmartCurrentTime(
-  eventsTable: EventsWithoutSessionTable,
-  sessionsTable: SessionsWithMaybeEventTable,
+  eventsTable: TimelineEventsTable,
+  sessionsTable: TimelineSessionsTable,
 ) {
   const [now, setNow] = useState(() => Date.now());
 
@@ -50,7 +50,7 @@ export function useSmartCurrentTime(
       if (eventsTable) {
         Object.values(eventsTable).forEach((event) => {
           const startTime = safeParseDate(event.started_at);
-          const endTime = safeParseDate((event as unknown as Event).ended_at);
+          const endTime = safeParseDate(event.ended_at);
 
           if (startTime && startTime.getTime() > currentTime) {
             importantTimes.push(startTime.getTime());
@@ -64,7 +64,7 @@ export function useSmartCurrentTime(
       if (sessionsTable) {
         Object.values(sessionsTable).forEach((session) => {
           const time = safeParseDate(
-            session.event_started_at ?? session.created_at,
+            getSessionEvent(session)?.started_at ?? session.created_at,
           );
           if (time && time.getTime() > currentTime) {
             importantTimes.push(time.getTime());

@@ -1,4 +1,3 @@
-use std::collections::BTreeMap;
 use std::time::{Instant, SystemTime};
 
 use ractor::{Actor, ActorCell, ActorProcessingErr, ActorRef, RpcReplyPort, SupervisionEvent};
@@ -7,17 +6,17 @@ use tauri_specta::Event;
 use tracing::Instrument;
 
 use crate::SessionLifecycleEvent;
-use crate::actors::{SessionContext, SessionParams, spawn_session_supervisor};
-
-/// Creates a tracing span with session context that child events will inherit
-pub(crate) fn session_span(session_id: &str) -> tracing::Span {
-    tracing::info_span!("session", session_id = %session_id)
-}
+use crate::actors::session::lifecycle::{
+    clear_sentry_session_context, configure_sentry_session_context, emit_session_ended,
+};
+use crate::actors::{
+    SessionContext, SessionMsg, SessionParams, session_span, spawn_session_supervisor,
+};
 
 pub enum RootMsg {
     StartSession(SessionParams, RpcReplyPort<bool>),
     StopSession(RpcReplyPort<()>),
-    GetState(RpcReplyPort<crate::fsm::State>),
+    GetState(RpcReplyPort<crate::State>),
 }
 
 pub struct RootArgs {
@@ -75,11 +74,11 @@ impl Actor for RootActor {
             }
             RootMsg::GetState(reply) => {
                 let fsm_state = if state.finalizing {
-                    crate::fsm::State::Finalizing
+                    crate::State::Finalizing
                 } else if state.supervisor.is_some() {
-                    crate::fsm::State::Active
+                    crate::State::Active
                 } else {
-                    crate::fsm::State::Inactive
+                    crate::State::Inactive
                 };
                 let _ = reply.send(fsm_state);
             }
@@ -105,7 +104,8 @@ impl Actor for RootActor {
                     tracing::info!(?reason, "session_supervisor_terminated");
                     state.supervisor = None;
                     state.finalizing = false;
-                    emit_session_ended(&state.app, &session_id, None);
+
+                    emit_session_ended(&state.app, &session_id, reason);
                 }
             }
             SupervisionEvent::ActorFailed(cell, error) => {
@@ -143,7 +143,7 @@ async fn start_session_impl(
         configure_sentry_session_context(&params);
 
         let app_dir = match state.app.settings().cached_vault_base() {
-            Ok(base) => base.join("sessions"),
+            Ok(base) => base.join("sessions").into_std_path_buf(),
             Err(e) => {
                 tracing::error!(error = ?e, "failed_to_resolve_sessions_base_dir");
                 clear_sentry_session_context();
@@ -173,6 +173,7 @@ async fn start_session_impl(
 
                 if let Err(error) = (SessionLifecycleEvent::Active {
                     session_id: params.session_id,
+                    error: None,
                 })
                 .emit(&state.app)
                 {
@@ -196,31 +197,6 @@ async fn start_session_impl(
     .await
 }
 
-fn configure_sentry_session_context(params: &SessionParams) {
-    sentry::configure_scope(|scope| {
-        scope.set_tag("session_id", &params.session_id);
-        scope.set_tag(
-            "session_type",
-            if params.onboarding {
-                "onboarding"
-            } else {
-                "production"
-            },
-        );
-
-        let mut session_context = BTreeMap::new();
-        session_context.insert("session_id".to_string(), params.session_id.clone().into());
-        session_context.insert("model".to_string(), params.model.clone().into());
-        session_context.insert("record_enabled".to_string(), params.record_enabled.into());
-        session_context.insert("onboarding".to_string(), params.onboarding.into());
-        session_context.insert(
-            "languages".to_string(),
-            format!("{:?}", params.languages).into(),
-        );
-        scope.set_context("session", sentry::protocol::Context::Other(session_context));
-    });
-}
-
 async fn stop_session_impl(state: &mut RootState) {
     if let Some(supervisor) = &state.supervisor {
         state.finalizing = true;
@@ -239,60 +215,13 @@ async fn stop_session_impl(state: &mut RootState) {
             }
         }
 
-        // TO make sure post_stop is called.
-        stop_actor_by_name_and_wait(crate::actors::RecorderActor::name(), "session_stop").await;
-
-        supervisor.stop(None);
-    }
-}
-
-async fn stop_actor_by_name_and_wait(actor_name: ractor::ActorName, reason: &str) {
-    if let Some(cell) = ractor::registry::where_is(actor_name.clone()) {
-        cell.stop(Some(reason.to_string()));
-        wait_for_actor_shutdown(actor_name).await;
-    }
-}
-
-async fn wait_for_actor_shutdown(actor_name: ractor::ActorName) {
-    for _ in 0..50 {
-        if ractor::registry::where_is(actor_name.clone()).is_none() {
-            break;
+        let session_ref: ActorRef<SessionMsg> = supervisor.clone().into();
+        if let Err(error) = session_ref.cast(SessionMsg::Shutdown) {
+            tracing::warn!(
+                ?error,
+                "failed_to_cast_session_shutdown_falling_back_to_stop"
+            );
+            supervisor.stop(Some("session_stop_cast_failed".to_string()));
         }
-        tokio::time::sleep(std::time::Duration::from_millis(100)).await;
     }
-}
-
-fn emit_session_ended(app: &tauri::AppHandle, session_id: &str, failure_reason: Option<String>) {
-    let span = session_span(session_id);
-    let _guard = span.enter();
-
-    {
-        use tauri_plugin_tray::TrayPluginExt;
-        let _ = app.tray().set_start_disabled(false);
-    }
-
-    if let Err(error) = (SessionLifecycleEvent::Inactive {
-        session_id: session_id.to_string(),
-        error: failure_reason.clone(),
-    })
-    .emit(app)
-    {
-        tracing::error!(?error, "failed_to_emit_inactive");
-    }
-
-    if let Some(reason) = failure_reason {
-        tracing::info!(failure_reason = %reason, "session_stopped");
-    } else {
-        tracing::info!("session_stopped");
-    }
-
-    clear_sentry_session_context();
-}
-
-fn clear_sentry_session_context() {
-    sentry::configure_scope(|scope| {
-        scope.remove_tag("session_id");
-        scope.remove_tag("session_type");
-        scope.remove_context("session");
-    });
 }

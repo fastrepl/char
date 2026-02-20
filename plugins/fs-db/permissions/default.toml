@@ -1,0 +1,10 @@
+[default]
+description = "Default permissions for the fs-db plugin"
+permissions = [
+    "allow-load-session-content",
+    "allow-load-session-transcript",
+    "allow-load-session-enhanced-notes",
+    "allow-save-session-content",
+    "allow-save-session-transcript",
+    "allow-save-session-enhanced-note",
+]

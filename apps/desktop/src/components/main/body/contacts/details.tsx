@@ -1,8 +1,9 @@
+import { Facehash } from "facehash";
 import {
   Building2,
   CircleMinus,
   FileText,
-  Pin,
+  Plus,
   SearchIcon,
 } from "lucide-react";
 import React, { useCallback, useState } from "react";
@@ -15,17 +16,16 @@ import {
   PopoverTrigger,
 } from "@hypr/ui/components/ui/popover";
 import { Textarea } from "@hypr/ui/components/ui/textarea";
+import { cn } from "@hypr/utils";
 
 import * as main from "../../../../store/tinybase/store/main";
-import { getInitials } from "./shared";
+import { getContactBgClass } from "./shared";
 
 export function DetailsColumn({
   selectedHumanId,
-  handleDeletePerson,
   handleSessionClick,
 }: {
   selectedHumanId?: string | null;
-  handleDeletePerson: (id: string) => void;
   handleSessionClick: (id: string) => void;
 }) {
   const selectedPersonData = main.UI.useRow(
@@ -33,8 +33,6 @@ export function DetailsColumn({
     selectedHumanId ?? "",
     main.STORE_ID,
   );
-  const isPinned = selectedPersonData.pinned as boolean | undefined;
-
   const mappingIdsByHuman = main.UI.useSliceRowIds(
     main.INDEXES.sessionsByHuman,
     selectedHumanId ?? "",
@@ -110,28 +108,6 @@ export function DetailsColumn({
 
   const store = main.UI.useStore(main.STORE_ID);
 
-  const handleTogglePin = useCallback(() => {
-    if (!store || !selectedHumanId) return;
-
-    const currentPinned = store.getCell("humans", selectedHumanId, "pinned");
-    if (currentPinned) {
-      store.setPartialRow("humans", selectedHumanId, {
-        pinned: false,
-        pin_order: undefined,
-      });
-    } else {
-      const allHumans = store.getTable("humans");
-      const maxOrder = Object.values(allHumans).reduce((max, h) => {
-        const order = (h.pin_order as number | undefined) ?? 0;
-        return Math.max(max, order);
-      }, 0);
-      store.setPartialRow("humans", selectedHumanId, {
-        pinned: true,
-        pin_order: maxOrder + 1,
-      });
-    }
-  }, [store, selectedHumanId]);
-
   const handleMergeContacts = useCallback(
     (duplicateId: string) => {
       if (!store || !selectedHumanId) return;
@@ -205,40 +181,27 @@ export function DetailsColumn({
     [store, selectedHumanId],
   );
 
+  const facehashName = String(
+    selectedPersonData?.name ||
+      selectedPersonData?.email ||
+      selectedHumanId ||
+      "",
+  );
+  const bgClass = getContactBgClass(facehashName);
+
   return (
     <div className="flex-1 flex flex-col h-full">
       {selectedPersonData && selectedHumanId ? (
         <>
-          <div className="px-6 py-4 border-b border-neutral-200">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-neutral-200 flex items-center justify-center">
-                <span className="text-lg font-medium text-neutral-600">
-                  {getInitials(
-                    selectedPersonData.name || selectedPersonData.email,
-                  )}
-                </span>
-              </div>
-              <div className="flex-1">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <EditablePersonNameField personId={selectedHumanId} />
-                    <Button
-                      onClick={handleTogglePin}
-                      variant="ghost"
-                      size="sm"
-                      className={
-                        isPinned ? "text-blue-600" : "text-neutral-400"
-                      }
-                      aria-label={isPinned ? "Unpin contact" : "Pin contact"}
-                    >
-                      <Pin
-                        className="size-4"
-                        fill={isPinned ? "currentColor" : "none"}
-                      />
-                    </Button>
-                  </div>
-                </div>
-              </div>
+          <div className="flex items-center justify-center py-6 border-b border-neutral-200">
+            <div className={cn(["rounded-full", bgClass])}>
+              <Facehash
+                name={facehashName}
+                size={64}
+                interactive={true}
+                showInitial={true}
+                colorClasses={[bgClass]}
+              />
             </div>
           </div>
 
@@ -264,10 +227,25 @@ export function DetailsColumn({
                       className="flex items-center justify-between p-2 bg-neutral-50 rounded-md border border-neutral-200"
                     >
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-neutral-200 flex items-center justify-center">
-                          <span className="text-xs font-medium text-neutral-600">
-                            {getInitials(dup.name || dup.email)}
-                          </span>
+                        <div
+                          className={cn([
+                            "shrink-0 rounded-full",
+                            getContactBgClass(
+                              String(dup.name || dup.email || dup.id),
+                            ),
+                          ])}
+                        >
+                          <Facehash
+                            name={String(dup.name || dup.email || dup.id)}
+                            size={32}
+                            interactive={false}
+                            showInitial={false}
+                            colorClasses={[
+                              getContactBgClass(
+                                String(dup.name || dup.email || dup.id),
+                              ),
+                            ]}
+                          />
                         </div>
                         <div>
                           <div className="text-sm font-medium text-neutral-900">
@@ -291,7 +269,13 @@ export function DetailsColumn({
               </div>
             )}
 
-            <div className="border-b border-neutral-200">
+            <div>
+              <div className="flex items-center px-4 py-3 border-b border-neutral-200">
+                <div className="w-28 text-sm text-neutral-500">Name</div>
+                <div className="flex-1">
+                  <EditablePersonNameField personId={selectedHumanId} />
+                </div>
+              </div>
               <EditablePersonJobTitleField personId={selectedHumanId} />
 
               <div className="flex items-center px-4 py-3 border-b border-neutral-200">
@@ -360,39 +344,6 @@ export function DetailsColumn({
               </div>
             </div>
 
-            <div className="p-6">
-              <div className="border border-red-200 rounded-lg overflow-hidden">
-                <div className="bg-red-50 px-4 py-3 border-b border-red-200">
-                  <h3 className="text-sm font-semibold text-red-900">
-                    Danger Zone
-                  </h3>
-                </div>
-                <div className="bg-white p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-neutral-900">
-                        Delete this contact
-                      </p>
-                      <p className="text-xs text-neutral-500 mt-1">
-                        This action cannot be undone
-                      </p>
-                    </div>
-                    <Button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleDeletePerson(selectedHumanId);
-                      }}
-                      variant="destructive"
-                      size="sm"
-                    >
-                      Delete Contact
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <div className="pb-96" />
           </div>
         </>
@@ -424,7 +375,7 @@ function EditablePersonNameField({ personId }: { personId: string }) {
       value={(value as string) || ""}
       onChange={handleChange}
       placeholder="Name"
-      className="border-none shadow-none p-0 h-8 text-lg font-semibold focus-visible:ring-0 focus-visible:ring-offset-0"
+      className="border-none shadow-none p-0 h-7 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
     />
   );
 }
@@ -536,7 +487,7 @@ function EditablePersonMemoField({ personId }: { personId: string }) {
           value={(value as string) || ""}
           onChange={handleChange}
           placeholder="Add notes about this contact..."
-          className="border-none shadow-none p-2 min-h-[80px] text-base focus-visible:ring-0 focus-visible:ring-offset-0 resize-none"
+          className="border-none shadow-none px-0 py-2 min-h-[80px] text-base focus-visible:ring-0 focus-visible:ring-offset-0 resize-none"
           rows={3}
         />
       </div>
@@ -571,8 +522,8 @@ function EditPersonOrganizationSelector({ personId }: { personId: string }) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <div className="inline-flex items-center cursor-pointer hover:bg-neutral-50 py-1 rounded-lg transition-colors">
-          {organization ? (
+        <div className="-mx-2 inline-flex items-center cursor-pointer hover:bg-neutral-50 px-2 py-1 rounded-lg transition-colors">
+          {organization?.name ? (
             <div className="flex items-center">
               <span className="text-base">{organization.name}</span>
               <span className="ml-2 text-neutral-400 group">
@@ -586,8 +537,9 @@ function EditPersonOrganizationSelector({ personId }: { personId: string }) {
               </span>
             </div>
           ) : (
-            <span className="text-neutral-400 text-base">
-              Select organization
+            <span className="flex items-center gap-1 text-neutral-400 text-base">
+              <Plus className="size-4" />
+              Add organization
             </span>
           )}
         </div>
@@ -611,6 +563,7 @@ function OrganizationControl({
   closePopover: () => void;
 }) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const userId = main.UI.useValue("user_id", main.STORE_ID);
 
   const organizationsData = main.UI.useResultTable(
@@ -630,6 +583,9 @@ function OrganizationControl({
         org.name.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     : allOrganizations;
+
+  const showCreateOption = searchTerm.trim() && organizations.length === 0;
+  const itemCount = organizations.length + (showCreateOption ? 1 : 0);
 
   const createOrganization = main.UI.useSetRowCallback(
     "organizations",
@@ -655,8 +611,19 @@ function OrganizationControl({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+    if (e.key === "ArrowDown") {
       e.preventDefault();
+      setHighlightedIndex((prev) => (prev < itemCount - 1 ? prev + 1 : 0));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : itemCount - 1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (highlightedIndex >= 0 && highlightedIndex < organizations.length) {
+        selectOrganization(organizations[highlightedIndex].id);
+      } else if (showCreateOption) {
+        handleCreateOrganization();
+      }
     }
   };
 
@@ -678,7 +645,10 @@ function OrganizationControl({
             <input
               type="text"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setHighlightedIndex(-1);
+              }}
               onKeyDown={handleKeyDown}
               placeholder="Search or add company"
               className="w-full bg-transparent text-sm focus:outline-hidden placeholder:text-neutral-400 focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -687,12 +657,18 @@ function OrganizationControl({
 
           {searchTerm.trim() && (
             <div className="flex flex-col w-full rounded-xs border border-neutral-200 overflow-hidden">
-              {organizations.map((org: any) => (
+              {organizations.map((org: any, index: number) => (
                 <button
                   key={org.id}
                   type="button"
-                  className="flex items-center px-3 py-2 text-sm text-left hover:bg-neutral-100 transition-colors w-full"
+                  className={[
+                    "flex items-center px-3 py-2 text-sm text-left transition-colors w-full",
+                    highlightedIndex === index
+                      ? "bg-neutral-100"
+                      : "hover:bg-neutral-100",
+                  ].join(" ")}
                   onClick={() => selectOrganization(org.id)}
+                  onMouseEnter={() => setHighlightedIndex(index)}
                 >
                   <span className="shrink-0 size-5 flex items-center justify-center mr-2 bg-neutral-100 rounded-full">
                     <Building2 className="size-3" />
@@ -701,11 +677,17 @@ function OrganizationControl({
                 </button>
               ))}
 
-              {organizations.length === 0 && (
+              {showCreateOption && (
                 <button
                   type="button"
-                  className="flex items-center px-3 py-2 text-sm text-left hover:bg-neutral-100 transition-colors w-full"
+                  className={[
+                    "flex items-center px-3 py-2 text-sm text-left transition-colors w-full",
+                    highlightedIndex === organizations.length
+                      ? "bg-neutral-100"
+                      : "hover:bg-neutral-100",
+                  ].join(" ")}
                   onClick={() => handleCreateOrganization()}
+                  onMouseEnter={() => setHighlightedIndex(organizations.length)}
                 >
                   <span className="shrink-0 size-5 flex items-center justify-center mr-2 bg-neutral-200 rounded-full">
                     <span className="text-xs">+</span>
@@ -723,12 +705,18 @@ function OrganizationControl({
 
           {!searchTerm.trim() && organizations.length > 0 && (
             <div className="flex flex-col w-full rounded-xs border border-neutral-200 overflow-hidden max-h-[40vh] overflow-y-auto custom-scrollbar">
-              {organizations.map((org: any) => (
+              {organizations.map((org: any, index: number) => (
                 <button
                   key={org.id}
                   type="button"
-                  className="flex items-center px-3 py-2 text-sm text-left hover:bg-neutral-100 transition-colors w-full"
+                  className={[
+                    "flex items-center px-3 py-2 text-sm text-left transition-colors w-full",
+                    highlightedIndex === index
+                      ? "bg-neutral-100"
+                      : "hover:bg-neutral-100",
+                  ].join(" ")}
                   onClick={() => selectOrganization(org.id)}
+                  onMouseEnter={() => setHighlightedIndex(index)}
                 >
                   <span className="shrink-0 size-5 flex items-center justify-center mr-2 bg-neutral-100 rounded-full">
                     <Building2 className="size-3" />

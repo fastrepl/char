@@ -87,8 +87,8 @@ export const HYPR_MODULES = {
       },
       QUERIES: {
         type: `{
-    eventsWithoutSession: string;
-    sessionsWithMaybeEvent: string;
+    timelineEvents: string;
+    timelineSessions: string;
     visibleOrganizations: string;
     visibleHumans: string;
     visibleTemplates: string;

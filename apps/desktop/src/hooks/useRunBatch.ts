@@ -67,8 +67,9 @@ export const useRunBatch = (sessionId: string) => {
   return useCallback(
     async (filePath: string, options?: RunOptions) => {
       if (!store || !conn || !runBatch) {
-        console.error("no_batch_connection");
-        return;
+        throw new Error(
+          "STT connection is not available. Please configure your speech-to-text provider.",
+        );
       }
 
       const provider = getBatchProvider(conn.provider, conn.model);
@@ -119,13 +120,10 @@ export const useRunBatch = (sessionId: string) => {
 
             newWords.push({
               id: wordId,
-              transcript_id: transcriptId,
               text: word.text,
               start_ms: word.start_ms,
               end_ms: word.end_ms,
               channel: word.channel,
-              user_id: user_id ?? "",
-              created_at: new Date().toISOString(),
             });
 
             newWordIds.push(wordId);
@@ -147,7 +145,6 @@ export const useRunBatch = (sessionId: string) => {
 
             newHints.push({
               id: id(),
-              transcript_id: transcriptId,
               word_id: wordId,
               type: "provider_speaker_index",
               value: JSON.stringify({
@@ -155,8 +152,6 @@ export const useRunBatch = (sessionId: string) => {
                 channel: hint.data.channel ?? word.channel,
                 speaker_index: hint.data.speaker_index,
               }),
-              user_id: user_id ?? "",
-              created_at: new Date().toISOString(),
             });
           });
 
