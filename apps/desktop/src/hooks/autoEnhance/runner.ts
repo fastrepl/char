@@ -6,6 +6,7 @@ import { md2json } from "@hypr/tiptap/shared";
 import { useAITask } from "../../contexts/ai-task";
 import { useListener } from "../../contexts/listener";
 import * as main from "../../store/tinybase/store/main";
+import * as settings from "../../store/tinybase/store/settings";
 import { createTaskId } from "../../store/zustand/ai-task/task-configs";
 import { getTaskState } from "../../store/zustand/ai-task/tasks";
 import { useTabs } from "../../store/zustand/tabs";
@@ -38,6 +39,10 @@ export function useAutoEnhanceRunner(
   const liveSessionId = useListener((state) => state.live.sessionId);
 
   const store = main.UI.useStore(main.STORE_ID) as main.Store | undefined;
+  const selectedTemplateId = settings.UI.useValue(
+    "selected_template_id",
+    settings.STORE_ID,
+  ) as string | undefined;
 
   const startedTasksRef = useRef<Set<string>>(new Set());
   const currentNoteIdRef = useRef<string | null>(null);
@@ -143,7 +148,10 @@ export function useAutoEnhanceRunner(
       return { type: "no_model" };
     }
 
-    const enhancedNoteId = createEnhancedNote(sessionId);
+    const enhancedNoteId = createEnhancedNote(
+      sessionId,
+      selectedTemplateId || undefined,
+    );
     if (!enhancedNoteId) {
       return { type: "skipped", reason: "Failed to create note" };
     }

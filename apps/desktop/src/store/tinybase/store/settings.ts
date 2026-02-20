@@ -77,6 +77,10 @@ export const SETTINGS_MAPPING = {
       type: "string",
       path: ["general", "week_start"],
     },
+    selected_template_id: {
+      type: "string",
+      path: ["general", "selected_template_id"],
+    },
   },
   tables: {
     ai_providers: {
