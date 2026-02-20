@@ -233,6 +233,7 @@ isolang = "2.4"
 itertools = "0.14.0"
 jsonschema = "0.41"
 lazy_static = "1.5.0"
+moka = { version = "0.12", features = ["future"] }
 open = "5"
 regex = "1.12"
 schemars = "1"

@@ -1,6 +1,8 @@
+mod cached;
 mod error;
 mod types;
 
+pub use cached::CachedClient;
 pub use error::Error;
 pub use types::*;
 

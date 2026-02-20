@@ -22,23 +22,8 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Flag<'a, R, M> {
             None => return false,
         };
 
-        {
-            let cache = state.cache.read().await;
-            if let Some(ref flags) = *cache {
-                return flags.is_enabled(key);
-            }
-        }
-
         let distinct_id = hypr_host::fingerprint();
-        match client.get_flags(&distinct_id, None).await {
-            Ok(flags) => {
-                let enabled = flags.is_enabled(key);
-                let mut cache = state.cache.write().await;
-                *cache = Some(flags);
-                enabled
-            }
-            Err(_) => false,
-        }
+        client.is_enabled(&distinct_id, key).await
     }
 }
 
