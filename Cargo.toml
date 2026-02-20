@@ -25,7 +25,6 @@ hypr-aec = { path = "crates/aec", package = "aec" }
 hypr-afconvert = { path = "crates/afconvert", package = "afconvert" }
 hypr-agc = { path = "crates/agc", package = "agc" }
 hypr-am = { path = "crates/am", package = "am" }
-hypr-am2 = { path = "crates/am2", package = "am2" }
 hypr-analytics = { path = "crates/analytics", package = "analytics" }
 hypr-api-auth = { path = "crates/api-auth", package = "api-auth" }
 hypr-api-calendar = { path = "crates/api-calendar", package = "api-calendar" }
@@ -67,6 +66,7 @@ hypr-gguf = { path = "crates/gguf", package = "gguf" }
 hypr-google-calendar = { path = "crates/google-calendar", package = "google-calendar" }
 hypr-google-drive = { path = "crates/google-drive", package = "google-drive" }
 hypr-granola = { path = "crates/granola", package = "granola" }
+hypr-hf = { path = "crates/hf", package = "hf" }
 hypr-host = { path = "crates/host", package = "host" }
 hypr-http = { path = "crates/http", package = "hypr-http-utils" }
 hypr-importer-core = { path = "crates/importer-core", package = "importer-core" }
@@ -110,11 +110,9 @@ hypr-transcribe-proxy = { path = "crates/transcribe-proxy", package = "transcrib
 hypr-transcribe-whisper-local = { path = "crates/transcribe-whisper-local", package = "transcribe-whisper-local" }
 hypr-transcript = { path = "crates/transcript", package = "transcript" }
 hypr-turso = { path = "crates/turso", package = "turso" }
+hypr-vad = { path = "crates/vad", package = "vad" }
 hypr-vad-ext = { path = "crates/vad-ext", package = "vad-ext" }
-hypr-vad2 = { path = "crates/vad2", package = "vad2" }
-hypr-vad3 = { path = "crates/vad3", package = "vad3" }
 hypr-version = { path = "crates/version", package = "version" }
-hypr-vvad = { path = "crates/vvad", package = "vvad" }
 hypr-whisper = { path = "crates/whisper", package = "whisper" }
 hypr-whisper-local = { path = "crates/whisper-local", package = "whisper-local" }
 hypr-whisper-local-model = { path = "crates/whisper-local-model", package = "whisper-local-model" }
@@ -312,6 +310,7 @@ silero-rs = { git = "https://github.com/emotechlab/silero-rs", rev = "193542c", 
 vorbis_rs = "0.5.5"
 
 deepgram = { version = "0.7", default-features = false }
+hf-hub = { git = "https://github.com/huggingface/hf-hub", rev = "5510260", default-features = false, features = ["tokio"] }
 libsql = "0.9.24"
 
 block2 = "0.6"

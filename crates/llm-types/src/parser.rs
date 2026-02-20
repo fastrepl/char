@@ -34,6 +34,13 @@ impl StreamingParser {
         }
     }
 
+    pub fn flush(&mut self) -> Option<Response> {
+        if self.buffer.is_empty() {
+            return None;
+        }
+        Some(Response::TextDelta(std::mem::take(&mut self.buffer)))
+    }
+
     pub fn process_chunk(&mut self, chunk: &str) -> Vec<Response> {
         self.buffer.push_str(chunk);
         let mut responses = Vec::new();

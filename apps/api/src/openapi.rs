@@ -9,7 +9,7 @@ use utoipa::{Modify, OpenApi};
 #[derive(OpenApi)]
 #[openapi(
     info(
-        title = "Hyprnote AI API",
+        title = "Char AI API",
         version = "1.0.0",
         description = "AI services API for speech-to-text transcription, LLM chat completions, and subscription management"
     ),

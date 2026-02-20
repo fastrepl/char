@@ -17,7 +17,7 @@ use std::marker::PhantomData;
 
 pub use adapter::deepgram::DeepgramModel;
 pub use adapter::{
-    AdapterKind, ArgmaxAdapter, AssemblyAIAdapter, BatchSttAdapter, CallbackResult,
+    AdapterKind, ArgmaxAdapter, AssemblyAIAdapter, BatchSttAdapter, CactusAdapter, CallbackResult,
     CallbackSttAdapter, DashScopeAdapter, DeepgramAdapter, ElevenLabsAdapter, FireworksAdapter,
     GladiaAdapter, HyprnoteAdapter, LanguageQuality, LanguageSupport, MistralAdapter,
     OpenAIAdapter, RealtimeSttAdapter, SonioxAdapter, append_provider_param,

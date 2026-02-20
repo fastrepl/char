@@ -339,7 +339,6 @@ dependencies = [
  "dirs 6.0.0",
  "download-interface",
  "file",
- "hf-hub",
  "reqwest 0.13.2",
  "serde",
  "serde_json",
@@ -349,14 +348,6 @@ dependencies = [
  "thiserror 2.0.18",
  "tokio",
  "tracing",
-]
-
-[[package]]
-name = "am2"
-version = "0.1.0"
-dependencies = [
- "data",
- "swift-rs 1.0.7 (git+https://github.com/yujonglee/swift-rs?rev=41a1605)",
 ]
 
 [[package]]
@@ -2722,6 +2713,7 @@ name = "cactus"
 version = "0.1.0"
 dependencies = [
  "cactus-sys",
+ "criterion",
  "data",
  "futures-util",
  "language",
@@ -3326,6 +3318,19 @@ dependencies = [
  "once_cell",
  "unicode-width 0.2.2",
  "windows-sys 0.59.0",
+]
+
+[[package]]
+name = "console"
+version = "0.16.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "03e45a4a8926227e4197636ba97a9fc9b00477e9f4bd711395687c5f0734bec4"
+dependencies = [
+ "encode_unicode",
+ "libc",
+ "once_cell",
+ "unicode-width 0.2.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -4183,7 +4188,6 @@ version = "0.1.0"
 dependencies = [
  "buffer",
  "chrono",
- "data",
  "db-core",
  "indoc",
  "language",
@@ -5253,7 +5257,7 @@ dependencies = [
  "tempfile",
  "template-eval",
  "thiserror 2.0.18",
- "ureq 3.2.0",
+ "ureq",
 ]
 
 [[package]]
@@ -5264,7 +5268,7 @@ dependencies = [
  "clap_complete",
  "comfy-table",
  "eval",
- "indicatif",
+ "indicatif 0.17.11",
  "serde_json",
  "template-eval",
 ]
@@ -8303,18 +8307,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 
 [[package]]
+name = "hf"
+version = "0.1.0"
+dependencies = [
+ "download-interface",
+ "hf-hub",
+ "thiserror 2.0.18",
+ "tokio",
+]
+
+[[package]]
 name = "hf-hub"
 version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "629d8f3bbeda9d148036d6b0de0a3ab947abd08ce90626327fc3547a49d59d97"
+source = "git+https://github.com/huggingface/hf-hub?rev=5510260#5510260d5fd1d93238f8c43272a1a14e6848ec4b"
 dependencies = [
  "dirs 6.0.0",
  "futures",
- "http 1.4.0",
- "indicatif",
+ "indicatif 0.18.4",
  "libc",
  "log",
- "native-tls",
  "num_cpus",
  "rand 0.9.2",
  "reqwest 0.12.28",
@@ -8322,8 +8333,7 @@ dependencies = [
  "serde_json",
  "thiserror 2.0.18",
  "tokio",
- "ureq 2.12.1",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -9183,10 +9193,23 @@ version = "0.17.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "183b3088984b400f4cfac3620d5e076c84da5364016b4f49473de574b2586235"
 dependencies = [
- "console",
+ "console 0.15.11",
  "number_prefix",
  "portable-atomic",
  "unicode-width 0.2.2",
+ "web-time",
+]
+
+[[package]]
+name = "indicatif"
+version = "0.18.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "25470f23803092da7d239834776d653104d551bc4d7eacaf31e6837854b8e9eb"
+dependencies = [
+ "console 0.16.2",
+ "portable-atomic",
+ "unicode-width 0.2.2",
+ "unit-prefix",
  "web-time",
 ]
 
@@ -9244,7 +9267,7 @@ version = "1.46.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e82db8c87c7f1ccecb34ce0c24399b8a73081427f3c7c50a5d597925356115e4"
 dependencies = [
- "console",
+ "console 0.15.11",
  "once_cell",
  "similar",
  "tempfile",
@@ -11992,7 +12015,7 @@ dependencies = [
  "pkg-config",
  "sha2",
  "tar",
- "ureq 3.2.0",
+ "ureq",
 ]
 
 [[package]]
@@ -15030,7 +15053,7 @@ dependencies = [
  "sentry-tower",
  "sentry-tracing",
  "tokio",
- "ureq 3.2.0",
+ "ureq",
 ]
 
 [[package]]
@@ -17843,7 +17866,6 @@ dependencies = [
  "bytes",
  "chrono",
  "codes-iso-639",
- "data",
  "device-monitor",
  "dirs 6.0.0",
  "futures-util",
@@ -17884,7 +17906,6 @@ dependencies = [
  "url",
  "uuid",
  "vad-ext",
- "vad2",
  "vorbis_rs",
 ]
 
@@ -18821,20 +18842,6 @@ dependencies = [
  "serde",
  "specta",
  "utoipa",
-]
-
-[[package]]
-name = "ten-vad-rs"
-version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2cd081e2be8ae77e8f2a69bfa5c34d1931de1c79a32879ba02d93c55e084a5f"
-dependencies = [
- "log",
- "ndarray",
- "ort",
- "rubato 0.16.2",
- "rustfft",
- "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -20593,6 +20600,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ebc1c04c71510c7f702b52b7c350734c9ff1295c464a03335b00bb84fc54f853"
 
 [[package]]
+name = "unit-prefix"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "81e544489bf3d8ef66c953931f56617f423cd4b5494be343d9b9d3dda037b9a3"
+
+[[package]]
 name = "unsafe-libyaml"
 version = "0.2.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -20609,26 +20622,6 @@ name = "untrusted"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
-
-[[package]]
-name = "ureq"
-version = "2.12.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "02d1a66277ed75f640d608235660df48c8e3c19f3b4edb6a263315626cc3c01d"
-dependencies = [
- "base64 0.22.1",
- "flate2",
- "log",
- "native-tls",
- "once_cell",
- "rustls 0.23.36",
- "rustls-pki-types",
- "serde",
- "serde_json",
- "socks",
- "url",
- "webpki-roots 0.26.11",
-]
 
 [[package]]
 name = "ureq"
@@ -20824,6 +20817,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "vad"
+version = "0.1.0"
+dependencies = [
+ "earshot",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "vad-ext"
 version = "0.1.0"
 dependencies = [
@@ -20836,28 +20837,10 @@ dependencies = [
  "rodio",
  "serde",
  "silero",
- "swift-rs 1.0.7 (git+https://github.com/yujonglee/swift-rs?rev=41a1605)",
  "thiserror 2.0.18",
  "tokio",
  "tracing",
- "vad3",
- "vvad",
-]
-
-[[package]]
-name = "vad2"
-version = "0.1.0"
-dependencies = [
- "serde",
- "ten-vad-rs",
- "thiserror 2.0.18",
-]
-
-[[package]]
-name = "vad3"
-version = "0.1.0"
-dependencies = [
- "earshot",
+ "vad",
 ]
 
 [[package]]
@@ -20990,14 +20973,6 @@ checksum = "fb067e4cbd1ff067d1df46c9194b5de0e98efd2810bbc95c5d5e5f25a3231150"
 dependencies = [
  "cc",
  "libc",
-]
-
-[[package]]
-name = "vvad"
-version = "0.1.0"
-dependencies = [
- "earshot",
- "thiserror 2.0.18",
 ]
 
 [[package]]

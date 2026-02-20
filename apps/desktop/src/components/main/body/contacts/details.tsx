@@ -16,8 +16,10 @@ import {
   PopoverTrigger,
 } from "@hypr/ui/components/ui/popover";
 import { Textarea } from "@hypr/ui/components/ui/textarea";
+import { cn } from "@hypr/utils";
 
 import * as main from "../../../../store/tinybase/store/main";
+import { getContactBgClass } from "./shared";
 
 export function DetailsColumn({
   selectedHumanId,
@@ -179,21 +181,26 @@ export function DetailsColumn({
     [store, selectedHumanId],
   );
 
+  const facehashName = String(
+    selectedPersonData?.name ||
+      selectedPersonData?.email ||
+      selectedHumanId ||
+      "",
+  );
+  const bgClass = getContactBgClass(facehashName);
+
   return (
     <div className="flex-1 flex flex-col h-full">
       {selectedPersonData && selectedHumanId ? (
         <>
           <div className="flex items-center justify-center py-6 border-b border-neutral-200">
-            <div className="rounded-full bg-amber-50">
+            <div className={cn(["rounded-full", bgClass])}>
               <Facehash
-                name={String(
-                  selectedPersonData.name ||
-                    selectedPersonData.email ||
-                    selectedHumanId,
-                )}
+                name={facehashName}
                 size={64}
-                interactive={false}
-                showInitial={false}
+                interactive={true}
+                showInitial={true}
+                colorClasses={[bgClass]}
               />
             </div>
           </div>
@@ -220,12 +227,24 @@ export function DetailsColumn({
                       className="flex items-center justify-between p-2 bg-neutral-50 rounded-md border border-neutral-200"
                     >
                       <div className="flex items-center gap-2">
-                        <div className="rounded-full bg-amber-50">
+                        <div
+                          className={cn([
+                            "shrink-0 rounded-full",
+                            getContactBgClass(
+                              String(dup.name || dup.email || dup.id),
+                            ),
+                          ])}
+                        >
                           <Facehash
                             name={String(dup.name || dup.email || dup.id)}
                             size={32}
                             interactive={false}
                             showInitial={false}
+                            colorClasses={[
+                              getContactBgClass(
+                                String(dup.name || dup.email || dup.id),
+                              ),
+                            ]}
                           />
                         </div>
                         <div>

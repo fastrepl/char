@@ -105,13 +105,15 @@ pub async fn handler(
         scope.set_context("stt_request", sentry::protocol::Context::Other(ctx));
     });
 
-    let proxy = if is_hyprnote_routing {
+    let proxy_result = if is_hyprnote_routing {
         hyprnote::build_proxy(&state, &selected, &params, analytics_ctx).await
     } else {
-        passthrough::build_proxy(&state, &selected, &params, analytics_ctx).await
+        passthrough::build_proxy(&state, &selected, &params, analytics_ctx)
+            .await
+            .map(hyprnote::StreamingProxy::Single)
     };
 
-    let proxy = match proxy {
+    let proxy = match proxy_result {
         Ok(p) => p,
         Err(ProxyBuildError::SessionInitFailed(e)) => {
             tracing::error!(
@@ -137,5 +139,8 @@ pub async fn handler(
         }
     };
 
-    proxy.handle_upgrade(ws).await.into_response()
+    match proxy {
+        hyprnote::StreamingProxy::Single(p) => p.handle_upgrade(ws).await.into_response(),
+        hyprnote::StreamingProxy::ChannelSplit(p) => p.handle_upgrade(ws).await.into_response(),
+    }
 }

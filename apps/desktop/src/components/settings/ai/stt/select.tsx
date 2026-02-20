@@ -250,7 +250,7 @@ export function SelectProviderAndModel() {
           <div className="flex items-center gap-2 pt-2 border-t border-red-200">
             <span className="text-sm text-red-600">
               <strong className="font-medium">Transcription model</strong> is
-              needed to make Hyprnote listen to your conversations.
+              needed to make Char listen to your conversations.
             </span>
           </div>
         )}

@@ -1,8 +1,6 @@
 use std::{
     future::Future,
-    path::PathBuf,
     pin::Pin,
-    sync::Arc,
     task::{Context, Poll},
 };
 
@@ -11,49 +9,26 @@ use axum::{
     http::{Request, StatusCode},
     response::{IntoResponse, Response, sse},
 };
-use futures_util::StreamExt;
-use tokio_util::sync::CancellationToken;
+use futures_util::{StreamExt, stream};
+use hypr_llm_types::{Response as LlmResponse, StreamingParser};
 use tower::Service;
 
-use hypr_llm_types::Response as LlmResponse;
+use crate::ModelManager;
 
 #[derive(Clone)]
 pub struct CompleteService {
-    model: Arc<hypr_cactus::Model>,
+    manager: ModelManager,
 }
 
 impl CompleteService {
-    pub fn builder() -> CompleteServiceBuilder {
-        CompleteServiceBuilder::default()
-    }
-}
-
-#[derive(Default)]
-pub struct CompleteServiceBuilder {
-    model_path: Option<PathBuf>,
-}
-
-impl CompleteServiceBuilder {
-    pub fn model_path(mut self, model_path: PathBuf) -> Self {
-        self.model_path = Some(model_path);
-        self
-    }
-
-    pub fn build(self) -> CompleteService {
-        let model_path = self
-            .model_path
-            .expect("CompleteServiceBuilder requires model_path");
-        let model = hypr_cactus::Model::new(&model_path)
-            .unwrap_or_else(|e| panic!("failed to load model from {}: {e}", model_path.display()));
-        CompleteService {
-            model: Arc::new(model),
-        }
+    pub fn new(manager: ModelManager) -> Self {
+        Self { manager }
     }
 }
 
 impl Service<Request<Body>> for CompleteService {
     type Response = Response;
-    type Error = String;
+    type Error = crate::Error;
     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
 
     fn poll_ready(&mut self, _cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
@@ -61,7 +36,7 @@ impl Service<Request<Body>> for CompleteService {
     }
 
     fn call(&mut self, req: Request<Body>) -> Self::Future {
-        let model = Arc::clone(&self.model);
+        let manager = self.manager.clone();
 
         Box::pin(async move {
             let body_bytes = match axum::body::to_bytes(req.into_body(), 10 * 1024 * 1024).await {
@@ -78,28 +53,34 @@ impl Service<Request<Body>> for CompleteService {
                 }
             };
 
-            let is_stream = request.stream.unwrap_or(false);
+            let model = match manager.get(request.model.as_deref()).await {
+                Ok(m) => m,
+                Err(e) => {
+                    return Ok((StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response());
+                }
+            };
+
             let messages = convert_messages(&request.messages);
             let options = build_options(&request);
 
-            let (stream, cancellation_token) =
-                match hypr_cactus::complete_stream(&model, messages, options) {
-                    Ok(pair) => pair,
-                    Err(e) => {
-                        return Ok(
-                            (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
-                        );
-                    }
-                };
+            if request.stream.unwrap_or(false) {
+                let (stream, cancellation_token, _worker_handle) =
+                    match hypr_cactus::complete_stream(&model, messages, options) {
+                        Ok(tuple) => tuple,
+                        Err(e) => {
+                            return Ok(
+                                (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
+                            );
+                        }
+                    };
 
-            if is_stream {
                 Ok(build_streaming_response(
                     stream,
                     cancellation_token,
                     &request.model,
                 ))
             } else {
-                Ok(build_non_streaming_response(stream, &request.model).await)
+                Ok(build_non_streaming_response(&model, messages, options, &request.model).await)
             }
         })
     }
@@ -154,7 +135,7 @@ fn model_name(model: &Option<String>) -> &str {
 
 fn build_streaming_response(
     stream: impl futures_util::Stream<Item = LlmResponse> + Send + 'static,
-    _cancellation_token: CancellationToken,
+    cancellation_token: tokio_util::sync::CancellationToken,
     model: &Option<String>,
 ) -> Response {
     let id = format!("chatcmpl-{}", uuid::Uuid::new_v4());
@@ -164,9 +145,14 @@ fn build_streaming_response(
         .as_secs();
     let model_name = model_name(model).to_string();
 
-    let event_stream = stream.filter_map(move |item| {
-        let id = id.clone();
-        let model_name = model_name.clone();
+    let id_for_events = id.clone();
+    let model_for_events = model_name.clone();
+
+    type SseResult = Result<sse::Event, std::convert::Infallible>;
+
+    let data_events = stream.filter_map(move |item| {
+        let id = id_for_events.clone();
+        let model_name = model_for_events.clone();
 
         async move {
             let delta = match item {
@@ -197,30 +183,90 @@ fn build_streaming_response(
                 "choices": [{
                     "index": 0,
                     "delta": delta,
-                    "finish_reason": null
+                    "finish_reason": serde_json::Value::Null
                 }]
             });
 
-            let data = serde_json::to_string(&chunk).unwrap_or_default();
             Some(Ok::<_, std::convert::Infallible>(
-                sse::Event::default().data(data),
+                sse::Event::default().data(serde_json::to_string(&chunk).unwrap_or_default()),
             ))
         }
     });
+
+    let stop_chunk = serde_json::json!({
+        "id": id,
+        "object": "chat.completion.chunk",
+        "created": created,
+        "model": model_name,
+        "choices": [{"index": 0, "delta": {}, "finish_reason": "stop"}]
+    });
+
+    let stop_event = stream::once(futures_util::future::ready(
+        Ok::<_, std::convert::Infallible>(
+            sse::Event::default().data(serde_json::to_string(&stop_chunk).unwrap_or_default()),
+        ),
+    ));
+
+    let done_event = stream::once(futures_util::future::ready(
+        Ok::<_, std::convert::Infallible>(sse::Event::default().data("[DONE]")),
+    ));
+
+    // drop_guard ensures inference is cancelled when the client disconnects and the
+    // stream is dropped (channel closure also triggers model.stop() inside the worker,
+    // so this is belt-and-suspenders).
+    let drop_guard = cancellation_token.drop_guard();
+
+    let event_stream = stream::unfold(
+        (
+            Box::pin(data_events.chain(stop_event).chain(done_event))
+                as Pin<Box<dyn futures_util::Stream<Item = SseResult> + Send>>,
+            Some(drop_guard),
+        ),
+        |(mut s, guard)| async move {
+            match s.next().await {
+                Some(item) => Some((item, (s, guard))),
+                None => None,
+            }
+        },
+    );
 
     sse::Sse::new(event_stream).into_response()
 }
 
 async fn build_non_streaming_response(
-    stream: impl futures_util::Stream<Item = LlmResponse> + Send + 'static,
-    model: &Option<String>,
+    model: &std::sync::Arc<hypr_cactus::Model>,
+    messages: Vec<hypr_llm_types::Message>,
+    options: hypr_cactus::CompleteOptions,
+    model_label: &Option<String>,
 ) -> Response {
-    futures_util::pin_mut!(stream);
+    let model = std::sync::Arc::clone(model);
+
+    let result = tokio::task::spawn_blocking(move || model.complete(&messages, &options)).await;
+
+    let completion = match result {
+        Ok(Ok(r)) => r,
+        Ok(Err(e)) => {
+            return (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response();
+        }
+        Err(_) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "worker task panicked".to_string(),
+            )
+                .into_response();
+        }
+    };
+
+    let mut parser = StreamingParser::new();
+    let mut responses = parser.process_chunk(&completion.text);
+    if let Some(r) = parser.flush() {
+        responses.push(r);
+    }
 
     let mut content = String::new();
     let mut tool_calls: Vec<serde_json::Value> = Vec::new();
 
-    while let Some(item) = stream.next().await {
+    for item in responses {
         match item {
             LlmResponse::TextDelta(text) => content.push_str(&text),
             LlmResponse::ToolCall { name, arguments } => {
@@ -255,12 +301,17 @@ async fn build_non_streaming_response(
         "id": id,
         "object": "chat.completion",
         "created": created,
-        "model": model_name(model),
+        "model": model_name(model_label),
         "choices": [{
             "index": 0,
             "message": message,
             "finish_reason": "stop"
-        }]
+        }],
+        "usage": {
+            "prompt_tokens": completion.prefill_tokens,
+            "completion_tokens": completion.decode_tokens,
+            "total_tokens": completion.total_tokens
+        }
     });
 
     axum::Json(response).into_response()

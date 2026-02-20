@@ -67,14 +67,13 @@ jobs:
             --exclude apple-note \
             --exclude notification-linux \
             --exclude am \
-            --exclude am2 \
             --exclude aec \
             --exclude agc \
             --exclude whisper \
             --exclude whisper-local \
             --exclude whisper-local-model \
             --exclude vad2 \
-            --exclude vad3 \
+            --exclude vad \
             --exclude vvad \
             --exclude vad-ext \
             --exclude onnx \

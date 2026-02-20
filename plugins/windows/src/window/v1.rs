@@ -101,7 +101,7 @@ impl AppWindow {
 impl WindowImpl for AppWindow {
     fn title(&self) -> String {
         match self {
-            Self::Main => "Hyprnote".into(),
+            Self::Main => "Char".into(),
             Self::Control => "Control".into(),
         }
     }

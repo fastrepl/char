@@ -70,11 +70,11 @@ tasks:
 
   supabase:
     cmds:
-      - supabase {{.CLI_ARGS}}
+      - pnpm exec supabase {{.CLI_ARGS}}
 
   supabase-stop:
     cmds:
-      - supabase stop
+      - pnpm exec supabase stop
       - task: supabase-tunnel-stop
 
   supabase-tunnel-start:
@@ -104,7 +104,7 @@ tasks:
     internal: true
     cmds:
       - |
-          supabase status --output=env | awk -F= '
+          pnpm exec supabase status --output=env | awk -F= '
             /^ANON_KEY=/ { print "SUPABASE_ANON_KEY=" $2; print "VITE_SUPABASE_ANON_KEY=" $2 }
             /^API_URL=/ { print "SUPABASE_URL=" $2; print "VITE_SUPABASE_URL=" $2 }
             /^DB_URL=/ { print "DATABASE_URL=" $2 }
@@ -138,9 +138,9 @@ tasks:
       - '[ -n "$GOOGLE_CLIENT_ID" ] && [ -n "$GOOGLE_CLIENT_SECRET" ] && dasel put -f supabase/config.toml -t bool -v false ''auth.external.google.skip_nonce_check'' || true'
       - dasel put -f supabase/config.toml -t bool -v true 'auth.hook.custom_access_token.enabled'
       - dasel put -f supabase/config.toml -t string -v 'pg-functions://postgres/public/custom_access_token_hook' 'auth.hook.custom_access_token.uri'
-      - '[ ! -f supabase/signing_keys.json ] && supabase gen signing-key --algorithm ES256 | jq -s ''.'' > supabase/signing_keys.json || true'
-      - dasel put -f supabase/config.toml -t string -v './signing_keys.json' 'auth.signing_keys_path'
-      - dprint fmt supabase/config.toml
-      - supabase start -x realtime,logflare
+      # - '[ ! -f supabase/signing_keys.json ] && pnpm exec supabase gen signing-key --algorithm ES256 | jq -s ''.'' > supabase/signing_keys.json || true'
+      # - dasel put -f supabase/config.toml -t string -v './signing_keys.json' 'auth.signing_keys_path'
+      - pnpm exec dprint fmt supabase/config.toml
+      - pnpm exec supabase start -x realtime,logflare
       - task: supabase-env
-      - supabase migration up --local
+      - pnpm exec supabase migration up --local

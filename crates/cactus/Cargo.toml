@@ -21,4 +21,9 @@ thiserror = { workspace = true }
 tracing = { workspace = true }
 
 [dev-dependencies]
-data = { path = "../data" }
+criterion = { workspace = true }
+hypr-data = { workspace = true }
+
+[[bench]]
+name = "vad"
+harness = false

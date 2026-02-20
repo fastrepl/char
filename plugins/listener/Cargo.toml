@@ -24,14 +24,12 @@ hypr-aec = { workspace = true }
 hypr-audio = { workspace = true }
 hypr-audio-device = { workspace = true }
 hypr-audio-utils = { workspace = true }
-hypr-data = { workspace = true }
 hypr-device-monitor = { workspace = true }
 hypr-host = { workspace = true }
 hypr-intercept = { workspace = true }
 hypr-language = { workspace = true }
 hypr-mac = { workspace = true }
 hypr-vad-ext = { workspace = true }
-hypr-vad2 = { workspace = true }
 tauri-plugin-fs-sync = { workspace = true }
 
 hypr-transcript = { workspace = true }
