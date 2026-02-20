@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/react";
 import { useMutation } from "@tanstack/react-query";
-import { FolderIcon, Link2Icon, Loader2Icon } from "lucide-react";
+import { FolderIcon, Link2Icon, Loader2Icon, SearchIcon } from "lucide-react";
 
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
@@ -15,6 +15,7 @@ import {
   TooltipTrigger,
 } from "@hypr/ui/components/ui/tooltip";
 
+import { save } from "../../../../../../store/tinybase/store/save";
 import { SearchableFolderSubmenuContent } from "../shared/folder";
 
 export function Copy() {
@@ -81,6 +82,33 @@ export function ShowInFinder({ sessionId }: { sessionId: string }) {
         <Icon icon="ri:finder-line" />
       )}
       <span>{isPending ? "Opening..." : "Show in Finder"}</span>
+    </DropdownMenuItem>
+  );
+}
+
+export function RevealInFinder({ sessionId }: { sessionId: string }) {
+  const { mutate, isPending } = useMutation({
+    mutationFn: async () => {
+      await save();
+      const result = await fsSyncCommands.sessionDir(sessionId);
+      if (result.status === "error") {
+        throw new Error(result.error);
+      }
+      await openerCommands.revealItemInDir(result.data);
+    },
+  });
+
+  return (
+    <DropdownMenuItem
+      onClick={(e) => {
+        e.preventDefault();
+        mutate();
+      }}
+      disabled={isPending}
+      className="cursor-pointer"
+    >
+      {isPending ? <Loader2Icon className="animate-spin" /> : <SearchIcon />}
+      <span>{isPending ? "Revealing..." : "Reveal in Finder"}</span>
     </DropdownMenuItem>
   );
 }
