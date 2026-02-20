@@ -9,7 +9,7 @@ use axum::{
 use crate::config::SubscriptionConfig;
 use crate::state::AppState;
 
-pub use billing::{Interval, StartTrialReason, StartTrialResponse};
+pub use crate::trial::{Interval, StartTrialReason, StartTrialResponse};
 pub use rpc::{CanStartTrialReason, CanStartTrialResponse};
 
 pub fn router(config: SubscriptionConfig) -> Router {

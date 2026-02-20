@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from "react";
 
 import { startTrial } from "@hypr/api-client";
 import { createClient } from "@hypr/api-client/client";
-import { commands as analyticsCommands } from "@hypr/plugin-analytics";
-
 import { useAuth } from "../../auth";
 import { useBillingAccess } from "../../billing";
 import { env } from "../../env";
@@ -119,13 +117,6 @@ export function LoginSection({ onContinue }: { onContinue: () => void }) {
         }
 
         if (store) configureProSettings(store);
-
-        void analyticsCommands.event({ event: "trial_started", plan: "pro" });
-        const trialEndDate = new Date();
-        trialEndDate.setDate(trialEndDate.getDate() + 14);
-        void analyticsCommands.setProperties({
-          set: { plan: "pro", trial_end_date: trialEndDate.toISOString() },
-        });
 
         setTrialPhase({ step: "done", result: "started" });
         await auth.refreshSession();
