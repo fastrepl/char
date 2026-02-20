@@ -108,6 +108,7 @@ hypr-transcribe-deepgram = { path = "crates/transcribe-deepgram", package = "tra
 hypr-transcribe-openai = { path = "crates/transcribe-openai", package = "transcribe-openai" }
 hypr-transcribe-proxy = { path = "crates/transcribe-proxy", package = "transcribe-proxy" }
 hypr-transcribe-whisper-local = { path = "crates/transcribe-whisper-local", package = "transcribe-whisper-local" }
+hypr-transcript = { path = "crates/transcript", package = "transcript" }
 hypr-turso = { path = "crates/turso", package = "turso" }
 hypr-vad = { path = "crates/vad", package = "vad" }
 hypr-vad-ext = { path = "crates/vad-ext", package = "vad-ext" }
