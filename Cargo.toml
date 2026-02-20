@@ -120,7 +120,7 @@ hypr-ws-client = { path = "crates/ws-client", package = "ws-client" }
 hypr-ws-utils = { path = "crates/ws-utils", package = "ws-utils" }
 posthog-rs = "0.4"
 
-owhisper-client= { path = "crates/owhisper-client", package = "owhisper-client" }
+owhisper-client = { path = "crates/owhisper-client", package = "owhisper-client" }
 owhisper-config = { path = "crates/owhisper-config", package = "owhisper-config" }
 owhisper-interface = { path = "crates/owhisper-interface", package = "owhisper-interface" }
 soniox = { path = "crates/soniox", package = "soniox" }

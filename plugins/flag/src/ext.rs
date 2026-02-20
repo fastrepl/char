@@ -15,23 +15,10 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Flag<'a, R, M> {
     }
 
     async fn get_posthog_flag(&self, flag_key: &str) -> bool {
-        let state = self.manager.state::<ManagedState>();
-
-        let api_key = match &state.api_key {
-            Some(k) => k.clone(),
-            None => return false,
-        };
-
-        let client = state
-            .client
-            .get_or_init(|| async move {
-                posthog_rs::client(posthog_rs::ClientOptions::from(api_key.as_str())).await
-            })
-            .await;
-
+        let client = self.manager.state::<ManagedState>();
         let distinct_id = hypr_host::fingerprint();
         client
-            .is_feature_enabled(flag_key, &distinct_id, None, None, None)
+            .is_feature_enabled(flag_key, &distinct_id)
             .await
             .unwrap_or(false)
     }

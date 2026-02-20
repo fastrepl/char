@@ -9,6 +9,8 @@ pub use error::*;
 use outlit::OutlitClient;
 use posthog_rs::{ClientOptions, Event};
 
+pub use posthog_rs::FlagValue;
+
 #[derive(Clone)]
 pub struct DeviceFingerprint(pub String);
 
@@ -124,6 +126,55 @@ impl AnalyticsClient {
         }
 
         Ok(())
+    }
+
+    pub async fn is_feature_enabled(
+        &self,
+        flag_key: &str,
+        distinct_id: &str,
+    ) -> Result<bool, Error> {
+        if let Some(lazy) = &self.posthog {
+            let client = lazy.get().await;
+            Ok(client
+                .is_feature_enabled(flag_key, distinct_id, None, None, None)
+                .await
+                .unwrap_or(false))
+        } else {
+            tracing::info!("is_feature_enabled: {} (no client)", flag_key);
+            Ok(false)
+        }
+    }
+
+    pub async fn get_feature_flag(
+        &self,
+        flag_key: &str,
+        distinct_id: &str,
+        person_properties: Option<HashMap<String, serde_json::Value>>,
+        group_properties: Option<HashMap<String, HashMap<String, serde_json::Value>>>,
+    ) -> Result<Option<FlagValue>, Error> {
+        if let Some(lazy) = &self.posthog {
+            let client = lazy.get().await;
+            Ok(client
+                .get_feature_flag(flag_key, distinct_id, None, person_properties, group_properties)
+                .await?)
+        } else {
+            tracing::info!("get_feature_flag: {} (no client)", flag_key);
+            Ok(None)
+        }
+    }
+
+    pub async fn get_feature_flag_payload(
+        &self,
+        flag_key: &str,
+        distinct_id: &str,
+    ) -> Result<Option<serde_json::Value>, Error> {
+        if let Some(lazy) = &self.posthog {
+            let client = lazy.get().await;
+            Ok(client.get_feature_flag_payload(flag_key, distinct_id).await?)
+        } else {
+            tracing::info!("get_feature_flag_payload: {} (no client)", flag_key);
+            Ok(None)
+        }
     }
 
     pub async fn identify(

@@ -1,5 +1,3 @@
-use tauri::Manager;
-
 mod commands;
 mod error;
 mod ext;
@@ -9,12 +7,7 @@ pub use error::*;
 pub use ext::*;
 pub use feature::*;
 
-pub struct FlagState {
-    pub api_key: Option<String>,
-    pub client: tokio::sync::OnceCell<posthog_rs::Client>,
-}
-
-pub type ManagedState = FlagState;
+pub type ManagedState = hypr_analytics::AnalyticsClient;
 
 const PLUGIN_NAME: &str = "flag";
 
@@ -32,15 +25,6 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
 
     tauri::plugin::Builder::new(PLUGIN_NAME)
         .invoke_handler(specta_builder.invoke_handler())
-        .setup(|app, _api| {
-            let posthog_key = option_env!("POSTHOG_API_KEY");
-            let state = FlagState {
-                api_key: posthog_key.map(|k| k.to_string()),
-                client: tokio::sync::OnceCell::new(),
-            };
-            app.manage(state);
-            Ok(())
-        })
         .build()
 }
 
@@ -70,7 +54,15 @@ mod test {
         ctx.config_mut().identifier = "com.hyprnote.dev".to_string();
         ctx.config_mut().version = Some("1.0.0".to_string());
 
-        builder.plugin(init()).build(ctx).unwrap()
+        builder
+            .plugin(init())
+            .setup(|app| {
+                let client = hypr_analytics::AnalyticsClientBuilder::default().build();
+                app.manage(client);
+                Ok(())
+            })
+            .build(ctx)
+            .unwrap()
     }
 
     #[tokio::test]

@@ -17998,8 +17998,8 @@ dependencies = [
 name = "tauri-plugin-flag"
 version = "0.1.0"
 dependencies = [
+ "analytics",
  "host",
- "posthog-rs",
  "serde",
  "specta",
  "specta-typescript",
