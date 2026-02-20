@@ -1,17 +1,19 @@
+use std::cell::{Cell, UnsafeCell};
 use std::ffi::{CStr, CString};
 
 use crate::error::{Error, Result};
 use crate::ffi_utils::{RESPONSE_BUF_SIZE, parse_buf};
-use crate::model::Model;
+use crate::model::{InferenceGuard, Model};
 
 use super::{CompleteOptions, CompletionResult, Message};
 
 type TokenCallback = unsafe extern "C" fn(*const std::ffi::c_char, u32, *mut std::ffi::c_void);
 
 struct CallbackState<'a, F: FnMut(&str) -> bool> {
-    on_token: &'a mut F,
+    on_token: UnsafeCell<&'a mut F>,
     model: &'a Model,
-    stopped: bool,
+    stopped: Cell<bool>,
+    in_callback: Cell<bool>,
 }
 
 unsafe extern "C" fn token_trampoline<F: FnMut(&str) -> bool>(
@@ -23,21 +25,28 @@ unsafe extern "C" fn token_trampoline<F: FnMut(&str) -> bool>(
         return;
     }
 
-    let state = unsafe { &mut *(user_data as *mut CallbackState<F>) };
-    if state.stopped {
+    // SAFETY: We only create a shared reference to CallbackState. Interior
+    // mutability (Cell/UnsafeCell) handles mutation. The `in_callback` guard
+    // prevents re-entrant access to the UnsafeCell contents.
+    let state = unsafe { &*(user_data as *const CallbackState<F>) };
+    if state.stopped.get() || state.in_callback.get() {
         return;
     }
+    state.in_callback.set(true);
 
     let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         let chunk = unsafe { CStr::from_ptr(token) }.to_string_lossy();
-        if !(state.on_token)(&chunk) {
-            state.stopped = true;
+        // SAFETY: The `in_callback` flag ensures exclusive access to the closure.
+        let on_token = unsafe { &mut *state.on_token.get() };
+        if !on_token(&chunk) {
+            state.stopped.set(true);
             state.model.stop();
         }
     }));
 
+    state.in_callback.set(false);
     if result.is_err() {
-        state.stopped = true;
+        state.stopped.set(true);
         state.model.stop();
     }
 }
@@ -58,6 +67,7 @@ pub(super) fn complete_error(rc: i32) -> Error {
 impl Model {
     fn call_complete(
         &self,
+        guard: &InferenceGuard<'_>,
         messages_c: &CString,
         options_c: &CString,
         callback: Option<TokenCallback>,
@@ -67,7 +77,7 @@ impl Model {
 
         let rc = unsafe {
             cactus_sys::cactus_complete(
-                self.raw_handle(),
+                guard.raw_handle(),
                 messages_c.as_ptr(),
                 buf.as_mut_ptr().cast::<std::ffi::c_char>(),
                 buf.len(),
@@ -86,9 +96,10 @@ impl Model {
         messages: &[Message],
         options: &CompleteOptions,
     ) -> Result<CompletionResult> {
-        let _guard = self.lock_inference();
+        let guard = self.lock_inference();
         let (messages_c, options_c) = serialize_complete_request(messages, options)?;
-        let (rc, buf) = self.call_complete(&messages_c, &options_c, None, std::ptr::null_mut());
+        let (rc, buf) =
+            self.call_complete(&guard, &messages_c, &options_c, None, std::ptr::null_mut());
 
         if rc < 0 {
             return Err(complete_error(rc));
@@ -106,23 +117,28 @@ impl Model {
     where
         F: FnMut(&str) -> bool,
     {
-        let _guard = self.lock_inference();
+        let guard = self.lock_inference();
         let (messages_c, options_c) = serialize_complete_request(messages, options)?;
 
-        let mut state = CallbackState {
-            on_token: &mut on_token,
+        let state = CallbackState {
+            on_token: UnsafeCell::new(&mut on_token),
             model: self,
-            stopped: false,
+            stopped: Cell::new(false),
+            in_callback: Cell::new(false),
         };
 
+        // SAFETY: `state` is stack-allocated and lives for the duration of the
+        // FFI call. The C++ side must not retain this pointer beyond the return
+        // of `cactus_complete`.
         let (rc, buf) = self.call_complete(
+            &guard,
             &messages_c,
             &options_c,
             Some(token_trampoline::<F>),
-            (&mut state as *mut CallbackState<F>).cast::<std::ffi::c_void>(),
+            (&state as *const CallbackState<F> as *mut std::ffi::c_void),
         );
 
-        if rc < 0 && !state.stopped {
+        if rc < 0 && !state.stopped.get() {
             return Err(complete_error(rc));
         }
 

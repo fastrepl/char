@@ -32,7 +32,7 @@ impl Model {
         input: TranscribeInput<'_>,
         options: &TranscribeOptions,
     ) -> Result<TranscriptionResult> {
-        let _guard = self.lock_inference();
+        let guard = self.lock_inference();
         let prompt_c = CString::new(build_whisper_prompt(options))?;
         let options_c = CString::new(serde_json::to_string(options)?)?;
         let mut buf = vec![0u8; RESPONSE_BUF_SIZE];
@@ -44,7 +44,7 @@ impl Model {
 
         let rc = unsafe {
             cactus_sys::cactus_transcribe(
-                self.raw_handle(),
+                guard.raw_handle(),
                 path_ptr,
                 prompt_c.as_ptr(),
                 buf.as_mut_ptr() as *mut std::ffi::c_char,
