@@ -4547,6 +4547,7 @@ version = "0.0.0"
 dependencies = [
  "host",
  "intercept",
+ "pico-args",
  "ractor",
  "sentry",
  "serde",
