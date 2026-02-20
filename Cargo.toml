@@ -60,7 +60,6 @@ hypr-eval = { path = "crates/eval", package = "eval" }
 hypr-exa = { path = "crates/exa", package = "exa" }
 hypr-extensions-runtime = { path = "crates/extensions-runtime", package = "extensions-runtime" }
 hypr-file = { path = "crates/file", package = "file" }
-hypr-flag = { path = "crates/flag", package = "flag" }
 hypr-frontmatter = { path = "crates/frontmatter", package = "frontmatter" }
 hypr-gbnf = { path = "crates/gbnf", package = "gbnf" }
 hypr-gguf = { path = "crates/gguf", package = "gguf" }
@@ -90,7 +89,7 @@ hypr-openrouter = { path = "crates/openrouter", package = "openrouter" }
 hypr-openstatus = { path = "crates/openstatus", package = "openstatus" }
 hypr-outlook-calendar = { path = "crates/outlook-calendar", package = "outlook-calendar" }
 hypr-porkbun = { path = "crates/porkbun", package = "porkbun" }
-hypr-posthog = { path = "crates/posthog", package = "posthog" }
+posthog-rs = "0.4"
 hypr-pyannote-cloud = { path = "crates/pyannote-cloud", package = "pyannote-cloud" }
 hypr-pyannote-local = { path = "crates/pyannote-local", package = "pyannote-local" }
 hypr-recall = { path = "crates/recall", package = "recall" }

@@ -1,9 +1,13 @@
 use std::collections::HashMap;
+use std::sync::Arc;
 
 mod error;
 mod outlit;
 
 pub use error::*;
+
+use outlit::OutlitClient;
+use posthog_rs::{ClientOptions, Event};
 
 #[derive(Clone)]
 pub struct DeviceFingerprint(pub String);
@@ -11,24 +15,44 @@ pub struct DeviceFingerprint(pub String);
 #[derive(Clone)]
 pub struct AuthenticatedUserId(pub String);
 
-use hypr_posthog::PosthogClient;
-use outlit::OutlitClient;
+struct LazyPosthogClient {
+    api_key: String,
+    client: tokio::sync::OnceCell<posthog_rs::Client>,
+}
+
+impl LazyPosthogClient {
+    fn new(api_key: impl Into<String>) -> Self {
+        Self {
+            api_key: api_key.into(),
+            client: tokio::sync::OnceCell::new(),
+        }
+    }
+
+    async fn get(&self) -> &posthog_rs::Client {
+        self.client
+            .get_or_init(|| {
+                let key = self.api_key.clone();
+                async move { posthog_rs::client(ClientOptions::from(key.as_str())).await }
+            })
+            .await
+    }
+}
 
 #[derive(Clone)]
 pub struct AnalyticsClient {
-    posthog: Option<PosthogClient>,
+    posthog: Option<Arc<LazyPosthogClient>>,
     outlit: Option<OutlitClient>,
 }
 
 #[derive(Default)]
 pub struct AnalyticsClientBuilder {
-    posthog: Option<PosthogClient>,
+    posthog: Option<Arc<LazyPosthogClient>>,
     outlit: Option<OutlitClient>,
 }
 
 impl AnalyticsClientBuilder {
     pub fn with_posthog(mut self, key: impl Into<String>) -> Self {
-        self.posthog = Some(PosthogClient::new(key));
+        self.posthog = Some(Arc::new(LazyPosthogClient::new(key)));
         self
     }
 
@@ -53,10 +77,13 @@ impl AnalyticsClient {
     ) -> Result<(), Error> {
         let distinct_id = distinct_id.into();
 
-        if let Some(posthog) = &self.posthog {
-            posthog
-                .event(&distinct_id, &payload.event, &payload.props)
-                .await?;
+        if let Some(lazy) = &self.posthog {
+            let client = lazy.get().await;
+            let mut event = Event::new(&payload.event, &distinct_id);
+            for (key, value) in &payload.props {
+                let _ = event.insert_prop(key, value);
+            }
+            client.capture(event).await?;
         } else {
             tracing::info!("event: {:?}", payload);
         }
@@ -75,15 +102,19 @@ impl AnalyticsClient {
     ) -> Result<(), Error> {
         let distinct_id = distinct_id.into();
 
-        if let Some(posthog) = &self.posthog {
-            posthog
-                .set_properties(
-                    &distinct_id,
-                    &payload.set,
-                    &payload.set_once,
-                    payload.email.as_deref(),
-                )
-                .await?;
+        if let Some(lazy) = &self.posthog {
+            let client = lazy.get().await;
+            let mut event = Event::new("$set", &distinct_id);
+            if !payload.set.is_empty() {
+                let _ = event.insert_prop("$set", &payload.set);
+            }
+            if !payload.set_once.is_empty() {
+                let _ = event.insert_prop("$set_once", &payload.set_once);
+            }
+            if let Some(ref email) = payload.email {
+                let _ = event.insert_prop("$email", email);
+            }
+            client.capture(event).await?;
         } else {
             tracing::info!("set_properties: {:?}", payload);
         }
@@ -104,16 +135,22 @@ impl AnalyticsClient {
         let user_id = user_id.into();
         let anon_distinct_id = anon_distinct_id.into();
 
-        if let Some(posthog) = &self.posthog {
-            posthog
-                .identify(
-                    &user_id,
-                    &anon_distinct_id,
-                    &payload.set,
-                    &payload.set_once,
-                    payload.email.as_deref(),
-                )
-                .await?;
+        if let Some(lazy) = &self.posthog {
+            let client = lazy.get().await;
+            let mut event = Event::new("$identify", &user_id);
+            let _ = event.insert_prop("$anon_distinct_id", &anon_distinct_id);
+
+            let mut set_props = payload.set.clone();
+            if let Some(ref email) = payload.email {
+                set_props.insert("email".to_string(), serde_json::json!(email));
+            }
+            if !set_props.is_empty() {
+                let _ = event.insert_prop("$set", &set_props);
+            }
+            if !payload.set_once.is_empty() {
+                let _ = event.insert_prop("$set_once", &payload.set_once);
+            }
+            client.capture(event).await?;
         } else {
             tracing::info!(
                 "identify: user_id={}, anon_distinct_id={}, payload={:?}",

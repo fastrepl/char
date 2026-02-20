@@ -1,7 +1,4 @@
-use std::sync::Arc;
-
 use tauri::Manager;
-use tokio::sync::RwLock;
 
 mod commands;
 mod error;
@@ -12,11 +9,9 @@ pub use error::*;
 pub use ext::*;
 pub use feature::*;
 
-pub use hypr_flag;
-
 pub struct FlagState {
-    pub client: Option<hypr_flag::FlagClient>,
-    pub cache: Arc<RwLock<Option<hypr_flag::FlagsResponse>>>,
+    pub api_key: Option<String>,
+    pub client: tokio::sync::OnceCell<posthog_rs::Client>,
 }
 
 pub type ManagedState = FlagState;
@@ -39,13 +34,10 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
         .invoke_handler(specta_builder.invoke_handler())
         .setup(|app, _api| {
             let posthog_key = option_env!("POSTHOG_API_KEY");
-
-            let client = posthog_key.map(hypr_flag::FlagClient::new);
             let state = FlagState {
-                client,
-                cache: Arc::new(RwLock::new(None)),
+                api_key: posthog_key.map(|k| k.to_string()),
+                client: tokio::sync::OnceCell::new(),
             };
-
             app.manage(state);
             Ok(())
         })
