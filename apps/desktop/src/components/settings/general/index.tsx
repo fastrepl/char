@@ -25,7 +25,8 @@ function useSettingsForm() {
     "autostart",
     "notification_detect",
     "save_recordings",
-    "telemetry_consent",
+    "telemetry_usage",
+    "telemetry_error",
     "ai_language",
     "spoken_languages",
     "current_stt_provider",
@@ -57,7 +58,8 @@ function useSettingsForm() {
       autostart: value.autostart,
       notification_detect: value.notification_detect,
       save_recordings: value.save_recordings,
-      telemetry_consent: value.telemetry_consent,
+      telemetry_usage: value.telemetry_usage,
+      telemetry_error: value.telemetry_error,
       ai_language: value.ai_language,
       spoken_languages: value.spoken_languages,
     },
@@ -86,11 +88,13 @@ function useSettingsForm() {
         autostart: value.autostart,
         notification_detect: value.notification_detect,
         save_recordings: value.save_recordings,
-        telemetry_consent: value.telemetry_consent,
+        telemetry_usage: value.telemetry_usage,
+        telemetry_error: value.telemetry_error,
       });
       void analyticsCommands.setProperties({
         set: {
-          telemetry_opt_out: value.telemetry_consent === false,
+          telemetry_usage_opt_out: value.telemetry_usage === false,
+          telemetry_error_opt_out: value.telemetry_error === false,
         },
       });
     },
@@ -133,41 +137,53 @@ export function SettingsApp() {
             {(notificationDetectField) => (
               <form.Field name="save_recordings">
                 {(saveRecordingsField) => (
-                  <form.Field name="telemetry_consent">
-                    {(telemetryConsentField) => (
-                      <AppSettingsView
-                        autostart={{
-                          title: "Start Char at login",
-                          description:
-                            "Always ready without manually launching.",
-                          value: autostartField.state.value,
-                          onChange: (val) => autostartField.handleChange(val),
-                        }}
-                        notificationDetect={{
-                          title: "Auto-detect meetings",
-                          description:
-                            "Automatically start and stop listening when a meeting is detected.",
-                          value: notificationDetectField.state.value,
-                          onChange: (val) =>
-                            notificationDetectField.handleChange(val),
-                        }}
-                        saveRecordings={{
-                          title: "Save recordings",
-                          description:
-                            "Keep audio files locally on your device.",
-                          value: saveRecordingsField.state.value,
-                          onChange: (val) =>
-                            saveRecordingsField.handleChange(val),
-                        }}
-                        telemetryConsent={{
-                          title: "Share usage data",
-                          description:
-                            "Send anonymous usage metadata to help improve Hyprnote.",
-                          value: telemetryConsentField.state.value,
-                          onChange: (val) =>
-                            telemetryConsentField.handleChange(val),
-                        }}
-                      />
+                  <form.Field name="telemetry_usage">
+                    {(telemetryUsageField) => (
+                      <form.Field name="telemetry_error">
+                        {(telemetryErrorField) => (
+                          <AppSettingsView
+                            autostart={{
+                              title: "Start Char at login",
+                              description:
+                                "Always ready without manually launching.",
+                              value: autostartField.state.value,
+                              onChange: (val) => autostartField.handleChange(val),
+                            }}
+                            notificationDetect={{
+                              title: "Auto-detect meetings",
+                              description:
+                                "Automatically start and stop listening when a meeting is detected.",
+                              value: notificationDetectField.state.value,
+                              onChange: (val) =>
+                                notificationDetectField.handleChange(val),
+                            }}
+                            saveRecordings={{
+                              title: "Save recordings",
+                              description:
+                                "Keep audio files locally on your device.",
+                              value: saveRecordingsField.state.value,
+                              onChange: (val) =>
+                                saveRecordingsField.handleChange(val),
+                            }}
+                            telemetryUsage={{
+                              title: "Share usage data",
+                              description:
+                                "Send anonymous usage analytics to help improve Char.",
+                              value: telemetryUsageField.state.value,
+                              onChange: (val) =>
+                                telemetryUsageField.handleChange(val),
+                            }}
+                            telemetryError={{
+                              title: "Share error reports",
+                              description:
+                                "Send crash and error reports to help fix issues.",
+                              value: telemetryErrorField.state.value,
+                              onChange: (val) =>
+                                telemetryErrorField.handleChange(val),
+                            }}
+                          />
+                        )}
+                      </form.Field>
                     )}
                   </form.Field>
                 )}
