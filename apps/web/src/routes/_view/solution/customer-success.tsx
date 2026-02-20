@@ -7,16 +7,16 @@ export const Route = createFileRoute("/_view/solution/customer-success")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "AI Meeting Notes for Customer Success - Hyprnote" },
+      { title: "AI Meeting Notes for Customer Success - Char" },
       {
         name: "description",
         content:
-          "Capture every customer conversation with AI-powered meeting notes. Track health signals, document feedback, and drive retention with Hyprnote.",
+          "Capture every customer conversation with AI-powered meeting notes. Track health signals, document feedback, and drive retention with Char.",
       },
       { name: "robots", content: "noindex, nofollow" },
       {
         property: "og:title",
-        content: "AI Meeting Notes for Customer Success - Hyprnote",
+        content: "AI Meeting Notes for Customer Success - Char",
       },
       {
         property: "og:description",
@@ -125,7 +125,7 @@ function HeroSection() {
             AI-powered meeting notes
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto">
-            Focus on your customers, not your notepad. Hyprnote captures every
+            Focus on your customers, not your notepad. Char captures every
             conversation detail so you can drive success and retention.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">

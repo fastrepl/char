@@ -37,19 +37,21 @@ type StartParams<T extends TaskType> = {
 };
 
 export function useAITaskTask<T extends TaskType>(
-  taskId: TaskId<T>,
+  taskId: TaskId<T> | null,
   taskType: T,
   options?: Options<T>,
 ) {
+  const enabled = taskId !== null;
+
   const { taskState, generate, cancel, reset } = useAITask(
     useCallback(
       (state) => ({
-        taskState: getTaskState(state.tasks, taskId),
+        taskState: enabled ? getTaskState(state.tasks, taskId) : undefined,
         generate: state.generate,
         cancel: state.cancel,
         reset: state.reset,
       }),
-      [taskId],
+      [taskId, enabled],
     ),
     shallow,
   );
@@ -81,13 +83,22 @@ export function useAITaskTask<T extends TaskType>(
   }, [status, streamedText, error, taskState, callbacksRef]);
 
   const start = useCallback(
-    (config: StartParams<T>) => generate(taskId, { ...config, taskType }),
-    [generate, taskId, taskType],
+    (config: StartParams<T>) => {
+      if (!enabled) return Promise.resolve();
+      return generate(taskId, { ...config, taskType });
+    },
+    [generate, taskId, taskType, enabled],
   );
 
-  const cancelTask = useCallback(() => cancel(taskId), [cancel, taskId]);
+  const cancelTask = useCallback(() => {
+    if (!enabled) return;
+    cancel(taskId);
+  }, [cancel, taskId, enabled]);
 
-  const resetTask = useCallback(() => reset(taskId), [reset, taskId]);
+  const resetTask = useCallback(() => {
+    if (!enabled) return;
+    reset(taskId);
+  }, [reset, taskId, enabled]);
 
   return {
     status,

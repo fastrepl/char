@@ -1,9 +1,5 @@
-import { PhysicalPosition, PhysicalSize } from "@tauri-apps/api/dpi";
-import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-import { currentMonitor } from "@tauri-apps/api/window";
+import { isTauri } from "@tauri-apps/api/core";
 import { useCallback, useState } from "react";
-
-const appWindow = getCurrentWebviewWindow();
 
 const COLLAPSED_SIZE = { width: 80, height: 80 };
 const EXPANDED_SIZE = { width: 400, height: 500 };
@@ -12,7 +8,23 @@ export function useWidgetState() {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const expand = useCallback(async () => {
-    const monitor = await currentMonitor();
+    if (!isTauri()) {
+      setIsExpanded(true);
+      return;
+    }
+
+    const [
+      { PhysicalPosition, PhysicalSize },
+      { getCurrentWebviewWindow },
+      tauriWindow,
+    ] = await Promise.all([
+      import("@tauri-apps/api/dpi"),
+      import("@tauri-apps/api/webviewWindow"),
+      import("@tauri-apps/api/window"),
+    ]);
+
+    const appWindow = getCurrentWebviewWindow();
+    const monitor = await tauriWindow.currentMonitor();
     if (!monitor) return;
 
     const { width: screenWidth, height: screenHeight } = monitor.size;
@@ -29,9 +41,25 @@ export function useWidgetState() {
   }, []);
 
   const collapse = useCallback(async () => {
-    const monitor = await currentMonitor();
+    if (!isTauri()) {
+      setIsExpanded(false);
+      return;
+    }
+
+    const [
+      { PhysicalPosition, PhysicalSize },
+      { getCurrentWebviewWindow },
+      tauriWindow,
+    ] = await Promise.all([
+      import("@tauri-apps/api/dpi"),
+      import("@tauri-apps/api/webviewWindow"),
+      import("@tauri-apps/api/window"),
+    ]);
+
+    const appWindow = getCurrentWebviewWindow();
+    const monitor = await tauriWindow.currentMonitor();
     if (!monitor) {
-      setIsExpanded(false); // Update state even if operations fail
+      setIsExpanded(false);
       return;
     }
 

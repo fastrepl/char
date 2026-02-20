@@ -30,3 +30,7 @@ alwaysApply: true
 - Do not create summary docs or example code file if not requested. Plan is ok.
 - If there are many classNames and they have conditional logic, use `cn` (import it with `import { cn } from "@hypr/utils"`). It is similar to `clsx`. Always pass an array. Split by logical grouping.
 - Use `motion/react` instead of `framer-motion`.
+
+# Dev Docs
+
+https://hyprnote.com/docs/developers

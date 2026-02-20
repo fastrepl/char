@@ -27,9 +27,9 @@ export function ParticipantInput({ sessionId }: { sessionId: string }) {
   });
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && inputValue.trim()) {
-      e.preventDefault();
+    if ((e.key === "Enter" || e.key === "Tab") && inputValue.trim()) {
       if (dropdownOptions.length > 0) {
+        e.preventDefault();
         handleAddParticipant(dropdownOptions[selectedIndex]);
         inputRef.current?.focus();
       }

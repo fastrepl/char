@@ -45,7 +45,8 @@ pub async fn list_extensions<R: tauri::Runtime>(
         .settings()
         .global_base()
         .map_err(|e| Error::Io(e.to_string()))?
-        .join("extensions");
+        .join("extensions")
+        .into_std_path_buf();
 
     let extensions = hypr_extensions_runtime::discover_extensions(&extensions_dir);
 
@@ -92,10 +93,11 @@ pub async fn get_extensions_dir<R: tauri::Runtime>(
         .join("extensions");
 
     if !extensions_dir.exists() {
-        std::fs::create_dir_all(&extensions_dir).map_err(|e| Error::Io(e.to_string()))?;
+        std::fs::create_dir_all(extensions_dir.as_std_path())
+            .map_err(|e| Error::Io(e.to_string()))?;
     }
 
-    Ok(extensions_dir.to_string_lossy().to_string())
+    Ok(extensions_dir.to_string())
 }
 
 #[tauri::command]
@@ -108,7 +110,8 @@ pub async fn get_extension<R: tauri::Runtime>(
         .settings()
         .global_base()
         .map_err(|e| Error::Io(e.to_string()))?
-        .join("extensions");
+        .join("extensions")
+        .into_std_path_buf();
 
     let extensions = hypr_extensions_runtime::discover_extensions(&extensions_dir);
 

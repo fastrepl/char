@@ -1,14 +1,19 @@
 import { tool } from "ai";
 import { z } from "zod";
 
+import type { SessionContext } from "@hypr/plugin-template";
+import { commands as templateCommands } from "@hypr/plugin-template";
+
 import { searchFiltersSchema } from "../contexts/search/engine/types";
 import type { SearchFilters, SearchHit } from "../contexts/search/engine/types";
+import type { SupportMcpTools } from "./support-mcp-tools";
 
 export interface ToolDependencies {
   search: (
     query: string,
     filters?: SearchFilters | null,
   ) => Promise<SearchHit[]>;
+  resolveSessionContext: (sessionId: string) => Promise<SessionContext | null>;
 }
 
 const buildSearchSessionsTool = (deps: ToolDependencies) =>
@@ -26,15 +31,31 @@ const buildSearchSessionsTool = (deps: ToolDependencies) =>
     execute: async (params: { query: string; filters?: SearchFilters }) => {
       const hits = await deps.search(params.query, params.filters || null);
 
-      const results = hits.slice(0, 5).map((hit) => ({
-        id: hit.document.id,
-        title: hit.document.title,
-        content: hit.document.content.slice(0, 500),
-        score: hit.score,
-        created_at: hit.document.created_at,
+      const results = await Promise.all(
+        hits.slice(0, 5).map(async (hit) => ({
+          id: hit.document.id,
+          title: hit.document.title,
+          excerpt: hit.document.content.slice(0, 180),
+          score: hit.score,
+          created_at: hit.document.created_at,
+          sessionContext: await deps.resolveSessionContext(hit.document.id),
+        })),
+      );
+      const templateResults = results.map((result) => ({
+        ...result,
+        createdAt: result.created_at,
       }));
 
-      return { results };
+      const rendered = await templateCommands.render({
+        toolSearchSessions: {
+          query: params.query,
+          results: templateResults,
+        },
+      });
+
+      const contextText = rendered.status === "ok" ? rendered.data : null;
+
+      return { results, contextText };
     },
   });
 
@@ -42,19 +63,23 @@ export const buildChatTools = (deps: ToolDependencies) => ({
   search_sessions: buildSearchSessionsTool(deps),
 });
 
-export type Tools = {
+type LocalTools = {
   search_sessions: {
     input: { query: string; filters?: SearchFilters };
     output: {
       results: Array<{
         id: string;
         title: string;
-        content: string;
+        excerpt: string;
         score: number;
         created_at: number;
+        sessionContext: SessionContext | null;
       }>;
+      contextText: string | null;
     };
   };
 };
+
+export type Tools = LocalTools & SupportMcpTools;
 
 export type ToolPartType = `tool-${keyof Tools}`;

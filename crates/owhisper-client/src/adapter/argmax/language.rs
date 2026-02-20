@@ -20,6 +20,9 @@ impl LanguageQueryStrategy for ArgmaxLanguageStrategy {
     ) {
         let lang = pick_single_language(params);
         query_pairs.append_pair("language", lang.iso639().code());
+        if !params.languages.is_empty() {
+            query_pairs.append_pair("detect_language", "false");
+        }
     }
 }
 

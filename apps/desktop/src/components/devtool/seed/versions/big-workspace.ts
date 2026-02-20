@@ -50,7 +50,7 @@ const buildBigWorkspaceData = (fixtureCalendars?: AppleCalendar[]) => {
   const templateIds = Object.keys(templates);
 
   const sessions = buildSessionsForBigWorkspace(150, {
-    eventIds: Object.keys(events),
+    events,
     eventLinkProbability: 0.7,
   });
   const sessionIds = Object.keys(sessions);

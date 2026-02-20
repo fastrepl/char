@@ -103,11 +103,17 @@ export function Disclosure({
       ])}
     >
       <summary
+        onClick={(event) => {
+          if (disabled) {
+            event.preventDefault();
+          }
+        }}
         className={cn([
           "w-full",
           "text-xs text-neutral-500",
           "select-none list-none marker:hidden",
           "flex items-center gap-2",
+          disabled && "cursor-default",
         ])}
       >
         {disabled ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
