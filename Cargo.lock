@@ -4188,7 +4188,6 @@ version = "0.1.0"
 dependencies = [
  "buffer",
  "chrono",
- "data",
  "db-core",
  "indoc",
  "language",
@@ -17867,7 +17866,6 @@ dependencies = [
  "bytes",
  "chrono",
  "codes-iso-639",
- "data",
  "device-monitor",
  "dirs 6.0.0",
  "futures-util",
