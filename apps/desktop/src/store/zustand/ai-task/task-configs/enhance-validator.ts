@@ -13,13 +13,27 @@ export function normalizeForComparison(text: string): string {
     .trim();
 }
 
-function pipe(...fns: EarlyValidatorFn[]): EarlyValidatorFn {
+function pipe(
+  ...fns: ((text: string) => { text: string } | { valid: false; feedback: string })[]
+): EarlyValidatorFn {
   return (text) => {
+    let current = text;
     for (const fn of fns) {
-      const result = fn(text);
-      if (!result.valid) return result;
+      const result = fn(current);
+      if ("valid" in result && !result.valid) return result;
+      if ("text" in result) current = result.text;
     }
     return { valid: true };
+  };
+}
+
+function stripPreamble(): (text: string) => { text: string } {
+  return (text) => {
+    const idx = text.indexOf("#");
+    if (idx > 0) {
+      return { text: text.slice(idx) };
+    }
+    return { text };
   };
 }
 
@@ -66,11 +80,14 @@ function matchSectionHeading(title: string): EarlyValidatorFn {
 export function createEnhanceValidator(
   template: EnhanceTemplate | null,
 ): EarlyValidatorFn {
-  const validators: EarlyValidatorFn[] = [requireH1()];
+  const steps: ((text: string) => { text: string } | { valid: false; feedback: string })[] = [
+    stripPreamble(),
+    requireH1(),
+  ];
 
   if (template?.sections?.length) {
-    validators.push(matchSectionHeading(template.sections[0].title));
+    steps.push(matchSectionHeading(template.sections[0].title));
   }
 
-  return pipe(...validators);
+  return pipe(...steps);
 }
