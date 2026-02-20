@@ -26,17 +26,17 @@ When you use Pro's curated transcription, you don't pick a specific provider —
 | 6 | Fireworks | `whisper-v3-turbo` | Whisper-based |
 | 7 | OpenAI | `gpt-4o-transcribe` | Final fallback |
 
-<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/transcribe-proxy/src/char_routing.rs#L33-L41" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/transcribe-proxy/src/hyprnote_routing.rs#L33-L41" />
 
 For example, when transcribing Korean + English, Soniox is selected over Deepgram because it has better multilingual support — even though Deepgram has higher base priority. The router sorts by language quality first, then falls back to priority order:
 
-<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/transcribe-proxy/src/char_routing.rs#L70-L111" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/transcribe-proxy/src/hyprnote_routing.rs#L70-L111" />
 
 ### How Audio Flows
 
 ```
 Your Device ──WebSocket──▶ Char API Server ──WebSocket──▶ STT Provider
-                           (pro.char.com)               (e.g., Deepgram, Soniox)
+                           (pro.hyprnote.com)               (e.g., Deepgram, Soniox)
 ```
 
 1. **Your device** opens a WebSocket to the Char API server, authenticated with your Supabase JWT token.
@@ -76,7 +76,7 @@ Char checks if your selected provider supports your configured languages. If the
 
 When using cloud transcription, your recorded audio is sent to the selected provider for processing:
 
-- **Pro curated models:** Your audio is proxied through `pro.char.com` and forwarded to a curated STT provider. The proxy does not store your audio.
+- **Pro curated models:** Your audio is proxied through `pro.hyprnote.com` and forwarded to a curated STT provider. The proxy does not store your audio.
 - **BYOK:** Your audio is sent directly from your device to the provider you selected. Char acts only as the client.
 
 Here is how Char selects the correct adapter for your configured provider — each provider has its own adapter that handles the audio stream:

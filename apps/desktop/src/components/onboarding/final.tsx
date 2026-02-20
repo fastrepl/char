@@ -7,7 +7,7 @@ import { OnboardingButton } from "./shared";
 
 const SOCIALS = [
   { label: "Discord", url: "https://discord.gg/CX8gTH2tj9" },
-  { label: "GitHub", url: "https://github.com/fastrepl/char" },
+  { label: "GitHub", url: "https://github.com/fastrepl/hyprnote" },
   { label: "X", url: "https://x.com/getcharnotes" },
 ] as const;
 

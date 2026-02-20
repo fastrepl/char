@@ -11,7 +11,7 @@ import { nangoCreateConnectSession } from "../../../functions/nango";
 const validateSearch = z.object({
   integration_id: z.string().default("google-calendar"),
   flow: z.enum(["desktop", "web"]).default("web"),
-  scheme: z.string().default("char"),
+  scheme: z.string().default("hyprnote"),
 });
 
 const INTEGRATION_DISPLAY: Record<

@@ -19,7 +19,7 @@ import {
 
 const validateSearch = z.object({
   flow: z.enum(["desktop", "web"]).default("web"),
-  scheme: z.string().default("char"),
+  scheme: z.string().default("hyprnote"),
   redirect: z.string().optional(),
   provider: z.enum(["github", "google"]).optional(),
   rra: z.boolean().optional(),

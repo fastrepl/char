@@ -198,7 +198,7 @@ function ChangelogHeader({
 async function fetchChangelogFromGitHub(
   version: string,
 ): Promise<string | null> {
-  const url = `https://raw.githubusercontent.com/fastrepl/char/main/apps/web/content/changelog/${version}.mdx`;
+  const url = `https://raw.githubusercontent.com/fastrepl/hyprnote/main/apps/web/content/changelog/${version}.mdx`;
   try {
     const response = await fetch(url);
     if (!response.ok) {

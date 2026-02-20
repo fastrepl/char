@@ -6,7 +6,7 @@ import { createJsonFilePersister } from "./json-file";
 const settingsMocks = vi.hoisted(() => ({
   vaultBase: vi
     .fn()
-    .mockResolvedValue({ status: "ok", data: "/mock/data/dir/char" }),
+    .mockResolvedValue({ status: "ok", data: "/mock/data/dir/hyprnote" }),
 }));
 
 const fs2Mocks = vi.hoisted(() => ({

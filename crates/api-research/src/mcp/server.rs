@@ -89,7 +89,7 @@ impl ServerHandler for ResearchMcpServer {
                 website_url: None,
             },
             instructions: Some(
-                "Char research server. Provides tools for web search and content retrieval powered by Exa."
+                "Hyprnote research server. Provides tools for web search and content retrieval powered by Exa."
                     .to_string(),
             ),
         }
@@ -103,7 +103,7 @@ impl ServerHandler for ResearchMcpServer {
         Ok(ListPromptsResult {
             prompts: vec![Prompt::new(
                 "research_chat",
-                Some("System prompt for the Char research chat"),
+                Some("System prompt for the Hyprnote research chat"),
                 None::<Vec<PromptArgument>>,
             )],
             next_cursor: None,

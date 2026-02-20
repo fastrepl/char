@@ -1,4 +1,4 @@
-import { store, ui } from "char";
+import { store, ui } from "hyprnote";
 
 const { Checkbox } = ui.checkbox;
 

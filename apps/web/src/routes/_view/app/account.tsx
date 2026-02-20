@@ -14,7 +14,7 @@ import {
 const VALID_SCHEMES = [
   "hyprnote",
   "hyprnote-nightly",
-  "char-staging",
+  "hyprnote-staging",
   "hypr",
 ] as const;
 

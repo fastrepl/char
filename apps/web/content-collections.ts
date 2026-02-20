@@ -73,7 +73,7 @@ async function embedGithubCode(content: string): Promise<string> {
     const [fullMatch, url] = match;
 
     const repoMatch = url.match(
-      /github\.com\/fastrepl\/(char|char)\/blob\/[^/]+\/(.+?)(?:#L\d+(?:-L\d+)?)?$/,
+      /github\.com\/fastrepl\/(hyprnote|char)\/blob\/[^/]+\/(.+?)(?:#L\d+(?:-L\d+)?)?$/,
     );
     if (repoMatch) {
       const filePath = repoMatch[2];
@@ -228,11 +228,11 @@ const changelog = defineCollection({
     const version = document._meta.path.replace(/\.mdx$/, "");
     const baseUrl = `https://github.com/fastrepl/char/releases/download/desktop_v${version}`;
     const downloads: Record<VersionPlatform, string> = {
-      "dmg-aarch64": `${baseUrl}/char-macos-aarch64.dmg`,
-      "appimage-x86_64": `${baseUrl}/char-linux-x86_64.AppImage`,
-      "deb-x86_64": `${baseUrl}/char-linux-x86_64.deb`,
-      "appimage-aarch64": `${baseUrl}/char-linux-aarch64.AppImage`,
-      "deb-aarch64": `${baseUrl}/char-linux-aarch64.deb`,
+      "dmg-aarch64": `${baseUrl}/hyprnote-macos-aarch64.dmg`,
+      "appimage-x86_64": `${baseUrl}/hyprnote-linux-x86_64.AppImage`,
+      "deb-x86_64": `${baseUrl}/hyprnote-linux-x86_64.deb`,
+      "appimage-aarch64": `${baseUrl}/hyprnote-linux-aarch64.AppImage`,
+      "deb-aarch64": `${baseUrl}/hyprnote-linux-aarch64.deb`,
     };
 
     return {

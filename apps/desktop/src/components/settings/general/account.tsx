@@ -181,7 +181,7 @@ export function AccountSettings() {
               <Input
                 type="text"
                 className="flex-1 text-xs font-mono"
-                placeholder="char://deeplink/auth?access_token=..."
+                placeholder="hyprnote://deeplink/auth?access_token=..."
                 value={callbackUrl}
                 onChange={(e) => setCallbackUrl(e.target.value)}
               />
@@ -201,7 +201,7 @@ export function AccountSettings() {
       <div className="flex flex-col items-center gap-6 text-center">
         <div className="flex flex-col gap-2">
           <h2 className="text-2xl font-semibold font-serif">
-            Sign in to Char
+            Sign in to Hyprnote
           </h2>
           <p className="text-base text-neutral-500">
             Get started without an account. Sign in to unlock more.

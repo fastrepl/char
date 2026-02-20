@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { format, isSameDay } from "date-fns";
-import { store, tabs, ui } from "char";
+import { store, tabs, ui } from "hyprnote";
 import { useState } from "react";
 
 import { CalendarIcon, PenIcon, StickyNoteIcon } from "./icons";

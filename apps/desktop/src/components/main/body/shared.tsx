@@ -307,7 +307,7 @@ export function TabItemBase({
         >
           <div className="flex flex-col gap-2">
             <p className="text-sm text-neutral-700">
-              Are you sure you want to close this tab? This will stop Char
+              Are you sure you want to close this tab? This will stop Hyprnote
               from listening.
             </p>
             <Button

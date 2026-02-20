@@ -25,12 +25,12 @@ export const Route = createFileRoute("/_view/company-handbook/$")({
     }
 
     if (!doc) {
-      if (normalizedSplat === "about/what-char-is") {
+      if (normalizedSplat === "about/what-hyprnote-is") {
         return;
       }
       throw redirect({
         to: "/company-handbook/$/",
-        params: { _splat: "about/what-char-is" },
+        params: { _splat: "about/what-hyprnote-is" },
       });
     }
   },

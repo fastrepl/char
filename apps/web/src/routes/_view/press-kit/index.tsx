@@ -54,10 +54,10 @@ function Component() {
               Download press materials, logos, screenshots, and learn more about
               Char. For press inquiries, contact us at{" "}
               <a
-                href="mailto:founders@char.com"
+                href="mailto:founders@hyprnote.com"
                 className="text-stone-600 underline hover:text-stone-700"
               >
-                founders@char.com
+                founders@hyprnote.com
               </a>
             </p>
           </div>
@@ -108,7 +108,7 @@ function Component() {
                       appIcon
                     />
                     <FinderAction
-                      href="mailto:founders@char.com"
+                      href="mailto:founders@hyprnote.com"
                       iconImage="/api/images/icons/macos-mail.png"
                       label="Contact"
                     />

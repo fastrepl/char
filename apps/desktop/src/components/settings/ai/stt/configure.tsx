@@ -50,9 +50,9 @@ export function ConfigureProviders() {
         <div ref={hyprAccordionRef}>
           <HyprProviderCard
             providerId="hyprnote"
-            providerName="Char"
+            providerName="Hyprnote"
             icon={
-              <img src="/assets/icon.png" alt="Char" className="size-5" />
+              <img src="/assets/icon.png" alt="Hyprnote" className="size-5" />
             }
             badge={PROVIDERS.find((p) => p.id === "hyprnote")?.badge}
           />
@@ -287,9 +287,9 @@ function HyprProviderCloudRow() {
   return (
     <HyprProviderRow>
       <div className="flex-1">
-        <span className="text-sm font-medium">Char Cloud (Beta)</span>
+        <span className="text-sm font-medium">Hyprnote Cloud (Beta)</span>
         <p className="text-xs text-neutral-500">
-          Use the Char Cloud API to transcribe your audio.
+          Use the Hyprnote Cloud API to transcribe your audio.
         </p>
       </div>
       <button
@@ -502,7 +502,7 @@ function HyprProviderLocalRow({
 function ProviderContext({ providerId }: { providerId: ProviderId }) {
   const content =
     providerId === "hyprnote"
-      ? "Char curates list of on-device models and also cloud models with high-availability and performance."
+      ? "Hyprnote curates list of on-device models and also cloud models with high-availability and performance."
       : providerId === "deepgram"
         ? `Use [Deepgram](https://deepgram.com) for transcriptions. \
     If you want to use a [Dedicated](https://developers.deepgram.com/reference/custom-endpoints#deepgram-dedicated-endpoints)

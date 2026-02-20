@@ -1,7 +1,7 @@
 {
-  "name": "char-changelog-generator",
+  "name": "hyprnote-changelog-generator",
   "version": "1.0.0",
-  "description": "Local AI changelog generator for char",
+  "description": "Local AI changelog generator for hyprnote",
   "keywords": [
     "ai",
     "automation",

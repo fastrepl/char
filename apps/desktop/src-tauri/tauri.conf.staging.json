@@ -5,7 +5,7 @@
   "identifier": "com.hyprnote.staging",
   "plugins": {
     "deep-link": {
-      "desktop": { "schemes": ["char-staging"] }
+      "desktop": { "schemes": ["hyprnote-staging"] }
     },
     "updater": {
       "active": false

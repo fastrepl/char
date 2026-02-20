@@ -7,7 +7,7 @@ import { createMultiTableDirPersister } from "./multi-table-dir";
 const settingsMocks = vi.hoisted(() => ({
   base: vi
     .fn()
-    .mockResolvedValue({ status: "ok", data: "/mock/data/dir/char" }),
+    .mockResolvedValue({ status: "ok", data: "/mock/data/dir/hyprnote" }),
 }));
 
 const fsSyncMocks = vi.hoisted(() => ({

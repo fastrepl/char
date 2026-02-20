@@ -1,5 +1,5 @@
 /**
- * Char Extension Runtime Configuration
+ * Hyprnote Extension Runtime Configuration
  *
  * This is the SINGLE SOURCE OF TRUTH for what's available to extensions.
  * From this config, we generate:

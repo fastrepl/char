@@ -1,4 +1,4 @@
-# Flatpak manifest for Char
+# Flatpak manifest for Hyprnote
 # https://docs.flathub.org/docs/for-app-authors/requirements
 #
 # To generate vendored dependencies:
@@ -20,7 +20,7 @@ sdk-extensions:
   - org.freedesktop.Sdk.Extension.rust-stable
   - org.freedesktop.Sdk.Extension.node22
 
-command: char
+command: hyprnote
 
 finish-args:
   # Display - Wayland and X11 fallback
@@ -54,11 +54,11 @@ finish-args:
 build-options:
   append-path: /usr/lib/sdk/node22/bin:/usr/lib/sdk/rust-stable/bin
   env:
-    CARGO_HOME: /run/build/char/cargo
+    CARGO_HOME: /run/build/hyprnote/cargo
     npm_config_nodedir: /usr/lib/sdk/node22
 
 modules:
-  - name: char
+  - name: hyprnote
     buildsystem: simple
 
     sources:
@@ -77,8 +77,8 @@ modules:
 
     build-options:
       env:
-        XDG_CACHE_HOME: /run/build/char/cache
-        npm_config_cache: /run/build/char/npm-cache
+        XDG_CACHE_HOME: /run/build/hyprnote/cache
+        npm_config_cache: /run/build/hyprnote/npm-cache
         npm_config_offline: "true"
 
     build-commands:
@@ -92,7 +92,7 @@ modules:
       - pnpm -F desktop tauri build --no-bundle --target x86_64-unknown-linux-gnu --config src-tauri/tauri.conf.flatpak.json
 
       # Install the binary
-      - install -Dm755 apps/desktop/src-tauri/target/x86_64-unknown-linux-gnu/release/char /app/bin/char
+      - install -Dm755 apps/desktop/src-tauri/target/x86_64-unknown-linux-gnu/release/hyprnote /app/bin/hyprnote
 
       # Install desktop file
       - install -Dm644 apps/desktop/flatpak/com.hyprnote.Hyprnote.desktop /app/share/applications/com.hyprnote.Hyprnote.desktop

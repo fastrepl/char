@@ -11,7 +11,7 @@ function createHyprExternalsPlugin(): esbuild.Plugin {
     ...CORE_MODULES,
     "@hypr/store": HYPR_MODULES["@hypr/store"],
     "@hypr/tabs": HYPR_MODULES["@hypr/tabs"],
-    char: { global: "__char" },
+    hyprnote: { global: "__hyprnote" },
   };
 
   return {

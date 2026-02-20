@@ -6,7 +6,7 @@ import { Image } from "@/components/image";
 import { SlashSeparator } from "@/components/slash-separator";
 import { CTASection } from "@/routes/_view/index";
 
-export const Route = createFileRoute("/_view/why-char")({
+export const Route = createFileRoute("/_view/why-hyprnote")({
   component: Component,
   head: () => ({
     meta: [

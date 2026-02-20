@@ -2,7 +2,7 @@ use std::path::Path;
 
 use crate::types::{CommitInfo, FileChangeType, FileStatus, StatusInfo};
 
-const DEFAULT_GITIGNORE: &str = "# Char auto-generated gitignore
+const DEFAULT_GITIGNORE: &str = "# Hyprnote auto-generated gitignore
 # Large audio files (not suitable for git)
 *.wav
 *.ogg

@@ -6,7 +6,7 @@ import { createCheckoutSession } from "@/functions/billing";
 const VALID_SCHEMES = [
   "hyprnote",
   "hyprnote-nightly",
-  "char-staging",
+  "hyprnote-staging",
   "hypr",
 ] as const;
 

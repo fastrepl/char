@@ -13,7 +13,7 @@ const validateSearch = z.object({
   token_hash: z.string().optional(),
   type: z.enum(["email", "recovery"]).optional(),
   flow: z.enum(["desktop", "web"]).default("desktop"),
-  scheme: z.string().default("char"),
+  scheme: z.string().default("hyprnote"),
   redirect: z.string().optional(),
   access_token: z.string().optional(),
   refresh_token: z.string().optional(),

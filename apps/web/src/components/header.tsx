@@ -72,7 +72,7 @@ const resourcesList: {
   { to: "/roadmap/", label: "Roadmap", icon: Map },
   { to: "/company-handbook/", label: "Company Handbook", icon: Building2 },
   {
-    to: "https://discord.gg/char",
+    to: "https://discord.gg/hyprnote",
     label: "Community",
     icon: MessageCircle,
     external: true,
@@ -231,7 +231,7 @@ function LeftNav({
       />
       <Logo />
       <Link
-        to="/why-char/"
+        to="/why-hyprnote/"
         className="hidden md:block text-sm text-neutral-600 hover:text-neutral-800 transition-all hover:underline decoration-dotted"
       >
         Why Char
@@ -642,7 +642,7 @@ function MobileMenuLinks({
   return (
     <div className="flex flex-col gap-4">
       <Link
-        to="/why-char/"
+        to="/why-hyprnote/"
         onClick={() => setIsMenuOpen(false)}
         className="block text-base text-neutral-700 hover:text-neutral-900 transition-colors"
       >

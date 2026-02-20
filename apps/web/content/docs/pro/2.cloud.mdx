@@ -64,7 +64,7 @@ And here are the two model pools defined in the server config:
 
 ```
 Your Device ──HTTPS──▶ Char API Server ──HTTPS──▶ OpenRouter ──▶ Model Provider
-                       (pro.char.com)          (openrouter.ai)   (OpenAI/Anthropic/Moonshot)
+                       (pro.hyprnote.com)          (openrouter.ai)   (OpenAI/Anthropic/Moonshot)
 ```
 
 1. **Your device** sends a chat completion request to the Char API server, authenticated with your Supabase JWT token.
@@ -114,7 +114,7 @@ While Char aims to be fully transparent and controllable, cloud services help in
 
 ## Privacy & Security
 
-The cloud server (`pro.char.com`) is [open-source](https://github.com/fastrepl/char/tree/main/apps/pro) and deployed in our Kubernetes cluster on AWS via GitHub Actions.
+The cloud server (`pro.hyprnote.com`) is [open-source](https://github.com/fastrepl/hyprnote/tree/main/apps/pro) and deployed in our Kubernetes cluster on AWS via GitHub Actions.
 
 **Data handling:**
 - Nothing is stored by us — the server proxies requests and discards them

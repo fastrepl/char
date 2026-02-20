@@ -6,10 +6,10 @@ The admin interface at `/admin` provides content management capabilities for the
 
 Access is restricted to whitelisted email addresses defined in `src/lib/team.ts` (`ADMIN_EMAILS`):
 
-- yujonglee@char.com
+- yujonglee@hyprnote.com
 - yujonglee.dev@gmail.com
-- john@char.com
-- marketing@char.com
+- john@hyprnote.com
+- marketing@hyprnote.com
 - harshika.alagh@gmail.com
 - yunhyungjo@yonsei.ac.kr
 

@@ -175,7 +175,7 @@ jobs:
       - if: ${{ inputs.channel == 'staging' }}
         uses: actions/upload-artifact@v4
         with:
-          name: char-staging-macos-${{ matrix.artifact_name }}
+          name: hyprnote-staging-macos-${{ matrix.artifact_name }}
           path: apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
           retention-days: 3
       - if: ${{ inputs.channel == 'staging' }}
@@ -270,13 +270,13 @@ jobs:
       - if: ${{ inputs.channel == 'staging' }}
         uses: actions/upload-artifact@v4
         with:
-          name: char-staging-linux-${{ matrix.arch }}-appimage
+          name: hyprnote-staging-linux-${{ matrix.arch }}-appimage
           path: apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/appimage/*.AppImage
           retention-days: 3
       - if: ${{ inputs.channel == 'staging' }}
         uses: actions/upload-artifact@v4
         with:
-          name: char-staging-linux-${{ matrix.arch }}-deb
+          name: hyprnote-staging-linux-${{ matrix.arch }}-deb
           path: apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/deb/*.deb
           retention-days: 3
 
@@ -325,7 +325,7 @@ jobs:
           version: ${{ needs.compute-version.outputs.version }}
           channel: ${{ env.RELEASE_CHANNEL }}
           platform: dmg-aarch64
-          output: char-macos-aarch64.dmg
+          output: hyprnote-macos-aarch64.dmg
           key: ${{ secrets.CN_API_KEY }}
       - if: ${{ needs.build-macos.result == 'success' }}
         uses: ./.github/actions/cn_download
@@ -334,7 +334,7 @@ jobs:
           version: ${{ needs.compute-version.outputs.version }}
           channel: ${{ env.RELEASE_CHANNEL }}
           platform: dmg-x86_64
-          output: char-macos-x86_64.dmg
+          output: hyprnote-macos-x86_64.dmg
           key: ${{ secrets.CN_API_KEY }}
       - if: ${{ needs.build-linux.result == 'success' }}
         uses: ./.github/actions/cn_download
@@ -343,7 +343,7 @@ jobs:
           version: ${{ needs.compute-version.outputs.version }}
           channel: ${{ env.RELEASE_CHANNEL }}
           platform: appimage-x86_64
-          output: char-linux-x86_64.AppImage
+          output: hyprnote-linux-x86_64.AppImage
           key: ${{ secrets.CN_API_KEY }}
       - if: ${{ needs.build-linux.result == 'success' }}
         uses: ./.github/actions/cn_download
@@ -352,7 +352,7 @@ jobs:
           version: ${{ needs.compute-version.outputs.version }}
           channel: ${{ env.RELEASE_CHANNEL }}
           platform: debian-x86_64
-          output: char-linux-x86_64.deb
+          output: hyprnote-linux-x86_64.deb
           key: ${{ secrets.CN_API_KEY }}
       - if: ${{ needs.build-linux.result == 'success' }}
         uses: ./.github/actions/cn_download
@@ -361,7 +361,7 @@ jobs:
           version: ${{ needs.compute-version.outputs.version }}
           channel: ${{ env.RELEASE_CHANNEL }}
           platform: appimage-aarch64
-          output: char-linux-aarch64.AppImage
+          output: hyprnote-linux-aarch64.AppImage
           key: ${{ secrets.CN_API_KEY }}
       - if: ${{ needs.build-linux.result == 'success' }}
         uses: ./.github/actions/cn_download
@@ -370,29 +370,29 @@ jobs:
           version: ${{ needs.compute-version.outputs.version }}
           channel: ${{ env.RELEASE_CHANNEL }}
           platform: debian-aarch64
-          output: char-linux-aarch64.deb
+          output: hyprnote-linux-aarch64.deb
           key: ${{ secrets.CN_API_KEY }}
       - id: checksums
         uses: ./.github/actions/generate_checksums
         with:
           files: |
-            ${{ needs.build-macos.result == 'success' && 'char-macos-aarch64.dmg' || '' }}
-            ${{ needs.build-macos.result == 'success' && 'char-macos-x86_64.dmg' || '' }}
-            ${{ needs.build-linux.result == 'success' && 'char-linux-x86_64.AppImage' || '' }}
-            ${{ needs.build-linux.result == 'success' && 'char-linux-x86_64.deb' || '' }}
-            ${{ needs.build-linux.result == 'success' && 'char-linux-aarch64.AppImage' || '' }}
-            ${{ needs.build-linux.result == 'success' && 'char-linux-aarch64.deb' || '' }}
+            ${{ needs.build-macos.result == 'success' && 'hyprnote-macos-aarch64.dmg' || '' }}
+            ${{ needs.build-macos.result == 'success' && 'hyprnote-macos-x86_64.dmg' || '' }}
+            ${{ needs.build-linux.result == 'success' && 'hyprnote-linux-x86_64.AppImage' || '' }}
+            ${{ needs.build-linux.result == 'success' && 'hyprnote-linux-x86_64.deb' || '' }}
+            ${{ needs.build-linux.result == 'success' && 'hyprnote-linux-aarch64.AppImage' || '' }}
+            ${{ needs.build-linux.result == 'success' && 'hyprnote-linux-aarch64.deb' || '' }}
       - id: artifacts
         run: |
           ARTIFACTS=""
           if [[ "${{ needs.build-macos.result }}" == "success" ]]; then
-            ARTIFACTS="char-macos-aarch64.dmg,char-macos-x86_64.dmg"
+            ARTIFACTS="hyprnote-macos-aarch64.dmg,hyprnote-macos-x86_64.dmg"
           fi
           if [[ "${{ needs.build-linux.result }}" == "success" ]]; then
             if [[ -n "$ARTIFACTS" ]]; then
-              ARTIFACTS="$ARTIFACTS,char-linux-x86_64.AppImage,char-linux-x86_64.deb,char-linux-aarch64.AppImage,char-linux-aarch64.deb"
+              ARTIFACTS="$ARTIFACTS,hyprnote-linux-x86_64.AppImage,hyprnote-linux-x86_64.deb,hyprnote-linux-aarch64.AppImage,hyprnote-linux-aarch64.deb"
             else
-              ARTIFACTS="char-linux-x86_64.AppImage,char-linux-x86_64.deb,char-linux-aarch64.AppImage,char-linux-aarch64.deb"
+              ARTIFACTS="hyprnote-linux-x86_64.AppImage,hyprnote-linux-x86_64.deb,hyprnote-linux-aarch64.AppImage,hyprnote-linux-aarch64.deb"
             fi
           fi
           if [[ -z "$ARTIFACTS" ]]; then

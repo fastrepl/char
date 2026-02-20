@@ -12,4 +12,4 @@ You will be able to try out Meeting Transcription after STT download is complete
 
 Also, please [join our Discord](https://hyprnote.com/discord)! We really want to hear from you.
 
-<img alt="welcome" src="https://raw.githubusercontent.com/fastrepl/char/refs/heads/main/crates/db-user/assets/welcome2.jpg"/>
+<img alt="welcome" src="https://raw.githubusercontent.com/fastrepl/hyprnote/refs/heads/main/crates/db-user/assets/welcome2.jpg"/>

@@ -76,21 +76,21 @@ There are two base directories:
 |-------------|-----------|-------------|
 | dev | `com.hyprnote.dev` | `com.hyprnote.dev` |
 | staging | `com.hyprnote.staging` | `com.hyprnote.staging` |
-| stable | `com.hyprnote.stable` | `char` |
-| nightly | `com.hyprnote.nightly` | `char` |
+| stable | `com.hyprnote.stable` | `hyprnote` |
+| nightly | `com.hyprnote.nightly` | `hyprnote` |
 
-Stable and nightly share the same folder (`char`) in production builds.
+Stable and nightly share the same folder (`hyprnote`) in production builds.
 
 #### vault_base
 
 Priority**:**
 1. `VAULT_BASE` env var (highest)
-2. `vault_path` in `char.json` (at global_base)
+2. `vault_path` in `hyprnote.json` (at global_base)
 3. Fall back to `global_base`
 
 Example:
 ```bash
-VAULT_BASE="$HOME/Library/Application Support/char" pnpm -F desktop tauri:dev
+VAULT_BASE="$HOME/Library/Application Support/hyprnote" pnpm -F desktop tauri:dev
 ```
 
 #### Platform Paths
@@ -106,7 +106,7 @@ VAULT_BASE="$HOME/Library/Application Support/char" pnpm -F desktop tauri:dev
 
 | File/Dir | Description |
 |----------|-------------|
-| `char.json` | Global config (vault_path, etc.) |
+| `hyprnote.json` | Global config (vault_path, etc.) |
 | `store.json` | Tauri plugin store |
 | `db.sqlite` | Legacy SQLite DB (release only) |
 | `models/stt/` | STT models |
@@ -134,7 +134,7 @@ VAULT_BASE="$HOME/Library/Application Support/char" pnpm -F desktop tauri:dev
 
 | What | Base | Env Override |
 |------|------|--------------|
-| `char.json` | global_base | No |
+| `hyprnote.json` | global_base | No |
 | `store.json` | global_base | No |
 | `db.sqlite` | global_base | No |
 | `models/` | global_base | No |

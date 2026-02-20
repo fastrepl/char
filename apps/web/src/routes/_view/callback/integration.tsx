@@ -9,7 +9,7 @@ const validateSearch = z.object({
   integration_id: z.string(),
   status: z.string(),
   flow: z.enum(["desktop", "web"]).default("desktop"),
-  scheme: z.string().default("char"),
+  scheme: z.string().default("hyprnote"),
 });
 
 type IntegrationDeeplinkParams = {

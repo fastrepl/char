@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { ui } from "char";
+import { ui } from "hyprnote";
 import { useState } from "react";
 
 import { DayEvent } from "./day-event";

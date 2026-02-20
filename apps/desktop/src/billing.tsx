@@ -68,7 +68,7 @@ export function BillingProvider({ children }: { children: ReactNode }) {
   const tokenInfo = tokenInfoQuery.data ?? DEFAULT_TOKEN_INFO;
   const entitlements = tokenInfo.entitlements ?? [];
   const subscriptionStatus = tokenInfo.subscription_status ?? null;
-  const isPro = entitlements.includes("char_pro");
+  const isPro = entitlements.includes("hyprnote_pro");
   const isTrialing = subscriptionStatus === "trialing";
 
   const trialDaysRemaining = useMemo(() => {

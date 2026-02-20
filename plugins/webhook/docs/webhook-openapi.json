@@ -1,12 +1,12 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Char Webhook API",
-    "description": "Webhook events sent by Char to external systems",
+    "title": "Hyprnote Webhook API",
+    "description": "Webhook events sent by Hyprnote to external systems",
     "contact": {
-      "name": "Char Team",
+      "name": "Hyprnote Team",
       "url": "https://hyprnote.com",
-      "email": "support@char.com"
+      "email": "support@hyprnote.com"
     },
     "license": {
       "name": "MIT",
@@ -237,6 +237,6 @@
   },
   "externalDocs": {
     "url": "https://docs.hyprnote.com/webhooks",
-    "description": "More information about Char webhooks"
+    "description": "More information about Hyprnote webhooks"
   }
 }

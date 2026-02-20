@@ -1,4 +1,4 @@
-import { store, tabs, ui } from "char";
+import { store, tabs, ui } from "hyprnote";
 
 import { StickyNoteIcon } from "./icons";
 

@@ -9,8 +9,8 @@ import {
   startOfMonth,
   subDays,
 } from "date-fns";
-import type { ExtensionViewProps } from "char";
-import { store, ui } from "char";
+import type { ExtensionViewProps } from "hyprnote";
+import { store, ui } from "hyprnote";
 import { useEffect, useState } from "react";
 
 import { CalendarCheckboxRow } from "./components/calendar-checkbox-row";

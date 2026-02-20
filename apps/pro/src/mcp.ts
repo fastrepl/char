@@ -5,7 +5,7 @@ import { env } from "./env.js";
 import { exa, searchAndContentsInputSchema } from "./exa.js";
 
 export const mcpServer = new McpServer({
-  name: "char-mcp-server",
+  name: "hyprnote-mcp-server",
   version: "0.0.1",
 });
 

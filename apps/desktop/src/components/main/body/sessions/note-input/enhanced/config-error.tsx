@@ -41,7 +41,7 @@ function getMessageForStatus(status: LLMConnectionStatus): string {
   }
 
   if (status.status === "error" && status.reason === "unauthenticated") {
-    return "You need to sign in to use Char's language model";
+    return "You need to sign in to use Hyprnote's language model";
   }
 
   if (status.status === "error" && status.reason === "missing_config") {
