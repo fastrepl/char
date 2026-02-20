@@ -14,16 +14,13 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Flag<'a, R, M> {
         }
     }
 
-    async fn get_posthog_flag(&self, key: &str) -> bool {
-        let state = self.manager.state::<ManagedState>();
-
-        let client = match &state.client {
-            Some(c) => c,
-            None => return false,
-        };
-
+    async fn get_posthog_flag(&self, flag_key: &str) -> bool {
+        let client = self.manager.state::<ManagedState>();
         let distinct_id = hypr_host::fingerprint();
-        client.is_enabled(&distinct_id, key).await
+        client
+            .is_feature_enabled(flag_key, &distinct_id)
+            .await
+            .unwrap_or(false)
     }
 }
 
