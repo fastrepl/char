@@ -30,7 +30,7 @@ describe("createEnhanceValidator", () => {
   };
 
   describe("h1 prefix requirement", () => {
-    it("rejects text not starting with # ", () => {
+    it("rejects text with no # at all", () => {
       const v = createEnhanceValidator(template);
       expect(v("Here is the summary")).toEqual({
         valid: false,
@@ -76,6 +76,22 @@ describe("createEnhanceValidator", () => {
       const v = createEnhanceValidator(template);
       const result = v("# Something Entirely Different");
       expect(result.valid).toBe(false);
+    });
+  });
+
+  describe("preamble stripping", () => {
+    it("accepts output with preamble text before heading", () => {
+      const v = createEnhanceValidator(template);
+      expect(
+        v("Here is the summary:\n# Data File Status and Upload Testing"),
+      ).toEqual({
+        valid: true,
+      });
+    });
+
+    it("accepts preamble with correct heading for null template", () => {
+      const v = createEnhanceValidator(null);
+      expect(v("Sure, here you go:\n# Any Heading")).toEqual({ valid: true });
     });
   });
 
