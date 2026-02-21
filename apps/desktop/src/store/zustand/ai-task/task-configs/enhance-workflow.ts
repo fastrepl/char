@@ -16,10 +16,7 @@ import { templateSectionSchema } from "@hypr/store";
 import type { TaskArgsMapTransformed, TaskConfig } from ".";
 import type { Store } from "../../../tinybase/store/main";
 import { getCustomPrompt } from "../../../tinybase/store/prompts";
-import {
-  normalizeBulletPoints,
-  trimBeforeMarker,
-} from "../shared/transform_impl";
+import { normalizeBulletPoints } from "../shared/transform_impl";
 import { withEarlyValidationRetry } from "../shared/validate";
 import { createEnhanceValidator } from "./enhance-validator";
 
@@ -29,7 +26,6 @@ export const enhanceWorkflow: Pick<
 > = {
   executeWorkflow,
   transforms: [
-    trimBeforeMarker("#"),
     normalizeBulletPoints(),
     smoothStream({ delayInMs: 250, chunking: "line" }),
   ],

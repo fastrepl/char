@@ -1,5 +1,3 @@
-use tauri::Manager;
-
 mod commands;
 mod error;
 mod ext;
@@ -9,13 +7,7 @@ pub use error::*;
 pub use ext::*;
 pub use feature::*;
 
-pub use hypr_flag;
-
-pub struct FlagState {
-    pub client: Option<hypr_flag::CachedClient>,
-}
-
-pub type ManagedState = FlagState;
+pub type ManagedState = hypr_analytics::AnalyticsClient;
 
 const PLUGIN_NAME: &str = "flag";
 
@@ -33,21 +25,13 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
 
     tauri::plugin::Builder::new(PLUGIN_NAME)
         .invoke_handler(specta_builder.invoke_handler())
-        .setup(|app, _api| {
-            let posthog_key = option_env!("POSTHOG_API_KEY");
-
-            let client = posthog_key.map(|key| hypr_flag::CachedClient::builder(key).build());
-            let state = FlagState { client };
-
-            app.manage(state);
-            Ok(())
-        })
         .build()
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+    use tauri::Manager;
 
     #[test]
     fn export_types() {
@@ -71,7 +55,15 @@ mod test {
         ctx.config_mut().identifier = "com.hyprnote.dev".to_string();
         ctx.config_mut().version = Some("1.0.0".to_string());
 
-        builder.plugin(init()).build(ctx).unwrap()
+        builder
+            .plugin(init())
+            .setup(|app| {
+                let client = hypr_analytics::AnalyticsClientBuilder::default().build();
+                app.manage(client);
+                Ok(())
+            })
+            .build(ctx)
+            .unwrap()
     }
 
     #[tokio::test]
