@@ -193,7 +193,9 @@ impl StreamResponse {
 
     pub fn set_provider(&mut self, provider: &str) {
         if let StreamResponse::TranscriptResponse { metadata, .. } = self {
-            let entry = metadata.extra.get_or_insert_with(std::collections::HashMap::new);
+            let entry = metadata
+                .extra
+                .get_or_insert_with(std::collections::HashMap::new);
             entry.insert(
                 "provider".to_string(),
                 serde_json::Value::String(provider.to_string()),
