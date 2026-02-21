@@ -9,6 +9,8 @@ import {
 } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
+import { useScopedShortcut } from "../../../../../../hooks/useShortcutRegistry";
+
 export interface SearchOptions {
   caseSensitive: boolean;
   wholeWord: boolean;
@@ -244,8 +246,8 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     setShowReplace((prev) => !prev);
   }, []);
 
-  useHotkeys(
-    "mod+f",
+  useScopedShortcut(
+    "transcript_search",
     (event) => {
       event.preventDefault();
       setIsVisible((prev) => !prev);

@@ -2,10 +2,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { useHotkeys } from "react-hotkeys-hook";
 
 import { cn } from "@hypr/utils";
 
+import { useScopedShortcut } from "../../../../hooks/useShortcutRegistry";
 import { restoreSessionData } from "../../../../store/tinybase/store/deleteSession";
 import * as main from "../../../../store/tinybase/store/main";
 import { useTabs } from "../../../../store/zustand/tabs";
@@ -213,8 +213,8 @@ export function UndoDeleteKeyboardHandler() {
     return groups[groups.length - 1];
   }, [groups]);
 
-  useHotkeys(
-    "mod+z",
+  useScopedShortcut(
+    "undo_delete",
     () => {
       if (latestGroup) {
         restoreGroup(latestGroup);

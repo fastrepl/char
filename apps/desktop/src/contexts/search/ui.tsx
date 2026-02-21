@@ -12,6 +12,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 
+import { useScopedShortcut } from "../../hooks/useShortcutRegistry";
 import type {
   SearchDocument,
   SearchEntityType,
@@ -189,7 +190,7 @@ export function SearchUIProvider({ children }: { children: React.ReactNode }) {
     focusImplRef.current = impl;
   }, []);
 
-  useHotkeys("mod+k", () => focus(), {
+  useScopedShortcut("focus_search", () => focus(), {
     preventDefault: true,
     enableOnFormTags: true,
     enableOnContentEditable: true,

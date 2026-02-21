@@ -79,6 +79,7 @@
     "permissions:default",
     "screen:default",
     "settings:default",
+    "shortcut:default",
     "sfx:default",
     "path2:default",
     "pdf:default",

@@ -70,6 +70,7 @@ tauri-plugin-sentry = { workspace = true }
 tauri-plugin-settings = { workspace = true }
 tauri-plugin-sfx = { workspace = true }
 tauri-plugin-shell = { workspace = true }
+tauri-plugin-shortcut = { workspace = true }
 tauri-plugin-sidecar2 = { workspace = true }
 tauri-plugin-single-instance = { workspace = true }
 tauri-plugin-store = { workspace = true }
