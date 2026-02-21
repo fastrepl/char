@@ -110,7 +110,13 @@ export function SelectProviderAndModel() {
               <div className="flex-2 min-w-0" data-llm-provider-selector>
                 <Select
                   value={field.state.value}
-                  onValueChange={(value) => field.handleChange(value)}
+                  onValueChange={(value) => {
+                    if (value === "hyprnote" && !billing.isPro) {
+                      billing.upgradeToPro();
+                      return;
+                    }
+                    field.handleChange(value);
+                  }}
                 >
                   <SelectTrigger className="bg-white shadow-none focus:ring-0">
                     <SelectValue placeholder="Select a provider" />
