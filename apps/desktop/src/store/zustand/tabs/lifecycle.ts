@@ -67,17 +67,21 @@ const lifecycleMiddlewareImpl: LifecycleMiddlewareImpl =
         const nextTabs = nextState.tabs;
         const isEmpty = nextTabs.length === 0;
 
+        const nextTabIds = new Set(nextTabs.map((t) => t.slotId));
+
         const closedTabs = prevTabs.filter(
-          (prevTab) => !nextTabs.some((nextTab) => isSameTab(prevTab, nextTab)),
+          (prevTab) => !nextTabIds.has(prevTab.slotId),
         );
 
         if (closedTabs.length > 0 && nextState.onClose) {
           closedTabs.forEach((tab) => {
-            try {
-              nextState.onClose?.(tab);
-            } catch (error) {
-              console.error("onClose", error);
-            }
+            queueMicrotask(() => {
+              try {
+                nextState.onClose?.(tab);
+              } catch (error) {
+                console.error("onClose", error);
+              }
+            });
           });
         }
 
