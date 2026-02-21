@@ -17,6 +17,7 @@ use crate::types::RawWord;
 pub enum TranscriptInput {
     Final { words: Vec<RawWord> },
     Partial { words: Vec<RawWord> },
+    Correction { words: Vec<RawWord> },
 }
 
 impl TranscriptInput {
@@ -26,15 +27,23 @@ impl TranscriptInput {
     /// Returns `None` for non-transcript variants (metadata, errors, …) and
     /// for responses whose word list and transcript string are both empty.
     pub fn from_stream_response(response: &StreamResponse) -> Option<Self> {
-        let (is_final, channel, channel_index) = match response {
+        let (is_final, channel, channel_index, metadata) = match response {
             StreamResponse::TranscriptResponse {
                 is_final,
                 channel,
                 channel_index,
+                metadata,
                 ..
-            } => (*is_final, channel, channel_index),
+            } => (*is_final, channel, channel_index, metadata),
             _ => return None,
         };
+
+        let is_correction = metadata
+            .extra
+            .as_ref()
+            .and_then(|e| e.get("cloud_corrected"))
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
 
         let alt = channel.alternatives.first()?;
         if alt.words.is_empty() && alt.transcript.is_empty() {
@@ -47,7 +56,9 @@ impl TranscriptInput {
             return None;
         }
 
-        Some(if is_final {
+        Some(if is_correction {
+            Self::Correction { words }
+        } else if is_final {
             Self::Final { words }
         } else {
             Self::Partial { words }

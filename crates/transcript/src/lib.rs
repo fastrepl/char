@@ -12,4 +12,4 @@ pub use postprocess::{BoxFuture, PostProcessError, PostProcessUpdate, PostProces
 pub use types::{
     PartialWord, RawWord, SpeakerHint, TranscriptFrame, TranscriptUpdate, TranscriptWord,
 };
-pub use view::{PipelineDebugFrame, TranscriptView};
+pub use view::{PipelineDebugFrame, ProcessOutcome, TranscriptView};

@@ -9,9 +9,17 @@ hypr-data = { workspace = true }
 serde_json = { workspace = true }
 strum = { workspace = true, features = ["derive"] }
 
-clap = { workspace = true, features = ["derive"] }
+clap = { workspace = true, features = ["derive", "env"] }
 crossterm = "0.29"
 ratatui = { version = "0.30", features = ["crossterm_0_29"] }
+
+bytes = { workspace = true }
+futures-util = { workspace = true }
+hypr-audio = { workspace = true }
+hypr-audio-utils = { workspace = true }
+owhisper-client = { workspace = true }
+tokio = { workspace = true, features = ["rt", "macros", "sync"] }
+tokio-stream = { workspace = true }
 
 [dependencies]
 owhisper-interface = { workspace = true }

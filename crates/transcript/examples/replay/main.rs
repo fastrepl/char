@@ -1,176 +1,85 @@
+mod app;
 mod fixture;
 mod renderer;
+mod source;
+mod theme;
 
 use std::time::{Duration, Instant};
 
-use crossterm::event::{self, Event, KeyCode, KeyEventKind};
+use app::{App, KeyAction};
+use crossterm::event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyEventKind};
+use crossterm::execute;
 use fixture::Fixture;
-use owhisper_interface::stream::StreamResponse;
 use ratatui::DefaultTerminal;
-use transcript::FlushMode;
-use transcript::input::TranscriptInput;
-use transcript::postprocess::PostProcessUpdate;
-use transcript::types::TranscriptWord;
-use transcript::view::TranscriptView;
+use source::Source;
 
 #[derive(clap::Parser)]
 #[command(name = "replay", about = "Replay transcript fixture in the terminal")]
 struct Args {
-    #[arg(short, long, default_value_t = Fixture::Deepgram)]
-    fixture: Fixture,
-
     #[arg(short, long, default_value_t = 30)]
     speed: u64,
+
+    #[command(subcommand)]
+    source: SourceCmd,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub enum LastEvent {
-    Final,
-    Partial,
-    Skipped,
-}
-
-pub struct App {
-    responses: Vec<StreamResponse>,
-    pub position: usize,
-    pub paused: bool,
-    pub speed_ms: u64,
-    pub view: TranscriptView,
-    pub fixture_name: String,
-    pub last_event: LastEvent,
-    pub flush_mode: FlushMode,
-    pub last_postprocess: Option<PostProcessUpdate>,
-}
-
-impl App {
-    fn new(responses: Vec<StreamResponse>, speed_ms: u64, fixture_name: String) -> Self {
-        Self {
-            responses,
-            position: 0,
-            paused: false,
-            speed_ms,
-            view: TranscriptView::new(),
-            fixture_name,
-            last_event: LastEvent::Skipped,
-            flush_mode: FlushMode::DrainAll,
-            last_postprocess: None,
-        }
-    }
-
-    pub fn total(&self) -> usize {
-        self.responses.len()
-    }
-
-    fn seek_to(&mut self, target: usize) {
-        let target = target.min(self.total());
-        self.view = TranscriptView::new();
-        self.last_postprocess = None;
-        self.position = 0;
-        let mut last_event = LastEvent::Skipped;
-        for i in 0..target {
-            match TranscriptInput::from_stream_response(&self.responses[i]) {
-                Some(input) => {
-                    last_event = match &input {
-                        TranscriptInput::Final { .. } => LastEvent::Final,
-                        TranscriptInput::Partial { .. } => LastEvent::Partial,
-                    };
-                    self.view.process(input);
-                }
-                None => {
-                    last_event = LastEvent::Skipped;
-                }
-            }
-        }
-        self.last_event = last_event;
-        self.position = target;
-    }
-
-    fn advance(&mut self) -> bool {
-        if self.position >= self.total() {
-            return false;
-        }
-        match TranscriptInput::from_stream_response(&self.responses[self.position]) {
-            Some(input) => {
-                self.last_event = match &input {
-                    TranscriptInput::Final { .. } => LastEvent::Final,
-                    TranscriptInput::Partial { .. } => LastEvent::Partial,
-                };
-                self.view.process(input);
-            }
-            None => {
-                self.last_event = LastEvent::Skipped;
-            }
-        }
-        self.position += 1;
-        true
-    }
-
-    pub fn is_done(&self) -> bool {
-        self.position >= self.total()
-    }
-
-    fn toggle_flush_mode(&mut self) {
-        self.flush_mode = match self.flush_mode {
-            FlushMode::DrainAll => FlushMode::PromotableOnly,
-            FlushMode::PromotableOnly => FlushMode::DrainAll,
-        };
-    }
-
-    fn simulate_postprocess(&mut self) {
-        let finals = self.view.frame().final_words;
-        if finals.is_empty() {
-            return;
-        }
-        let transformed: Vec<TranscriptWord> = finals
-            .into_iter()
-            .map(|w| {
-                let new_text = title_case_word(&w.text);
-                TranscriptWord {
-                    text: new_text,
-                    ..w
-                }
-            })
-            .collect();
-        let update = self.view.apply_postprocess(transformed);
-        self.last_postprocess = Some(update);
-    }
-}
-
-/// Title-case a word that may have a leading space (e.g. " hello" -> " Hello").
-fn title_case_word(s: &str) -> String {
-    let trimmed = s.trim_start_matches(' ');
-    let leading_spaces = &s[..s.len() - trimmed.len()];
-    let mut chars = trimmed.chars();
-    match chars.next() {
-        None => s.to_string(),
-        Some(first) => {
-            let upper: String = first.to_uppercase().collect();
-            format!("{leading_spaces}{upper}{}", chars.as_str())
-        }
-    }
+#[derive(clap::Subcommand)]
+enum SourceCmd {
+    /// Replay a built-in transcript fixture
+    Fixture {
+        #[arg(default_value_t = Fixture::Deepgram)]
+        name: Fixture,
+    },
+    /// Stream an audio file to Cactus for live transcription
+    File {
+        path: String,
+        #[arg(long)]
+        url: String,
+        #[arg(long, env = "CACTUS_API_KEY")]
+        api_key: Option<String>,
+    },
+    /// Stream default microphone to Cactus for live transcription
+    Mic {
+        #[arg(long)]
+        url: String,
+        #[arg(long, env = "CACTUS_API_KEY")]
+        api_key: Option<String>,
+    },
 }
 
 fn main() {
     use clap::Parser;
     let args = Args::parse();
-    let fixture = args.fixture;
     let speed_ms = args.speed;
-    let fixture_name = fixture.to_string();
 
-    let responses: Vec<StreamResponse> =
-        serde_json::from_str(fixture.json()).expect("fixture must parse as StreamResponse[]");
+    let (source, source_name) = match args.source {
+        SourceCmd::Fixture { name } => {
+            let label = name.to_string();
+            (Source::from_fixture(name.json()), label)
+        }
+        SourceCmd::File { path, url, api_key } => {
+            let label = format!("file:{url}");
+            (Source::from_cactus_file(&url, &path, api_key), label)
+        }
+        SourceCmd::Mic { url, api_key } => {
+            let (source, device_name) = Source::from_cactus_mic(&url, api_key);
+            (source, format!("mic:{device_name}"))
+        }
+    };
 
     let mut terminal = ratatui::init();
-    let result = run(&mut terminal, responses, speed_ms, fixture_name.clone());
+    execute!(std::io::stdout(), EnableMouseCapture).ok();
+    let result = run(&mut terminal, source, speed_ms, source_name.clone());
+    execute!(std::io::stdout(), DisableMouseCapture).ok();
     ratatui::restore();
 
     match result {
         Ok(app) => {
             println!(
-                "Done. {} final words from {} events ({} fixture).",
+                "Done. {} final words from {} events ({}).",
                 app.view.frame().final_words.len(),
                 app.total(),
-                fixture_name,
+                source_name,
             );
         }
         Err(e) => {
@@ -182,60 +91,43 @@ fn main() {
 
 fn run(
     terminal: &mut DefaultTerminal,
-    responses: Vec<StreamResponse>,
+    source: Source,
     speed_ms: u64,
-    fixture_name: String,
+    source_name: String,
 ) -> std::io::Result<App> {
-    let mut app = App::new(responses, speed_ms, fixture_name);
+    let mut app = App::new(source, speed_ms, source_name);
     let mut last_tick = Instant::now();
 
     loop {
-        terminal.draw(|frame| renderer::render(frame, &app))?;
+        let mut layout = None;
+        terminal.draw(|frame| {
+            layout = Some(renderer::render(frame, &app));
+        })?;
+        app.update_layout(layout.unwrap());
 
         let tick_duration = Duration::from_millis(app.speed_ms);
         let elapsed = last_tick.elapsed();
         let timeout = tick_duration.saturating_sub(elapsed);
 
         if event::poll(timeout)? {
-            if let Event::Key(key) = event::read()? {
-                if key.kind != KeyEventKind::Press {
-                    continue;
+            match event::read()? {
+                Event::Key(key) => {
+                    if key.kind != KeyEventKind::Press {
+                        continue;
+                    }
+                    match app.handle_key(key.code) {
+                        KeyAction::Quit => break,
+                        KeyAction::Continue { reset_tick } => {
+                            if reset_tick {
+                                last_tick = Instant::now();
+                            }
+                        }
+                    }
                 }
-                match key.code {
-                    KeyCode::Char('q') | KeyCode::Esc => break,
-                    KeyCode::Char(' ') => {
-                        app.paused = !app.paused;
-                        last_tick = Instant::now();
-                    }
-                    KeyCode::Right => {
-                        app.seek_to(app.position + 1);
-                    }
-                    KeyCode::Left => {
-                        app.seek_to(app.position.saturating_sub(1));
-                    }
-                    KeyCode::Up => {
-                        app.speed_ms = app.speed_ms.saturating_sub(10).max(5);
-                    }
-                    KeyCode::Down => {
-                        app.speed_ms += 10;
-                    }
-                    KeyCode::Home => {
-                        app.seek_to(0);
-                    }
-                    KeyCode::End => {
-                        let total = app.total();
-                        app.seek_to(total);
-                        let mode = app.flush_mode;
-                        app.view.flush(mode);
-                    }
-                    KeyCode::Char('f') => {
-                        app.toggle_flush_mode();
-                    }
-                    KeyCode::Char('p') => {
-                        app.simulate_postprocess();
-                    }
-                    _ => {}
+                Event::Mouse(mouse) => {
+                    app.handle_mouse(mouse);
                 }
+                _ => {}
             }
         } else if !app.paused {
             if last_tick.elapsed() >= tick_duration {
@@ -245,7 +137,9 @@ fn run(
                 if app.is_done() {
                     let mode = app.flush_mode;
                     app.view.flush(mode);
-                    terminal.draw(|frame| renderer::render(frame, &app))?;
+                    terminal.draw(|frame| {
+                        renderer::render(frame, &app);
+                    })?;
                     app.paused = true;
                 }
             }

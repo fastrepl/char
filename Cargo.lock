@@ -20328,15 +20328,22 @@ dependencies = [
 name = "transcript"
 version = "0.1.0"
 dependencies = [
+ "audio",
+ "audio-utils",
+ "bytes",
  "clap",
  "crossterm",
  "data",
+ "futures-util",
+ "owhisper-client",
  "owhisper-interface",
  "ratatui",
  "serde",
  "serde_json",
  "specta",
  "strum 0.27.2",
+ "tokio",
+ "tokio-stream",
  "uuid",
 ]
 

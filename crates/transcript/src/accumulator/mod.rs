@@ -71,6 +71,7 @@ impl TranscriptAccumulator {
         let (words, is_final) = match input {
             TranscriptInput::Final { words } => (words, true),
             TranscriptInput::Partial { words } => (words, false),
+            TranscriptInput::Correction { .. } => return None,
         };
 
         if words.is_empty() {

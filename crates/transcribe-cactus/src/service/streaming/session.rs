@@ -190,6 +190,8 @@ async fn handle_transcribe_event(
             let confidence = result.confidence as f64;
             let confirmed_text = result.confirmed.trim();
 
+            let metrics = stream_result_metrics(&result);
+
             state.pending_text = result.pending.clone();
             state.pending_language = result.language.clone();
             state.pending_confidence = confidence;
@@ -204,7 +206,7 @@ async fn handle_transcribe_event(
                 let job_id = result.cloud_result_job_id;
                 let seg_start = state.cloud_handoff_segment_start;
                 let seg_duration = state.audio_offset - seg_start;
-                let mut keys = std::collections::HashMap::new();
+                let mut keys = metrics.clone();
                 keys.insert("cloud_corrected".to_string(), serde_json::Value::Bool(true));
                 keys.insert(
                     "cloud_job_id".to_string(),
@@ -254,16 +256,16 @@ async fn handle_transcribe_event(
                     }
                 }
 
-                let handoff_extra = if result.cloud_handoff && result.cloud_job_id != 0 {
-                    let mut keys = std::collections::HashMap::new();
-                    keys.insert("cloud_handoff".to_string(), serde_json::Value::Bool(true));
-                    keys.insert(
-                        "cloud_job_id".to_string(),
-                        serde_json::Value::Number(result.cloud_job_id.into()),
-                    );
+                let handoff_extra = {
+                    let mut keys = metrics.clone();
+                    if result.cloud_handoff && result.cloud_job_id != 0 {
+                        keys.insert("cloud_handoff".to_string(), serde_json::Value::Bool(true));
+                        keys.insert(
+                            "cloud_job_id".to_string(),
+                            serde_json::Value::Number(result.cloud_job_id.into()),
+                        );
+                    }
                     Some(keys)
-                } else {
-                    None
                 };
 
                 tracing::info!(text = confirmed_text, ch = ch_idx, "cactus_confirmed_text");
@@ -330,16 +332,16 @@ async fn handle_transcribe_event(
                 }
             }
 
-            let pending_handoff_extra = if result.cloud_handoff && result.cloud_job_id != 0 {
-                let mut keys = std::collections::HashMap::new();
-                keys.insert("cloud_handoff".to_string(), serde_json::Value::Bool(true));
-                keys.insert(
-                    "cloud_job_id".to_string(),
-                    serde_json::Value::Number(result.cloud_job_id.into()),
-                );
+            let pending_handoff_extra = {
+                let mut keys = metrics;
+                if result.cloud_handoff && result.cloud_job_id != 0 {
+                    keys.insert("cloud_handoff".to_string(), serde_json::Value::Bool(true));
+                    keys.insert(
+                        "cloud_job_id".to_string(),
+                        serde_json::Value::Number(result.cloud_job_id.into()),
+                    );
+                }
                 Some(keys)
-            } else {
-                None
             };
 
             if !send_ws(
@@ -420,6 +422,45 @@ async fn handle_ws_message(
     }
 
     LoopAction::Continue
+}
+
+fn stream_result_metrics(
+    result: &hypr_cactus::StreamResult,
+) -> std::collections::HashMap<String, serde_json::Value> {
+    let mut m = std::collections::HashMap::new();
+    m.insert(
+        "decode_tps".to_string(),
+        serde_json::json!(result.decode_tps),
+    );
+    m.insert(
+        "prefill_tps".to_string(),
+        serde_json::json!(result.prefill_tps),
+    );
+    m.insert(
+        "time_to_first_token_ms".to_string(),
+        serde_json::json!(result.time_to_first_token_ms),
+    );
+    m.insert(
+        "total_time_ms".to_string(),
+        serde_json::json!(result.total_time_ms),
+    );
+    m.insert(
+        "decode_tokens".to_string(),
+        serde_json::json!(result.decode_tokens),
+    );
+    m.insert(
+        "prefill_tokens".to_string(),
+        serde_json::json!(result.prefill_tokens),
+    );
+    m.insert(
+        "total_tokens".to_string(),
+        serde_json::json!(result.total_tokens),
+    );
+    m.insert(
+        "buffer_duration_ms".to_string(),
+        serde_json::json!(result.buffer_duration_ms),
+    );
+    m
 }
 
 async fn handle_finalize(
