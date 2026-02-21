@@ -1,5 +1,7 @@
+import * as Sentry from "@sentry/react";
 import { disable, enable } from "@tauri-apps/plugin-autostart";
 
+import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as detectCommands } from "@hypr/plugin-detect";
 import {
   commands as localSttCommands,
@@ -18,7 +20,8 @@ export type ConfigKey =
   | "ai_language"
   | "spoken_languages"
   | "save_recordings"
-  | "telemetry_consent"
+  | "telemetry_usage"
+  | "telemetry_error"
   | "current_llm_provider"
   | "current_llm_model"
   | "timezone"
@@ -136,9 +139,23 @@ export const CONFIG_REGISTRY = {
     default: true,
   },
 
-  telemetry_consent: {
-    key: "telemetry_consent",
+  telemetry_usage: {
+    key: "telemetry_usage",
     default: true,
+    sideEffect: async (value: boolean, _) => {
+      await analyticsCommands.setDisabled(!value);
+    },
+  },
+
+  telemetry_error: {
+    key: "telemetry_error",
+    default: true,
+    sideEffect: (value: boolean, _) => {
+      const client = Sentry.getClient();
+      if (client) {
+        client.getOptions().enabled = value;
+      }
+    },
   },
 
   current_llm_provider: {
