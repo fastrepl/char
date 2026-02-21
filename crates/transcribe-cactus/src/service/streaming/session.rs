@@ -44,7 +44,7 @@ pub(super) async fn handle_websocket(
     socket: WebSocket,
     params: ListenParams,
     model_path: PathBuf,
-    cloud_handoff: bool,
+    cactus_config: crate::CactusConfig,
     guard: ConnectionGuard,
 ) {
     let (mut ws_sender, mut ws_receiver) = socket.split();
@@ -55,6 +55,7 @@ pub(super) async fn handle_websocket(
 
     let options = hypr_cactus::TranscribeOptions {
         language: hypr_cactus::constrain_to(&params.languages),
+        min_chunk_size: Some((cactus_config.min_chunk_sec * SAMPLE_RATE as f32) as u32),
         ..Default::default()
     };
 
@@ -76,7 +77,7 @@ pub(super) async fn handle_websocket(
                 return;
             }
         };
-        let cloud_config = if cloud_handoff {
+        let cloud_config = if cactus_config.cloud_handoff {
             hypr_cactus::CloudConfig::default()
         } else {
             hypr_cactus::CloudConfig {

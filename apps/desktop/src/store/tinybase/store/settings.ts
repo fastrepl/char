@@ -69,6 +69,10 @@ export const SETTINGS_MAPPING = {
       type: "boolean",
       path: ["cactus", "cloud_handoff"],
     },
+    cactus_min_chunk_sec: {
+      type: "number",
+      path: ["cactus", "min_chunk_sec"],
+    },
     timezone: {
       type: "string",
       path: ["general", "timezone"],

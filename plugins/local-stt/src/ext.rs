@@ -131,14 +131,20 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
             ServerType::Internal => {
                 #[cfg(target_arch = "aarch64")]
                 {
+                    use hypr_transcribe_cactus::CactusConfig;
+
                     let cache_dir = self.cactus_models_dir();
                     let cactus_model = match model {
                         SupportedSttModel::Cactus(m) => m,
                         _ => return Err(crate::Error::UnsupportedModelType),
                     };
-                    let cloud_handoff = read_cactus_cloud_handoff(self.manager);
-                    start_internal2_server(&supervisor, cache_dir, cactus_model, cloud_handoff)
-                        .await
+                    start_internal2_server(
+                        &supervisor,
+                        cache_dir,
+                        cactus_model,
+                        CactusConfig::default(),
+                    )
+                    .await
                 }
                 #[cfg(not(target_arch = "aarch64"))]
                 Err(crate::Error::UnsupportedModelType)
@@ -472,14 +478,14 @@ async fn start_internal2_server(
     supervisor: &supervisor::SupervisorRef,
     cache_dir: PathBuf,
     model: hypr_cactus_model::CactusSttModel,
-    cloud_handoff: bool,
+    cactus_config: hypr_transcribe_cactus::CactusConfig,
 ) -> Result<String, crate::Error> {
     supervisor::start_internal2_stt(
         supervisor,
         internal2::Internal2STTArgs {
             model_cache_dir: cache_dir,
             model_type: model,
-            cloud_handoff,
+            cactus_config,
         },
     )
     .await
@@ -559,24 +565,6 @@ async fn start_external_server<R: Runtime, T: Manager<R>>(
         .await
         .and_then(|info| info.url)
         .ok_or_else(|| crate::Error::ServerStartFailed("empty_health".to_string()))
-}
-
-#[cfg(target_arch = "aarch64")]
-fn read_cactus_cloud_handoff<R: Runtime, T: Manager<R>>(manager: &T) -> bool {
-    use tauri_plugin_settings::SettingsPluginExt;
-
-    let Ok(settings_path) = manager.settings().settings_path() else {
-        return false;
-    };
-    let Ok(content) = std::fs::read_to_string(settings_path.as_std_path()) else {
-        return false;
-    };
-    let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) else {
-        return false;
-    };
-    json.pointer("/cactus/cloud_handoff")
-        .and_then(|v| v.as_bool())
-        .unwrap_or(true)
 }
 
 #[cfg(target_arch = "aarch64")]

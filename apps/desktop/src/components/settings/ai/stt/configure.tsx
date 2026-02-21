@@ -199,6 +199,8 @@ function HyprProviderCard({
               {cactusModels.length > 0 && (
                 <>
                   <ModelGroupLabel label="Cactus (Experimental)" />
+                  {/* <CactusSettings models={cactusModels.map((m) => m.key)} /> */}
+
                   {cactusModels.map((model) => (
                     <CactusRow
                       key={model.key as string}
@@ -206,7 +208,6 @@ function HyprProviderCard({
                       displayName={model.display_name}
                     />
                   ))}
-                  <CactusCloudHandoff models={cactusModels.map((m) => m.key)} />
                 </>
               )}
             </>
@@ -266,7 +267,8 @@ function CactusRow({
   );
 }
 
-function CactusCloudHandoff({ models }: { models: SupportedSttModel[] }) {
+// @ts-expect-error
+function CactusSettings({ models }: { models: SupportedSttModel[] }) {
   const downloadedQueries = useQueries({
     queries: models.map((m) => localSttQueries.isDownloaded(m)),
   });
@@ -285,20 +287,47 @@ function CactusCloudHandoff({ models }: { models: SupportedSttModel[] }) {
     settings.STORE_ID,
   );
 
+  const minChunkSec = settings.UI.useValue(
+    "cactus_min_chunk_sec",
+    settings.STORE_ID,
+  );
+
+  const handleSetMinChunkSec = settings.UI.useSetValueCallback(
+    "cactus_min_chunk_sec",
+    (v: number) => v,
+    [],
+    settings.STORE_ID,
+  );
+
   if (!anyDownloaded) {
     return null;
   }
 
   return (
     <HyprProviderRow>
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-neutral-500">
-          Hand off to cloud when on-device processing is unavailable.
-        </p>
-        <Switch
-          checked={cloudHandoff ?? true}
-          onCheckedChange={handleSetCloudHandoff}
-        />
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-neutral-500">
+            Hand off to cloud when model is uncertain. (only that chunk of
+            audio)
+          </p>
+          <Switch
+            checked={cloudHandoff ?? true}
+            onCheckedChange={handleSetCloudHandoff}
+          />
+        </div>
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-neutral-500">Min chunk size (seconds)</p>
+          <input
+            type="number"
+            min={0.5}
+            max={10}
+            step={0.5}
+            value={minChunkSec ?? 2.5}
+            onChange={(e) => handleSetMinChunkSec(Number(e.target.value))}
+            className="w-16 rounded border border-neutral-700 bg-transparent px-2 py-0.5 text-right text-xs text-neutral-300 focus:outline-none"
+          />
+        </div>
       </div>
     </HyprProviderRow>
   );

@@ -24,11 +24,12 @@ use hypr_ws_utils::ConnectionManager;
 use owhisper_interface::ListenParams;
 
 use super::batch;
+use crate::CactusConfig;
 
 #[derive(Clone)]
 pub struct TranscribeService {
     model_path: PathBuf,
-    cloud_handoff: bool,
+    cactus_config: CactusConfig,
     connection_manager: ConnectionManager,
 }
 
@@ -41,7 +42,7 @@ impl TranscribeService {
 #[derive(Default)]
 pub struct TranscribeServiceBuilder {
     model_path: Option<PathBuf>,
-    cloud_handoff: bool,
+    cactus_config: CactusConfig,
     connection_manager: Option<ConnectionManager>,
 }
 
@@ -51,8 +52,8 @@ impl TranscribeServiceBuilder {
         self
     }
 
-    pub fn cloud_handoff(mut self, enabled: bool) -> Self {
-        self.cloud_handoff = enabled;
+    pub fn cactus_config(mut self, config: CactusConfig) -> Self {
+        self.cactus_config = config;
         self
     }
 
@@ -61,7 +62,7 @@ impl TranscribeServiceBuilder {
             model_path: self
                 .model_path
                 .expect("TranscribeServiceBuilder requires model_path"),
-            cloud_handoff: self.cloud_handoff,
+            cactus_config: self.cactus_config,
             connection_manager: self.connection_manager.unwrap_or_default(),
         }
     }
@@ -78,7 +79,7 @@ impl Service<Request<Body>> for TranscribeService {
 
     fn call(&mut self, req: Request<Body>) -> Self::Future {
         let model_path = self.model_path.clone();
-        let cloud_handoff = self.cloud_handoff;
+        let cactus_config = self.cactus_config.clone();
         let connection_manager = self.connection_manager.clone();
 
         Box::pin(async move {
@@ -110,7 +111,7 @@ impl Service<Request<Body>> for TranscribeService {
 
                 Ok(ws_upgrade
                     .on_upgrade(move |socket| async move {
-                        session::handle_websocket(socket, params, model_path, cloud_handoff, guard)
+                        session::handle_websocket(socket, params, model_path, cactus_config, guard)
                             .await;
                     })
                     .into_response())

@@ -20,7 +20,7 @@ pub enum Internal2STTMessage {
 pub struct Internal2STTArgs {
     pub model_type: CactusSttModel,
     pub model_cache_dir: PathBuf,
-    pub cloud_handoff: bool,
+    pub cactus_config: hypr_transcribe_cactus::CactusConfig,
 }
 
 pub struct Internal2STTState {
@@ -52,7 +52,7 @@ impl Actor for Internal2STTActor {
         let Internal2STTArgs {
             model_type,
             model_cache_dir,
-            cloud_handoff,
+            cactus_config,
         } = args;
 
         let model_path = model_cache_dir.join(model_type.dir_name());
@@ -62,7 +62,7 @@ impl Actor for Internal2STTActor {
         let cactus_service = HandleError::new(
             hypr_transcribe_cactus::TranscribeService::builder()
                 .model_path(model_path)
-                .cloud_handoff(cloud_handoff)
+                .cactus_config(cactus_config)
                 .build(),
             move |err: String| async move {
                 let _ = myself.send_message(Internal2STTMessage::ServerError(err.clone()));

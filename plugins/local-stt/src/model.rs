@@ -3,17 +3,12 @@ use hypr_whisper_local_model::WhisperModel;
 
 pub use hypr_cactus_model::CactusSttModel;
 
-pub static SUPPORTED_MODELS: [SupportedSttModel; 10] = [
+pub static SUPPORTED_MODELS: [SupportedSttModel; 5] = [
     SupportedSttModel::Am(AmModel::ParakeetV2),
     SupportedSttModel::Am(AmModel::ParakeetV3),
     SupportedSttModel::Am(AmModel::WhisperLargeV3),
-    SupportedSttModel::Cactus(CactusSttModel::WhisperSmallInt4),
     SupportedSttModel::Cactus(CactusSttModel::WhisperSmallInt8),
     SupportedSttModel::Cactus(CactusSttModel::WhisperSmallInt8Apple),
-    SupportedSttModel::Cactus(CactusSttModel::WhisperMediumInt4),
-    SupportedSttModel::Cactus(CactusSttModel::WhisperMediumInt4Apple),
-    SupportedSttModel::Cactus(CactusSttModel::WhisperMediumInt8),
-    SupportedSttModel::Cactus(CactusSttModel::WhisperMediumInt8Apple),
 ];
 
 #[derive(serde::Serialize, serde::Deserialize, specta::Type)]
