@@ -1,0 +1,73 @@
+on:
+  push:
+    tags:
+      - "desktop_v*"
+
+jobs:
+  parse:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.parse.outputs.version }}
+      is_nightly: ${{ steps.parse.outputs.is_nightly }}
+    steps:
+      - id: parse
+        run: |
+          VERSION="${GITHUB_REF_NAME#desktop_v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          if [[ "$VERSION" == *"-"* ]]; then
+            echo "is_nightly=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_nightly=false" >> $GITHUB_OUTPUT
+          fi
+
+  notify-discord:
+    needs: parse
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          VERSION="${{ needs.parse.outputs.version }}"
+          IS_NIGHTLY="${{ needs.parse.outputs.is_nightly }}"
+
+          if [[ "$IS_NIGHTLY" == "true" ]]; then
+            EMOJI="🌙"
+            LABEL="Nightly"
+          else
+            EMOJI="🚀"
+            LABEL="Released"
+          fi
+
+          CONTENT="${EMOJI} **Hyprnote Desktop ${VERSION}** ${LABEL}!
+
+          Changelog: https://hyprnote.com/changelog/${VERSION}
+          Release: https://github.com/${{ github.repository }}/releases/tag/${GITHUB_REF_NAME}"
+
+          jq -n --arg content "$CONTENT" '{content: $content}' | \
+            curl -X POST \
+              -H "Content-Type: application/json" \
+              -d @- \
+              "${{ secrets.DISCORD_WEBHOOK_URL }}"
+
+  notify-loops:
+    needs: parse
+    if: needs.parse.outputs.is_nightly == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          VERSION="${{ needs.parse.outputs.version }}"
+          CHANGELOG_URL="https://hyprnote.com/changelog/${VERSION}"
+
+          jq -n \
+            --arg version "$VERSION" \
+            --arg changelog_url "$CHANGELOG_URL" \
+            '{
+              eventName: "desktop_release",
+              eventProperties: {
+                version: $version,
+                changelog_url: $changelog_url
+              }
+            }' | \
+            curl -X POST \
+              -H "Authorization: Bearer ${{ secrets.LOOPS_API_KEY }}" \
+              -H "Content-Type: application/json" \
+              -d @- \
+              "https://app.loops.so/api/v1/events/send"
