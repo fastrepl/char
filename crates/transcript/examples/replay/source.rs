@@ -17,9 +17,17 @@ impl Source {
         Self::Fixture { responses }
     }
 
-    pub fn from_cactus(url: &str) -> Self {
+    pub fn from_cactus(api_base: &str, audio_path: &str) -> Self {
+        use std::time::Duration;
+
+        use futures_util::StreamExt;
+        use hypr_audio_utils::AudioFormatExt;
+        use owhisper_client::{CactusAdapter, FinalizeHandle, ListenClient};
+        use owhisper_interface::MixedMessage;
+
         let (tx, rx) = std::sync::mpsc::channel();
-        let url = url.to_string();
+        let api_base = api_base.to_string();
+        let audio_path = audio_path.to_string();
 
         std::thread::spawn(move || {
             let rt = tokio::runtime::Builder::new_current_thread()
@@ -28,23 +36,46 @@ impl Source {
                 .expect("tokio runtime");
 
             rt.block_on(async {
-                use tokio_tungstenite::tungstenite::Message;
+                let client = ListenClient::builder()
+                    .adapter::<CactusAdapter>()
+                    .api_base(&api_base)
+                    .params(owhisper_interface::ListenParams::default())
+                    .build_single()
+                    .await;
 
-                let (ws, _) = tokio_tungstenite::connect_async(&url)
+                let audio = rodio::Decoder::new(std::io::BufReader::new(
+                    std::fs::File::open(&audio_path).expect("audio file not found"),
+                ))
+                .expect("failed to decode audio");
+
+                let audio_stream = audio.to_i16_le_chunks(16000, 1600);
+                let throttled = tokio_stream::StreamExt::throttle(
+                    audio_stream.map(|chunk| MixedMessage::Audio(chunk)),
+                    Duration::from_millis(100),
+                );
+
+                let (response_stream, handle) = client
+                    .from_realtime_audio(Box::pin(throttled))
                     .await
-                    .expect("ws connect failed");
+                    .expect("failed to connect to cactus");
 
-                let (mut _ws_tx, mut ws_rx) = futures_util::StreamExt::split(ws);
+                futures_util::pin_mut!(response_stream);
 
-                while let Some(Ok(msg)) = futures_util::StreamExt::next(&mut ws_rx).await {
-                    if let Message::Text(text) = msg {
-                        if let Ok(sr) = serde_json::from_str::<StreamResponse>(&text) {
+                while let Some(result) = response_stream.next().await {
+                    match result {
+                        Ok(sr) => {
                             if tx.send(sr).is_err() {
                                 break;
                             }
                         }
+                        Err(e) => {
+                            eprintln!("cactus stream error: {e}");
+                            break;
+                        }
                     }
                 }
+
+                handle.finalize().await;
             });
         });
 

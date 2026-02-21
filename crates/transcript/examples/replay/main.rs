@@ -23,11 +23,11 @@ struct Args {
     #[arg(short, long, default_value_t = 30)]
     speed: u64,
 
-    #[arg(
-        long,
-        help = "WebSocket URL for live Cactus source (e.g. ws://localhost:8080/v1/listen?channels=1&sample_rate=16000)"
-    )]
+    #[arg(long, help = "Cactus API base URL (e.g. http://localhost:8080)")]
     cactus: Option<String>,
+
+    #[arg(long, help = "Path to audio file to stream (required with --cactus)")]
+    audio: Option<String>,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -204,8 +204,14 @@ fn main() {
     let args = Args::parse();
     let speed_ms = args.speed;
 
-    let (source, source_name) = if let Some(url) = args.cactus {
-        (Source::from_cactus(&url), format!("cactus:{}", url))
+    let (source, source_name) = if let Some(api_base) = args.cactus {
+        let audio = args
+            .audio
+            .expect("--audio <path> is required with --cactus");
+        (
+            Source::from_cactus(&api_base, &audio),
+            format!("cactus:{}", api_base),
+        )
     } else {
         let fixture = args.fixture;
         let name = fixture.to_string();

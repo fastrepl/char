@@ -14,8 +14,11 @@ crossterm = "0.29"
 ratatui = { version = "0.30", features = ["crossterm_0_29"] }
 
 futures-util = { workspace = true }
+hypr-audio-utils = { workspace = true }
+owhisper-client = { workspace = true }
+rodio = { workspace = true }
 tokio = { workspace = true, features = ["rt", "macros", "sync"] }
-tokio-tungstenite = { workspace = true }
+tokio-stream = { workspace = true }
 
 [dependencies]
 owhisper-interface = { workspace = true }
