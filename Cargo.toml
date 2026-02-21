@@ -26,6 +26,8 @@ hypr-afconvert = { path = "crates/afconvert", package = "afconvert" }
 hypr-agc = { path = "crates/agc", package = "agc" }
 hypr-am = { path = "crates/am", package = "am" }
 hypr-analytics = { path = "crates/analytics", package = "analytics" }
+hypr-api-asset = { path = "crates/api-asset", package = "api-asset" }
+hypr-api-asset-client = { path = "crates/api-asset-client", package = "api-asset-client" }
 hypr-api-auth = { path = "crates/api-auth", package = "api-auth" }
 hypr-api-bot = { path = "crates/api-bot", package = "api-bot" }
 hypr-api-calendar = { path = "crates/api-calendar", package = "api-calendar" }

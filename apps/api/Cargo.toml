@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 hypr-analytics = { workspace = true }
+hypr-api-asset = { workspace = true }
 hypr-api-auth = { workspace = true }
 hypr-api-calendar = { workspace = true }
 hypr-api-env = { workspace = true }

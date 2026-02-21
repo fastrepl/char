@@ -166,6 +166,8 @@ async fn app() -> Router {
             auth::optional_auth,
         ));
 
+    let asset_routes = Router::new().nest("/v1/assets", hypr_api_asset::router());
+
     Router::new()
         .route("/health", axum::routing::get(version))
         .route("/openapi.json", axum::routing::get(openapi_json))
@@ -174,6 +176,7 @@ async fn app() -> Router {
         .merge(pro_routes)
         .merge(integration_routes)
         .merge(auth_routes)
+        .merge(asset_routes)
         .layer(
             CorsLayer::new()
                 .allow_origin(cors::Any)

@@ -336,6 +336,7 @@ dependencies = [
 name = "am"
 version = "0.1.0"
 dependencies = [
+ "api-asset-client",
  "dirs 6.0.0",
  "download-interface",
  "file",
@@ -505,6 +506,7 @@ name = "api"
 version = "0.1.0"
 dependencies = [
  "analytics",
+ "api-asset",
  "api-auth",
  "api-calendar",
  "api-env",
@@ -533,6 +535,25 @@ dependencies = [
  "url",
  "utoipa",
  "vergen-gix",
+]
+
+[[package]]
+name = "api-asset"
+version = "0.1.0"
+dependencies = [
+ "axum 0.8.8",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "api-asset-client"
+version = "0.1.0"
+dependencies = [
+ "reqwest 0.13.2",
+ "serde",
+ "thiserror 2.0.18",
+ "tokio",
 ]
 
 [[package]]
@@ -18314,6 +18335,7 @@ dependencies = [
 name = "tauri-plugin-local-llm"
 version = "0.1.0"
 dependencies = [
+ "api-asset-client",
  "async-openai",
  "async-stream",
  "axum 0.8.8",
@@ -18350,6 +18372,7 @@ name = "tauri-plugin-local-stt"
 version = "0.1.0"
 dependencies = [
  "am",
+ "api-asset-client",
  "audio-utils",
  "axum 0.8.8",
  "axum-extra",
