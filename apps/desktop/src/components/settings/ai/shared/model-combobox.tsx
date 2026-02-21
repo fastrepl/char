@@ -66,7 +66,7 @@ const formatIgnoreReason = (reason: ModelIgnoreReason): string => {
 
 const getDisplayName = (providerId: string, model: string): string => {
   if (providerId === "hyprnote" && model === "Auto") {
-    return "Pro";
+    return "Pro (Cloud)";
   }
   return model;
 };

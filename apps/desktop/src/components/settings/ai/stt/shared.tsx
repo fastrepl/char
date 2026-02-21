@@ -33,7 +33,7 @@ type Provider = {
 
 export const displayModelId = (model: string) => {
   if (model === "cloud") {
-    return "Cloud";
+    return "Pro (Cloud)";
   }
 
   if (model === "stt-v4" || model === "stt-rt-v4" || model === "stt-async-v4") {
