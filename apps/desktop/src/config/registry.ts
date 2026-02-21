@@ -126,7 +126,10 @@ export const CONFIG_REGISTRY = {
       if (modelsResult.status !== "ok") return;
 
       const modelInfo = modelsResult.data.find((m) => m.key === model);
-      if (modelInfo && modelInfo.model_type !== "cactus") {
+      if (modelInfo && modelInfo.model_type === "cactus") {
+        await localSttCommands.stopServer(null);
+        await localSttCommands.startServer(model as SupportedSttModel);
+      } else if (modelInfo) {
         await localSttCommands.startServer(model as SupportedSttModel);
       }
     },

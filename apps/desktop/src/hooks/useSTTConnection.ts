@@ -73,14 +73,27 @@ export const useSTTConnection = () => {
 
       const server = serverResult.data;
 
-      if (isCactus && server?.status !== "ready") {
+      if (
+        isCactus &&
+        (server?.status !== "ready" || server?.model !== current_stt_model)
+      ) {
         if (!cactusStartingRef.current) {
           cactusStartingRef.current = true;
-          localSttCommands
-            .startServer(current_stt_model as SupportedSttModel)
-            .finally(() => {
-              cactusStartingRef.current = false;
-            });
+          const restart =
+            server?.status === "ready" && server?.model !== current_stt_model
+              ? localSttCommands
+                  .stopServer(null)
+                  .then(() =>
+                    localSttCommands.startServer(
+                      current_stt_model as SupportedSttModel,
+                    ),
+                  )
+              : localSttCommands.startServer(
+                  current_stt_model as SupportedSttModel,
+                );
+          restart.finally(() => {
+            cactusStartingRef.current = false;
+          });
         }
         return { status: "loading" as const, connection: null };
       }
