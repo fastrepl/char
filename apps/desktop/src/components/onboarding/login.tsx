@@ -1,64 +1,196 @@
-import { useEffect, useState } from "react";
+import * as Sentry from "@sentry/react";
+import { CheckCircle2Icon, Loader2Icon, XCircleIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
-import { commands as sfxCommands } from "@hypr/plugin-sfx";
-import { commands as windowsCommands } from "@hypr/plugin-windows";
+import { startTrial } from "@hypr/api-client";
+import { createClient } from "@hypr/api-client/client";
 
 import { useAuth } from "../../auth";
-import { Route } from "../../routes/app/onboarding/_layout.index";
-import { commands } from "../../types/tauri.gen";
-import { getBack, getNext, type StepProps } from "./config";
-import { Divider, OnboardingContainer } from "./shared";
+import { useBillingAccess } from "../../billing";
+import { env } from "../../env";
+import * as settings from "../../store/tinybase/store/settings";
+import { configureProSettings } from "../../utils";
+import { Divider, OnboardingButton } from "./shared";
 
-export const STEP_ID_LOGIN = "login" as const;
+type TrialPhase =
+  | { step: "checking" }
+  | { step: "starting" }
+  | {
+      step: "done";
+      result:
+        | "started"
+        | "not-eligible"
+        | "failed"
+        | "already-pro"
+        | "already-trialing";
+    };
 
-async function finishOnboarding() {
-  await sfxCommands.stop("BGM").catch(console.error);
-  await new Promise((resolve) => setTimeout(resolve, 100));
-  await commands.setOnboardingNeeded(false).catch(console.error);
-  await new Promise((resolve) => setTimeout(resolve, 100));
-  await windowsCommands.windowShow({ type: "main" });
-  await new Promise((resolve) => setTimeout(resolve, 100));
-  await windowsCommands.windowDestroy({ type: "onboarding" });
+function StepRow({
+  status,
+  label,
+}: {
+  status: "done" | "active" | "failed";
+  label: string;
+}) {
+  return (
+    <div className="flex items-center gap-2 text-sm">
+      {status === "done" && (
+        <CheckCircle2Icon className="size-4 text-emerald-600" />
+      )}
+      {status === "active" && (
+        <Loader2Icon className="size-4 text-neutral-400 animate-spin" />
+      )}
+      {status === "failed" && <XCircleIcon className="size-4 text-red-400" />}
+      <span
+        className={status === "failed" ? "text-red-500" : "text-neutral-500"}
+      >
+        {label}
+      </span>
+    </div>
+  );
 }
 
-export function Login({ onNavigate }: StepProps) {
-  const search = Route.useSearch();
+export function LoginSection({ onContinue }: { onContinue: () => void }) {
   const auth = useAuth();
+  const billing = useBillingAccess();
+  const store = settings.UI.useStore(settings.STORE_ID);
   const [callbackUrl, setCallbackUrl] = useState("");
+  const [trialPhase, setTrialPhase] = useState<TrialPhase | null>(null);
+  const hasHandledRef = useRef(false);
 
   useEffect(() => {
-    if (auth?.session) {
-      const nextStep = getNext(search);
-      if (nextStep) {
-        onNavigate({ ...search, step: nextStep });
-      } else {
-        void finishOnboarding();
+    if (hasHandledRef.current || !auth?.session) return;
+
+    setTrialPhase((prev) => prev ?? { step: "checking" });
+
+    const billingReady =
+      billing.isPro || billing.isTrialing || !billing.canStartTrial.isPending;
+    if (!billingReady) return;
+
+    hasHandledRef.current = true;
+
+    if (billing.isPro && !billing.isTrialing) {
+      if (store) configureProSettings(store);
+      setTrialPhase({ step: "done", result: "already-pro" });
+      setTimeout(onContinue, 1500);
+      return;
+    }
+
+    if (billing.isTrialing) {
+      if (store) configureProSettings(store);
+      setTrialPhase({ step: "done", result: "already-trialing" });
+      setTimeout(onContinue, 1500);
+      return;
+    }
+
+    if (!billing.canStartTrial.data) {
+      setTrialPhase({ step: "done", result: "not-eligible" });
+      onContinue();
+      return;
+    }
+
+    const handle = async () => {
+      const headers = auth.getHeaders();
+      if (!headers) {
+        onContinue();
+        return;
       }
-    }
-  }, [auth?.session, search, onNavigate]);
 
-  useEffect(() => {
-    if (!auth?.session) {
-      void auth?.signIn();
-    }
-  }, [auth?.session, auth?.signIn]);
+      const client = createClient({ baseUrl: env.VITE_API_URL, headers });
+      setTrialPhase({ step: "starting" });
 
-  const backStep = getBack(search);
+      try {
+        const { data: startData, error } = await startTrial({
+          client,
+          query: { interval: "monthly" },
+        });
+
+        if (error || !startData?.started) {
+          Sentry.captureMessage("Trial start failed", {
+            level: "warning",
+            extra: { error },
+          });
+          setTrialPhase({ step: "done", result: "failed" });
+          await auth.refreshSession();
+          await new Promise((r) => setTimeout(r, 1500));
+          onContinue();
+          return;
+        }
+
+        if (store) configureProSettings(store);
+
+        setTrialPhase({ step: "done", result: "started" });
+        await auth.refreshSession();
+        await new Promise((r) => setTimeout(r, 3000));
+      } catch (e) {
+        Sentry.captureException(e);
+        console.error(e);
+        setTrialPhase({ step: "done", result: "failed" });
+        await new Promise((r) => setTimeout(r, 1500));
+      }
+
+      onContinue();
+    };
+
+    void handle();
+  }, [auth, billing, store, onContinue]);
+
+  if (trialPhase) {
+    return (
+      <div className="flex flex-col gap-1.5">
+        <StepRow status="done" label="Signed in" />
+
+        {trialPhase.step === "checking" && (
+          <StepRow status="active" label="Checking trial eligibility…" />
+        )}
+
+        {trialPhase.step === "starting" && (
+          <>
+            <StepRow status="done" label="Eligible for free trial" />
+            <StepRow status="active" label="Starting your trial…" />
+          </>
+        )}
+
+        {trialPhase.step === "done" && trialPhase.result === "started" && (
+          <>
+            <StepRow status="done" label="Eligible for free trial" />
+            <StepRow status="done" label="Trial activated — 14 days of Pro" />
+          </>
+        )}
+
+        {trialPhase.step === "done" && trialPhase.result === "failed" && (
+          <>
+            <StepRow status="done" label="Eligible for free trial" />
+            <StepRow status="failed" label="Could not start trial" />
+          </>
+        )}
+
+        {trialPhase.step === "done" && trialPhase.result === "already-pro" && (
+          <StepRow status="done" label="You have an active Pro plan" />
+        )}
+
+        {trialPhase.step === "done" &&
+          trialPhase.result === "already-trialing" && (
+            <StepRow status="done" label="You're on a Pro trial" />
+          )}
+      </div>
+    );
+  }
+
+  if (auth?.session) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-emerald-600">
+        <CheckCircle2Icon className="size-4" />
+        <span>Signed in</span>
+      </div>
+    );
+  }
 
   return (
-    <OnboardingContainer
-      title="Waiting for sign in..."
-      description="Complete the process in your browser"
-      onBack={
-        backStep ? () => onNavigate({ ...search, step: backStep }) : undefined
-      }
-    >
-      <button
-        onClick={() => auth?.signIn()}
-        className="w-full py-3 rounded-full bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900 text-sm font-medium duration-150 hover:scale-[1.01] active:scale-[0.99]"
-      >
-        Open sign in page in browser
-      </button>
+    <div className="flex flex-col gap-4">
+      <OnboardingButton onClick={() => auth?.signIn()}>
+        Sign in
+      </OnboardingButton>
 
       <Divider text="or paste callback URL" />
 
@@ -73,11 +205,18 @@ export function Login({ onNavigate }: StepProps) {
         <button
           onClick={() => auth?.handleAuthCallback(callbackUrl)}
           disabled={!callbackUrl}
-          className="absolute right-0.5 px-4 py-2 text-sm bg-linear-to-t from-neutral-600 to-neutral-500 text-white rounded-full enabled:hover:scale-[1.02] enabled:active:scale-[0.98] transition-all disabled:opacity-50"
+          className="absolute right-0.5 px-4 py-2 text-sm bg-neutral-600 text-white rounded-full enabled:hover:scale-[1.02] enabled:active:scale-[0.98] transition-all disabled:opacity-50"
         >
           Submit
         </button>
       </div>
-    </OnboardingContainer>
+
+      <button
+        onClick={onContinue}
+        className="text-sm text-neutral-400 transition-opacity duration-150 hover:opacity-70"
+      >
+        proceed without account
+      </button>
+    </div>
   );
 }

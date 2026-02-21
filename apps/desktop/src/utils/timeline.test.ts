@@ -2,9 +2,9 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import {
   buildTimelineBuckets,
-  type EventsWithoutSessionTable,
   getBucketInfo,
-  type SessionsWithMaybeEventTable,
+  type TimelineEventsTable,
+  type TimelineSessionsTable,
 } from "./timeline";
 
 process.env.TZ = "UTC";
@@ -38,56 +38,52 @@ describe("timeline utils", () => {
 
   test("buildTimelineBuckets excludes Today bucket when empty", () => {
     const buckets = buildTimelineBuckets({
-      eventsWithoutSessionTable: null,
-      sessionsWithMaybeEventTable: null,
+      timelineEventsTable: null,
+      timelineSessionsTable: null,
     });
 
     const todayBucket = buckets.find((bucket) => bucket.label === "Today");
     expect(todayBucket).toBeUndefined();
   });
 
-  test("buildTimelineBuckets prioritizes upcoming events and avoids duplicate sessions", () => {
-    const eventsWithoutSessionTable: EventsWithoutSessionTable = {
+  test("buildTimelineBuckets prioritizes sessions to events and avoid duplicate timeline items", () => {
+    const timelineEventsTable: TimelineEventsTable = {
       "event-1": {
         title: "Future Event",
         started_at: "2024-01-18T12:00:00.000Z",
         ended_at: "2024-01-18T13:00:00.000Z",
-        created_at: "2024-01-10T12:00:00.000Z",
         calendar_id: "cal-1",
-        user_id: "user-1",
+        tracking_id_event: "event-1",
+        has_recurrence_rules: false,
       },
     };
 
-    const sessionsWithMaybeEventTable: SessionsWithMaybeEventTable = {
+    const timelineSessionsTable: TimelineSessionsTable = {
       "session-1": {
         title: "Linked Session",
         created_at: "2024-01-10T12:00:00.000Z",
-        event_id: "event-1",
-        event_started_at: "2024-01-18T12:00:00.000Z",
-        user_id: "user-1",
-        raw_md: "",
-        transcript: { words: [] },
+        event_json: JSON.stringify({
+          tracking_id: "event-1",
+          started_at: "2024-01-18T12:00:00.000Z",
+        }),
       },
       "session-2": {
         title: "Standalone Session",
         created_at: "2024-01-14T12:00:00.000Z",
-        user_id: "user-1",
-        raw_md: "",
-        transcript: { words: [] },
       },
     };
 
     const buckets = buildTimelineBuckets({
-      eventsWithoutSessionTable,
-      sessionsWithMaybeEventTable,
+      timelineEventsTable,
+      timelineSessionsTable,
     });
 
     const futureBucket = buckets[0];
     expect(futureBucket.label).toBe("in 3 days");
     expect(futureBucket.items).toHaveLength(1);
     expect(futureBucket.items[0]).toMatchObject({
-      type: "event",
-      id: "event-1",
+      type: "session",
+      id: "session-1",
     });
 
     const sessionBucket = buckets.find((bucket) =>
@@ -95,39 +91,38 @@ describe("timeline utils", () => {
     );
     expect(sessionBucket).toBeDefined();
     expect(sessionBucket?.items).toHaveLength(1);
-    const containsLinkedSession = buckets.some((bucket) =>
-      bucket.items.some((item) => item.id === "session-1"),
+    const containsLinkedEvent = buckets.some((bucket) =>
+      bucket.items.some((item) => item.id === "event-1"),
     );
-    expect(containsLinkedSession).toBe(false);
+    expect(containsLinkedEvent).toBe(false);
   });
 
   test("buildTimelineBuckets excludes past events but keeps related sessions", () => {
-    const eventsWithoutSessionTable: EventsWithoutSessionTable = {
+    const timelineEventsTable: TimelineEventsTable = {
       "event-past": {
         title: "Past Event",
         started_at: "2024-01-10T10:00:00.000Z",
         ended_at: "2024-01-10T11:00:00.000Z",
-        created_at: "2024-01-05T09:00:00.000Z",
         calendar_id: "cal-1",
-        user_id: "user-1",
+        tracking_id_event: "event-past",
+        has_recurrence_rules: false,
       },
     };
 
-    const sessionsWithMaybeEventTable: SessionsWithMaybeEventTable = {
+    const timelineSessionsTable: TimelineSessionsTable = {
       "session-past": {
         title: "Follow-up Session",
         created_at: "2024-01-10T12:00:00.000Z",
-        event_id: "event-past",
-        event_started_at: "2024-01-10T10:00:00.000Z",
-        user_id: "user-1",
-        raw_md: "",
-        transcript: { words: [] },
+        event_json: JSON.stringify({
+          tracking_id: "event-past",
+          started_at: "2024-01-10T10:00:00.000Z",
+        }),
       },
     };
 
     const buckets = buildTimelineBuckets({
-      eventsWithoutSessionTable,
-      sessionsWithMaybeEventTable,
+      timelineEventsTable,
+      timelineSessionsTable,
     });
 
     const pastBucket = buckets.find((bucket) => bucket.label === "5 days ago");
@@ -148,27 +143,21 @@ describe("timeline utils", () => {
   });
 
   test("buildTimelineBuckets sorts buckets by most recent first", () => {
-    const sessionsWithMaybeEventTable: SessionsWithMaybeEventTable = {
+    const timelineSessionsTable: TimelineSessionsTable = {
       "session-future": {
         title: "Future Session",
         created_at: "2024-01-10T12:00:00.000Z",
-        event_started_at: "2024-01-16T09:00:00.000Z",
-        user_id: "user-1",
-        raw_md: "",
-        transcript: { words: [] },
+        event_json: JSON.stringify({ started_at: "2024-01-16T09:00:00.000Z" }),
       },
       "session-past": {
         title: "Past Session",
         created_at: "2024-01-14T09:00:00.000Z",
-        user_id: "user-1",
-        raw_md: "",
-        transcript: { words: [] },
       },
     };
 
     const buckets = buildTimelineBuckets({
-      eventsWithoutSessionTable: null,
-      sessionsWithMaybeEventTable,
+      timelineEventsTable: null,
+      timelineSessionsTable,
     });
 
     expect(buckets.map((bucket) => bucket.label)).toEqual([
@@ -200,37 +189,115 @@ describe("timeline utils", () => {
     expect(monthAgo.sortKey).toBeLessThan(weeksAgo4.sortKey);
   });
 
-  test("buildTimelineBuckets: future buckets sort correctly (weeks before months)", () => {
-    const sessionsWithMaybeEventTable: SessionsWithMaybeEventTable = {
-      "session-2weeks": {
-        title: "In 2 weeks",
-        event_started_at: "2024-01-29T09:00:00.000Z", // 14 days -> "in 2 weeks"
-        created_at: "2024-01-10T12:00:00.000Z",
-        user_id: "user-1",
-        raw_md: "",
-        transcript: { words: [] },
+  test("buildTimelineBuckets deduplicates recurring events by composite key (tracking_id + day)", () => {
+    const timelineEventsTable: TimelineEventsTable = {
+      "event-jan18": {
+        title: "Weekly Standup",
+        started_at: "2024-01-18T09:00:00.000Z",
+        ended_at: "2024-01-18T09:30:00.000Z",
+        calendar_id: "cal-1",
+        tracking_id_event: "recurring-1",
+        has_recurrence_rules: true,
+        recurrence_series_id: "series-1",
       },
-      "session-4weeks": {
-        title: "In 4 weeks",
-        event_started_at: "2024-02-11T09:00:00.000Z", // 27 days -> "in 4 weeks"
-        created_at: "2024-01-10T12:00:00.000Z",
-        user_id: "user-1",
-        raw_md: "",
-        transcript: { words: [] },
+      "event-jan25": {
+        title: "Weekly Standup",
+        started_at: "2024-01-25T09:00:00.000Z",
+        ended_at: "2024-01-25T09:30:00.000Z",
+        calendar_id: "cal-1",
+        tracking_id_event: "recurring-1",
+        has_recurrence_rules: true,
+        recurrence_series_id: "series-1",
       },
-      "session-nextmonth": {
-        title: "Next month",
-        event_started_at: "2024-02-13T09:00:00.000Z", // 29 days -> "next month"
-        created_at: "2024-01-10T12:00:00.000Z",
-        user_id: "user-1",
-        raw_md: "",
-        transcript: { words: [] },
+    };
+
+    const timelineSessionsTable: TimelineSessionsTable = {
+      "session-jan18": {
+        title: "Weekly Standup",
+        created_at: "2024-01-18T09:00:00.000Z",
+        event_json: JSON.stringify({
+          tracking_id: "recurring-1",
+          started_at: "2024-01-18T09:00:00.000Z",
+          has_recurrence_rules: true,
+        }),
       },
     };
 
     const buckets = buildTimelineBuckets({
-      eventsWithoutSessionTable: null,
-      sessionsWithMaybeEventTable,
+      timelineEventsTable,
+      timelineSessionsTable,
+    });
+
+    const allItems = buckets.flatMap((b) => b.items);
+
+    const jan18Session = allItems.find(
+      (i) => i.type === "session" && i.id === "session-jan18",
+    );
+    expect(jan18Session).toBeDefined();
+
+    const jan18Event = allItems.find(
+      (i) => i.type === "event" && i.id === "event-jan18",
+    );
+    expect(jan18Event).toBeUndefined();
+
+    const jan25Event = allItems.find(
+      (i) => i.type === "event" && i.id === "event-jan25",
+    );
+    expect(jan25Event).toBeDefined();
+  });
+
+  test("buildTimelineBuckets does not deduplicate recurring events on different days", () => {
+    const timelineEventsTable: TimelineEventsTable = {
+      "event-jan18": {
+        title: "Weekly Standup",
+        started_at: "2024-01-18T09:00:00.000Z",
+        ended_at: "2024-01-18T09:30:00.000Z",
+        calendar_id: "cal-1",
+        tracking_id_event: "recurring-1",
+        has_recurrence_rules: true,
+      },
+      "event-jan25": {
+        title: "Weekly Standup",
+        started_at: "2024-01-25T09:00:00.000Z",
+        ended_at: "2024-01-25T09:30:00.000Z",
+        calendar_id: "cal-1",
+        tracking_id_event: "recurring-1",
+        has_recurrence_rules: true,
+      },
+    };
+
+    const buckets = buildTimelineBuckets({
+      timelineEventsTable,
+      timelineSessionsTable: null,
+    });
+
+    const allItems = buckets.flatMap((b) => b.items);
+    const eventItems = allItems.filter((i) => i.type === "event");
+    expect(eventItems).toHaveLength(2);
+  });
+
+  test("buildTimelineBuckets: future buckets sort correctly (weeks before months)", () => {
+    const timelineSessionsTable: TimelineSessionsTable = {
+      "session-2weeks": {
+        title: "In 2 weeks",
+        event_json: JSON.stringify({ started_at: "2024-01-29T09:00:00.000Z" }), // 14 days -> "in 2 weeks"
+        created_at: "2024-01-10T12:00:00.000Z",
+      },
+      "session-4weeks": {
+        title: "In 4 weeks",
+        event_json: JSON.stringify({ started_at: "2024-02-11T09:00:00.000Z" }), // 27 days -> "in 4 weeks"
+        created_at: "2024-01-10T12:00:00.000Z",
+      },
+      "session-nextmonth": {
+        title: "Next month",
+        event_json: JSON.stringify({ started_at: "2024-02-13T09:00:00.000Z" }), // 29 days -> "next month"
+        created_at: "2024-01-10T12:00:00.000Z",
+      },
+    };
+
+    const buckets = buildTimelineBuckets({
+      timelineEventsTable: null,
+      timelineSessionsTable,
     });
 
     // Should be: next month, in 4 weeks, in 2 weeks (furthest future first)

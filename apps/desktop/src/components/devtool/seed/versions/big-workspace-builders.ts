@@ -1,31 +1,36 @@
 import { faker } from "@faker-js/faker/locale/en";
 
-import type { SessionStorage, TranscriptStorage } from "@hypr/store";
+import type {
+  EventStorage,
+  SessionStorage,
+  TranscriptStorage,
+} from "@hypr/store";
 
 import type { WordWithId } from "../../../../store/transcript/types";
 import { DEFAULT_USER_ID, id } from "../../../../utils";
-import { createSession } from "../shared";
+import { createSession, toSessionEvent } from "../shared";
 
 export const buildSessionsForBigWorkspace = (
   count: number,
   options: {
-    eventIds?: string[];
+    events?: Record<string, EventStorage>;
     eventLinkProbability?: number;
   } = {},
 ): Record<string, SessionStorage> => {
   const sessions: Record<string, SessionStorage> = {};
-  const { eventIds = [], eventLinkProbability = 0.6 } = options;
+  const { events = {}, eventLinkProbability = 0.6 } = options;
+  const eventEntries = Object.entries(events);
 
   for (let i = 0; i < count; i++) {
     const shouldLinkToEvent =
-      eventIds.length > 0 &&
+      eventEntries.length > 0 &&
       faker.datatype.boolean({ probability: eventLinkProbability });
 
-    const eventId = shouldLinkToEvent
-      ? faker.helpers.arrayElement(eventIds)
+    const sessionEvent = shouldLinkToEvent
+      ? toSessionEvent(faker.helpers.arrayElement(eventEntries))
       : undefined;
 
-    const session = createSession(eventId, undefined);
+    const session = createSession(sessionEvent, undefined);
     sessions[session.id] = session.data;
   }
 
@@ -184,9 +189,6 @@ export const buildLongTranscriptsForSessions = (
       for (const wordData of turn.words) {
         wordsList.push({
           id: id(),
-          user_id: DEFAULT_USER_ID,
-          created_at: createdAtStr,
-          transcript_id: transcriptId,
           channel: currentChannel,
           text: wordData.text,
           start_ms: currentTimeMs,

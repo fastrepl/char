@@ -1,49 +1,13 @@
 import { memo, useCallback, useMemo } from "react";
 
+import type { Operations, Segment, SegmentWord } from "@hypr/transcript";
+import { SpeakerLabelManager } from "@hypr/transcript";
+import { groupWordsIntoLines } from "@hypr/transcript/ui";
 import { cn } from "@hypr/utils";
 
 import { useAudioPlayer } from "../../../../../../../contexts/audio-player/provider";
-import { Segment, SegmentWord } from "../../../../../../../utils/segment";
-import { SpeakerLabelManager } from "../../../../../../../utils/segment/shared";
-import { Operations } from "./operations";
 import { SegmentHeader } from "./segment-header";
 import { WordSpan } from "./word-span";
-
-type SentenceLine = {
-  words: SegmentWord[];
-  startMs: number;
-  endMs: number;
-};
-
-function groupWordsIntoLines(words: SegmentWord[]): SentenceLine[] {
-  if (words.length === 0) return [];
-
-  const lines: SentenceLine[] = [];
-  let currentLine: SegmentWord[] = [];
-
-  for (const word of words) {
-    currentLine.push(word);
-    const text = word.text.trim();
-    if (text.endsWith(".") || text.endsWith("?") || text.endsWith("!")) {
-      lines.push({
-        words: currentLine,
-        startMs: currentLine[0].start_ms,
-        endMs: currentLine[currentLine.length - 1].end_ms,
-      });
-      currentLine = [];
-    }
-  }
-
-  if (currentLine.length > 0) {
-    lines.push({
-      words: currentLine,
-      startMs: currentLine[0].start_ms,
-      endMs: currentLine[currentLine.length - 1].end_ms,
-    });
-  }
-
-  return lines;
-}
 
 export const SegmentRenderer = memo(
   ({

@@ -27,9 +27,7 @@ export function ConfigureProviders() {
         <HyprProviderCard
           providerId="hyprnote"
           providerName="Hyprnote"
-          icon={
-            <img src="/assets/icon.png" alt="Hyprnote" className="size-5" />
-          }
+          icon={<img src="/assets/icon.png" alt="Char" className="size-5" />}
         />
         {PROVIDERS.filter((provider) => provider.id !== "hyprnote").map(
           (provider) => (
@@ -96,9 +94,9 @@ function ProviderContext({
     providerId === "hyprnote"
       ? "A curated set of models we continuously test to provide the **best performance & reliability**."
       : providerId === "lmstudio"
-        ? "- Ensure LM Studio server is **running.** (Default port is 1234)\n- Enable **CORS** in LM Studio config.\n\nSee our [setup guide](https://hyprnote.com/docs/faq/local-llm-setup#lm-studio-setup) for detailed instructions."
+        ? "- Ensure LM Studio server is **running.** (Default port is 1234)\n- Enable **CORS** in LM Studio config."
         : providerId === "ollama"
-          ? "- Ensure Ollama is **running** (`ollama serve`)\n- Pull a model first (`ollama pull llama3.2`)\n\nSee our [setup guide](https://hyprnote.com/docs/faq/local-llm-setup#ollama-setup) for detailed instructions."
+          ? "- Ensure Ollama is **running** (`ollama serve`)\n- Pull a model first (`ollama pull llama3.2`)"
           : providerId === "custom"
             ? "We only support **OpenAI-compatible** endpoints for now."
             : providerId === "openrouter"
@@ -107,7 +105,9 @@ function ProviderContext({
                 ? "Visit [AI Studio](https://aistudio.google.com/api-keys) to create an API key."
                 : "";
 
-  const buttonLabel = canStartTrial ? "Start Free Trial" : "Upgrade to Pro";
+  const buttonLabel = canStartTrial.data
+    ? "Start Free Trial"
+    : "Upgrade to Pro";
 
   if (providerId === "hyprnote" && !isPro) {
     return (

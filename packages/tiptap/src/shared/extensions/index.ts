@@ -37,6 +37,7 @@ export type FileHandlerConfig = {
 
 export type ExtensionOptions = {
   imageExtension?: any;
+  onLinkOpen?: (url: string) => void;
 };
 
 const AttachmentImage = Image.extend({
@@ -127,11 +128,15 @@ export const getExtensions = (
 
               if (linkMark && linkMark.attrs.href) {
                 event.preventDefault();
-                window.open(
-                  linkMark.attrs.href,
-                  "_blank",
-                  "noopener,noreferrer",
-                );
+                if (options?.onLinkOpen) {
+                  options.onLinkOpen(linkMark.attrs.href);
+                } else {
+                  window.open(
+                    linkMark.attrs.href,
+                    "_blank",
+                    "noopener,noreferrer",
+                  );
+                }
                 return true;
               }
 

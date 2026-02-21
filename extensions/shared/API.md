@@ -1,4 +1,4 @@
-# Hyprnote Extension API Reference
+# Char Extension API Reference
 
 > AUTO-GENERATED from runtime.ts
 

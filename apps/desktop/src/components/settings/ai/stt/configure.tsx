@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { arch, platform } from "@tauri-apps/plugin-os";
 import {
   AlertCircle,
   Download,
@@ -22,6 +21,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@hypr/ui/components/ui/accordion";
+import { Input } from "@hypr/ui/components/ui/input";
 import { cn } from "@hypr/utils";
 
 import { useBillingAccess } from "../../../../billing";
@@ -50,9 +50,7 @@ export function ConfigureProviders() {
           <HyprProviderCard
             providerId="hyprnote"
             providerName="Hyprnote"
-            icon={
-              <img src="/assets/icon.png" alt="Hyprnote" className="size-5" />
-            }
+            icon={<img src="/assets/icon.png" alt="Char" className="size-5" />}
             badge={PROVIDERS.find((p) => p.id === "hyprnote")?.badge}
           />
         </div>
@@ -72,6 +70,17 @@ export function ConfigureProviders() {
   );
 }
 
+function ModelGroupLabel({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-2 pt-1">
+      <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-widest shrink-0">
+        {label}
+      </span>
+      <div className="flex-1 border-t border-neutral-200" />
+    </div>
+  );
+}
+
 function HyprProviderCard({
   providerId,
   providerName,
@@ -83,13 +92,26 @@ function HyprProviderCard({
   icon: React.ReactNode;
   badge?: string | null;
 }) {
-  const isMacos = platform() === "macos";
-  const targetArch = useQuery({
-    queryKey: ["target-arch"],
-    queryFn: () => arch(),
+  const supportedModels = useQuery({
+    queryKey: ["list-supported-models"],
+    queryFn: async () => {
+      const result = await localSttCommands.listSupportedModels();
+      return result.status === "ok" ? result.data : [];
+    },
     staleTime: Infinity,
   });
-  const isAppleSilicon = isMacos && targetArch.data === "aarch64";
+
+  const argmaxModels =
+    supportedModels.data?.filter((m) => m.model_type === "argmax") ?? [];
+  const whispercppModels =
+    supportedModels.data?.filter((m) => m.model_type === "whispercpp") ?? [];
+  const cactusModels =
+    supportedModels.data?.filter((m) => m.model_type === "cactus") ?? [];
+
+  const hasLocalModels =
+    argmaxModels.length > 0 ||
+    whispercppModels.length > 0 ||
+    cactusModels.length > 0;
 
   const providerDef = PROVIDERS.find((p) => p.id === providerId);
   const isConfigured = providerDef?.requirements.length === 0;
@@ -120,75 +142,143 @@ function HyprProviderCard({
         <div className="flex flex-col gap-3">
           <HyprProviderCloudRow />
 
-          <div className="flex items-center gap-3 py-2">
-            <div className="flex-1 border-t border-dashed border-neutral-300" />
-            <a
-              href="https://hyprnote.com/docs/developers/local-models"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-neutral-400 hover:underline flex items-center gap-1"
-            >
-              <span>or use on-device model</span>
-              <HelpCircle className="size-3" />
-            </a>
-            <div className="flex-1 border-t border-dashed border-neutral-300" />
-          </div>
-
-          {isAppleSilicon && (
+          {hasLocalModels && (
             <>
-              <HyprProviderLocalRow
-                model="am-parakeet-v2"
-                displayName="Parakeet v2"
-                description="English only. Works best for English."
-              />
-              <HyprProviderLocalRow
-                model="am-parakeet-v3"
-                displayName="Parakeet v3"
-                description="English and European languages."
-              />
-              <HyprProviderLocalRow
-                model="am-whisper-large-v3"
-                displayName="Whisper Large v3"
-                description="Broad coverage of languages."
-              />
+              <div className="flex items-center gap-3 py-2">
+                <div className="flex-1 border-t border-dashed border-neutral-300" />
+                <a
+                  href="https://hyprnote.com/docs/developers/local-models"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-neutral-400 hover:underline flex items-center gap-1"
+                >
+                  <span>or use on-device model</span>
+                  <HelpCircle className="size-3" />
+                </a>
+                <div className="flex-1 border-t border-dashed border-neutral-300" />
+              </div>
 
-              <details className="flex flex-col gap-4 pt-2">
-                <summary className="text-xs cursor-pointer text-neutral-600 hover:text-neutral-900 hover:underline">
-                  Advanced
-                </summary>
-                <div className="mt-4 flex flex-col gap-3">
-                  <HyprProviderLocalRow
-                    model="QuantizedTinyEn"
-                    displayName="whisper-tiny-en-q8"
-                    description="Only for experiment & development purposes."
-                  />
-                  <HyprProviderLocalRow
-                    model="QuantizedSmallEn"
-                    displayName="whisper-small-en-q8"
-                    description="Only for experiment & development purposes."
-                  />
-                </div>
-              </details>
-            </>
-          )}
+              {argmaxModels.length > 0 && (
+                <>
+                  <ModelGroupLabel label="Argmax" />
+                  {argmaxModels.map((model) => (
+                    <HyprProviderLocalRow
+                      key={model.key as string}
+                      model={model.key}
+                      displayName={model.display_name}
+                      description={model.description}
+                    />
+                  ))}
+                </>
+              )}
 
-          {!isAppleSilicon && (
-            <>
-              <HyprProviderLocalRow
-                model="QuantizedTinyEn"
-                displayName="whisper-tiny-en-q8"
-                description="Powered by Whisper.cpp. English only."
-              />
-              <HyprProviderLocalRow
-                model="QuantizedSmallEn"
-                displayName="whisper-small-en-q8"
-                description="Powered by Whisper.cpp. English only."
-              />
+              {whispercppModels.length > 0 && (
+                <>
+                  <ModelGroupLabel label="WhisperCPP" />
+                  {whispercppModels.map((model) => (
+                    <HyprProviderLocalRow
+                      key={model.key as string}
+                      model={model.key}
+                      displayName={model.display_name}
+                      description={model.description}
+                    />
+                  ))}
+                </>
+              )}
+
+              {cactusModels.length > 0 && (
+                <>
+                  <ModelGroupLabel label="Cactus (Experimental)" />
+                  {cactusModels.map((model) => (
+                    <CactusDisabledRow
+                      key={model.key as string}
+                      displayName={model.display_name}
+                    />
+                  ))}
+                  <CactusModelPathRow />
+                </>
+              )}
             </>
           )}
         </div>
       </AccordionContent>
     </AccordionItem>
+  );
+}
+
+function CactusDisabledRow({ displayName }: { displayName: string }) {
+  return (
+    <HyprProviderRow>
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium text-neutral-400">
+          {displayName}
+        </span>
+        <span className="text-[10px] text-neutral-400 border border-neutral-200 rounded-full px-2 py-0.5">
+          Coming soon
+        </span>
+      </div>
+    </HyprProviderRow>
+  );
+}
+
+function CactusModelPathRow() {
+  const modelPath = settings.UI.useValue(
+    "cactus_model_path",
+    settings.STORE_ID,
+  );
+
+  const handleSetModelPath = settings.UI.useSetValueCallback(
+    "cactus_model_path",
+    (path: string) => path,
+    [],
+    settings.STORE_ID,
+  );
+
+  const handleSelectProvider = settings.UI.useSetValueCallback(
+    "current_stt_provider",
+    (provider: string) => provider,
+    [],
+    settings.STORE_ID,
+  );
+
+  const handleSelectModel = settings.UI.useSetValueCallback(
+    "current_stt_model",
+    (model: string) => model,
+    [],
+    settings.STORE_ID,
+  );
+
+  const active = useListener((state) => state.live.status !== "inactive");
+
+  const handleUseCactus = useCallback(() => {
+    if (active) return;
+    handleSelectProvider("hyprnote");
+    handleSelectModel("cactus");
+  }, [active, handleSelectProvider, handleSelectModel]);
+
+  return (
+    <HyprProviderRow>
+      <span className="text-xs text-neutral-500">Custom model path</span>
+      <Input
+        value={modelPath ?? ""}
+        onChange={(e) => handleSetModelPath(e.target.value)}
+        placeholder="/path/to/cactus-model"
+        className="text-xs font-mono"
+      />
+      <button
+        onClick={handleUseCactus}
+        disabled={active || !modelPath}
+        className={cn([
+          "w-fit h-8.5 px-4 rounded-full text-xs font-mono text-center",
+          "bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900",
+          "shadow-xs hover:shadow-md hover:scale-[102%] active:scale-[98%]",
+          "transition-all duration-150",
+          "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-xs",
+        ])}
+      >
+        Use Cactus
+      </button>
+    </HyprProviderRow>
   );
 }
 
@@ -236,7 +326,7 @@ function HyprProviderCloudRow() {
 
   const buttonLabel = isPro
     ? "Ready to use"
-    : canStartTrial
+    : canStartTrial.data
       ? "Start Free Trial"
       : "Upgrade to Pro";
 
@@ -474,9 +564,11 @@ function ProviderContext({ providerId }: { providerId: ProviderId }) {
                 ? `Use [OpenAI](https://openai.com) for transcriptions.`
                 : providerId === "fireworks"
                   ? `Use [Fireworks AI](https://fireworks.ai) for transcriptions.`
-                  : providerId === "custom"
-                    ? `We only support **Deepgram compatible** endpoints for now.`
-                    : "";
+                  : providerId === "mistral"
+                    ? `Use [Mistral](https://mistral.ai) for transcriptions.`
+                    : providerId === "custom"
+                      ? `We only support **Deepgram compatible** endpoints for now.`
+                      : "";
 
   if (!content.trim()) {
     return null;

@@ -5,13 +5,9 @@ Default permissions for the plugin
 #### This default permission set includes the following:
 
 - `allow-models-dir`
-- `allow-is-server-running`
 - `allow-is-model-downloading`
 - `allow-is-model-downloaded`
 - `allow-download-model`
-- `allow-start-server`
-- `allow-stop-server`
-- `allow-restart-server`
 - `allow-get-current-model`
 - `allow-set-current-model`
 - `allow-list-downloaded-model`

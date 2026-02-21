@@ -48,25 +48,28 @@ function FloatingButtonContainer({ children }: { children: ReactNode }) {
     }
 
     const updateChatWidth = () => {
-      const chatPanel = document.querySelector("[data-panel-id]");
-      if (chatPanel) {
-        const panels = document.querySelectorAll("[data-panel-id]");
-        const lastPanel = panels[panels.length - 1];
-        if (lastPanel) {
-          setChatPanelWidth(lastPanel.getBoundingClientRect().width);
-        }
+      const panels = document.querySelectorAll("[data-panel-id]");
+      const lastPanel = panels[panels.length - 1];
+      if (lastPanel) {
+        setChatPanelWidth(lastPanel.getBoundingClientRect().width);
       }
     };
 
     updateChatWidth();
     window.addEventListener("resize", updateChatWidth);
 
-    const observer = new MutationObserver(updateChatWidth);
-    observer.observe(document.body, { subtree: true, attributes: true });
+    // Use ResizeObserver on the specific panel instead of MutationObserver on document.body
+    // MutationObserver on document.body with subtree:true causes high CPU usage
+    const resizeObserver = new ResizeObserver(updateChatWidth);
+    const panels = document.querySelectorAll("[data-panel-id]");
+    const lastPanel = panels[panels.length - 1];
+    if (lastPanel) {
+      resizeObserver.observe(lastPanel);
+    }
 
     return () => {
       window.removeEventListener("resize", updateChatWidth);
-      observer.disconnect();
+      resizeObserver.disconnect();
     };
   }, [isChatPanelOpen]);
 

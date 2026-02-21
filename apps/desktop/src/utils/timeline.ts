@@ -1,33 +1,47 @@
-import type { Event, Session } from "@hypr/store";
 import {
+  differenceInCalendarDays,
   differenceInCalendarMonths,
-  differenceInDays,
   isPast,
-  safeFormat,
   safeParseDate,
   startOfDay,
+  startOfMonth,
+  TZDate,
 } from "@hypr/utils";
 
+import {
+  eventMatchingKey,
+  getSessionEvent,
+  sessionEventMatchingKey,
+} from "./session-event";
+
+function toTZ(date: Date, timezone?: string): Date {
+  return timezone ? new TZDate(date, timezone) : date;
+}
+
+// comes from QUERIES.timelineEvents
 export type TimelineEventRow = {
+  title?: string | null;
   started_at?: string | null;
-  created_at?: string | null;
-  title?: string | null;
-  [key: string]: unknown;
+  ended_at?: string | null;
+  calendar_id?: string | null;
+  tracking_id_event?: string | null;
+  has_recurrence_rules: boolean;
+  recurrence_series_id?: string | null;
 };
 
+// comes from QUERIES.timelineSessions
 export type TimelineSessionRow = {
-  event_started_at?: string | null;
-  created_at?: string | null;
-  event_id?: string | null;
   title?: string | null;
-  [key: string]: unknown;
+  created_at?: string | null;
+  event_json?: string | null;
+  folder_id?: string | null;
 };
 
-export type EventsWithoutSessionTable =
+export type TimelineEventsTable =
   | Record<string, TimelineEventRow>
   | null
   | undefined;
-export type SessionsWithMaybeEventTable =
+export type TimelineSessionsTable =
   | Record<string, TimelineSessionRow>
   | null
   | undefined;
@@ -35,14 +49,12 @@ export type SessionsWithMaybeEventTable =
 export type EventTimelineItem = {
   type: "event";
   id: string;
-  date: string;
-  data: Event;
+  data: TimelineEventRow;
 };
 export type SessionTimelineItem = {
   type: "session";
   id: string;
-  date: string;
-  data: Session;
+  data: TimelineSessionRow;
 };
 export type TimelineItem = EventTimelineItem | SessionTimelineItem;
 
@@ -54,15 +66,19 @@ export type TimelineBucket = {
   items: TimelineItem[];
 };
 
-export function getBucketInfo(date: Date): {
+export function getBucketInfo(
+  date: Date,
+  timezone?: string,
+): {
   label: string;
   sortKey: number;
   precision: TimelinePrecision;
 } {
-  const now = startOfDay(new Date());
-  const targetDay = startOfDay(date);
-  const daysDiff = differenceInDays(targetDay, now);
-  const sortKey = targetDay.getTime();
+  const now = new Date();
+  const tzDate = toTZ(date, timezone);
+  const tzNow = toTZ(now, timezone);
+  const daysDiff = differenceInCalendarDays(tzDate, tzNow);
+  const sortKey = startOfDay(tzDate).getTime();
   const absDays = Math.abs(daysDiff);
 
   if (daysDiff === 0) {
@@ -85,10 +101,10 @@ export function getBucketInfo(date: Date): {
     if (absDays <= 27) {
       const weeks = Math.max(1, Math.round(absDays / 7));
       const weekRangeEndDay = Math.max(7, weeks * 7 - 3);
-      const weekRangeEnd = startOfDay(
-        new Date(now.getTime() - weekRangeEndDay * 24 * 60 * 60 * 1000),
+      const weekRangeEnd = new Date(
+        now.getTime() - weekRangeEndDay * 24 * 60 * 60 * 1000,
       );
-      const weekSortKey = weekRangeEnd.getTime();
+      const weekSortKey = startOfDay(toTZ(weekRangeEnd, timezone)).getTime();
 
       return {
         label: weeks === 1 ? "a week ago" : `${weeks} weeks ago`,
@@ -97,20 +113,18 @@ export function getBucketInfo(date: Date): {
       };
     }
 
-    let months = Math.abs(differenceInCalendarMonths(targetDay, now));
+    let months = Math.abs(differenceInCalendarMonths(tzDate, tzNow));
     if (months === 0) {
       months = 1;
     }
-    const monthStart = startOfDay(
-      new Date(targetDay.getFullYear(), targetDay.getMonth(), 1),
+    const monthStartKey = startOfMonth(tzDate).getTime();
+    const lastDayInMonthBucket = new Date(
+      now.getTime() - 28 * 24 * 60 * 60 * 1000,
     );
-    const lastDayInMonthBucket = startOfDay(
-      new Date(now.getTime() - 28 * 24 * 60 * 60 * 1000),
-    );
-    const monthSortKey = Math.min(
-      monthStart.getTime(),
-      lastDayInMonthBucket.getTime(),
-    );
+    const lastDayKey = startOfDay(
+      toTZ(lastDayInMonthBucket, timezone),
+    ).getTime();
+    const monthSortKey = Math.min(monthStartKey, lastDayKey);
     return {
       label: months === 1 ? "a month ago" : `${months} months ago`,
       sortKey: monthSortKey,
@@ -125,10 +139,10 @@ export function getBucketInfo(date: Date): {
   if (absDays <= 27) {
     const weeks = Math.max(1, Math.round(absDays / 7));
     const weekRangeStartDay = Math.max(7, weeks * 7 - 3);
-    const weekRangeStart = startOfDay(
-      new Date(now.getTime() + weekRangeStartDay * 24 * 60 * 60 * 1000),
+    const weekRangeStart = new Date(
+      now.getTime() + weekRangeStartDay * 24 * 60 * 60 * 1000,
     );
-    const weekSortKey = weekRangeStart.getTime();
+    const weekSortKey = startOfDay(toTZ(weekRangeStart, timezone)).getTime();
 
     return {
       label: weeks === 1 ? "next week" : `in ${weeks} weeks`,
@@ -137,20 +151,18 @@ export function getBucketInfo(date: Date): {
     };
   }
 
-  let months = differenceInCalendarMonths(targetDay, now);
+  let months = differenceInCalendarMonths(tzDate, tzNow);
   if (months === 0) {
     months = 1;
   }
-  const monthStart = startOfDay(
-    new Date(targetDay.getFullYear(), targetDay.getMonth(), 1),
+  const monthStartKey = startOfMonth(tzDate).getTime();
+  const firstDayInMonthBucket = new Date(
+    now.getTime() + 28 * 24 * 60 * 60 * 1000,
   );
-  const firstDayInMonthBucket = startOfDay(
-    new Date(now.getTime() + 28 * 24 * 60 * 60 * 1000),
-  );
-  const monthSortKey = Math.max(
-    monthStart.getTime(),
-    firstDayInMonthBucket.getTime(),
-  );
+  const firstDayKey = startOfDay(
+    toTZ(firstDayInMonthBucket, timezone),
+  ).getTime();
+  const monthSortKey = Math.max(monthStartKey, firstDayKey);
   return {
     label: months === 1 ? "next month" : `in ${months} months`,
     sortKey: monthSortKey,
@@ -177,76 +189,95 @@ export function calculateIndicatorIndex(
   return index;
 }
 
+export function getItemTimestamp(item: TimelineItem): Date | null {
+  if (item.type === "event") {
+    return safeParseDate(item.data.started_at);
+  }
+  return safeParseDate(
+    getSessionEvent(item.data)?.started_at ?? item.data.created_at,
+  );
+}
+
+function getEventKey(row: TimelineEventRow, timezone?: string): string {
+  return eventMatchingKey(row, timezone);
+}
+
+function getSessionKey(row: TimelineSessionRow, timezone?: string): string {
+  const event = getSessionEvent(row);
+  if (!event) return "";
+  return sessionEventMatchingKey(event, timezone);
+}
+
 export function buildTimelineBuckets({
-  eventsWithoutSessionTable,
-  sessionsWithMaybeEventTable,
+  timelineEventsTable,
+  timelineSessionsTable,
+  timezone,
 }: {
-  eventsWithoutSessionTable: EventsWithoutSessionTable;
-  sessionsWithMaybeEventTable: SessionsWithMaybeEventTable;
+  timelineEventsTable: TimelineEventsTable;
+  timelineSessionsTable: TimelineSessionsTable;
+  timezone?: string;
 }): TimelineBucket[] {
   const items: TimelineItem[] = [];
-  const seenEvents = new Set<string>();
+  const seenEventKeys = new Set<string>();
 
-  if (eventsWithoutSessionTable) {
-    Object.entries(eventsWithoutSessionTable).forEach(([eventId, row]) => {
-      const eventStartTime = safeParseDate(row.started_at);
+  if (timelineSessionsTable) {
+    Object.entries(timelineSessionsTable).forEach(([sessionId, row]) => {
+      const sessionEvent = getSessionEvent(row);
+      const startTime = safeParseDate(
+        sessionEvent?.started_at ?? row.created_at,
+      );
 
-      if (!eventStartTime) {
-        return;
-      }
-
-      const eventEndTime = safeParseDate((row as unknown as Event).ended_at);
-      const timeToCheck = eventEndTime || eventStartTime;
-
-      if (!isPast(timeToCheck)) {
-        items.push({
-          type: "event",
-          id: eventId,
-          date: safeFormat(eventStartTime, "yyyy-MM-dd"),
-          data: row as unknown as Event,
-        });
-        seenEvents.add(eventId);
-      }
-    });
-  }
-
-  if (sessionsWithMaybeEventTable) {
-    Object.entries(sessionsWithMaybeEventTable).forEach(([sessionId, row]) => {
-      const eventId = row.event_id ? String(row.event_id) : undefined;
-      if (eventId && seenEvents.has(eventId)) {
-        return;
-      }
-
-      const date = safeParseDate(row.event_started_at ?? row.created_at);
-
-      if (!date) {
+      if (!startTime) {
         return;
       }
 
       items.push({
         type: "session",
         id: sessionId,
-        date: safeFormat(date, "yyyy-MM-dd"),
-        data: row as unknown as Session,
+        data: row,
       });
+      const key = getSessionKey(row, timezone);
+      if (key) {
+        seenEventKeys.add(key);
+      }
+    });
+  }
+
+  if (timelineEventsTable) {
+    Object.entries(timelineEventsTable).forEach(([eventId, row]) => {
+      const key = getEventKey(row, timezone);
+      if (key && seenEventKeys.has(key)) {
+        return;
+      }
+      const eventStartTime = safeParseDate(row.started_at);
+      const eventEndTime = safeParseDate(row.ended_at);
+      const timeToCheck = eventEndTime || eventStartTime;
+      if (!timeToCheck) {
+        return;
+      }
+
+      if (!isPast(timeToCheck)) {
+        items.push({
+          type: "event",
+          id: eventId,
+          data: row,
+        });
+      }
     });
   }
 
   items.sort((a, b) => {
-    const timeA =
-      a.type === "event"
-        ? a.data.started_at
-        : ((a.data as unknown as TimelineSessionRow).event_started_at ??
-          a.data.created_at);
-    const timeB =
-      b.type === "event"
-        ? b.data.started_at
-        : ((b.data as unknown as TimelineSessionRow).event_started_at ??
-          b.data.created_at);
-    const dateA = safeParseDate(timeA);
-    const dateB = safeParseDate(timeB);
+    const dateA = getItemTimestamp(a);
+    const dateB = getItemTimestamp(b);
     const timeAValue = dateA?.getTime() ?? 0;
     const timeBValue = dateB?.getTime() ?? 0;
+    if (timeBValue == timeAValue) {
+      return (a.data.title ?? "Untitled") > (b.data.title ?? "Untitled")
+        ? 1
+        : (a.data.title ?? "Untitled") < (b.data.title ?? "Untitled")
+          ? -1
+          : 0;
+    }
     return timeBValue - timeAValue;
   });
 
@@ -256,8 +287,10 @@ export function buildTimelineBuckets({
   >();
 
   items.forEach((item) => {
-    const itemDate = new Date(item.date + "T00:00:00");
-    const bucket = getBucketInfo(itemDate);
+    const bucket = getBucketInfo(
+      getItemTimestamp(item) ?? new Date(0),
+      timezone,
+    );
 
     if (!bucketMap.has(bucket.label)) {
       bucketMap.set(bucket.label, {

@@ -79,6 +79,15 @@ impl WhisperModel {
         }
     }
 
+    pub fn description(&self) -> String {
+        let mb = self.model_size_bytes() / (1024 * 1024);
+        if mb >= 1024 {
+            format!("{:.1} GB", mb as f64 / 1024.0)
+        } else {
+            format!("{} MB", mb)
+        }
+    }
+
     pub fn model_size_bytes(&self) -> u64 {
         match self {
             WhisperModel::QuantizedTiny => 43537433,

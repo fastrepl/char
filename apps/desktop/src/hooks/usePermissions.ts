@@ -25,6 +25,14 @@ export function usePermission(type: Permission) {
   const requestMutation = useMutation({
     mutationFn: () => permissionsCommands.requestPermission(type),
     onSuccess: () => {
+      if (type === "systemAudio") {
+        void message("The app will now restart to apply the changes", {
+          kind: "info",
+          title: "System Audio Status Changed",
+        });
+        setTimeout(() => relaunch(), 2000);
+        return;
+      }
       setTimeout(() => status.refetch(), 1000);
     },
   });

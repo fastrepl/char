@@ -61,6 +61,12 @@ export function useConnectionHealth(): HealthStatus {
 
   if (!isCloud) {
     const serverStatus = local.data?.status ?? "unavailable";
+    if (serverStatus === "not_downloaded") {
+      return {
+        status: "error",
+        message: "Selected model is not downloaded.",
+      };
+    }
     if (serverStatus === "loading") {
       return {
         status: "pending",

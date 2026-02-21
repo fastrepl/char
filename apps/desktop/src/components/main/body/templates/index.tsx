@@ -10,11 +10,11 @@ import {
 import {
   type ComponentRef,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import { createQueries } from "tinybase/with-schemas";
 
 import type { Template, TemplateSection, TemplateStorage } from "@hypr/store";
 import { Button } from "@hypr/ui/components/ui/button";
@@ -100,32 +100,24 @@ export type UserTemplate = Template & { id: string };
 
 export function useUserTemplates(): UserTemplate[] {
   const { user_id } = main.UI.useValues(main.STORE_ID);
-  const store = main.UI.useStore(main.STORE_ID);
+  const queries = main.UI.useQueries(main.STORE_ID);
 
-  const USER_TEMPLATE_QUERY = "user_templates";
+  useEffect(() => {
+    queries?.setParamValue(
+      main.QUERIES.userTemplates,
+      "user_id",
+      user_id ?? "",
+    );
+  }, [queries, user_id]);
 
-  const queries = main.UI.useCreateQueries(
-    store,
-    (store) =>
-      createQueries(store).setQueryDefinition(
-        USER_TEMPLATE_QUERY,
-        "templates",
-        ({ select, where }) => {
-          select("title");
-          select("description");
-          select("sections");
-          select("user_id");
-          where("user_id", user_id ?? "");
-        },
-      ),
-    [user_id],
+  const templates = main.UI.useResultTable(
+    main.QUERIES.userTemplates,
+    main.STORE_ID,
   );
 
-  const templates = main.UI.useResultTable(USER_TEMPLATE_QUERY, queries);
-
   return useMemo(() => {
-    return Object.entries(templates as Record<string, unknown>).map(
-      ([id, template]) => normalizeTemplateWithId(id, template),
+    return Object.entries(templates).map(([id, template]) =>
+      normalizeTemplateWithId(id, template as unknown),
     );
   }, [templates]);
 }
@@ -199,6 +191,7 @@ function TemplateView({ tab }: { tab: Extract<Tab, { type: "templates" }> }) {
     (id: string | null) => {
       updateTabState(tab, {
         ...tab.state,
+        isWebMode: false,
         showHomepage: false,
         selectedMineId: id,
         selectedWebIndex: null,
@@ -211,6 +204,7 @@ function TemplateView({ tab }: { tab: Extract<Tab, { type: "templates" }> }) {
     (index: number | null) => {
       updateTabState(tab, {
         ...tab.state,
+        isWebMode: true,
         showHomepage: false,
         selectedMineId: null,
         selectedWebIndex: index,
@@ -284,7 +278,6 @@ function TemplateView({ tab }: { tab: Extract<Tab, { type: "templates" }> }) {
         sections: template.sections.map((section) => ({ ...section })),
       });
 
-      setIsWebMode(false);
       setSelectedMineId(newId);
     },
     [user_id, setRow, setIsWebMode, setSelectedMineId],
@@ -305,7 +298,6 @@ function TemplateView({ tab }: { tab: Extract<Tab, { type: "templates" }> }) {
       sections: [],
     });
 
-    setIsWebMode(false);
     setSelectedMineId(newId);
   }, [user_id, setRow, setIsWebMode, setSelectedMineId]);
 

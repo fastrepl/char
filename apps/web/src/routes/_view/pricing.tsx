@@ -112,7 +112,8 @@ function TeamPricingBanner() {
     >
       <span>
         <strong>Early Bird Discount:</strong> Get 68% off as we launch our new
-        version and help with migration
+        version and help with migration —{" "}
+        <strong>offer ends February 28th</strong>
       </span>
     </div>
   );
@@ -123,7 +124,7 @@ function HeroSection() {
     <section className="flex flex-col items-center text-center gap-6 py-24 px-4 laptop:px-0 border-b border-neutral-100">
       <div className="flex flex-col gap-4 max-w-3xl">
         <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600">
-          Hyprnote Pricing
+          Char Pricing
         </h1>
         <p className="text-lg sm:text-xl text-neutral-600">
           Choose the plan that fits your needs. Start for free, upgrade when you
@@ -335,7 +336,7 @@ function CTASection() {
         <div className="mb-4 size-40 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[48px] bg-transparent">
           <Image
             src="/api/images/hyprnote/icon.png"
-            alt="Hyprnote"
+            alt="Char"
             width={144}
             height={144}
             className="size-36 mx-auto rounded-[40px] border border-neutral-100"

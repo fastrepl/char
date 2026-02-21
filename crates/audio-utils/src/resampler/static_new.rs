@@ -1,4 +1,5 @@
 use futures_util::{Stream, pin_mut};
+use pin_project::pin_project;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
@@ -7,7 +8,7 @@ use rubato::{FastFixedIn, PolynomialDegree};
 
 use super::driver::RubatoChunkResampler;
 
-pub trait AsyncSourceChunkResampleExt: AsyncSource + Sized + Unpin {
+pub trait AsyncSourceChunkResampleExt: AsyncSource + Sized {
     fn resampled_chunks(
         self,
         target_rate: u32,
@@ -17,11 +18,12 @@ pub trait AsyncSourceChunkResampleExt: AsyncSource + Sized + Unpin {
     }
 }
 
-impl<T> AsyncSourceChunkResampleExt for T where T: AsyncSource + Sized + Unpin {}
+impl<T> AsyncSourceChunkResampleExt for T where T: AsyncSource + Sized {}
 
+#[pin_project]
 pub struct ResamplerStaticNew<S>
 where
-    S: AsyncSource + Unpin,
+    S: AsyncSource,
 {
     source: S,
     driver: RubatoChunkResampler<FastFixedIn<f32>, 1>,
@@ -30,7 +32,7 @@ where
 
 impl<S> ResamplerStaticNew<S>
 where
-    S: AsyncSource + Unpin,
+    S: AsyncSource,
 {
     pub fn new(
         source: S,
@@ -85,12 +87,12 @@ where
 
 impl<S> Stream for ResamplerStaticNew<S>
 where
-    S: AsyncSource + Unpin,
+    S: AsyncSource,
 {
     type Item = Result<Vec<f32>, crate::Error>;
 
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        let me = Pin::into_inner(self);
+        let me = self.get_mut();
 
         loop {
             if let Some(chunk) = me.driver.take_full_chunk() {

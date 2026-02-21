@@ -1,14 +1,28 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
+  BookOpen,
+  Building2,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   ChevronUp,
+  FileText,
+  History,
+  LayoutTemplate,
+  Map,
   Menu,
+  MessageCircle,
   PanelLeft,
   PanelLeftClose,
+  X,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { cn } from "@hypr/utils";
+
 import { SearchTrigger } from "@/components/search";
+import { useBlogToc } from "@/hooks/use-blog-toc";
 import { useDocsDrawer } from "@/hooks/use-docs-drawer";
 import { useHandbookDrawer } from "@/hooks/use-handbook-drawer";
 import { getPlatformCTA, usePlatform } from "@/hooks/use-platform";
@@ -26,30 +40,50 @@ function getMaxWidthClass(pathname: string): string {
   return isBlogOrDocs ? "max-w-6xl" : "max-w-6xl";
 }
 
-const productsList = [
-  { to: "/product/notepad", label: "Notepad" },
-  { to: "/product/memory", label: "Memory", badge: "Coming Soon" },
-  { to: "/product/bot", label: "Bot", badge: "Coming Soon" },
-  { to: "/product/api", label: "API", badge: "Coming Soon" },
-  { to: "/product/extensions", label: "Extensions", badge: "Coming Soon" },
-];
-
 const featuresList = [
   { to: "/product/ai-notetaking", label: "AI Notetaking" },
-  { to: "/product/ai-assistant", label: "AI Assistant" },
-  { to: "/product/mini-apps", label: "Mini Apps" },
-  { to: "/gallery", label: "Templates & Shortcuts" },
+  { to: "/product/search", label: "Searchable Notes" },
+  { to: "/gallery?type=template", label: "Custom Templates" },
+  { to: "/product/markdown", label: "Markdown Files" },
+  { to: "/product/flexible-ai", label: "Flexible AI" },
+  { to: "/opensource", label: "Open Source" },
+];
+
+const solutionsList = [
+  { to: "/solution/knowledge-workers", label: "For Knowledge Workers" },
+  { to: "/enterprise", label: "For Enterprises" },
+  { to: "/product/api", label: "For Developers" },
+];
+
+const resourcesList: {
+  to: string;
+  label: string;
+  icon: LucideIcon;
+  external?: boolean;
+}[] = [
+  { to: "/blog/", label: "Blog", icon: FileText },
+  { to: "/docs/", label: "Documentation", icon: BookOpen },
   {
-    to: "/product/integrations",
-    label: "Integrations",
-    badge: "Coming Soon",
+    to: "/gallery?type=template",
+    label: "Meeting Templates",
+    icon: LayoutTemplate,
+  },
+  { to: "/changelog/", label: "Changelog", icon: History },
+  { to: "/roadmap/", label: "Roadmap", icon: Map },
+  { to: "/company-handbook/", label: "Company Handbook", icon: Building2 },
+  {
+    to: "https://discord.gg/hyprnote",
+    label: "Community",
+    icon: MessageCircle,
+    external: true,
   },
 ];
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProductOpen, setIsProductOpen] = useState(false);
-  const [showMobileSearch, setShowMobileSearch] = useState(true);
+  const [isResourcesOpen, setIsResourcesOpen] = useState(false);
+  const [showMobileHeader, setShowMobileHeader] = useState(true);
   const platform = usePlatform();
   const platformCTA = getPlatformCTA(platform);
   const router = useRouterState();
@@ -57,8 +91,12 @@ export function Header() {
   const isDocsPage = router.location.pathname.startsWith("/docs");
   const isHandbookPage =
     router.location.pathname.startsWith("/company-handbook");
+  const isBlogArticlePage =
+    router.location.pathname.startsWith("/blog/") &&
+    router.location.pathname !== "/blog/";
   const docsDrawer = useDocsDrawer();
   const handbookDrawer = useHandbookDrawer();
+  const blogToc = useBlogToc();
   const lastScrollY = useRef(0);
 
   useEffect(() => {
@@ -67,14 +105,18 @@ export function Header() {
     }
 
     const handleScroll = () => {
+      if (window.innerWidth >= 768) {
+        return;
+      }
+
       const currentScrollY = window.scrollY;
 
       if (currentScrollY < 10) {
-        setShowMobileSearch(true);
+        setShowMobileHeader(true);
       } else if (currentScrollY > lastScrollY.current) {
-        setShowMobileSearch(false);
-      } else if (lastScrollY.current - currentScrollY > 5) {
-        setShowMobileSearch(true);
+        setShowMobileHeader(false);
+      } else if (currentScrollY < lastScrollY.current) {
+        setShowMobileHeader(true);
       }
 
       lastScrollY.current = currentScrollY;
@@ -86,9 +128,13 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 bg-white/80 backdrop-blur-xs border-b border-neutral-100 z-50 h-17.25">
+      <header
+        className={`fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-xs border-b border-neutral-100 z-50 max-md:transition-transform max-md:duration-300 ${
+          showMobileHeader ? "max-md:translate-y-0" : "max-md:-translate-y-full"
+        }`}
+      >
         <div
-          className={`${maxWidthClass} mx-auto px-4 laptop:px-0 border-x border-neutral-100 h-full`}
+          className={`${maxWidthClass} mx-auto px-4 laptop:px-0 border-x border-neutral-100 h-17.25`}
         >
           <div className="flex items-center justify-between h-full">
             <LeftNav
@@ -99,6 +145,8 @@ export function Header() {
               setIsMenuOpen={setIsMenuOpen}
               isProductOpen={isProductOpen}
               setIsProductOpen={setIsProductOpen}
+              isResourcesOpen={isResourcesOpen}
+              setIsResourcesOpen={setIsResourcesOpen}
             />
             <DesktopNav platformCTA={platformCTA} />
             <MobileNav
@@ -113,27 +161,36 @@ export function Header() {
             />
           </div>
         </div>
-      </header>
-
-      {(isDocsPage || isHandbookPage) && (
-        <div
-          className={`sticky top-17.25 bg-white/80 backdrop-blur-xs border-b border-neutral-100 z-40 md:hidden transition-transform duration-300 ${
-            showMobileSearch ? "translate-y-0" : "-translate-y-full"
-          }`}
-        >
+        {(isDocsPage || isHandbookPage) && (
           <div
-            className={`${maxWidthClass} mx-auto px-4 border-x border-neutral-100 py-2`}
+            className={`${maxWidthClass} mx-auto px-4 border-x border-neutral-100 py-2 md:hidden`}
           >
             <SearchTrigger variant="mobile" />
           </div>
-        </div>
-      )}
+        )}
+        {isBlogArticlePage && blogToc && blogToc.toc.length > 0 && (
+          <BlogTocSubBar blogToc={blogToc} maxWidthClass={maxWidthClass} />
+        )}
+      </header>
+
+      {/* Spacer to account for fixed header */}
+      <div
+        className={
+          isDocsPage || isHandbookPage
+            ? "h-17.25 md:h-17.25 max-md:h-[calc(69px+52px)]"
+            : isBlogArticlePage && blogToc && blogToc.toc.length > 0
+              ? "h-[calc(69px+44px)] sm:h-17.25"
+              : "h-17.25"
+        }
+      />
 
       <MobileMenu
         isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
         isProductOpen={isProductOpen}
         setIsProductOpen={setIsProductOpen}
+        isResourcesOpen={isResourcesOpen}
+        setIsResourcesOpen={setIsResourcesOpen}
         platform={platform}
         platformCTA={platformCTA}
         maxWidthClass={maxWidthClass}
@@ -150,6 +207,8 @@ function LeftNav({
   setIsMenuOpen,
   isProductOpen,
   setIsProductOpen,
+  isResourcesOpen,
+  setIsResourcesOpen,
 }: {
   isDocsPage: boolean;
   isHandbookPage: boolean;
@@ -158,6 +217,8 @@ function LeftNav({
   setIsMenuOpen: (open: boolean) => void;
   isProductOpen: boolean;
   setIsProductOpen: (open: boolean) => void;
+  isResourcesOpen: boolean;
+  setIsResourcesOpen: (open: boolean) => void;
 }) {
   return (
     <div className="flex items-center gap-4">
@@ -169,9 +230,19 @@ function LeftNav({
         setIsMenuOpen={setIsMenuOpen}
       />
       <Logo />
+      <Link
+        to="/why-hyprnote/"
+        className="hidden md:block text-sm text-neutral-600 hover:text-neutral-800 transition-all hover:underline decoration-dotted"
+      >
+        Why Char
+      </Link>
       <ProductDropdown
         isProductOpen={isProductOpen}
         setIsProductOpen={setIsProductOpen}
+      />
+      <ResourcesDropdown
+        isResourcesOpen={isResourcesOpen}
+        setIsResourcesOpen={setIsResourcesOpen}
       />
       <NavLinks />
     </div>
@@ -248,7 +319,7 @@ function Logo() {
       to="/"
       className="font-semibold text-2xl font-serif hover:scale-105 transition-transform mr-4"
     >
-      <img src="/api/images/hyprnote/logo.svg" alt="Hyprnote" className="h-6" />
+      Char
     </Link>
   );
 }
@@ -271,42 +342,15 @@ function ProductDropdown({
         {isProductOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
       </button>
       {isProductOpen && (
-        <div className="absolute top-full left-0 pt-2 w-130 z-50">
+        <div className="absolute top-full left-0 pt-2 w-150 z-50">
           <div className="bg-white border border-neutral-200 rounded-xs shadow-lg py-2">
             <div className="px-3 py-2 grid grid-cols-2 gap-x-6">
-              <ProductsList onClose={() => setIsProductOpen(false)} />
               <FeaturesList onClose={() => setIsProductOpen(false)} />
+              <SolutionsList onClose={() => setIsProductOpen(false)} />
             </div>
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function ProductsList({ onClose }: { onClose: () => void }) {
-  return (
-    <div>
-      <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
-        Products
-      </div>
-      {productsList.map((link) => (
-        <Link
-          key={link.to}
-          to={link.to}
-          onClick={onClose}
-          className="py-2 text-sm text-neutral-700 flex items-center justify-between group"
-        >
-          <span className="group-hover:underline decoration-dotted">
-            {link.label}
-          </span>
-          {link.badge && (
-            <span className="text-[10px] bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900 px-2 py-0.5 rounded-full">
-              {link.badge}
-            </span>
-          )}
-        </Link>
-      ))}
     </div>
   );
 }
@@ -322,50 +366,105 @@ function FeaturesList({ onClose }: { onClose: () => void }) {
           key={link.to}
           to={link.to}
           onClick={onClose}
-          className="py-2 text-sm text-neutral-700 flex items-center justify-between group"
+          className="py-2 text-sm text-neutral-700 flex items-center group"
         >
           <span className="group-hover:underline decoration-dotted">
             {link.label}
           </span>
-          {link.badge && (
-            <span className="text-[10px] bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900 px-2 py-0.5 rounded-full">
-              {link.badge}
-            </span>
-          )}
         </Link>
       ))}
     </div>
   );
 }
 
+function SolutionsList({ onClose }: { onClose: () => void }) {
+  return (
+    <div>
+      <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
+        Solutions
+      </div>
+      {solutionsList.map((link) => (
+        <Link
+          key={link.to}
+          to={link.to}
+          onClick={onClose}
+          className="py-2 text-sm text-neutral-700 flex items-center group"
+        >
+          <span className="group-hover:underline decoration-dotted">
+            {link.label}
+          </span>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+function ResourcesDropdown({
+  isResourcesOpen,
+  setIsResourcesOpen,
+}: {
+  isResourcesOpen: boolean;
+  setIsResourcesOpen: (open: boolean) => void;
+}) {
+  return (
+    <div
+      className="relative hidden sm:block"
+      onMouseEnter={() => setIsResourcesOpen(true)}
+      onMouseLeave={() => setIsResourcesOpen(false)}
+    >
+      <button className="flex items-center gap-1 text-sm text-neutral-600 hover:text-neutral-800 transition-all py-2">
+        Resources
+        {isResourcesOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+      </button>
+      {isResourcesOpen && (
+        <div className="absolute top-full left-0 pt-2 w-56 z-50">
+          <div className="bg-white border border-neutral-200 rounded-xs shadow-lg py-2">
+            <div className="px-3 py-2">
+              {resourcesList.map((link) =>
+                link.external ? (
+                  <a
+                    key={link.to}
+                    href={link.to}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsResourcesOpen(false)}
+                    className="py-2 text-sm text-neutral-700 flex items-center gap-2 group"
+                  >
+                    <link.icon size={16} className="text-neutral-400" />
+                    <span className="group-hover:underline decoration-dotted">
+                      {link.label}
+                    </span>
+                  </a>
+                ) : (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    onClick={() => setIsResourcesOpen(false)}
+                    className="py-2 text-sm text-neutral-700 flex items-center gap-2 group"
+                  >
+                    <link.icon size={16} className="text-neutral-400" />
+                    <span className="group-hover:underline decoration-dotted">
+                      {link.label}
+                    </span>
+                  </Link>
+                ),
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function NavLinks() {
   return (
-    <>
-      <Link
-        to="/docs/"
-        className="hidden md:block text-sm text-neutral-600 hover:text-neutral-800 transition-all hover:underline decoration-dotted"
-      >
-        Docs
-      </Link>
-      <Link
-        to="/blog/"
-        className="hidden sm:block text-sm text-neutral-600 hover:text-neutral-800 transition-all hover:underline decoration-dotted"
-      >
-        Blog
-      </Link>
-      <Link
-        to="/pricing/"
-        className="hidden sm:block text-sm text-neutral-600 hover:text-neutral-800 transition-all hover:underline decoration-dotted"
-      >
-        Pricing
-      </Link>
-      <Link
-        to="/enterprise/"
-        className="hidden md:block text-sm text-neutral-600 hover:text-neutral-800 transition-all hover:underline decoration-dotted"
-      >
-        Enterprise
-      </Link>
-    </>
+    <Link
+      to="/pricing/"
+      className="hidden sm:block text-sm text-neutral-600 hover:text-neutral-800 transition-all hover:underline decoration-dotted"
+    >
+      Pricing
+    </Link>
   );
 }
 
@@ -406,7 +505,13 @@ function MobileNav({
   return (
     <div className="sm:hidden flex items-center gap-3">
       {!hideCTA && (
-        <CTAButton platformCTA={platformCTA} platform={platform} mobile />
+        <div
+          className={cn("transition-opacity duration-200 ease-out", [
+            isMenuOpen ? "opacity-0" : "opacity-100",
+          ])}
+        >
+          <CTAButton platformCTA={platformCTA} platform={platform} mobile />
+        </div>
       )}
       <button
         onClick={() => {
@@ -424,7 +529,11 @@ function MobileNav({
         aria-label={isMenuOpen ? "Close menu" : "Open menu"}
         aria-expanded={isMenuOpen}
       >
-        <Menu className="text-neutral-600" size={16} />
+        {isMenuOpen ? (
+          <X className="text-neutral-600" size={16} />
+        ) : (
+          <Menu className="text-neutral-600" size={16} />
+        )}
       </button>
     </div>
   );
@@ -471,6 +580,8 @@ function MobileMenu({
   setIsMenuOpen,
   isProductOpen,
   setIsProductOpen,
+  isResourcesOpen,
+  setIsResourcesOpen,
   platform,
   platformCTA,
   maxWidthClass,
@@ -479,6 +590,8 @@ function MobileMenu({
   setIsMenuOpen: (open: boolean) => void;
   isProductOpen: boolean;
   setIsProductOpen: (open: boolean) => void;
+  isResourcesOpen: boolean;
+  setIsResourcesOpen: (open: boolean) => void;
   platform: string;
   platformCTA: ReturnType<typeof getPlatformCTA>;
   maxWidthClass: string;
@@ -497,6 +610,8 @@ function MobileMenu({
             <MobileMenuLinks
               isProductOpen={isProductOpen}
               setIsProductOpen={setIsProductOpen}
+              isResourcesOpen={isResourcesOpen}
+              setIsResourcesOpen={setIsResourcesOpen}
               setIsMenuOpen={setIsMenuOpen}
             />
             <MobileMenuCTAs
@@ -514,46 +629,41 @@ function MobileMenu({
 function MobileMenuLinks({
   isProductOpen,
   setIsProductOpen,
+  isResourcesOpen,
+  setIsResourcesOpen,
   setIsMenuOpen,
 }: {
   isProductOpen: boolean;
   setIsProductOpen: (open: boolean) => void;
+  isResourcesOpen: boolean;
+  setIsResourcesOpen: (open: boolean) => void;
   setIsMenuOpen: (open: boolean) => void;
 }) {
   return (
     <div className="flex flex-col gap-4">
+      <Link
+        to="/why-hyprnote/"
+        onClick={() => setIsMenuOpen(false)}
+        className="block text-base text-neutral-700 hover:text-neutral-900 transition-colors"
+      >
+        Why Char
+      </Link>
       <MobileProductSection
         isProductOpen={isProductOpen}
         setIsProductOpen={setIsProductOpen}
         setIsMenuOpen={setIsMenuOpen}
       />
-      <Link
-        to="/docs/"
-        onClick={() => setIsMenuOpen(false)}
-        className="block text-base text-neutral-700 hover:text-neutral-900 transition-colors"
-      >
-        Docs
-      </Link>
-      <Link
-        to="/blog/"
-        onClick={() => setIsMenuOpen(false)}
-        className="block text-base text-neutral-700 hover:text-neutral-900 transition-colors"
-      >
-        Blog
-      </Link>
+      <MobileResourcesSection
+        isResourcesOpen={isResourcesOpen}
+        setIsResourcesOpen={setIsResourcesOpen}
+        setIsMenuOpen={setIsMenuOpen}
+      />
       <Link
         to="/pricing/"
         onClick={() => setIsMenuOpen(false)}
         className="block text-base text-neutral-700 hover:text-neutral-900 transition-colors"
       >
         Pricing
-      </Link>
-      <Link
-        to="/enterprise/"
-        onClick={() => setIsMenuOpen(false)}
-        className="block text-base text-neutral-700 hover:text-neutral-900 transition-colors"
-      >
-        Enterprise
       </Link>
     </div>
   );
@@ -579,39 +689,61 @@ function MobileProductSection({
       </button>
       {isProductOpen && (
         <div className="mt-3 ml-4 flex flex-col gap-4 border-l-2 border-neutral-200 pl-4">
-          <MobileProductsList setIsMenuOpen={setIsMenuOpen} />
           <MobileFeaturesList setIsMenuOpen={setIsMenuOpen} />
+          <MobileSolutionsList setIsMenuOpen={setIsMenuOpen} />
         </div>
       )}
     </div>
   );
 }
 
-function MobileProductsList({
+function MobileResourcesSection({
+  isResourcesOpen,
+  setIsResourcesOpen,
   setIsMenuOpen,
 }: {
+  isResourcesOpen: boolean;
+  setIsResourcesOpen: (open: boolean) => void;
   setIsMenuOpen: (open: boolean) => void;
 }) {
   return (
     <div>
-      <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
-        Products
-      </div>
-      {productsList.map((link) => (
-        <Link
-          key={link.to}
-          to={link.to}
-          onClick={() => setIsMenuOpen(false)}
-          className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors flex items-center justify-between py-1"
-        >
-          <span>{link.label}</span>
-          {link.badge && (
-            <span className="text-[10px] bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900 px-2 py-0.5 rounded-full">
-              {link.badge}
-            </span>
+      <button
+        onClick={() => setIsResourcesOpen(!isResourcesOpen)}
+        className="flex items-center justify-between w-full text-base text-neutral-700 hover:text-neutral-900 transition-colors"
+      >
+        <span>Resources</span>
+        {isResourcesOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+      </button>
+      {isResourcesOpen && (
+        <div className="mt-3 ml-4 flex flex-col gap-2 border-l-2 border-neutral-200 pl-4">
+          {resourcesList.map((link) =>
+            link.external ? (
+              <a
+                key={link.to}
+                href={link.to}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setIsMenuOpen(false)}
+                className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors py-1 flex items-center gap-2"
+              >
+                <link.icon size={14} className="text-neutral-400" />
+                {link.label}
+              </a>
+            ) : (
+              <Link
+                key={link.to}
+                to={link.to}
+                onClick={() => setIsMenuOpen(false)}
+                className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors py-1 flex items-center gap-2"
+              >
+                <link.icon size={14} className="text-neutral-400" />
+                {link.label}
+              </Link>
+            ),
           )}
-        </Link>
-      ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -626,21 +758,109 @@ function MobileFeaturesList({
       <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
         Features
       </div>
-      {featuresList.map((link) => (
-        <Link
-          key={link.to}
-          to={link.to}
-          onClick={() => setIsMenuOpen(false)}
-          className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors flex items-center justify-between py-1"
+      <div className="flex flex-col gap-2 pb-4">
+        {featuresList.map((link) => (
+          <Link
+            key={link.to}
+            to={link.to}
+            onClick={() => setIsMenuOpen(false)}
+            className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors py-1"
+          >
+            {link.label}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MobileSolutionsList({
+  setIsMenuOpen,
+}: {
+  setIsMenuOpen: (open: boolean) => void;
+}) {
+  return (
+    <div>
+      <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
+        Solutions
+      </div>
+      <div className="flex flex-col gap-2">
+        {solutionsList.map((link) => (
+          <Link
+            key={link.to}
+            to={link.to}
+            onClick={() => setIsMenuOpen(false)}
+            className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors py-1"
+          >
+            {link.label}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BlogTocSubBar({
+  blogToc,
+  maxWidthClass,
+}: {
+  blogToc: NonNullable<ReturnType<typeof useBlogToc>>;
+  maxWidthClass: string;
+}) {
+  const { toc, activeId, scrollToHeading } = blogToc;
+  const activeIndex = toc.findIndex((item) => item.id === activeId);
+  const activeItem = activeIndex >= 0 ? toc[activeIndex] : toc[0];
+
+  const goPrev = () => {
+    const prevIndex = Math.max(0, activeIndex - 1);
+    scrollToHeading(toc[prevIndex].id);
+  };
+
+  const goNext = () => {
+    const nextIndex = Math.min(toc.length - 1, activeIndex + 1);
+    scrollToHeading(toc[nextIndex].id);
+  };
+
+  return (
+    <div
+      className={`${maxWidthClass} mx-auto border-x border-neutral-100 border-t border-t-neutral-50 sm:hidden`}
+    >
+      <div className="flex items-center h-11 px-2">
+        <button
+          onClick={goPrev}
+          disabled={activeIndex <= 0}
+          className={cn([
+            "shrink-0 p-1.5 rounded-md transition-colors cursor-pointer",
+            activeIndex <= 0
+              ? "text-neutral-200"
+              : "text-neutral-500 hover:text-stone-700 hover:bg-stone-50",
+          ])}
         >
-          <span>{link.label}</span>
-          {link.badge && (
-            <span className="text-[10px] bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900 px-2 py-0.5 rounded-full">
-              {link.badge}
-            </span>
-          )}
-        </Link>
-      ))}
+          <ChevronLeft size={14} />
+        </button>
+        <button
+          onClick={() => {
+            if (activeItem) scrollToHeading(activeItem.id);
+          }}
+          className="flex-1 min-w-0 px-2 cursor-pointer"
+        >
+          <p className="text-sm text-stone-700 font-medium truncate text-center">
+            {activeItem?.text}
+          </p>
+        </button>
+        <button
+          onClick={goNext}
+          disabled={activeIndex >= toc.length - 1}
+          className={cn([
+            "shrink-0 p-1.5 rounded-md transition-colors cursor-pointer",
+            activeIndex >= toc.length - 1
+              ? "text-neutral-200"
+              : "text-neutral-500 hover:text-stone-700 hover:bg-stone-50",
+          ])}
+        >
+          <ChevronRight size={14} />
+        </button>
+      </div>
     </div>
   );
 }
@@ -655,11 +875,11 @@ function MobileMenuCTAs({
   setIsMenuOpen: (open: boolean) => void;
 }) {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-row sticky bottom-4 gap-3">
       <Link
         to="/auth/"
         onClick={() => setIsMenuOpen(false)}
-        className="block w-full px-4 py-3 text-center text-sm text-neutral-700 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+        className="block w-full px-4 py-3 text-center text-sm text-neutral-700 border border-neutral-200 bg-white rounded-lg hover:bg-neutral-50 transition-colors"
       >
         Get started
       </Link>

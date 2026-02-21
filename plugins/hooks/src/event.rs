@@ -41,7 +41,7 @@ fn push_cli_arg(args: &mut Vec<OsString>, field_name: &str, value: &str) {
 pub struct AfterListeningStoppedArgs {
     /// Path to the resource directory.
     pub resource_dir: String,
-    /// Application-specific Hyprnote data.
+    /// Application-specific Char data.
     pub app_hyprnote: String,
     /// Optional meeting-specific data.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -67,7 +67,7 @@ impl HookArgs for AfterListeningStoppedArgs {
 pub struct BeforeListeningStartedArgs {
     /// Path to the resource directory.
     pub resource_dir: String,
-    /// Application-specific Hyprnote data.
+    /// Application-specific Char data.
     pub app_hyprnote: String,
     /// Optional meeting-specific data.
     #[serde(skip_serializing_if = "Option::is_none")]

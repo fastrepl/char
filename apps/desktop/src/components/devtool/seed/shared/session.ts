@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker/locale/en";
 
-import type { SessionStorage } from "@hypr/store";
+import type { SessionEvent, SessionStorage } from "@hypr/store";
 import { md2json } from "@hypr/tiptap/shared";
 
 import { DEFAULT_USER_ID, id } from "../../../../utils";
@@ -42,7 +42,7 @@ export const generateEnhancedMarkdown = () => {
 };
 
 export const createSession = (
-  eventId?: string,
+  event?: SessionEvent,
   folderId?: string,
 ): { id: string; data: SessionStorage } => {
   const title = generateTitle();
@@ -58,7 +58,7 @@ export const createSession = (
       title,
       raw_md: JSON.stringify(md2json(raw_md)),
       created_at: faker.date.recent({ days: 30 }).toISOString(),
-      event_id: eventId,
+      event_json: event ? JSON.stringify(event) : undefined,
       folder_id: folderId,
     },
   };

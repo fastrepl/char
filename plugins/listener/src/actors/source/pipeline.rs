@@ -176,6 +176,7 @@ impl Pipeline {
 struct AudioBuffer {
     buffer: VecDeque<BufferedAudio>,
     max_size: usize,
+    overflowing: bool,
 }
 
 impl AudioBuffer {
@@ -183,19 +184,27 @@ impl AudioBuffer {
         Self {
             buffer: VecDeque::new(),
             max_size,
+            overflowing: false,
         }
     }
 
     fn push(&mut self, mic: Arc<[f32]>, spk: Arc<[f32]>, mode: ChannelMode) {
         if self.buffer.len() >= self.max_size {
             self.buffer.pop_front();
-            tracing::warn!("audio_buffer_overflow");
+            if !self.overflowing {
+                self.overflowing = true;
+                tracing::warn!("audio_buffer_overflow_listener_unavailable");
+            }
         }
         self.buffer.push_back((mic, spk, mode));
     }
 
     fn pop(&mut self) -> Option<BufferedAudio> {
-        self.buffer.pop_front()
+        let item = self.buffer.pop_front();
+        if self.overflowing && self.buffer.len() < self.max_size {
+            self.overflowing = false;
+        }
+        item
     }
 
     fn len(&self) -> usize {

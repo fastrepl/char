@@ -1,14 +1,21 @@
 import { Icon } from "@iconify-icon/react";
 import { useMutation } from "@tanstack/react-query";
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { ArrowLeftIcon, MailIcon } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
 
 import { cn } from "@hypr/utils";
 
 import { Image } from "@/components/image";
-import { doAuth, doMagicLinkAuth, fetchUser } from "@/functions/auth";
-import { getSupabaseServerClient } from "@/functions/supabase";
+import {
+  createDesktopSession,
+  doAuth,
+  doMagicLinkAuth,
+  doPasswordSignIn,
+  doPasswordSignUp,
+  fetchUser,
+} from "@/functions/auth";
 
 const validateSearch = z.object({
   flow: z.enum(["desktop", "web"]).default("web"),
@@ -33,17 +40,18 @@ export const Route = createFileRoute("/auth")({
       }
 
       if (search.flow === "desktop") {
-        const supabase = getSupabaseServerClient();
-        const { data } = await supabase.auth.getSession();
+        const result = await createDesktopSession({
+          data: { email: user.email },
+        });
 
-        if (data.session) {
+        if (result) {
           throw redirect({
             to: "/callback/auth/",
             search: {
               flow: "desktop",
               scheme: search.scheme,
-              access_token: data.session.access_token,
-              refresh_token: data.session.refresh_token,
+              access_token: result.access_token,
+              refresh_token: result.refresh_token,
             },
           });
         }
@@ -52,42 +60,68 @@ export const Route = createFileRoute("/auth")({
   },
 });
 
+type AuthView = "main" | "email";
+
 function Component() {
   const { flow, scheme, redirect, provider, rra } = Route.useSearch();
+  const [view, setView] = useState<AuthView>("main");
 
   const showGoogle = !provider || provider === "google";
   const showGithub = !provider || provider === "github";
-  const showMagicLink = !provider;
+  const showEmail = !provider;
 
   return (
     <Container>
       <Header />
-      <div className="flex flex-col gap-2">
-        {showGoogle && (
-          <OAuthButton
-            flow={flow}
-            scheme={scheme}
-            redirect={redirect}
-            provider="google"
-          />
-        )}
-        {showGithub && (
-          <OAuthButton
-            flow={flow}
-            scheme={scheme}
-            redirect={redirect}
-            provider="github"
-            rra={rra}
-          />
-        )}
-      </div>
-      {showMagicLink && (
+      {view === "main" && (
         <>
-          <Divider />
-          <MagicLinkForm flow={flow} scheme={scheme} redirect={redirect} />
+          <div className="flex flex-col gap-2">
+            {showGoogle && (
+              <OAuthButton
+                flow={flow}
+                scheme={scheme}
+                redirect={redirect}
+                provider="google"
+              />
+            )}
+            {showGithub && (
+              <OAuthButton
+                flow={flow}
+                scheme={scheme}
+                redirect={redirect}
+                provider="github"
+                rra={rra}
+              />
+            )}
+            {showEmail && (
+              <button
+                onClick={() => setView("email")}
+                className={cn([
+                  "w-full px-4 py-2 cursor-pointer",
+                  "border border-neutral-300",
+                  "rounded-lg font-medium text-neutral-700",
+                  "hover:bg-neutral-50",
+                  "focus:outline-hidden focus:ring-2 focus:ring-stone-500 focus:ring-offset-2",
+                  "transition-colors",
+                  "flex items-center justify-center gap-2",
+                ])}
+              >
+                <MailIcon className="size-4" />
+                Sign in with Email
+              </button>
+            )}
+          </div>
+          <LegalText />
         </>
       )}
-      <PrivacyPolicy />
+      {view === "email" && (
+        <EmailAuthView
+          flow={flow}
+          scheme={scheme}
+          redirect={redirect}
+          onBack={() => setView("main")}
+        />
+      )}
     </Container>
   );
 }
@@ -120,27 +154,318 @@ function Header() {
       >
         <Image
           src="/api/images/hyprnote/icon.png"
-          alt="Hyprnote"
+          alt="Char"
           width={96}
           height={96}
           className={cn(["size-24", "rounded-3xl border border-neutral-200"])}
         />
       </div>
       <h1 className="text-3xl font-serif text-stone-800 mb-2">
-        Welcome to Hyprnote
+        Welcome to Char
       </h1>
     </div>
   );
 }
 
-function Divider() {
+function LegalText() {
   return (
-    <div className="flex items-center gap-3 my-4">
-      <div className="flex-1 h-px bg-neutral-200" />
-      <span className="text-sm text-neutral-400">or</span>
-      <div className="flex-1 h-px bg-neutral-200" />
+    <p className="text-xs text-neutral-500 mt-4 text-center">
+      By signing up, you agree to our{" "}
+      <a
+        href="https://hyprnote.com/legal/terms"
+        className="underline hover:text-neutral-700"
+      >
+        Terms of Service
+      </a>{" "}
+      and{" "}
+      <a
+        href="https://hyprnote.com/legal/privacy"
+        className="underline hover:text-neutral-700"
+      >
+        Privacy Policy
+      </a>
+      .
+    </p>
+  );
+}
+
+type EmailMode = "password" | "magic-link";
+
+function EmailAuthView({
+  flow,
+  scheme,
+  redirect,
+  onBack,
+}: {
+  flow: "desktop" | "web";
+  scheme?: string;
+  redirect?: string;
+  onBack: () => void;
+}) {
+  const [mode, setMode] = useState<EmailMode>("password");
+
+  return (
+    <div className="flex flex-col gap-4">
+      <button
+        onClick={onBack}
+        className="flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-700 transition-colors self-start -mt-2 mb-1"
+      >
+        <ArrowLeftIcon className="size-3.5" />
+        Back
+      </button>
+
+      <div className="flex gap-1 p-1 bg-neutral-100 rounded-lg">
+        <button
+          onClick={() => setMode("password")}
+          className={cn([
+            "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors",
+            mode === "password"
+              ? "bg-white text-neutral-900 shadow-sm"
+              : "text-neutral-500 hover:text-neutral-700",
+          ])}
+        >
+          Password
+        </button>
+        <button
+          onClick={() => setMode("magic-link")}
+          className={cn([
+            "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors",
+            mode === "magic-link"
+              ? "bg-white text-neutral-900 shadow-sm"
+              : "text-neutral-500 hover:text-neutral-700",
+          ])}
+        >
+          Magic Link
+        </button>
+      </div>
+
+      {mode === "password" && (
+        <PasswordForm flow={flow} scheme={scheme} redirect={redirect} />
+      )}
+      {mode === "magic-link" && (
+        <MagicLinkForm flow={flow} scheme={scheme} redirect={redirect} />
+      )}
+
+      <LegalText />
     </div>
   );
+}
+
+function PasswordForm({
+  flow,
+  scheme,
+  redirect,
+}: {
+  flow: "desktop" | "web";
+  scheme?: string;
+  redirect?: string;
+}) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  const signInMutation = useMutation({
+    mutationFn: () =>
+      doPasswordSignIn({
+        data: { email, password, flow, scheme, redirect },
+      }),
+    onSuccess: (result) => {
+      if (result && "error" in result && result.error) {
+        setErrorMessage(
+          (result as { error: boolean; message: string }).message,
+        );
+        return;
+      }
+      if (
+        result &&
+        "success" in result &&
+        result.success &&
+        "access_token" in result
+      ) {
+        handlePasswordSuccess(
+          result.access_token as string,
+          result.refresh_token as string,
+          flow,
+          scheme,
+          redirect,
+        );
+      }
+    },
+  });
+
+  const signUpMutation = useMutation({
+    mutationFn: () =>
+      doPasswordSignUp({
+        data: { email, password, flow, scheme, redirect },
+      }),
+    onSuccess: (result) => {
+      if (result && "error" in result && result.error) {
+        setErrorMessage(
+          (result as { error: boolean; message: string }).message,
+        );
+        return;
+      }
+      if (result && "success" in result && result.success) {
+        if ("needsConfirmation" in result && result.needsConfirmation) {
+          setSubmitted(true);
+          return;
+        }
+        if ("access_token" in result) {
+          handlePasswordSuccess(
+            result.access_token as string,
+            result.refresh_token as string,
+            flow,
+            scheme,
+            redirect,
+          );
+        }
+      }
+    },
+  });
+
+  const isPending = signInMutation.isPending || signUpMutation.isPending;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage("");
+
+    if (isSignUp) {
+      if (password !== confirmPassword) {
+        setErrorMessage("Passwords do not match");
+        return;
+      }
+      if (password.length < 6) {
+        setErrorMessage("Password must be at least 6 characters");
+        return;
+      }
+      signUpMutation.mutate();
+    } else {
+      signInMutation.mutate();
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="text-center p-4 bg-stone-50 rounded-lg border border-stone-200">
+        <p className="text-stone-700 font-medium">Check your email</p>
+        <p className="text-sm text-stone-500 mt-1">
+          We sent a confirmation link to {email}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Email"
+        required
+        className={cn([
+          "w-full px-4 py-2",
+          "border border-neutral-300 rounded-lg",
+          "text-neutral-700 placeholder:text-neutral-400",
+          "focus:outline-hidden focus:ring-2 focus:ring-stone-500 focus:ring-offset-2",
+        ])}
+      />
+      <input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Password"
+        required
+        className={cn([
+          "w-full px-4 py-2",
+          "border border-neutral-300 rounded-lg",
+          "text-neutral-700 placeholder:text-neutral-400",
+          "focus:outline-hidden focus:ring-2 focus:ring-stone-500 focus:ring-offset-2",
+        ])}
+      />
+      {isSignUp && (
+        <input
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="Confirm password"
+          required
+          className={cn([
+            "w-full px-4 py-2",
+            "border border-neutral-300 rounded-lg",
+            "text-neutral-700 placeholder:text-neutral-400",
+            "focus:outline-hidden focus:ring-2 focus:ring-stone-500 focus:ring-offset-2",
+          ])}
+        />
+      )}
+      {errorMessage && (
+        <p className="text-sm text-red-500 text-center">{errorMessage}</p>
+      )}
+      <button
+        type="submit"
+        disabled={
+          isPending || !email || !password || (isSignUp && !confirmPassword)
+        }
+        className={cn([
+          "w-full px-4 py-2 cursor-pointer",
+          "border border-neutral-300",
+          "rounded-lg font-medium text-neutral-700",
+          "hover:bg-neutral-50",
+          "focus:outline-hidden focus:ring-2 focus:ring-stone-500 focus:ring-offset-2",
+          "disabled:opacity-50 disabled:cursor-not-allowed",
+          "transition-colors",
+          "flex items-center justify-center gap-2",
+        ])}
+      >
+        {isPending ? "Loading..." : isSignUp ? "Create account" : "Sign in"}
+      </button>
+      <div className="flex flex-col items-center gap-1">
+        <button
+          type="button"
+          onClick={() => {
+            setIsSignUp(!isSignUp);
+            setErrorMessage("");
+            setConfirmPassword("");
+          }}
+          className="text-sm text-neutral-500 hover:text-neutral-700 transition-colors"
+        >
+          {isSignUp
+            ? "Already have an account? Sign in"
+            : "Don't have an account? Sign up"}
+        </button>
+        {!isSignUp && (
+          <Link
+            to="/reset-password/"
+            className="text-sm text-neutral-500 hover:text-neutral-700 transition-colors"
+          >
+            Forgot password?
+          </Link>
+        )}
+      </div>
+    </form>
+  );
+}
+
+function handlePasswordSuccess(
+  accessToken: string,
+  refreshToken: string,
+  flow: "desktop" | "web",
+  scheme?: string,
+  redirectPath?: string,
+) {
+  if (flow === "desktop") {
+    const params = new URLSearchParams();
+    params.set("flow", "desktop");
+    if (scheme) params.set("scheme", scheme);
+    params.set("access_token", accessToken);
+    params.set("refresh_token", refreshToken);
+    window.location.href = `/callback/auth?${params.toString()}`;
+  } else {
+    window.location.href = redirectPath || "/app/account/";
+  }
 }
 
 function MagicLinkForm({
@@ -191,7 +516,7 @@ function MagicLinkForm({
           magicLinkMutation.mutate(email);
         }
       }}
-      className="flex flex-col gap-2"
+      className="flex flex-col gap-3"
     >
       <input
         type="email"
@@ -220,7 +545,7 @@ function MagicLinkForm({
           "flex items-center justify-center gap-2",
         ])}
       >
-        {magicLinkMutation.isPending ? "Sending..." : "Continue with Email"}
+        {magicLinkMutation.isPending ? "Sending..." : "Send magic link"}
       </button>
       {magicLinkMutation.isError && (
         <p className="text-sm text-red-500 text-center">
@@ -228,22 +553,6 @@ function MagicLinkForm({
         </p>
       )}
     </form>
-  );
-}
-
-function PrivacyPolicy() {
-  return (
-    <p className="text-xs text-neutral-500 mt-4 text-left">
-      By signing up, you agree to Hyprnote's{" "}
-      <a href="/legal/terms" className="underline hover:text-neutral-700">
-        Terms of Service
-      </a>{" "}
-      and{" "}
-      <a href="/legal/privacy" className="underline hover:text-neutral-700">
-        Privacy Policy
-      </a>
-      .
-    </p>
   );
 }
 

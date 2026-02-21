@@ -1,14 +1,25 @@
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
-import { type ReactNode, useMemo } from "react";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
 
+import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 import { Button } from "@hypr/ui/components/ui/button";
-import { cn, safeParseDate, startOfDay } from "@hypr/utils";
+import { cn, format, safeParseDate, startOfDay, TZDate } from "@hypr/utils";
 
+import { useConfigValue } from "../../../../config/use-config";
+import { useIgnoredEvents } from "../../../../hooks/tinybase";
+import { useNativeContextMenu } from "../../../../hooks/useNativeContextMenu";
+import {
+  captureSessionData,
+  deleteSessionCascade,
+} from "../../../../store/tinybase/store/deleteSession";
 import * as main from "../../../../store/tinybase/store/main";
 import { useTabs } from "../../../../store/zustand/tabs";
+import { useTimelineSelection } from "../../../../store/zustand/timeline-selection";
+import { useUndoDelete } from "../../../../store/zustand/undo-delete";
 import {
   buildTimelineBuckets,
   calculateIndicatorIndex,
+  getItemTimestamp,
   type TimelineBucket,
   type TimelineItem,
   type TimelinePrecision,
@@ -22,26 +33,67 @@ import {
 } from "./realtime";
 
 export function TimelineView() {
-  const buckets = useTimelineData();
+  const allBuckets = useTimelineData();
+  const timezone = useConfigValue("timezone") || undefined;
+  const [showIgnored, setShowIgnored] = useState(false);
+
+  const { isIgnored } = useIgnoredEvents();
+
+  const buckets = useMemo(() => {
+    if (showIgnored) {
+      return allBuckets;
+    }
+
+    return allBuckets
+      .map((bucket) => ({
+        ...bucket,
+        items: bucket.items.filter((item) => {
+          if (item.type !== "event") return true;
+          const parsed = safeParseDate(item.data.started_at);
+          const day = parsed
+            ? format(
+                timezone ? new TZDate(parsed, timezone) : parsed,
+                "yyyy-MM-dd",
+              )
+            : undefined;
+          return !isIgnored(
+            item.data.tracking_id_event,
+            item.data.recurrence_series_id,
+            day,
+          );
+        }),
+      }))
+      .filter((bucket) => bucket.items.length > 0);
+  }, [allBuckets, showIgnored, isIgnored, timezone]);
+
   const hasToday = useMemo(
     () => buckets.some((bucket) => bucket.label === "Today"),
     [buckets],
   );
 
   const currentTab = useTabs((state) => state.currentTab);
-  const store = main.UI.useStore(main.STORE_ID);
 
   const selectedSessionId = useMemo(() => {
     return currentTab?.type === "sessions" ? currentTab.id : undefined;
   }, [currentTab]);
 
-  const selectedEventId = useMemo(() => {
-    if (!selectedSessionId || !store) {
-      return undefined;
+  const store = main.UI.useStore(main.STORE_ID);
+
+  const selectedIds = useTimelineSelection((s) => s.selectedIds);
+  const clearSelection = useTimelineSelection((s) => s.clear);
+  const indexes = main.UI.useIndexes(main.STORE_ID);
+  const invalidateResource = useTabs((state) => state.invalidateResource);
+  const addDeletion = useUndoDelete((state) => state.addDeletion);
+
+  const flatItemKeys = useMemo(() => {
+    const keys: string[] = [];
+    for (const bucket of buckets) {
+      for (const item of bucket.items) {
+        keys.push(`${item.type}-${item.id}`);
+      }
     }
-    const session = store.getRow("sessions", selectedSessionId);
-    return session?.event_id ? String(session.event_id) : undefined;
-  }, [selectedSessionId, store]);
+    return keys;
+  }, [buckets]);
 
   const {
     containerRef,
@@ -73,24 +125,98 @@ export function TimelineView() {
       (bucket) =>
         bucket.items.length > 0 &&
         (() => {
-          const firstItem = bucket.items[0];
-          const timestamp =
-            firstItem.type === "event"
-              ? firstItem.data.started_at
-              : firstItem.data.created_at;
-          if (!timestamp) {
+          const itemDate = getItemTimestamp(bucket.items[0]);
+          if (!itemDate) {
             return false;
           }
-          const itemDate = new Date(timestamp);
           return itemDate.getTime() < todayTimestamp;
         })(),
     );
   }, [buckets, hasToday, todayTimestamp]);
 
+  const toggleShowIgnored = useCallback(() => {
+    setShowIgnored((prev) => !prev);
+  }, []);
+
+  const handleDeleteSelected = useCallback(() => {
+    if (!store || !indexes) {
+      return;
+    }
+
+    const sessionIds = selectedIds
+      .filter((key) => key.startsWith("session-"))
+      .map((key) => key.replace("session-", ""));
+
+    const batchId = sessionIds.length > 1 ? crypto.randomUUID() : undefined;
+
+    for (const sessionId of sessionIds) {
+      const capturedData = captureSessionData(store, indexes, sessionId);
+
+      invalidateResource("sessions", sessionId);
+      void deleteSessionCascade(store, indexes, sessionId, {
+        skipAudio: true,
+      });
+
+      if (capturedData) {
+        addDeletion(
+          capturedData,
+          () => {
+            void fsSyncCommands.audioDelete(sessionId);
+          },
+          batchId,
+        );
+      }
+    }
+
+    clearSelection();
+  }, [
+    store,
+    indexes,
+    selectedIds,
+    invalidateResource,
+    addDeletion,
+    clearSelection,
+  ]);
+
+  const sessionCount = useMemo(
+    () => selectedIds.filter((key) => key.startsWith("session-")).length,
+    [selectedIds],
+  );
+
+  const contextMenuItems = useMemo(
+    () =>
+      selectedIds.length > 0
+        ? [
+            {
+              id: "delete-selected",
+              text: `Delete Selected (${sessionCount})`,
+              action: handleDeleteSelected,
+              disabled: sessionCount === 0,
+            },
+          ]
+        : [
+            {
+              id: "toggle-ignored",
+              text: showIgnored ? "Hide Ignored Events" : "Show Ignored Events",
+              action: toggleShowIgnored,
+            },
+          ],
+    [
+      selectedIds,
+      sessionCount,
+      handleDeleteSelected,
+      showIgnored,
+      toggleShowIgnored,
+    ],
+  );
+
+  const showContextMenu = useNativeContextMenu(contextMenuItems);
+
   return (
     <div className="relative h-full">
       <div
         ref={containerRef}
+        onContextMenu={showContextMenu}
         className={cn([
           "flex flex-col h-full overflow-y-auto scrollbar-hide",
           "bg-neutral-50 rounded-xl",
@@ -122,20 +248,24 @@ export function TimelineView() {
                   precision={bucket.precision}
                   registerIndicator={setCurrentTimeIndicatorRef}
                   selectedSessionId={selectedSessionId}
-                  selectedEventId={selectedEventId}
+                  timezone={timezone}
+                  selectedIds={selectedIds}
+                  flatItemKeys={flatItemKeys}
                 />
               ) : (
                 bucket.items.map((item) => {
+                  const itemKey = `${item.type}-${item.id}`;
                   const selected =
-                    item.type === "session"
-                      ? item.id === selectedSessionId
-                      : item.id === selectedEventId;
+                    item.type === "session" && item.id === selectedSessionId;
                   return (
                     <TimelineItemComponent
-                      key={`${item.type}-${item.id}`}
+                      key={itemKey}
                       item={item}
                       precision={bucket.precision}
                       selected={selected}
+                      timezone={timezone}
+                      multiSelected={selectedIds.includes(itemKey)}
+                      flatItemKeys={flatItemKeys}
                     />
                   );
                 })
@@ -180,13 +310,17 @@ function TodayBucket({
   precision,
   registerIndicator,
   selectedSessionId,
-  selectedEventId,
+  timezone,
+  selectedIds,
+  flatItemKeys,
 }: {
   items: TimelineItem[];
   precision: TimelinePrecision;
   registerIndicator: (node: HTMLDivElement | null) => void;
   selectedSessionId: string | undefined;
-  selectedEventId: string | undefined;
+  timezone?: string;
+  selectedIds: string[];
+  flatItemKeys: string[];
 }) {
   const currentTimeMs = useCurrentTimeMs();
 
@@ -230,17 +364,19 @@ function TodayBucket({
         );
       }
 
+      const itemKey = `${entry.item.type}-${entry.item.id}`;
       const selected =
-        entry.item.type === "session"
-          ? entry.item.id === selectedSessionId
-          : entry.item.id === selectedEventId;
+        entry.item.type === "session" && entry.item.id === selectedSessionId;
 
       nodes.push(
         <TimelineItemComponent
-          key={`${entry.item.type}-${entry.item.id}`}
+          key={itemKey}
           item={entry.item}
           precision={precision}
           selected={selected}
+          timezone={timezone}
+          multiSelected={selectedIds.includes(itemKey)}
+          flatItemKeys={flatItemKeys}
         />,
       );
     });
@@ -261,38 +397,36 @@ function TodayBucket({
     precision,
     registerIndicator,
     selectedSessionId,
-    selectedEventId,
+    timezone,
+    selectedIds,
+    flatItemKeys,
   ]);
 
   return renderedEntries;
 }
 
 function useTimelineData(): TimelineBucket[] {
-  const eventsWithoutSessionTable = main.UI.useResultTable(
-    main.QUERIES.eventsWithoutSession,
+  const timelineEventsTable = main.UI.useResultTable(
+    main.QUERIES.timelineEvents,
     main.STORE_ID,
   );
-  const sessionsWithMaybeEventTable = main.UI.useResultTable(
-    main.QUERIES.sessionsWithMaybeEvent,
+  const timelineSessionsTable = main.UI.useResultTable(
+    main.QUERIES.timelineSessions,
     main.STORE_ID,
   );
   const currentTimeMs = useSmartCurrentTime(
-    eventsWithoutSessionTable,
-    sessionsWithMaybeEventTable,
+    timelineEventsTable,
+    timelineSessionsTable,
   );
+  const timezone = useConfigValue("timezone");
 
   return useMemo(
     () =>
       buildTimelineBuckets({
-        eventsWithoutSessionTable,
-        sessionsWithMaybeEventTable,
+        timelineEventsTable,
+        timelineSessionsTable,
+        timezone: timezone || undefined,
       }),
-    [eventsWithoutSessionTable, sessionsWithMaybeEventTable, currentTimeMs],
+    [timelineEventsTable, timelineSessionsTable, currentTimeMs, timezone],
   );
-}
-
-function getItemTimestamp(item: TimelineItem): Date | null {
-  const value =
-    item.type === "event" ? item.data.started_at : item.data.created_at;
-  return safeParseDate(value);
 }

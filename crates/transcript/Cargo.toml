@@ -1,0 +1,21 @@
+[package]
+name = "transcript"
+version = "0.1.0"
+edition = "2024"
+
+[dev-dependencies]
+hypr-data = { workspace = true }
+
+serde_json = { workspace = true }
+strum = { workspace = true, features = ["derive"] }
+
+clap = { workspace = true, features = ["derive"] }
+crossterm = "0.29"
+ratatui = { version = "0.30", features = ["crossterm_0_29"] }
+
+[dependencies]
+owhisper-interface = { workspace = true }
+
+serde = { workspace = true }
+specta = { workspace = true }
+uuid = { workspace = true, features = ["v4"] }
