@@ -73,9 +73,32 @@ export function findSessionByKey(
     if (!sessionEvent) return;
     if (sessionEventMatchingKey(sessionEvent, timezone) === key) {
       found = rowId;
+      return;
+    }
+    if (matchesWithFallback(sessionEvent, key, timezone)) {
+      found = rowId;
     }
   });
   return found;
+}
+
+function matchesWithFallback(
+  sessionEvent: SessionEvent,
+  targetKey: string,
+  timezone?: string,
+): boolean {
+  const colonIdx = targetKey.indexOf(":");
+  if (colonIdx === -1) {
+    return false;
+  }
+
+  const targetTrackingId = targetKey.substring(0, colonIdx);
+  const targetDay = targetKey.substring(colonIdx + 1);
+  if (sessionEvent.tracking_id !== targetTrackingId) {
+    return false;
+  }
+  const sessionDay = dayFromDate(sessionEvent.started_at, timezone);
+  return sessionDay === targetDay;
 }
 
 export function findSessionByTrackingId(

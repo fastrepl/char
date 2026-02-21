@@ -1,4 +1,5 @@
 import type { EventStorage, SessionEvent } from "@hypr/store";
+import { format, safeParseDate, TZDate } from "@hypr/utils";
 
 import { id } from "../../../../utils";
 import {
@@ -97,8 +98,13 @@ export function syncSessionEmbeddedEvents(
   timezone?: string,
 ): void {
   const incomingByKey = new Map<string, IncomingEvent>();
+  const incomingByTrackingId = new Map<string, IncomingEvent[]>();
   for (const event of incoming) {
     incomingByKey.set(eventMatchingKey(event, timezone), event);
+    const tid = event.tracking_id_event;
+    const arr = incomingByTrackingId.get(tid) ?? [];
+    arr.push(event);
+    incomingByTrackingId.set(tid, arr);
   }
 
   ctx.store.transaction(() => {
@@ -107,7 +113,14 @@ export function syncSessionEmbeddedEvents(
       if (!sessionEvent) return;
       const key = sessionEventMatchingKey(sessionEvent, timezone);
 
-      const incomingEvent = incomingByKey.get(key);
+      let incomingEvent = incomingByKey.get(key);
+      if (!incomingEvent) {
+        incomingEvent = findIncomingByTrackingIdAndDay(
+          incomingByTrackingId,
+          sessionEvent,
+          timezone,
+        );
+      }
       if (!incomingEvent) return;
 
       const calendarId =
@@ -133,4 +146,27 @@ export function syncSessionEmbeddedEvents(
       });
     });
   });
+}
+
+function dayFromDateLocal(
+  dateStr: string | null | undefined,
+  timezone?: string,
+): string {
+  const parsed = safeParseDate(dateStr);
+  if (!parsed) return "1970-01-01";
+  const date = timezone ? new TZDate(parsed, timezone) : parsed;
+  return format(date, "yyyy-MM-dd");
+}
+
+function findIncomingByTrackingIdAndDay(
+  incomingByTrackingId: Map<string, IncomingEvent[]>,
+  sessionEvent: SessionEvent,
+  timezone?: string,
+): IncomingEvent | undefined {
+  const candidates = incomingByTrackingId.get(sessionEvent.tracking_id);
+  if (!candidates) return undefined;
+  const sessionDay = dayFromDateLocal(sessionEvent.started_at, timezone);
+  return candidates.find(
+    (e) => dayFromDateLocal(e.started_at, timezone) === sessionDay,
+  );
 }
