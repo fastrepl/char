@@ -282,7 +282,7 @@ jobs:
           retention-days: 3
 
   create-tag:
-    if: ${{ inputs.channel != 'staging' && !cancelled() && (needs.build-macos.result == 'success' || needs.build-linux.result == 'success') }}
+    if: ${{ inputs.channel != 'staging' && !cancelled() && needs.build-macos.result == 'success' && needs.build-linux.result == 'success' }}
     needs: [compute-version, build-macos, build-linux]
     runs-on: ubuntu-latest
     permissions:
@@ -312,7 +312,7 @@ jobs:
           working-directory: ./apps/desktop
 
   release:
-    if: ${{ inputs.channel != 'staging' && inputs.publish && !cancelled() && needs.cn-publish.result == 'success' && (needs.build-macos.result == 'success' || needs.build-linux.result == 'success') }}
+    if: ${{ inputs.channel != 'staging' && inputs.publish && !cancelled() && needs.cn-publish.result == 'success' && needs.build-macos.result == 'success' && needs.build-linux.result == 'success' }}
     needs: [compute-version, build-macos, build-linux, cn-publish]
     runs-on: ubuntu-latest
     permissions:
