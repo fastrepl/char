@@ -125,12 +125,36 @@ fn convert_list(l: &mdast::List) -> Value {
     }
 }
 
+fn ensure_starts_with_paragraph(content: Vec<Value>) -> Vec<Value> {
+    if content.is_empty() {
+        return vec![json!({ "type": "paragraph" })];
+    }
+
+    let first_is_paragraph = content
+        .first()
+        .and_then(|v| v.get("type"))
+        .and_then(|t| t.as_str())
+        .map(|t| t == "paragraph")
+        .unwrap_or(false);
+
+    if first_is_paragraph {
+        content
+    } else {
+        let mut result = vec![json!({ "type": "paragraph" })];
+        result.extend(content);
+        result
+    }
+}
+
 fn convert_list_item(item: &mdast::ListItem) -> Value {
     let content: Vec<Value> = item
         .children
         .iter()
         .filter_map(convert_block_node)
         .collect();
+
+    let content = ensure_starts_with_paragraph(content);
+
     json!({
         "type": "listItem",
         "content": content
@@ -143,6 +167,9 @@ fn convert_task_item(item: &mdast::ListItem) -> Value {
         .iter()
         .filter_map(convert_block_node)
         .collect();
+
+    let content = ensure_starts_with_paragraph(content);
+
     json!({
         "type": "taskItem",
         "attrs": { "checked": item.checked.unwrap_or(false) },
