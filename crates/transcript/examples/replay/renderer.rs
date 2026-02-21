@@ -7,9 +7,7 @@ use ratatui::{
 };
 use transcript::FlushMode;
 
-use crate::App;
-use crate::CactusMetrics;
-use crate::LastEvent;
+use crate::app::{App, CactusMetrics, LastEvent};
 
 const DEBUG_PANEL_WIDTH: u16 = 36;
 

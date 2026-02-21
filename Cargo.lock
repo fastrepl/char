@@ -20328,7 +20328,9 @@ dependencies = [
 name = "transcript"
 version = "0.1.0"
 dependencies = [
+ "audio",
  "audio-utils",
+ "bytes",
  "clap",
  "crossterm",
  "data",
@@ -20336,7 +20338,6 @@ dependencies = [
  "owhisper-client",
  "owhisper-interface",
  "ratatui",
- "rodio",
  "serde",
  "serde_json",
  "specta",
