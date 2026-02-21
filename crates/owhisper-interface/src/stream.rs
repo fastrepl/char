@@ -191,6 +191,16 @@ impl StreamResponse {
         }
     }
 
+    pub fn set_provider(&mut self, provider: &str) {
+        if let StreamResponse::TranscriptResponse { metadata, .. } = self {
+            let entry = metadata.extra.get_or_insert_with(std::collections::HashMap::new);
+            entry.insert(
+                "provider".to_string(),
+                serde_json::Value::String(provider.to_string()),
+            );
+        }
+    }
+
     pub fn remap_channel_index(&mut self, from: i32, to: i32) {
         if let StreamResponse::TranscriptResponse { channel_index, .. } = self
             && !channel_index.is_empty()
