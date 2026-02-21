@@ -38,7 +38,10 @@ const _PROVIDERS = [
     badge: "Recommended",
     icon: <img src="/assets/icon.png" alt="Char" className="size-5" />,
     baseUrl: new URL("/llm", env.VITE_API_URL).toString(),
-    requirements: [{ kind: "requires_auth" }],
+    requirements: [
+      { kind: "requires_auth" },
+      { kind: "requires_entitlement", entitlement: "pro" },
+    ],
   },
   {
     id: "lmstudio",
