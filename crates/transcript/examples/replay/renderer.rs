@@ -103,15 +103,20 @@ fn render_debug(frame: &mut Frame, app: &App, area: Rect) {
     let has_metrics = app.cactus_metrics.is_some();
     let metrics_height = if has_metrics { 6 } else { 0 };
 
-    let [event_area, pipeline_area, counts_area, postprocess_area, metrics_area] =
-        Layout::vertical([
-            Constraint::Length(3),
-            Constraint::Fill(1),
-            Constraint::Length(5),
-            Constraint::Length(5),
-            Constraint::Length(metrics_height),
-        ])
-        .areas(inner);
+    let [
+        event_area,
+        pipeline_area,
+        counts_area,
+        postprocess_area,
+        metrics_area,
+    ] = Layout::vertical([
+        Constraint::Length(3),
+        Constraint::Fill(1),
+        Constraint::Length(5),
+        Constraint::Length(5),
+        Constraint::Length(metrics_height),
+    ])
+    .areas(inner);
 
     render_event_section(frame, app, event_area);
     render_pipeline_section(frame, app, pipeline_area);

@@ -6,9 +6,9 @@ use std::time::{Duration, Instant};
 
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use fixture::Fixture;
+use owhisper_interface::stream::StreamResponse;
 use ratatui::DefaultTerminal;
 use source::Source;
-use owhisper_interface::stream::StreamResponse;
 use transcript::FlushMode;
 use transcript::input::TranscriptInput;
 use transcript::postprocess::PostProcessUpdate;
@@ -57,12 +57,7 @@ impl CactusMetrics {
             StreamResponse::TranscriptResponse { metadata, .. } => metadata.extra.as_ref()?,
             _ => return None,
         };
-        let f = |key: &str| -> f64 {
-            extra
-                .get(key)
-                .and_then(|v| v.as_f64())
-                .unwrap_or(0.0)
-        };
+        let f = |key: &str| -> f64 { extra.get(key).and_then(|v| v.as_f64()).unwrap_or(0.0) };
         Some(Self {
             decode_tps: f("decode_tps"),
             prefill_tps: f("prefill_tps"),

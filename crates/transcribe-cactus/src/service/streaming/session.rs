@@ -259,10 +259,7 @@ async fn handle_transcribe_event(
                 let handoff_extra = {
                     let mut keys = metrics.clone();
                     if result.cloud_handoff && result.cloud_job_id != 0 {
-                        keys.insert(
-                            "cloud_handoff".to_string(),
-                            serde_json::Value::Bool(true),
-                        );
+                        keys.insert("cloud_handoff".to_string(), serde_json::Value::Bool(true));
                         keys.insert(
                             "cloud_job_id".to_string(),
                             serde_json::Value::Number(result.cloud_job_id.into()),
@@ -338,10 +335,7 @@ async fn handle_transcribe_event(
             let pending_handoff_extra = {
                 let mut keys = metrics;
                 if result.cloud_handoff && result.cloud_job_id != 0 {
-                    keys.insert(
-                        "cloud_handoff".to_string(),
-                        serde_json::Value::Bool(true),
-                    );
+                    keys.insert("cloud_handoff".to_string(), serde_json::Value::Bool(true));
                     keys.insert(
                         "cloud_job_id".to_string(),
                         serde_json::Value::Number(result.cloud_job_id.into()),
