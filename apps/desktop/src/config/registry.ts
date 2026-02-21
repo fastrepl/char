@@ -97,13 +97,7 @@ export const CONFIG_REGISTRY = {
         return;
       }
 
-      const modelsResult = await localSttCommands.listSupportedModels();
-      if (modelsResult.status !== "ok") return;
-
-      const modelInfo = modelsResult.data.find((m) => m.key === model);
-      if (modelInfo && modelInfo.model_type !== "cactus") {
-        await localSttCommands.startServer(model as SupportedSttModel);
-      }
+      await localSttCommands.startServer(model as SupportedSttModel);
     },
   },
 
@@ -122,16 +116,7 @@ export const CONFIG_REGISTRY = {
         return;
       }
 
-      const modelsResult = await localSttCommands.listSupportedModels();
-      if (modelsResult.status !== "ok") return;
-
-      const modelInfo = modelsResult.data.find((m) => m.key === model);
-      if (modelInfo && modelInfo.model_type === "cactus") {
-        await localSttCommands.stopServer(null);
-        await localSttCommands.startServer(model as SupportedSttModel);
-      } else if (modelInfo) {
-        await localSttCommands.startServer(model as SupportedSttModel);
-      }
+      await localSttCommands.startServer(model as SupportedSttModel);
     },
   },
 

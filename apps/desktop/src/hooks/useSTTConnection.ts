@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 
 import {
   commands as localSttCommands,
@@ -13,11 +13,9 @@ import { providerRowId } from "../components/settings/ai/shared";
 import { type ProviderId } from "../components/settings/ai/stt/shared";
 import { env } from "../env";
 import * as settings from "../store/tinybase/store/settings";
-import { localSttQueries } from "./useLocalSttModel";
 
 export const useSTTConnection = () => {
   const auth = useAuth();
-  const cactusStartingRef = useRef(false);
   const billing = useBillingAccess();
   const { current_stt_provider, current_stt_model } = settings.UI.useValues(
     settings.STORE_ID,
@@ -40,8 +38,6 @@ export const useSTTConnection = () => {
   const isCloudModel =
     current_stt_provider === "hyprnote" && current_stt_model === "cloud";
 
-  const supportedModels = useQuery(localSttQueries.supportedModels());
-
   const local = useQuery({
     enabled: current_stt_provider === "hyprnote",
     queryKey: ["stt-connection", isLocalModel, current_stt_model],
@@ -50,11 +46,6 @@ export const useSTTConnection = () => {
       if (!isLocalModel || !current_stt_model) {
         return null;
       }
-
-      const modelInfo = supportedModels.data?.find(
-        (m) => m.key === current_stt_model,
-      );
-      const isCactus = modelInfo?.model_type === "cactus";
 
       const downloaded = await localSttCommands.isModelDownloaded(
         current_stt_model as SupportedSttModel,
@@ -73,31 +64,6 @@ export const useSTTConnection = () => {
 
       const server = serverResult.data;
 
-      if (
-        isCactus &&
-        (server?.status !== "ready" || server?.model !== current_stt_model)
-      ) {
-        if (!cactusStartingRef.current) {
-          cactusStartingRef.current = true;
-          const restart =
-            server?.status === "ready" && server?.model !== current_stt_model
-              ? localSttCommands
-                  .stopServer(null)
-                  .then(() =>
-                    localSttCommands.startServer(
-                      current_stt_model as SupportedSttModel,
-                    ),
-                  )
-              : localSttCommands.startServer(
-                  current_stt_model as SupportedSttModel,
-                );
-          restart.finally(() => {
-            cactusStartingRef.current = false;
-          });
-        }
-        return { status: "loading" as const, connection: null };
-      }
-
       if (server?.status === "ready" && server.url) {
         return {
           status: "ready" as const,
@@ -111,7 +77,7 @@ export const useSTTConnection = () => {
       }
 
       return {
-        status: server?.status,
+        status: server?.status ?? "loading",
         connection: null,
       };
     },
