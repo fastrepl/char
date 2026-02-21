@@ -2,13 +2,16 @@ mod app;
 mod fixture;
 mod renderer;
 mod source;
+mod theme;
 
 use std::time::{Duration, Instant};
 
 use app::{App, KeyAction};
-use crossterm::event::{self, Event, KeyEventKind};
+use crossterm::event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyEventKind};
+use crossterm::execute;
 use fixture::Fixture;
 use ratatui::DefaultTerminal;
+use renderer::LayoutInfo;
 use source::Source;
 
 #[derive(clap::Parser)]
@@ -66,7 +69,9 @@ fn main() {
     };
 
     let mut terminal = ratatui::init();
+    execute!(std::io::stdout(), EnableMouseCapture).ok();
     let result = run(&mut terminal, source, speed_ms, source_name.clone());
+    execute!(std::io::stdout(), DisableMouseCapture).ok();
     ratatui::restore();
 
     match result {
@@ -95,25 +100,45 @@ fn run(
     let mut last_tick = Instant::now();
 
     loop {
-        terminal.draw(|frame| renderer::render(frame, &app))?;
+        let mut layout = LayoutInfo {
+            transcript_lines: 0,
+            transcript_area_height: 0,
+            word_regions: Vec::new(),
+            transcript_area: ratatui::layout::Rect::default(),
+        };
+        terminal.draw(|frame| {
+            layout = renderer::render(frame, &app);
+        })?;
+        app.update_layout(
+            layout.transcript_lines,
+            layout.transcript_area_height,
+            layout.word_regions,
+            layout.transcript_area,
+        );
 
         let tick_duration = Duration::from_millis(app.speed_ms);
         let elapsed = last_tick.elapsed();
         let timeout = tick_duration.saturating_sub(elapsed);
 
         if event::poll(timeout)? {
-            if let Event::Key(key) = event::read()? {
-                if key.kind != KeyEventKind::Press {
-                    continue;
-                }
-                match app.handle_key(key.code) {
-                    KeyAction::Quit => break,
-                    KeyAction::Continue { reset_tick } => {
-                        if reset_tick {
-                            last_tick = Instant::now();
+            match event::read()? {
+                Event::Key(key) => {
+                    if key.kind != KeyEventKind::Press {
+                        continue;
+                    }
+                    match app.handle_key(key.code) {
+                        KeyAction::Quit => break,
+                        KeyAction::Continue { reset_tick } => {
+                            if reset_tick {
+                                last_tick = Instant::now();
+                            }
                         }
                     }
                 }
+                Event::Mouse(mouse) => {
+                    app.handle_mouse(mouse);
+                }
+                _ => {}
             }
         } else if !app.paused {
             if last_tick.elapsed() >= tick_duration {
@@ -123,7 +148,9 @@ fn run(
                 if app.is_done() {
                     let mode = app.flush_mode;
                     app.view.flush(mode);
-                    terminal.draw(|frame| renderer::render(frame, &app))?;
+                    terminal.draw(|frame| {
+                        renderer::render(frame, &app);
+                    })?;
                     app.paused = true;
                 }
             }

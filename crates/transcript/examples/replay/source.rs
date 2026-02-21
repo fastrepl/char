@@ -5,6 +5,38 @@ use hypr_audio_utils::AudioFormatExt;
 use owhisper_interface::stream::StreamResponse;
 use owhisper_interface::{ControlMessage, MixedMessage};
 
+#[derive(Clone, Default)]
+pub struct CactusMetrics {
+    pub decode_tps: f64,
+    pub prefill_tps: f64,
+    pub time_to_first_token_ms: f64,
+    pub total_time_ms: f64,
+    pub decode_tokens: f64,
+    pub prefill_tokens: f64,
+    pub total_tokens: f64,
+    pub buffer_duration_ms: f64,
+}
+
+impl CactusMetrics {
+    pub fn from_stream_response(sr: &StreamResponse) -> Option<Self> {
+        let extra = match sr {
+            StreamResponse::TranscriptResponse { metadata, .. } => metadata.extra.as_ref()?,
+            _ => return None,
+        };
+        let f = |key: &str| -> f64 { extra.get(key).and_then(|v| v.as_f64()).unwrap_or(0.0) };
+        Some(Self {
+            decode_tps: f("decode_tps"),
+            prefill_tps: f("prefill_tps"),
+            time_to_first_token_ms: f("time_to_first_token_ms"),
+            total_time_ms: f("total_time_ms"),
+            decode_tokens: f("decode_tokens"),
+            prefill_tokens: f("prefill_tokens"),
+            total_tokens: f("total_tokens"),
+            buffer_duration_ms: f("buffer_duration_ms"),
+        })
+    }
+}
+
 pub enum Source {
     Fixture {
         responses: Vec<StreamResponse>,
