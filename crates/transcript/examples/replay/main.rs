@@ -23,7 +23,10 @@ struct Args {
     #[arg(short, long, default_value_t = 30)]
     speed: u64,
 
-    #[arg(long, help = "WebSocket URL for live Cactus source (e.g. ws://localhost:8080/v1/listen?channels=1&sample_rate=16000)")]
+    #[arg(
+        long,
+        help = "WebSocket URL for live Cactus source (e.g. ws://localhost:8080/v1/listen?channels=1&sample_rate=16000)"
+    )]
     cactus: Option<String>,
 }
 

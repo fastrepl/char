@@ -89,7 +89,9 @@ impl TranscriptView {
             .final_words
             .iter()
             .enumerate()
-            .filter(|(_, w)| w.channel == corr_channel && w.start_ms >= corr_start && w.end_ms <= corr_end)
+            .filter(|(_, w)| {
+                w.channel == corr_channel && w.start_ms >= corr_start && w.end_ms <= corr_end
+            })
             .map(|(i, _)| i)
             .collect();
 
@@ -136,7 +138,8 @@ impl TranscriptView {
                 .collect();
 
             updated = new_words.clone();
-            self.final_words.splice(first_idx..first_idx + remove_count, new_words);
+            self.final_words
+                .splice(first_idx..first_idx + remove_count, new_words);
         }
 
         self.postprocess_applied += 1;
@@ -409,10 +412,7 @@ mod tests {
         transcript: &str,
     ) -> owhisper_interface::stream::StreamResponse {
         let mut extra = std::collections::HashMap::new();
-        extra.insert(
-            "cloud_corrected".to_string(),
-            serde_json::Value::Bool(true),
-        );
+        extra.insert("cloud_corrected".to_string(), serde_json::Value::Bool(true));
         extra.insert(
             "cloud_job_id".to_string(),
             serde_json::Value::Number(42.into()),
