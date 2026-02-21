@@ -113,7 +113,7 @@ describe("settingsPersister roundtrip", () => {
     store.setValues(values);
     const result = storeToSettings(store);
 
-    expect(result).toEqual(original);
+    expect(result).toEqual({ ...original, cactus: {} });
   });
 
   test("store -> settings -> store preserves all data", () => {
@@ -180,6 +180,7 @@ describe("settingsPersister roundtrip", () => {
 
     expect(result).toEqual({
       ai: { llm: {}, stt: {} },
+      cactus: {},
       notification: {},
       general: {},
       language: {},
