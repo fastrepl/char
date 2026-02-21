@@ -155,10 +155,7 @@ export function useEnsureDefaultSummary(sessionId: string) {
       return;
     }
 
-    createEnhancedNote(
-      sessionId,
-      selectedTemplateId || undefined,
-    );
+    createEnhancedNote(sessionId, selectedTemplateId || undefined);
   }, [
     hasTranscript,
     sessionMode,
