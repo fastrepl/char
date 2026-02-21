@@ -183,10 +183,11 @@ export function useAutoEnhanceRunner(
       return { type: "started", noteId: enhancedNoteId };
     }
 
+    const templateId = selectedTemplateId || undefined;
     void generate(enhanceTaskId, {
       model,
       taskType: "enhance",
-      args: { sessionId, enhancedNoteId },
+      args: { sessionId, enhancedNoteId, templateId },
     });
 
     return { type: "started", noteId: enhancedNoteId };
@@ -197,6 +198,7 @@ export function useAutoEnhanceRunner(
     model,
     sessionId,
     createEnhancedNote,
+    selectedTemplateId,
     updateSessionTabState,
     llmConn,
     generate,

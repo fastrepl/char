@@ -4,6 +4,7 @@ import { Button } from "@hypr/ui/components/ui/button";
 
 import { useAITask } from "../../../../../../contexts/ai-task";
 import { useLanguageModel } from "../../../../../../hooks/useLLMConnection";
+import * as main from "../../../../../../store/tinybase/store/main";
 import { createTaskId } from "../../../../../../store/zustand/ai-task/task-configs";
 
 export function EnhanceError({
@@ -17,6 +18,13 @@ export function EnhanceError({
 }) {
   const model = useLanguageModel();
   const generate = useAITask((state) => state.generate);
+  const templateId =
+    (main.UI.useCell(
+      "enhanced_notes",
+      enhancedNoteId,
+      "template_id",
+      main.STORE_ID,
+    ) as string | undefined) || undefined;
 
   const handleRetry = () => {
     if (!model) return;
@@ -25,7 +33,7 @@ export function EnhanceError({
     void generate(taskId, {
       model,
       taskType: "enhance",
-      args: { sessionId, enhancedNoteId },
+      args: { sessionId, enhancedNoteId, templateId },
     });
   };
 

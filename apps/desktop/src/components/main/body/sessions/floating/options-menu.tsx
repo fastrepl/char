@@ -29,6 +29,7 @@ import { useCreateEnhancedNote } from "../../../../../hooks/useEnhancedNotes";
 import { useLanguageModel } from "../../../../../hooks/useLLMConnection";
 import { useRunBatch } from "../../../../../hooks/useRunBatch";
 import * as main from "../../../../../store/tinybase/store/main";
+import * as settings from "../../../../../store/tinybase/store/settings";
 import { createTaskId } from "../../../../../store/zustand/ai-task/task-configs";
 import { type Tab, useTabs } from "../../../../../store/zustand/tabs";
 import { ChannelProfile } from "../../../../../utils/segment";
@@ -63,6 +64,10 @@ export function OptionsMenu({
   const createEnhancedNote = useCreateEnhancedNote();
   const model = useLanguageModel();
   const generate = useAITask((state) => state.generate);
+  const selectedTemplateId = settings.UI.useValue(
+    "selected_template_id",
+    settings.STORE_ID,
+  ) as string | undefined;
   const sessionTab = useTabs((state) => {
     const found = state.tabs.find(
       (tab): tab is Extract<Tab, { type: "sessions" }> =>
@@ -83,7 +88,8 @@ export function OptionsMenu({
 
     if (!eligibility.eligible) return;
 
-    const enhancedNoteId = createEnhancedNote(sessionId);
+    const templateId = selectedTemplateId || undefined;
+    const enhancedNoteId = createEnhancedNote(sessionId, templateId);
     if (!enhancedNoteId) return;
 
     if (sessionTab) {
@@ -97,7 +103,7 @@ export function OptionsMenu({
     void generate(enhanceTaskId, {
       model,
       taskType: "enhance",
-      args: { sessionId, enhancedNoteId },
+      args: { sessionId, enhancedNoteId, templateId },
       onComplete: (text) => {
         if (!text || !store) return;
         try {
@@ -139,6 +145,7 @@ export function OptionsMenu({
     model,
     sessionId,
     createEnhancedNote,
+    selectedTemplateId,
     sessionTab,
     updateSessionTabState,
     generate,

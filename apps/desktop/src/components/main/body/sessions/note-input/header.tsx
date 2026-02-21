@@ -619,6 +619,13 @@ function useEnhanceLogic(sessionId: string, enhancedNoteId: string) {
   );
 
   const store = main.UI.useStore(main.STORE_ID);
+  const noteTemplateId =
+    (main.UI.useCell(
+      "enhanced_notes",
+      enhancedNoteId,
+      "template_id",
+      main.STORE_ID,
+    ) as string | undefined) || undefined;
 
   const enhanceTask = useAITaskTask(taskId, "enhance", {
     onSuccess: ({ text }) => {
@@ -656,11 +663,11 @@ function useEnhanceLogic(sessionId: string, enhancedNoteId: string) {
         args: {
           sessionId,
           enhancedNoteId,
-          templateId: templateId ?? undefined,
+          templateId: templateId ?? noteTemplateId,
         },
       });
     },
-    [model, enhanceTask.start, sessionId, enhancedNoteId],
+    [model, enhanceTask.start, sessionId, enhancedNoteId, noteTemplateId],
   );
 
   useEffect(() => {

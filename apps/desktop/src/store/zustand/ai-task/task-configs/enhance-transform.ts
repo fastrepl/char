@@ -65,13 +65,8 @@ async function transformArgs(
 ): Promise<TaskArgsMapTransformed["enhance"]> {
   const { sessionId, templateId } = args;
 
-  const effectiveTemplateId =
-    templateId || getDefaultTemplateId(settingsStore) || undefined;
-
   const sessionContext = getSessionContext(sessionId, store);
-  const template = effectiveTemplateId
-    ? getTemplateData(effectiveTemplateId, store)
-    : null;
+  const template = templateId ? getTemplateData(templateId, store) : null;
   const language = getLanguage(settingsStore);
 
   return {
@@ -450,11 +445,6 @@ function getOptionalStringCell(
 ): string | undefined {
   const value = store.getCell(tableId, rowId, columnId);
   return typeof value === "string" && value.length > 0 ? value : undefined;
-}
-
-function getDefaultTemplateId(settingsStore: SettingsStore): string | null {
-  const value = settingsStore.getValue("selected_template_id");
-  return typeof value === "string" && value.length > 0 ? value : null;
 }
 
 function getNumberCell(
