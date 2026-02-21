@@ -58,7 +58,9 @@ function StartButton({ sessionId }: { sessionId: string }) {
       ])}
     >
       <RecordingIcon />
-      <span className="text-neutral-900 hover:text-neutral-800 whitespace-nowrap">Resume listening</span>
+      <span className="text-neutral-900 hover:text-neutral-800 whitespace-nowrap">
+        Resume listening
+      </span>
     </button>
   );
 
