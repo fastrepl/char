@@ -44,7 +44,7 @@ fn render_header(frame: &mut Frame, app: &App, area: Rect) {
     };
     let text = format!(
         " {} | {} | {}ms/event | flush: {} ",
-        app.fixture_name, status, app.speed_ms, flush_label
+        app.source_name, status, app.speed_ms, flush_label
     );
     frame.render_widget(
         Paragraph::new(text).style(Style::default().fg(Color::DarkGray)),
@@ -118,6 +118,7 @@ fn render_event_section(frame: &mut Frame, app: &App, area: Rect) {
     let (label, color) = match app.last_event {
         LastEvent::Final => ("FINAL", Color::Green),
         LastEvent::Partial => ("PARTIAL", Color::Yellow),
+        LastEvent::Correction => ("CORRECTION", Color::Magenta),
         LastEvent::Skipped => ("SKIPPED", Color::DarkGray),
     };
 

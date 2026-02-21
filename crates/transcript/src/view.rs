@@ -2,7 +2,15 @@ use crate::accumulator::{FlushMode, TranscriptAccumulator};
 use crate::id::{IdGenerator, UuidIdGen};
 use crate::input::TranscriptInput;
 use crate::postprocess::PostProcessUpdate;
-use crate::types::{SpeakerHint, TranscriptFrame, TranscriptWord};
+use crate::types::{RawWord, SpeakerHint, TranscriptFrame, TranscriptWord};
+
+/// Result of feeding one [`TranscriptInput`] into [`TranscriptView::process`].
+#[derive(Debug, Clone)]
+pub enum ProcessOutcome {
+    Unchanged,
+    Updated,
+    Corrected(PostProcessUpdate),
+}
 
 /// Debug snapshot of the accumulator pipeline state, intended for tooling and
 /// visualisation only. Not part of the stable rendering contract.
@@ -51,16 +59,92 @@ impl TranscriptView {
         }
     }
 
-    /// Feed one [`TranscriptInput`]. Returns `true` if the visible frame changed.
-    pub fn process(&mut self, input: TranscriptInput) -> bool {
+    /// Feed one [`TranscriptInput`]. Returns a [`ProcessOutcome`] describing
+    /// what changed.
+    pub fn process(&mut self, input: TranscriptInput) -> ProcessOutcome {
+        if let TranscriptInput::Correction { words } = input {
+            return self.apply_correction(words);
+        }
+
         match self.acc.process(input) {
             Some(update) => {
                 self.final_words.extend(update.new_final_words);
                 self.speaker_hints.extend(update.speaker_hints);
-                true
+                ProcessOutcome::Updated
             }
-            None => false,
+            None => ProcessOutcome::Unchanged,
         }
+    }
+
+    fn apply_correction(&mut self, correction_words: Vec<RawWord>) -> ProcessOutcome {
+        if correction_words.is_empty() {
+            return ProcessOutcome::Unchanged;
+        }
+
+        let corr_start = correction_words.iter().map(|w| w.start_ms).min().unwrap();
+        let corr_end = correction_words.iter().map(|w| w.end_ms).max().unwrap();
+        let corr_channel = correction_words[0].channel;
+
+        let matched_indices: Vec<usize> = self
+            .final_words
+            .iter()
+            .enumerate()
+            .filter(|(_, w)| w.channel == corr_channel && w.start_ms >= corr_start && w.end_ms <= corr_end)
+            .map(|(i, _)| i)
+            .collect();
+
+        if matched_indices.is_empty() {
+            return ProcessOutcome::Unchanged;
+        }
+
+        let replaced_ids: Vec<String> = matched_indices
+            .iter()
+            .map(|&i| self.final_words[i].id.clone())
+            .collect();
+
+        let mut updated = Vec::new();
+
+        if matched_indices.len() == correction_words.len() {
+            for (&idx, cw) in matched_indices.iter().zip(correction_words.iter()) {
+                let existing = &mut self.final_words[idx];
+                existing.text = cw.text.clone();
+                existing.start_ms = cw.start_ms;
+                existing.end_ms = cw.end_ms;
+                updated.push(existing.clone());
+            }
+        } else {
+            let first_idx = matched_indices[0];
+            let remove_count = matched_indices.len();
+
+            let new_words: Vec<TranscriptWord> = correction_words
+                .into_iter()
+                .enumerate()
+                .map(|(i, cw)| {
+                    let id = if i < replaced_ids.len() {
+                        replaced_ids[i].clone()
+                    } else {
+                        uuid::Uuid::new_v4().to_string()
+                    };
+                    TranscriptWord {
+                        id,
+                        text: cw.text,
+                        start_ms: cw.start_ms,
+                        end_ms: cw.end_ms,
+                        channel: cw.channel,
+                    }
+                })
+                .collect();
+
+            updated = new_words.clone();
+            self.final_words.splice(first_idx..first_idx + remove_count, new_words);
+        }
+
+        self.postprocess_applied += 1;
+
+        ProcessOutcome::Corrected(PostProcessUpdate {
+            updated,
+            replaced_ids,
+        })
     }
 
     /// Drain any held or partial words at session end.
@@ -208,11 +292,11 @@ mod tests {
     fn process_sr(
         view: &mut TranscriptView,
         sr: &owhisper_interface::stream::StreamResponse,
-    ) -> bool {
+    ) -> ProcessOutcome {
         if let Some(input) = TranscriptInput::from_stream_response(sr) {
             view.process(input)
         } else {
-            false
+            ProcessOutcome::Unchanged
         }
     }
 
@@ -318,5 +402,190 @@ mod tests {
         }]);
         assert!(update.updated.is_empty());
         assert!(update.replaced_ids.is_empty());
+    }
+
+    fn make_cloud_corrected_response(
+        words: &[(&str, f64, f64)],
+        transcript: &str,
+    ) -> owhisper_interface::stream::StreamResponse {
+        let mut extra = std::collections::HashMap::new();
+        extra.insert(
+            "cloud_corrected".to_string(),
+            serde_json::Value::Bool(true),
+        );
+        extra.insert(
+            "cloud_job_id".to_string(),
+            serde_json::Value::Number(42.into()),
+        );
+
+        owhisper_interface::stream::StreamResponse::TranscriptResponse {
+            start: 0.0,
+            duration: 0.0,
+            is_final: true,
+            speech_final: true,
+            from_finalize: false,
+            channel: Channel {
+                alternatives: vec![Alternatives {
+                    transcript: transcript.to_string(),
+                    words: words
+                        .iter()
+                        .map(|&(t, s, e)| owhisper_interface::stream::Word {
+                            word: t.to_string(),
+                            start: s,
+                            end: e,
+                            confidence: 1.0,
+                            speaker: None,
+                            punctuated_word: Some(t.to_string()),
+                            language: None,
+                        })
+                        .collect(),
+                    confidence: 1.0,
+                    languages: vec![],
+                }],
+            },
+            metadata: Metadata {
+                request_id: String::new(),
+                model_info: ModelInfo {
+                    name: String::new(),
+                    version: String::new(),
+                    arch: String::new(),
+                },
+                model_uuid: String::new(),
+                extra: Some(extra),
+            },
+            channel_index: vec![0],
+        }
+    }
+
+    #[test]
+    fn cloud_corrected_response_produces_correction_variant() {
+        let sr = make_cloud_corrected_response(
+            &[(" Hello", 0.1, 0.5), (" world", 0.6, 0.9)],
+            " Hello world",
+        );
+        let input = TranscriptInput::from_stream_response(&sr).unwrap();
+        assert!(matches!(input, TranscriptInput::Correction { .. }));
+    }
+
+    #[test]
+    fn correction_replaces_matching_finalized_words() {
+        use crate::id::SequentialIdGen;
+        let mut view = TranscriptView::with_config(SequentialIdGen::new());
+
+        process_sr(
+            &mut view,
+            &make_response(
+                &[(" Hello", 0.1, 0.5), (" world", 0.6, 0.9)],
+                " Hello world",
+                true,
+            ),
+        );
+        view.flush(FlushMode::DrainAll);
+        assert_eq!(view.frame().final_words.len(), 2);
+
+        let correction = TranscriptInput::Correction {
+            words: vec![
+                crate::types::RawWord {
+                    text: " Hola".to_string(),
+                    start_ms: 100,
+                    end_ms: 500,
+                    channel: 0,
+                    speaker: None,
+                },
+                crate::types::RawWord {
+                    text: " mundo".to_string(),
+                    start_ms: 600,
+                    end_ms: 900,
+                    channel: 0,
+                    speaker: None,
+                },
+            ],
+        };
+
+        let outcome = view.process(correction);
+        assert!(matches!(outcome, ProcessOutcome::Corrected(_)));
+        let frame = view.frame();
+        assert_eq!(frame.final_words.len(), 2);
+        assert_eq!(frame.final_words[0].text, " Hola");
+        assert_eq!(frame.final_words[1].text, " mundo");
+    }
+
+    #[test]
+    fn correction_with_no_matching_range_is_unchanged() {
+        let mut view = TranscriptView::new();
+
+        process_sr(
+            &mut view,
+            &make_response(
+                &[(" Hello", 0.1, 0.5), (" world", 0.6, 0.9)],
+                " Hello world",
+                true,
+            ),
+        );
+        view.flush(FlushMode::DrainAll);
+
+        let correction = TranscriptInput::Correction {
+            words: vec![crate::types::RawWord {
+                text: " nope".to_string(),
+                start_ms: 5000,
+                end_ms: 6000,
+                channel: 0,
+                speaker: None,
+            }],
+        };
+
+        let outcome = view.process(correction);
+        assert!(matches!(outcome, ProcessOutcome::Unchanged));
+    }
+
+    #[test]
+    fn correction_word_count_mismatch_handled() {
+        use crate::id::SequentialIdGen;
+        let mut view = TranscriptView::with_config(SequentialIdGen::new());
+
+        process_sr(
+            &mut view,
+            &make_response(
+                &[(" Hello", 0.1, 0.5), (" world", 0.6, 0.9)],
+                " Hello world",
+                true,
+            ),
+        );
+        view.flush(FlushMode::DrainAll);
+        assert_eq!(view.frame().final_words.len(), 2);
+
+        let correction = TranscriptInput::Correction {
+            words: vec![
+                crate::types::RawWord {
+                    text: " Hola".to_string(),
+                    start_ms: 100,
+                    end_ms: 400,
+                    channel: 0,
+                    speaker: None,
+                },
+                crate::types::RawWord {
+                    text: " querido".to_string(),
+                    start_ms: 400,
+                    end_ms: 700,
+                    channel: 0,
+                    speaker: None,
+                },
+                crate::types::RawWord {
+                    text: " mundo".to_string(),
+                    start_ms: 700,
+                    end_ms: 900,
+                    channel: 0,
+                    speaker: None,
+                },
+            ],
+        };
+
+        let outcome = view.process(correction);
+        assert!(matches!(outcome, ProcessOutcome::Corrected(_)));
+        let frame = view.frame();
+        assert_eq!(frame.final_words.len(), 3);
+        assert_eq!(frame.final_words[0].text, " Hola");
+        assert_eq!(frame.final_words[1].text, " querido");
+        assert_eq!(frame.final_words[2].text, " mundo");
     }
 }

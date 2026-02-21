@@ -1,17 +1,18 @@
 mod fixture;
 mod renderer;
+mod source;
 
 use std::time::{Duration, Instant};
 
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use fixture::Fixture;
-use owhisper_interface::stream::StreamResponse;
 use ratatui::DefaultTerminal;
+use source::Source;
 use transcript::FlushMode;
 use transcript::input::TranscriptInput;
 use transcript::postprocess::PostProcessUpdate;
 use transcript::types::TranscriptWord;
-use transcript::view::TranscriptView;
+use transcript::view::{ProcessOutcome, TranscriptView};
 
 #[derive(clap::Parser)]
 #[command(name = "replay", about = "Replay transcript fixture in the terminal")]
@@ -21,36 +22,40 @@ struct Args {
 
     #[arg(short, long, default_value_t = 30)]
     speed: u64,
+
+    #[arg(long, help = "WebSocket URL for live Cactus source (e.g. ws://localhost:8080/v1/listen?channels=1&sample_rate=16000)")]
+    cactus: Option<String>,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum LastEvent {
     Final,
     Partial,
+    Correction,
     Skipped,
 }
 
 pub struct App {
-    responses: Vec<StreamResponse>,
+    source: Source,
     pub position: usize,
     pub paused: bool,
     pub speed_ms: u64,
     pub view: TranscriptView,
-    pub fixture_name: String,
+    pub source_name: String,
     pub last_event: LastEvent,
     pub flush_mode: FlushMode,
     pub last_postprocess: Option<PostProcessUpdate>,
 }
 
 impl App {
-    fn new(responses: Vec<StreamResponse>, speed_ms: u64, fixture_name: String) -> Self {
+    fn new(source: Source, speed_ms: u64, source_name: String) -> Self {
         Self {
-            responses,
+            source,
             position: 0,
             paused: false,
             speed_ms,
             view: TranscriptView::new(),
-            fixture_name,
+            source_name,
             last_event: LastEvent::Skipped,
             flush_mode: FlushMode::DrainAll,
             last_postprocess: None,
@@ -58,7 +63,7 @@ impl App {
     }
 
     pub fn total(&self) -> usize {
-        self.responses.len()
+        self.source.total()
     }
 
     fn seek_to(&mut self, target: usize) {
@@ -68,16 +73,22 @@ impl App {
         self.position = 0;
         let mut last_event = LastEvent::Skipped;
         for i in 0..target {
-            match TranscriptInput::from_stream_response(&self.responses[i]) {
-                Some(input) => {
-                    last_event = match &input {
-                        TranscriptInput::Final { .. } => LastEvent::Final,
-                        TranscriptInput::Partial { .. } => LastEvent::Partial,
-                    };
-                    self.view.process(input);
-                }
-                None => {
-                    last_event = LastEvent::Skipped;
+            if let Some(sr) = self.source.get(i) {
+                match TranscriptInput::from_stream_response(sr) {
+                    Some(input) => {
+                        last_event = match &input {
+                            TranscriptInput::Final { .. } => LastEvent::Final,
+                            TranscriptInput::Partial { .. } => LastEvent::Partial,
+                            TranscriptInput::Correction { .. } => LastEvent::Correction,
+                        };
+                        let outcome = self.view.process(input);
+                        if let ProcessOutcome::Corrected(update) = outcome {
+                            self.last_postprocess = Some(update);
+                        }
+                    }
+                    None => {
+                        last_event = LastEvent::Skipped;
+                    }
                 }
             }
         }
@@ -86,19 +97,51 @@ impl App {
     }
 
     fn advance(&mut self) -> bool {
+        if self.source.is_live() {
+            if let Some(sr) = self.source.poll_next() {
+                let sr = sr.clone();
+                self.position = self.source.total();
+                match TranscriptInput::from_stream_response(&sr) {
+                    Some(input) => {
+                        self.last_event = match &input {
+                            TranscriptInput::Final { .. } => LastEvent::Final,
+                            TranscriptInput::Partial { .. } => LastEvent::Partial,
+                            TranscriptInput::Correction { .. } => LastEvent::Correction,
+                        };
+                        let outcome = self.view.process(input);
+                        if let ProcessOutcome::Corrected(update) = outcome {
+                            self.last_postprocess = Some(update);
+                        }
+                    }
+                    None => {
+                        self.last_event = LastEvent::Skipped;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
         if self.position >= self.total() {
             return false;
         }
-        match TranscriptInput::from_stream_response(&self.responses[self.position]) {
-            Some(input) => {
-                self.last_event = match &input {
-                    TranscriptInput::Final { .. } => LastEvent::Final,
-                    TranscriptInput::Partial { .. } => LastEvent::Partial,
-                };
-                self.view.process(input);
-            }
-            None => {
-                self.last_event = LastEvent::Skipped;
+        if let Some(sr) = self.source.get(self.position) {
+            let sr = sr.clone();
+            match TranscriptInput::from_stream_response(&sr) {
+                Some(input) => {
+                    self.last_event = match &input {
+                        TranscriptInput::Final { .. } => LastEvent::Final,
+                        TranscriptInput::Partial { .. } => LastEvent::Partial,
+                        TranscriptInput::Correction { .. } => LastEvent::Correction,
+                    };
+                    let outcome = self.view.process(input);
+                    if let ProcessOutcome::Corrected(update) = outcome {
+                        self.last_postprocess = Some(update);
+                    }
+                }
+                None => {
+                    self.last_event = LastEvent::Skipped;
+                }
             }
         }
         self.position += 1;
@@ -106,6 +149,9 @@ impl App {
     }
 
     pub fn is_done(&self) -> bool {
+        if self.source.is_live() {
+            return false;
+        }
         self.position >= self.total()
     }
 
@@ -153,24 +199,27 @@ fn title_case_word(s: &str) -> String {
 fn main() {
     use clap::Parser;
     let args = Args::parse();
-    let fixture = args.fixture;
     let speed_ms = args.speed;
-    let fixture_name = fixture.to_string();
 
-    let responses: Vec<StreamResponse> =
-        serde_json::from_str(fixture.json()).expect("fixture must parse as StreamResponse[]");
+    let (source, source_name) = if let Some(url) = args.cactus {
+        (Source::from_cactus(&url), format!("cactus:{}", url))
+    } else {
+        let fixture = args.fixture;
+        let name = fixture.to_string();
+        (Source::from_fixture(fixture.json()), name)
+    };
 
     let mut terminal = ratatui::init();
-    let result = run(&mut terminal, responses, speed_ms, fixture_name.clone());
+    let result = run(&mut terminal, source, speed_ms, source_name.clone());
     ratatui::restore();
 
     match result {
         Ok(app) => {
             println!(
-                "Done. {} final words from {} events ({} fixture).",
+                "Done. {} final words from {} events ({}).",
                 app.view.frame().final_words.len(),
                 app.total(),
-                fixture_name,
+                source_name,
             );
         }
         Err(e) => {
@@ -182,11 +231,11 @@ fn main() {
 
 fn run(
     terminal: &mut DefaultTerminal,
-    responses: Vec<StreamResponse>,
+    source: Source,
     speed_ms: u64,
-    fixture_name: String,
+    source_name: String,
 ) -> std::io::Result<App> {
-    let mut app = App::new(responses, speed_ms, fixture_name);
+    let mut app = App::new(source, speed_ms, source_name);
     let mut last_tick = Instant::now();
 
     loop {
@@ -207,10 +256,10 @@ fn run(
                         app.paused = !app.paused;
                         last_tick = Instant::now();
                     }
-                    KeyCode::Right => {
+                    KeyCode::Right if !app.source.is_live() => {
                         app.seek_to(app.position + 1);
                     }
-                    KeyCode::Left => {
+                    KeyCode::Left if !app.source.is_live() => {
                         app.seek_to(app.position.saturating_sub(1));
                     }
                     KeyCode::Up => {
@@ -219,10 +268,10 @@ fn run(
                     KeyCode::Down => {
                         app.speed_ms += 10;
                     }
-                    KeyCode::Home => {
+                    KeyCode::Home if !app.source.is_live() => {
                         app.seek_to(0);
                     }
-                    KeyCode::End => {
+                    KeyCode::End if !app.source.is_live() => {
                         let total = app.total();
                         app.seek_to(total);
                         let mode = app.flush_mode;
