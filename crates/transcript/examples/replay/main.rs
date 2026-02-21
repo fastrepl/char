@@ -8,6 +8,7 @@ use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use fixture::Fixture;
 use ratatui::DefaultTerminal;
 use source::Source;
+use owhisper_interface::stream::StreamResponse;
 use transcript::FlushMode;
 use transcript::input::TranscriptInput;
 use transcript::postprocess::PostProcessUpdate;
@@ -38,6 +39,43 @@ pub enum LastEvent {
     Skipped,
 }
 
+#[derive(Clone, Default)]
+pub struct CactusMetrics {
+    pub decode_tps: f64,
+    pub prefill_tps: f64,
+    pub time_to_first_token_ms: f64,
+    pub total_time_ms: f64,
+    pub decode_tokens: f64,
+    pub prefill_tokens: f64,
+    pub total_tokens: f64,
+    pub buffer_duration_ms: f64,
+}
+
+impl CactusMetrics {
+    fn from_stream_response(sr: &StreamResponse) -> Option<Self> {
+        let extra = match sr {
+            StreamResponse::TranscriptResponse { metadata, .. } => metadata.extra.as_ref()?,
+            _ => return None,
+        };
+        let f = |key: &str| -> f64 {
+            extra
+                .get(key)
+                .and_then(|v| v.as_f64())
+                .unwrap_or(0.0)
+        };
+        Some(Self {
+            decode_tps: f("decode_tps"),
+            prefill_tps: f("prefill_tps"),
+            time_to_first_token_ms: f("time_to_first_token_ms"),
+            total_time_ms: f("total_time_ms"),
+            decode_tokens: f("decode_tokens"),
+            prefill_tokens: f("prefill_tokens"),
+            total_tokens: f("total_tokens"),
+            buffer_duration_ms: f("buffer_duration_ms"),
+        })
+    }
+}
+
 pub struct App {
     source: Source,
     pub position: usize,
@@ -48,6 +86,7 @@ pub struct App {
     pub last_event: LastEvent,
     pub flush_mode: FlushMode,
     pub last_postprocess: Option<PostProcessUpdate>,
+    pub cactus_metrics: Option<CactusMetrics>,
 }
 
 impl App {
@@ -62,6 +101,7 @@ impl App {
             last_event: LastEvent::Skipped,
             flush_mode: FlushMode::DrainAll,
             last_postprocess: None,
+            cactus_metrics: None,
         }
     }
 
@@ -73,10 +113,14 @@ impl App {
         let target = target.min(self.total());
         self.view = TranscriptView::new();
         self.last_postprocess = None;
+        self.cactus_metrics = None;
         self.position = 0;
         let mut last_event = LastEvent::Skipped;
         for i in 0..target {
             if let Some(sr) = self.source.get(i) {
+                if let Some(m) = CactusMetrics::from_stream_response(sr) {
+                    self.cactus_metrics = Some(m);
+                }
                 match TranscriptInput::from_stream_response(sr) {
                     Some(input) => {
                         last_event = match &input {
@@ -104,6 +148,9 @@ impl App {
             if let Some(sr) = self.source.poll_next() {
                 let sr = sr.clone();
                 self.position = self.source.total();
+                if let Some(m) = CactusMetrics::from_stream_response(&sr) {
+                    self.cactus_metrics = Some(m);
+                }
                 match TranscriptInput::from_stream_response(&sr) {
                     Some(input) => {
                         self.last_event = match &input {
@@ -130,6 +177,9 @@ impl App {
         }
         if let Some(sr) = self.source.get(self.position) {
             let sr = sr.clone();
+            if let Some(m) = CactusMetrics::from_stream_response(&sr) {
+                self.cactus_metrics = Some(m);
+            }
             match TranscriptInput::from_stream_response(&sr) {
                 Some(input) => {
                     self.last_event = match &input {

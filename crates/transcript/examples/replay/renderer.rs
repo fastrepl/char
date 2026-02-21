@@ -8,6 +8,7 @@ use ratatui::{
 use transcript::FlushMode;
 
 use crate::App;
+use crate::CactusMetrics;
 use crate::LastEvent;
 
 const DEBUG_PANEL_WIDTH: u16 = 36;
@@ -99,19 +100,26 @@ fn render_debug(frame: &mut Frame, app: &App, area: Rect) {
     let inner = block.inner(area);
     frame.render_widget(block, area);
 
-    // Sections from top to bottom: event, pipeline internals, counts, postprocess
-    let [event_area, pipeline_area, counts_area, postprocess_area] = Layout::vertical([
-        Constraint::Length(3),
-        Constraint::Fill(1),
-        Constraint::Length(5),
-        Constraint::Length(5),
-    ])
-    .areas(inner);
+    let has_metrics = app.cactus_metrics.is_some();
+    let metrics_height = if has_metrics { 6 } else { 0 };
+
+    let [event_area, pipeline_area, counts_area, postprocess_area, metrics_area] =
+        Layout::vertical([
+            Constraint::Length(3),
+            Constraint::Fill(1),
+            Constraint::Length(5),
+            Constraint::Length(5),
+            Constraint::Length(metrics_height),
+        ])
+        .areas(inner);
 
     render_event_section(frame, app, event_area);
     render_pipeline_section(frame, app, pipeline_area);
     render_counts_section(frame, app, counts_area);
     render_postprocess_section(frame, app, postprocess_area);
+    if let Some(metrics) = &app.cactus_metrics {
+        render_metrics_section(frame, metrics, metrics_area);
+    }
 }
 
 fn render_event_section(frame: &mut Frame, app: &App, area: Rect) {
@@ -280,6 +288,35 @@ fn render_postprocess_section(frame: &mut Frame, app: &App, area: Rect) {
         }
     }
 
+    frame.render_widget(Paragraph::new(lines), area);
+}
+
+fn render_metrics_section(frame: &mut Frame, m: &CactusMetrics, area: Rect) {
+    let lines = vec![
+        section_header("cactus"),
+        Line::from(vec![
+            Span::styled("decode   ", Style::default().fg(Color::DarkGray)),
+            Span::styled(
+                format!("{:.0} tok/s", m.decode_tps),
+                Style::default().fg(Color::Cyan),
+            ),
+        ]),
+        Line::from(vec![
+            Span::styled("prefill  ", Style::default().fg(Color::DarkGray)),
+            Span::styled(
+                format!("{:.0} tok/s", m.prefill_tps),
+                Style::default().fg(Color::Cyan),
+            ),
+        ]),
+        Line::from(vec![
+            Span::styled("ttft     ", Style::default().fg(Color::DarkGray)),
+            Span::raw(format!("{:.0}ms", m.time_to_first_token_ms)),
+        ]),
+        Line::from(vec![
+            Span::styled("total    ", Style::default().fg(Color::DarkGray)),
+            Span::raw(format!("{:.0}ms", m.total_time_ms)),
+        ]),
+    ];
     frame.render_widget(Paragraph::new(lines), area);
 }
 
