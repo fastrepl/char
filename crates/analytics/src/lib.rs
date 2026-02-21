@@ -219,7 +219,11 @@ impl AnalyticsClient {
 
             if let Some(local) = &state.local_eval {
                 let props = person_properties.as_ref().cloned().unwrap_or_default();
-                if let Ok(Some(value)) = local.evaluator.evaluate_flag(flag_key, distinct_id, &props) { return Ok(Some(value)) }
+                if let Ok(Some(value)) =
+                    local.evaluator.evaluate_flag(flag_key, distinct_id, &props)
+                {
+                    return Ok(Some(value));
+                }
             }
 
             Ok(state
