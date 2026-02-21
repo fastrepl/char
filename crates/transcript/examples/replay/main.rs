@@ -11,7 +11,6 @@ use crossterm::event::{self, DisableMouseCapture, EnableMouseCapture, Event, Key
 use crossterm::execute;
 use fixture::Fixture;
 use ratatui::DefaultTerminal;
-use renderer::LayoutInfo;
 use source::Source;
 
 #[derive(clap::Parser)]
@@ -100,21 +99,11 @@ fn run(
     let mut last_tick = Instant::now();
 
     loop {
-        let mut layout = LayoutInfo {
-            transcript_lines: 0,
-            transcript_area_height: 0,
-            word_regions: Vec::new(),
-            transcript_area: ratatui::layout::Rect::default(),
-        };
+        let mut layout = None;
         terminal.draw(|frame| {
-            layout = renderer::render(frame, &app);
+            layout = Some(renderer::render(frame, &app));
         })?;
-        app.update_layout(
-            layout.transcript_lines,
-            layout.transcript_area_height,
-            layout.word_regions,
-            layout.transcript_area,
-        );
+        app.update_layout(layout.unwrap());
 
         let tick_duration = Duration::from_millis(app.speed_ms);
         let elapsed = last_tick.elapsed();

@@ -8,7 +8,7 @@ use transcript::postprocess::PostProcessUpdate;
 use transcript::types::{PartialWord, SpeakerHint, TranscriptWord};
 use transcript::view::{ProcessOutcome, TranscriptView};
 
-use crate::renderer::WordRegion;
+use crate::renderer::{LayoutInfo, WordRegion};
 use crate::source::{CactusMetrics, Source};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -188,17 +188,11 @@ impl App {
         }
     }
 
-    pub fn update_layout(
-        &mut self,
-        transcript_lines: u16,
-        transcript_area_height: u16,
-        word_regions: Vec<WordRegion>,
-        transcript_area: Rect,
-    ) {
-        self.transcript_lines = transcript_lines;
-        self.transcript_area_height = transcript_area_height;
-        self.word_regions = word_regions;
-        self.transcript_area = transcript_area;
+    pub fn update_layout(&mut self, layout: LayoutInfo) {
+        self.transcript_lines = layout.transcript_lines;
+        self.transcript_area_height = layout.transcript_area_height;
+        self.word_regions = layout.word_regions;
+        self.transcript_area = layout.transcript_area;
     }
 
     pub fn handle_mouse(&mut self, event: MouseEvent) {
@@ -214,12 +208,7 @@ impl App {
             return;
         }
 
-        let scroll_offset = if self.auto_scroll {
-            self.transcript_lines
-                .saturating_sub(self.transcript_area_height)
-        } else {
-            self.transcript_scroll
-        };
+        let scroll_offset = self.current_scroll_offset();
 
         let logical_col = col - area.x;
         let logical_row = (row - area.y) + scroll_offset;
