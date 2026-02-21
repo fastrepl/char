@@ -375,11 +375,10 @@ impl AdapterKind {
         }
 
         if is_local_argmax(base_url) {
-            if let Some(model) = _model {
-                if model.contains("cactus") {
+            if let Some(model) = _model
+                && model.contains("cactus") {
                     return Self::Cactus;
                 }
-            }
             return Self::Argmax;
         }
 
