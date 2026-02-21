@@ -44,6 +44,7 @@ pub(super) async fn handle_websocket(
     socket: WebSocket,
     params: ListenParams,
     model_path: PathBuf,
+    cloud_handoff: bool,
     guard: ConnectionGuard,
 ) {
     let (mut ws_sender, mut ws_receiver) = socket.split();
@@ -75,10 +76,18 @@ pub(super) async fn handle_websocket(
                 return;
             }
         };
+        let cloud_config = if cloud_handoff {
+            hypr_cactus::CloudConfig::default()
+        } else {
+            hypr_cactus::CloudConfig {
+                threshold: Some(0.0),
+                ..Default::default()
+            }
+        };
         let (audio_tx, event_rx, cancel_token, handle) = hypr_cactus::transcribe_stream(
             model,
             options.clone(),
-            hypr_cactus::CloudConfig::default(),
+            cloud_config,
             chunk_size_ms,
             SAMPLE_RATE,
         );

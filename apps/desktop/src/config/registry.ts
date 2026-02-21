@@ -90,12 +90,18 @@ export const CONFIG_REGISTRY = {
       const provider = getConfig("current_stt_provider") as string | undefined;
       const model = getConfig("current_stt_model") as string | undefined;
 
-      if (
-        provider === "hyprnote" &&
-        model &&
-        model !== "cloud" &&
-        (model.startsWith("am-") || model.startsWith("Quantized"))
-      ) {
+      const isHyprnoteLocal =
+        provider === "hyprnote" && model && model !== "cloud";
+
+      if (!isHyprnoteLocal) {
+        return;
+      }
+
+      const modelsResult = await localSttCommands.listSupportedModels();
+      if (modelsResult.status !== "ok") return;
+
+      const modelInfo = modelsResult.data.find((m) => m.key === model);
+      if (modelInfo && modelInfo.model_type !== "cactus") {
         await localSttCommands.startServer(model as SupportedSttModel);
       }
     },
@@ -108,15 +114,20 @@ export const CONFIG_REGISTRY = {
       const provider = getConfig("current_stt_provider") as string | undefined;
       const model = getConfig("current_stt_model") as string | undefined;
 
-      if (
-        provider === "hyprnote" &&
-        model &&
-        model !== "cloud" &&
-        (model.startsWith("am-") || model.startsWith("Quantized"))
-      ) {
-        await localSttCommands.startServer(model as SupportedSttModel);
-      } else {
+      const isHyprnoteLocal =
+        provider === "hyprnote" && model && model !== "cloud";
+
+      if (!isHyprnoteLocal) {
         await localSttCommands.stopServer(null);
+        return;
+      }
+
+      const modelsResult = await localSttCommands.listSupportedModels();
+      if (modelsResult.status !== "ok") return;
+
+      const modelInfo = modelsResult.data.find((m) => m.key === model);
+      if (modelInfo && modelInfo.model_type !== "cactus") {
+        await localSttCommands.startServer(model as SupportedSttModel);
       }
     },
   },

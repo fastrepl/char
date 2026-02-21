@@ -13,6 +13,18 @@ pub async fn models_dir<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> Result<S
 
 #[tauri::command]
 #[specta::specta]
+pub async fn cactus_models_dir<R: tauri::Runtime>(
+    app: tauri::AppHandle<R>,
+) -> Result<String, String> {
+    Ok(app
+        .local_stt()
+        .cactus_models_dir()
+        .to_string_lossy()
+        .to_string())
+}
+
+#[tauri::command]
+#[specta::specta]
 pub async fn list_supported_models() -> Result<Vec<SttModelInfo>, String> {
     Ok(SUPPORTED_MODELS
         .iter()
@@ -101,6 +113,18 @@ pub async fn stop_server<R: tauri::Runtime>(
 
 #[tauri::command]
 #[specta::specta]
+pub async fn get_server_for_model<R: tauri::Runtime>(
+    app: tauri::AppHandle<R>,
+    model: SupportedSttModel,
+) -> Result<Option<ServerInfo>, String> {
+    app.local_stt()
+        .get_server_for_model(&model)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+#[specta::specta]
 pub async fn get_servers<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
 ) -> Result<HashMap<ServerType, ServerInfo>, String> {
@@ -108,10 +132,4 @@ pub async fn get_servers<R: tauri::Runtime>(
         .get_servers()
         .await
         .map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-#[specta::specta]
-pub fn list_supported_languages(model: SupportedSttModel) -> Vec<hypr_language::Language> {
-    model.supported_languages()
 }

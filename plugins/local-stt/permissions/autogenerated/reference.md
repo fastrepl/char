@@ -28,6 +28,32 @@ Default permissions for the plugin
 <tr>
 <td>
 
+`local-stt:allow-cactus-models-dir`
+
+</td>
+<td>
+
+Enables the cactus_models_dir command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`local-stt:deny-cactus-models-dir`
+
+</td>
+<td>
+
+Denies the cactus_models_dir command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
 `local-stt:allow-cancel-download`
 
 </td>
@@ -99,6 +125,32 @@ Enables the download_model command without any pre-configured scope.
 <td>
 
 Denies the download_model command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`local-stt:allow-get-server-for-model`
+
+</td>
+<td>
+
+Enables the get_server_for_model command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`local-stt:deny-get-server-for-model`
+
+</td>
+<td>
+
+Denies the get_server_for_model command without any pre-configured scope.
 
 </td>
 </tr>

@@ -266,6 +266,10 @@ fn is_local_argmax(base_url: &str) -> bool {
     host_matches(base_url, is_local_host) && !is_hyprnote_local_proxy(base_url)
 }
 
+fn is_cactus_model(model: &str) -> bool {
+    model.parse::<hypr_cactus_model::CactusSttModel>().is_ok()
+}
+
 pub(crate) fn build_ws_url_from_base_with(
     provider: crate::providers::Provider,
     api_base: &str,
@@ -376,7 +380,7 @@ impl AdapterKind {
 
         if is_local_argmax(base_url) {
             if let Some(model) = _model {
-                if model.contains("cactus") {
+                if is_cactus_model(model) {
                     return Self::Cactus;
                 }
             }

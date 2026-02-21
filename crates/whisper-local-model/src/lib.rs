@@ -111,4 +111,16 @@ impl WhisperModel {
             WhisperModel::QuantizedLargeTurbo => 3055274469,
         }
     }
+
+    pub fn supported_languages(&self) -> Vec<hypr_language::Language> {
+        match self {
+            WhisperModel::QuantizedTinyEn
+            | WhisperModel::QuantizedBaseEn
+            | WhisperModel::QuantizedSmallEn => vec![hypr_language::ISO639::En.into()],
+            WhisperModel::QuantizedTiny
+            | WhisperModel::QuantizedBase
+            | WhisperModel::QuantizedSmall
+            | WhisperModel::QuantizedLargeTurbo => hypr_language::whisper_multilingual(),
+        }
+    }
 }

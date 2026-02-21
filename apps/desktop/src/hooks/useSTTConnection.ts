@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 
 import {
   commands as localSttCommands,
@@ -10,14 +10,14 @@ import type { AIProviderStorage } from "@hypr/store";
 import { useAuth } from "../auth";
 import { useBillingAccess } from "../billing";
 import { providerRowId } from "../components/settings/ai/shared";
-import { ProviderId } from "../components/settings/ai/stt/shared";
+import { type ProviderId } from "../components/settings/ai/stt/shared";
 import { env } from "../env";
 import * as settings from "../store/tinybase/store/settings";
-
-let cactusStarting = false;
+import { localSttQueries } from "./useLocalSttModel";
 
 export const useSTTConnection = () => {
   const auth = useAuth();
+  const cactusStartingRef = useRef(false);
   const billing = useBillingAccess();
   const { current_stt_provider, current_stt_model } = settings.UI.useValues(
     settings.STORE_ID,
@@ -35,12 +35,12 @@ export const useSTTConnection = () => {
   const isLocalModel =
     current_stt_provider === "hyprnote" &&
     !!current_stt_model &&
-    (current_stt_model.startsWith("am-") ||
-      current_stt_model.startsWith("Quantized") ||
-      current_stt_model === "cactus");
+    current_stt_model !== "cloud";
 
   const isCloudModel =
     current_stt_provider === "hyprnote" && current_stt_model === "cloud";
+
+  const supportedModels = useQuery(localSttQueries.supportedModels());
 
   const local = useQuery({
     enabled: current_stt_provider === "hyprnote",
@@ -51,36 +51,35 @@ export const useSTTConnection = () => {
         return null;
       }
 
-      const isCactus = current_stt_model === "cactus";
+      const modelInfo = supportedModels.data?.find(
+        (m) => m.key === current_stt_model,
+      );
+      const isCactus = modelInfo?.model_type === "cactus";
 
-      if (!isCactus) {
-        const downloaded = await localSttCommands.isModelDownloaded(
-          current_stt_model as SupportedSttModel,
-        );
-        if (downloaded.status !== "ok" || !downloaded.data) {
-          return { status: "not_downloaded" as const, connection: null };
-        }
+      const downloaded = await localSttCommands.isModelDownloaded(
+        current_stt_model as SupportedSttModel,
+      );
+      if (downloaded.status !== "ok" || !downloaded.data) {
+        return { status: "not_downloaded" as const, connection: null };
       }
 
-      const servers = await localSttCommands.getServers();
+      const serverResult = await localSttCommands.getServerForModel(
+        current_stt_model as SupportedSttModel,
+      );
 
-      if (servers.status !== "ok") {
+      if (serverResult.status !== "ok") {
         return null;
       }
 
-      const isInternalModel =
-        current_stt_model.startsWith("Quantized") || isCactus;
-      const server = isInternalModel
-        ? servers.data.internal
-        : servers.data.external;
+      const server = serverResult.data;
 
       if (isCactus && server?.status !== "ready") {
-        if (!cactusStarting) {
-          cactusStarting = true;
+        if (!cactusStartingRef.current) {
+          cactusStartingRef.current = true;
           localSttCommands
-            .startServer("QuantizedSmall" as SupportedSttModel)
+            .startServer(current_stt_model as SupportedSttModel)
             .finally(() => {
-              cactusStarting = false;
+              cactusStartingRef.current = false;
             });
         }
         return { status: "loading" as const, connection: null };

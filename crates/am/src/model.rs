@@ -1,3 +1,9 @@
+// https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3
+pub const PARAKEET_V3_LANGS: &[&str] = &[
+    "bg", "cs", "da", "de", "el", "en", "es", "et", "fi", "fr", "hr", "hu", "it", "lt", "lv", "mt",
+    "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sv", "uk",
+];
+
 #[derive(
     Debug,
     Clone,
@@ -51,6 +57,20 @@ impl AmModel {
             AmModel::ParakeetV2 => "English only. Works best for English.",
             AmModel::ParakeetV3 => "English and European languages.",
             AmModel::WhisperLargeV3 => "Broad coverage of languages.",
+        }
+    }
+
+    pub fn supported_languages(&self) -> Vec<hypr_language::Language> {
+        use hypr_language::ISO639;
+
+        match self {
+            AmModel::ParakeetV2 => vec![ISO639::En.into()],
+            AmModel::ParakeetV3 => PARAKEET_V3_LANGS
+                .iter()
+                .filter_map(|code| code.parse::<ISO639>().ok())
+                .map(|iso| iso.into())
+                .collect(),
+            AmModel::WhisperLargeV3 => hypr_language::whisper_multilingual(),
         }
     }
 

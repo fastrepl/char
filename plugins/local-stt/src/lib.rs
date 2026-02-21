@@ -40,16 +40,17 @@ fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
         .plugin_name(PLUGIN_NAME)
         .commands(tauri_specta::collect_commands![
             commands::models_dir::<Wry>,
+            commands::cactus_models_dir::<Wry>,
             commands::is_model_downloaded::<Wry>,
             commands::is_model_downloading::<Wry>,
             commands::download_model::<Wry>,
             commands::cancel_download::<Wry>,
             commands::delete_model::<Wry>,
+            commands::get_server_for_model::<Wry>,
             commands::get_servers::<Wry>,
             commands::start_server::<Wry>,
             commands::stop_server::<Wry>,
             commands::list_supported_models,
-            commands::list_supported_languages,
         ])
         .events(tauri_specta::collect_events![
             types::DownloadProgressPayload,

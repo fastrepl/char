@@ -4,7 +4,10 @@ import { arch } from "@tauri-apps/plugin-os";
 import { Check, Loader2 } from "lucide-react";
 
 import { commands as listenerCommands } from "@hypr/plugin-listener";
-import type { SupportedSttModel } from "@hypr/plugin-local-stt";
+import {
+  commands as localSttCommands,
+  type SupportedSttModel,
+} from "@hypr/plugin-local-stt";
 import type { AIProviderStorage } from "@hypr/store";
 import { Input } from "@hypr/ui/components/ui/input";
 import {
@@ -272,11 +275,13 @@ export function SelectProviderAndModel() {
   );
 }
 
+type ModelEntry = { id: string; isDownloaded: boolean; displayName?: string };
+
 function useConfiguredMapping(): Record<
   ProviderId,
   {
     configured: boolean;
-    models: Array<{ id: string; isDownloaded: boolean }>;
+    models: ModelEntry[];
   }
 > {
   const billing = useBillingAccess();
@@ -293,11 +298,24 @@ function useConfiguredMapping(): Record<
 
   const isAppleSilicon = targetArch.data === "aarch64";
 
-  const [p2, p3, whisperLargeV3] = useQueries({
+  const supportedModels = useQuery({
+    queryKey: ["list-supported-models"],
+    queryFn: async () => {
+      const result = await localSttCommands.listSupportedModels();
+      return result.status === "ok" ? result.data : [];
+    },
+    staleTime: Infinity,
+  });
+
+  const cactusModels =
+    supportedModels.data?.filter((m) => m.model_type === "cactus") ?? [];
+
+  const [p2, p3, whisperLargeV3, ...cactusDownloaded] = useQueries({
     queries: [
       sttModelQueries.isDownloaded("am-parakeet-v2"),
       sttModelQueries.isDownloaded("am-parakeet-v3"),
       sttModelQueries.isDownloaded("am-whisper-large-v3"),
+      ...cactusModels.map((m) => sttModelQueries.isDownloaded(m.key)),
     ],
   });
 
@@ -321,15 +339,19 @@ function useConfiguredMapping(): Record<
       }
 
       if (provider.id === "hyprnote") {
-        const models: Array<{ id: string; isDownloaded: boolean }> = [
+        const models: ModelEntry[] = [
           { id: "cloud", isDownloaded: billing.isPro },
         ];
 
         if (isAppleSilicon) {
-          models.push({ id: "cactus", isDownloaded: true });
-        }
+          cactusModels.forEach((model, i) => {
+            models.push({
+              id: model.key,
+              isDownloaded: cactusDownloaded[i]?.data ?? false,
+              displayName: model.display_name,
+            });
+          });
 
-        if (isAppleSilicon) {
           models.push(
             {
               id: "am-parakeet-v2",
@@ -346,13 +368,7 @@ function useConfiguredMapping(): Record<
           );
         }
 
-        return [
-          provider.id,
-          {
-            configured: true,
-            models,
-          },
-        ];
+        return [provider.id, { configured: true, models }];
       }
 
       if (provider.id === "custom") {
@@ -374,7 +390,7 @@ function useConfiguredMapping(): Record<
     ProviderId,
     {
       configured: boolean;
-      models: Array<{ id: string; isDownloaded: boolean }>;
+      models: ModelEntry[];
     }
   >;
 }
@@ -384,7 +400,7 @@ function ModelSelectItem({
   onDownload,
   onStartTrial,
 }: {
-  model: { id: string; isDownloaded: boolean };
+  model: ModelEntry;
   onDownload: () => void;
   onStartTrial: () => void;
 }) {
@@ -394,10 +410,12 @@ function ModelSelectItem({
   const isDownloading = !!downloadInfo;
   const billing = useBillingAccess();
 
+  const label = model.displayName ?? displayModelId(model.id);
+
   if (model.isDownloaded) {
     return (
       <SelectItem key={model.id} value={model.id}>
-        {displayModelId(model.id)}
+        {label}
       </SelectItem>
     );
   }
@@ -429,7 +447,7 @@ function ModelSelectItem({
         "group",
       ])}
     >
-      <span className="text-neutral-400">{displayModelId(model.id)}</span>
+      <span className="text-neutral-400">{label}</span>
       {isDownloading ? (
         <span
           className={cn([

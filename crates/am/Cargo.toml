@@ -9,6 +9,7 @@ tokio = { workspace = true, features = ["rt", "macros"] }
 [dependencies]
 hypr-download-interface = { workspace = true }
 hypr-file = { workspace = true }
+hypr-language = { workspace = true }
 
 reqwest = { workspace = true, features = ["json", "query"] }
 tracing = { workspace = true }

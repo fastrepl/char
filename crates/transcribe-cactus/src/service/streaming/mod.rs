@@ -28,6 +28,7 @@ use super::batch;
 #[derive(Clone)]
 pub struct TranscribeService {
     model_path: PathBuf,
+    cloud_handoff: bool,
     connection_manager: ConnectionManager,
 }
 
@@ -40,6 +41,7 @@ impl TranscribeService {
 #[derive(Default)]
 pub struct TranscribeServiceBuilder {
     model_path: Option<PathBuf>,
+    cloud_handoff: bool,
     connection_manager: Option<ConnectionManager>,
 }
 
@@ -49,11 +51,17 @@ impl TranscribeServiceBuilder {
         self
     }
 
+    pub fn cloud_handoff(mut self, enabled: bool) -> Self {
+        self.cloud_handoff = enabled;
+        self
+    }
+
     pub fn build(self) -> TranscribeService {
         TranscribeService {
             model_path: self
                 .model_path
                 .expect("TranscribeServiceBuilder requires model_path"),
+            cloud_handoff: self.cloud_handoff,
             connection_manager: self.connection_manager.unwrap_or_default(),
         }
     }
@@ -70,6 +78,7 @@ impl Service<Request<Body>> for TranscribeService {
 
     fn call(&mut self, req: Request<Body>) -> Self::Future {
         let model_path = self.model_path.clone();
+        let cloud_handoff = self.cloud_handoff;
         let connection_manager = self.connection_manager.clone();
 
         Box::pin(async move {
@@ -101,7 +110,8 @@ impl Service<Request<Body>> for TranscribeService {
 
                 Ok(ws_upgrade
                     .on_upgrade(move |socket| async move {
-                        session::handle_websocket(socket, params, model_path, guard).await;
+                        session::handle_websocket(socket, params, model_path, cloud_handoff, guard)
+                            .await;
                     })
                     .into_response())
             } else {

@@ -85,8 +85,6 @@ export const displayModelId = (model: string) => {
     }
   }
 
-  if (model === "cactus") return "Cactus";
-
   return model;
 };
 

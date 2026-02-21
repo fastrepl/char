@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import {
   AlertCircle,
   Download,
@@ -21,12 +21,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@hypr/ui/components/ui/accordion";
-import { Input } from "@hypr/ui/components/ui/input";
+import { Switch } from "@hypr/ui/components/ui/switch";
 import { cn } from "@hypr/utils";
 
 import { useBillingAccess } from "../../../../billing";
 import { useListener } from "../../../../contexts/listener";
-import { useLocalModelDownload } from "../../../../hooks/useLocalSttModel";
+import {
+  localSttQueries,
+  useLocalModelDownload,
+} from "../../../../hooks/useLocalSttModel";
 import * as settings from "../../../../store/tinybase/store/settings";
 import { NonHyprProviderCard, StyledStreamdown } from "../shared";
 import { useSttSettings } from "./context";
@@ -190,12 +193,13 @@ function HyprProviderCard({
                 <>
                   <ModelGroupLabel label="Cactus (Experimental)" />
                   {cactusModels.map((model) => (
-                    <CactusDisabledRow
+                    <CactusRow
                       key={model.key as string}
+                      model={model.key}
                       displayName={model.display_name}
                     />
                   ))}
-                  <CactusModelPathRow />
+                  <CactusCloudHandoff models={cactusModels.map((m) => m.key)} />
                 </>
               )}
             </>
@@ -206,78 +210,89 @@ function HyprProviderCard({
   );
 }
 
-function CactusDisabledRow({ displayName }: { displayName: string }) {
+function CactusRow({
+  model,
+  displayName,
+}: {
+  model: SupportedSttModel;
+  displayName: string;
+}) {
+  const handleSelectModel = useSafeSelectModel();
+  const { shouldHighlightDownload } = useSttSettings();
+
+  const {
+    progress,
+    hasError,
+    isDownloaded,
+    showProgress,
+    handleDownload,
+    handleCancel,
+    handleDelete,
+  } = useLocalModelDownload(model, handleSelectModel);
+
+  const handleOpen = () => {
+    void localSttCommands.cactusModelsDir().then((result) => {
+      if (result.status === "ok") {
+        void openerCommands.openPath(result.data, null);
+      }
+    });
+  };
+
   return (
     <HyprProviderRow>
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-neutral-400">
-          {displayName}
-        </span>
-        <span className="text-[10px] text-neutral-400 border border-neutral-200 rounded-full px-2 py-0.5">
-          Coming soon
-        </span>
+      <div className="flex-1">
+        <span className="text-sm font-medium">{displayName}</span>
       </div>
+
+      <LocalModelAction
+        isDownloaded={isDownloaded}
+        showProgress={showProgress}
+        progress={progress}
+        hasError={hasError}
+        highlight={shouldHighlightDownload}
+        onOpen={handleOpen}
+        onDownload={handleDownload}
+        onCancel={handleCancel}
+        onDelete={handleDelete}
+      />
     </HyprProviderRow>
   );
 }
 
-function CactusModelPathRow() {
-  const modelPath = settings.UI.useValue(
-    "cactus_model_path",
+function CactusCloudHandoff({ models }: { models: SupportedSttModel[] }) {
+  const downloadedQueries = useQueries({
+    queries: models.map((m) => localSttQueries.isDownloaded(m)),
+  });
+
+  const anyDownloaded = downloadedQueries.some((q) => q.data);
+
+  const cloudHandoff = settings.UI.useValue(
+    "cactus_cloud_handoff",
     settings.STORE_ID,
   );
 
-  const handleSetModelPath = settings.UI.useSetValueCallback(
-    "cactus_model_path",
-    (path: string) => path,
+  const handleSetCloudHandoff = settings.UI.useSetValueCallback(
+    "cactus_cloud_handoff",
+    (v: boolean) => v,
     [],
     settings.STORE_ID,
   );
 
-  const handleSelectProvider = settings.UI.useSetValueCallback(
-    "current_stt_provider",
-    (provider: string) => provider,
-    [],
-    settings.STORE_ID,
-  );
-
-  const handleSelectModel = settings.UI.useSetValueCallback(
-    "current_stt_model",
-    (model: string) => model,
-    [],
-    settings.STORE_ID,
-  );
-
-  const active = useListener((state) => state.live.status !== "inactive");
-
-  const handleUseCactus = useCallback(() => {
-    if (active) return;
-    handleSelectProvider("hyprnote");
-    handleSelectModel("cactus");
-  }, [active, handleSelectProvider, handleSelectModel]);
+  if (!anyDownloaded) {
+    return null;
+  }
 
   return (
     <HyprProviderRow>
-      <span className="text-xs text-neutral-500">Custom model path</span>
-      <Input
-        value={modelPath ?? ""}
-        onChange={(e) => handleSetModelPath(e.target.value)}
-        placeholder="/path/to/cactus-model"
-        className="text-xs font-mono"
-      />
-      <button
-        onClick={handleUseCactus}
-        disabled={active || !modelPath}
-        className={cn([
-          "w-fit h-8.5 px-4 rounded-full text-xs font-mono text-center",
-          "bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900",
-          "shadow-xs hover:shadow-md hover:scale-[102%] active:scale-[98%]",
-          "transition-all duration-150",
-          "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-xs",
-        ])}
-      >
-        Use Cactus
-      </button>
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-neutral-500">
+          Hand off to cloud when on-device processing is unavailable.
+        </p>
+        <Switch
+          checked={cloudHandoff ?? true}
+          onCheckedChange={handleSetCloudHandoff}
+        />
+      </div>
     </HyprProviderRow>
   );
 }

@@ -65,9 +65,9 @@ export const SETTINGS_MAPPING = {
       type: "string",
       path: ["ai", "current_stt_model"],
     },
-    cactus_model_path: {
-      type: "string",
-      path: ["ai", "cactus_model_path"],
+    cactus_cloud_handoff: {
+      type: "boolean",
+      path: ["cactus", "cloud_handoff"],
     },
     timezone: {
       type: "string",

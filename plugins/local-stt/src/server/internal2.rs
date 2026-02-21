@@ -9,7 +9,7 @@ use reqwest::StatusCode;
 use tower_http::cors::{self, CorsLayer};
 
 use super::{ServerInfo, ServerStatus};
-use hypr_whisper_local_model::WhisperModel;
+use hypr_cactus_model::CactusSttModel;
 
 pub enum Internal2STTMessage {
     GetHealth(RpcReplyPort<ServerInfo>),
@@ -18,14 +18,14 @@ pub enum Internal2STTMessage {
 
 #[derive(Clone)]
 pub struct Internal2STTArgs {
-    pub model_type: WhisperModel,
+    pub model_type: CactusSttModel,
     pub model_cache_dir: PathBuf,
-    pub cactus_model_path: Option<PathBuf>,
+    pub cloud_handoff: bool,
 }
 
 pub struct Internal2STTState {
     base_url: String,
-    model: WhisperModel,
+    model: CactusSttModel,
     shutdown: tokio::sync::watch::Sender<()>,
     server_task: tokio::task::JoinHandle<()>,
 }
@@ -52,16 +52,17 @@ impl Actor for Internal2STTActor {
         let Internal2STTArgs {
             model_type,
             model_cache_dir,
-            cactus_model_path,
+            cloud_handoff,
         } = args;
 
-        let model_path = cactus_model_path
-            .filter(|p| p.exists())
-            .unwrap_or_else(|| resolve_cactus_model_path(&model_cache_dir));
+        let model_path = model_cache_dir.join(model_type.dir_name());
+
+        tracing::info!(model_path = %model_path.display(), "starting internal2 STT server");
 
         let cactus_service = HandleError::new(
             hypr_transcribe_cactus::TranscribeService::builder()
                 .model_path(model_path)
+                .cloud_handoff(cloud_handoff)
                 .build(),
             move |err: String| async move {
                 let _ = myself.send_message(Internal2STTMessage::ServerError(err.clone()));
@@ -125,7 +126,7 @@ impl Actor for Internal2STTActor {
                 let info = ServerInfo {
                     url: Some(state.base_url.clone()),
                     status: ServerStatus::Ready,
-                    model: Some(crate::SupportedSttModel::Whisper(state.model.clone())),
+                    model: Some(crate::SupportedSttModel::Cactus(state.model.clone())),
                 };
 
                 if let Err(e) = reply_port.send(info) {
@@ -136,29 +137,4 @@ impl Actor for Internal2STTActor {
             }
         }
     }
-}
-
-fn resolve_cactus_model_path(model_cache_dir: &std::path::Path) -> PathBuf {
-    if let Ok(explicit) = std::env::var("CACTUS_STT_MODEL") {
-        let explicit_path = PathBuf::from(explicit);
-        if explicit_path.exists() {
-            tracing::info!(path = %explicit_path.display(), "using_cactus_model_from_env");
-            return explicit_path;
-        }
-        tracing::warn!(
-            path = %explicit_path.display(),
-            "cactus_model_path_from_env_missing"
-        );
-    }
-
-    let tmp_model = PathBuf::from("/tmp/cactus-model");
-    if tmp_model.exists() {
-        tracing::info!(path = %tmp_model.display(), "using_cactus_model_from_tmp");
-        return tmp_model;
-    }
-
-    // TODO: replace with proper cactus model registry once models are hosted
-    let fallback = model_cache_dir.join("whisper-small");
-    tracing::info!(path = %fallback.display(), "using_cactus_model_from_cache_dir");
-    fallback
 }
