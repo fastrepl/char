@@ -39,7 +39,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.changed-files.outputs.has_files == 'true'
-        run: npm install ai @ai-sdk/anthropic zod
+        run: npm install --legacy-peer-deps ai @ai-sdk/anthropic zod
 
       - name: Run grammar check
         if: steps.changed-files.outputs.has_files == 'true'
