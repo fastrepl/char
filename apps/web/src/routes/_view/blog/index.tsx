@@ -404,7 +404,7 @@ function MostRecentFeaturedCard({ article }: { article: Article }) {
               "md:text-2xl md:mb-3",
             ])}
           >
-            {article.display_title}
+            {article.title}
           </h3>
 
           <p className="text-neutral-600 leading-relaxed mb-4 line-clamp-2 md:line-clamp-3">
@@ -516,7 +516,7 @@ function OtherFeaturedCard({
               "group-hover:text-stone-800 transition-colors line-clamp-2",
             ])}
           >
-            {article.display_title}
+            {article.title}
           </h3>
 
           <div className="flex items-center gap-2 text-xs text-neutral-500">
