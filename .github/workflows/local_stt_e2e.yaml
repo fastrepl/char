@@ -45,3 +45,4 @@ jobs:
         env:
           CACTUS_STT_MODEL: ${{ github.workspace }}/vendor/cactus/weights/${{ matrix.model.name }}
           CACTUS_CLOUD_API_KEY: ${{ secrets.CACTUS_CLOUD_API_KEY }}
+          E2E_AUDIO_SECS: 20

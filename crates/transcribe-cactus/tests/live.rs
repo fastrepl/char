@@ -2,6 +2,18 @@ mod common;
 
 use std::time::Duration;
 
+fn e2e_audio_secs(default: usize) -> usize {
+    std::env::var("E2E_AUDIO_SECS")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(default)
+}
+
+fn scale_close_after(audio_secs: usize, default_audio: usize, default_close: u32) -> u32 {
+    let ratio = audio_secs as f64 / default_audio as f64;
+    ((default_close as f64 * ratio).ceil() as u32).max(1)
+}
+
 use axum::error_handling::HandleError;
 use axum::{Router, http::StatusCode};
 use futures_util::{SinkExt, StreamExt};
@@ -131,7 +143,8 @@ async fn run_single_channel_opts(
 }
 
 async fn run_single_channel(cactus_config: CactusConfig) {
-    run_single_channel_opts(cactus_config, 100, 3, 120).await;
+    let secs = e2e_audio_secs(100);
+    run_single_channel_opts(cactus_config, secs, scale_close_after(secs, 100, 3), 120).await;
 }
 
 #[ignore = "requires local cactus model files"]
@@ -164,6 +177,7 @@ fn e2e_websocket_with_handoff() {
         .build()
         .unwrap();
 
+    let secs = e2e_audio_secs(120);
     rt.block_on(run_single_channel_opts(
         CactusConfig {
             // Well below model defaults (Whisper=0.4, Moonshine=0.35) to trigger aggressively
@@ -173,8 +187,8 @@ fn e2e_websocket_with_handoff() {
             },
             ..Default::default()
         },
-        120,
-        30,
+        secs,
+        scale_close_after(secs, 120, 30),
         180,
     ));
 }
@@ -188,7 +202,9 @@ fn e2e_websocket_dual_channel_no_handoff() {
         .build()
         .unwrap();
 
-    rt.block_on(async {
+    let dual_secs = e2e_audio_secs(100);
+    let dual_close = scale_close_after(dual_secs, 100, 6);
+    rt.block_on(async move {
         let app = Router::new().route_service(
             "/v1/listen",
             HandleError::new(
@@ -239,7 +255,7 @@ fn e2e_websocket_dual_channel_no_handoff() {
         let t0 = std::time::Instant::now();
 
         let writer = tokio::spawn(async move {
-            for chunk in interleaved.chunks(64_000).cycle().take(100) {
+            for chunk in interleaved.chunks(64_000).cycle().take(dual_secs) {
                 tx.send(WsMessage::Binary(chunk.to_vec().into()))
                     .await
                     .unwrap();
@@ -286,7 +302,7 @@ fn e2e_websocket_dual_channel_no_handoff() {
                             );
                             channels_seen.insert(ch);
                             results += 1;
-                            if results >= 6 && !close_sent {
+                            if results >= dual_close && !close_sent {
                                 close_sent = true;
                                 if let Some(tx) = close_tx.take() {
                                     let _ = tx.send(());

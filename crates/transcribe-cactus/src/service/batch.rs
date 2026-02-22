@@ -320,9 +320,14 @@ mod tests {
         println!("{}", alternative.transcript.trim());
         println!("--- END (confidence={:.2}) ---\n", alternative.confidence);
 
+        let transcript = alternative.transcript.trim().to_lowercase();
+        assert!(!transcript.is_empty(), "expected non-empty transcript");
         assert!(
-            !alternative.transcript.trim().is_empty(),
-            "expected non-empty transcript"
+            transcript.contains("maybe")
+                || transcript.contains("this")
+                || transcript.contains("talking"),
+            "transcript looks like a hallucination (got: {:?})",
+            transcript
         );
         assert!(
             alternative.confidence.is_finite(),
