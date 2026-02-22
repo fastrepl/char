@@ -13,23 +13,17 @@ pub(super) fn transcribe_batch(
     content_type: &str,
     params: &ListenParams,
     model_path: &Path,
-) -> Result<batch::Response, String> {
+) -> Result<batch::Response, crate::Error> {
     let extension = content_type_to_extension(content_type);
     let mut temp_file = tempfile::Builder::new()
         .prefix("cactus_batch_")
         .suffix(&format!(".{}", extension))
-        .tempfile()
-        .map_err(|e| format!("failed to create temp file: {}", e))?;
+        .tempfile()?;
 
-    temp_file
-        .write_all(audio_data)
-        .map_err(|e| format!("failed to write audio data: {}", e))?;
-    temp_file
-        .flush()
-        .map_err(|e| format!("failed to flush temp file: {}", e))?;
+    temp_file.write_all(audio_data)?;
+    temp_file.flush()?;
 
-    let model =
-        hypr_cactus::Model::new(model_path).map_err(|e| format!("failed to load model: {}", e))?;
+    let model = hypr_cactus::Model::new(model_path)?;
 
     let options = hypr_cactus::TranscribeOptions {
         language: hypr_cactus::constrain_to(&params.languages),
@@ -38,9 +32,7 @@ pub(super) fn transcribe_batch(
 
     let total_duration = audio_duration_secs(temp_file.path());
 
-    let cactus_response = model
-        .transcribe_file(temp_file.path(), &options)
-        .map_err(|e| format!("transcription failed: {}", e))?;
+    let cactus_response = model.transcribe_file(temp_file.path(), &options)?;
     let transcript = cactus_response.text.trim().to_string();
     let confidence = cactus_response.confidence as f64;
     let words = build_batch_words(&transcript, total_duration, confidence);

@@ -37,7 +37,7 @@ pub async fn handle_batch(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(serde_json::json!({
                     "error": "transcription_failed",
-                    "detail": e
+                    "detail": e.to_string()
                 })),
             )
                 .into_response()
