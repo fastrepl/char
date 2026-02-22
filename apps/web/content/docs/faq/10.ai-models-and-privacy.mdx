@@ -156,7 +156,7 @@ An analytics event is also fired when auto-enhance runs — it includes only the
 
 **Where it goes depends on your setup:**
 
-- **Pro curated models:** Requests are proxied through `pro.hyprnote.com` and forwarded to a curated LLM provider. Nothing is stored by our proxy.
+- **Pro curated models:** Requests are proxied through `pro.hyprnote.com` and forwarded to a curated LLM provider via [OpenRouter](https://openrouter.ai). Nothing is stored by our proxy. We have [Zero Data Retention (ZDR)](https://openrouter.ai/docs/guides/features/zdr) enabled on our OpenRouter account, so all requests are routed exclusively to endpoints where the provider does not store your data.
 - **BYOK providers:** Requests are sent directly to the provider you selected (OpenAI, Anthropic, Google, or Mistral).
 - **Local LLMs:** Everything stays on your device. See [Local LLM Setup](/docs/faq/local-llm-setup).
 

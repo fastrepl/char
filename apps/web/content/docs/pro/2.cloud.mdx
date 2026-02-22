@@ -128,9 +128,11 @@ All requests are rate-limited and authenticated using your Pro subscription.
 
 All Pro LLM requests go through [OpenRouter](https://openrouter.ai), which routes to the actual model provider (OpenAI, Anthropic, Moonshot AI).
 
+**We have enabled [Zero Data Retention (ZDR)](https://openrouter.ai/docs/guides/features/zdr) on our OpenRouter account.** This means all Pro requests are routed exclusively to endpoints that have a Zero Data Retention policy — model providers cannot store your prompts or completions, even temporarily.
+
 | Policy | Details |
 |--------|---------|
-| **Data retention** | Zero by default — prompts and completions are not stored unless you opt in on your OpenRouter account |
+| **Data retention** | Zero — ZDR is enforced on our account, so only ZDR-compliant endpoints are used |
 | **Training** | Does not train on API data |
 | **Compliance** | SOC 2 |
 | **Data location** | US (default) |

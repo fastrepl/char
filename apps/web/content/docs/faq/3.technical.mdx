@@ -22,7 +22,7 @@ Char supports 9 cloud speech-to-text providers: Deepgram, AssemblyAI, Soniox, Fi
 
 ## How does Char route cloud LLM requests?
 
-When using cloud AI (Char Pro), LLM requests are routed through [OpenRouter](https://openrouter.ai). OpenRouter acts as a unified gateway to multiple model providers (OpenAI, Anthropic, Google, and others), so Char can switch between models without requiring separate API keys for each provider. A single `OPENROUTER_API_KEY` is all that's needed for cloud LLM access.
+When using cloud AI (Char Pro), LLM requests are routed through [OpenRouter](https://openrouter.ai). OpenRouter acts as a unified gateway to multiple model providers (OpenAI, Anthropic, Google, and others), so Char can switch between models without requiring separate API keys for each provider. A single `OPENROUTER_API_KEY` is all that's needed for cloud LLM access. We have [Zero Data Retention (ZDR)](https://openrouter.ai/docs/guides/features/zdr) enabled on our OpenRouter account, ensuring all requests only route to endpoints where providers do not retain your data.
 
 ## How does in-app search work?
 
