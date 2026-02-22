@@ -50,13 +50,25 @@ pub struct ShortcutDef {
     pub scope: ShortcutScope,
 }
 
-#[derive(Serialize, Deserialize, Clone, Type)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Type)]
 pub enum ShortcutCategory {
-    Tabs,
     Navigation,
-    Editor,
-    Search,
     View,
+    Tabs,
+    Search,
+    Editor,
+}
+
+impl ShortcutCategory {
+    pub fn display_name(&self) -> &'static str {
+        match self {
+            ShortcutCategory::Navigation => "Navigation",
+            ShortcutCategory::View => "Sidebar & Panels",
+            ShortcutCategory::Tabs => "Notes & Tabs",
+            ShortcutCategory::Search => "Quick Access",
+            ShortcutCategory::Editor => "Editor",
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, Type)]

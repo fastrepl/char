@@ -1,4 +1,5 @@
 mod commands;
+pub mod doc;
 pub mod registry;
 pub mod types;
 
@@ -39,5 +40,23 @@ mod test {
 
         let content = std::fs::read_to_string(OUTPUT_FILE).unwrap();
         std::fs::write(OUTPUT_FILE, format!("// @ts-nocheck\n{content}")).unwrap();
+    }
+
+    #[test]
+    fn export_docs() {
+        const OUTPUT_FILE: &str = "../../apps/web/content/docs/faq/6.keyboard-shortcuts.mdx";
+
+        #[derive(askama::Template)]
+        #[template(path = "keyboard-shortcuts.mdx.jinja", escape = "none")]
+        struct KeyboardShortcutsDoc {
+            sections: Vec<doc::DocSection>,
+        }
+
+        let doc = KeyboardShortcutsDoc {
+            sections: doc::build_sections(),
+        };
+
+        let rendered = askama::Template::render(&doc).unwrap();
+        std::fs::write(OUTPUT_FILE, rendered).unwrap();
     }
 }
