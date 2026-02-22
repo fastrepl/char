@@ -13,6 +13,8 @@ use axum::{
 use hypr_api_auth::AuthContext;
 use owhisper_interface::ListenParams;
 
+use hypr_audio_utils::content_type_to_extension;
+
 use crate::hyprnote_routing::should_use_hyprnote_routing;
 use crate::query_params::QueryParams;
 
@@ -112,23 +114,4 @@ fn write_to_temp_file(
     temp_file.flush()?;
 
     Ok(temp_file)
-}
-
-fn content_type_to_extension(content_type: &str) -> &'static str {
-    let mime = content_type
-        .split(';')
-        .next()
-        .unwrap_or(content_type)
-        .trim();
-
-    match mime {
-        "audio/wav" | "audio/wave" | "audio/x-wav" => "wav",
-        "audio/mpeg" | "audio/mp3" => "mp3",
-        "audio/ogg" => "ogg",
-        "audio/flac" => "flac",
-        "audio/mp4" | "audio/m4a" | "audio/x-m4a" => "m4a",
-        "audio/webm" => "webm",
-        "audio/aac" => "aac",
-        _ => "wav",
-    }
 }
