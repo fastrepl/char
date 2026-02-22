@@ -7,14 +7,17 @@ import {
   XCircleIcon,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 
 import { cn } from "@hypr/utils";
+
+const SCROLL_DELAY_MS = 350;
 
 export type SectionStatus = "completed" | "active" | "upcoming";
 
 export function OnboardingSection({
   title,
+  completedTitle,
   description,
   status,
   onBack,
@@ -22,34 +25,54 @@ export function OnboardingSection({
   children,
 }: {
   title: string;
+  completedTitle?: string;
   description?: string;
   status: SectionStatus | null;
   onBack?: () => void;
   onNext?: () => void;
   children: ReactNode;
 }) {
-  if (!status) return null;
+  const sectionRef = useRef<HTMLElement>(null);
 
   const isActive = status === "active";
   const isCompleted = status === "completed";
 
+  useEffect(() => {
+    if (!isActive) return;
+    const timeout = setTimeout(() => {
+      sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, SCROLL_DELAY_MS);
+    return () => clearTimeout(timeout);
+  }, [isActive]);
+
+  if (!status || status === "upcoming") return null;
+
   return (
-    <section>
+    <section ref={sectionRef}>
       <div
         className={cn([
-          "flex items-center gap-2 mb-4 transition-all duration-300",
-          status === "upcoming" && "opacity-15",
-          isCompleted && "opacity-25",
+          "flex items-center gap-2 transition-all duration-300",
+          isActive && "mb-4",
         ])}
       >
+        {isCompleted && (
+          <CheckIcon
+            className="size-4 shrink-0 text-green-600"
+            strokeWidth={2.5}
+          />
+        )}
         <div className="flex min-w-0 flex-col gap-1">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold font-serif text-neutral-900">
-              {title}
+            <h2
+              className={cn([
+                "transition-all duration-300",
+                isCompleted
+                  ? "text-sm font-normal text-neutral-300"
+                  : "text-lg font-semibold font-serif text-neutral-900",
+              ])}
+            >
+              {isCompleted ? (completedTitle ?? title) : title}
             </h2>
-            {isCompleted && (
-              <CheckIcon className="size-3.5 text-neutral-900" aria-hidden />
-            )}
             {import.meta.env.DEV && isActive && (onBack || onNext) && (
               <div className="flex items-center gap-2">
                 {onBack && (
@@ -103,7 +126,7 @@ export function OnboardingButton(
   return (
     <button
       {...props}
-      className="w-full py-3 rounded-full bg-stone-600 text-white text-sm font-medium duration-150 hover:scale-[1.01] active:scale-[0.99]"
+      className="w-fit px-6 py-2.5 rounded-full bg-stone-600 text-white text-sm font-medium duration-150 hover:scale-[1.01] active:scale-[0.99]"
     />
   );
 }
