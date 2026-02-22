@@ -111,11 +111,10 @@ export const getExtensions = (
   }),
   Hashtag,
   Link.extend({
-    inclusive() {
-      return false;
-    },
     addProseMirrorPlugins() {
+      const parentPlugins = this.parent?.() || [];
       return [
+        ...parentPlugins,
         new Plugin({
           key: new PluginKey("linkCmdClick"),
           props: {
@@ -142,6 +141,30 @@ export const getExtensions = (
               }
               return true;
             },
+          },
+        }),
+        new Plugin({
+          key: new PluginKey("linkBoundaryGuard"),
+          appendTransaction(transactions, _oldState, newState) {
+            if (!transactions.some((tr) => tr.docChanged)) return null;
+            const linkType = newState.schema.marks.link;
+            if (!linkType) return null;
+            let tr: ReturnType<typeof newState.tr> | null = null;
+            newState.doc.descendants((node, pos) => {
+              if (!node.isText || !node.text) return;
+              const linkMark = node.marks.find((m) => m.type === linkType);
+              if (!linkMark?.attrs.href) return;
+              const href: string = linkMark.attrs.href;
+              const text = node.text;
+              if (text === href) return;
+              const hrefIndex = text.indexOf(href);
+              if (hrefIndex < 0) return;
+              if (hrefIndex > 0) {
+                if (!tr) tr = newState.tr;
+                tr.removeMark(pos, pos + hrefIndex, linkType);
+              }
+            });
+            return tr;
           },
         }),
       ];
