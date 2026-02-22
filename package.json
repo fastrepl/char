@@ -13,7 +13,7 @@
     "eslint": "^9.39.2",
     "oxfmt": "^0.18.0",
     "oxlint": "^1.46.0",
-    "oxlint-tsgolint": "^0.11.5",
+    "oxlint-tsgolint": "^0.12.2",
     "prettier": "^3.8.1",
     "supabase": "^2.76.8",
     "turbo": "2.8.3",
