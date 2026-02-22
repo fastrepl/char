@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { useAuth } from "../../../auth";
+import { OnboardingButton } from "../shared";
 
 export function BeforeLogin() {
   const auth = useAuth();
@@ -10,15 +11,14 @@ export function BeforeLogin() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
-        <button
+        <OnboardingButton
           onClick={() => auth?.signIn()}
           disabled={!autoSignInCompleted}
-          className="px-5 py-2.5 rounded-full bg-stone-600 text-white text-sm font-medium duration-150 hover:scale-[1.01] active:scale-[0.99] w-fit"
         >
           {autoSignInCompleted
             ? "Click here to Sign in"
             : "Signing in on your browser..."}
-        </button>
+        </OnboardingButton>
         {autoSignInCompleted && (
           <button
             className="text-sm text-neutral-500 hover:text-neutral-600 underline"

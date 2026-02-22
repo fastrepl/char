@@ -7,17 +7,17 @@ import { commands as sfxCommands } from "@hypr/plugin-sfx";
 import { commands } from "../../types/tauri.gen";
 import { OnboardingButton } from "./shared";
 
-const DEFAULT_ICON_SIZE = 14;
-
 const SOCIALS = [
   {
     label: "Discord",
     icon: "simple-icons:discord",
+    size: 14,
     url: "https://discord.gg/CX8gTH2tj9",
   },
   {
     label: "GitHub",
     icon: "simple-icons:github",
+    size: 14,
     url: "https://github.com/fastrepl/hyprnote",
   },
   {
@@ -33,9 +33,8 @@ export function FinalSection({ onContinue }: { onContinue: () => void }) {
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-1.5 text-sm text-neutral-500">
         <span>Join our community and stay updated:</span>
-        {SOCIALS.map(({ label, icon, url, ...rest }) => {
-          const size = "size" in rest ? rest.size : DEFAULT_ICON_SIZE;
-          return (
+          {SOCIALS.map(({ label, icon, size, url }) => {
+            return (
             <button
               key={label}
               onClick={() => void openerCommands.openUrl(url, null)}
