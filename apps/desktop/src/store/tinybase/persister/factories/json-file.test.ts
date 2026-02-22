@@ -65,7 +65,7 @@ describe("createJsonFilePersister", () => {
           meeting_link: "",
           description: "",
           note: "",
-          ignored: false,
+          is_all_day: false,
           recurrence_series_id: "",
         },
       };
@@ -118,7 +118,7 @@ describe("createJsonFilePersister", () => {
         meeting_link: "",
         description: "",
         note: "",
-        ignored: false,
+        is_all_day: false,
         recurrence_series_id: "",
       });
 

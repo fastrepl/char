@@ -29,7 +29,7 @@ export function ParticipantChip({ mappingId }: { mappingId: string }) {
     if (assignedHumanId) {
       useTabs.getState().openNew({
         type: "contacts",
-        state: { selectedOrganization: null, selectedPerson: assignedHumanId },
+        state: { selected: { type: "person", id: assignedHumanId } },
       });
     }
   }, [assignedHumanId]);

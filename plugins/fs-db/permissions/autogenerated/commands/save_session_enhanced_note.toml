@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-save-session-enhanced-note"
+description = "Enables the save_session_enhanced_note command without any pre-configured scope."
+commands.allow = ["save_session_enhanced_note"]
+
+[[permission]]
+identifier = "deny-save-session-enhanced-note"
+description = "Denies the save_session_enhanced_note command without any pre-configured scope."
+commands.deny = ["save_session_enhanced_note"]

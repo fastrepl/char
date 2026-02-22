@@ -17,6 +17,8 @@ import { NotificationSettingsView } from "./notification";
 import { Permissions } from "./permissions";
 import { SpokenLanguagesView } from "./spoken-languages";
 import { StorageSettingsView } from "./storage";
+import { TimezoneSelector } from "./timezone";
+import { WeekStartSelector } from "./week-start";
 
 function useSettingsForm() {
   const value = useConfigValues([
@@ -41,6 +43,9 @@ function useSettingsForm() {
           : undefined,
         ignored_recurring_series: row.ignored_recurring_series
           ? JSON.stringify(row.ignored_recurring_series)
+          : undefined,
+        ignored_events: row.ignored_events
+          ? JSON.stringify(row.ignored_events)
           : undefined,
       }) satisfies Partial<GeneralStorage>,
     [],
@@ -120,26 +125,6 @@ export function SettingsApp() {
   });
   const supportedLanguages = supportedLanguagesQuery.data ?? ["en"];
 
-  const value = useConfigValues(["spoken_languages"] as const);
-
-  const suggestedProviders = useQuery({
-    enabled: !!value.spoken_languages?.length,
-    queryKey: ["suggested-stt-providers", value.spoken_languages],
-    queryFn: async () => {
-      const result = await listenerCommands.suggestProvidersForLanguagesLive(
-        value.spoken_languages ?? [],
-      );
-
-      if (result.status === "error") {
-        throw new Error(result.error);
-      }
-
-      return result.data.filter(
-        (provider) => !["fireworks", "openai"].includes(provider),
-      );
-    },
-  });
-
   return (
     <div className="flex flex-col gap-8 pt-3">
       <form.Field name="autostart">
@@ -152,17 +137,16 @@ export function SettingsApp() {
                     {(telemetryConsentField) => (
                       <AppSettingsView
                         autostart={{
-                          title: "Start Hyprnote automatically at login",
+                          title: "Start Char at login",
                           description:
-                            "Hyprnote will always be ready for action without you having to turn it on",
+                            "Always ready without manually launching.",
                           value: autostartField.state.value,
                           onChange: (val) => autostartField.handleChange(val),
                         }}
                         notificationDetect={{
-                          title:
-                            "Start/Stop listening to meetings automatically",
+                          title: "Auto-detect meetings",
                           description:
-                            "You don't have to press button every time — we'll start/stop listening for you",
+                            "Automatically start and stop listening when a meeting is detected.",
                           value: notificationDetectField.state.value,
                           onChange: (val) =>
                             notificationDetectField.handleChange(val),
@@ -170,7 +154,7 @@ export function SettingsApp() {
                         saveRecordings={{
                           title: "Save recordings",
                           description:
-                            "Audio files of meetings will be saved locally and won't be leaving your device",
+                            "Keep audio files locally on your device.",
                           value: saveRecordingsField.state.value,
                           onChange: (val) =>
                             saveRecordingsField.handleChange(val),
@@ -178,7 +162,7 @@ export function SettingsApp() {
                         telemetryConsent={{
                           title: "Share usage data",
                           description:
-                            "Help us improve Hyprnote by sharing anonymous metadata like button clicks",
+                            "Send anonymous usage metadata to help improve Hyprnote.",
                           value: telemetryConsentField.state.value,
                           onChange: (val) =>
                             telemetryConsentField.handleChange(val),
@@ -195,7 +179,7 @@ export function SettingsApp() {
 
       <div>
         <h2 className="text-lg font-semibold font-serif mb-4">
-          Language & Vocabulary
+          Language & Region
         </h2>
         <div className="flex flex-col gap-6">
           <form.Field name="ai_language">
@@ -207,19 +191,21 @@ export function SettingsApp() {
               />
             )}
           </form.Field>
+          <TimezoneSelector />
+          <WeekStartSelector />
+        </div>
+      </div>
+
+      <div>
+        <h2 className="text-lg font-semibold font-serif mb-4">Transcription</h2>
+        <div className="flex flex-col gap-6">
           <form.Field name="spoken_languages">
             {(field) => (
-              <>
-                <SpokenLanguagesView
-                  value={field.state.value}
-                  onChange={(val) => field.handleChange(val)}
-                  supportedLanguages={supportedLanguages}
-                />
-                <span className="text-xs text-neutral-500">
-                  Providers outside {suggestedProviders.data?.join(", ")} may
-                  not work properly.
-                </span>
-              </>
+              <SpokenLanguagesView
+                value={field.state.value}
+                onChange={(val) => field.handleChange(val)}
+                supportedLanguages={supportedLanguages}
+              />
             )}
           </form.Field>
         </div>

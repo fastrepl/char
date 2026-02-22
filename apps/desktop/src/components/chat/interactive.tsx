@@ -20,16 +20,16 @@ export function InteractiveContainer({
       <Resizable
         defaultSize={{ width, height }}
         minWidth={280}
-        minHeight={height / 2}
+        minHeight={400}
         bounds="window"
         enable={{
-          top: false,
-          right: true,
-          bottom: true,
+          top: true,
+          right: false,
+          bottom: false,
           left: true,
           topRight: false,
-          bottomRight: true,
-          bottomLeft: true,
+          bottomRight: false,
+          bottomLeft: false,
           topLeft: true,
         }}
         className={cn([
@@ -38,30 +38,9 @@ export function InteractiveContainer({
           "flex flex-col",
           !isResizing && "transition-all duration-200",
         ])}
-        handleClasses={{
-          right: "hover:bg-blue-500/20 transition-colors",
-          bottom: "hover:bg-blue-500/20 transition-colors",
-          left: "hover:bg-blue-500/20 transition-colors",
-          bottomRight: "hover:bg-blue-500/20 transition-colors",
-          bottomLeft: "hover:bg-blue-500/20 transition-colors",
-          topLeft: "hover:bg-blue-500/20 transition-colors",
-        }}
         handleStyles={{
-          right: { width: "4px", right: 0 },
-          bottom: { height: "4px", bottom: 0 },
+          top: { height: "4px", top: 0 },
           left: { width: "4px", left: 0 },
-          bottomRight: {
-            width: "12px",
-            height: "12px",
-            bottom: 0,
-            right: 0,
-          },
-          bottomLeft: {
-            width: "12px",
-            height: "12px",
-            bottom: 0,
-            left: 0,
-          },
           topLeft: { width: "12px", height: "12px", top: 0, left: 0 },
         }}
         onResizeStart={() => setIsResizing(true)}

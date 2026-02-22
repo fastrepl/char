@@ -17,7 +17,7 @@ import { DeleteNote, DeleteRecording } from "./delete";
 import { ExportPDF } from "./export-pdf";
 import { ExportTranscript } from "./export-transcript";
 import { Listening } from "./listening";
-import { Copy, Folder, ShowInFinder } from "./misc";
+import { Copy, Folder, RevealInFinder, ShowInFinder } from "./misc";
 
 export function OverflowButton({
   sessionId,
@@ -58,6 +58,7 @@ export function OverflowButton({
         <DropdownMenuSeparator />
         <Listening sessionId={sessionId} />
         <DropdownMenuSeparator />
+        <RevealInFinder sessionId={sessionId} />
         {audioExists.data && <ShowInFinder sessionId={sessionId} />}
         <DeleteNote sessionId={sessionId} />
         {audioExists.data && <DeleteRecording sessionId={sessionId} />}

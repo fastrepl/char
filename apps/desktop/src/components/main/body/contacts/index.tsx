@@ -2,6 +2,7 @@ import { Contact2Icon } from "lucide-react";
 import { useCallback, useEffect } from "react";
 import { useShallow } from "zustand/shallow";
 
+import type { ContactsSelection } from "@hypr/plugin-windows";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -12,10 +13,9 @@ import * as main from "../../../../store/tinybase/store/main";
 import { type Tab, useTabs } from "../../../../store/zustand/tabs";
 import { StandardTabWrapper } from "../index";
 import { type TabItem, TabItemBase } from "../shared";
+import { ContactsListColumn } from "./contacts-list";
 import { DetailsColumn } from "./details";
 import { OrganizationDetailsColumn } from "./organization-details";
-import { OrganizationsColumn } from "./organizations";
-import { PeopleColumn, useSortedHumanIds } from "./people";
 
 export const TabItemContact: TabItem<Extract<Tab, { type: "contacts" }>> = ({
   tab,
@@ -67,26 +67,11 @@ function ContactView({ tab }: { tab: Extract<Tab, { type: "contacts" }> }) {
     })),
   );
 
-  const { selectedOrganization, selectedPerson } = tab.state;
+  const selected = tab.state.selected;
 
-  const setSelectedOrganization = useCallback(
-    (value: string | null) => {
-      updateContactsTabState(tab, {
-        ...tab.state,
-        selectedOrganization: value,
-        // Clear selected person when selecting an organization
-        selectedPerson: value ? null : tab.state.selectedPerson,
-      });
-    },
-    [updateContactsTabState, tab],
-  );
-
-  const setSelectedPerson = useCallback(
-    (value: string | null) => {
-      updateContactsTabState(tab, {
-        ...tab.state,
-        selectedPerson: value,
-      });
+  const setSelected = useCallback(
+    (value: ContactsSelection | null) => {
+      updateContactsTabState(tab, { selected: value });
     },
     [updateContactsTabState, tab],
   );
@@ -108,8 +93,9 @@ function ContactView({ tab }: { tab: Extract<Tab, { type: "contacts" }> }) {
     (id: string) => {
       invalidateResource("humans", id);
       deletePersonFromStore(id);
+      setSelected(null);
     },
-    [invalidateResource, deletePersonFromStore],
+    [invalidateResource, deletePersonFromStore, setSelected],
   );
 
   const deleteOrganizationFromStore = main.UI.useDelRowCallback(
@@ -122,53 +108,61 @@ function ContactView({ tab }: { tab: Extract<Tab, { type: "contacts" }> }) {
     (id: string) => {
       invalidateResource("organizations" as const, id);
       deleteOrganizationFromStore(id);
+      setSelected(null);
     },
-    [invalidateResource, deleteOrganizationFromStore],
+    [invalidateResource, deleteOrganizationFromStore, setSelected],
   );
 
-  // Get the list of humanIds to auto-select the first person (only when no org is selected)
-  const { humanIds } = useSortedHumanIds(selectedOrganization);
+  const allHumanIds = main.UI.useResultSortedRowIds(
+    main.QUERIES.visibleHumans,
+    "name",
+    false,
+    0,
+    undefined,
+    main.STORE_ID,
+  );
 
-  // Auto-select first person on load if no person is selected and no org is selected
+  const allOrgIds = main.UI.useResultSortedRowIds(
+    main.QUERIES.visibleOrganizations,
+    "name",
+    false,
+    0,
+    undefined,
+    main.STORE_ID,
+  );
+
   useEffect(() => {
-    if (!selectedOrganization && !selectedPerson && humanIds.length > 0) {
-      setSelectedPerson(humanIds[0]);
+    if (!selected) {
+      if (allHumanIds.length > 0) {
+        setSelected({ type: "person", id: allHumanIds[0] });
+      } else if (allOrgIds.length > 0) {
+        setSelected({ type: "organization", id: allOrgIds[0] });
+      }
     }
-  }, [humanIds, selectedPerson, selectedOrganization, setSelectedPerson]);
-
-  const isViewingOrgDetails = selectedOrganization && !selectedPerson;
+  }, [allHumanIds, allOrgIds, selected, setSelected]);
 
   return (
     <ResizablePanelGroup direction="horizontal" className="h-full">
-      <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
-        <OrganizationsColumn
-          selectedOrganization={selectedOrganization}
-          setSelectedOrganization={setSelectedOrganization}
-          isViewingOrgDetails={!!isViewingOrgDetails}
+      <ResizablePanel defaultSize={30} minSize={20} maxSize={40}>
+        <ContactsListColumn
+          selected={selected}
+          setSelected={setSelected}
+          onDeletePerson={handleDeletePerson}
+          onDeleteOrganization={handleDeleteOrganization}
         />
       </ResizablePanel>
       <ResizableHandle />
-      <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
-        <PeopleColumn
-          currentOrgId={selectedOrganization}
-          currentHumanId={selectedPerson}
-          setSelectedPerson={setSelectedPerson}
-        />
-      </ResizablePanel>
-      <ResizableHandle />
-      <ResizablePanel defaultSize={55} minSize={30}>
-        {selectedOrganization && !selectedPerson ? (
-          // Show organization details when org is selected but no person is selected
+      <ResizablePanel defaultSize={70} minSize={40}>
+        {selected?.type === "organization" ? (
           <OrganizationDetailsColumn
-            selectedOrganizationId={selectedOrganization}
-            handleDeleteOrganization={handleDeleteOrganization}
-            onPersonClick={setSelectedPerson}
+            selectedOrganizationId={selected.id}
+            onPersonClick={(personId) =>
+              setSelected({ type: "person", id: personId })
+            }
           />
         ) : (
-          // Show person details when a person is selected or no org is selected
           <DetailsColumn
-            selectedHumanId={selectedPerson}
-            handleDeletePerson={handleDeletePerson}
+            selectedHumanId={selected?.type === "person" ? selected.id : null}
             handleSessionClick={handleSessionClick}
           />
         )}

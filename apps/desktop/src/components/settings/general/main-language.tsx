@@ -1,17 +1,13 @@
 import { useMemo } from "react";
 
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@hypr/ui/components/ui/select";
-
-import {
   getBaseLanguageDisplayName,
   parseLocale,
 } from "../../../utils/language";
+import {
+  SearchableSelect,
+  type SearchableSelectOption,
+} from "./searchable-select";
 
 export function MainLanguageView({
   value,
@@ -38,6 +34,15 @@ export function MainLanguageView({
     return deduped.get(language) ?? value;
   }, [value, deduped]);
 
+  const options: SearchableSelectOption[] = useMemo(
+    () =>
+      [...deduped.values()].map((code) => ({
+        value: code,
+        label: getBaseLanguageDisplayName(code),
+      })),
+    [deduped],
+  );
+
   return (
     <div className="flex flex-row items-center justify-between">
       <div>
@@ -46,18 +51,14 @@ export function MainLanguageView({
           Language for summaries, chats, and AI-generated responses
         </p>
       </div>
-      <Select value={normalizedValue} onValueChange={onChange}>
-        <SelectTrigger className="w-40 shadow-none focus:ring-0 focus:ring-offset-0">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent className="max-h-[250px] overflow-auto">
-          {[...deduped.values()].map((code) => (
-            <SelectItem key={code} value={code}>
-              {getBaseLanguageDisplayName(code)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <SearchableSelect
+        value={normalizedValue}
+        onChange={onChange}
+        options={options}
+        placeholder="Select language"
+        searchPlaceholder="Search language..."
+        className="w-40"
+      />
     </div>
   );
 }

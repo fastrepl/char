@@ -9,8 +9,8 @@ type NotificationContextMap = Mutex<HashMap<String, (Option<String>, Instant)>>;
 static RECENT_NOTIFICATIONS: OnceLock<Mutex<HashMap<String, Instant>>> = OnceLock::new();
 static NOTIFICATION_CONTEXT: OnceLock<NotificationContextMap> = OnceLock::new();
 
-const DEDUPE_WINDOW: Duration = Duration::from_secs(60 * 5);
-const CONTEXT_TTL: Duration = Duration::from_secs(60 * 10);
+const DEDUPE_WINDOW: Duration = Duration::from_mins(1);
+const CONTEXT_TTL: Duration = Duration::from_mins(10);
 
 pub enum NotificationMutation {
     Confirm,

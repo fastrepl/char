@@ -150,9 +150,6 @@ export function generateTranscript(options?: {
         const end_ms = start_ms + durationMs;
 
         words.push({
-          user_id: DEFAULT_USER_ID,
-          created_at: createdAtStr,
-          transcript_id: transcriptId,
           channel: currentChannel,
           text: ` ${text}`,
           start_ms,

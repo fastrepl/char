@@ -1,4 +1,3 @@
-import { getCurrentWindow } from "@tauri-apps/api/window";
 import React, { createContext, useContext, useEffect, useRef } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/shallow";
@@ -62,36 +61,30 @@ const useHandleDetectEvents = (store: ListenerStore) => {
   useEffect(() => {
     let unlisten: (() => void) | undefined;
     let cancelled = false;
-    let notificationTimerId: ReturnType<typeof setTimeout>;
 
     detectEvents.detectEvent
       .listen(({ payload }) => {
-        if (payload.type === "micStarted") {
+        if (payload.type === "micDetected") {
           if (!notificationDetectEnabledRef.current) {
             return;
           }
 
-          void getCurrentWindow()
-            .isFocused()
-            .then((isFocused) => {
-              if (isFocused) {
-                return;
-              }
+          if (store.getState().live.status === "active") {
+            return;
+          }
 
-              notificationTimerId = setTimeout(() => {
-                void notificationCommands.showNotification({
-                  key: payload.key,
-                  title: "Mic Started",
-                  message: "Mic started",
-                  timeout: { secs: 8, nanos: 0 },
-                  event_id: null,
-                  start_time: null,
-                  participants: null,
-                  event_details: null,
-                  action_label: null,
-                });
-              }, 2000);
-            });
+          void notificationCommands.showNotification({
+            key: payload.key,
+            title: "Meeting in progress?",
+            message:
+              "Noticed microphone usage for certain period of time. Start listening?",
+            timeout: { secs: 15, nanos: 0 },
+            event_id: null,
+            start_time: null,
+            participants: null,
+            event_details: null,
+            action_label: null,
+          });
         } else if (payload.type === "micStopped") {
           stop();
         } else if (payload.type === "sleepStateChanged") {
@@ -116,9 +109,6 @@ const useHandleDetectEvents = (store: ListenerStore) => {
     return () => {
       cancelled = true;
       unlisten?.();
-      if (notificationTimerId) {
-        clearTimeout(notificationTimerId);
-      }
     };
   }, [stop, setMuted]);
 };

@@ -2,10 +2,12 @@ import { useForm } from "@tanstack/react-form";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { arch } from "@tauri-apps/plugin-os";
 import { Check, Loader2 } from "lucide-react";
-import { useEffect } from "react";
 
 import { commands as listenerCommands } from "@hypr/plugin-listener";
-import type { SupportedSttModel } from "@hypr/plugin-local-stt";
+import {
+  commands as localSttCommands,
+  type SupportedSttModel,
+} from "@hypr/plugin-local-stt";
 import type { AIProviderStorage } from "@hypr/store";
 import { Input } from "@hypr/ui/components/ui/input";
 import {
@@ -21,6 +23,7 @@ import { useBillingAccess } from "../../../../billing";
 import { useConfigValues } from "../../../../config/use-config";
 import { useNotifications } from "../../../../contexts/notifications";
 import * as settings from "../../../../store/tinybase/store/settings";
+import { providerRowId } from "../shared";
 import {
   getProviderSelectionBlockers,
   requiresEntitlement,
@@ -106,36 +109,6 @@ export function SelectProviderAndModel() {
       handleSelectModel(value.model);
     },
   });
-
-  useEffect(() => {
-    if (!current_stt_provider || !current_stt_model) {
-      return;
-    }
-
-    const providerConfig =
-      configuredProviders[current_stt_provider as ProviderId];
-    if (!providerConfig) {
-      return;
-    }
-
-    if (current_stt_provider === "custom") {
-      return;
-    }
-
-    const modelEntry = providerConfig.models.find(
-      (m) => m.id === current_stt_model,
-    );
-    if (modelEntry && !modelEntry.isDownloaded) {
-      handleSelectModel("");
-      form.setFieldValue("model", "");
-    }
-  }, [
-    current_stt_provider,
-    current_stt_model,
-    configuredProviders,
-    handleSelectModel,
-    form,
-  ]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -235,16 +208,7 @@ export function SelectProviderAndModel() {
                 );
               }
 
-              const allModels = configuredProviders?.[providerId]?.models ?? [];
-              const models = allModels.filter((model) => {
-                if (model.id === "cloud") {
-                  return true;
-                }
-                if (model.id.startsWith("Quantized")) {
-                  return model.isDownloaded;
-                }
-                return true;
-              });
+              const models = configuredProviders?.[providerId]?.models ?? [];
 
               return (
                 <div className="flex-3 min-w-0">
@@ -262,7 +226,7 @@ export function SelectProviderAndModel() {
                     >
                       <SelectValue placeholder="Select a model" />
                       {isConfigured && <HealthStatusIndicator />}
-                      {isConfigured && health.status !== "pending" && (
+                      {isConfigured && health.status === "success" && (
                         <Check className="-mr-1 h-4 w-4 shrink-0 text-green-600" />
                       )}
                     </SelectTrigger>
@@ -289,7 +253,7 @@ export function SelectProviderAndModel() {
           <div className="flex items-center gap-2 pt-2 border-t border-red-200">
             <span className="text-sm text-red-600">
               <strong className="font-medium">Transcription model</strong> is
-              needed to make Hyprnote listen to your conversations.
+              needed to make Char listen to your conversations.
             </span>
           </div>
         )}
@@ -311,11 +275,13 @@ export function SelectProviderAndModel() {
   );
 }
 
+type ModelEntry = { id: string; isDownloaded: boolean; displayName?: string };
+
 function useConfiguredMapping(): Record<
   ProviderId,
   {
     configured: boolean;
-    models: Array<{ id: string; isDownloaded: boolean }>;
+    models: ModelEntry[];
   }
 > {
   const billing = useBillingAccess();
@@ -332,19 +298,30 @@ function useConfiguredMapping(): Record<
 
   const isAppleSilicon = targetArch.data === "aarch64";
 
-  const [p2, p3, whisperLargeV3, tinyEn, smallEn] = useQueries({
+  const supportedModels = useQuery({
+    queryKey: ["list-supported-models"],
+    queryFn: async () => {
+      const result = await localSttCommands.listSupportedModels();
+      return result.status === "ok" ? result.data : [];
+    },
+    staleTime: Infinity,
+  });
+
+  const cactusModels =
+    supportedModels.data?.filter((m) => m.model_type === "cactus") ?? [];
+
+  const [p2, p3, whisperLargeV3, ...cactusDownloaded] = useQueries({
     queries: [
       sttModelQueries.isDownloaded("am-parakeet-v2"),
       sttModelQueries.isDownloaded("am-parakeet-v3"),
       sttModelQueries.isDownloaded("am-whisper-large-v3"),
-      sttModelQueries.isDownloaded("QuantizedTinyEn"),
-      sttModelQueries.isDownloaded("QuantizedSmallEn"),
+      ...cactusModels.map((m) => sttModelQueries.isDownloaded(m.key)),
     ],
   });
 
   return Object.fromEntries(
     PROVIDERS.map((provider) => {
-      const config = configuredProviders[provider.id] as
+      const config = configuredProviders[providerRowId("stt", provider.id)] as
         | AIProviderStorage
         | undefined;
       const baseUrl = String(config?.base_url || provider.baseUrl || "").trim();
@@ -362,19 +339,19 @@ function useConfiguredMapping(): Record<
       }
 
       if (provider.id === "hyprnote") {
-        const models = [
+        const models: ModelEntry[] = [
           { id: "cloud", isDownloaded: billing.isPro },
-          {
-            id: "QuantizedTinyEn",
-            isDownloaded: tinyEn.data ?? false,
-          },
-          {
-            id: "QuantizedSmallEn",
-            isDownloaded: smallEn.data ?? false,
-          },
         ];
 
         if (isAppleSilicon) {
+          cactusModels.forEach((model, i) => {
+            models.push({
+              id: model.key,
+              isDownloaded: cactusDownloaded[i]?.data ?? false,
+              displayName: model.display_name,
+            });
+          });
+
           models.push(
             {
               id: "am-parakeet-v2",
@@ -391,13 +368,7 @@ function useConfiguredMapping(): Record<
           );
         }
 
-        return [
-          provider.id,
-          {
-            configured: true,
-            models,
-          },
-        ];
+        return [provider.id, { configured: true, models }];
       }
 
       if (provider.id === "custom") {
@@ -419,7 +390,7 @@ function useConfiguredMapping(): Record<
     ProviderId,
     {
       configured: boolean;
-      models: Array<{ id: string; isDownloaded: boolean }>;
+      models: ModelEntry[];
     }
   >;
 }
@@ -429,7 +400,7 @@ function ModelSelectItem({
   onDownload,
   onStartTrial,
 }: {
-  model: { id: string; isDownloaded: boolean };
+  model: ModelEntry;
   onDownload: () => void;
   onStartTrial: () => void;
 }) {
@@ -439,10 +410,12 @@ function ModelSelectItem({
   const isDownloading = !!downloadInfo;
   const billing = useBillingAccess();
 
+  const label = model.displayName ?? displayModelId(model.id);
+
   if (model.isDownloaded) {
     return (
       <SelectItem key={model.id} value={model.id}>
-        {displayModelId(model.id)}
+        {label}
       </SelectItem>
     );
   }
@@ -460,7 +433,9 @@ function ModelSelectItem({
     }
   };
 
-  const cloudButtonLabel = billing.canStartTrial ? "Free Trial" : "Upgrade";
+  const cloudButtonLabel = billing.canStartTrial.data
+    ? "Free Trial"
+    : "Upgrade";
 
   return (
     <div
@@ -472,7 +447,7 @@ function ModelSelectItem({
         "group",
       ])}
     >
-      <span className="text-neutral-400">{displayModelId(model.id)}</span>
+      <span className="text-neutral-400">{label}</span>
       {isDownloading ? (
         <span
           className={cn([

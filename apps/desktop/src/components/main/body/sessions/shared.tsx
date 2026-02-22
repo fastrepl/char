@@ -48,8 +48,16 @@ export function useCurrentNoteTab(
   tab: Extract<Tab, { type: "sessions" }>,
 ): EditorView {
   const sessionMode = useListener((state) => state.getSessionMode(tab.id));
+  const isListenerStarting = useListener(
+    (state) =>
+      state.live.loading &&
+      state.live.sessionId === tab.id &&
+      state.live.status === "inactive",
+  );
   const isListenerActive =
-    sessionMode === "active" || sessionMode === "finalizing";
+    sessionMode === "active" ||
+    sessionMode === "finalizing" ||
+    isListenerStarting;
 
   const enhancedNoteIds = main.UI.useSliceRowIds(
     main.INDEXES.enhancedNotesBySession,
@@ -87,6 +95,7 @@ export function useListenButtonState(sessionId: string) {
 
   const localServerStatus = local.data?.status ?? "unavailable";
   const isLocalServerLoading = localServerStatus === "loading";
+  const isLocalModelNotDownloaded = localServerStatus === "not_downloaded";
 
   const isOfflineWithCloudModel = !isOnline && !isLocalModel;
 
@@ -95,11 +104,14 @@ export function useListenButtonState(sessionId: string) {
     !sttConnection ||
     batching ||
     isLocalServerLoading ||
+    isLocalModelNotDownloaded ||
     isOfflineWithCloudModel;
 
   let warningMessage = "";
   if (lastError) {
     warningMessage = `Session failed: ${lastError}`;
+  } else if (isLocalModelNotDownloaded) {
+    warningMessage = "Selected model is not downloaded.";
   } else if (isLocalServerLoading) {
     warningMessage = "Local STT server is starting up...";
   } else if (isOfflineWithCloudModel) {

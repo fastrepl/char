@@ -18,10 +18,12 @@ tauri-plugin = { workspace = true, features = ["build"] }
 
 [dev-dependencies]
 specta-typescript = { workspace = true }
+tokio = { workspace = true, features = ["test-util"] }
 
 [dependencies]
 hypr-detect = { workspace = true, features = ["mic", "list", "language", "sleep"] }
 hypr-host = { workspace = true }
+hypr-notification-interface = { workspace = true }
 
 tauri = { workspace = true, features = ["specta", "test"] }
 tauri-plugin-windows = { workspace = true }
@@ -34,4 +36,5 @@ thiserror = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }
 
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+tokio-util = { workspace = true }
 tracing = { workspace = true }

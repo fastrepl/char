@@ -10,11 +10,8 @@ import { fetchAdminUser } from "@/functions/admin";
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Content Admin - Hyprnote" },
-      {
-        name: "description",
-        content: "Manage content and media for Hyprnote.",
-      },
+      { title: "Admin - Char" },
+      { name: "description", content: "Char admin dashboard." },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -72,7 +69,7 @@ function AdminHeader({ user }: { user: { email: string } }) {
             to="/admin/"
             className="font-serif2 italic text-stone-600 text-2xl"
           >
-            Content Admin
+            Char Admin
           </Link>
           <nav className="flex items-center gap-4">
             <Link
@@ -88,6 +85,29 @@ function AdminHeader({ user }: { user: { email: string } }) {
               activeProps={{ className: "active" }}
             >
               Media
+            </Link>
+            <div className="h-4 w-px bg-neutral-300" />
+            <Link
+              to="/admin/crm/"
+              className="relative py-1 text-sm text-neutral-600 hover:text-neutral-900 transition-colors [&.active]:text-neutral-900 font-medium [&.active]:after:absolute [&.active]:after:bottom-0 [&.active]:after:left-1/2 [&.active]:after:-translate-x-1/2 [&.active]:after:w-7 [&.active]:after:h-0.5 [&.active]:after:bg-neutral-900 [&.active]:after:rounded-full"
+              activeProps={{ className: "active" }}
+            >
+              CRM
+            </Link>
+            <Link
+              to="/admin/lead-finder/"
+              className="relative py-1 text-sm text-neutral-600 hover:text-neutral-900 transition-colors [&.active]:text-neutral-900 font-medium [&.active]:after:absolute [&.active]:after:bottom-0 [&.active]:after:left-1/2 [&.active]:after:-translate-x-1/2 [&.active]:after:w-7 [&.active]:after:h-0.5 [&.active]:after:bg-neutral-900 [&.active]:after:rounded-full"
+              activeProps={{ className: "active" }}
+            >
+              Lead Finder
+            </Link>
+            <div className="h-4 w-px bg-neutral-300" />
+            <Link
+              to="/admin/kanban/"
+              className="relative py-1 text-sm text-neutral-600 hover:text-neutral-900 transition-colors [&.active]:text-neutral-900 font-medium [&.active]:after:absolute [&.active]:after:bottom-0 [&.active]:after:left-1/2 [&.active]:after:-translate-x-1/2 [&.active]:after:w-7 [&.active]:after:h-0.5 [&.active]:after:bg-neutral-900 [&.active]:after:rounded-full"
+              activeProps={{ className: "active" }}
+            >
+              Kanban
             </Link>
           </nav>
         </div>

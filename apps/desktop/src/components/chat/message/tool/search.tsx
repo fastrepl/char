@@ -14,13 +14,40 @@ import * as main from "../../../../store/tinybase/store/main";
 import { useTabs } from "../../../../store/zustand/tabs";
 import { Disclosure } from "../shared";
 import { ToolRenderer } from "../types";
+import { useToolState } from "./shared";
 
 type Renderer = ToolRenderer<"tool-search_sessions">;
 type Part = Parameters<Renderer>[0]["part"];
+type SearchResult = {
+  id: string;
+};
+
+function parseSearchResults(output: unknown): SearchResult[] {
+  if (!output || typeof output !== "object" || !("results" in output)) {
+    return [];
+  }
+
+  const { results } = output as { results?: unknown };
+  if (!Array.isArray(results)) {
+    return [];
+  }
+
+  return results.flatMap((result): SearchResult[] => {
+    if (!result || typeof result !== "object") {
+      return [];
+    }
+
+    const { id } = result as { id?: unknown };
+    if (typeof id !== "string") {
+      return [];
+    }
+
+    return [{ id }];
+  });
+}
 
 export const ToolSearchSessions: Renderer = ({ part }) => {
-  const disabled =
-    part.state === "input-streaming" || part.state === "input-available";
+  const { running: disabled } = useToolState(part);
 
   return (
     <Disclosure
@@ -50,12 +77,8 @@ const getTitle = (part: Part) => {
 };
 
 function RenderContent({ part }: { part: Part }) {
-  if (
-    part.state === "output-available" &&
-    part.output &&
-    "results" in part.output
-  ) {
-    const { results } = part.output;
+  if (part.state === "output-available") {
+    const results = parseSearchResults(part.output);
 
     if (!results || results.length === 0) {
       return (
@@ -69,7 +92,7 @@ function RenderContent({ part }: { part: Part }) {
       <div className="relative -mx-1">
         <Carousel className="w-full" opts={{ align: "start" }}>
           <CarouselContent className="-ml-2">
-            {results.map((result: any, index: number) => (
+            {results.map((result, index: number) => (
               <CarouselItem
                 key={result.id || index}
                 className="pl-1 basis-full sm:basis-1/2 lg:basis-1/3"
@@ -125,13 +148,17 @@ function RenderSession({ sessionId }: { sessionId: string }) {
   }
 
   return (
-    <div className="text-xs flex flex-col gap-1" onClick={handleClick}>
+    <button
+      type="button"
+      onClick={handleClick}
+      className="text-xs flex flex-col gap-1 w-full text-left"
+    >
       <span className="font-medium truncate">
         {session.title || "Untitled"}
       </span>
       <span className="text-muted-foreground truncate">
         {enhancedNoteContent ?? session.raw_md}
       </span>
-    </div>
+    </button>
   );
 }

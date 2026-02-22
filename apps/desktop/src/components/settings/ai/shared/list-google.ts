@@ -5,6 +5,8 @@ import {
   extractMetadataMap,
   fetchJson,
   type InputModality,
+  isDateSnapshot,
+  isNonChatModel,
   type ListModelsResult,
   type ModelIgnoreReason,
   partition,
@@ -37,19 +39,25 @@ export async function listGoogleModels(
     !model.supportedGenerationMethods ||
     model.supportedGenerationMethods.includes("generateContent");
 
+  const extractModelId = (model: GoogleModel): string => {
+    return model.name.replace(/^models\//, "");
+  };
+
   const getIgnoreReasons = (model: GoogleModel): ModelIgnoreReason[] | null => {
     const reasons: ModelIgnoreReason[] = [];
     if (shouldIgnoreCommonKeywords(model.name)) {
       reasons.push("common_keyword");
     }
+    if (isNonChatModel(extractModelId(model))) {
+      reasons.push("not_chat_model");
+    }
     if (!supportsGeneration(model)) {
       reasons.push("no_completion");
     }
+    if (isDateSnapshot(extractModelId(model))) {
+      reasons.push("date_snapshot");
+    }
     return reasons.length > 0 ? reasons : null;
-  };
-
-  const extractModelId = (model: GoogleModel): string => {
-    return model.name.replace(/^models\//, "");
   };
 
   return pipe(

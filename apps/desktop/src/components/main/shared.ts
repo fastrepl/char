@@ -43,3 +43,34 @@ export function useNewNote({
 
   return handler;
 }
+
+export function useNewNoteAndListen() {
+  const { persistedStore, internalStore } = useRouteContext({
+    from: "__root__",
+  });
+  const openNew = useTabs((state) => state.openNew);
+
+  const handler = useCallback(() => {
+    const user_id = internalStore?.getValue("user_id");
+    const sessionId = id();
+
+    persistedStore?.setRow("sessions", sessionId, {
+      user_id,
+      created_at: new Date().toISOString(),
+      title: "",
+    });
+
+    void analyticsCommands.event({
+      event: "note_created",
+      has_event_id: false,
+    });
+
+    openNew({
+      type: "sessions",
+      id: sessionId,
+      state: { view: null, autoStart: true },
+    });
+  }, [persistedStore, internalStore, openNew]);
+
+  return handler;
+}

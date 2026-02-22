@@ -1,5 +1,6 @@
 import { Icon } from "@iconify-icon/react";
 import { type AnyFieldApi, useForm } from "@tanstack/react-form";
+import { ExternalLink } from "lucide-react";
 import type { ReactNode } from "react";
 import { Streamdown } from "streamdown";
 
@@ -26,6 +27,7 @@ import {
   requiresEntitlement,
 } from "./eligibility";
 
+export * from "./hypr-cloud-button";
 export * from "./model-combobox";
 
 type ProviderType = "stt" | "llm";
@@ -38,7 +40,16 @@ type ProviderConfig = {
   baseUrl?: string;
   disabled?: boolean;
   requirements: ProviderRequirement[];
+  links?: {
+    download?: { label: string; url: string };
+    models?: { label: string; url: string };
+    setup?: { label: string; url: string };
+  };
 };
+
+export function providerRowId(providerType: ProviderType, providerId: string) {
+  return `${providerType}:${providerId}`;
+}
 
 function useIsProviderConfigured(
   providerId: string,
@@ -56,7 +67,7 @@ function useIsProviderConfigured(
     settings.STORE_ID,
   );
   const providerDef = providers.find((p) => p.id === providerId);
-  const config = configuredProviders[providerId];
+  const config = configuredProviders[providerRowId(providerType, providerId)];
 
   if (!providerDef) {
     return false;
@@ -86,7 +97,7 @@ export function NonHyprProviderCard({
   providerContext?: ReactNode;
 }) {
   const billing = useBillingAccess();
-  const [provider, setProvider] = useProvider(config.id);
+  const [provider, setProvider] = useProvider(providerType, config.id);
   const locked =
     requiresEntitlement(config.requirements, "pro") && !billing.isPro;
   const isConfigured = useIsProviderConfigured(
@@ -101,6 +112,7 @@ export function NonHyprProviderCard({
 
   const form = useForm({
     onSubmit: ({ value }) => {
+      setProvider(value);
       void analyticsCommands.event({
         event: "ai_provider_configured",
         provider: value.type,
@@ -110,7 +122,6 @@ export function NonHyprProviderCard({
           has_configured_ai: true,
         },
       });
-      setProvider(value);
     },
     defaultValues:
       provider ??
@@ -186,6 +197,43 @@ export function NonHyprProviderCard({
               )}
             </form.Field>
           )}
+          {config.links && (
+            <div className="flex items-center gap-4 text-xs">
+              {config.links.download && (
+                <a
+                  href={config.links.download.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-0.5 text-neutral-600 hover:text-neutral-900 hover:underline"
+                >
+                  {config.links.download.label}
+                  <ExternalLink size={12} />
+                </a>
+              )}
+              {config.links.models && (
+                <a
+                  href={config.links.models.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-0.5 text-neutral-600 hover:text-neutral-900 hover:underline"
+                >
+                  {config.links.models.label}
+                  <ExternalLink size={12} />
+                </a>
+              )}
+              {config.links.setup && (
+                <a
+                  href={config.links.setup.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-0.5 text-neutral-600 hover:text-neutral-900 hover:underline"
+                >
+                  {config.links.setup.label}
+                  <ExternalLink size={12} />
+                </a>
+              )}
+            </div>
+          )}
           {!showBaseUrl && config.baseUrl && (
             <details className="flex flex-col gap-4 pt-2">
               <summary className="text-xs cursor-pointer text-neutral-600 hover:text-neutral-900 hover:underline">
@@ -245,13 +293,18 @@ export function StyledStreamdown({
   );
 }
 
-function useProvider(id: string) {
-  const providerRow = settings.UI.useRow("ai_providers", id, settings.STORE_ID);
+function useProvider(providerType: ProviderType, id: string) {
+  const rowId = providerRowId(providerType, id);
+  const providerRow = settings.UI.useRow(
+    "ai_providers",
+    rowId,
+    settings.STORE_ID,
+  );
   const setProvider = settings.UI.useSetPartialRowCallback(
     "ai_providers",
-    id,
+    rowId,
     (row: Partial<AIProvider>) => row,
-    [id],
+    [rowId],
     settings.STORE_ID,
   ) as (row: Partial<AIProvider>) => void;
 

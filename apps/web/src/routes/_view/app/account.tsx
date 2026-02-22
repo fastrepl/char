@@ -18,11 +18,13 @@ const VALID_SCHEMES = [
   "hypr",
 ] as const;
 
-const validateSearch = z.object({
-  success: z.enum(["true"]).optional(),
-  trial: z.enum(["started"]).optional(),
-  scheme: z.enum(VALID_SCHEMES).optional(),
-});
+const validateSearch = z
+  .object({
+    success: z.coerce.boolean(),
+    trial: z.enum(["started"]),
+    scheme: z.enum(VALID_SCHEMES),
+  })
+  .partial();
 
 export const Route = createFileRoute("/_view/app/account")({
   validateSearch,
@@ -35,10 +37,7 @@ function Component() {
   const search = Route.useSearch();
 
   useEffect(() => {
-    if (
-      (search.success === "true" || search.trial === "started") &&
-      search.scheme
-    ) {
+    if ((search.success || search.trial === "started") && search.scheme) {
       window.location.href = `${search.scheme}://billing/refresh`;
     }
   }, [search.success, search.trial, search.scheme]);
@@ -282,36 +281,6 @@ function AccountSettingsCard() {
     </div>
   );
 }
-
-// function IntegrationsSettingsCard() {
-//   const connectedApps = 1;
-//
-//   return (
-//     <div className="border border-neutral-100 rounded-xs">
-//       <div className="p-4">
-//         <h3 className="font-serif text-lg font-semibold mb-2">
-//           Integrations Settings
-//         </h3>
-//         <p className="text-sm text-neutral-600">
-//           Save your time by streamlining your work related to meetings
-//         </p>
-//       </div>
-//
-//       <div className="flex items-center justify-between border-t border-neutral-100 p-4">
-//         <div className="text-sm">
-//           {connectedApps} {connectedApps === 1 ? "app is" : "apps are"}{" "}
-//           connected to Hyprnote
-//         </div>
-//         <Link
-//           to="/app/integration/"
-//           className="px-4 h-8 flex items-center text-sm bg-linear-to-b from-white to-stone-50 border border-neutral-300 text-neutral-700 rounded-full shadow-xs hover:shadow-md hover:scale-[102%] active:scale-[98%] transition-all"
-//         >
-//           See all
-//         </Link>
-//       </div>
-//     </div>
-//   );
-// }
 
 function SignOutSection() {
   const navigate = useNavigate();

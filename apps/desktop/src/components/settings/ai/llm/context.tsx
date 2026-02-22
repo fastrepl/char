@@ -33,7 +33,9 @@ export function LlmSettingsProvider({
   ] as const);
   const hasLlmConfigured = !!(current_llm_provider && current_llm_model);
 
-  const [accordionValue, setAccordionValue] = useState<string>("");
+  const [accordionValue, setAccordionValue] = useState<string>(
+    hasLlmConfigured ? "" : "hyprnote",
+  );
   const [shouldHighlight, setShouldHighlight] = useState(false);
   const { upgradeToPro } = useBillingAccess();
   const hyprAccordionRef = useRef<HTMLDivElement | null>(null);
