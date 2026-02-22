@@ -12,6 +12,8 @@ pub enum Error {
     SpawnError(#[from] ractor::SpawnErr),
     #[error("batch start failed: {0}")]
     BatchStartFailed(String),
+    #[error("diarization failed: {0}")]
+    DiarizeFailed(String),
 }
 
 impl Serialize for Error {

@@ -47,11 +47,6 @@ impl EmbeddingExtractor {
         let embeddings = ort_out.iter().copied().collect::<Vec<_>>();
         Ok(embeddings)
     }
-
-    pub fn cluster(&self, _n_clusters: usize, embeddings: &[f32]) -> Vec<usize> {
-        let assignments = vec![0; embeddings.len()];
-        assignments
-    }
 }
 
 #[cfg(test)]

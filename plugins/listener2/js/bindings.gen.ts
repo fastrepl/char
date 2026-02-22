@@ -30,6 +30,14 @@ async exportToVtt(sessionId: string, words: VttWord[]) : Promise<Result<string, 
     else return { status: "error", error: e  as any };
 }
 },
+async diarizeSession(sessionId: string, maxSpeakers: number) : Promise<Result<DiarizationSegment[], string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:listener2|diarize_session", { sessionId, maxSpeakers }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async isSupportedLanguagesBatch(provider: string, model: string | null, languages: string[]) : Promise<Result<boolean, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:listener2|is_supported_languages_batch", { provider, model, languages }) };
@@ -79,6 +87,7 @@ export type BatchProvider = "deepgram" | "soniox" | "assemblyai" | "am"
 export type BatchResponse = { metadata: JsonValue; results: BatchResults }
 export type BatchResults = { channels: BatchChannel[] }
 export type BatchWord = { word: string; start: number; end: number; confidence: number; speaker: number | null; punctuated_word: string | null }
+export type DiarizationSegment = { start: number; end: number; speaker: number }
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
 export type StreamAlternatives = { transcript: string; words: StreamWord[]; confidence: number; languages?: string[] }
 export type StreamChannel = { alternatives: StreamAlternatives[] }

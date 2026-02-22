@@ -2,6 +2,7 @@ use owhisper_client::AdapterKind;
 use std::str::FromStr;
 
 use crate::{BatchParams, Listener2PluginExt, Subtitle, VttWord};
+use hypr_pyannote_local::diarize::DiarizationSegment;
 
 #[tauri::command]
 #[specta::specta]
@@ -99,6 +100,19 @@ pub async fn suggest_providers_for_languages_batch<R: tauri::Runtime>(
         .collect();
 
     Ok(supported)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn diarize_session<R: tauri::Runtime>(
+    app: tauri::AppHandle<R>,
+    session_id: String,
+    max_speakers: usize,
+) -> Result<Vec<DiarizationSegment>, String> {
+    app.listener2()
+        .diarize_session(session_id, max_speakers)
+        .await
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]

@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-diarize-session"
+description = "Enables the diarize_session command without any pre-configured scope."
+commands.allow = ["diarize_session"]
+
+[[permission]]
+identifier = "deny-diarize-session"
+description = "Denies the diarize_session command without any pre-configured scope."
+commands.deny = ["diarize_session"]
