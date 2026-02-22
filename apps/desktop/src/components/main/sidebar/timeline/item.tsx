@@ -128,7 +128,7 @@ function ItemBase({
               ignored && "line-through",
             )}
           >
-            {title}
+            {title || <span className="text-neutral-400">Untitled</span>}
           </div>
           {displayTime && (
             <div className="text-xs text-neutral-500">{displayTime}</div>
