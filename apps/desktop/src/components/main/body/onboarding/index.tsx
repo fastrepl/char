@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { platform } from "@tauri-apps/plugin-os";
 import { Volume2Icon, VolumeXIcon } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as sfxCommands } from "@hypr/plugin-sfx";
@@ -115,20 +115,6 @@ export function TabContentOnboarding({
     }
   }, [close, currentTab, queryClient]);
 
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      const el = scrollRef.current?.querySelector(
-        `[data-step="${currentStep}"]`,
-      );
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }, 350);
-    return () => clearTimeout(timeout);
-  }, [currentStep]);
-
   return (
     <StandardTabWrapper>
       <div className="relative flex h-full flex-col">
@@ -149,10 +135,9 @@ export function TabContentOnboarding({
           </button>
         </div>
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto">
           <div className="flex flex-col px-6 pb-16 gap-3">
             <OnboardingSection
-              stepId="permissions"
               title="Permissions"
               completedTitle="Permissions granted"
               description="Required for best experience"
@@ -164,7 +149,6 @@ export function TabContentOnboarding({
             </OnboardingSection>
 
             <OnboardingSection
-              stepId="login"
               title="Account"
               description="Sign in to unlock Pro features"
               completedTitle="Signed up"
@@ -176,7 +160,6 @@ export function TabContentOnboarding({
             </OnboardingSection>
 
             <OnboardingSection
-              stepId="calendar"
               title="Calendar"
               description="Select calendars to sync"
               completedTitle="Calendar connected"
@@ -188,7 +171,6 @@ export function TabContentOnboarding({
             </OnboardingSection>
 
             <OnboardingSection
-              stepId="folder-location"
               title="Storage"
               description="Where your notes and recordings are stored"
               completedTitle="Storage configured"
@@ -200,7 +182,6 @@ export function TabContentOnboarding({
             </OnboardingSection>
 
             <OnboardingSection
-              stepId="final"
               title="Ready to go"
               status={getStepStatus("final", currentStep)}
               onBack={goBack}
