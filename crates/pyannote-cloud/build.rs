@@ -12,7 +12,7 @@ fn main() {
         .flatten_all_of()
         .remove_unreferenced_schemas()
         .write_filtered(
-            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("openapi.filtered.json"),
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("openapi-filtered.gen.json"),
         )
         .generate("codegen.rs");
 }
