@@ -40,7 +40,10 @@ export function OnboardingSection({
   useEffect(() => {
     if (!isActive) return;
     const timeout = setTimeout(() => {
-      sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      sectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }, SCROLL_DELAY_MS);
     return () => clearTimeout(timeout);
   }, [isActive]);

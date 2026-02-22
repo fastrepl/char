@@ -33,8 +33,8 @@ export function FinalSection({ onContinue }: { onContinue: () => void }) {
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-1.5 text-sm text-neutral-500">
         <span>Join our community and stay updated:</span>
-          {SOCIALS.map(({ label, icon, size, url }) => {
-            return (
+        {SOCIALS.map(({ label, icon, size, url }) => {
+          return (
             <button
               key={label}
               onClick={() => void openerCommands.openUrl(url, null)}

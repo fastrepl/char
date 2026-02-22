@@ -43,7 +43,7 @@ function CallbackUrlInput() {
       <input
         type="text"
         className="flex-1 px-4 py-3 text-xs font-mono outline-hidden bg-white"
-        placeholder="char://...?access_token=..."
+        placeholder="Paste browser url here, after you've signed in. (Like: http://char.com/callback/auth/?flow=desktop&scheme=hyprnote&access_token=<V>&refresh_token=<V>)"
         value={callbackUrl}
         onChange={(e) => setCallbackUrl(e.target.value)}
       />
