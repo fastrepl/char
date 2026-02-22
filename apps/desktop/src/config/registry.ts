@@ -1,5 +1,6 @@
 import { disable, enable } from "@tauri-apps/plugin-autostart";
 
+import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as detectCommands } from "@hypr/plugin-detect";
 import {
   commands as localSttCommands,
@@ -138,6 +139,9 @@ export const CONFIG_REGISTRY = {
   telemetry_consent: {
     key: "telemetry_consent",
     default: true,
+    sideEffect: async (value: boolean, _) => {
+      await analyticsCommands.setDisabled(!value);
+    },
   },
 
   current_llm_provider: {

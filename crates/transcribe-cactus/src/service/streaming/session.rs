@@ -69,24 +69,18 @@ pub(super) async fn handle_websocket(
 
     let mut worker_handles = Vec::with_capacity(total_channels);
 
+    let model = match hypr_cactus::Model::builder(&model_path).build() {
+        Ok(m) => std::sync::Arc::new(m),
+        Err(e) => {
+            tracing::error!(error = %e, "failed to load model");
+            return;
+        }
+    };
+
     for ch_idx in 0..total_channels {
-        let model = match hypr_cactus::Model::builder(&model_path).build() {
-            Ok(m) => std::sync::Arc::new(m),
-            Err(e) => {
-                tracing::error!(error = %e, "failed to load model for channel {ch_idx}");
-                return;
-            }
-        };
-        let cloud_config = if cactus_config.cloud_handoff {
-            hypr_cactus::CloudConfig::default()
-        } else {
-            hypr_cactus::CloudConfig {
-                threshold: Some(0.0),
-                ..Default::default()
-            }
-        };
+        let cloud_config = cactus_config.cloud.clone();
         let (audio_tx, event_rx, cancel_token, handle) = hypr_cactus::transcribe_stream(
-            model,
+            model.clone(),
             options.clone(),
             cloud_config,
             chunk_size_ms,

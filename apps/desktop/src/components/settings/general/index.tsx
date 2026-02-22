@@ -162,7 +162,7 @@ export function SettingsApp() {
                         telemetryConsent={{
                           title: "Share usage data",
                           description:
-                            "Send anonymous usage metadata to help improve Hyprnote.",
+                            "Send anonymous usage analytics to help improve Char.",
                           value: telemetryConsentField.state.value,
                           onChange: (val) =>
                             telemetryConsentField.handleChange(val),

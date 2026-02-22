@@ -20,7 +20,12 @@ impl Model {
         options: &TranscribeOptions,
     ) -> Result<TranscriptionResult> {
         let guard = self.lock_inference();
-        let prompt_c = CString::new(build_whisper_prompt(options))?;
+        let prompt = if self.is_moonshine() {
+            String::new()
+        } else {
+            build_whisper_prompt(options)
+        };
+        let prompt_c = CString::new(prompt)?;
         let options_c = CString::new(serde_json::to_string(options)?)?;
         let mut buf = vec![0u8; RESPONSE_BUF_SIZE];
 
