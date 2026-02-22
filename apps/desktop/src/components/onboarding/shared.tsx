@@ -14,33 +14,35 @@ import { cn } from "@hypr/utils";
 export type SectionStatus = "completed" | "active" | "upcoming";
 
 export function OnboardingSection({
+  stepId,
   title,
+  completedTitle,
   description,
   status,
   onBack,
   onNext,
   children,
 }: {
+  stepId: string;
   title: string;
+  completedTitle?: string;
   description?: string;
   status: SectionStatus | null;
   onBack?: () => void;
   onNext?: () => void;
   children: ReactNode;
 }) {
-  if (!status) return null;
+  if (!status || status === "upcoming") return null;
 
   const isActive = status === "active";
   const isCompleted = status === "completed";
-  const isUpcoming = status === "upcoming";
 
   return (
-    <section>
+    <section data-step={stepId}>
       <div
         className={cn([
           "flex items-center gap-2 transition-all duration-300",
           isActive && "mb-4",
-          isUpcoming && "mb-4",
         ])}
       >
         {isCompleted && (
@@ -53,13 +55,13 @@ export function OnboardingSection({
           <div className="flex items-center gap-2">
             <h2
               className={cn([
-                "font-semibold font-serif",
+                "transition-all duration-300",
                 isCompleted
-                  ? "text-sm text-neutral-400"
-                  : "text-lg text-neutral-900",
+                  ? "text-sm font-normal text-neutral-300"
+                  : "text-lg font-semibold font-serif text-neutral-900",
               ])}
             >
-              {title}
+              {isCompleted && completedTitle ? completedTitle : title}
             </h2>
             {import.meta.env.DEV && isActive && (onBack || onNext) && (
               <div className="flex items-center gap-2">
@@ -104,12 +106,6 @@ export function OnboardingSection({
           </motion.div>
         )}
       </AnimatePresence>
-
-      {isUpcoming && (
-        <div className="relative select-none pointer-events-none">
-          <div className="blur-[6px] opacity-60">{children}</div>
-        </div>
-      )}
     </section>
   );
 }
@@ -120,7 +116,7 @@ export function OnboardingButton(
   return (
     <button
       {...props}
-      className="w-full py-3 rounded-full bg-stone-600 text-white text-sm font-medium duration-150 hover:scale-[1.01] active:scale-[0.99]"
+      className="w-fit px-6 py-2.5 rounded-full bg-stone-600 text-white text-sm font-medium duration-150 hover:scale-[1.01] active:scale-[0.99]"
     />
   );
 }

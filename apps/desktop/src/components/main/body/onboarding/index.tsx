@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { platform } from "@tauri-apps/plugin-os";
 import { Volume2Icon, VolumeXIcon } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as sfxCommands } from "@hypr/plugin-sfx";
@@ -115,74 +115,100 @@ export function TabContentOnboarding({
     }
   }, [close, currentTab, queryClient]);
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const el = scrollRef.current?.querySelector(
+        `[data-step="${currentStep}"]`,
+      );
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 350);
+    return () => clearTimeout(timeout);
+  }, [currentStep]);
+
   return (
     <StandardTabWrapper>
-      <div className="relative h-full overflow-y-auto">
-        <button
-          onClick={() => setIsMuted((prev) => !prev)}
-          className="sticky top-2 float-right mr-2 p-1.5 rounded-full hover:bg-neutral-100 transition-colors z-10"
-          aria-label={isMuted ? "Unmute" : "Mute"}
-        >
-          {isMuted ? (
-            <VolumeXIcon size={16} className="text-neutral-600" />
-          ) : (
-            <Volume2Icon size={16} className="text-neutral-600" />
-          )}
-        </button>
-
-        <div className="flex flex-col px-6 pt-4 pb-16 gap-8">
+      <div className="relative flex h-full flex-col">
+        <div className="sticky top-0 z-10 flex items-center justify-between bg-white px-6 pt-4 pb-3">
           <h1 className="text-2xl font-semibold font-serif text-neutral-900">
             Welcome to Char
           </h1>
-
-          <OnboardingSection
-            title="Permissions"
-            description="Required for best experience"
-            status={getStepStatus("permissions", currentStep)}
-            onBack={goBack}
-            onNext={goNext}
+          <button
+            onClick={() => setIsMuted((prev) => !prev)}
+            className="p-1.5 rounded-full hover:bg-neutral-100 transition-colors"
+            aria-label={isMuted ? "Unmute" : "Mute"}
           >
-            <PermissionsSection />
-          </OnboardingSection>
+            {isMuted ? (
+              <VolumeXIcon size={16} className="text-neutral-600" />
+            ) : (
+              <Volume2Icon size={16} className="text-neutral-600" />
+            )}
+          </button>
+        </div>
 
-          <OnboardingSection
-            title="Account"
-            description="Sign in to unlock Pro features"
-            status={getStepStatus("login", currentStep)}
-            onBack={goBack}
-            onNext={goNext}
-          >
-            <LoginSection onContinue={goNext} />
-          </OnboardingSection>
+        <div ref={scrollRef} className="flex-1 overflow-y-auto">
+          <div className="flex flex-col px-6 pb-16 gap-3">
+            <OnboardingSection
+              stepId="permissions"
+              title="Permissions"
+              completedTitle="Permissions granted"
+              description="Required for best experience"
+              status={getStepStatus("permissions", currentStep)}
+              onBack={goBack}
+              onNext={goNext}
+            >
+              <PermissionsSection />
+            </OnboardingSection>
 
-          <OnboardingSection
-            title="Calendar"
-            description="Select calendars to sync"
-            status={getStepStatus("calendar", currentStep)}
-            onBack={goBack}
-            onNext={goNext}
-          >
-            <CalendarSection onContinue={goNext} />
-          </OnboardingSection>
+            <OnboardingSection
+              stepId="login"
+              title="Account"
+              description="Sign in to unlock Pro features"
+              completedTitle="Signed up"
+              status={getStepStatus("login", currentStep)}
+              onBack={goBack}
+              onNext={goNext}
+            >
+              <LoginSection onContinue={goNext} />
+            </OnboardingSection>
 
-          <OnboardingSection
-            title="Storage"
-            description="Where your notes and recordings are stored"
-            status={getStepStatus("folder-location", currentStep)}
-            onBack={goBack}
-            onNext={goNext}
-          >
-            <FolderLocationSection onContinue={goNext} />
-          </OnboardingSection>
+            <OnboardingSection
+              stepId="calendar"
+              title="Calendar"
+              description="Select calendars to sync"
+              completedTitle="Calendar connected"
+              status={getStepStatus("calendar", currentStep)}
+              onBack={goBack}
+              onNext={goNext}
+            >
+              <CalendarSection onContinue={goNext} />
+            </OnboardingSection>
 
-          <OnboardingSection
-            title="Ready to go"
-            status={getStepStatus("final", currentStep)}
-            onBack={goBack}
-            onNext={() => void finishOnboarding(handleFinish)}
-          >
-            <FinalSection onContinue={handleFinish} />
-          </OnboardingSection>
+            <OnboardingSection
+              stepId="folder-location"
+              title="Storage"
+              description="Where your notes and recordings are stored"
+              completedTitle="Storage configured"
+              status={getStepStatus("folder-location", currentStep)}
+              onBack={goBack}
+              onNext={goNext}
+            >
+              <FolderLocationSection onContinue={goNext} />
+            </OnboardingSection>
+
+            <OnboardingSection
+              stepId="final"
+              title="Ready to go"
+              status={getStepStatus("final", currentStep)}
+              onBack={goBack}
+              onNext={() => void finishOnboarding(handleFinish)}
+            >
+              <FinalSection onContinue={handleFinish} />
+            </OnboardingSection>
+          </div>
         </div>
       </div>
     </StandardTabWrapper>
