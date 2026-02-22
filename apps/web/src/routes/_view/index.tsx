@@ -257,7 +257,7 @@ function HeroSection({
       <div className="flex flex-col items-center text-center">
         <section
           id="hero"
-          className="flex flex-col items-center text-center gap-12 py-24 px-4 laptop:px-0"
+          className="flex flex-col items-center text-center gap-12 py-24 px-6 laptop:px-0"
         >
           <div className="flex flex-col gap-6">
             <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600">
