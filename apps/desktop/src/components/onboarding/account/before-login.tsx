@@ -2,13 +2,9 @@ import { useEffect, useState } from "react";
 
 import { useAuth } from "../../../auth";
 
-export function BeforeLogin({
-  onContinue: _onContinue,
-}: {
-  onContinue: () => void;
-}) {
+export function BeforeLogin() {
   const auth = useAuth();
-  const triggered = useAutoTriggerSignin();
+  const autoSignInCompleted = useAutoTriggerSignin();
   const [showCallbackUrlInput, setShowCallbackUrlInput] = useState(false);
 
   return (
@@ -16,14 +12,14 @@ export function BeforeLogin({
       <div className="flex items-center gap-3">
         <button
           onClick={() => auth?.signIn()}
-          disabled={!triggered}
+          disabled={!autoSignInCompleted}
           className="px-5 py-2.5 rounded-full bg-stone-600 text-white text-sm font-medium duration-150 hover:scale-[1.01] active:scale-[0.99] w-fit"
         >
-          {triggered
+          {autoSignInCompleted
             ? "Click here to Sign in"
             : "Signing in on your browser..."}
         </button>
-        {triggered && (
+        {autoSignInCompleted && (
           <button
             className="text-sm text-neutral-500 hover:text-neutral-600 underline"
             onClick={() => setShowCallbackUrlInput(true)}

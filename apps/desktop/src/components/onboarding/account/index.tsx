@@ -9,5 +9,5 @@ export function LoginSection({ onContinue }: { onContinue: () => void }) {
     return <AfterLogin onContinue={onContinue} />;
   }
 
-  return <BeforeLogin onContinue={onContinue} />;
+  return <BeforeLogin />;
 }

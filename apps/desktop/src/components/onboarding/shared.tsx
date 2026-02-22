@@ -7,14 +7,15 @@ import {
   XCircleIcon,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 
 import { cn } from "@hypr/utils";
+
+const SCROLL_DELAY_MS = 350;
 
 export type SectionStatus = "completed" | "active" | "upcoming";
 
 export function OnboardingSection({
-  stepId,
   title,
   completedTitle,
   description,
@@ -23,7 +24,6 @@ export function OnboardingSection({
   onNext,
   children,
 }: {
-  stepId: string;
   title: string;
   completedTitle?: string;
   description?: string;
@@ -32,13 +32,23 @@ export function OnboardingSection({
   onNext?: () => void;
   children: ReactNode;
 }) {
-  if (!status || status === "upcoming") return null;
+  const sectionRef = useRef<HTMLElement>(null);
 
   const isActive = status === "active";
   const isCompleted = status === "completed";
 
+  useEffect(() => {
+    if (!isActive) return;
+    const timeout = setTimeout(() => {
+      sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, SCROLL_DELAY_MS);
+    return () => clearTimeout(timeout);
+  }, [isActive]);
+
+  if (!status || status === "upcoming") return null;
+
   return (
-    <section data-step={stepId}>
+    <section ref={sectionRef}>
       <div
         className={cn([
           "flex items-center gap-2 transition-all duration-300",

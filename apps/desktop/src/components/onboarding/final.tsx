@@ -7,17 +7,17 @@ import { commands as sfxCommands } from "@hypr/plugin-sfx";
 import { commands } from "../../types/tauri.gen";
 import { OnboardingButton } from "./shared";
 
+const DEFAULT_ICON_SIZE = 14;
+
 const SOCIALS = [
   {
     label: "Discord",
     icon: "simple-icons:discord",
-    size: 14,
     url: "https://discord.gg/CX8gTH2tj9",
   },
   {
     label: "GitHub",
     icon: "simple-icons:github",
-    size: 14,
     url: "https://github.com/fastrepl/hyprnote",
   },
   {
@@ -33,16 +33,19 @@ export function FinalSection({ onContinue }: { onContinue: () => void }) {
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-1.5 text-sm text-neutral-500">
         <span>Join our community and stay updated:</span>
-        {SOCIALS.map(({ label, icon, size, url }) => (
-          <button
-            key={label}
-            onClick={() => void openerCommands.openUrl(url, null)}
-            className="inline-flex items-center justify-center size-6 rounded-md text-neutral-400 transition-colors duration-150 hover:text-neutral-700"
-            aria-label={label}
-          >
-            <Icon icon={icon} width={size} height={size} />
-          </button>
-        ))}
+        {SOCIALS.map(({ label, icon, url, ...rest }) => {
+          const size = "size" in rest ? rest.size : DEFAULT_ICON_SIZE;
+          return (
+            <button
+              key={label}
+              onClick={() => void openerCommands.openUrl(url, null)}
+              className="inline-flex items-center justify-center size-6 rounded-md text-neutral-400 transition-colors duration-150 hover:text-neutral-700"
+              aria-label={label}
+            >
+              <Icon icon={icon} width={size} height={size} />
+            </button>
+          );
+        })}
       </div>
 
       <OnboardingButton onClick={() => void finishOnboarding(onContinue)}>
