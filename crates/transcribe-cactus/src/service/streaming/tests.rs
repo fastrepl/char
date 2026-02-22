@@ -462,17 +462,10 @@ fn e2e_streaming_dual_channel() {
                 audio_tx_1.blocking_send(chunk.to_vec()).expect("ch1 send");
             }
             if i % 20 == 0 {
-                println!(
-                    "[{:>6.1}s] sent chunk {}",
-                    t0.elapsed().as_secs_f64(),
-                    i,
-                );
+                println!("[{:>6.1}s] sent chunk {}", t0.elapsed().as_secs_f64(), i,);
             }
         }
-        println!(
-            "[{:>6.1}s] all chunks sent",
-            t0.elapsed().as_secs_f64(),
-        );
+        println!("[{:>6.1}s] all chunks sent", t0.elapsed().as_secs_f64(),);
     });
 
     let rt = tokio::runtime::Builder::new_current_thread()
@@ -563,9 +556,7 @@ fn e2e_websocket_dual_channel() {
         );
         let app = Router::new().route_service("/v1/listen", service);
 
-        let listener = tokio::net::TcpListener::bind("127.0.0.1:0")
-            .await
-            .unwrap();
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
         let addr = listener.local_addr().unwrap();
 
         let (shutdown_tx, shutdown_rx) = tokio::sync::oneshot::channel::<()>();
@@ -615,11 +606,7 @@ fn e2e_websocket_dual_channel() {
         let close_tx = std::cell::Cell::new(Some(close_tx));
 
         let writer = tokio::spawn(async move {
-            for (i, chunk) in interleaved
-                .chunks(chunk_bytes)
-                .take(num_chunks)
-                .enumerate()
-            {
+            for (i, chunk) in interleaved.chunks(chunk_bytes).take(num_chunks).enumerate() {
                 ws_tx
                     .send(WsMessage::Binary(chunk.to_vec().into()))
                     .await
@@ -713,10 +700,7 @@ fn e2e_websocket_dual_channel() {
                             break;
                         }
                         other => {
-                            println!(
-                                "[{:>5.1}s] ws recv {other}",
-                                t0.elapsed().as_secs_f64()
-                            );
+                            println!("[{:>5.1}s] ws recv {other}", t0.elapsed().as_secs_f64());
                         }
                     }
                 }
