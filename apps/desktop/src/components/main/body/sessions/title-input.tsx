@@ -149,36 +149,6 @@ const TitleInputInner = memo(
         main.STORE_ID,
       );
 
-      const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-      const pendingValueRef = useRef<string | null>(null);
-
-      const flushDebounce = useCallback(() => {
-        if (debounceRef.current) {
-          clearTimeout(debounceRef.current);
-          debounceRef.current = null;
-        }
-        if (pendingValueRef.current !== null) {
-          setStoreTitle(pendingValueRef.current);
-          pendingValueRef.current = null;
-        }
-      }, [setStoreTitle]);
-
-      const debouncedPersist = useCallback(
-        (value: string) => {
-          pendingValueRef.current = value;
-          if (debounceRef.current) {
-            clearTimeout(debounceRef.current);
-          }
-          debounceRef.current = setTimeout(() => {
-            if (pendingValueRef.current !== null) {
-              setStoreTitle(pendingValueRef.current);
-              pendingValueRef.current = null;
-            }
-            debounceRef.current = null;
-          }, 150);
-        },
-        [setStoreTitle],
-      );
 
       useEffect(() => {
         const handleMoveToTitlePosition = (e: Event) => {
@@ -238,7 +208,6 @@ const TitleInputInner = memo(
           const beforeCursor = input.value.slice(0, cursorPos);
           const afterCursor = input.value.slice(cursorPos);
 
-          flushDebounce();
           setStoreTitle(beforeCursor);
 
           if (afterCursor) {
@@ -299,7 +268,6 @@ const TitleInputInner = memo(
             type="text"
             onChange={(e) => {
               setLocalTitle(e.target.value);
-              debouncedPersist(e.target.value);
             }}
             onKeyDown={handleKeyDown}
             onFocus={() => {
@@ -307,7 +275,7 @@ const TitleInputInner = memo(
             }}
             onBlur={() => {
               isFocused.current = false;
-              flushDebounce();
+              setStoreTitle(localTitle);
             }}
             value={localTitle}
             className={cn([
