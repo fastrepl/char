@@ -63,8 +63,7 @@ pub(super) async fn handle_websocket(
 
     let mut audio_txs: Vec<tokio::sync::mpsc::Sender<Vec<f32>>> =
         Vec::with_capacity(total_channels);
-    let mut cancel_tokens: Vec<tokio_util::sync::CancellationToken> =
-        Vec::with_capacity(total_channels);
+    let mut cancel_tokens = Vec::with_capacity(total_channels);
     let mut event_streams: futures_util::stream::SelectAll<TaggedStream> =
         futures_util::stream::SelectAll::new();
 
