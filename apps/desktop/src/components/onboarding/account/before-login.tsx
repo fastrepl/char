@@ -1,60 +1,38 @@
 import { useEffect, useState } from "react";
 
 import { useAuth } from "../../../auth";
-import { OnboardingButton } from "../shared";
 
-export function BeforeLogin({ onContinue }: { onContinue: () => void }) {
-  return (
-    <div className="flex flex-col gap-4">
-      <SigninButton />
-      <ControlRegion handleContinue={onContinue} />
-    </div>
-  );
-}
-
-function SigninButton() {
+export function BeforeLogin({
+  onContinue: _onContinue,
+}: {
+  onContinue: () => void;
+}) {
   const auth = useAuth();
-
   const triggered = useAutoTriggerSignin();
-
-  return (
-    <OnboardingButton onClick={() => auth?.signIn()} disabled={triggered}>
-      {triggered ? "Click here to Sign in" : "Signing in on your browser..."}
-    </OnboardingButton>
-  );
-}
-
-function ControlRegion(_: { handleContinue: () => void }) {
-  const auth = useAuth();
   const [showCallbackUrlInput, setShowCallbackUrlInput] = useState(false);
 
   return (
     <div className="flex flex-col gap-4">
-      {showCallbackUrlInput ? <CallbackUrlInput /> : null}
-
-      <div className="flex flex-row gap-2 items-center mx-auto">
+      <div className="flex items-center gap-3">
         <button
-          className="text-sm text-neutral-500 hover:text-neutral-600 underline"
           onClick={() => auth?.signIn()}
+          disabled={!triggered}
+          className="px-5 py-2.5 rounded-full bg-stone-600 text-white text-sm font-medium duration-150 hover:scale-[1.01] active:scale-[0.99] w-fit"
         >
-          Browser not opened?
+          {triggered
+            ? "Click here to Sign in"
+            : "Signing in on your browser..."}
         </button>
-
-        <span className="text-sm text-neutral-400 mx-1">/</span>
-        <button
-          className="text-sm text-neutral-500 hover:text-neutral-600 underline"
-          onClick={(_v) => setShowCallbackUrlInput(true)}
-        >
-          Deeplink not working?
-        </button>
-        {/* <span className="text-sm text-neutral-600">or </span>
-        <button
-          className="text-sm text-neutral-400 hover:text-neutral-600 underline"
-          onClick={() => handleContinue()}
-        >
-          continue without account.
-        </button> */}
+        {triggered && (
+          <button
+            className="text-sm text-neutral-500 hover:text-neutral-600 underline"
+            onClick={() => setShowCallbackUrlInput(true)}
+          >
+            Something not working?
+          </button>
+        )}
       </div>
+      {showCallbackUrlInput && <CallbackUrlInput />}
     </div>
   );
 }
