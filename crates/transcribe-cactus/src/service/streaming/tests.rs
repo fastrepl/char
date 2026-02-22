@@ -402,6 +402,350 @@ fn e2e_streaming() {
     assert!(!full_transcript.is_empty(), "expected non-empty transcript");
 }
 
+// cargo test -p transcribe-cactus e2e_streaming_dual_channel -- --ignored --nocapture
+#[ignore = "requires local cactus model files"]
+#[test]
+fn e2e_streaming_dual_channel() {
+    let model_path = std::env::var("CACTUS_STT_MODEL")
+        .unwrap_or_else(|_| "/tmp/cactus-model/moonshine-base-cactus".to_string());
+    let model_path = PathBuf::from(model_path);
+    assert!(
+        model_path.exists(),
+        "model not found: {}",
+        model_path.display()
+    );
+
+    let model = std::sync::Arc::new(hypr_cactus::Model::new(&model_path).unwrap());
+    let options = hypr_cactus::TranscribeOptions::default();
+    let chunk_size_ms = 300u32;
+
+    let (audio_tx_0, mut event_stream_0, _cancel_0, _handle_0) = hypr_cactus::transcribe_stream(
+        model.clone(),
+        options.clone(),
+        hypr_cactus::CloudConfig::default(),
+        chunk_size_ms,
+        SAMPLE_RATE,
+    );
+    let (audio_tx_1, mut event_stream_1, _cancel_1, _handle_1) = hypr_cactus::transcribe_stream(
+        model,
+        options,
+        hypr_cactus::CloudConfig::default(),
+        chunk_size_ms,
+        SAMPLE_RATE,
+    );
+
+    let samples_ch0 = bytes_to_f32_samples(hypr_data::english_1::AUDIO);
+    let samples_ch1 = bytes_to_f32_samples(hypr_data::english_2::AUDIO);
+    let chunk_size = 8_000;
+
+    println!(
+        "\n--- dual channel: ch0={:.1}s ch1={:.1}s ---",
+        samples_ch0.len() as f64 / 16_000.0,
+        samples_ch1.len() as f64 / 16_000.0,
+    );
+
+    let t0 = std::time::Instant::now();
+
+    let sender = std::thread::spawn(move || {
+        let max_chunks = samples_ch0
+            .chunks(chunk_size)
+            .count()
+            .max(samples_ch1.chunks(chunk_size).count());
+        let mut ch0_iter = samples_ch0.chunks(chunk_size);
+        let mut ch1_iter = samples_ch1.chunks(chunk_size);
+
+        for i in 0..max_chunks {
+            if let Some(chunk) = ch0_iter.next() {
+                audio_tx_0.blocking_send(chunk.to_vec()).expect("ch0 send");
+            }
+            if let Some(chunk) = ch1_iter.next() {
+                audio_tx_1.blocking_send(chunk.to_vec()).expect("ch1 send");
+            }
+            if i % 20 == 0 {
+                println!(
+                    "[{:>6.1}s] sent chunk {}",
+                    t0.elapsed().as_secs_f64(),
+                    i,
+                );
+            }
+        }
+        println!(
+            "[{:>6.1}s] all chunks sent",
+            t0.elapsed().as_secs_f64(),
+        );
+    });
+
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .expect("failed to create tokio runtime");
+
+    let t0 = std::time::Instant::now();
+    let mut transcript_0 = String::new();
+    let mut transcript_1 = String::new();
+    let mut events_0 = 0u32;
+    let mut events_1 = 0u32;
+
+    loop {
+        let event = rt.block_on(async {
+            tokio::select! {
+                e = event_stream_0.next() => e.map(|e| (0, e)),
+                e = event_stream_1.next() => e.map(|e| (1, e)),
+            }
+        });
+
+        let Some((ch, event)) = event else { break };
+        match event {
+            Ok(hypr_cactus::TranscribeEvent { result: r, .. }) => {
+                let confirmed = r.confirmed.trim();
+                let pending = r.pending.trim();
+                if !confirmed.is_empty() || !pending.is_empty() {
+                    println!(
+                        "[{:>6.1}s] ch{ch} confirmed={:?} pending={:?}",
+                        t0.elapsed().as_secs_f64(),
+                        confirmed,
+                        pending,
+                    );
+                }
+                if !confirmed.is_empty() {
+                    let transcript = if ch == 0 {
+                        &mut transcript_0
+                    } else {
+                        &mut transcript_1
+                    };
+                    if !transcript.is_empty() {
+                        transcript.push(' ');
+                    }
+                    transcript.push_str(confirmed);
+                }
+                if ch == 0 {
+                    events_0 += 1;
+                } else {
+                    events_1 += 1;
+                }
+            }
+            Err(e) => panic!("streaming error ch{ch}: {e}"),
+        }
+    }
+
+    sender.join().expect("sender thread panicked");
+
+    println!("\n--- DUAL CHANNEL RESULTS ---");
+    println!("ch0 ({events_0} events): {transcript_0}");
+    println!("ch1 ({events_1} events): {transcript_1}");
+    println!("---\n");
+
+    assert!(events_0 > 0, "expected events from channel 0");
+    assert!(events_1 > 0, "expected events from channel 1");
+}
+
+// cargo test -p transcribe-cactus e2e_websocket_dual_channel -- --ignored --nocapture
+#[ignore = "requires local cactus model files"]
+#[test]
+fn e2e_websocket_dual_channel() {
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .expect("failed to create tokio runtime");
+    rt.block_on(async {
+        let model_path = std::env::var("CACTUS_STT_MODEL")
+            .unwrap_or_else(|_| "/tmp/cactus-model/moonshine-base-cactus".to_string());
+        let model_path = PathBuf::from(model_path);
+        assert!(
+            model_path.exists(),
+            "model not found: {}",
+            model_path.display()
+        );
+
+        let service = HandleError::new(
+            TranscribeService::builder().model_path(model_path).build(),
+            |err: String| async move { (StatusCode::INTERNAL_SERVER_ERROR, err) },
+        );
+        let app = Router::new().route_service("/v1/listen", service);
+
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0")
+            .await
+            .unwrap();
+        let addr = listener.local_addr().unwrap();
+
+        let (shutdown_tx, shutdown_rx) = tokio::sync::oneshot::channel::<()>();
+        tokio::spawn(async move {
+            let _ = axum::serve(listener, app)
+                .with_graceful_shutdown(async {
+                    let _ = shutdown_rx.await;
+                })
+                .await;
+        });
+
+        let ws_url = format!(
+            "ws://{}/v1/listen?channels=2&sample_rate=16000&chunk_size_ms=300",
+            addr
+        );
+        let (ws_stream, _) = connect_async(&ws_url).await.expect("ws connect failed");
+        let (mut ws_tx, mut ws_rx) = ws_stream.split();
+
+        // Build interleaved stereo PCM: ch0=english_1, ch1=english_2
+        let audio_ch0 = hypr_data::english_1::AUDIO;
+        let audio_ch1 = hypr_data::english_2::AUDIO;
+        let frames_ch0 = audio_ch0.len() / 2; // i16 = 2 bytes
+        let frames_ch1 = audio_ch1.len() / 2;
+        let num_frames = frames_ch0.min(frames_ch1);
+
+        let mut interleaved = Vec::with_capacity(num_frames * 4);
+        for i in 0..num_frames {
+            // ch0 sample (i16 LE)
+            interleaved.push(audio_ch0[i * 2]);
+            interleaved.push(audio_ch0[i * 2 + 1]);
+            // ch1 sample (i16 LE)
+            interleaved.push(audio_ch1[i * 2]);
+            interleaved.push(audio_ch1[i * 2 + 1]);
+        }
+
+        let t0 = std::time::Instant::now();
+        let chunk_bytes = 64_000; // 1s of stereo 16kHz i16 PCM (4 bytes per frame)
+        let num_chunks = 5;
+        println!(
+            "\n--- ws dual: sending {} chunks of {}B ({:.1}s each) ---",
+            num_chunks,
+            chunk_bytes,
+            chunk_bytes as f64 / 64_000.0,
+        );
+
+        let (close_tx, close_rx) = tokio::sync::oneshot::channel::<()>();
+        let close_tx = std::cell::Cell::new(Some(close_tx));
+
+        let writer = tokio::spawn(async move {
+            for (i, chunk) in interleaved
+                .chunks(chunk_bytes)
+                .take(num_chunks)
+                .enumerate()
+            {
+                ws_tx
+                    .send(WsMessage::Binary(chunk.to_vec().into()))
+                    .await
+                    .unwrap();
+                println!("[{:>5.1}s] ws sent chunk {}", t0.elapsed().as_secs_f64(), i);
+            }
+
+            let _ = close_rx.await;
+            println!(
+                "[{:>5.1}s] ws sending CloseStream",
+                t0.elapsed().as_secs_f64()
+            );
+            let _ = ws_tx
+                .send(WsMessage::Text(
+                    r#"{"type":"CloseStream"}"#.to_string().into(),
+                ))
+                .await;
+        });
+
+        let mut results_count = 0u32;
+        let mut saw_terminal = false;
+        let mut saw_error: Option<String> = None;
+        let mut close_sent = false;
+        let mut channels_seen = std::collections::HashSet::new();
+
+        while let Ok(Some(Ok(msg))) =
+            tokio::time::timeout(Duration::from_secs(120), ws_rx.next()).await
+        {
+            match msg {
+                WsMessage::Text(text) => {
+                    let Ok(v) = serde_json::from_str::<serde_json::Value>(&text) else {
+                        continue;
+                    };
+                    let msg_type = v.get("type").and_then(|t| t.as_str()).unwrap_or("?");
+                    match msg_type {
+                        "Results" => {
+                            let transcript = v
+                                .pointer("/channel/alternatives/0/transcript")
+                                .and_then(|t| t.as_str())
+                                .unwrap_or("");
+                            let ch_idx = v
+                                .pointer("/channel_index/0")
+                                .and_then(|c| c.as_i64())
+                                .unwrap_or(-1);
+                            channels_seen.insert(ch_idx);
+                            println!(
+                                "[{:>5.1}s] ws recv Results ch={} {:?}",
+                                t0.elapsed().as_secs_f64(),
+                                ch_idx,
+                                transcript,
+                            );
+                            results_count += 1;
+
+                            if results_count >= 6 && !close_sent {
+                                close_sent = true;
+                                if let Some(tx) = close_tx.take() {
+                                    let _ = tx.send(());
+                                }
+                            }
+                        }
+                        "Metadata" => {
+                            println!(
+                                "[{:>5.1}s] ws recv Metadata (terminal)",
+                                t0.elapsed().as_secs_f64()
+                            );
+                            saw_terminal = true;
+                            break;
+                        }
+                        "SpeechStarted" => {
+                            println!(
+                                "[{:>5.1}s] ws recv SpeechStarted",
+                                t0.elapsed().as_secs_f64()
+                            );
+                        }
+                        "UtteranceEnd" => {
+                            println!(
+                                "[{:>5.1}s] ws recv UtteranceEnd",
+                                t0.elapsed().as_secs_f64()
+                            );
+                        }
+                        "Error" => {
+                            saw_error = v
+                                .get("error_message")
+                                .and_then(|m| m.as_str())
+                                .map(str::to_owned);
+                            println!(
+                                "[{:>5.1}s] ws recv Error: {:?}",
+                                t0.elapsed().as_secs_f64(),
+                                saw_error
+                            );
+                            break;
+                        }
+                        other => {
+                            println!(
+                                "[{:>5.1}s] ws recv {other}",
+                                t0.elapsed().as_secs_f64()
+                            );
+                        }
+                    }
+                }
+                WsMessage::Close(_) => break,
+                _ => {}
+            }
+        }
+
+        let _ = writer.await;
+        let _ = shutdown_tx.send(());
+        println!(
+            "[{:>5.1}s] done ({} Results, terminal={}, channels_seen={:?})\n",
+            t0.elapsed().as_secs_f64(),
+            results_count,
+            saw_terminal,
+            channels_seen,
+        );
+
+        assert!(saw_error.is_none(), "ws error: {:?}", saw_error);
+        assert!(results_count > 0, "expected at least one Results message");
+        assert!(saw_terminal, "expected terminal Metadata message");
+        assert!(
+            channels_seen.contains(&0) && channels_seen.contains(&1),
+            "expected results from both channels, got {:?}",
+            channels_seen,
+        );
+    });
+}
+
 // cargo test -p transcribe-cactus e2e_websocket -- --ignored --nocapture
 #[ignore = "requires local cactus model files"]
 #[test]
