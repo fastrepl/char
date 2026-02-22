@@ -81,7 +81,9 @@ const issueSchema = z.object({
   score: z.object({
     naturalness: z
       .number()
-      .describe("Score from 1 to 10: Does it sound like a real person wrote this?"),
+      .describe(
+        "Score from 1 to 10: Does it sound like a real person wrote this?",
+      ),
     specificity: z
       .number()
       .describe("Score from 1 to 10: Specific details vs vague claims?"),
@@ -288,7 +290,10 @@ async function main() {
 
     try {
       const contentWithLineNumbers = addLineNumbers(articleContent);
-      const feedback = await checkHumanizer(articleContent, contentWithLineNumbers);
+      const feedback = await checkHumanizer(
+        articleContent,
+        contentWithLineNumbers,
+      );
 
       const totalScore =
         feedback.score.naturalness +
