@@ -42,7 +42,10 @@ fn render_table(entries: &[DocShortcutEntry]) -> String {
     lines.push("| Shortcut | Action |".to_string());
     lines.push("| --- | --- |".to_string());
     for entry in entries {
-        lines.push(format!("| {} | {} |", entry.keys_display, entry.description));
+        lines.push(format!(
+            "| {} | {} |",
+            entry.keys_display, entry.description
+        ));
     }
     lines.join("\n")
 }
