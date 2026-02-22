@@ -79,7 +79,7 @@ export function EventChip({ eventId }: { eventId: string }) {
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-[280px] shadow-lg p-0 rounded-lg"
+        className="w-[280px] shadow-lg p-0 rounded-lg max-h-[80vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <EventPopoverContent eventId={eventId} />

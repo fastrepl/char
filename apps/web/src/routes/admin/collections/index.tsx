@@ -1,7 +1,6 @@
 import { MDXContent } from "@content-collections/mdx/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import type { JSONContent } from "@tiptap/react";
 import { allArticles } from "content-collections";
 import {
   AlertTriangleIcon,
@@ -62,7 +61,7 @@ import { Spinner } from "@hypr/ui/components/ui/spinner";
 import { sonnerToast } from "@hypr/ui/components/ui/toast";
 import { cn } from "@hypr/utils";
 
-import BlogEditor from "@/components/admin/blog-editor";
+import BlogEditor, { useBlogEditor } from "@/components/admin/blog-editor";
 import { MediaSelectorModal } from "@/components/admin/media-selector-modal";
 import { defaultMDXComponents } from "@/components/mdx";
 import { fetchGitHubCredentials } from "@/functions/admin";
@@ -2721,78 +2720,8 @@ const FileEditor = React.forwardRef<
   const [autoSaveCountdown, setAutoSaveCountdown] = useState<number | null>(
     null,
   );
-  const lastSavedContentRef = useRef(fileContent?.content || "");
-  const lastSavedMetadataRef = useRef<ArticleMetadata>({
-    meta_title: fileContent?.meta_title || "",
-    display_title: fileContent?.display_title || "",
-    meta_description: fileContent?.meta_description || "",
-    author: fileContent?.author || [],
-    date: fileContent?.date || "",
-    coverImage: fileContent?.coverImage || "",
-    featured: fileContent?.featured || false,
-    category: fileContent?.category || "",
-  });
-  const editorRef = useRef<{ editor: any } | null>(null);
   const autoSaveIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const onSaveRef = useRef(onSave);
-  const contentRef = useRef(content);
-  const metadataRef = useRef<ArticleMetadata>(lastSavedMetadataRef.current);
-
-  const slug = filePath.replace(/\.mdx$/, "").replace(/^articles\//, "");
-
-  const { mutate: importFromDocs, isPending: isImporting } = useMutation({
-    mutationFn: async (params: {
-      url: string;
-      title?: string;
-      author?: string | string[];
-      description?: string;
-      coverImage?: string;
-      slug?: string;
-    }) => {
-      const response = await fetch("/api/admin/import/google-docs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(params),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Import failed");
-      }
-      return response.json() as Promise<ImportResult>;
-    },
-    onSuccess: (data) => {
-      if (data.json) {
-        editorRef.current?.editor?.commands.setContent(data.json);
-        setHasUnsavedChanges(true);
-      }
-      if (data.frontmatter) {
-        if (data.frontmatter.meta_title)
-          setMetaTitle(data.frontmatter.meta_title);
-        if (data.frontmatter.display_title)
-          setDisplayTitle(data.frontmatter.display_title);
-        if (data.frontmatter.meta_description)
-          setMetaDescription(data.frontmatter.meta_description);
-        if (data.frontmatter.author) setAuthor([data.frontmatter.author]);
-        if (data.frontmatter.date) setDate(data.frontmatter.date);
-        if (data.frontmatter.coverImage)
-          setCoverImage(data.frontmatter.coverImage);
-      }
-    },
-  });
-
-  const handleGoogleDocsImport = useCallback(
-    (url: string) => {
-      importFromDocs({
-        url,
-        slug,
-        title: metaTitle,
-        author,
-        description: metaDescription,
-        coverImage,
-      });
-    },
-    [importFromDocs, slug, metaTitle, author, metaDescription, coverImage],
-  );
 
   const handleImageUpload = useCallback(
     async (file: File): Promise<{ url: string; attachmentId: string }> => {
@@ -2829,21 +2758,88 @@ const FileEditor = React.forwardRef<
     [],
   );
 
-  const handleMediaLibrarySelect = useCallback((publicUrl: string) => {
-    const editor = editorRef.current?.editor;
-    if (editor) {
-      editor
-        .chain()
-        .focus()
-        .insertContent({
-          type: "image",
-          attrs: { src: publicUrl },
-        })
-        .run();
+  const editor = useBlogEditor({
+    content: fileContent?.content || "",
+    onUpdate: (markdown) => {
+      setContent(markdown);
       setHasUnsavedChanges(true);
-    }
-    setIsMediaSelectorOpen(false);
-  }, []);
+    },
+    onImageUpload: handleImageUpload,
+  });
+
+  const slug = filePath.replace(/\.mdx$/, "").replace(/^articles\//, "");
+
+  const { mutate: importFromDocs, isPending: isImporting } = useMutation({
+    mutationFn: async (params: {
+      url: string;
+      title?: string;
+      author?: string | string[];
+      description?: string;
+      coverImage?: string;
+      slug?: string;
+    }) => {
+      const response = await fetch("/api/admin/import/google-docs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(params),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Import failed");
+      }
+      return response.json() as Promise<ImportResult>;
+    },
+    onSuccess: (data) => {
+      if (data.md) {
+        editor?.commands.setContent(data.md, { contentType: "markdown" });
+      }
+      if (data.frontmatter) {
+        if (data.frontmatter.meta_title)
+          setMetaTitle(data.frontmatter.meta_title);
+        if (data.frontmatter.display_title)
+          setDisplayTitle(data.frontmatter.display_title);
+        if (data.frontmatter.meta_description)
+          setMetaDescription(data.frontmatter.meta_description);
+        if (data.frontmatter.author) setAuthor(data.frontmatter.author);
+        if (data.frontmatter.date) setDate(data.frontmatter.date);
+        if (data.frontmatter.coverImage)
+          setCoverImage(data.frontmatter.coverImage);
+      }
+      setHasUnsavedChanges(true);
+    },
+  });
+
+  const handleGoogleDocsImport = useCallback(
+    (url: string) => {
+      importFromDocs({
+        url,
+        slug,
+        title: metaTitle,
+        author,
+        description: metaDescription,
+        coverImage,
+      });
+    },
+    [importFromDocs, slug, metaTitle, author, metaDescription, coverImage],
+  );
+
+  const handleMediaLibrarySelect = useCallback(
+    (publicUrl: string) => {
+      if (editor) {
+        editor
+          .chain()
+          .focus()
+          .insertContent({
+            type: "image",
+            attrs: { src: publicUrl },
+          })
+          .run();
+        setHasUnsavedChanges(true);
+      }
+      setIsMediaSelectorOpen(false);
+    },
+    [editor],
+  );
 
   const getMetadata = useCallback(
     (): ArticleMetadata => ({
@@ -2869,7 +2865,8 @@ const FileEditor = React.forwardRef<
   );
 
   useEffect(() => {
-    setContent(fileContent?.content || "");
+    const newContent = fileContent?.content || "";
+    setContent(newContent);
     setMetaTitle(fileContent?.meta_title || "");
     setDisplayTitle(fileContent?.display_title || "");
     setMetaDescription(fileContent?.meta_description || "");
@@ -2878,19 +2875,14 @@ const FileEditor = React.forwardRef<
     setCoverImage(fileContent?.coverImage || "");
     setFeatured(fileContent?.featured || false);
     setCategory(fileContent?.category || "");
-    lastSavedContentRef.current = fileContent?.content || "";
-    lastSavedMetadataRef.current = {
-      meta_title: fileContent?.meta_title || "",
-      display_title: fileContent?.display_title || "",
-      meta_description: fileContent?.meta_description || "",
-      author: fileContent?.author || [],
-      date: fileContent?.date || "",
-      coverImage: fileContent?.coverImage || "",
-      featured: fileContent?.featured || false,
-      category: fileContent?.category || "",
-    };
     setHasUnsavedChanges(false);
-  }, [filePath, fileContent, pendingPRData?.hasPendingPR]);
+    if (editor) {
+      editor.commands.setContent(newContent, {
+        contentType: "markdown",
+        emitUpdate: false,
+      });
+    }
+  }, [filePath, fileContent, pendingPRData?.hasPendingPR, editor]);
 
   useEffect(() => {
     onDataChange({
@@ -2915,57 +2907,9 @@ const FileEditor = React.forwardRef<
     autoSaveCountdown,
   ]);
 
-  const hasMetadataChanged = useCallback((currentMetadata: ArticleMetadata) => {
-    const saved = lastSavedMetadataRef.current;
-    return (
-      currentMetadata.meta_title !== saved.meta_title ||
-      currentMetadata.display_title !== saved.display_title ||
-      currentMetadata.meta_description !== saved.meta_description ||
-      JSON.stringify(currentMetadata.author) !== JSON.stringify(saved.author) ||
-      currentMetadata.date !== saved.date ||
-      currentMetadata.coverImage !== saved.coverImage ||
-      currentMetadata.featured !== saved.featured ||
-      currentMetadata.category !== saved.category
-    );
-  }, []);
-
-  const handleContentChange = useCallback(
-    (newContent: string) => {
-      setContent(newContent);
-      const contentChanged = newContent !== lastSavedContentRef.current;
-      const metadataChanged = hasMetadataChanged(metadataRef.current);
-      setHasUnsavedChanges(contentChanged || metadataChanged);
-    },
-    [hasMetadataChanged],
-  );
-
-  useEffect(() => {
-    const currentMetadata = getMetadata();
-    metadataRef.current = currentMetadata;
-    const metadataChanged = hasMetadataChanged(currentMetadata);
-    const contentChanged = content !== lastSavedContentRef.current;
-    setHasUnsavedChanges(metadataChanged || contentChanged);
-  }, [
-    metaTitle,
-    displayTitle,
-    metaDescription,
-    author,
-    date,
-    coverImage,
-    featured,
-    category,
-    getMetadata,
-    hasMetadataChanged,
-    content,
-  ]);
-
   useEffect(() => {
     onSaveRef.current = onSave;
   }, [onSave]);
-
-  useEffect(() => {
-    contentRef.current = content;
-  }, [content]);
 
   useEffect(() => {
     if (!hasUnsavedChanges) {
@@ -2983,8 +2927,6 @@ const FileEditor = React.forwardRef<
       setAutoSaveCountdown((prev) => {
         if (prev === null || prev <= 1) {
           onSaveRef.current({ isAutoSave: true });
-          lastSavedContentRef.current = contentRef.current;
-          lastSavedMetadataRef.current = { ...metadataRef.current };
           setHasUnsavedChanges(false);
           return null;
         }
@@ -3005,8 +2947,6 @@ const FileEditor = React.forwardRef<
       if ((e.metaKey || e.ctrlKey) && e.key === "s") {
         e.preventDefault();
         onSaveRef.current();
-        lastSavedContentRef.current = contentRef.current;
-        lastSavedMetadataRef.current = { ...metadataRef.current };
         setHasUnsavedChanges(false);
         setAutoSaveCountdown(null);
         if (autoSaveIntervalRef.current) {
@@ -3081,23 +3021,29 @@ const FileEditor = React.forwardRef<
 
   const selectedAuthors = AUTHORS.filter((a) => author.includes(a.name));
 
+  const dirty = <T,>(setter: React.Dispatch<React.SetStateAction<T>>) =>
+    ((value: React.SetStateAction<T>) => {
+      setter(value);
+      setHasUnsavedChanges(true);
+    }) as React.Dispatch<React.SetStateAction<T>>;
+
   const metadataHandlers: MetadataHandlers = {
     metaTitle,
-    onMetaTitleChange: setMetaTitle,
+    onMetaTitleChange: dirty(setMetaTitle),
     displayTitle,
-    onDisplayTitleChange: setDisplayTitle,
+    onDisplayTitleChange: dirty(setDisplayTitle),
     metaDescription,
-    onMetaDescriptionChange: setMetaDescription,
+    onMetaDescriptionChange: dirty(setMetaDescription),
     author,
-    onAuthorChange: setAuthor,
+    onAuthorChange: dirty(setAuthor),
     date,
-    onDateChange: setDate,
+    onDateChange: dirty(setDate),
     coverImage,
-    onCoverImageChange: setCoverImage,
+    onCoverImageChange: dirty(setCoverImage),
     featured,
-    onFeaturedChange: setFeatured,
+    onFeaturedChange: dirty(setFeatured),
     category,
-    onCategoryChange: setCategory,
+    onCategoryChange: dirty(setCategory),
   };
 
   const renderPreview = () => (
@@ -3188,12 +3134,9 @@ const FileEditor = React.forwardRef<
                 handlers={metadataHandlers}
               />
               <BlogEditor
-                ref={editorRef}
-                content={content}
-                onChange={handleContentChange}
+                editor={editor}
                 onGoogleDocsImport={handleGoogleDocsImport}
                 isImporting={isImporting}
-                onImageUpload={handleImageUpload}
                 onAddImageFromLibrary={() => setIsMediaSelectorOpen(true)}
                 showToolbar={false}
               />
@@ -3220,12 +3163,9 @@ const FileEditor = React.forwardRef<
       <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
         <ResizablePanel defaultSize={70} minSize={50}>
           <BlogEditor
-            ref={editorRef}
-            content={content}
-            onChange={handleContentChange}
+            editor={editor}
             onGoogleDocsImport={handleGoogleDocsImport}
             isImporting={isImporting}
-            onImageUpload={handleImageUpload}
             onAddImageFromLibrary={() => setIsMediaSelectorOpen(true)}
           />
         </ResizablePanel>
@@ -3304,12 +3244,12 @@ function FileItem({
 
 interface ImportResult {
   success: boolean;
-  json?: JSONContent;
+  md?: string;
   frontmatter?: {
     meta_title: string;
     display_title: string;
     meta_description: string;
-    author: string;
+    author: string[];
     coverImage: string;
     featured: boolean;
     date: string;

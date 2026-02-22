@@ -142,7 +142,7 @@ function AIView({ tab }: { tab: Extract<Tab, { type: "ai" }> }) {
 
   return (
     <div className="flex flex-col flex-1 w-full overflow-hidden">
-      <div className="flex gap-1 px-6 pt-6 pb-2">
+      <div className="flex flex-wrap gap-1 px-6 pt-6 pb-2">
         {menuItems.map((item) => (
           <Button
             key={item.key}

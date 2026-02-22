@@ -8,7 +8,6 @@ import {
 import { z } from "zod";
 
 import {
-  type EnhanceTemplate,
   commands as templateCommands,
   type TemplateSection,
 } from "@hypr/plugin-template";
@@ -17,14 +16,9 @@ import { templateSectionSchema } from "@hypr/store";
 import type { TaskArgsMapTransformed, TaskConfig } from ".";
 import type { Store } from "../../../tinybase/store/main";
 import { getCustomPrompt } from "../../../tinybase/store/prompts";
-import {
-  normalizeBulletPoints,
-  trimBeforeMarker,
-} from "../shared/transform_impl";
-import {
-  type EarlyValidatorFn,
-  withEarlyValidationRetry,
-} from "../shared/validate";
+import { normalizeBulletPoints } from "../shared/transform_impl";
+import { withEarlyValidationRetry } from "../shared/validate";
+import { createEnhanceValidator } from "./enhance-validator";
 
 export const enhanceWorkflow: Pick<
   TaskConfig<"enhance">,
@@ -32,7 +26,6 @@ export const enhanceWorkflow: Pick<
 > = {
   executeWorkflow,
   transforms: [
-    trimBeforeMarker("#"),
     normalizeBulletPoints(),
     smoothStream({ delayInMs: 250, chunking: "line" }),
   ],
@@ -237,7 +230,7 @@ async function* generateSummary(params: {
 
   onProgress({ type: "generating" });
 
-  const validator = createValidator(args.template);
+  const validator = createEnhanceValidator(args.template);
 
   yield* withEarlyValidationRetry(
     (retrySignal, { previousFeedback }) => {
@@ -283,32 +276,4 @@ IMPORTANT: Previous attempt failed. ${previousFeedback}`;
       },
     },
   );
-}
-
-function createValidator(template: EnhanceTemplate | null): EarlyValidatorFn {
-  return (textSoFar: string) => {
-    const normalized = textSoFar.trim();
-
-    if (!template?.sections || template.sections.length === 0) {
-      if (!normalized.startsWith("# ")) {
-        const feedback =
-          "Output must start with a markdown h1 heading (# Title).";
-        return { valid: false, feedback };
-      }
-
-      return { valid: true };
-    }
-
-    const firstSection = template.sections[0];
-    const expectedStart = `# ${firstSection.title}`;
-    const isValid =
-      expectedStart.startsWith(normalized) ||
-      normalized.startsWith(expectedStart);
-    if (!isValid) {
-      const feedback = `Output must start with the first template section heading: "${expectedStart}"`;
-      return { valid: false, feedback };
-    }
-
-    return { valid: true };
-  };
 }

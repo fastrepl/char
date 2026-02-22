@@ -120,7 +120,7 @@ fn build_cover_page(
 
     cover.push_str("    #v(1fr)\n");
 
-    cover.push_str("    #text(size: 10pt, fill: muted-color)[Exported from Hyprnote]\n");
+    cover.push_str("    #text(size: 10pt, fill: muted-color)[Exported from Char]\n");
 
     cover.push_str("  ]\n");
     cover.push_str("]\n\n");

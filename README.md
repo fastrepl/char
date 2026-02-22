@@ -1,11 +1,11 @@
-![poster-image](https://github.com/user-attachments/assets/d4502cab-9fbd-404b-8fc9-6469695492e7)
+![twitter-image](https://github.com/user-attachments/assets/b6161cfd-ddfa-4c09-9fbb-ab5a2d6961fc)
 
 <p align="center">
   <p align="center">Char - The AI notepad for <strong>private</strong> meetings</p>
   <p align="center">
-   <a href="https://deepwiki.com/fastrepl/hyprnote"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
+   <a href="https://deepwiki.com/fastrepl/char"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
    <a href="https://hyprnote.com/discord" target="_blank"><img src="https://img.shields.io/static/v1?label=Join%20our&message=Discord&color=blue&logo=Discord" alt="Discord"></a>
-   <a href="https://x.com/tryhyprnote" target="_blank"><img src="https://img.shields.io/static/v1?label=Follow%20us%20on&message=X&color=black&logo=x" alt="X"></a>
+   <a href="https://x.com/getcharnotes" target="_blank"><img src="https://img.shields.io/static/v1?label=Follow%20us%20on&message=X&color=black&logo=x" alt="X"></a>
   </p>
 </p>
    
@@ -27,8 +27,8 @@ brew install --cask fastrepl/hyprnote/hyprnote@nightly
 ```
 
 - [macOS](https://hyprnote.com/download) (public beta)
-- [Windows](https://github.com/fastrepl/hyprnote/issues/66) (q1 2026)
-- [Linux](https://github.com/fastrepl/hyprnote/issues/67) (q1 2026)
+- [Windows](https://github.com/fastrepl/char/issues/66) (q1 2026)
+- [Linux](https://github.com/fastrepl/char/issues/67) (q1 2026)
 
 ## Highlights
 
@@ -72,7 +72,7 @@ Char plays nice with whatever stack you're running.
 
 Prefer a certain style? Choose from predefined templates like bullet points, agenda-based, or paragraph summary. Or create your own.
 
-Check out our [template gallery](https://hyprnote.com/templates) and add your own [here](https://github.com/fastrepl/hyprnote/tree/main/apps/web/content/templates).
+Check out our [template gallery](https://hyprnote.com/templates) and add your own [here](https://github.com/fastrepl/char/tree/main/apps/web/content/templates).
 
 ### AI Chat
 

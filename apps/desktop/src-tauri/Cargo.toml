@@ -95,11 +95,10 @@ strum = { workspace = true, features = ["derive"] }
 tracing = { workspace = true }
 
 hypr-host = { workspace = true }
-
 hypr-supervisor = { workspace = true }
-ractor = { workspace = true }
 
-pico-args = "0.5"
+pico-args = { workspace = true }
+ractor = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 
 [features]

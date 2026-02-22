@@ -65,6 +65,14 @@ export const SETTINGS_MAPPING = {
       type: "string",
       path: ["ai", "current_stt_model"],
     },
+    cactus_cloud_handoff: {
+      type: "boolean",
+      path: ["cactus", "cloud_handoff"],
+    },
+    cactus_min_chunk_sec: {
+      type: "number",
+      path: ["cactus", "min_chunk_sec"],
+    },
     timezone: {
       type: "string",
       path: ["general", "timezone"],
@@ -72,6 +80,10 @@ export const SETTINGS_MAPPING = {
     week_start: {
       type: "string",
       path: ["general", "week_start"],
+    },
+    selected_template_id: {
+      type: "string",
+      path: ["general", "selected_template_id"],
     },
   },
   tables: {

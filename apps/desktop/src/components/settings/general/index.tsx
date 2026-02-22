@@ -137,7 +137,7 @@ export function SettingsApp() {
                     {(telemetryConsentField) => (
                       <AppSettingsView
                         autostart={{
-                          title: "Start Hyprnote at login",
+                          title: "Start Char at login",
                           description:
                             "Always ready without manually launching.",
                           value: autostartField.state.value,
@@ -162,7 +162,7 @@ export function SettingsApp() {
                         telemetryConsent={{
                           title: "Share usage data",
                           description:
-                            "Send anonymous usage metadata to help improve Hyprnote.",
+                            "Send anonymous usage analytics to help improve Char.",
                           value: telemetryConsentField.state.value,
                           onChange: (val) =>
                             telemetryConsentField.handleChange(val),

@@ -121,6 +121,7 @@ export function storeValuesToSettings(
     notification: {},
     general: {},
     language: {},
+    cactus: {},
   };
 
   for (const [key, config] of Object.entries(SETTINGS_MAPPING.values)) {

@@ -1,8 +1,8 @@
-import { TriangleAlert } from "lucide-react";
 import { type RefObject, useCallback, useMemo, useRef, useState } from "react";
 
 import type { DegradedError } from "@hypr/plugin-listener";
 import type { RuntimeSpeakerHint } from "@hypr/transcript";
+import { DancingSticks } from "@hypr/ui/components/ui/dancing-sticks";
 import { cn } from "@hypr/utils";
 
 import { useAudioPlayer } from "../../../../../../../contexts/audio-player/provider";
@@ -153,30 +153,33 @@ export function TranscriptContainer({
           "pb-16 scroll-pb-32 scrollbar-hide",
         ])}
       >
-        {currentActive && degraded && <DegradedState error={degraded} />}
-        {transcriptIds.map((transcriptId, index) => (
-          <div key={transcriptId} className="flex flex-col gap-8">
-            <RenderTranscript
-              scrollElement={scrollElement}
-              isLastTranscript={index === transcriptIds.length - 1}
-              isAtBottom={isAtBottom}
-              editable={editable}
-              transcriptId={transcriptId}
-              partialWords={
-                index === transcriptIds.length - 1 && currentActive
-                  ? partialWords
-                  : []
-              }
-              partialHints={
-                index === transcriptIds.length - 1 && currentActive
-                  ? partialHints
-                  : []
-              }
-              operations={operations}
-            />
-            {index < transcriptIds.length - 1 && <TranscriptSeparator />}
-          </div>
-        ))}
+        {currentActive && degraded ? (
+          <DegradedState error={degraded} />
+        ) : (
+          transcriptIds.map((transcriptId, index) => (
+            <div key={transcriptId} className="flex flex-col gap-8">
+              <RenderTranscript
+                scrollElement={scrollElement}
+                isLastTranscript={index === transcriptIds.length - 1}
+                isAtBottom={isAtBottom}
+                editable={editable}
+                transcriptId={transcriptId}
+                partialWords={
+                  index === transcriptIds.length - 1 && currentActive
+                    ? partialWords
+                    : []
+                }
+                partialHints={
+                  index === transcriptIds.length - 1 && currentActive
+                    ? partialHints
+                    : []
+                }
+                operations={operations}
+              />
+              {index < transcriptIds.length - 1 && <TranscriptSeparator />}
+            </div>
+          ))
+        )}
 
         {editable && (
           <SelectionMenu
@@ -233,17 +236,23 @@ function degradedMessage(error: DegradedError): string {
 }
 
 function DegradedState({ error }: { error: DegradedError }) {
+  const amplitude = useListener((state) => state.live.amplitude);
+
   return (
-    <div
-      className={cn([
-        "h-full flex flex-col items-center justify-center gap-3",
-        "bg-red-50/50 text-red-700",
-      ])}
-    >
-      <TriangleAlert size={24} className="text-red-400" />
-      <div className="flex flex-col items-center gap-1">
-        <p className="text-sm font-medium">{degradedMessage(error)}</p>
-        <p className="text-xs text-red-400">Recording continues.</p>
+    <div className="h-full flex flex-col items-center justify-center gap-6">
+      <DancingSticks
+        amplitude={Math.min((amplitude.mic + amplitude.speaker) / 2000, 1)}
+        color="#a3a3a3"
+        height={40}
+        width={80}
+        stickWidth={3}
+        gap={3}
+      />
+      <div className="flex flex-col items-center gap-1.5 text-center">
+        <p className="text-sm font-medium text-neutral-600">
+          Recording continues
+        </p>
+        <p className="text-xs text-neutral-400">{degradedMessage(error)}</p>
       </div>
     </div>
   );

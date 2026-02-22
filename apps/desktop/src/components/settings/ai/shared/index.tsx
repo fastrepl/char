@@ -27,6 +27,7 @@ import {
   requiresEntitlement,
 } from "./eligibility";
 
+export * from "./hypr-cloud-button";
 export * from "./model-combobox";
 
 type ProviderType = "stt" | "llm";

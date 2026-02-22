@@ -10,7 +10,7 @@ import type { AIProviderStorage } from "@hypr/store";
 import { useAuth } from "../auth";
 import { useBillingAccess } from "../billing";
 import { providerRowId } from "../components/settings/ai/shared";
-import { ProviderId } from "../components/settings/ai/stt/shared";
+import { type ProviderId } from "../components/settings/ai/stt/shared";
 import { env } from "../env";
 import * as settings from "../store/tinybase/store/settings";
 
@@ -33,8 +33,7 @@ export const useSTTConnection = () => {
   const isLocalModel =
     current_stt_provider === "hyprnote" &&
     !!current_stt_model &&
-    (current_stt_model.startsWith("am-") ||
-      current_stt_model.startsWith("Quantized"));
+    current_stt_model !== "cloud";
 
   const isCloudModel =
     current_stt_provider === "hyprnote" && current_stt_model === "cloud";
@@ -55,16 +54,15 @@ export const useSTTConnection = () => {
         return { status: "not_downloaded" as const, connection: null };
       }
 
-      const servers = await localSttCommands.getServers();
+      const serverResult = await localSttCommands.getServerForModel(
+        current_stt_model as SupportedSttModel,
+      );
 
-      if (servers.status !== "ok") {
+      if (serverResult.status !== "ok") {
         return null;
       }
 
-      const isInternalModel = current_stt_model.startsWith("Quantized");
-      const server = isInternalModel
-        ? servers.data.internal
-        : servers.data.external;
+      const server = serverResult.data;
 
       if (server?.status === "ready" && server.url) {
         return {
@@ -79,7 +77,7 @@ export const useSTTConnection = () => {
       }
 
       return {
-        status: server?.status,
+        status: server?.status ?? "loading",
         connection: null,
       };
     },

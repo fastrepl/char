@@ -7,6 +7,9 @@
     },
     "TypeScript": {
       "formatter": "prettier"
+    },
+    "TSX": {
+      "formatter": "prettier"
     }
   },
   "lsp": {

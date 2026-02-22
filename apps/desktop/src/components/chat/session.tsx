@@ -213,7 +213,7 @@ function useTransport(
   systemPromptOverride?: string,
 ) {
   const registry = useToolRegistry();
-  const configuredModel = useLanguageModel();
+  const configuredModel = useLanguageModel("chat");
   const model = modelOverride ?? configuredModel;
   const language = main.UI.useValue("ai_language", main.STORE_ID) ?? "en";
   const [systemPrompt, setSystemPrompt] = useState<string | undefined>();

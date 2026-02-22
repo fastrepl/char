@@ -24,6 +24,10 @@ pub fn should_skip_path(relative_path: &str, path: &Path) -> bool {
         return true;
     }
 
+    if relative_path.starts_with("models/") {
+        return true;
+    }
+
     if path
         .extension()
         .is_some_and(|ext| ext == "wav" || ext == "ogg" || ext == "tmp")
@@ -96,6 +100,15 @@ mod tests {
     fn test_skip_tmp_extension() {
         let path = PathBuf::from("/vault/temp/file.tmp");
         assert!(should_skip_path("temp/file.tmp", &path));
+    }
+
+    #[test]
+    fn test_skip_models() {
+        let path = PathBuf::from("/vault/models/cactus/encoder.layer_6_self_attn_output.bias");
+        assert!(should_skip_path(
+            "models/cactus/encoder.layer_6_self_attn_output.bias",
+            &path
+        ));
     }
 
     #[test]

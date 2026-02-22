@@ -20,6 +20,7 @@ use reqwest::Client;
 
 use crate::analytics::{AnalyticsReporter, GenerationEvent};
 use crate::config::LlmProxyConfig;
+use crate::model::{CharTask, ModelContext};
 use crate::types::{ChatCompletionRequest, ToolChoice};
 
 async fn report_with_cost(
@@ -170,24 +171,31 @@ where
 async fn completions_handler(
     State(state): State<AppState>,
     analytics_ctx: AnalyticsContext,
+    headers: axum::http::HeaderMap,
     Json(request): Json<ChatCompletionRequest>,
 ) -> Response {
     let start_time = Instant::now();
 
+    let task = headers
+        .get(crate::CHAR_TASK_HEADER)
+        .and_then(|v| v.to_str().ok())
+        .and_then(|s| s.parse::<CharTask>().ok());
+
     let needs_tool_calling = request.tools.as_ref().is_some_and(|t| !t.is_empty())
         && !matches!(&request.tool_choice, Some(ToolChoice::String(s)) if s == "none");
 
-    let models = if needs_tool_calling {
-        state.config.models_tool_calling.clone()
-    } else {
-        state.config.models_default.clone()
+    let ctx = ModelContext {
+        task,
+        needs_tool_calling,
     };
+    let models = state.config.resolve(&ctx);
 
     let stream = request.stream.unwrap_or(false);
 
     tracing::info!(
         stream = %stream,
         has_tools = %needs_tool_calling,
+        task = ?task,
         message_count = %request.messages.len(),
         model_count = %models.len(),
         provider = %state.config.provider.name(),
@@ -203,11 +211,17 @@ async fn completions_handler(
         }
         scope.set_tag("llm.stream", stream.to_string());
         scope.set_tag("llm.tool_calling", needs_tool_calling.to_string());
+        if let Some(t) = &task {
+            scope.set_tag("llm.task", t.to_string());
+        }
 
         let mut ctx = BTreeMap::new();
         ctx.insert("model_count".into(), models.len().into());
         ctx.insert("message_count".into(), request.messages.len().into());
         ctx.insert("has_tools".into(), needs_tool_calling.into());
+        if let Some(t) = &task {
+            ctx.insert("task".into(), serde_json::Value::String(t.to_string()));
+        }
         scope.set_context("llm_request", sentry::protocol::Context::Other(ctx));
     });
 

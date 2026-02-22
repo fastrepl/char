@@ -20,6 +20,18 @@ export const localSttKeys = {
 };
 
 export const localSttQueries = {
+  supportedModels: () =>
+    queryOptions({
+      queryKey: [...localSttKeys.all, "supported-models"] as const,
+      queryFn: () => localSttCommands.listSupportedModels(),
+      staleTime: Infinity,
+      select: (result) => {
+        if (result.status === "error") {
+          throw new Error(result.error);
+        }
+        return result.data;
+      },
+    }),
   isDownloaded: (model: SupportedSttModel) =>
     queryOptions({
       refetchInterval: 1000,

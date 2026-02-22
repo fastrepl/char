@@ -1,6 +1,7 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef } from "react";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
+import { commands as openerCommands } from "@hypr/plugin-opener2";
 import NoteEditor, {
   type JSONContent,
   type TiptapEditor,
@@ -84,6 +85,15 @@ export const RawEditor = forwardRef<
 
   const fileHandlerConfig = useMemo(() => ({ onImageUpload }), [onImageUpload]);
 
+  const extensionOptions = useMemo(
+    () => ({
+      onLinkOpen: (url: string) => {
+        void openerCommands.openUrl(url, null);
+      },
+    }),
+    [],
+  );
+
   return (
     <NoteEditor
       ref={ref}
@@ -94,6 +104,7 @@ export const RawEditor = forwardRef<
       placeholderComponent={Placeholder}
       onNavigateToTitle={onNavigateToTitle}
       fileHandlerConfig={fileHandlerConfig}
+      extensionOptions={extensionOptions}
     />
   );
 });

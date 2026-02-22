@@ -272,7 +272,7 @@ function Header({ tabs }: { tabs: Tab[] }) {
                   ref={(el) => setTabRef(tab, el)}
                   style={{ position: "relative" }}
                   className="h-full z-10"
-                  layoutScroll
+                  transition={{ layout: { duration: 0.15 } }}
                 >
                   <TabItem
                     tab={tab}
@@ -766,10 +766,12 @@ function useScrollState(
 
     updateScrollState();
     requestAnimationFrame(updateScrollState);
+    const timerId = setTimeout(updateScrollState, 200);
     container.addEventListener("scroll", updateScrollState);
 
     return () => {
       container.removeEventListener("scroll", updateScrollState);
+      clearTimeout(timerId);
     };
   }, [updateScrollState, tabCount]);
 

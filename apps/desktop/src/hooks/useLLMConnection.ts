@@ -7,6 +7,7 @@ import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { extractReasoningMiddleware, wrapLanguageModel } from "ai";
 import { useMemo } from "react";
 
+import type { CharTask } from "@hypr/api-client";
 import type { AIProviderStorage } from "@hypr/store";
 
 import { useAuth } from "../auth";
@@ -22,7 +23,7 @@ import {
 } from "../components/settings/ai/shared/eligibility";
 import { env } from "../env";
 import * as settings from "../store/tinybase/store/settings";
-import { tracedFetch } from "../utils/traced-fetch";
+import { createTracedFetch, tracedFetch } from "../utils/traced-fetch";
 
 type LanguageModelV3 = Parameters<typeof wrapLanguageModel>[0]["model"];
 
@@ -52,9 +53,12 @@ type LLMConnectionResult = {
   status: LLMConnectionStatus;
 };
 
-export const useLanguageModel = (): LanguageModelV3 | null => {
+export const useLanguageModel = (task?: CharTask): LanguageModelV3 | null => {
   const { conn } = useLLMConnection();
-  return useMemo(() => (conn ? createLanguageModel(conn) : null), [conn]);
+  return useMemo(
+    () => (conn ? createLanguageModel(conn, task) : null),
+    [conn, task],
+  );
 };
 
 export const useLLMConnection = (): LLMConnectionResult => {
@@ -227,11 +231,14 @@ const wrapWithThinkingMiddleware = (
   });
 };
 
-const createLanguageModel = (conn: LLMConnectionInfo): LanguageModelV3 => {
+const createLanguageModel = (
+  conn: LLMConnectionInfo,
+  task?: CharTask,
+): LanguageModelV3 => {
   switch (conn.providerId) {
     case "hyprnote": {
       const provider = createOpenRouter({
-        fetch: tracedFetch,
+        fetch: task ? createTracedFetch(task) : tracedFetch,
         baseURL: conn.baseUrl,
         apiKey: conn.apiKey,
       });

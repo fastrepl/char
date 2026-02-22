@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Hyprnote AI API",
+    "title": "Char AI API",
     "description": "AI services API for speech-to-text transcription, LLM chat completions, and subscription management",
     "license": {
       "name": ""
@@ -168,6 +168,49 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/llm/chat/completions": {
+      "post": {
+        "tags": [
+          "llm"
+        ],
+        "operationId": "llm_chat_completions",
+        "parameters": [
+          {
+            "name": "x-char-task",
+            "in": "header",
+            "description": "Task type for model selection",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/components/schemas/CharTask"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat completion response (streaming or non-streaming)"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "502": {
+            "description": "Upstream provider failed"
+          },
+          "504": {
+            "description": "Request timeout"
           }
         }
       }
@@ -880,6 +923,14 @@
             ]
           }
         }
+      },
+      "CharTask": {
+        "type": "string",
+        "enum": [
+          "chat",
+          "enhance",
+          "title"
+        ]
       },
       "ConnectSessionResponse": {
         "type": "object",
@@ -1759,12 +1810,6 @@
         "scheme": "bearer",
         "bearerFormat": "JWT",
         "description": "Supabase JWT token"
-      },
-      "device_fingerprint": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "x-device-fingerprint",
-        "description": "Optional device fingerprint for analytics"
       }
     }
   },

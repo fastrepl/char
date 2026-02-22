@@ -27,14 +27,17 @@ jobs:
       matrix:
         include:
           - platform: "macos"
-            runner: "depot-macos-14"
-          - platform: "linux"
+            runner: "depot-macos-15"
+          - platform: "linux-x86_64"
             runner: "depot-ubuntu-22.04-8"
-          - platform: "windows"
-            runner: "windows-latest"
+          - platform: "linux-aarch64"
+            runner: "depot-ubuntu-22.04-arm-8"
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
       - uses: ./.github/actions/pnpm_install
       - uses: denoland/setup-deno@v2
       - run: pnpm -F ui build
@@ -46,19 +49,12 @@ jobs:
       - uses: ./.github/actions/rust_install
         with:
           platform: ${{ matrix.platform }}
+      - if: matrix.platform == 'macos'
+        run: echo "SDKROOT=$(xcrun --sdk macosx --show-sdk-path)" >> $GITHUB_ENV
       - run: cargo check -p desktop
       - run: cargo test -p desktop
-        if: matrix.platform != 'windows'
-      - run: cargo test -p desktop --no-run
-        if: matrix.platform == 'windows'
-      - name: Test workspace crates
-        run: |
-          EXTRA_EXCLUDES=""
-          if [[ "${{ matrix.platform }}" == "windows" ]]; then
-            EXTRA_EXCLUDES="--exclude gbnf --exclude tauri-plugin-dock --exclude tauri-plugin-flag --exclude tauri-plugin-git --exclude tauri-plugin-mcp"
-          fi
+      - run: |
           cargo test --workspace \
-            $EXTRA_EXCLUDES \
             --exclude desktop \
             --exclude control-tauri \
             --exclude ai \
@@ -71,16 +67,13 @@ jobs:
             --exclude apple-note \
             --exclude notification-linux \
             --exclude am \
-            --exclude am2 \
             --exclude aec \
             --exclude agc \
             --exclude whisper \
             --exclude whisper-local \
             --exclude whisper-local-model \
-            --exclude moonshine \
-            --exclude kyutai \
             --exclude vad2 \
-            --exclude vad3 \
+            --exclude vad \
             --exclude vvad \
             --exclude vad-ext \
             --exclude onnx \
@@ -100,6 +93,10 @@ jobs:
             --exclude audio-device \
             --exclude transcribe-whisper-local \
             --exclude device-monitor \
+            --exclude cactus-sys \
+            --exclude cactus \
+            --exclude transcribe-cactus \
+            --exclude llm-cactus \
             --exclude tauri-plugin-analytics\
             --exclude tauri-plugin-apple-calendar \
             --exclude tauri-plugin-apple-contact \

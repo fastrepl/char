@@ -234,7 +234,7 @@ export function EventDisplay({
       {event.description && (
         <>
           <div className="h-px bg-neutral-200" />
-          <div className="text-sm text-neutral-700 whitespace-pre-wrap break-words">
+          <div className="text-sm text-neutral-700 whitespace-pre-wrap break-words overflow-y-auto max-h-40">
             {event.description}
           </div>
         </>

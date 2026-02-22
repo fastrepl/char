@@ -1,4 +1,6 @@
+import { stringHash } from "facehash";
 import { ArrowDownUp, Plus, Search, X } from "lucide-react";
+import React from "react";
 import { useState } from "react";
 
 import { Button } from "@hypr/ui/components/ui/button";
@@ -9,6 +11,24 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@hypr/ui/components/ui/dropdown-menu";
+
+const COLOR_PALETTES = [
+  "bg-amber-50",
+  "bg-rose-50",
+  "bg-violet-50",
+  "bg-blue-50",
+  "bg-teal-50",
+  "bg-green-50",
+  "bg-cyan-50",
+  "bg-fuchsia-50",
+  "bg-indigo-50",
+  "bg-yellow-50",
+];
+
+export function getContactBgClass(name: string) {
+  const hash = stringHash(name);
+  return COLOR_PALETTES[hash % COLOR_PALETTES.length];
+}
 
 export type SortOption =
   | "alphabetical"

@@ -33,7 +33,7 @@ type Provider = {
 
 export const displayModelId = (model: string) => {
   if (model === "cloud") {
-    return "Cloud";
+    return "Pro (Cloud)";
   }
 
   if (model === "stt-v4" || model === "stt-rt-v4" || model === "stt-async-v4") {
@@ -94,7 +94,7 @@ const _PROVIDERS = [
     id: "hyprnote",
     displayName: "Hyprnote",
     badge: "Recommended",
-    icon: <img src="/assets/icon.png" alt="Hyprnote" className="size-5" />,
+    icon: <img src="/assets/icon.png" alt="Char" className="size-5" />,
     baseUrl: new URL("/stt", env.VITE_API_URL).toString(),
     models: [
       "cloud",

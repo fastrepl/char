@@ -3,6 +3,7 @@ use std::time::Duration;
 
 use crate::analytics::AnalyticsReporter;
 use crate::env::ApiKey;
+use crate::model::{ModelContext, ModelResolver, StaticModelResolver};
 use crate::provider::{OpenRouterProvider, Provider};
 
 const DEFAULT_TIMEOUT_MS: u64 = 120_000;
@@ -28,8 +29,7 @@ impl Default for RetryConfig {
 pub struct LlmProxyConfig {
     pub api_key: String,
     pub timeout: Duration,
-    pub models_tool_calling: Vec<String>,
-    pub models_default: Vec<String>,
+    resolver: Arc<dyn ModelResolver>,
     pub analytics: Option<Arc<dyn AnalyticsReporter>>,
     pub provider: Arc<dyn Provider>,
     pub retry_config: RetryConfig,
@@ -40,20 +40,15 @@ impl LlmProxyConfig {
         Self {
             api_key: api_key.into().0,
             timeout: Duration::from_millis(DEFAULT_TIMEOUT_MS),
-            models_tool_calling: vec![
-                "anthropic/claude-haiku-4.5".into(),
-                "openai/gpt-oss-120b:exacto".into(),
-                "moonshotai/kimi-k2-0905:exacto".into(),
-            ],
-            models_default: vec![
-                "anthropic/claude-sonnet-4.5".into(),
-                "openai/gpt-5.2-chat".into(),
-                "moonshotai/kimi-k2-0905".into(),
-            ],
+            resolver: Arc::new(StaticModelResolver::default()),
             analytics: None,
             provider: Arc::new(OpenRouterProvider::default()),
             retry_config: RetryConfig::default(),
         }
+    }
+
+    pub fn resolve(&self, ctx: &ModelContext) -> Vec<String> {
+        self.resolver.resolve(ctx)
     }
 
     pub fn with_timeout(mut self, timeout: Duration) -> Self {
@@ -61,13 +56,8 @@ impl LlmProxyConfig {
         self
     }
 
-    pub fn with_models_tool_calling(mut self, models: Vec<String>) -> Self {
-        self.models_tool_calling = models;
-        self
-    }
-
-    pub fn with_models_default(mut self, models: Vec<String>) -> Self {
-        self.models_default = models;
+    pub fn with_model_resolver(mut self, resolver: Arc<dyn ModelResolver>) -> Self {
+        self.resolver = resolver;
         self
     }
 

@@ -8,6 +8,7 @@ import { commands as sfxCommands } from "@hypr/plugin-sfx";
 
 import { usePermissions } from "../../../../hooks/usePermissions";
 import { type Tab, useTabs } from "../../../../store/zustand/tabs";
+import { LoginSection } from "../../../onboarding/account";
 import { CalendarSection } from "../../../onboarding/calendar";
 import {
   getInitialStep,
@@ -17,7 +18,6 @@ import {
 } from "../../../onboarding/config";
 import { FinalSection, finishOnboarding } from "../../../onboarding/final";
 import { FolderLocationSection } from "../../../onboarding/folder-location";
-import { LoginSection } from "../../../onboarding/login";
 import { PermissionsSection } from "../../../onboarding/permissions";
 import { OnboardingSection } from "../../../onboarding/shared";
 import { StandardTabWrapper } from "../index";
@@ -147,7 +147,7 @@ export function TabContentOnboarding({
 
           <OnboardingSection
             title="Account"
-            description="Sign in to sync and unlock Pro features"
+            description="Sign in to unlock Pro features"
             status={getStepStatus("login", currentStep)}
             onBack={goBack}
             onNext={goNext}

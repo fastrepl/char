@@ -1,4 +1,11 @@
-import { CheckIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import {
+  CheckCircle2Icon,
+  CheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  Loader2Icon,
+  XCircleIcon,
+} from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import type { ReactNode } from "react";
 
@@ -30,18 +37,18 @@ export function OnboardingSection({
     <section>
       <div
         className={cn([
-          "flex items-center gap-2 mb-4 transition-opacity duration-300",
-          status === "upcoming" && "opacity-40",
-          isCompleted && "opacity-60",
+          "flex items-center gap-2 mb-4 transition-all duration-300",
+          status === "upcoming" && "opacity-15",
+          isCompleted && "opacity-25",
         ])}
       >
         <div className="flex min-w-0 flex-col gap-1">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold text-neutral-900 font-serif">
+            <h2 className="text-lg font-semibold font-serif text-neutral-900">
               {title}
             </h2>
             {isCompleted && (
-              <CheckIcon className="size-3.5 text-neutral-400" aria-hidden />
+              <CheckIcon className="size-3.5 text-neutral-900" aria-hidden />
             )}
             {import.meta.env.DEV && isActive && (onBack || onNext) && (
               <div className="flex items-center gap-2">
@@ -66,7 +73,7 @@ export function OnboardingSection({
               </div>
             )}
           </div>
-          {description && (
+          {isActive && description && (
             <p className="text-sm text-neutral-500">{description}</p>
           )}
         </div>
@@ -107,6 +114,31 @@ export function Divider({ text }: { text: string }) {
       <div className="h-px flex-1 bg-neutral-200" />
       <span className="text-sm text-neutral-500">{text}</span>
       <div className="h-px flex-1 bg-neutral-200" />
+    </div>
+  );
+}
+
+export function StepRow({
+  status,
+  label,
+}: {
+  status: "done" | "active" | "failed";
+  label: string;
+}) {
+  return (
+    <div className="flex items-center gap-2 text-sm">
+      {status === "done" && (
+        <CheckCircle2Icon className="size-4 text-emerald-600" />
+      )}
+      {status === "active" && (
+        <Loader2Icon className="size-4 text-neutral-400 animate-spin" />
+      )}
+      {status === "failed" && <XCircleIcon className="size-4 text-red-400" />}
+      <span
+        className={status === "failed" ? "text-red-500" : "text-neutral-500"}
+      >
+        {label}
+      </span>
     </div>
   );
 }

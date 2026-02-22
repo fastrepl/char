@@ -9,7 +9,7 @@ import { cn } from "@hypr/utils";
 
 import { useNativeContextMenu } from "../../../../hooks/useNativeContextMenu";
 import * as main from "../../../../store/tinybase/store/main";
-import { ColumnHeader, type SortOption } from "./shared";
+import { ColumnHeader, getContactBgClass, type SortOption } from "./shared";
 
 type ContactItem =
   | { kind: "person"; id: string }
@@ -359,6 +359,8 @@ function PersonItem({
   const isPinned = Boolean(person.pinned);
   const personName = String(person.name ?? "");
   const personEmail = String(person.email ?? "");
+  const facehashName = personName || personEmail || humanId;
+  const bgClass = getContactBgClass(facehashName);
 
   const store = main.UI.useStore(main.STORE_ID);
 
@@ -418,12 +420,13 @@ function PersonItem({
         active ? "border-neutral-500 bg-neutral-100" : "border-transparent",
       ])}
     >
-      <div className="shrink-0 rounded-full bg-amber-50">
+      <div className={cn(["shrink-0 rounded-full", bgClass])}>
         <Facehash
-          name={String(personName || personEmail || humanId)}
+          name={facehashName}
           size={32}
-          interactive={false}
-          showInitial={false}
+          interactive={true}
+          showInitial={true}
+          colorClasses={[bgClass]}
         />
       </div>
       <div className="flex-1 min-w-0">

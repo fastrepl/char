@@ -26,6 +26,8 @@ pub enum Error {
     UnsupportedModelType,
     #[error("Model delete failed: {0}")]
     ModelDeleteFailed(String),
+    #[error("Model unpack failed: {0}")]
+    ModelUnpackFailed(String),
 }
 
 impl Serialize for Error {

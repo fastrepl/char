@@ -1,0 +1,107 @@
+import * as Sentry from "@sentry/react";
+import { useMutation } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
+
+import { startTrial } from "@hypr/api-client";
+import type { StartTrialReason } from "@hypr/api-client";
+import { createClient } from "@hypr/api-client/client";
+
+import { useAuth } from "../../../auth";
+import { useBillingAccess } from "../../../billing";
+import { env } from "../../../env";
+import * as settings from "../../../store/tinybase/store/settings";
+import { configureProSettings } from "../../../utils";
+
+export type TrialPhase =
+  | "checking"
+  | "starting"
+  | "already-pro"
+  | "already-trialing"
+  | { done: StartTrialReason };
+
+export function useTrialFlow(onContinue: () => void) {
+  const auth = useAuth();
+  const billing = useBillingAccess();
+  const store = settings.UI.useStore(settings.STORE_ID);
+  const hasTriggeredRef = useRef(false);
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const headers = auth.getHeaders();
+      if (!headers) throw new Error("no headers");
+      const client = createClient({ baseUrl: env.VITE_API_URL, headers });
+      const { data, error } = await startTrial({
+        client,
+        query: { interval: "monthly" },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: async (data) => {
+      if (data?.started && store) {
+        configureProSettings(store);
+      }
+      await auth.refreshSession();
+      await new Promise((r) => setTimeout(r, data?.started ? 3000 : 1500));
+      onContinue();
+    },
+    onError: async (e) => {
+      Sentry.captureException(e);
+      await new Promise((r) => setTimeout(r, 1500));
+      onContinue();
+    },
+  });
+
+  useEffect(() => {
+    if (!auth?.session || !billing.isReady || hasTriggeredRef.current) return;
+
+    if (billing.isPro && !billing.isTrialing) {
+      hasTriggeredRef.current = true;
+      if (store) configureProSettings(store);
+      setTimeout(onContinue, 1500);
+      return;
+    }
+
+    if (billing.isTrialing) {
+      hasTriggeredRef.current = true;
+      if (store) configureProSettings(store);
+      setTimeout(onContinue, 1500);
+      return;
+    }
+
+    if (billing.canStartTrial.isPending) return;
+
+    hasTriggeredRef.current = true;
+
+    if (!billing.canStartTrial.data) {
+      setTimeout(onContinue, 1500);
+      return;
+    }
+
+    mutation.mutate();
+  }, [auth, billing, store, mutation, onContinue]);
+
+  if (!auth?.session) return null;
+  if (!billing.isReady || billing.canStartTrial.isPending)
+    return "checking" as const;
+
+  if (billing.isPro && !billing.isTrialing) return "already-pro" as const;
+  if (billing.isTrialing) return "already-trialing" as const;
+
+  if (mutation.isPending) return "starting" as const;
+
+  if (mutation.isSuccess) {
+    const reason: StartTrialReason = mutation.data?.reason ?? "error";
+    return { done: reason };
+  }
+
+  if (mutation.isError) {
+    return { done: "error" as StartTrialReason };
+  }
+
+  if (!billing.canStartTrial.data) {
+    return { done: "not_eligible" as StartTrialReason };
+  }
+
+  return "checking" as const;
+}

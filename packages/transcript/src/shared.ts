@@ -137,7 +137,7 @@ export const SegmentKey = {
       const selfHumanId = ctx.getSelfHumanId();
       if (selfHumanId) {
         const selfHuman = ctx.getHumanName(selfHumanId);
-        return selfHuman ?? "You";
+        return selfHuman || "You";
       }
     }
 

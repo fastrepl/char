@@ -48,8 +48,16 @@ export function useCurrentNoteTab(
   tab: Extract<Tab, { type: "sessions" }>,
 ): EditorView {
   const sessionMode = useListener((state) => state.getSessionMode(tab.id));
+  const isListenerStarting = useListener(
+    (state) =>
+      state.live.loading &&
+      state.live.sessionId === tab.id &&
+      state.live.status === "inactive",
+  );
   const isListenerActive =
-    sessionMode === "active" || sessionMode === "finalizing";
+    sessionMode === "active" ||
+    sessionMode === "finalizing" ||
+    isListenerStarting;
 
   const enhancedNoteIds = main.UI.useSliceRowIds(
     main.INDEXES.enhancedNotesBySession,

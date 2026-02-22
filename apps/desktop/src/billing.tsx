@@ -45,6 +45,7 @@ async function getInfoFromToken(accessToken: string): Promise<TokenInfo> {
 type BillingContextValue = {
   entitlements: string[];
   subscriptionStatus: SubscriptionStatus | null;
+  isReady: boolean;
   isPro: boolean;
   isTrialing: boolean;
   trialDaysRemaining: number | null;
@@ -68,6 +69,7 @@ export function BillingProvider({ children }: { children: ReactNode }) {
   const tokenInfo = tokenInfoQuery.data ?? DEFAULT_TOKEN_INFO;
   const entitlements = tokenInfo.entitlements ?? [];
   const subscriptionStatus = tokenInfo.subscription_status ?? null;
+  const isReady = !tokenInfoQuery.isPending;
   const isPro = entitlements.includes("hyprnote_pro");
   const isTrialing = subscriptionStatus === "trialing";
 
@@ -119,6 +121,7 @@ export function BillingProvider({ children }: { children: ReactNode }) {
     () => ({
       entitlements,
       subscriptionStatus,
+      isReady,
       isPro,
       isTrialing,
       trialDaysRemaining,
@@ -128,6 +131,7 @@ export function BillingProvider({ children }: { children: ReactNode }) {
     [
       entitlements,
       subscriptionStatus,
+      isReady,
       isPro,
       isTrialing,
       trialDaysRemaining,

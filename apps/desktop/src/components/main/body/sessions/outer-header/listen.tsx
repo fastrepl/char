@@ -53,12 +53,14 @@ function StartButton({ sessionId }: { sessionId: string }) {
         "inline-flex items-center justify-center rounded-md text-xs font-medium",
         "bg-white text-neutral-900 hover:bg-neutral-100",
         "gap-1.5",
-        "w-20 h-7",
+        "px-2 h-7",
         "disabled:pointer-events-none disabled:opacity-50",
       ])}
     >
       <RecordingIcon />
-      <span className="text-neutral-900 hover:text-neutral-800">Listen</span>
+      <span className="text-neutral-900 hover:text-neutral-800 whitespace-nowrap">
+        Resume listening
+      </span>
     </button>
   );
 

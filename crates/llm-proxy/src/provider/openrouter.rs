@@ -1,4 +1,7 @@
-use hypr_openrouter::{Client as OpenRouterClient, Error as OpenRouterError};
+use hypr_openrouter::{
+    Client as OpenRouterClient, Error as OpenRouterError, ProviderPreferences, ProviderSort,
+    ProviderSortUnion,
+};
 use reqwest::Client;
 use serde::Deserialize;
 
@@ -53,12 +56,18 @@ impl Provider for OpenRouterProvider {
         let mut body = serde_json::to_value(request)?;
         let obj = body.as_object_mut().unwrap();
 
+        let provider_prefs = ProviderPreferences {
+            sort: Some(ProviderSortUnion::Simple(ProviderSort::Latency)),
+            preferred_min_throughput: None,
+            ..Default::default()
+        };
+
         obj.remove("model");
         obj.insert("models".to_string(), serde_json::to_value(models)?);
         obj.insert("stream".to_string(), serde_json::Value::Bool(stream));
         obj.insert(
             "provider".to_string(),
-            serde_json::json!({"sort": "latency"}),
+            serde_json::to_value(provider_prefs)?,
         );
 
         Ok(body)

@@ -4,12 +4,12 @@ version = "0.1.0"
 edition = "2024"
 
 [dev-dependencies]
-hf-hub = "0.4.3"
 tokio = { workspace = true, features = ["rt", "macros"] }
 
 [dependencies]
 hypr-download-interface = { workspace = true }
 hypr-file = { workspace = true }
+hypr-language = { workspace = true }
 
 reqwest = { workspace = true, features = ["json", "query"] }
 tracing = { workspace = true }
