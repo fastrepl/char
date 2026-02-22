@@ -56,7 +56,7 @@ export function OverflowButton({
         <ExportPDF sessionId={sessionId} currentView={currentView} />
         {hasTranscript && <ExportTranscript sessionId={sessionId} />}
         <DropdownMenuSeparator />
-        <Listening sessionId={sessionId} />
+        <Listening sessionId={sessionId} hasTranscript={hasTranscript} />
         <DropdownMenuSeparator />
         <RevealInFinder sessionId={sessionId} />
         {audioExists.data && <ShowInFinder sessionId={sessionId} />}
