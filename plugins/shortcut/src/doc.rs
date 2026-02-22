@@ -3,12 +3,12 @@ use crate::types::ShortcutCategory;
 
 pub struct DocSection {
     pub title: String,
-    pub shortcuts: Vec<DocShortcutEntry>,
+    pub table: String,
 }
 
-pub struct DocShortcutEntry {
-    pub keys_display: String,
-    pub description: String,
+struct DocShortcutEntry {
+    keys_display: String,
+    description: String,
 }
 
 fn format_key_part(part: &str) -> String {
@@ -22,7 +22,7 @@ fn format_key_part(part: &str) -> String {
         "space" => "<kbd>Space</kbd>".to_string(),
         "esc" => "<kbd>Esc</kbd>".to_string(),
         "comma" => "<kbd>,</kbd>".to_string(),
-        "\\" => "<kbd>\\</kbd>".to_string(),
+        "\\" => "<kbd>\\\\</kbd>".to_string(),
         other => {
             let display = other.to_uppercase();
             format!("<kbd>{}</kbd>", display)
@@ -37,6 +37,16 @@ pub fn format_keys_as_kbd(keys: &str) -> String {
         .join(" + ")
 }
 
+fn render_table(entries: &[DocShortcutEntry]) -> String {
+    let mut lines = Vec::new();
+    lines.push("| Shortcut | Action |".to_string());
+    lines.push("| --- | --- |".to_string());
+    for entry in entries {
+        lines.push(format!("| {} | {} |", entry.keys_display, entry.description));
+    }
+    lines.join("\n")
+}
+
 pub fn build_sections() -> Vec<DocSection> {
     let all = registry::all();
 
@@ -47,7 +57,7 @@ pub fn build_sections() -> Vec<DocSection> {
     categories
         .into_iter()
         .map(|cat| {
-            let shortcuts = all
+            let shortcuts: Vec<DocShortcutEntry> = all
                 .iter()
                 .filter(|s| s.category == cat)
                 .map(|s| DocShortcutEntry {
@@ -58,7 +68,7 @@ pub fn build_sections() -> Vec<DocSection> {
 
             DocSection {
                 title: cat.display_name().to_string(),
-                shortcuts,
+                table: render_table(&shortcuts),
             }
         })
         .collect()
@@ -109,7 +119,7 @@ mod tests {
     fn test_format_keys_mod_backslash() {
         assert_eq!(
             format_keys_as_kbd("mod+\\"),
-            "<kbd>\u{2318}</kbd> + <kbd>\\</kbd>"
+            "<kbd>\u{2318}</kbd> + <kbd>\\\\</kbd>"
         );
     }
 
