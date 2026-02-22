@@ -19,6 +19,7 @@ tauri-plugin-settings = { workspace = true }
 hypr-audio-utils = { workspace = true }
 hypr-host = { workspace = true }
 hypr-language = { workspace = true }
+hypr-pyannote-cloud = { workspace = true }
 
 owhisper-client = { workspace = true, features = ["argmax"] }
 owhisper-interface = { workspace = true }
@@ -29,8 +30,11 @@ camino = { workspace = true }
 specta = { workspace = true }
 tauri-specta = { workspace = true, features = ["derive", "typescript"] }
 
+reqwest = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
 thiserror = { workspace = true }
+uuid = { workspace = true }
 
 ractor = { workspace = true, features = ["async-trait"] }
 

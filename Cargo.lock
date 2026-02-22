@@ -18383,8 +18383,11 @@ dependencies = [
  "language",
  "owhisper-client",
  "owhisper-interface",
+ "pyannote-cloud",
  "ractor",
+ "reqwest 0.13.2",
  "serde",
+ "serde_json",
  "specta",
  "specta-typescript",
  "tauri",
@@ -18395,6 +18398,7 @@ dependencies = [
  "tokio",
  "tokio-stream",
  "tracing",
+ "uuid",
 ]
 
 [[package]]
