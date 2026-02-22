@@ -59,9 +59,13 @@ impl Drop for TranscriptionSession {
     fn drop(&mut self) {
         self.cancellation_token.cancel();
         if let Some(handle) = self.handle.take() {
-            if let Err(panic) = handle.join() {
-                tracing::error!(?panic, "cactus_transcribe_worker_panicked");
-            }
+            // Detach: don't block the (possibly async) caller.
+            // Spawn a background thread to join so we still log panics.
+            std::thread::spawn(move || {
+                if let Err(panic) = handle.join() {
+                    tracing::error!(?panic, "cactus_transcribe_worker_panicked");
+                }
+            });
         }
     }
 }
