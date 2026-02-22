@@ -2,9 +2,6 @@ mod message;
 mod response;
 mod session;
 
-#[cfg(test)]
-mod tests;
-
 use std::{
     future::Future,
     path::PathBuf,

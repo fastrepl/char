@@ -15,6 +15,11 @@ on:
 jobs:
   local-stt-e2e:
     runs-on: depot-ubuntu-24.04-arm-8
+    strategy:
+      matrix:
+        model:
+          - name: whisper-small
+            repo: openai/whisper-small
     defaults:
       run:
         shell: bash
@@ -34,14 +39,9 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: vendor/cactus/weights/
-          key: cactus-models-arm-v1
-      - run: cactus download UsefulSensors/moonshine-base
-      - run: cargo test -p transcribe-cactus e2e_streaming -- --ignored --nocapture
+          key: cactus-models-${{ matrix.model.name }}-arm-v1
+      - run: cactus download ${{ matrix.model.repo }}
+      - run: cargo test -p transcribe-cactus -- --ignored --nocapture
         env:
-          CACTUS_STT_MODEL: ${{ github.workspace }}/vendor/cactus/weights/moonshine-base
-      - run: cargo test -p transcribe-cactus e2e_streaming_dual_channel -- --ignored --nocapture
-        env:
-          CACTUS_STT_MODEL: ${{ github.workspace }}/vendor/cactus/weights/moonshine-base
-      - run: cargo test -p transcribe-cactus e2e_websocket_dual_channel -- --ignored --nocapture
-        env:
-          CACTUS_STT_MODEL: ${{ github.workspace }}/vendor/cactus/weights/moonshine-base
+          CACTUS_STT_MODEL: ${{ github.workspace }}/vendor/cactus/weights/${{ matrix.model.name }}
+          CACTUS_CLOUD_API_KEY: ${{ secrets.CACTUS_CLOUD_API_KEY }}

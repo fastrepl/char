@@ -78,14 +78,7 @@ pub(super) async fn handle_websocket(
     };
 
     for ch_idx in 0..total_channels {
-        let cloud_config = if cactus_config.cloud_handoff {
-            hypr_cactus::CloudConfig::default()
-        } else {
-            hypr_cactus::CloudConfig {
-                threshold: Some(0.0),
-                ..Default::default()
-            }
-        };
+        let cloud_config = cactus_config.cloud.clone();
         let (audio_tx, event_rx, cancel_token, handle) = hypr_cactus::transcribe_stream(
             model.clone(),
             options.clone(),
