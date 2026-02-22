@@ -36,6 +36,7 @@ pub enum ShortcutId {
     PrevPanelTab,
     NextPanelTab,
     TranscriptSearch,
+    FindReplace,
     UndoDelete,
     Dismiss,
     PlayPauseAudio,

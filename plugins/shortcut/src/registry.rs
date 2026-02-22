@@ -227,6 +227,13 @@ pub fn all() -> Vec<ShortcutDef> {
             scope: ShortcutScope::Scoped,
         },
         ShortcutDef {
+            id: ShortcutId::FindReplace,
+            keys: "mod+h".into(),
+            category: ShortcutCategory::Search,
+            description: "Find and replace in note".into(),
+            scope: ShortcutScope::Scoped,
+        },
+        ShortcutDef {
             id: ShortcutId::UndoDelete,
             keys: "mod+z".into(),
             category: ShortcutCategory::Tabs,

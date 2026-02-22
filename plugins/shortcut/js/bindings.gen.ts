@@ -23,7 +23,7 @@ async getAllShortcuts() : Promise<ShortcutDef[]> {
 
 export type ShortcutCategory = "Navigation" | "View" | "Tabs" | "Search" | "Editor"
 export type ShortcutDef = { id: ShortcutId; keys: string; category: ShortcutCategory; description: string; scope: ShortcutScope }
-export type ShortcutId = "new_note" | "new_empty_tab" | "close_tab" | "select_tab_1" | "select_tab_2" | "select_tab_3" | "select_tab_4" | "select_tab_5" | "select_tab_6" | "select_tab_7" | "select_tab_8" | "select_tab_9" | "prev_tab" | "next_tab" | "restore_closed_tab" | "open_calendar" | "open_contacts" | "open_ai_settings" | "open_folders" | "open_search" | "new_note_and_listen" | "toggle_chat" | "open_settings" | "toggle_sidebar" | "focus_search" | "open_note_dialog" | "switch_to_enhanced" | "switch_to_raw" | "switch_to_transcript" | "prev_panel_tab" | "next_panel_tab" | "transcript_search" | "undo_delete" | "dismiss" | "play_pause_audio"
+export type ShortcutId = "new_note" | "new_empty_tab" | "close_tab" | "select_tab_1" | "select_tab_2" | "select_tab_3" | "select_tab_4" | "select_tab_5" | "select_tab_6" | "select_tab_7" | "select_tab_8" | "select_tab_9" | "prev_tab" | "next_tab" | "restore_closed_tab" | "open_calendar" | "open_contacts" | "open_ai_settings" | "open_folders" | "open_search" | "new_note_and_listen" | "toggle_chat" | "open_settings" | "toggle_sidebar" | "focus_search" | "open_note_dialog" | "switch_to_enhanced" | "switch_to_raw" | "switch_to_transcript" | "prev_panel_tab" | "next_panel_tab" | "transcript_search" | "find_replace" | "undo_delete" | "dismiss" | "play_pause_audio"
 export type ShortcutScope = "Global" | "Scoped"
 
 /** tauri-specta globals **/
