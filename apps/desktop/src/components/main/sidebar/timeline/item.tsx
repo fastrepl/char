@@ -20,6 +20,7 @@ import {
 import * as main from "../../../../store/tinybase/store/main";
 import { save } from "../../../../store/tinybase/store/save";
 import { getOrCreateSessionForEventId } from "../../../../store/tinybase/store/sessions";
+import { useSessionTitle } from "../../../../store/zustand/live-title";
 import { type TabInput, useTabs } from "../../../../store/zustand/tabs";
 import { useTimelineSelection } from "../../../../store/zustand/timeline-selection";
 import { useUndoDelete } from "../../../../store/zustand/undo-delete";
@@ -323,10 +324,13 @@ const SessionItem = memo(
     const addDeletion = useUndoDelete((state) => state.addDeletion);
 
     const sessionId = item.id;
-    const title =
-      (main.UI.useCell("sessions", sessionId, "title", main.STORE_ID) as
-        | string
-        | undefined) || "Untitled";
+    const storeTitle = main.UI.useCell(
+      "sessions",
+      sessionId,
+      "title",
+      main.STORE_ID,
+    ) as string | undefined;
+    const title = useSessionTitle(sessionId, storeTitle);
 
     const sessionMode = useListener((state) => state.getSessionMode(sessionId));
     const isEnhancing = useIsSessionEnhancing(sessionId);

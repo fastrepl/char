@@ -19,6 +19,7 @@ import { cn } from "@hypr/utils";
 
 import { useTitleGenerating } from "../../../../hooks/useTitleGenerating";
 import * as main from "../../../../store/tinybase/store/main";
+import { useLiveTitle } from "../../../../store/zustand/live-title";
 import { type Tab } from "../../../../store/zustand/tabs";
 
 export const TitleInput = forwardRef<
@@ -119,6 +120,8 @@ const TitleInputInner = memo(
       const isFocused = useRef(false);
       const internalRef = useRef<HTMLInputElement>(null);
       const store = main.UI.useStore(main.STORE_ID);
+      const setLiveTitle = useLiveTitle((s) => s.setTitle);
+      const clearLiveTitle = useLiveTitle((s) => s.clearTitle);
 
       useImperativeHandle(ref, () => internalRef.current!, []);
 
@@ -148,7 +151,6 @@ const TitleInputInner = memo(
         [],
         main.STORE_ID,
       );
-
 
       useEffect(() => {
         const handleMoveToTitlePosition = (e: Event) => {
@@ -209,6 +211,7 @@ const TitleInputInner = memo(
           const afterCursor = input.value.slice(cursorPos);
 
           setStoreTitle(beforeCursor);
+          clearLiveTitle(sessionId);
 
           if (afterCursor) {
             setTimeout(() => {
@@ -267,7 +270,9 @@ const TitleInputInner = memo(
             placeholder="Untitled"
             type="text"
             onChange={(e) => {
-              setLocalTitle(e.target.value);
+              const value = e.target.value;
+              setLocalTitle(value);
+              setLiveTitle(sessionId, value);
             }}
             onKeyDown={handleKeyDown}
             onFocus={() => {
@@ -276,6 +281,7 @@ const TitleInputInner = memo(
             onBlur={() => {
               isFocused.current = false;
               setStoreTitle(localTitle);
+              clearLiveTitle(sessionId);
             }}
             value={localTitle}
             className={cn([
