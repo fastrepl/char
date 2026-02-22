@@ -45,19 +45,7 @@ export function OnboardingSection({
     return () => clearTimeout(timeout);
   }, [isActive]);
 
-  if (!status || status === "upcoming") {
-    return (
-      <section className="pointer-events-none opacity-15 blur-[1px]">
-        <div className="flex items-center gap-2">
-          <div className="flex min-w-0 flex-col gap-1">
-            <h2 className="text-lg font-semibold font-serif text-neutral-900">
-              {title}
-            </h2>
-          </div>
-        </div>
-      </section>
-    );
-  }
+  if (!status || status === "upcoming") return null;
 
   return (
     <section ref={sectionRef}>
