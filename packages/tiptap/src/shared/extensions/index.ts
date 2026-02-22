@@ -111,36 +111,36 @@ export const getExtensions = (
   }),
   Hashtag,
   Link.extend({
+    inclusive() {
+      return false;
+    },
     addProseMirrorPlugins() {
       return [
         new Plugin({
           key: new PluginKey("linkCmdClick"),
           props: {
             handleClick(view, pos, event) {
-              if (!(event.metaKey || event.ctrlKey)) {
-                return false;
-              }
-
               const { state } = view;
               const $pos = state.doc.resolve(pos);
               const marks = $pos.marks();
               const linkMark = marks.find((mark) => mark.type.name === "link");
-
-              if (linkMark && linkMark.attrs.href) {
-                event.preventDefault();
-                if (options?.onLinkOpen) {
-                  options.onLinkOpen(linkMark.attrs.href);
-                } else {
-                  window.open(
-                    linkMark.attrs.href,
-                    "_blank",
-                    "noopener,noreferrer",
-                  );
-                }
+              if (!linkMark || !linkMark.attrs.href) {
+                return false;
+              }
+              if (!(event.metaKey || event.ctrlKey)) {
                 return true;
               }
-
-              return false;
+              event.preventDefault();
+              if (options?.onLinkOpen) {
+                options.onLinkOpen(linkMark.attrs.href);
+              } else {
+                window.open(
+                  linkMark.attrs.href,
+                  "_blank",
+                  "noopener,noreferrer",
+                );
+              }
+              return true;
             },
           },
         }),
