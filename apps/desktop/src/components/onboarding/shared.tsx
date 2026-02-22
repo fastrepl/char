@@ -44,9 +44,10 @@ export function OnboardingSection({
         ])}
       >
         {isCompleted && (
-          <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-neutral-900">
-            <CheckIcon className="size-3 text-white" strokeWidth={2.5} />
-          </div>
+          <CheckIcon
+            className="size-4 shrink-0 text-green-600"
+            strokeWidth={2.5}
+          />
         )}
         <div className="flex min-w-0 flex-col gap-1">
           <div className="flex items-center gap-2">
