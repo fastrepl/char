@@ -141,23 +141,7 @@ pub fn mix_audio_pcm16le(mic: &[u8], speaker: &[u8]) -> Vec<u8> {
     mixed
 }
 
-pub fn content_type_to_extension(content_type: &str) -> &'static str {
-    let mime = content_type
-        .split(';')
-        .next()
-        .unwrap_or(content_type)
-        .trim();
-    match mime {
-        "audio/wav" | "audio/wave" | "audio/x-wav" => "wav",
-        "audio/mpeg" | "audio/mp3" => "mp3",
-        "audio/ogg" => "ogg",
-        "audio/flac" => "flac",
-        "audio/mp4" | "audio/m4a" | "audio/x-m4a" => "m4a",
-        "audio/webm" => "webm",
-        "audio/aac" => "aac",
-        _ => "wav",
-    }
-}
+pub use hypr_audio_mime::content_type_to_extension;
 
 pub fn source_from_path(
     path: impl AsRef<std::path::Path>,
@@ -326,27 +310,7 @@ mod tests {
         };
     }
 
-    #[test]
-    fn content_type_mapping() {
-        assert_eq!(content_type_to_extension("audio/wav"), "wav");
-        assert_eq!(content_type_to_extension("audio/wave"), "wav");
-        assert_eq!(content_type_to_extension("audio/mpeg"), "mp3");
-        assert_eq!(content_type_to_extension("audio/mp3"), "mp3");
-        assert_eq!(content_type_to_extension("audio/ogg"), "ogg");
-        assert_eq!(content_type_to_extension("audio/flac"), "flac");
-        assert_eq!(content_type_to_extension("audio/m4a"), "m4a");
-        assert_eq!(content_type_to_extension("audio/webm"), "webm");
-        assert_eq!(content_type_to_extension("audio/aac"), "aac");
-        assert_eq!(content_type_to_extension("application/octet-stream"), "wav");
-    }
-
-    #[test]
-    fn content_type_with_charset() {
-        assert_eq!(content_type_to_extension("audio/wav; charset=utf-8"), "wav");
-        assert_eq!(content_type_to_extension("audio/mpeg; bitrate=128"), "mp3");
-    }
-
-    test_audio_file_metadata! {
+    test_audio_file_metadata!{
         test_audio_file_metadata_wav: hypr_data::english_1::AUDIO_PATH,
         test_audio_file_metadata_mp3: hypr_data::english_1::AUDIO_MP3_PATH,
         test_audio_file_metadata_mp4: hypr_data::english_1::AUDIO_MP4_PATH,

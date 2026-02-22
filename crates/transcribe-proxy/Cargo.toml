@@ -7,7 +7,7 @@ edition = "2024"
 hypr-analytics = { workspace = true }
 hypr-api-auth = { workspace = true }
 hypr-api-env = { workspace = true }
-hypr-audio-utils = { workspace = true }
+hypr-audio-mime = { workspace = true }
 hypr-language = { workspace = true }
 hypr-supabase-storage = { workspace = true }
 owhisper-client = { workspace = true }
@@ -37,6 +37,7 @@ urlencoding = { workspace = true }
 utoipa = { workspace = true }
 
 [dev-dependencies]
+hypr-audio-utils = { workspace = true }
 hypr-data = { workspace = true }
 hypr-language = { workspace = true }
 owhisper-interface = { workspace = true, features = ["openapi"] }

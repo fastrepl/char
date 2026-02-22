@@ -13,7 +13,7 @@ use axum::{
 use hypr_api_auth::AuthContext;
 use owhisper_interface::ListenParams;
 
-use hypr_audio_utils::content_type_to_extension;
+use hypr_audio_mime::content_type_to_extension;
 
 use crate::hyprnote_routing::should_use_hyprnote_routing;
 use crate::query_params::QueryParams;
