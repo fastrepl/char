@@ -4,10 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-hypr-audio-mime = { workspace = true }
 bytes = { workspace = true }
 futures-util = { workspace = true }
 hypr-audio-interface = { workspace = true }
+hypr-audio-mime = { workspace = true }
 pin-project = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }

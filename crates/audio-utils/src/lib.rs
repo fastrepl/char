@@ -310,7 +310,7 @@ mod tests {
         };
     }
 
-    test_audio_file_metadata!{
+    test_audio_file_metadata! {
         test_audio_file_metadata_wav: hypr_data::english_1::AUDIO_PATH,
         test_audio_file_metadata_mp3: hypr_data::english_1::AUDIO_MP3_PATH,
         test_audio_file_metadata_mp4: hypr_data::english_1::AUDIO_MP4_PATH,
