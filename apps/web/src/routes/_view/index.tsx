@@ -326,18 +326,6 @@ function HeroSection({
                             : heroCTA.buttonLabel}
                       </button>
                     </div>
-                    <p className="text-neutral-400 mt-2 text-xs">
-                      By submitting, you agree to receive updates and marketing
-                      emails per our{" "}
-                      <Link
-                        to="/legal/$slug/"
-                        params={{ slug: "terms" }}
-                        className="underline hover:text-neutral-600 transition-colors"
-                      >
-                        Terms of Service
-                      </Link>
-                      .
-                    </p>
                     {mutation.isSuccess && (
                       <p className="text-green-600 mt-4 text-sm">
                         Thanks! We'll be in touch soon.
