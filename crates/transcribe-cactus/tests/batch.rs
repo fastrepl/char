@@ -66,7 +66,10 @@ fn e2e_batch() {
 
         let wav_bytes = audio_wav_bytes();
 
-        let url = format!("http://{}/v1/listen?channels=1&sample_rate=16000&language=en", addr);
+        let url = format!(
+            "http://{}/v1/listen?channels=1&sample_rate=16000&language=en",
+            addr
+        );
         let client = reqwest::Client::new();
         let response = client
             .post(&url)
