@@ -9,7 +9,7 @@ category: "Engineering"
 date: "2026-02-13"
 ---
 
-In the last two months, my two-person team spent over $5,000 running roughly 1,000 tasks in **[Devin](https://devin.ai/)**, the AI software engineer. This isn't vibe coding hype, or spinning up 10 Claude Code instances to burn tokens as fast as possible. This is what actually happened when we integrated AI agents into our real-world workflow while building Hyprnote.
+In the last two months, my two-person team spent over $5,000 running roughly 1,000 tasks in **[Devin](https://devin.ai/)**, the AI software engineer. We weren't spinning up 10 Claude Code instances to burn tokens as fast as possible. This is what actually happened when we integrated AI agents into our real-world workflow while building Hyprnote.
 
 Here's what we learned.
 
@@ -21,19 +21,17 @@ Here's what we learned.
 
 ## Running AI Agents Where Your Team Already Works
 
-The single most powerful decision we made was running Devin inside Slack, not our IDE. Here's why this matters:
+The single most powerful decision we made was running Devin inside Slack, not our IDE.
 
-Slack is where discussions already happen. We're already getting alerts from Zendesk, Sentry, and Discord. Being able to launch an agent directly inside a thread where the problem is being discussed is incredibly valuable.
+Slack is where discussions already happen. We're already getting alerts from Zendesk, Sentry, and Discord. Launching an agent directly inside a thread where the problem is being discussed eliminates the friction of switching contexts.
 
-**Real example:** John, my co-founder, identified an issue with our AI prompts and tagged Devin to fix it. Devin fixed it, but the approach was non-optimal. Since AI prompting is something I work on, I jumped into the same thread with more context. Devin figured it out based on my additional input, finished the PR, and it got merged.
-
-This is collaborative debugging without context switching. No copying issues into a separate tool. No explaining the same problem twice.
+**Real example:** John, my co-founder, identified an issue with our AI prompts and tagged Devin to fix it. Devin fixed it, but the approach was non-optimal. Since AI prompting is something I work on, I jumped into the same thread with more context. Devin figured it out based on my additional input, finished the PR, and it got merged. We stayed in the same Slack thread the whole time, with no copy-pasting between tools.
 
 <Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=52" />
 
 **Another example:** I tagged Devin about our 404 page not rendering properly. John, who works on our webpage primarily, pointed out reference files to look at in the same thread. Based on his input, we got a PR and merged it.
 
-The agent isn't replacing us—it's joining the conversation where it's already happening.
+The agent participates in the same Slack threads where we discuss the problem.
 
 <Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=74" />
 
@@ -51,23 +49,21 @@ Since we use GitHub as a CMS for Hyprnote, we can even update landing pages or b
 
 ## Three Types of Tasks to Delegate to Devin AI
 
-As a small early-stage startup, there's always a lot going on. We're handling day-to-day work while thinking about what's next—new features, product direction, how the codebase should evolve. That's why it's extremely helpful to dump all of this into an async coding agent and let it figure things out.
-
-Here are three types of tasks that represent different degrees of relevance and urgency:
+As a small early-stage startup, there's always a lot going on. We're handling day-to-day work while thinking about what's next—new features, product direction, how the codebase should evolve. Dumping all of this into an async coding agent lets us explore solutions without blocking other work.
 
 ### Degree 1: Exploration (Not Shipping Anytime Soon)
 
-This is work that isn't planned for the immediate future. We're not going to ship it or even merge it right now, but it's still valuable to explore so we can understand what the work would look like, how complex it is, and roughly how long it might take.
+This is work that isn't planned for the immediate future. We're not going to ship it or even merge it right now, but exploring it helps us understand what the work would look like, how complex it is, and roughly how long it might take.
 
 **Example:** Even though we're focusing on our macOS desktop app, we had ideas around building a Chrome extension. I asked Devin to research how to make a Chrome extension that works with a desktop app. We learned how 1Password does it and got a rough plan.
 
-Then we cloned the repository of a popular Chrome extension framework. Based on the docs and actual code examples, we implemented it to see how it would look. We didn't even merge it, but it's still useful to see how it'll look in the future.
+Then we cloned the repository of a popular Chrome extension framework. Based on the docs and actual code examples, we implemented it to see how it would look. We didn't merge it, but it's useful to see how it'll look in the future.
 
 <Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=177" />
 
 ### Degree 2: Preparation (Relevant, But Not Right Now)
 
-This is work we'll likely merge, but I won't pull it into my IDE yet.
+This is work we'll likely merge, but we're not pulling it into the IDE yet.
 
 **Example:** Someone asked whether Hyprnote could import data from Apple Notes. That feels like a feature we could support in the future, but it's not a core focus at the moment.
 
@@ -77,11 +73,11 @@ We did research to see if there was any existing work on that. There was, so we 
 
 ### Degree 3: Production (Very Relevant Right Now)
 
-This is work I'll definitely look at, but I'm spawning the agent right now because I'm in the middle of something and want to avoid context switching. Or maybe I'm traveling or about to go to sleep.
+This is work we'll definitely look at, but spawning the agent right now lets us avoid context switching. Maybe we're traveling or about to go to sleep.
 
 **Example:** We needed to update test cases around our Tinybase utils—very relevant and important work. We asked Devin to clone the repo, inspect the codebase, and write the test cases.
 
-One interesting trick: we asked Devin to use the Claude CLI that we already installed on Devin's machine. This way we can offload some AI inference to our Anthropic account and use some credits.
+One trick: we asked Devin to use the Claude CLI that we already installed on Devin's machine. This way we can offload some AI inference to our Anthropic account and use some credits.
 
 **Pro tip:** We encoded this knowledge as an "offload agent" on how to use Claude CLI. Mentioning "consult smart friend" (something Devin uses as a prompt internally) helps Claude CLI get called at the right timing.
 
@@ -89,9 +85,7 @@ One interesting trick: we asked Devin to use the Claude CLI that we already inst
 
 ## Good Documentation Enables AI Agents to Ship Code Faster
 
-In Hyprnote, we focus on supporting multiple providers for language and speech model inference as part of our open-source effort. Early on, we spent time designing and documenting flexible, clean interfaces. This worked well for future contributions and community involvement.
-
-It turns out these same choices are incredibly helpful when working with coding agents.
+In Hyprnote, we focus on supporting multiple providers for language and speech model inference as part of our open-source effort. Early on, we spent time designing and documenting flexible, clean interfaces. This worked well for future contributions and community involvement, and the same benefits apply when working with coding agents.
 
 **Example: ElevenLabs Support**
 
@@ -111,13 +105,13 @@ Same story for language models—even easier because there's no WebSocket involv
 
 This one was a little harder. We had errors in the client, so we passed the error message and credentials. After a few minutes—since we had API keys and test cases in place—Devin figured out that OpenAI only supports 24kHz sample rate. That's why it was failing. We fixed it without any engineering resources invested.
 
-The pattern is clear: **good docs + clean interfaces + test infrastructure = AI agents that actually ship code.**
+The pattern: good docs, clean interfaces, and test infrastructure make it possible for agents to ship working code.
 
 <Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=406" />
 
 ## Automating Code Maintenance with AI Agents
 
-If you're a developer, you know that once a codebase reaches a certain size and age, maintenance work alone can take a lot of engineering time and slow the team down. With coding agents, we can offload a lot of that work.
+Once a codebase reaches a certain size and age, maintenance work alone can consume significant engineering time and slow the team down. Coding agents let us offload much of that work.
 
 ### Single-Prompt Migrations
 
@@ -132,7 +126,7 @@ One common example is doing migrations that have clear documentation. In Hyprnot
 
 Things can get more complicated and may require multiple PRs or concurrent work.
 
-A good example is applying Vercel's recent React best practices agent skills. We attached Vercel's React best practices document, and Devin figured out what changes should be done. But since there was a lot of isolatable work, we prompted Devin to do this concurrently by spawning concurrent Devin sessions.
+A good example is applying Vercel's recent React best practices agent skills. We attached Vercel's React best practices document, and Devin figured out what changes should be done. Since there was a lot of isolatable work, we prompted Devin to do this concurrently by spawning concurrent Devin sessions.
 
 One way to do this is to ask Devin to make actual API calls. But there's a better way: use the analyze-session task. This lets you spawn concurrent Devin sessions to run work concurrently and generate separate PRs per task.
 
@@ -140,19 +134,19 @@ One way to do this is to ask Devin to make actual API calls. But there's a bette
 
 ### Daily Automated Linting
 
-This is all very useful, but we're not doing migrations or receiving new guidelines every day. However, if you pair an agent with an automated linting tool, this approach can be applied daily.
+Migrations and new guidelines don't happen every day, but pairing an agent with an automated linting tool can be applied daily.
 
 In Hyprnote, we have a large Rust codebase, and since Cargo Clippy is pretty good, we set up a GitHub Action to run Cargo Clippy daily and spawn Devin to apply any fixes based on the output.
 
-Since it takes a lot of time to run Clippy and Cargo check, we save a lot of time applying these guidelines or Clippy warnings in an async manner.
+This saves a lot of time applying these guidelines or Clippy warnings in an async manner, since running Clippy and Cargo check takes a long time.
 
 <Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=528" />
 
-## Final Verdict: Is Devin AI Worth It?
+## When Devin Works and When It Doesn't
 
 If you're expecting AI agents to replace developers, you'll be disappointed. We're not there yet.
 
-But if you're looking to meaningfully extend what a small team can accomplish? Absolutely worth it.
+But if you're looking to meaningfully extend what a small team can accomplish, it's absolutely worth it.
 
 **Devin AI is worth the investment when you:**
 
@@ -169,8 +163,8 @@ But if you're looking to meaningfully extend what a small team can accomplish? A
 - Want it to make architectural decisions
 - Need it to work in complete isolation without human oversight
 
-The key insight after 1,000 tasks: You're not buying code generation. You're buying collaboration at scale.
+After 1,000 tasks, the pattern is clear: You're not buying code generation. You're buying the ability to delegate work and parallelize effort across your team.
 
-The best ROI came from tasks we could delegate async (exploration work at 2 AM, maintenance work during travel, migrations while focusing on core features). The agent didn't replace our judgment; it multiplied our capacity to act on it.
+The best ROI came from tasks we could delegate async—exploration work at 2 AM, maintenance work during travel, migrations while focusing on core features. The agent didn't replace our judgment; it multiplied our capacity to act on it.
 
 **Our recommendation:** Start with one well-defined use case (like automated linting or simple migrations), measure the time saved, then expand. Don't try to use it for everything on day one.
