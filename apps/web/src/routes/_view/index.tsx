@@ -330,7 +330,8 @@ function HeroSection({
                       By submitting, you agree to receive updates and marketing
                       emails per our{" "}
                       <Link
-                        to="/legal/terms/"
+                        to="/legal/$slug/"
+                        params={{ slug: "terms" }}
                         className="underline hover:text-neutral-600 transition-colors"
                       >
                         Terms of Service
