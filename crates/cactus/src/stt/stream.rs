@@ -59,7 +59,9 @@ impl Drop for TranscriptionSession {
     fn drop(&mut self) {
         self.cancellation_token.cancel();
         if let Some(handle) = self.handle.take() {
-            let _ = handle.join();
+            if let Err(panic) = handle.join() {
+                tracing::error!(?panic, "cactus_transcribe_worker_panicked");
+            }
         }
     }
 }

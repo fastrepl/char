@@ -117,7 +117,9 @@ impl Drop for CompletionStream {
     fn drop(&mut self) {
         self.cancellation_token.cancel();
         if let Some(handle) = self.handle.take() {
-            let _ = handle.join();
+            if let Err(panic) = handle.join() {
+                tracing::error!(?panic, "cactus_completion_worker_panicked");
+            }
         }
     }
 }
