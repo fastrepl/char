@@ -1,0 +1,64 @@
+name: devin_humanizer_check
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "apps/web/content/articles/**"
+
+jobs:
+  run:
+    if: startsWith(github.head_ref, 'blog/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/devin
+        with:
+          api_key: ${{ secrets.DEVIN_API_KEY }}
+          prompt: |
+            You are reviewing a blog post PR for AI writing patterns using the humanizer skill from https://github.com/blader/humanizer.
+
+            ## Context
+            Repository: fastrepl/char
+            PR number: {{ pr_number }}
+
+            ## Setup
+            1. Clone the humanizer skill:
+               ```
+               mkdir -p ~/.claude/skills
+               git clone https://github.com/blader/humanizer.git ~/.claude/skills/humanizer
+               ```
+            2. Check out the PR branch and find changed article files:
+               ```
+               git fetch origin pull/{{ pr_number }}/head:pr-branch
+               git checkout pr-branch
+               git diff --name-only origin/main...HEAD -- 'apps/web/content/articles/*.mdx'
+               ```
+
+            ## Your Task
+            For each changed `.mdx` file in `apps/web/content/articles/`:
+            1. Read the file content (skip the frontmatter between `---` markers)
+            2. Run the humanizer check using:
+               ```
+               claude --permission-mode bypassPermissions -p "Using the humanizer skill at ~/.claude/skills/humanizer/SKILL.md, review the following blog post for AI writing patterns. Identify all 24 patterns from the skill. For each issue found, provide the line number, the original text, which pattern it matches, and a suggested rewrite. Score the text on: naturalness, specificity, voice, rhythm, conciseness (each 1-10). Here is the blog post content:
+
+               $(cat <file_path>)"
+               ```
+            3. Collect all results
+
+            ## Output
+            Post a comment on PR #{{ pr_number }} with the humanizer check results. Use this format:
+            - Overall score and pass/fail (below 35/50 = NEEDS REVISION)
+            - Score breakdown by dimension
+            - List of issues grouped by severity (high/medium/low)
+            - For each issue: line number, original text, pattern matched, suggested rewrite
+
+            Use the `<!-- humanizer-check-bot -->` marker in the comment so it can be updated on subsequent runs.
+
+            If a previous comment with that marker exists, update it instead of creating a new one.
+          vars: '{"pr_number": "${{ github.event.pull_request.number }}"}'
+          title: ${{ github.run_id }}-humanizer-check
+          tags: '["humanizer_check"]'
