@@ -1,34 +1,17 @@
-use std::sync::{Arc, Mutex};
+#![allow(dead_code)]
+
+use std::sync::Arc;
 
 use axum::body::Body;
 use axum::http::Request;
 use llm_proxy::provider::OpenRouterProvider;
-use llm_proxy::{AnalyticsReporter, GenerationEvent, LlmProxyConfig};
+use llm_proxy::{GenerationEvent, LlmProxyConfig, MODEL_KEY_DEFAULT, StaticModelResolver};
 use wiremock::matchers::{header, method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
-#[derive(Default, Clone)]
-pub struct MockAnalytics {
-    events: Arc<Mutex<Vec<GenerationEvent>>>,
-}
-
-impl AnalyticsReporter for MockAnalytics {
-    fn report_generation(
-        &self,
-        event: GenerationEvent,
-    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = ()> + Send + '_>> {
-        let events = self.events.clone();
-        Box::pin(async move {
-            events.lock().unwrap().push(event);
-        })
-    }
-}
+use super::analytics::MockAnalytics;
 
 impl MockAnalytics {
-    pub fn captured_events(&self) -> Vec<GenerationEvent> {
-        self.events.lock().unwrap().clone()
-    }
-
     pub async fn get_single_event(&self) -> GenerationEvent {
         let timeout = std::time::Duration::from_secs(10);
         let poll_interval = std::time::Duration::from_millis(50);
@@ -64,16 +47,20 @@ impl TestHarness {
     }
 
     pub fn config(&self) -> LlmProxyConfig {
+        let resolver = StaticModelResolver::default()
+            .with_models(MODEL_KEY_DEFAULT, vec!["openai/gpt-4.1-nano".into()]);
         LlmProxyConfig::new("test-api-key")
             .with_provider(Arc::new(OpenRouterProvider::new(self.mock_server.uri())))
-            .with_models_default(vec!["openai/gpt-4.1-nano".into()])
+            .with_model_resolver(Arc::new(resolver))
             .with_analytics(Arc::new(self.analytics.clone()))
     }
 
     pub fn config_no_analytics(&self) -> LlmProxyConfig {
+        let resolver = StaticModelResolver::default()
+            .with_models(MODEL_KEY_DEFAULT, vec!["openai/gpt-4.1-nano".into()]);
         LlmProxyConfig::new("test-api-key")
             .with_provider(Arc::new(OpenRouterProvider::new(self.mock_server.uri())))
-            .with_models_default(vec!["openai/gpt-4.1-nano".into()])
+            .with_model_resolver(Arc::new(resolver))
     }
 
     pub async fn mount_json_response(&self, response: serde_json::Value) {
@@ -132,21 +119,6 @@ pub fn build_request(body: serde_json::Value) -> Request<Body> {
         .header("Content-Type", "application/json")
         .body(Body::from(serde_json::to_string(&body).unwrap()))
         .unwrap()
-}
-
-pub fn simple_message(content: &str) -> serde_json::Value {
-    serde_json::json!({
-        "messages": [{"role": "user", "content": content}],
-        "max_tokens": 10
-    })
-}
-
-pub fn stream_request(content: &str) -> serde_json::Value {
-    serde_json::json!({
-        "messages": [{"role": "user", "content": content}],
-        "stream": true,
-        "max_tokens": 10
-    })
 }
 
 pub fn stream_chunks(id: &str) -> [String; 4] {

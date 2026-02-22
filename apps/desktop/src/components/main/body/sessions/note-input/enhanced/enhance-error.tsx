@@ -16,7 +16,7 @@ export function EnhanceError({
   enhancedNoteId: string;
   error: Error | undefined;
 }) {
-  const model = useLanguageModel();
+  const model = useLanguageModel("enhance");
   const generate = useAITask((state) => state.generate);
   const templateId =
     (main.UI.useCell(

@@ -62,7 +62,7 @@ export function OptionsMenu({
   const { user_id } = main.UI.useValues(main.STORE_ID);
   const updateSessionTabState = useTabs((state) => state.updateSessionTabState);
   const createEnhancedNote = useCreateEnhancedNote();
-  const model = useLanguageModel();
+  const model = useLanguageModel("enhance");
   const generate = useAITask((state) => state.generate);
   const selectedTemplateId = settings.UI.useValue(
     "selected_template_id",

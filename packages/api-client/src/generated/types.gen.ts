@@ -41,6 +41,8 @@ export type CanStartTrialResponse = {
     reason?: null | CanStartTrialReason;
 };
 
+export type CharTask = 'chat' | 'enhance' | 'title';
+
 export type ConnectSessionResponse = {
     expires_at: string;
     token: string;
@@ -376,6 +378,45 @@ export type SubmitResponses = {
 };
 
 export type SubmitResponse = SubmitResponses[keyof SubmitResponses];
+
+export type LlmChatCompletionsData = {
+    body?: never;
+    headers?: {
+        /**
+         * Task type for model selection
+         */
+        'x-char-task'?: null | CharTask;
+    };
+    path?: never;
+    query?: never;
+    url: '/llm/chat/completions';
+};
+
+export type LlmChatCompletionsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Rate limit exceeded
+     */
+    429: unknown;
+    /**
+     * Upstream provider failed
+     */
+    502: unknown;
+    /**
+     * Request timeout
+     */
+    504: unknown;
+};
+
+export type LlmChatCompletionsResponses = {
+    /**
+     * Chat completion response (streaming or non-streaming)
+     */
+    200: unknown;
+};
 
 export type CreateConnectSessionData = {
     body?: never;

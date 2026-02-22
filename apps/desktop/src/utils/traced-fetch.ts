@@ -1,9 +1,10 @@
 import * as Sentry from "@sentry/react";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 
+import type { CharTask } from "@hypr/api-client";
 import { commands as miscCommands } from "@hypr/plugin-misc";
 
-import { DEVICE_FINGERPRINT_HEADER } from ".";
+import { CHAR_TASK_HEADER, DEVICE_FINGERPRINT_HEADER } from ".";
 
 let cachedFingerprint: string | null = null;
 
@@ -57,3 +58,11 @@ export const tracedFetch: typeof fetch = async (input, init) => {
     },
   );
 };
+
+export function createTracedFetch(task: CharTask): typeof fetch {
+  return async (input, init) => {
+    const headers = new Headers(init?.headers);
+    headers.set(CHAR_TASK_HEADER, task);
+    return tracedFetch(input, { ...init, headers });
+  };
+}

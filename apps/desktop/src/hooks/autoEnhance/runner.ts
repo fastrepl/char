@@ -30,7 +30,7 @@ export function useAutoEnhanceRunner(
   isEnhancing: boolean;
 } {
   const sessionId = tab.id;
-  const model = useLanguageModel();
+  const model = useLanguageModel("enhance");
   const { conn: llmConn } = useLLMConnection();
   const { updateSessionTabState } = useTabs();
   const createEnhancedNote = useCreateEnhancedNote();

@@ -1,9 +1,7 @@
 use std::collections::BTreeMap;
 
 use utoipa::openapi::path::{Operation, PathItem};
-use utoipa::openapi::security::{
-    ApiKey, ApiKeyValue, Http, HttpAuthScheme, SecurityRequirement, SecurityScheme,
-};
+use utoipa::openapi::security::{Http, HttpAuthScheme, SecurityRequirement, SecurityScheme};
 use utoipa::{Modify, OpenApi};
 
 #[derive(OpenApi)]
@@ -70,13 +68,6 @@ impl Modify for SecurityAddon {
                         .description(Some("Supabase JWT token"))
                         .build(),
                 ),
-            );
-            components.add_security_scheme(
-                "device_fingerprint",
-                SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::with_description(
-                    "x-device-fingerprint",
-                    "Optional device fingerprint for analytics",
-                ))),
             );
         }
     }

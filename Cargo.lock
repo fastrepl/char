@@ -10451,6 +10451,7 @@ dependencies = [
  "sentry",
  "serde",
  "serde_json",
+ "strum 0.27.2",
  "thiserror 2.0.18",
  "tokio",
  "tower 0.5.3",

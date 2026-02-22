@@ -18,7 +18,7 @@ export function ChatView() {
     currentTab?.type === "sessions" ? currentTab.id : undefined;
 
   const stableSessionId = useStableSessionId(groupId);
-  const model = useLanguageModel();
+  const model = useLanguageModel("chat");
 
   const { handleSendMessage } = useChatActions({
     groupId,

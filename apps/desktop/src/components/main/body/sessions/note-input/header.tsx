@@ -301,7 +301,7 @@ function CreateOtherFormatButton({
     main.STORE_ID,
   );
   const createEnhancedNote = useCreateEnhancedNote();
-  const model = useLanguageModel();
+  const model = useLanguageModel("enhance");
   const openNew = useTabs((state) => state.openNew);
 
   const store = main.UI.useStore(main.STORE_ID);
@@ -611,7 +611,7 @@ function labelForEditorView(view: EditorView): string {
 }
 
 function useEnhanceLogic(sessionId: string, enhancedNoteId: string) {
-  const model = useLanguageModel();
+  const model = useLanguageModel("enhance");
   const llmStatus = useLLMConnectionStatus();
   const taskId = createTaskId(enhancedNoteId, "enhance");
   const [missingModelError, setMissingModelError] = useState<Error | null>(

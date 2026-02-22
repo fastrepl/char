@@ -13,15 +13,23 @@ use crate::state::AppState;
 pub use feedback::{FeedbackRequest, FeedbackResponse};
 
 pub async fn router(config: SupportConfig) -> Router {
+    let resolver = hypr_llm_proxy::StaticModelResolver::default()
+        .with_models(
+            hypr_llm_proxy::MODEL_KEY_DEFAULT,
+            vec![
+                "openai/gpt-oss-120b".into(),
+                "moonshotai/kimi-k2-0905".into(),
+            ],
+        )
+        .with_models(
+            hypr_llm_proxy::MODEL_KEY_TOOL_CALLING,
+            vec![
+                "anthropic/claude-haiku-4.5".into(),
+                "moonshotai/kimi-k2-0905:exacto".into(),
+            ],
+        );
     let llm_config = hypr_llm_proxy::LlmProxyConfig::new(&config.openrouter)
-        .with_models_default(vec![
-            "openai/gpt-oss-120b".into(),
-            "moonshotai/kimi-k2-0905".into(),
-        ])
-        .with_models_tool_calling(vec![
-            "anthropic/claude-haiku-4.5".into(),
-            "moonshotai/kimi-k2-0905:exacto".into(),
-        ]);
+        .with_model_resolver(std::sync::Arc::new(resolver));
     let llm_router = hypr_llm_proxy::router(llm_config);
 
     let state = AppState::new(config).await;
