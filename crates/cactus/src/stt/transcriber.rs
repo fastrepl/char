@@ -1,11 +1,31 @@
 use std::ffi::CString;
 use std::ptr::NonNull;
 
+use serde::Deserialize;
+
 use crate::error::{Error, Result};
 use crate::ffi_utils::{RESPONSE_BUF_SIZE, read_cstr_from_buf};
 use crate::model::Model;
 
 use super::TranscribeOptions;
+
+/// Deserialise a JSON number that may arrive as either an integer or a float
+/// (the C++ side stores token counts as `double` and serialises via
+/// `operator<<`, which *usually* omits the decimal point for whole values but
+/// is not guaranteed to).
+fn deserialize_number_as_u64<'de, D>(deserializer: D) -> std::result::Result<u64, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let v = serde_json::Value::deserialize(deserializer)?;
+    match v {
+        serde_json::Value::Number(n) => n
+            .as_u64()
+            .or_else(|| n.as_f64().map(|f| f as u64))
+            .ok_or_else(|| serde::de::Error::custom("expected non-negative number")),
+        _ => Err(serde::de::Error::custom("expected a number")),
+    }
+}
 
 /// Cloud handoff configuration for streaming STT.
 ///
@@ -88,11 +108,11 @@ pub struct StreamResult {
     pub decode_tps: f64,
     #[serde(default)]
     pub ram_usage_mb: f64,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_number_as_u64")]
     pub prefill_tokens: u64,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_number_as_u64")]
     pub decode_tokens: u64,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_number_as_u64")]
     pub total_tokens: u64,
 }
 
