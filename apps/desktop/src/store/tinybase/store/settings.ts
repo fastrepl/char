@@ -32,9 +32,9 @@ export const SETTINGS_MAPPING = {
       path: ["notification", "detect"],
     },
     respect_dnd: { type: "boolean", path: ["notification", "respect_dnd"] },
-    telemetry_usage: {
+    telemetry_consent: {
       type: "boolean",
-      path: ["general", "telemetry_usage"],
+      path: ["general", "telemetry_consent"],
     },
     ai_language: { type: "string", path: ["language", "ai_language"] },
     spoken_languages: {

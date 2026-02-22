@@ -19,7 +19,7 @@ export type ConfigKey =
   | "ai_language"
   | "spoken_languages"
   | "save_recordings"
-  | "telemetry_usage"
+  | "telemetry_consent"
   | "current_llm_provider"
   | "current_llm_model"
   | "timezone"
@@ -137,8 +137,8 @@ export const CONFIG_REGISTRY = {
     default: true,
   },
 
-  telemetry_usage: {
-    key: "telemetry_usage",
+  telemetry_consent: {
+    key: "telemetry_consent",
     default: true,
     sideEffect: async (value: boolean, _) => {
       await analyticsCommands.setDisabled(!value);

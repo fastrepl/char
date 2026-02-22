@@ -25,7 +25,7 @@ function useSettingsForm() {
     "autostart",
     "notification_detect",
     "save_recordings",
-    "telemetry_usage",
+    "telemetry_consent",
     "ai_language",
     "spoken_languages",
     "current_stt_provider",
@@ -57,7 +57,7 @@ function useSettingsForm() {
       autostart: value.autostart,
       notification_detect: value.notification_detect,
       save_recordings: value.save_recordings,
-      telemetry_usage: value.telemetry_usage,
+      telemetry_consent: value.telemetry_consent,
       ai_language: value.ai_language,
       spoken_languages: value.spoken_languages,
     },
@@ -86,11 +86,11 @@ function useSettingsForm() {
         autostart: value.autostart,
         notification_detect: value.notification_detect,
         save_recordings: value.save_recordings,
-        telemetry_usage: value.telemetry_usage,
+        telemetry_consent: value.telemetry_consent,
       });
       void analyticsCommands.setProperties({
         set: {
-          telemetry_usage_opt_out: value.telemetry_usage === false,
+          telemetry_opt_out: value.telemetry_consent === false,
         },
       });
     },
@@ -133,8 +133,8 @@ export function SettingsApp() {
             {(notificationDetectField) => (
               <form.Field name="save_recordings">
                 {(saveRecordingsField) => (
-                  <form.Field name="telemetry_usage">
-                    {(telemetryUsageField) => (
+                  <form.Field name="telemetry_consent">
+                    {(telemetryConsentField) => (
                       <AppSettingsView
                         autostart={{
                           title: "Start Char at login",
@@ -159,13 +159,13 @@ export function SettingsApp() {
                           onChange: (val) =>
                             saveRecordingsField.handleChange(val),
                         }}
-                        telemetryUsage={{
+                        telemetryConsent={{
                           title: "Share usage data",
                           description:
                             "Send anonymous usage analytics to help improve Char.",
-                          value: telemetryUsageField.state.value,
+                          value: telemetryConsentField.state.value,
                           onChange: (val) =>
-                            telemetryUsageField.handleChange(val),
+                            telemetryConsentField.handleChange(val),
                         }}
                       />
                     )}

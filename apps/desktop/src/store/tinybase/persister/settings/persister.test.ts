@@ -97,7 +97,7 @@ describe("settingsPersister roundtrip", () => {
       general: {
         autostart: true,
         save_recordings: false,
-        telemetry_usage: false,
+        telemetry_consent: false,
       },
       language: {
         ai_language: "en",
@@ -152,7 +152,7 @@ describe("settingsPersister roundtrip", () => {
       ignored_platforms: '["zoom"]',
       autostart: true,
       save_recordings: false,
-      telemetry_usage: false,
+      telemetry_consent: false,
       ai_language: "en",
       spoken_languages: '["en","ko"]',
     };
@@ -369,26 +369,6 @@ describe("settingsPersister roundtrip", () => {
     expect(result.language).toEqual({
       ai_language: "ja",
       spoken_languages: ["ja", "en", "ko"],
-    });
-  });
-
-  test("handles migration from telemetry_consent to telemetry_usage", () => {
-    const oldSettings = {
-      general: {
-        telemetry_consent: false,
-      },
-    };
-
-    const [tables, values] = settingsToContent(oldSettings);
-    const store = createMergeableStore()
-      .setTablesSchema(SCHEMA.table)
-      .setValuesSchema(SCHEMA.value);
-    store.setTables(tables);
-    store.setValues(values);
-    const result = storeToSettings(store);
-
-    expect(result.general).toEqual({
-      telemetry_usage: false,
     });
   });
 

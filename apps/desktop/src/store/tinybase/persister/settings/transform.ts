@@ -77,8 +77,6 @@ function settingsToStoreValues(settings: unknown): Record<string, unknown> {
         value = getByPath(settings, ["general", "ai_language"]);
       } else if (key === "spoken_languages") {
         value = getByPath(settings, ["general", "spoken_languages"]);
-      } else if (key === "telemetry_usage") {
-        value = getByPath(settings, ["general", "telemetry_consent"]);
       }
     }
 
