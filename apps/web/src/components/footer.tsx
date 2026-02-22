@@ -58,8 +58,8 @@ function BrandSection({ currentYear }: { currentYear: number }) {
       await addContact({
         data: {
           email,
-          userGroup: "Subscriber",
-          source: "FOOTER",
+          userGroup: "Lead",
+          source: "LANDING_PAGE",
         },
       });
     },
