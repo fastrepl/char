@@ -65,7 +65,7 @@ export function Toast({
           {toast.primaryAction && (
             <button
               onClick={toast.primaryAction.onClick}
-              className="w-full py-2 rounded-full bg-stone-600 text-white text-sm font-medium duration-150 hover:scale-[1.01] active:scale-[0.99]"
+              className="w-full py-2 rounded-full bg-stone-800 hover:bg-stone-700 text-white text-sm font-medium border-2 border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)] transition-all duration-200"
             >
               {toast.primaryAction.label}
             </button>
