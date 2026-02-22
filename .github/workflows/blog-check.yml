@@ -57,14 +57,6 @@ jobs:
         run: |
           node .github/scripts/slop-check.mjs
 
-      - name: Run humanizer check
-        if: steps.changed-files.outputs.has_files == 'true'
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          CHANGED_FILES: ${{ steps.changed-files.outputs.files }}
-        run: |
-          node .github/scripts/humanizer-check.mjs
-
       - name: Post PR comment
         if: steps.changed-files.outputs.has_files == 'true'
         uses: actions/github-script@v7
@@ -73,8 +65,7 @@ jobs:
             const fs = require('fs');
             const grammarResults = fs.readFileSync('grammar-check-results.md', 'utf8');
             const slopResults = fs.readFileSync('slop-check-results.md', 'utf8');
-            const humanizerResults = fs.readFileSync('humanizer-check-results.md', 'utf8');
-            const comment = `${grammarResults}\n\n---\n\n${slopResults}\n\n---\n\n${humanizerResults}`;
+            const comment = `${grammarResults}\n\n---\n\n${slopResults}`;
 
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
