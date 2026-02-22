@@ -8,6 +8,7 @@ use crate::error::{Error, Result};
 pub struct Model {
     handle: NonNull<std::ffi::c_void>,
     inference_lock: Mutex<()>,
+    is_moonshine: bool,
 }
 
 unsafe impl Send for Model {}
@@ -39,9 +40,16 @@ impl ModelBuilder {
         let handle =
             NonNull::new(raw).ok_or_else(|| Error::Init("cactus_init returned null".into()))?;
 
+        let is_moonshine = self
+            .model_path
+            .to_string_lossy()
+            .to_lowercase()
+            .contains("moonshine");
+
         Ok(Model {
             handle,
             inference_lock: Mutex::new(()),
+            is_moonshine,
         })
     }
 }
@@ -55,6 +63,10 @@ impl Model {
 
     pub fn new(model_path: impl AsRef<Path>) -> Result<Self> {
         Self::builder(model_path).build()
+    }
+
+    pub fn is_moonshine(&self) -> bool {
+        self.is_moonshine
     }
 
     /// Cancel an in-progress inference. Safe to call concurrently — only sets an
