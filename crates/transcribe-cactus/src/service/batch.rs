@@ -176,6 +176,8 @@ fn content_type_to_extension(content_type: &str) -> &'static str {
 mod tests {
     use std::path::Path;
 
+    use hypr_language::ISO639;
+
     use super::*;
 
     #[test]
@@ -301,13 +303,13 @@ mod tests {
         let wav_bytes = std::fs::read(hypr_data::english_1::AUDIO_PATH)
             .unwrap_or_else(|e| panic!("failed to read fixture wav: {e}"));
 
-        let response = transcribe_batch(
-            &wav_bytes,
-            "audio/wav",
-            &ListenParams::default(),
-            model_path,
-        )
-        .unwrap_or_else(|e| panic!("real-model batch transcription failed: {e}"));
+        let params = ListenParams {
+            languages: vec![ISO639::En.into()],
+            ..Default::default()
+        };
+
+        let response = transcribe_batch(&wav_bytes, "audio/wav", &params, model_path)
+            .unwrap_or_else(|e| panic!("real-model batch transcription failed: {e}"));
 
         let Some(channel) = response.results.channels.first() else {
             panic!("expected at least one channel in response");
