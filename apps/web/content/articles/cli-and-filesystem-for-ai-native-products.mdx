@@ -1,0 +1,44 @@
+---
+meta_title: "File System and CLI Is the Future Interface of AI-Native Products"
+display_title: "File System and CLI Is the Future Interface of AI-Native Products"
+meta_description: "Why the best interface for AI-native products might not be a modern UI — it might be the file system and CLI. A reflection on building aipm and what clicked."
+author: "John Jeong"
+category: "Founders' notes"
+date: "2026-02-22"
+---
+
+This wasn't some grand vision I had. It's something I backed into while building.
+
+I've been working on [aipm](https://github.com/ComputelessComputer/aipm), a small AI task manager I built for myself. At first I thought the hard part would be the AI layer. Better prompts. Better reasoning. Better summaries. But the more I built, the more I realized the bottleneck wasn't the model — it was the interface.
+
+## Other founders circling the same idea
+
+Around the same time, I started seeing other founders circling around similar ideas. [Airstore](https://www.airstore.ai) posted "the filesystem for AI agents". [Ironclaw](https://ironclaw.sh) launched an AI CRM hosted locally on your Mac, built on top of OpenClaw. Different products. Similar direction.
+
+That caught my attention.
+
+Separately, I re-read a [post](https://steipete.me/posts/2025/shipping-at-inference-speed#tooling--infrastructure) from Peter from OpenClaw where he said he builds a CLI first for every project. No dashboard. Just a command. Obsidian also shipped their own [CLI](https://help.obsidian.md/cli). If you follow [Kepano](https://x.com/kepano/status/2007223691315499199), that move makes sense. Serious users are already operating their vaults through Claude Code and terminal workflows.
+
+Then it really clicked for me.
+
+## You don't need a rich plugin ecosystem
+
+Over the past few weeks I've been building small [Obsidian plugins](https://github.com/ComputelessComputer/obsidian-ghostty) for myself. One of them [syncs my reMarkable notes](https://github.com/ComputelessComputer/slate) into my vault. I assumed I needed a rich plugin ecosystem — I didn't.
+
+Because everything in my vault is just:
+
+- Markdown
+- A predictable folder structure
+- Plain text
+
+Once that structure is stable, an agent can generate the glue code on demand. The file system gives you inspectable state. The CLI forces you to define explicit inputs and outputs. If something breaks, it fails clearly. That's good.
+
+## GUI state is implicit. CLI + files is explicit.
+
+GUI state is often implicit. Hidden toggles. Scattered settings. Local state you can't easily inspect.
+
+CLI + files is explicit. In [aipm](https://github.com/ComputelessComputer/aipm), everything revolves around a single command: `aipm`. The agent uses the same command I use. That symmetry made the system more robust than any prompt engineering trick.
+
+## What AI-native might actually mean
+
+I used to think AI-native meant wrapping a model in a modern UI. Now I'm starting to think it might mean designing your product so that an agent can operate it as cleanly as a human can. And if that's true, then the file system and CLI aren't outdated abstractions. They might be the right ones.
