@@ -55,8 +55,7 @@ function BrandSection({ currentYear }: { currentYear: number }) {
   const [expanded, setExpanded] = useState(false);
   const [email, setEmail] = useState("");
   const [subscriptions, setSubscriptions] = useState({
-    releaseNotesStable: false,
-    releaseNotesBeta: false,
+    releaseNotes: false,
     newsletter: false,
   });
   const containerRef = useRef<HTMLDivElement>(null);
@@ -84,8 +83,7 @@ function BrandSection({ currentYear }: { currentYear: number }) {
           email,
           userGroup: "Subscriber",
           source: "FOOTER",
-          releaseNotesStable: subscriptions.releaseNotesStable,
-          releaseNotesBeta: subscriptions.releaseNotesBeta,
+          releaseNotes: subscriptions.releaseNotes,
           newsletter: subscriptions.newsletter,
         },
       });
@@ -94,16 +92,14 @@ function BrandSection({ currentYear }: { currentYear: number }) {
       setExpanded(false);
       setEmail("");
       setSubscriptions({
-        releaseNotesStable: false,
-        releaseNotesBeta: false,
+        releaseNotes: false,
         newsletter: false,
       });
     },
   });
 
   const hasSelection =
-    subscriptions.releaseNotesStable ||
-    subscriptions.releaseNotesBeta ||
+    subscriptions.releaseNotes ||
     subscriptions.newsletter;
 
   return (
@@ -123,62 +119,33 @@ function BrandSection({ currentYear }: { currentYear: number }) {
               What would you like to receive?
             </p>
 
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-neutral-700 uppercase tracking-wide">
-                  Release Notes
-                </p>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <Checkbox
-                    checked={subscriptions.releaseNotesStable}
-                    onCheckedChange={(checked) =>
-                      setSubscriptions((prev) => ({
-                        ...prev,
-                        releaseNotesStable: checked === true,
-                      }))
-                    }
-                    className="data-[state=checked]:bg-black data-[state=checked]:border-black data-[state=checked]:text-white"
-                  />
-                  <span className="text-sm text-neutral-600">Stable</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <Checkbox
-                    checked={subscriptions.releaseNotesBeta}
-                    onCheckedChange={(checked) =>
-                      setSubscriptions((prev) => ({
-                        ...prev,
-                        releaseNotesBeta: checked === true,
-                      }))
-                    }
-                    className="data-[state=checked]:bg-black data-[state=checked]:border-black data-[state=checked]:text-white"
-                  />
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-sm text-neutral-600">Beta</span>
-                    <span className="text-xs text-neutral-400">
-                      - includes beta download link
-                    </span>
-                  </div>
-                </label>
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-neutral-700 uppercase tracking-wide">
-                  Newsletter
-                </p>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <Checkbox
-                    checked={subscriptions.newsletter}
-                    onCheckedChange={(checked) =>
-                      setSubscriptions((prev) => ({
-                        ...prev,
-                        newsletter: checked === true,
-                      }))
-                    }
-                    className="data-[state=checked]:bg-black data-[state=checked]:border-black data-[state=checked]:text-white"
-                  />
-                  <span className="text-sm text-neutral-600">Blog</span>
-                </label>
-              </div>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <Checkbox
+                  checked={subscriptions.releaseNotes}
+                  onCheckedChange={(checked) =>
+                    setSubscriptions((prev) => ({
+                      ...prev,
+                      releaseNotes: checked === true,
+                    }))
+                  }
+                  className="data-[state=checked]:bg-black data-[state=checked]:border-black data-[state=checked]:text-white"
+                />
+                <span className="text-sm text-neutral-600">Release Notes</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <Checkbox
+                  checked={subscriptions.newsletter}
+                  onCheckedChange={(checked) =>
+                    setSubscriptions((prev) => ({
+                      ...prev,
+                      newsletter: checked === true,
+                    }))
+                  }
+                  className="data-[state=checked]:bg-black data-[state=checked]:border-black data-[state=checked]:text-white"
+                />
+                <span className="text-sm text-neutral-600">Newsletter</span>
+              </label>
             </div>
 
             {mutation.isError && (
