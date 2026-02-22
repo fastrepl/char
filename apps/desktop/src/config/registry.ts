@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import { disable, enable } from "@tauri-apps/plugin-autostart";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";

@@ -131,6 +131,14 @@ impl AnalyticsClient {
     }
 }
 
+pub trait ToAnalyticsPayload {
+    fn to_analytics_payload(&self) -> AnalyticsPayload;
+
+    fn to_analytics_properties(&self) -> Option<PropertiesPayload> {
+        None
+    }
+}
+
 #[derive(Debug, serde::Serialize, serde::Deserialize, specta::Type)]
 pub struct AnalyticsPayload {
     pub event: String,
@@ -148,6 +156,39 @@ pub struct PropertiesPayload {
     pub email: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
+}
+
+#[derive(Default)]
+pub struct PropertiesPayloadBuilder {
+    set: HashMap<String, serde_json::Value>,
+    set_once: HashMap<String, serde_json::Value>,
+}
+
+impl PropertiesPayload {
+    pub fn builder() -> PropertiesPayloadBuilder {
+        PropertiesPayloadBuilder::default()
+    }
+}
+
+impl PropertiesPayloadBuilder {
+    pub fn set(mut self, key: impl Into<String>, value: impl Into<serde_json::Value>) -> Self {
+        self.set.insert(key.into(), value.into());
+        self
+    }
+
+    pub fn set_once(mut self, key: impl Into<String>, value: impl Into<serde_json::Value>) -> Self {
+        self.set_once.insert(key.into(), value.into());
+        self
+    }
+
+    pub fn build(self) -> PropertiesPayload {
+        PropertiesPayload {
+            set: self.set,
+            set_once: self.set_once,
+            email: None,
+            user_id: None,
+        }
+    }
 }
 
 #[derive(Clone)]

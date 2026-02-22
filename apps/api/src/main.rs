@@ -40,7 +40,7 @@ async fn app() -> Router {
         hypr_llm_proxy::LlmProxyConfig::new(&env.llm).with_analytics(analytics.clone());
     let stt_config = hypr_transcribe_proxy::SttProxyConfig::new(&env.stt, &env.supabase)
         .with_hyprnote_routing(hypr_transcribe_proxy::HyprnoteRoutingConfig::default())
-        .with_analytics(analytics);
+        .with_analytics(analytics.clone());
 
     let stt_rate_limit = rate_limit::RateLimitState::builder()
         .pro(
@@ -79,7 +79,8 @@ async fn app() -> Router {
     );
     let nango_connection_state = hypr_api_nango::NangoConnectionState::from_config(&nango_config);
     let subscription_config =
-        hypr_api_subscription::SubscriptionConfig::new(&env.supabase, &env.stripe);
+        hypr_api_subscription::SubscriptionConfig::new(&env.supabase, &env.stripe)
+            .with_analytics(analytics.clone());
     let support_config = hypr_api_support::SupportConfig::new(
         &env.github_app,
         &env.llm,

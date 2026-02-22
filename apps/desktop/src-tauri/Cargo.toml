@@ -96,6 +96,7 @@ tracing = { workspace = true }
 hypr-host = { workspace = true }
 hypr-supervisor = { workspace = true }
 
+pico-args = { workspace = true }
 ractor = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 

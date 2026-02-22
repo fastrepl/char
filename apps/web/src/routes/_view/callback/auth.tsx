@@ -7,6 +7,7 @@ import { z } from "zod";
 import { cn } from "@hypr/utils";
 
 import { exchangeOAuthCode, exchangeOtpToken } from "@/functions/auth";
+import { useAnalytics } from "@/hooks/use-posthog";
 
 const validateSearch = z.object({
   code: z.string().optional(),
@@ -115,7 +116,8 @@ export const Route = createFileRoute("/_view/callback/auth")({
 function Component() {
   const search = Route.useSearch();
   const navigate = useNavigate();
-  const { identify, isInitialized } = useOutlit();
+  const { identify: identifyOutlit, isInitialized } = useOutlit();
+  const { identify: identifyPosthog } = useAnalytics();
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -127,18 +129,19 @@ function Component() {
       const userId = payload.sub;
 
       if (email && userId) {
-        identify({
+        identifyOutlit({
           email,
           userId,
           traits: {
             auth_provider: payload.app_metadata?.provider,
           },
         });
+        identifyPosthog(userId, { email });
       }
     } catch (e) {
       console.error("Failed to decode JWT for identify:", e);
     }
-  }, [search.access_token, identify, isInitialized]);
+  }, [search.access_token, identifyOutlit, isInitialized]);
 
   const getDeeplink = () => {
     if (search.access_token && search.refresh_token) {

@@ -27,6 +27,7 @@ hypr-agc = { path = "crates/agc", package = "agc" }
 hypr-am = { path = "crates/am", package = "am" }
 hypr-analytics = { path = "crates/analytics", package = "analytics" }
 hypr-api-auth = { path = "crates/api-auth", package = "api-auth" }
+hypr-api-bot = { path = "crates/api-bot", package = "api-bot" }
 hypr-api-calendar = { path = "crates/api-calendar", package = "api-calendar" }
 hypr-api-env = { path = "crates/api-env", package = "api-env" }
 hypr-api-messenger = { path = "crates/api-messenger", package = "api-messenger" }
@@ -92,6 +93,7 @@ hypr-porkbun = { path = "crates/porkbun", package = "porkbun" }
 hypr-posthog = { path = "crates/posthog", package = "posthog" }
 hypr-pyannote-cloud = { path = "crates/pyannote-cloud", package = "pyannote-cloud" }
 hypr-pyannote-local = { path = "crates/pyannote-local", package = "pyannote-local" }
+hypr-recall = { path = "crates/recall", package = "recall" }
 hypr-s3 = { path = "crates/s3", package = "s3" }
 hypr-slack-web = { path = "crates/slack-web", package = "slack-web" }
 hypr-supabase-auth = { path = "crates/supabase-auth", package = "supabase-auth" }

@@ -182,7 +182,12 @@ impl StreamResponse {
 
     pub fn set_extra(&mut self, extra: &Extra) {
         if let StreamResponse::TranscriptResponse { metadata, .. } = self {
-            metadata.extra = Some(extra.clone().into());
+            let incoming: std::collections::HashMap<String, serde_json::Value> =
+                extra.clone().into();
+            match &mut metadata.extra {
+                Some(existing) => existing.extend(incoming),
+                slot => *slot = Some(incoming),
+            }
         }
     }
 

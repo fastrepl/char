@@ -143,7 +143,7 @@ async function generateTemplateIfNeeded(params: {
       model,
       schema,
       signal,
-      prompt: createTemplatePrompt(userPrompt, schema, args.language),
+      prompt: createTemplatePrompt(userPrompt, schema),
     });
 
     if (!result) {
@@ -162,16 +162,11 @@ async function generateTemplateIfNeeded(params: {
 function createTemplatePrompt(
   userPrompt: string,
   schema: z.ZodObject<any>,
-  language: string | null,
 ): string {
-  const languageInstruction = language
-    ? `\n  IMPORTANT: Generate all section titles in ${language} language.`
-    : "";
-
   return `Analyze this meeting content and suggest appropriate section headings for a comprehensive summary.
   The sections should cover the main themes and topics discussed.
   Generate around 5-7 sections based on the content depth.
-  Give me in bullet points.${languageInstruction}
+  Give me in bullet points.
 
   Content:
   ---
@@ -242,7 +237,7 @@ async function* generateSummary(params: {
 
   onProgress({ type: "generating" });
 
-  const validator = createValidator(args.template, args.language);
+  const validator = createValidator(args.template);
 
   yield* withEarlyValidationRetry(
     (retrySignal, { previousFeedback }) => {
@@ -290,24 +285,17 @@ IMPORTANT: Previous attempt failed. ${previousFeedback}`;
   );
 }
 
-function createValidator(
-  template: EnhanceTemplate | null,
-  language: string | null,
-): EarlyValidatorFn {
-  const isNonEnglish =
-    language != null && language !== "en" && !language.startsWith("en-");
-
+function createValidator(template: EnhanceTemplate | null): EarlyValidatorFn {
   return (textSoFar: string) => {
     const normalized = textSoFar.trim();
 
-    if (!normalized.startsWith("# ")) {
-      return {
-        valid: false,
-        feedback: "Output must start with a markdown h1 heading (# Title).",
-      };
-    }
+    if (!template?.sections || template.sections.length === 0) {
+      if (!normalized.startsWith("# ")) {
+        const feedback =
+          "Output must start with a markdown h1 heading (# Title).";
+        return { valid: false, feedback };
+      }
 
-    if (isNonEnglish || !template?.sections || template.sections.length === 0) {
       return { valid: true };
     }
 

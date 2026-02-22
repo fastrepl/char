@@ -104,6 +104,8 @@ async function initSession(
   }
 }
 
+let lastTrackedAccessToken: string | null = null;
+
 async function trackAuthEvent(
   event: AuthChangeEvent,
   session: Session | null,
@@ -112,10 +114,8 @@ async function trackAuthEvent(
     const appVersion = await getVersion();
     void analyticsCommands.identify(session.user.id, {
       email: session.user.email,
-      set_once: {
-        account_created_date: new Date().toISOString(),
-      },
       set: {
+        account_created_date: session.user.created_at,
         is_signed_up: true,
         app_version: appVersion,
         os_version: osVersion(),
@@ -123,7 +123,17 @@ async function trackAuthEvent(
       },
     });
 
-    if (event === "SIGNED_IN") {
+    if (event === "INITIAL_SESSION") {
+      // Seed the token so the immediate auto-refresh tick (which fires SIGNED_IN
+      // with the same token) doesn't look like a new sign-in.
+      lastTrackedAccessToken = session.access_token;
+    } else if (
+      event === "SIGNED_IN" &&
+      session.access_token !== lastTrackedAccessToken
+    ) {
+      // Supabase fires SIGNED_IN on every auto-refresh tick and window focus,
+      // not just on actual OAuth sign-ins. Only track when the token is genuinely new.
+      lastTrackedAccessToken = session.access_token;
       void analyticsCommands.event({ event: "user_signed_in" });
     }
   }
