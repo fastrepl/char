@@ -43,7 +43,6 @@ user_common_derives! {
         #[serde(default)]
         pub jargons: Vec<String>,
         pub telemetry_usage: bool,
-        pub telemetry_error: bool,
         pub save_recordings: Option<bool>,
         pub selected_template_id: Option<String>,
         #[specta(type = String)]
@@ -61,7 +60,6 @@ impl Default for ConfigGeneral {
             spoken_languages: vec![hypr_language::ISO639::En.into()],
             jargons: vec![],
             telemetry_usage: true,
-            telemetry_error: true,
             save_recordings: Some(false),
             selected_template_id: None,
             summary_language: hypr_language::ISO639::En.into(),

@@ -246,7 +246,6 @@ export const generalSchema = z.object({
   user_id: z.string(),
   autostart: z.boolean().default(false),
   telemetry_usage: z.boolean().default(true),
-  telemetry_error: z.boolean().default(true),
   save_recordings: z.boolean().default(true),
   notification_event: z.boolean().default(true),
   notification_detect: z.boolean().default(true),

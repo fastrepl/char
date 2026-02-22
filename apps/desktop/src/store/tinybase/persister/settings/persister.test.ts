@@ -98,7 +98,6 @@ describe("settingsPersister roundtrip", () => {
         autostart: true,
         save_recordings: false,
         telemetry_usage: false,
-        telemetry_error: false,
       },
       language: {
         ai_language: "en",
@@ -154,7 +153,6 @@ describe("settingsPersister roundtrip", () => {
       autostart: true,
       save_recordings: false,
       telemetry_usage: false,
-      telemetry_error: false,
       ai_language: "en",
       spoken_languages: '["en","ko"]',
     };
@@ -374,7 +372,7 @@ describe("settingsPersister roundtrip", () => {
     });
   });
 
-  test("handles migration from telemetry_consent to telemetry_usage and telemetry_error", () => {
+  test("handles migration from telemetry_consent to telemetry_usage", () => {
     const oldSettings = {
       general: {
         telemetry_consent: false,
@@ -391,7 +389,6 @@ describe("settingsPersister roundtrip", () => {
 
     expect(result.general).toEqual({
       telemetry_usage: false,
-      telemetry_error: false,
     });
   });
 

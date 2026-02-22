@@ -164,7 +164,6 @@ export const valueSchemaForTinybase = {
   respect_dnd: { type: "boolean" },
   quit_intercept: { type: "boolean" },
   telemetry_usage: { type: "boolean" },
-  telemetry_error: { type: "boolean" },
   ai_language: { type: "string" },
   spoken_languages: { type: "string" },
   ignored_platforms: { type: "string" },

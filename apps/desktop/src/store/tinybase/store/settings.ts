@@ -36,10 +36,6 @@ export const SETTINGS_MAPPING = {
       type: "boolean",
       path: ["general", "telemetry_usage"],
     },
-    telemetry_error: {
-      type: "boolean",
-      path: ["general", "telemetry_error"],
-    },
     ai_language: { type: "string", path: ["language", "ai_language"] },
     spoken_languages: {
       type: "string",
