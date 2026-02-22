@@ -1332,10 +1332,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "audio-mime"
+version = "0.1.0"
+
+[[package]]
 name = "audio-utils"
 version = "0.1.0"
 dependencies = [
  "audio-interface",
+ "audio-mime",
  "bytes",
  "dasp",
  "data",
@@ -20279,6 +20284,7 @@ dependencies = [
  "analytics",
  "api-auth",
  "api-env",
+ "audio-mime",
  "audio-utils",
  "axum 0.8.8",
  "backon",
