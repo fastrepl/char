@@ -29,9 +29,9 @@ pub struct CompletionResult {
     #[serde(default)]
     pub decode_tps: f64,
     #[serde(default)]
-    pub prefill_tokens: u32,
+    pub prefill_tokens: u64,
     #[serde(default)]
-    pub decode_tokens: u32,
+    pub decode_tokens: u64,
     #[serde(default)]
-    pub total_tokens: u32,
+    pub total_tokens: u64,
 }

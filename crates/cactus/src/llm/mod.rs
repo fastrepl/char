@@ -4,7 +4,7 @@ mod stream;
 
 pub use hypr_llm_types::Message;
 pub use result::CompletionResult;
-pub use stream::complete_stream;
+pub use stream::{CompletionStream, complete_stream};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct CompleteOptions {

@@ -1,5 +1,8 @@
+use std::pin::Pin;
 use std::sync::Arc;
+use std::task::{Context, Poll};
 
+use futures_util::Stream;
 use tokio_stream::wrappers::ReceiverStream;
 use tokio_util::sync::CancellationToken;
 
@@ -15,18 +18,59 @@ pub struct TranscribeEvent {
     pub chunk_duration_secs: f64,
 }
 
+/// A live transcription session.
+///
+/// Feed audio via [`TranscriptionSession::audio_tx`] and consume
+/// [`TranscribeEvent`]s by polling the session as a [`Stream`].
+/// Dropping the session cancels the worker and joins its thread.
+pub struct TranscriptionSession {
+    audio_tx: tokio::sync::mpsc::Sender<Vec<f32>>,
+    inner: ReceiverStream<Result<TranscribeEvent>>,
+    cancellation_token: CancellationToken,
+    handle: Option<std::thread::JoinHandle<()>>,
+}
+
+impl TranscriptionSession {
+    /// Channel for sending audio samples to the transcription worker.
+    pub fn audio_tx(&self) -> &tokio::sync::mpsc::Sender<Vec<f32>> {
+        &self.audio_tx
+    }
+
+    /// Returns a reference to the cancellation token.
+    pub fn cancellation_token(&self) -> &CancellationToken {
+        &self.cancellation_token
+    }
+
+    /// Signal the worker to stop transcribing.
+    pub fn cancel(&self) {
+        self.cancellation_token.cancel();
+    }
+}
+
+impl Stream for TranscriptionSession {
+    type Item = Result<TranscribeEvent>;
+
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        Pin::new(&mut self.inner).poll_next(cx)
+    }
+}
+
+impl Drop for TranscriptionSession {
+    fn drop(&mut self) {
+        self.cancellation_token.cancel();
+        if let Some(handle) = self.handle.take() {
+            let _ = handle.join();
+        }
+    }
+}
+
 pub fn transcribe_stream(
     model: Arc<Model>,
     options: TranscribeOptions,
     cloud: CloudConfig,
     chunk_size_ms: u32,
     sample_rate: u32,
-) -> (
-    tokio::sync::mpsc::Sender<Vec<f32>>,
-    impl futures_util::Stream<Item = Result<TranscribeEvent>> + Unpin,
-    CancellationToken,
-    std::thread::JoinHandle<()>,
-) {
+) -> TranscriptionSession {
     let (audio_tx, audio_rx) = tokio::sync::mpsc::channel::<Vec<f32>>(64);
     let (event_tx, event_rx) = tokio::sync::mpsc::channel(64);
     let cancellation_token = CancellationToken::new();
@@ -45,8 +89,13 @@ pub fn transcribe_stream(
         );
     });
 
-    let stream = ReceiverStream::new(event_rx);
-    (audio_tx, stream, cancellation_token, handle)
+    let inner = ReceiverStream::new(event_rx);
+    TranscriptionSession {
+        audio_tx,
+        inner,
+        cancellation_token,
+        handle: Some(handle),
+    }
 }
 
 fn run_transcribe_worker(

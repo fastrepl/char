@@ -63,11 +63,10 @@ pub(super) async fn handle_websocket(
 
     let mut audio_txs: Vec<tokio::sync::mpsc::Sender<Vec<f32>>> =
         Vec::with_capacity(total_channels);
-    let mut cancel_tokens = Vec::with_capacity(total_channels);
+    let mut cancel_tokens: Vec<tokio_util::sync::CancellationToken> =
+        Vec::with_capacity(total_channels);
     let mut event_streams: futures_util::stream::SelectAll<TaggedStream> =
         futures_util::stream::SelectAll::new();
-
-    let mut worker_handles = Vec::with_capacity(total_channels);
 
     let model = match hypr_cactus::Model::builder(&model_path).build() {
         Ok(m) => std::sync::Arc::new(m),
@@ -79,17 +78,16 @@ pub(super) async fn handle_websocket(
 
     for ch_idx in 0..total_channels {
         let cloud_config = cactus_config.cloud.clone();
-        let (audio_tx, event_rx, cancel_token, handle) = hypr_cactus::transcribe_stream(
+        let session = hypr_cactus::transcribe_stream(
             model.clone(),
             options.clone(),
             cloud_config,
             chunk_size_ms,
             SAMPLE_RATE,
         );
-        audio_txs.push(audio_tx);
-        cancel_tokens.push(cancel_token);
-        worker_handles.push(handle);
-        event_streams.push(Box::pin(event_rx.map(move |e| (ch_idx, e))));
+        audio_txs.push(session.audio_tx().clone());
+        cancel_tokens.push(session.cancellation_token().clone());
+        event_streams.push(Box::pin(session.map(move |e| (ch_idx, e))));
     }
 
     let mut channel_states: Vec<ChannelState> = (0..total_channels)
@@ -122,14 +120,10 @@ pub(super) async fn handle_websocket(
         }
     }
 
+    // Dropping audio senders signals workers to finish, then dropping
+    // event_streams drops the TranscriptionSessions which cancel + join workers.
     drop(audio_txs);
     drop(event_streams);
-
-    for handle in worker_handles {
-        if let Err(panic) = handle.join() {
-            tracing::error!(?panic, "cactus_transcribe_worker_panicked");
-        }
-    }
 
     let total_audio_offset = channel_states.first().map_or(0.0, |s| s.audio_offset);
 

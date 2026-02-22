@@ -64,9 +64,9 @@ impl Service<Request<Body>> for CompleteService {
             let options = build_options(&request);
 
             if request.stream.unwrap_or(false) {
-                let (stream, cancellation_token, _worker_handle) =
+                let completion_stream =
                     match hypr_cactus::complete_stream(&model, messages, options) {
-                        Ok(tuple) => tuple,
+                        Ok(s) => s,
                         Err(e) => {
                             return Ok(
                                 (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
@@ -74,11 +74,7 @@ impl Service<Request<Body>> for CompleteService {
                         }
                     };
 
-                Ok(build_streaming_response(
-                    stream,
-                    cancellation_token,
-                    &request.model,
-                ))
+                Ok(build_streaming_response(completion_stream, &request.model))
             } else {
                 Ok(build_non_streaming_response(&model, messages, options, &request.model).await)
             }
@@ -134,8 +130,7 @@ fn model_name(model: &Option<String>) -> &str {
 }
 
 fn build_streaming_response(
-    stream: impl futures_util::Stream<Item = LlmResponse> + Send + 'static,
-    cancellation_token: tokio_util::sync::CancellationToken,
+    completion_stream: hypr_cactus::CompletionStream,
     model: &Option<String>,
 ) -> Response {
     let id = format!("chatcmpl-{}", uuid::Uuid::new_v4());
@@ -150,7 +145,7 @@ fn build_streaming_response(
 
     type SseResult = Result<sse::Event, std::convert::Infallible>;
 
-    let data_events = stream.filter_map(move |item| {
+    let data_events = completion_stream.filter_map(move |item| {
         let id = id_for_events.clone();
         let model_name = model_for_events.clone();
 
@@ -211,24 +206,7 @@ fn build_streaming_response(
         Ok::<_, std::convert::Infallible>(sse::Event::default().data("[DONE]")),
     ));
 
-    // drop_guard ensures inference is cancelled when the client disconnects and the
-    // stream is dropped (channel closure also triggers model.stop() inside the worker,
-    // so this is belt-and-suspenders).
-    let drop_guard = cancellation_token.drop_guard();
-
-    let event_stream = stream::unfold(
-        (
-            Box::pin(data_events.chain(stop_event).chain(done_event))
-                as Pin<Box<dyn futures_util::Stream<Item = SseResult> + Send>>,
-            Some(drop_guard),
-        ),
-        |(mut s, guard)| async move {
-            match s.next().await {
-                Some(item) => Some((item, (s, guard))),
-                None => None,
-            }
-        },
-    );
+    let event_stream = data_events.chain(stop_event).chain(done_event);
 
     sse::Sse::new(event_stream).into_response()
 }

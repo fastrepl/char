@@ -89,11 +89,11 @@ pub struct StreamResult {
     #[serde(default)]
     pub ram_usage_mb: f64,
     #[serde(default)]
-    pub prefill_tokens: f64,
+    pub prefill_tokens: u64,
     #[serde(default)]
-    pub decode_tokens: f64,
+    pub decode_tokens: u64,
     #[serde(default)]
-    pub total_tokens: f64,
+    pub total_tokens: u64,
 }
 
 impl std::str::FromStr for StreamResult {

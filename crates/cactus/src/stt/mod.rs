@@ -5,7 +5,7 @@ mod transcriber;
 mod whisper;
 
 pub use result::TranscriptionResult;
-pub use stream::{TranscribeEvent, transcribe_stream};
+pub use stream::{TranscribeEvent, TranscriptionSession, transcribe_stream};
 pub use transcriber::{CloudConfig, StreamResult, Transcriber};
 
 use hypr_language::Language;

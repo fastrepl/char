@@ -85,10 +85,13 @@ impl Model {
     }
 
     pub(crate) fn lock_inference(&self) -> InferenceGuard<'_> {
-        let guard = self
-            .inference_lock
-            .lock()
-            .unwrap_or_else(|e| e.into_inner());
+        let guard = self.inference_lock.lock().unwrap_or_else(|e| {
+            tracing::warn!(
+                "inference mutex was poisoned (a previous FFI call likely panicked); \
+                 recovering, but model state may be inconsistent"
+            );
+            e.into_inner()
+        });
         InferenceGuard {
             handle: self.handle,
             _guard: guard,

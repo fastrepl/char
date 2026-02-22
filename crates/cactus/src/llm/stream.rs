@@ -1,5 +1,8 @@
+use std::pin::Pin;
 use std::sync::Arc;
+use std::task::{Context, Poll};
 
+use futures_util::Stream;
 use hypr_llm_types::{Response, StreamingParser};
 use tokio::sync::mpsc::UnboundedSender;
 use tokio_stream::wrappers::UnboundedReceiverStream;
@@ -78,15 +81,52 @@ fn run_stream_worker(
     worker.run(&messages, &options);
 }
 
+/// A streaming LLM completion session.
+///
+/// Implements [`Stream`] yielding [`Response`] items. Cancelling the stream
+/// (via [`CompletionStream::cancel`] or by dropping) stops the underlying
+/// inference and joins the worker thread.
+pub struct CompletionStream {
+    inner: UnboundedReceiverStream<Response>,
+    cancellation_token: CancellationToken,
+    handle: Option<std::thread::JoinHandle<()>>,
+}
+
+impl CompletionStream {
+    /// Returns a reference to the cancellation token for external use
+    /// (e.g. attaching a `drop_guard`).
+    pub fn cancellation_token(&self) -> &CancellationToken {
+        &self.cancellation_token
+    }
+
+    /// Signal the worker to stop generating tokens.
+    pub fn cancel(&self) {
+        self.cancellation_token.cancel();
+    }
+}
+
+impl Stream for CompletionStream {
+    type Item = Response;
+
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        Pin::new(&mut self.inner).poll_next(cx)
+    }
+}
+
+impl Drop for CompletionStream {
+    fn drop(&mut self) {
+        self.cancellation_token.cancel();
+        if let Some(handle) = self.handle.take() {
+            let _ = handle.join();
+        }
+    }
+}
+
 pub fn complete_stream(
     model: &Arc<Model>,
     messages: Vec<Message>,
     options: CompleteOptions,
-) -> Result<(
-    impl futures_util::Stream<Item = Response> + 'static,
-    CancellationToken,
-    std::thread::JoinHandle<()>,
-)> {
+) -> Result<CompletionStream> {
     let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
     let cancellation_token = CancellationToken::new();
 
@@ -97,6 +137,10 @@ pub fn complete_stream(
         run_stream_worker(model, messages, options, worker_cancellation_token, tx);
     });
 
-    let stream = UnboundedReceiverStream::new(rx);
-    Ok((stream, cancellation_token, handle))
+    let inner = UnboundedReceiverStream::new(rx);
+    Ok(CompletionStream {
+        inner,
+        cancellation_token,
+        handle: Some(handle),
+    })
 }
