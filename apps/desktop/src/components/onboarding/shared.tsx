@@ -32,24 +32,34 @@ export function OnboardingSection({
 
   const isActive = status === "active";
   const isCompleted = status === "completed";
+  const isUpcoming = status === "upcoming";
 
   return (
     <section>
       <div
         className={cn([
-          "flex items-center gap-2 mb-4 transition-all duration-300",
-          status === "upcoming" && "opacity-15",
-          isCompleted && "opacity-25",
+          "flex items-center gap-2 transition-all duration-300",
+          isActive && "mb-4",
+          isUpcoming && "mb-4",
         ])}
       >
+        {isCompleted && (
+          <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-neutral-900">
+            <CheckIcon className="size-3 text-white" strokeWidth={2.5} />
+          </div>
+        )}
         <div className="flex min-w-0 flex-col gap-1">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold font-serif text-neutral-900">
+            <h2
+              className={cn([
+                "font-semibold font-serif",
+                isCompleted
+                  ? "text-sm text-neutral-400"
+                  : "text-lg text-neutral-900",
+              ])}
+            >
               {title}
             </h2>
-            {isCompleted && (
-              <CheckIcon className="size-3.5 text-neutral-900" aria-hidden />
-            )}
             {import.meta.env.DEV && isActive && (onBack || onNext) && (
               <div className="flex items-center gap-2">
                 {onBack && (
@@ -93,6 +103,12 @@ export function OnboardingSection({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {isUpcoming && (
+        <div className="relative select-none pointer-events-none">
+          <div className="blur-[6px] opacity-60">{children}</div>
+        </div>
+      )}
     </section>
   );
 }
