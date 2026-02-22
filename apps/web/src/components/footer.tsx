@@ -3,7 +3,6 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowRightIcon, ExternalLinkIcon, MailIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { Checkbox } from "@hypr/ui/components/ui/checkbox";
 import { cn } from "@hypr/utils";
 
 import { addContact } from "@/functions/loops";
@@ -52,29 +51,7 @@ export function Footer() {
 }
 
 function BrandSection({ currentYear }: { currentYear: number }) {
-  const [expanded, setExpanded] = useState(false);
   const [email, setEmail] = useState("");
-  const [subscriptions, setSubscriptions] = useState({
-    releaseNotes: false,
-    newsletter: false,
-  });
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!expanded) return;
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setExpanded(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [expanded]);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -83,24 +60,13 @@ function BrandSection({ currentYear }: { currentYear: number }) {
           email,
           userGroup: "Subscriber",
           source: "FOOTER",
-          releaseNotes: subscriptions.releaseNotes,
-          newsletter: subscriptions.newsletter,
         },
       });
     },
     onSuccess: () => {
-      setExpanded(false);
       setEmail("");
-      setSubscriptions({
-        releaseNotes: false,
-        newsletter: false,
-      });
     },
   });
-
-  const hasSelection =
-    subscriptions.releaseNotes ||
-    subscriptions.newsletter;
 
   return (
     <div className="lg:flex-1">
@@ -112,61 +78,15 @@ function BrandSection({ currentYear }: { currentYear: number }) {
       </Link>
       <p className="text-sm text-neutral-500 mb-4">Fastrepl © {currentYear}</p>
 
-      <div className="mb-4 relative" ref={containerRef}>
-        {expanded && (
-          <div className="absolute bottom-full left-0 w-72 bg-white border border-b-0 laptop:border-l-0 border-stone-100 p-4 space-y-4">
-            <p className="text-sm font-medium text-neutral-900">
-              What would you like to receive?
-            </p>
-
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <Checkbox
-                  checked={subscriptions.releaseNotes}
-                  onCheckedChange={(checked) =>
-                    setSubscriptions((prev) => ({
-                      ...prev,
-                      releaseNotes: checked === true,
-                    }))
-                  }
-                  className="data-[state=checked]:bg-black data-[state=checked]:border-black data-[state=checked]:text-white"
-                />
-                <span className="text-sm text-neutral-600">Release Notes</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <Checkbox
-                  checked={subscriptions.newsletter}
-                  onCheckedChange={(checked) =>
-                    setSubscriptions((prev) => ({
-                      ...prev,
-                      newsletter: checked === true,
-                    }))
-                  }
-                  className="data-[state=checked]:bg-black data-[state=checked]:border-black data-[state=checked]:text-white"
-                />
-                <span className="text-sm text-neutral-600">Newsletter</span>
-              </label>
-            </div>
-
-            {mutation.isError && (
-              <p className="text-xs text-red-500">
-                Something went wrong. Please try again.
-              </p>
-            )}
-          </div>
-        )}
-
+      <div className="mb-4">
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (expanded && hasSelection && email) {
+            if (email) {
               mutation.mutate();
             }
           }}
-          className={cn([
-            "max-w-72 border border-neutral-100 bg-white transition-all laptop:border-l-0",
-            expanded && "shadow-lg",
-          ])}
+          className="max-w-72 border border-neutral-100 bg-white transition-all laptop:border-l-0"
         >
           <div className="relative flex items-center">
             <MailIcon className="absolute left-2.5 size-3.5 text-neutral-400" />
@@ -174,10 +94,7 @@ function BrandSection({ currentYear }: { currentYear: number }) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              onFocus={() => setExpanded(true)}
-              placeholder={
-                expanded ? "Enter your email" : "Subscribe to updates"
-              }
+              placeholder="Subscribe to updates"
               className={cn([
                 "min-w-0 flex-1 pl-8 pr-2 py-1.5 text-sm",
                 "bg-transparent placeholder:text-neutral-400",
@@ -185,16 +102,11 @@ function BrandSection({ currentYear }: { currentYear: number }) {
               ])}
             />
             <button
-              type={expanded ? "submit" : "button"}
-              onClick={() => !expanded && setExpanded(true)}
-              disabled={
-                expanded && (!hasSelection || !email || mutation.isPending)
-              }
+              type="submit"
+              disabled={!email || mutation.isPending}
               className={cn([
                 "shrink-0 px-2 transition-colors focus:outline-none",
-                expanded && hasSelection && email
-                  ? "text-stone-600"
-                  : "text-neutral-300",
+                email ? "text-stone-600" : "text-neutral-300",
                 mutation.isPending && "opacity-50",
               ])}
             >
@@ -202,6 +114,14 @@ function BrandSection({ currentYear }: { currentYear: number }) {
             </button>
           </div>
         </form>
+        <p className="text-xs text-neutral-400 mt-1.5">
+          Only important stuff like release notes and interesting articles.
+        </p>
+        {mutation.isError && (
+          <p className="text-xs text-red-500 mt-1">
+            Something went wrong. Please try again.
+          </p>
+        )}
       </div>
 
       <p className="text-sm text-neutral-500">

@@ -10,8 +10,6 @@ const inputSchema = z.object({
   platform: z.string().optional(),
   source: z.string().optional(),
   intent: z.string().optional(),
-  releaseNotes: z.boolean().optional(),
-  newsletter: z.boolean().optional(),
 });
 
 export const addContact = createServerFn({ method: "POST" })
@@ -32,8 +30,6 @@ export const addContact = createServerFn({ method: "POST" })
           source: data.source,
           intent: data.intent,
           platform: data.platform,
-          releaseNotes: data.releaseNotes,
-          newsletter: data.newsletter,
         }),
       },
     );
