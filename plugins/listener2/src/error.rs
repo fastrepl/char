@@ -12,6 +12,8 @@ pub enum Error {
     SpawnError(#[from] ractor::SpawnErr),
     #[error("batch start failed: {0}")]
     BatchStartFailed(String),
+    #[error("pyannote error: {0}")]
+    Pyannote(String),
 }
 
 impl Serialize for Error {
