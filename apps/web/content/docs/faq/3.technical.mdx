@@ -14,7 +14,7 @@ The app itself is about 200MB. Recording storage depends on your usage - a 1-hou
 
 ## Does Char work offline?
 
-Yes! Since Char uses local AI, it works completely offline. You don't need an internet connection to record, transcribe, or generate summaries. See [Local Models](/docs/developers/local-models) for available local STT models and [Local LLM Setup](/docs/faq/local-llm-setup) for configuring local AI.
+Yes! Since Char uses local AI, it works completely offline. You don't need an internet connection to record, transcribe, or generate summaries. See [Local Models](/docs/developers/local-models) for available local STT models (including the new Cactus engine) and [Local LLM Setup](/docs/faq/local-llm-setup) for configuring local AI.
 
 ## What cloud STT providers does Char support?
 
@@ -27,6 +27,8 @@ When using cloud AI (Char Pro), LLM requests are routed through [OpenRouter](htt
 ## How does in-app search work?
 
 Char uses [Tantivy](https://github.com/quickwit-oss/tantivy), a Rust full-text search engine, to index and search your notes locally. Documents are indexed in the background as you create and edit sessions. The search supports filtering by type (meeting notes, people, organizations) and date range, with results ranked by relevance.
+
+Within a note or transcript, <kbd>⌘</kbd> + <kbd>F</kbd> opens an inline search bar with case-sensitive matching, whole-word matching, and find-and-replace (<kbd>⌘</kbd> + <kbd>H</kbd>). Replace supports single-match and replace-all modes.
 
 ## What is the support chat powered by?
 

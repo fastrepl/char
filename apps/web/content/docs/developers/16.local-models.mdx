@@ -16,7 +16,25 @@ For step-by-step setup instructions for LM Studio and Ollama, see the [Local LLM
 - All STT models are stored in `~/Library/Application Support/hyprnote/models/stt/`
 - The built-in whisper-cpp backend is now an optional compile-time feature. Production builds on macOS Apple Silicon use the Argmax sidecar by default. Whisper-cpp quantized models have been removed from the settings UI.
 
-### Manual Download
+### Cactus Engine (Beta)
+
+Cactus is a new local STT backend that runs optimized Whisper models. Cactus models are listed in Settings > Transcription under the Hyprnote provider. Models with an "Apple NPU" suffix use the Apple Neural Engine for hardware-accelerated inference on Apple Silicon Macs; non-Apple variants run on any platform.
+
+| Model | Quantization | Platform |
+| ----- | ------------ | -------- |
+| Whisper Small (INT4) | INT4 | General |
+| Whisper Small (INT8) | INT8 | General |
+| Whisper Small (INT8, Apple NPU) | INT8 | Apple Silicon |
+| Whisper Medium (INT4) | INT4 | General |
+| Whisper Medium (INT4, Apple NPU) | INT4 | Apple Silicon |
+| Whisper Medium (INT8) | INT8 | General |
+| Whisper Medium (INT8, Apple NPU) | INT8 | Apple Silicon |
+
+Cactus models are downloaded and managed from the Settings UI. They are stored in a separate `cactus/` directory within the models folder.
+
+### Argmax Models
+
+Manual download:
 
 | URL                                                                                               | Folder                                    |
 | ------------------------------------------------------------------------------------------------- | ----------------------------------------- |

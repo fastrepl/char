@@ -158,15 +158,15 @@ PostHog's `$identify` event links anonymous device IDs to authenticated user IDs
 
 Char uses PostHog feature flags to control feature rollouts. The system is built on two layers:
 
-- **`crates/flag`** - A standalone Rust client for the PostHog feature flags API (`/flags?v=2`). It fetches flags by `distinct_id` and supports groups, person properties, and group properties.
-- **`plugins/flag`** - A Tauri plugin that wraps the flag client with caching and provides the `FlagPluginExt` trait for checking flags from application code via `app.flag().is_enabled(feature)`.
+- **`crates/analytics`** - Uses the official `posthog-rs` 0.4 client with lazy initialization. Supports optional local flag evaluation via `PostHog LocalEvaluator` when a personal API key is configured.
+- **`plugins/flag`** - A Tauri plugin that delegates to the shared `AnalyticsClient` from `crates/analytics` and provides the `FlagPluginExt` trait for checking flags from application code via `app.flag().is_enabled(feature)`.
 
 Each feature defines a `FlagStrategy`:
 
 | Strategy | Behavior |
 |----------|----------|
 | `Debug` | Enabled only in debug builds |
-| `Posthog(key)` | Resolved via PostHog API (cached after first fetch) |
+| `Posthog(key)` | Resolved via PostHog `is_feature_enabled` (through `posthog-rs`) |
 | `Hardcoded(bool)` | Always enabled or disabled |
 
 Features can also be overridden at build time using environment variables (e.g., `CHAT=1` forces the Chat feature on).

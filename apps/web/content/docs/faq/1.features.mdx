@@ -46,6 +46,8 @@ Yes! Char supports backlink mentions. Type `@` in a note to search for and link 
 
 Yes. Press <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>F</kbd> to open the Advanced Search tab, which uses Tantivy-powered full-text search to find matches across all sessions. You can filter by type (meeting notes, people, organizations) and date range (today, this week, this month). Results highlight matching text in context.
 
+Within a note or transcript, <kbd>⌘</kbd> + <kbd>F</kbd> opens an inline search bar with case-sensitive and whole-word matching options. Press <kbd>⌘</kbd> + <kbd>H</kbd> to toggle find-and-replace mode, which supports replacing individual matches or all matches at once.
+
 ## What views does the calendar support?
 
 The calendar tab (<kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>C</kbd>) supports week, 3-day, and day views. You can switch between them using the controls at the top of the calendar. Events display inline with time slots, and clicking an event opens a popover where you can create a session from it. See [Calendar](/docs/calendar/apple) for setup instructions.
@@ -65,6 +67,18 @@ Yes. The AI chat bubble can be expanded into a full tab for a more spacious conv
 ## Can I select and delete multiple notes at once?
 
 Yes. In the sidebar timeline, you can select multiple sessions using <kbd>⌘</kbd> + click or <kbd>⇧</kbd> + click, then right-click to bulk delete them. A confirmation toast appears with an undo option.
+
+## Can I reveal a note's files in Finder?
+
+Yes. Open the overflow menu (three dots) on any session and select **Reveal in Finder** to open the session's directory in macOS Finder. This lets you access the raw Markdown, audio, and transcript files directly.
+
+## Can I set a default template for AI summaries?
+
+Yes. Go to **Settings** > **Intelligence** and select a default template. When auto-enhance runs after a recording, it will use this template. You can also choose a template manually from the enhance button dropdown in any session.
+
+## What is the Memory tab in AI settings?
+
+The Memory tab (under **Settings** > **Intelligence**) lets you define custom vocabulary — names, acronyms, and technical terms that appear frequently in your meetings. These terms are passed to the transcription and AI providers to improve recognition accuracy.
 
 ## Does Char auto-generate summaries?
 
