@@ -13663,13 +13663,13 @@ dependencies = [
 name = "pyannote-cloud"
 version = "0.1.0"
 dependencies = [
- "data",
+ "chrono",
+ "progenitor-client",
+ "progenitor-utils",
+ "regress",
  "reqwest 0.13.2",
- "rodio",
  "serde",
- "specta",
- "tokio",
- "url",
+ "serde_json",
 ]
 
 [[package]]
