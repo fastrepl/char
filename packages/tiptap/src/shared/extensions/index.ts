@@ -11,7 +11,7 @@ import {
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
 import Underline from "@tiptap/extension-underline";
-import { Plugin, PluginKey } from "@tiptap/pm/state";
+import { Plugin, PluginKey, Transaction } from "@tiptap/pm/state";
 import StarterKit from "@tiptap/starter-kit";
 
 import { AIHighlight } from "../ai-highlight";
@@ -149,7 +149,7 @@ export const getExtensions = (
             if (!transactions.some((tr) => tr.docChanged)) return null;
             const linkType = newState.schema.marks.link;
             if (!linkType) return null;
-            let tr: ReturnType<typeof newState.tr> | null = null;
+            let tr: Transaction | null = null;
             newState.doc.descendants((node, pos) => {
               if (!node.isText || !node.text) return;
               const linkMark = node.marks.find((m) => m.type === linkType);
