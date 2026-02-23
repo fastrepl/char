@@ -37,7 +37,7 @@ describe("buildSegments", () => {
       ],
     },
     {
-      name: "merges same-channel turns across interleaving speakers if gap is less than maxGapMs",
+      name: "interleaves same-channel turns across speakers within gap threshold",
       finalWords: [{ text: "0", start_ms: 300, end_ms: 400, channel: 1 }],
       partialWords: [
         { text: "1", start_ms: 0, end_ms: 100, channel: 0 },
@@ -46,14 +46,15 @@ describe("buildSegments", () => {
       expected: [
         expect.objectContaining({
           key: SegmentKey.make({ channel: 0 }),
-          words: [
-            expect.objectContaining({ text: "1" }),
-            expect.objectContaining({ text: "2" }),
-          ],
+          words: [expect.objectContaining({ text: "1" })],
         }),
         expect.objectContaining({
           key: SegmentKey.make({ channel: 1 }),
           words: [expect.objectContaining({ text: "0" })],
+        }),
+        expect.objectContaining({
+          key: SegmentKey.make({ channel: 0 }),
+          words: [expect.objectContaining({ text: "2" })],
         }),
       ],
     },
@@ -198,7 +199,7 @@ describe("buildSegments", () => {
       ],
     },
     {
-      name: "merges multiple short interruptions within gap threshold",
+      name: "interleaves multiple short turns across channels",
       finalWords: [
         { text: "0", start_ms: 0, end_ms: 100, channel: 0 },
         { text: "1", start_ms: 150, end_ms: 200, channel: 1 },
@@ -210,18 +211,23 @@ describe("buildSegments", () => {
       expected: [
         expect.objectContaining({
           key: SegmentKey.make({ channel: 0 }),
-          words: [
-            expect.objectContaining({ text: "0" }),
-            expect.objectContaining({ text: "2" }),
-            expect.objectContaining({ text: "4" }),
-          ],
+          words: [expect.objectContaining({ text: "0" })],
         }),
         expect.objectContaining({
           key: SegmentKey.make({ channel: 1 }),
-          words: [
-            expect.objectContaining({ text: "1" }),
-            expect.objectContaining({ text: "3" }),
-          ],
+          words: [expect.objectContaining({ text: "1" })],
+        }),
+        expect.objectContaining({
+          key: SegmentKey.make({ channel: 0 }),
+          words: [expect.objectContaining({ text: "2" })],
+        }),
+        expect.objectContaining({
+          key: SegmentKey.make({ channel: 1 }),
+          words: [expect.objectContaining({ text: "3" })],
+        }),
+        expect.objectContaining({
+          key: SegmentKey.make({ channel: 0 }),
+          words: [expect.objectContaining({ text: "4" })],
         }),
       ],
     },
@@ -458,7 +464,7 @@ describe("buildSegments", () => {
       ],
     },
     {
-      name: "applies speaker hints targeting partial word indexes",
+      name: "partial word inherits previous segment key ignoring its own speaker hints",
       finalWords: [{ text: "0", start_ms: 0, end_ms: 90, channel: 0 }],
       partialWords: [{ text: "1", start_ms: 140, end_ms: 220, channel: 0 }],
       speakerHints: [
@@ -480,15 +486,10 @@ describe("buildSegments", () => {
       expected: [
         expect.objectContaining({
           key: SegmentKey.make({ channel: 0 }),
-          words: [expect.objectContaining({ text: "0", isFinal: true })],
-        }),
-        expect.objectContaining({
-          key: SegmentKey.make({
-            channel: 0,
-            speaker_index: 4,
-            speaker_human_id: "alice",
-          }),
-          words: [expect.objectContaining({ text: "1", isFinal: false })],
+          words: [
+            expect.objectContaining({ text: "0", isFinal: true }),
+            expect.objectContaining({ text: "1", isFinal: false }),
+          ],
         }),
       ],
     },
@@ -831,7 +832,7 @@ describe("buildSegments", () => {
       ],
     },
     {
-      name: "partial words inherit speaker_index from previous final word on same channel",
+      name: "partial words inherit speaker_index and interleave across channels",
       finalWords: [
         { text: "0", start_ms: 0, end_ms: 100, channel: 0 },
         { text: "1", start_ms: 150, end_ms: 250, channel: 1 },
@@ -859,22 +860,24 @@ describe("buildSegments", () => {
       expected: [
         expect.objectContaining({
           key: SegmentKey.make({ channel: 0, speaker_index: 0 }),
-          words: [
-            expect.objectContaining({ text: "0", isFinal: true }),
-            expect.objectContaining({ text: "2", isFinal: false }),
-          ],
+          words: [expect.objectContaining({ text: "0", isFinal: true })],
         }),
         expect.objectContaining({
           key: SegmentKey.make({ channel: 1, speaker_index: 1 }),
-          words: [
-            expect.objectContaining({ text: "1", isFinal: true }),
-            expect.objectContaining({ text: "3", isFinal: false }),
-          ],
+          words: [expect.objectContaining({ text: "1", isFinal: true })],
+        }),
+        expect.objectContaining({
+          key: SegmentKey.make({ channel: 0, speaker_index: 0 }),
+          words: [expect.objectContaining({ text: "2", isFinal: false })],
+        }),
+        expect.objectContaining({
+          key: SegmentKey.make({ channel: 1, speaker_index: 1 }),
+          words: [expect.objectContaining({ text: "3", isFinal: false })],
         }),
       ],
     },
     {
-      name: "partial words inherit both speaker_index and human_id from previous final word per channel",
+      name: "partial words inherit full identity and interleave across channels",
       finalWords: [
         { text: "0", start_ms: 0, end_ms: 100, channel: 0 },
         { text: "1", start_ms: 150, end_ms: 250, channel: 1 },
@@ -921,11 +924,7 @@ describe("buildSegments", () => {
             speaker_index: 5,
             speaker_human_id: "alice",
           }),
-          words: [
-            expect.objectContaining({ text: "0", isFinal: true }),
-            expect.objectContaining({ text: "2", isFinal: false }),
-            expect.objectContaining({ text: "4", isFinal: false }),
-          ],
+          words: [expect.objectContaining({ text: "0", isFinal: true })],
         }),
         expect.objectContaining({
           key: SegmentKey.make({
@@ -933,10 +932,89 @@ describe("buildSegments", () => {
             speaker_index: 7,
             speaker_human_id: "bob",
           }),
+          words: [expect.objectContaining({ text: "1", isFinal: true })],
+        }),
+        expect.objectContaining({
+          key: SegmentKey.make({
+            channel: 0,
+            speaker_index: 5,
+            speaker_human_id: "alice",
+          }),
+          words: [expect.objectContaining({ text: "2", isFinal: false })],
+        }),
+        expect.objectContaining({
+          key: SegmentKey.make({
+            channel: 1,
+            speaker_index: 7,
+            speaker_human_id: "bob",
+          }),
+          words: [expect.objectContaining({ text: "3", isFinal: false })],
+        }),
+        expect.objectContaining({
+          key: SegmentKey.make({
+            channel: 0,
+            speaker_index: 5,
+            speaker_human_id: "alice",
+          }),
+          words: [expect.objectContaining({ text: "4", isFinal: false })],
+        }),
+      ],
+    },
+    {
+      name: "partial word with intermittent speaker hint stays in previous segment",
+      finalWords: [{ text: "0", start_ms: 0, end_ms: 100, channel: 0 }],
+      partialWords: [{ text: "1", start_ms: 150, end_ms: 250, channel: 0 }],
+      speakerHints: [
+        {
+          wordIndex: 0,
+          data: {
+            type: "provider_speaker_index" as const,
+            speaker_index: 0,
+          },
+        },
+        {
+          wordIndex: 1,
+          data: {
+            type: "provider_speaker_index" as const,
+            speaker_index: 1,
+          },
+        },
+      ],
+      expected: [
+        expect.objectContaining({
+          key: SegmentKey.make({ channel: 0, speaker_index: 0 }),
           words: [
-            expect.objectContaining({ text: "1", isFinal: true }),
-            expect.objectContaining({ text: "3", isFinal: false }),
+            expect.objectContaining({ text: "0", isFinal: true }),
+            expect.objectContaining({ text: "1", isFinal: false }),
           ],
+        }),
+      ],
+    },
+    {
+      name: "overlapping channels produce interleaved segments",
+      finalWords: [
+        { text: "0", start_ms: 0, end_ms: 100, channel: 0 },
+        { text: "1", start_ms: 50, end_ms: 150, channel: 1 },
+        { text: "2", start_ms: 200, end_ms: 300, channel: 0 },
+        { text: "3", start_ms: 250, end_ms: 350, channel: 1 },
+      ],
+      partialWords: [],
+      expected: [
+        expect.objectContaining({
+          key: SegmentKey.make({ channel: 0 }),
+          words: [expect.objectContaining({ text: "0" })],
+        }),
+        expect.objectContaining({
+          key: SegmentKey.make({ channel: 1 }),
+          words: [expect.objectContaining({ text: "1" })],
+        }),
+        expect.objectContaining({
+          key: SegmentKey.make({ channel: 0 }),
+          words: [expect.objectContaining({ text: "2" })],
+        }),
+        expect.objectContaining({
+          key: SegmentKey.make({ channel: 1 }),
+          words: [expect.objectContaining({ text: "3" })],
         }),
       ],
     },

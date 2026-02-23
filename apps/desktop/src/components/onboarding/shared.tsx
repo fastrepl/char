@@ -129,7 +129,7 @@ export function OnboardingButton(
   return (
     <button
       {...props}
-      className="w-fit px-6 py-2.5 rounded-full bg-stone-600 text-white text-sm font-medium duration-150 hover:scale-[1.01] active:scale-[0.99]"
+      className="w-fit px-6 py-2.5 rounded-full bg-stone-800 hover:bg-stone-700 text-white text-sm font-medium border-2 border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)] transition-all duration-200"
     />
   );
 }

@@ -11,7 +11,7 @@ import {
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
 import Underline from "@tiptap/extension-underline";
-import { Plugin, PluginKey } from "@tiptap/pm/state";
+import { Plugin, PluginKey, Transaction } from "@tiptap/pm/state";
 import StarterKit from "@tiptap/starter-kit";
 
 import { AIHighlight } from "../ai-highlight";
@@ -112,36 +112,59 @@ export const getExtensions = (
   Hashtag,
   Link.extend({
     addProseMirrorPlugins() {
+      const parentPlugins = this.parent?.() || [];
       return [
+        ...parentPlugins,
         new Plugin({
           key: new PluginKey("linkCmdClick"),
           props: {
             handleClick(view, pos, event) {
-              if (!(event.metaKey || event.ctrlKey)) {
-                return false;
-              }
-
               const { state } = view;
               const $pos = state.doc.resolve(pos);
               const marks = $pos.marks();
               const linkMark = marks.find((mark) => mark.type.name === "link");
-
-              if (linkMark && linkMark.attrs.href) {
-                event.preventDefault();
-                if (options?.onLinkOpen) {
-                  options.onLinkOpen(linkMark.attrs.href);
-                } else {
-                  window.open(
-                    linkMark.attrs.href,
-                    "_blank",
-                    "noopener,noreferrer",
-                  );
-                }
+              if (!linkMark || !linkMark.attrs.href) {
+                return false;
+              }
+              if (!(event.metaKey || event.ctrlKey)) {
                 return true;
               }
-
-              return false;
+              event.preventDefault();
+              if (options?.onLinkOpen) {
+                options.onLinkOpen(linkMark.attrs.href);
+              } else {
+                window.open(
+                  linkMark.attrs.href,
+                  "_blank",
+                  "noopener,noreferrer",
+                );
+              }
+              return true;
             },
+          },
+        }),
+        new Plugin({
+          key: new PluginKey("linkBoundaryGuard"),
+          appendTransaction(transactions, _oldState, newState) {
+            if (!transactions.some((tr) => tr.docChanged)) return null;
+            const linkType = newState.schema.marks.link;
+            if (!linkType) return null;
+            let tr: Transaction | null = null;
+            newState.doc.descendants((node, pos) => {
+              if (!node.isText || !node.text) return;
+              const linkMark = node.marks.find((m) => m.type === linkType);
+              if (!linkMark?.attrs.href) return;
+              const href: string = linkMark.attrs.href;
+              const text = node.text;
+              if (text === href) return;
+              const hrefIndex = text.indexOf(href);
+              if (hrefIndex < 0) return;
+              if (hrefIndex > 0) {
+                if (!tr) tr = newState.tr;
+                tr.removeMark(pos, pos + hrefIndex, linkType);
+              }
+            });
+            return tr;
           },
         }),
       ];

@@ -21,7 +21,7 @@ use reqwest::Client;
 use crate::analytics::{AnalyticsReporter, GenerationEvent};
 use crate::config::LlmProxyConfig;
 use crate::model::{CharTask, ModelContext};
-use crate::types::{ChatCompletionRequest, ToolChoice};
+use crate::types::{ChatCompletionRequest, ToolChoice, has_audio_content};
 
 async fn report_with_cost(
     analytics: &dyn AnalyticsReporter,
@@ -183,10 +183,12 @@ async fn completions_handler(
 
     let needs_tool_calling = request.tools.as_ref().is_some_and(|t| !t.is_empty())
         && !matches!(&request.tool_choice, Some(ToolChoice::String(s)) if s == "none");
+    let has_audio = has_audio_content(&request.messages);
 
     let ctx = ModelContext {
         task,
         needs_tool_calling,
+        has_audio,
     };
     let models = state.config.resolve(&ctx);
 

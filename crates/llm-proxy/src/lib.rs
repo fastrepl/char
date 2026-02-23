@@ -15,7 +15,7 @@ pub use env::{ApiKey, Env};
 pub use handler::{chat_completions_router, router};
 pub use hypr_analytics::{AuthenticatedUserId, DeviceFingerprint};
 pub use model::{
-    CharTask, MODEL_KEY_DEFAULT, MODEL_KEY_TOOL_CALLING, ModelContext, ModelResolver,
-    StaticModelResolver,
+    CharTask, MODEL_KEY_AUDIO, MODEL_KEY_DEFAULT, MODEL_KEY_TOOL_CALLING, ModelContext,
+    ModelResolver, StaticModelResolver,
 };
 pub use openapi::openapi;

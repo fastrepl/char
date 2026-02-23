@@ -17,6 +17,7 @@ import { useStartListening } from "../../../../hooks/useStartListening";
 import { useSTTConnection } from "../../../../hooks/useSTTConnection";
 import { useTitleGeneration } from "../../../../hooks/useTitleGeneration";
 import * as main from "../../../../store/tinybase/store/main";
+import { useSessionTitle } from "../../../../store/zustand/live-title";
 import { type Tab, useTabs } from "../../../../store/zustand/tabs";
 import { StandardTabWrapper } from "../index";
 import { type TabItem, TabItemBase } from "../shared";
@@ -43,7 +44,13 @@ export const TabItemNote: TabItem<Extract<Tab, { type: "sessions" }>> = ({
   pendingCloseConfirmationTab,
   setPendingCloseConfirmationTab,
 }) => {
-  const title = main.UI.useCell("sessions", tab.id, "title", main.STORE_ID);
+  const storeTitle = main.UI.useCell(
+    "sessions",
+    tab.id,
+    "title",
+    main.STORE_ID,
+  );
+  const title = useSessionTitle(tab.id, storeTitle as string | undefined);
   const sessionMode = useListener((state) => state.getSessionMode(tab.id));
   const stop = useListener((state) => state.stop);
   const isEnhancing = useIsSessionEnhancing(tab.id);

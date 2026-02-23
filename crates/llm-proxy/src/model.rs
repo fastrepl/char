@@ -5,6 +5,7 @@ use utoipa::ToSchema;
 
 pub const MODEL_KEY_DEFAULT: &str = "default";
 pub const MODEL_KEY_TOOL_CALLING: &str = "tool_calling";
+pub const MODEL_KEY_AUDIO: &str = "audio";
 
 #[derive(
     Debug,
@@ -30,6 +31,7 @@ pub enum CharTask {
 pub struct ModelContext {
     pub task: Option<CharTask>,
     pub needs_tool_calling: bool,
+    pub has_audio: bool,
 }
 
 pub trait ModelResolver: Send + Sync {
@@ -77,6 +79,13 @@ impl Default for StaticModelResolver {
                 "moonshotai/kimi-k2-0905".into(),
             ],
         );
+        models.insert(
+            MODEL_KEY_AUDIO.to_owned(),
+            vec![
+                "google/gemini-2.5-flash-lite".into(),
+                "mistralai/voxtral-small-24b-2507".into(),
+            ],
+        );
 
         Self { models }
     }
@@ -91,6 +100,12 @@ impl StaticModelResolver {
 
 impl ModelResolver for StaticModelResolver {
     fn resolve(&self, ctx: &ModelContext) -> Vec<String> {
+        if ctx.has_audio {
+            if let Some(models) = self.models.get(MODEL_KEY_AUDIO) {
+                return models.clone();
+            }
+        }
+
         if let Some(models) = ctx.task.and_then(|t| self.models.get(&t.to_string())) {
             return models.clone();
         }
@@ -111,6 +126,7 @@ mod tests {
     type ResolveTestCase = (
         &'static str,
         Option<CharTask>,
+        bool,
         bool,
         Option<(&'static str, Vec<&'static str>)>,
         &'static [&'static str],
@@ -134,6 +150,7 @@ mod tests {
                 "by_task",
                 Some(CharTask::Chat),
                 false,
+                false,
                 None,
                 &[
                     "anthropic/claude-haiku-4.5",
@@ -145,6 +162,7 @@ mod tests {
                 "by_tool_calling",
                 None,
                 true,
+                false,
                 None,
                 &[
                     "anthropic/claude-sonnet-4.6",
@@ -155,6 +173,7 @@ mod tests {
             (
                 "default",
                 None,
+                false,
                 false,
                 None,
                 &[
@@ -167,6 +186,7 @@ mod tests {
                 "task_overrides_tool_calling",
                 Some(CharTask::Chat),
                 true,
+                false,
                 None,
                 &[
                     "anthropic/claude-haiku-4.5",
@@ -178,12 +198,14 @@ mod tests {
                 "with_models_custom_key",
                 Some(CharTask::Enhance),
                 false,
+                false,
                 Some(("enhance", vec!["foo/bar"])),
                 &["foo/bar"],
             ),
             (
                 "unknown_task_falls_back_to_default",
                 Some(CharTask::Enhance),
+                false,
                 false,
                 None,
                 &[
@@ -192,9 +214,31 @@ mod tests {
                     "moonshotai/kimi-k2-0905",
                 ],
             ),
+            (
+                "audio_overrides_task",
+                Some(CharTask::Chat),
+                false,
+                true,
+                None,
+                &[
+                    "google/gemini-2.5-flash-lite",
+                    "mistralai/voxtral-small-24b-2507",
+                ],
+            ),
+            (
+                "audio_overrides_tool_calling",
+                None,
+                true,
+                true,
+                None,
+                &[
+                    "google/gemini-2.5-flash-lite",
+                    "mistralai/voxtral-small-24b-2507",
+                ],
+            ),
         ];
 
-        for (name, task, needs_tool_calling, with_models, expected) in cases {
+        for (name, task, needs_tool_calling, has_audio, with_models, expected) in cases {
             let mut resolver = StaticModelResolver::default();
             if let Some((key, models)) = with_models {
                 resolver =
@@ -206,6 +250,7 @@ mod tests {
                 ModelContext {
                     task: *task,
                     needs_tool_calling: *needs_tool_calling,
+                    has_audio: *has_audio,
                 },
                 expected,
             );

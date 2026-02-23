@@ -48,6 +48,19 @@ pub struct ChatCompletionRequest {
     pub extra: serde_json::Map<String, serde_json::Value>,
 }
 
+pub fn has_audio_content(messages: &[ChatMessage]) -> bool {
+    messages.iter().any(|msg| {
+        msg.content
+            .as_ref()
+            .and_then(|c| c.as_array())
+            .is_some_and(|parts| {
+                parts
+                    .iter()
+                    .any(|part| part.get("type").and_then(|t| t.as_str()) == Some("input_audio"))
+            })
+    })
+}
+
 #[derive(Debug, Deserialize)]
 pub struct UsageInfo {
     pub prompt_tokens: Option<u32>,
