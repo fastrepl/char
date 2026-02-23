@@ -1,5 +1,5 @@
-import { CalendarIcon } from "lucide-react";
 import { platform } from "@tauri-apps/plugin-os";
+import { CalendarIcon } from "lucide-react";
 
 import { Button } from "@hypr/ui/components/ui/button";
 
@@ -25,7 +25,10 @@ function AppleCalendarList() {
 function RequestCalendarAccess({
   onRequest,
   isPending,
-}: { onRequest: () => void; isPending: boolean }) {
+}: {
+  onRequest: () => void;
+  isPending: boolean;
+}) {
   return (
     <div className="flex flex-col items-center justify-center py-6 px-4 border rounded-lg">
       <CalendarIcon className="size-6 text-neutral-300 mb-2" />
