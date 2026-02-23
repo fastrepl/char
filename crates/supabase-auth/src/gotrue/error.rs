@@ -30,10 +30,6 @@ pub enum GoTrueError {
     /// Storage operation failed.
     #[error("storage error: {0}")]
     StorageError(String),
-
-    /// URL parsing error.
-    #[error("URL parse error: {0}")]
-    UrlParseError(#[from] url::ParseError),
 }
 
 impl GoTrueError {
@@ -52,6 +48,14 @@ impl GoTrueError {
                     Some("refresh_token_not_found") | Some("refresh_token_already_used")
                 )
             }
+            _ => false,
+        }
+    }
+
+    pub fn is_ignorable_signout_error(&self) -> bool {
+        match self {
+            Self::SessionMissing => true,
+            Self::ApiError { status, .. } => matches!(*status, 401 | 403 | 404),
             _ => false,
         }
     }

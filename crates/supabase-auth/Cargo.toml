@@ -12,8 +12,11 @@ thiserror = { workspace = true }
 base64 = { workspace = true }
 chrono = { workspace = true, features = ["serde"] }
 jsonwebtoken = { workspace = true }
-url = { workspace = true }
 urlencoding = { workspace = true }
 
 reqwest = { workspace = true, features = ["json"] }
 tokio = { workspace = true, features = ["sync", "time", "rt", "macros"] }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["sync", "time", "rt-multi-thread", "macros"] }
+uuid = { workspace = true, features = ["v4"] }

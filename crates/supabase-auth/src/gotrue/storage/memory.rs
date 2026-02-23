@@ -1,17 +1,8 @@
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 
-/// Trait for session storage, analogous to the JS SDK's `SupportedStorage`.
-///
-/// Implementors provide persistent key-value storage for auth session data.
-/// Methods are synchronous to allow use from both sync and async contexts.
-pub trait AuthStorage: Send + Sync + 'static {
-    fn get_item(&self, key: &str) -> Result<Option<String>, String>;
-    fn set_item(&self, key: &str, value: &str) -> Result<(), String>;
-    fn remove_item(&self, key: &str) -> Result<(), String>;
-}
+use super::AuthStorage;
 
-/// In-memory storage implementation, useful for testing.
 #[derive(Clone)]
 pub struct MemoryStorage {
     data: Arc<RwLock<HashMap<String, String>>>,
