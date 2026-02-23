@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 
+use base64::{Engine, engine::general_purpose::STANDARD};
 use serde::{Deserialize, Serialize};
+
+use super::content::AudioFormat;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -53,11 +56,24 @@ pub struct InputAudio {
     pub format: AudioFormat,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub enum AudioFormat {
-    Mp3,
-    Wav,
+impl ResponseInputContent {
+    pub fn input_audio(data: impl Into<String>, format: AudioFormat) -> Self {
+        Self::InputAudio {
+            input_audio: InputAudio {
+                data: data.into(),
+                format,
+            },
+        }
+    }
+
+    pub fn input_audio_from_bytes(data: &[u8], format: AudioFormat) -> Self {
+        Self::InputAudio {
+            input_audio: InputAudio {
+                data: STANDARD.encode(data),
+                format,
+            },
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
