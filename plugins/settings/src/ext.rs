@@ -13,14 +13,14 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Settings<'a, R, M> {
     pub fn default_base(&self) -> Result<PathBuf, crate::Error> {
         let bundle_id: &str = self.manager.config().identifier.as_ref();
         let path = hypr_storage::global::compute_default_base(bundle_id)
-            .ok_or(crate::Error::DataDirUnavailable)?;
+            .ok_or(hypr_storage::Error::DataDirUnavailable)?;
         std::fs::create_dir_all(&path)?;
         Ok(path)
     }
 
     pub fn global_base(&self) -> Result<Utf8PathBuf, crate::Error> {
         let path = self.default_base()?;
-        Utf8PathBuf::from_path_buf(path).map_err(|_| crate::Error::PathNotValidUtf8)
+        Utf8PathBuf::from_path_buf(path).map_err(|_| hypr_storage::Error::PathNotValidUtf8.into())
     }
 
     pub fn settings_path(&self) -> Result<Utf8PathBuf, crate::Error> {
@@ -31,7 +31,7 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Settings<'a, R, M> {
     pub fn cached_vault_base(&self) -> Result<Utf8PathBuf, crate::Error> {
         let state = self.manager.state::<crate::state::State>();
         Utf8PathBuf::from_path_buf(state.vault_base().clone())
-            .map_err(|_| crate::Error::PathNotValidUtf8)
+            .map_err(|_| hypr_storage::Error::PathNotValidUtf8.into())
     }
 
     pub fn fresh_vault_base(&self) -> Result<PathBuf, crate::Error> {

@@ -8,7 +8,6 @@ default = []
 specta = ["dep:specta"]
 
 [dependencies]
-camino = { workspace = true }
 dirs = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }

@@ -10,10 +10,6 @@ pub enum Error {
     Json(#[from] serde_json::Error),
     #[error(transparent)]
     Storage(#[from] hypr_storage::Error),
-    #[error("data directory not available")]
-    DataDirUnavailable,
-    #[error("path contains invalid UTF-8")]
-    PathNotValidUtf8,
 }
 
 impl Serialize for Error {
