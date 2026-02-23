@@ -37,7 +37,11 @@ export const TabItemOnboarding: TabItem<
 }) => {
   return (
     <TabItemBase
-      icon={<span className="text-sm">👋</span>}
+      icon={
+        <span className="text-sm inline-block origin-[70%_80%] group-hover:animate-wiggle">
+          👋
+        </span>
+      }
       title="Welcome"
       selected={tab.active}
       allowPin={false}
