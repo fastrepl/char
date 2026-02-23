@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use tokio::sync::{broadcast, Mutex, RwLock};
+use tokio::sync::{Mutex, RwLock, broadcast};
 
 use super::error::GoTrueError;
 use super::storage::AuthStorage;
@@ -277,16 +277,10 @@ impl<S: AuthStorage> GoTrueClient<S> {
     ) -> String {
         let inner = self.inner.read().await;
 
-        let mut params = vec![format!(
-            "provider={}",
-            urlencoding::encode(provider)
-        )];
+        let mut params = vec![format!("provider={}", urlencoding::encode(provider))];
 
         if let Some(redirect) = redirect_to {
-            params.push(format!(
-                "redirect_to={}",
-                urlencoding::encode(redirect)
-            ));
+            params.push(format!("redirect_to={}", urlencoding::encode(redirect)));
         }
 
         if let Some(scopes) = scopes {
@@ -375,16 +369,13 @@ impl<S: AuthStorage> GoTrueClient<S> {
 
         let status = response.status().as_u16();
         if !response.status().is_success() {
-            let body: GoTrueErrorBody = response
-                .json()
-                .await
-                .unwrap_or_else(|_| GoTrueErrorBody {
-                    error: Some("Unknown error".to_string()),
-                    error_description: None,
-                    code: None,
-                    msg: None,
-                    message: None,
-                });
+            let body: GoTrueErrorBody = response.json().await.unwrap_or_else(|_| GoTrueErrorBody {
+                error: Some("Unknown error".to_string()),
+                error_description: None,
+                code: None,
+                msg: None,
+                message: None,
+            });
             return Err(GoTrueError::from_api_response(status, body));
         }
 
@@ -413,16 +404,13 @@ impl<S: AuthStorage> GoTrueClient<S> {
 
         let status = response.status().as_u16();
         if !response.status().is_success() {
-            let body: GoTrueErrorBody = response
-                .json()
-                .await
-                .unwrap_or_else(|_| GoTrueErrorBody {
-                    error: Some("Unknown error".to_string()),
-                    error_description: None,
-                    code: None,
-                    msg: None,
-                    message: None,
-                });
+            let body: GoTrueErrorBody = response.json().await.unwrap_or_else(|_| GoTrueErrorBody {
+                error: Some("Unknown error".to_string()),
+                error_description: None,
+                code: None,
+                msg: None,
+                message: None,
+            });
             return Err(GoTrueError::from_api_response(status, body));
         }
 
@@ -463,16 +451,13 @@ impl<S: AuthStorage> GoTrueClient<S> {
 
         if !response.status().is_success() {
             let status = response.status().as_u16();
-            let body: GoTrueErrorBody = response
-                .json()
-                .await
-                .unwrap_or_else(|_| GoTrueErrorBody {
-                    error: Some("Unknown error".to_string()),
-                    error_description: None,
-                    code: None,
-                    msg: None,
-                    message: None,
-                });
+            let body: GoTrueErrorBody = response.json().await.unwrap_or_else(|_| GoTrueErrorBody {
+                error: Some("Unknown error".to_string()),
+                error_description: None,
+                code: None,
+                msg: None,
+                message: None,
+            });
             return Err(GoTrueError::from_api_response(status, body));
         }
 
@@ -567,8 +552,7 @@ async fn auto_refresh_tick<S: AuthStorage>(client: &GoTrueClient<S>) {
     };
 
     let now = chrono::Utc::now().timestamp_millis();
-    let expires_in_ticks =
-        (expires_at * 1000 - now) / AUTO_REFRESH_TICK_DURATION_MS as i64;
+    let expires_in_ticks = (expires_at * 1000 - now) / AUTO_REFRESH_TICK_DURATION_MS as i64;
 
     if expires_in_ticks <= AUTO_REFRESH_TICK_THRESHOLD {
         if let Err(e) = client.call_refresh_token(&session.refresh_token).await {
@@ -593,7 +577,7 @@ fn decode_jwt_exp(token: &str) -> Option<i64> {
         return None;
     }
 
-    use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
+    use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
     let payload = URL_SAFE_NO_PAD.decode(parts[1]).ok()?;
     let claims: serde_json::Value = serde_json::from_slice(&payload).ok()?;
     claims.get("exp")?.as_i64()
@@ -635,10 +619,7 @@ fn save_session<S: AuthStorage>(
     Ok(())
 }
 
-fn remove_session<S: AuthStorage>(
-    storage: &S,
-    storage_key: &str,
-) -> Result<(), GoTrueError> {
+fn remove_session<S: AuthStorage>(storage: &S, storage_key: &str) -> Result<(), GoTrueError> {
     storage
         .remove_item(storage_key)
         .map_err(GoTrueError::StorageError)?;
@@ -662,7 +643,7 @@ mod tests {
 
     #[test]
     fn test_decode_jwt_exp() {
-        use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
+        use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
 
         let header = URL_SAFE_NO_PAD.encode(r#"{"alg":"HS256","typ":"JWT"}"#);
         let payload = URL_SAFE_NO_PAD.encode(r#"{"sub":"user-1","exp":1700000000}"#);
@@ -673,7 +654,7 @@ mod tests {
 
     #[test]
     fn test_decode_jwt_exp_no_exp() {
-        use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
+        use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
 
         let header = URL_SAFE_NO_PAD.encode(r#"{"alg":"HS256","typ":"JWT"}"#);
         let payload = URL_SAFE_NO_PAD.encode(r#"{"sub":"user-1"}"#);
