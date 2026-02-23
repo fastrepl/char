@@ -21,6 +21,7 @@ const validateSearch = z.object({
   error: z.string().optional(),
   error_code: z.string().optional(),
   error_description: z.string().optional(),
+  auto_open: z.boolean().optional(),
 });
 
 export const Route = createFileRoute("/_view/callback/auth")({
@@ -164,6 +165,16 @@ function Component() {
       window.location.href = deeplink;
     }
   };
+
+  // When the user already had a web session and was redirected here
+  // automatically (auto_open=true), try to trigger the deeplink immediately.
+  // The redirect chain from /auth preserves transient user activation,
+  // so the browser will show its native "Open Char?" confirmation dialog.
+  useEffect(() => {
+    if (search.auto_open && search.flow === "desktop") {
+      handleDeeplink();
+    }
+  }, [search.auto_open, search.flow]);
 
   const handleCopy = async () => {
     const deeplink = getDeeplink();

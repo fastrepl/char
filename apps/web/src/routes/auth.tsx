@@ -52,6 +52,7 @@ export const Route = createFileRoute("/auth")({
               scheme: search.scheme,
               access_token: result.access_token,
               refresh_token: result.refresh_token,
+              auto_open: true,
             },
           });
         }
