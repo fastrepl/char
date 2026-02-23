@@ -48,7 +48,6 @@ hypr-buffer = { path = "crates/buffer", package = "buffer" }
 hypr-bundle = { path = "crates/bundle", package = "bundle" }
 hypr-cactus = { path = "crates/cactus", package = "cactus" }
 hypr-cactus-model = { path = "crates/cactus-model", package = "cactus-model" }
-hypr-cactus-sys = { path = "crates/cactus-sys", package = "cactus-sys" }
 hypr-chatwoot = { path = "crates/chatwoot", package = "chatwoot" }
 hypr-data = { path = "crates/data", package = "data" }
 hypr-db-core = { path = "crates/db-core", package = "db-core" }
@@ -83,7 +82,6 @@ hypr-loops = { path = "crates/loops", package = "loops" }
 hypr-mac = { path = "crates/mac", package = "mac" }
 hypr-mcp = { path = "crates/mcp", package = "mcp" }
 hypr-nango = { path = "crates/nango", package = "nango" }
-hypr-notch = { path = "crates/notch", package = "notch" }
 hypr-notification = { path = "crates/notification", package = "notification" }
 hypr-notification-interface = { path = "crates/notification-interface", package = "notification-interface" }
 hypr-notion = { path = "crates/notion", package = "notion" }
@@ -107,8 +105,6 @@ hypr-template-eval = { path = "crates/template-eval", package = "template-eval" 
 hypr-template-support = { path = "crates/template-support", package = "template-support" }
 hypr-tiptap = { path = "crates/tiptap", package = "tiptap" }
 hypr-transcribe-cactus = { path = "crates/transcribe-cactus", package = "transcribe-cactus" }
-hypr-transcribe-deepgram = { path = "crates/transcribe-deepgram", package = "transcribe-deepgram" }
-hypr-transcribe-openai = { path = "crates/transcribe-openai", package = "transcribe-openai" }
 hypr-transcribe-proxy = { path = "crates/transcribe-proxy", package = "transcribe-proxy" }
 hypr-transcribe-whisper-local = { path = "crates/transcribe-whisper-local", package = "transcribe-whisper-local" }
 hypr-transcript = { path = "crates/transcript", package = "transcript" }

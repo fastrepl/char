@@ -15,6 +15,7 @@ hypr-device-monitor = { workspace = true }
 hypr-host = { workspace = true }
 hypr-language = { workspace = true }
 hypr-supervisor = { workspace = true }
+hypr-transcript = { workspace = true }
 hypr-vad-ext = { workspace = true }
 
 owhisper-client = { workspace = true }
