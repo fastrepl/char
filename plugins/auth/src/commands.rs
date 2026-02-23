@@ -8,7 +8,7 @@ pub(crate) fn decode_claims(token: String) -> Result<hypr_supabase_auth::Claims,
 
 #[tauri::command]
 #[specta::specta]
-pub(crate) async fn get_account_info<R: tauri::Runtime>(
+pub(crate) fn get_account_info<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
 ) -> Result<Option<hypr_template_support::AccountInfo>, String> {
     app.get_account_info().map_err(|e| e.to_string())
@@ -16,7 +16,7 @@ pub(crate) async fn get_account_info<R: tauri::Runtime>(
 
 #[tauri::command]
 #[specta::specta]
-pub(crate) async fn get_item<R: tauri::Runtime>(
+pub(crate) fn get_item<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     key: String,
 ) -> Result<Option<String>, String> {
@@ -25,7 +25,7 @@ pub(crate) async fn get_item<R: tauri::Runtime>(
 
 #[tauri::command]
 #[specta::specta]
-pub(crate) async fn set_item<R: tauri::Runtime>(
+pub(crate) fn set_item<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     key: String,
     value: String,
@@ -35,7 +35,7 @@ pub(crate) async fn set_item<R: tauri::Runtime>(
 
 #[tauri::command]
 #[specta::specta]
-pub(crate) async fn remove_item<R: tauri::Runtime>(
+pub(crate) fn remove_item<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     key: String,
 ) -> Result<(), String> {
@@ -44,6 +44,6 @@ pub(crate) async fn remove_item<R: tauri::Runtime>(
 
 #[tauri::command]
 #[specta::specta]
-pub(crate) async fn clear<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> Result<(), String> {
+pub(crate) fn clear<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> Result<(), String> {
     app.clear_auth().map_err(|e| e.to_string())
 }

@@ -80,6 +80,7 @@ const useHandleDetectEvents = (store: ListenerStore) => {
               "Noticed microphone usage for certain period of time. Start listening?",
             timeout: { secs: 15, nanos: 0 },
             event_id: null,
+            source: "mic_detected",
             start_time: null,
             participants: null,
             event_details: null,

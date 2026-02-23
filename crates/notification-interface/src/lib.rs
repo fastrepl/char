@@ -93,6 +93,7 @@ pub struct EventDetails {
 pub struct NotificationContext {
     pub key: String,
     pub event_id: Option<String>,
+    pub source: Option<String>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, specta::Type)]
@@ -102,6 +103,7 @@ pub struct Notification {
     pub message: String,
     pub timeout: Option<std::time::Duration>,
     pub event_id: Option<String>,
+    pub source: Option<String>,
     pub start_time: Option<i64>,
     pub participants: Option<Vec<Participant>>,
     pub event_details: Option<EventDetails>,
@@ -125,6 +127,7 @@ pub struct NotificationBuilder {
     message: Option<String>,
     timeout: Option<std::time::Duration>,
     event_id: Option<String>,
+    source: Option<String>,
     start_time: Option<i64>,
     participants: Option<Vec<Participant>>,
     event_details: Option<EventDetails>,
@@ -157,6 +160,11 @@ impl NotificationBuilder {
         self
     }
 
+    pub fn source(mut self, source: impl Into<String>) -> Self {
+        self.source = Some(source.into());
+        self
+    }
+
     pub fn start_time(mut self, start_time: i64) -> Self {
         self.start_time = Some(start_time);
         self
@@ -184,6 +192,7 @@ impl NotificationBuilder {
             message: self.message.unwrap(),
             timeout: self.timeout,
             event_id: self.event_id,
+            source: self.source,
             start_time: self.start_time,
             participants: self.participants,
             event_details: self.event_details,
