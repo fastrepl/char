@@ -80,6 +80,64 @@ const AttachmentImage = Image.extend({
   },
 });
 
+const COMMON_TLDS = new Set([
+  "com",
+  "org",
+  "net",
+  "edu",
+  "gov",
+  "mil",
+  "int",
+  "info",
+  "biz",
+  "name",
+  "pro",
+  "app",
+  "dev",
+  "tech",
+  "xyz",
+  "online",
+  "site",
+  "store",
+  "cloud",
+  "design",
+  "studio",
+  "agency",
+  "blog",
+  "shop",
+  "media",
+  "news",
+  "world",
+  "global",
+  "digital",
+  "network",
+  "museum",
+  "aero",
+  "coop",
+  "travel",
+  "jobs",
+  "mobi",
+  "asia",
+  "tel",
+  "cat",
+  "post",
+]);
+
+function isValidUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:")
+      return false;
+    const parts = parsed.hostname.split(".");
+    if (parts.length < 2) return false;
+    const tld = parts[parts.length - 1].toLowerCase();
+    if (tld.length === 2 && /^[a-z]{2}$/.test(tld)) return true;
+    return COMMON_TLDS.has(tld);
+  } catch {
+    return false;
+  }
+}
+
 export const getExtensions = (
   placeholderComponent?: PlaceholderFunction,
   fileHandlerConfig?: FileHandlerConfig,
@@ -137,16 +195,20 @@ export const getExtensions = (
               }
               const linkMark = node.marks.find((m) => m.type === linkType);
               if (linkMark) {
-                if (node.text === linkMark.attrs.href) {
+                const textLooksLikeUrl =
+                  node.text.startsWith("https://") ||
+                  node.text.startsWith("http://");
+                if (textLooksLikeUrl && !isValidUrl(node.text)) {
+                  if (!tr) tr = newState.tr;
+                  tr.removeMark(pos, pos + node.text.length, linkType);
+                  prevLink = null;
+                } else if (node.text === linkMark.attrs.href) {
                   prevLink = {
                     startPos: pos,
                     endPos: pos + node.text.length,
                     mark: linkMark,
                   };
-                } else if (
-                  node.text.startsWith("https://") ||
-                  node.text.startsWith("http://")
-                ) {
+                } else if (textLooksLikeUrl) {
                   const updatedMark = linkType.create({
                     ...linkMark.attrs,
                     href: node.text,
@@ -168,16 +230,18 @@ export const getExtensions = (
                   const extendLen = wsIdx >= 0 ? wsIdx : node.text.length;
                   const newHref =
                     prevLink.mark.attrs.href + node.text.slice(0, extendLen);
-                  if (!tr) tr = newState.tr;
-                  tr.removeMark(prevLink.startPos, prevLink.endPos, linkType);
-                  tr.addMark(
-                    prevLink.startPos,
-                    pos + extendLen,
-                    linkType.create({
-                      ...prevLink.mark.attrs,
-                      href: newHref,
-                    }),
-                  );
+                  if (isValidUrl(newHref)) {
+                    if (!tr) tr = newState.tr;
+                    tr.removeMark(prevLink.startPos, prevLink.endPos, linkType);
+                    tr.addMark(
+                      prevLink.startPos,
+                      pos + extendLen,
+                      linkType.create({
+                        ...prevLink.mark.attrs,
+                        href: newHref,
+                      }),
+                    );
+                  }
                 }
                 prevLink = null;
               } else {
@@ -251,8 +315,7 @@ export const getExtensions = (
         return false;
       }
     },
-    shouldAutoLink: (url) =>
-      url.startsWith("https://") || url.startsWith("http://"),
+    shouldAutoLink: (url) => isValidUrl(url),
   }),
   TaskList,
   TaskItem.configure({ nested: true }),
