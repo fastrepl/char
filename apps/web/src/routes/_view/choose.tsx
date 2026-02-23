@@ -204,6 +204,9 @@ function Component() {
       style={{ backgroundImage: "url(/patterns/dots.svg)" }}
     >
       <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white min-h-screen">
+        <h1 className="text-4xl sm:text-5xl font-serif text-stone-600 text-center pt-12 pb-4">
+          Build Your Pizza
+        </h1>
         <div className="flex flex-col md:flex-row md:h-[calc(100vh-65px)]">
           <div className="flex items-center justify-center p-10 md:p-16 border-b md:border-b-0 md:border-r border-neutral-100 md:flex-1">
             <PizzaGraphic
