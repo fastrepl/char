@@ -37,8 +37,7 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Settings<'a, R, M> {
     pub fn fresh_vault_base(&self) -> Result<PathBuf, crate::Error> {
         let default_base = self.default_base()?;
         let global_base = self.global_base()?;
-        let custom_base =
-            hypr_storage::vault::resolve_custom(global_base.as_ref(), &default_base);
+        let custom_base = hypr_storage::vault::resolve_custom(global_base.as_ref(), &default_base);
         Ok(custom_base.unwrap_or(default_base))
     }
 
@@ -78,8 +77,7 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R> + tauri::Emitter<R>> Settings<'
         hypr_storage::vault::ensure_vault_dir(new_path.as_ref())?;
         hypr_storage::vault::copy_vault_items(old_vault_base.as_ref(), new_path.as_ref()).await?;
 
-        let vault_config_path =
-            hypr_storage::global::compute_vault_config_path(&default_base);
+        let vault_config_path = hypr_storage::global::compute_vault_config_path(&default_base);
         let mut config = std::fs::read_to_string(&vault_config_path)
             .ok()
             .and_then(|s| serde_json::from_str(&s).ok())
