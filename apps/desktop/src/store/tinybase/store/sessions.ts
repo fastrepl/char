@@ -132,14 +132,14 @@ export function isSessionEmpty(store: Store, sessionId: string): boolean {
     return false;
   }
 
-  let hasParticipant = false;
+  let hasManualParticipant = false;
   store.forEachRow("mapping_session_participant", (rowId, _forEachCell) => {
     const row = store.getRow("mapping_session_participant", rowId);
-    if (row?.session_id === sessionId) {
-      hasParticipant = true;
+    if (row?.session_id === sessionId && row.source !== "auto") {
+      hasManualParticipant = true;
     }
   });
-  if (hasParticipant) {
+  if (hasManualParticipant) {
     return false;
   }
 
