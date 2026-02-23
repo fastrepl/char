@@ -14,30 +14,16 @@ tauri-plugin = { workspace = true, features = ["build"] }
 specta-typescript = { workspace = true }
 
 [dependencies]
-tauri-plugin-settings = { workspace = true }
-
-hypr-audio-utils = { workspace = true }
-hypr-host = { workspace = true }
 hypr-language = { workspace = true }
+hypr-listener2-core = { workspace = true, features = ["specta"] }
 hypr-transcript = { workspace = true }
 
-owhisper-client = { workspace = true, features = ["argmax"] }
-owhisper-interface = { workspace = true }
+tauri-plugin-settings = { workspace = true }
 
 tauri = { workspace = true, features = ["specta", "test"] }
 
-camino = { workspace = true }
 specta = { workspace = true }
 tauri-specta = { workspace = true, features = ["derive", "typescript"] }
 
 serde = { workspace = true }
-thiserror = { workspace = true }
-
-ractor = { workspace = true, features = ["async-trait"] }
-
-futures-util = { workspace = true }
-tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
-tokio-stream = { workspace = true }
-tracing = { workspace = true }
-
-aspasia = "0.2.1"
+tokio = { workspace = true }

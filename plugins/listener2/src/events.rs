@@ -1,5 +1,5 @@
-use owhisper_interface::batch::Response as BatchResponse;
-use owhisper_interface::stream::StreamResponse;
+use hypr_listener2_core as core;
+use hypr_transcript::TranscriptDelta;
 
 #[macro_export]
 macro_rules! common_event_derives {
@@ -14,18 +14,38 @@ common_event_derives! {
     pub enum BatchEvent {
         #[serde(rename = "batchStarted")]
         BatchStarted { session_id: String },
-        #[serde(rename = "batchResponse")]
-        BatchResponse {
-            session_id: String,
-            response: BatchResponse,
-        },
         #[serde(rename = "batchProgress")]
-        BatchResponseStreamed {
+        BatchProgress {
             session_id: String,
-            response: StreamResponse,
+            delta: TranscriptDelta,
             percentage: f64,
         },
+        #[serde(rename = "batchEnded")]
+        BatchEnded { session_id: String },
         #[serde(rename = "batchFailed")]
         BatchFailed { session_id: String, error: String },
+    }
+}
+
+impl From<core::BatchEvent> for BatchEvent {
+    fn from(event: core::BatchEvent) -> Self {
+        match event {
+            core::BatchEvent::BatchStarted { session_id } => {
+                BatchEvent::BatchStarted { session_id }
+            }
+            core::BatchEvent::BatchProgress {
+                session_id,
+                delta,
+                percentage,
+            } => BatchEvent::BatchProgress {
+                session_id,
+                delta,
+                percentage,
+            },
+            core::BatchEvent::BatchEnded { session_id } => BatchEvent::BatchEnded { session_id },
+            core::BatchEvent::BatchFailed { session_id, error } => {
+                BatchEvent::BatchFailed { session_id, error }
+            }
+        }
     }
 }

@@ -10434,6 +10434,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "listener2-core"
+version = "0.1.0"
+dependencies = [
+ "aspasia",
+ "audio-utils",
+ "futures-util",
+ "host",
+ "language",
+ "owhisper-client",
+ "owhisper-interface",
+ "ractor",
+ "serde",
+ "specta",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-stream",
+ "tracing",
+ "transcript",
+]
+
+[[package]]
 name = "litemap"
 version = "0.7.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -18363,15 +18384,8 @@ dependencies = [
 name = "tauri-plugin-listener2"
 version = "0.1.0"
 dependencies = [
- "aspasia",
- "audio-utils",
- "camino",
- "futures-util",
- "host",
  "language",
- "owhisper-client",
- "owhisper-interface",
- "ractor",
+ "listener2-core",
  "serde",
  "specta",
  "specta-typescript",
@@ -18379,10 +18393,7 @@ dependencies = [
  "tauri-plugin",
  "tauri-plugin-settings",
  "tauri-specta",
- "thiserror 2.0.18",
  "tokio",
- "tokio-stream",
- "tracing",
  "transcript",
 ]
 

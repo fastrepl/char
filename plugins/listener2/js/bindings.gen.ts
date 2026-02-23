@@ -71,25 +71,50 @@ batchEvent: "plugin:listener2:batch-event"
 
 /** user-defined types **/
 
-export type BatchAlternatives = { transcript: string; confidence: number; words?: BatchWord[] }
-export type BatchChannel = { alternatives: BatchAlternatives[] }
-export type BatchEvent = { type: "batchStarted"; session_id: string } | { type: "batchResponse"; session_id: string; response: BatchResponse } | { type: "batchProgress"; session_id: string; response: StreamResponse; percentage: number } | { type: "batchFailed"; session_id: string; error: string }
+export type BatchEvent = { type: "batchStarted"; session_id: string } | { type: "batchProgress"; session_id: string; delta: TranscriptDelta; percentage: number } | { type: "batchEnded"; session_id: string } | { type: "batchFailed"; session_id: string; error: string }
 export type BatchParams = { session_id: string; provider: BatchProvider; file_path: string; model?: string | null; base_url: string; api_key: string; languages?: string[]; keywords?: string[] }
 export type BatchProvider = "deepgram" | "soniox" | "assemblyai" | "am"
-export type BatchResponse = { metadata: JsonValue; results: BatchResults }
-export type BatchResults = { channels: BatchChannel[] }
-export type BatchWord = { word: string; start: number; end: number; confidence: number; speaker: number | null; punctuated_word: string | null }
-export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
-export type StreamAlternatives = { transcript: string; words: StreamWord[]; confidence: number; languages?: string[] }
-export type StreamChannel = { alternatives: StreamAlternatives[] }
-export type StreamExtra = { started_unix_millis: number }
-export type StreamMetadata = { request_id: string; model_info: StreamModelInfo; model_uuid: string; extra?: StreamExtra }
-export type StreamModelInfo = { name: string; version: string; arch: string }
-export type StreamResponse = { type: "Results"; start: number; duration: number; is_final: boolean; speech_final: boolean; from_finalize: boolean; channel: StreamChannel; metadata: StreamMetadata; channel_index: number[] } | { type: "Metadata"; request_id: string; created: string; duration: number; channels: number } | { type: "SpeechStarted"; channel: number[]; timestamp: number } | { type: "UtteranceEnd"; channel: number[]; last_word_end: number } | { type: "Error"; error_code: number | null; error_message: string; provider: string }
-export type StreamWord = { word: string; start: number; end: number; confidence: number; speaker: number | null; punctuated_word: string | null; language: string | null }
+export type FinalizedWord = { id: string; text: string; start_ms: number; end_ms: number; channel: number; state: WordState }
+export type PartialWord = { text: string; start_ms: number; end_ms: number; channel: number }
+export type SpeakerHint = { word_id: string; speaker_index: number }
 export type Subtitle = { tokens: Token[] }
 export type Token = { text: string; start_time: number; end_time: number; speaker: string | null }
+/**
+ * Delta emitted to the frontend after processing.
+ * 
+ * The frontend should:
+ * 1. Remove words listed in `replaced_ids` from TinyBase
+ * 2. Persist `new_words` to TinyBase (honoring `state`)
+ * 3. Store `partials` in ephemeral Zustand state for rendering
+ * 
+ * This shape handles all correction flows uniformly:
+ * - Normal finalization: `new_words` with `Final`, empty `replaced_ids`
+ * - Pending correction submitted: `new_words` with `Pending`, `replaced_ids`
+ * pointing at the same words' previous `Final` versions
+ * - Correction resolved: `new_words` with `Final` (corrected text),
+ * `replaced_ids` pointing at the `Pending` versions
+ */
+export type TranscriptDelta = { new_words: FinalizedWord[]; hints: SpeakerHint[]; 
+/**
+ * IDs of words superseded by `new_words`. Empty for normal finalization.
+ */
+replaced_ids: string[]; 
+/**
+ * Current in-progress words across all channels. Global snapshot.
+ */
+partials: PartialWord[] }
 export type VttWord = { text: string; start_ms: number; end_ms: number; speaker: string | null }
+/**
+ * Lifecycle state of a word in the transcript.
+ * 
+ * - `Partial`: still being streamed, ephemeral (not persisted).
+ * - `Pending`: confirmed by the STT model but a correction source (cloud STT
+ * fallback, LLM postprocessor, etc.) is still processing it. The word has an
+ * ID and is persisted, but its text may be replaced when the correction
+ * resolves via `TranscriptDelta::replaced_ids`.
+ * - `Final`: stable, will not change.
+ */
+export type WordState = "partial" | "pending" | "final"
 
 /** tauri-specta globals **/
 

@@ -4,19 +4,191 @@ use std::time::Duration;
 
 use futures_util::StreamExt;
 use owhisper_client::{
-    AdapterKind, ArgmaxAdapter, AssemblyAIAdapter, CactusAdapter, DashScopeAdapter,
-    DeepgramAdapter, ElevenLabsAdapter, FireworksAdapter, GladiaAdapter, HyprnoteAdapter,
-    MistralAdapter, OpenAIAdapter, RealtimeSttAdapter, SonioxAdapter,
+    AdapterKind, ArgmaxAdapter, AssemblyAIAdapter, BatchSttAdapter, CactusAdapter,
+    DashScopeAdapter, DeepgramAdapter, ElevenLabsAdapter, FireworksAdapter, GladiaAdapter,
+    HyprnoteAdapter, MistralAdapter, OpenAIAdapter, RealtimeSttAdapter, SonioxAdapter,
 };
 use owhisper_interface::stream::StreamResponse;
 use owhisper_interface::{ControlMessage, MixedMessage};
 use ractor::{Actor, ActorName, ActorProcessingErr, ActorRef, SpawnErr};
-use tauri_specta::Event;
 use tokio_stream::{self as tokio_stream, StreamExt as TokioStreamExt};
+use tracing::Instrument;
 
-use crate::BatchEvent;
+use hypr_transcript::{TranscriptDelta, TranscriptProcessor};
+
+use crate::{BatchEvent, BatchRuntime};
 
 const BATCH_STREAM_TIMEOUT_SECS: u64 = 30;
+const DEFAULT_CHUNK_MS: u64 = 500;
+const DEFAULT_DELAY_MS: u64 = 20;
+const DEVICE_FINGERPRINT_HEADER: &str = "x-device-fingerprint";
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
+#[serde(rename_all = "lowercase")]
+pub enum BatchProvider {
+    Deepgram,
+    Soniox,
+    AssemblyAI,
+    Am,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
+pub struct BatchParams {
+    pub session_id: String,
+    pub provider: BatchProvider,
+    pub file_path: String,
+    #[serde(default)]
+    pub model: Option<String>,
+    pub base_url: String,
+    pub api_key: String,
+    #[serde(default)]
+    pub languages: Vec<hypr_language::Language>,
+    #[serde(default)]
+    pub keywords: Vec<String>,
+}
+
+pub async fn run_batch(runtime: Arc<dyn BatchRuntime>, params: BatchParams) -> crate::Result<()> {
+    let metadata = tokio::task::spawn_blocking({
+        let path = params.file_path.clone();
+        move || hypr_audio_utils::audio_file_metadata(path)
+    })
+    .await
+    .map_err(|err| {
+        crate::Error::BatchStartFailed(format!("failed to join audio metadata task: {err:?}"))
+    })?
+    .map_err(|err| {
+        crate::Error::BatchStartFailed(format!("failed to read audio metadata: {err}"))
+    })?;
+
+    let listen_params = owhisper_interface::ListenParams {
+        model: params.model.clone(),
+        channels: metadata.channels,
+        sample_rate: metadata.sample_rate,
+        languages: params.languages.clone(),
+        keywords: params.keywords.clone(),
+        custom_query: None,
+    };
+
+    match params.provider {
+        BatchProvider::Am => run_batch_am(runtime, params, listen_params).await,
+        BatchProvider::Deepgram => {
+            run_batch_simple::<DeepgramAdapter>(runtime, params, listen_params).await
+        }
+        BatchProvider::Soniox => {
+            run_batch_simple::<SonioxAdapter>(runtime, params, listen_params).await
+        }
+        BatchProvider::AssemblyAI => {
+            run_batch_simple::<AssemblyAIAdapter>(runtime, params, listen_params).await
+        }
+    }
+}
+
+// Simple (non-streaming) batch: upload file, get result
+async fn run_batch_simple<A: BatchSttAdapter>(
+    runtime: Arc<dyn BatchRuntime>,
+    params: BatchParams,
+    listen_params: owhisper_interface::ListenParams,
+) -> crate::Result<()> {
+    let span = session_span(&params.session_id);
+
+    async {
+        runtime.emit(BatchEvent::BatchStarted {
+            session_id: params.session_id.clone(),
+        });
+
+        let client = owhisper_client::BatchClient::<A>::builder()
+            .api_base(params.base_url.clone())
+            .api_key(params.api_key.clone())
+            .params(listen_params)
+            .build();
+
+        tracing::debug!("transcribing file: {}", params.file_path);
+        let response = client.transcribe_file(&params.file_path).await?;
+        tracing::info!("batch transcription completed");
+
+        let delta = TranscriptProcessor::process_batch_response(&response);
+        runtime.emit(BatchEvent::BatchProgress {
+            session_id: params.session_id.clone(),
+            delta,
+            percentage: 1.0,
+        });
+
+        runtime.emit(BatchEvent::BatchEnded {
+            session_id: params.session_id.clone(),
+        });
+
+        Ok(())
+    }
+    .instrument(span)
+    .await
+}
+
+// Streaming batch via actor
+async fn run_batch_am(
+    runtime: Arc<dyn BatchRuntime>,
+    params: BatchParams,
+    listen_params: owhisper_interface::ListenParams,
+) -> crate::Result<()> {
+    let span = session_span(&params.session_id);
+
+    async {
+        let (start_tx, start_rx) =
+            tokio::sync::oneshot::channel::<std::result::Result<(), String>>();
+        let start_notifier = Arc::new(Mutex::new(Some(start_tx)));
+
+        let args = BatchArgs {
+            runtime: runtime.clone(),
+            file_path: params.file_path.clone(),
+            base_url: params.base_url.clone(),
+            api_key: params.api_key.clone(),
+            listen_params: listen_params.clone(),
+            start_notifier: start_notifier.clone(),
+            session_id: params.session_id.clone(),
+        };
+
+        match spawn_batch_actor(args).await {
+            Ok(_) => {
+                tracing::info!("batch actor spawned successfully");
+                runtime.emit(BatchEvent::BatchStarted {
+                    session_id: params.session_id.clone(),
+                });
+            }
+            Err(e) => {
+                tracing::error!("batch supervisor spawn failed: {:?}", e);
+                if let Ok(mut notifier) = start_notifier.lock()
+                    && let Some(tx) = notifier.take()
+                {
+                    let _ = tx.send(Err(format!("failed to spawn batch supervisor: {e:?}")));
+                }
+                return Err(e.into());
+            }
+        }
+
+        match start_rx.await {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(error)) => {
+                tracing::error!("batch actor reported start failure: {}", error);
+                Err(crate::Error::BatchStartFailed(error))
+            }
+            Err(_) => {
+                tracing::error!("batch actor start notifier dropped before reporting result");
+                Err(crate::Error::BatchStartFailed(
+                    "batch stream start cancelled unexpectedly".to_string(),
+                ))
+            }
+        }
+    }
+    .instrument(span)
+    .await
+}
+
+// --- Actor internals ---
+
+fn session_span(session_id: &str) -> tracing::Span {
+    tracing::info_span!("session", session_id = %session_id)
+}
 
 fn format_user_friendly_error(error: &str) -> String {
     let error_lower = error.to_lowercase();
@@ -53,12 +225,9 @@ fn format_user_friendly_error(error: &str) -> String {
 
     error.to_string()
 }
-const DEFAULT_CHUNK_MS: u64 = 500;
-const DEFAULT_DELAY_MS: u64 = 20;
-const DEVICE_FINGERPRINT_HEADER: &str = "x-device-fingerprint";
 
 #[allow(clippy::enum_variant_names)]
-pub enum BatchMsg {
+enum BatchMsg {
     StreamResponse {
         response: Box<StreamResponse>,
         percentage: f64,
@@ -68,60 +237,66 @@ pub enum BatchMsg {
     StreamStartFailed(String),
 }
 
-pub type BatchStartNotifier = Arc<Mutex<Option<tokio::sync::oneshot::Sender<Result<(), String>>>>>;
+type BatchStartNotifier = Arc<Mutex<Option<tokio::sync::oneshot::Sender<Result<(), String>>>>>;
 
 #[derive(Clone)]
-pub struct BatchArgs {
-    pub app: tauri::AppHandle,
-    pub file_path: String,
-    pub base_url: String,
-    pub api_key: String,
-    pub listen_params: owhisper_interface::ListenParams,
-    pub start_notifier: BatchStartNotifier,
-    pub session_id: String,
+struct BatchArgs {
+    runtime: Arc<dyn BatchRuntime>,
+    file_path: String,
+    base_url: String,
+    api_key: String,
+    listen_params: owhisper_interface::ListenParams,
+    start_notifier: BatchStartNotifier,
+    session_id: String,
 }
 
-pub struct BatchState {
-    pub app: tauri::AppHandle,
-    pub session_id: String,
+struct BatchState {
+    runtime: Arc<dyn BatchRuntime>,
+    session_id: String,
     rx_task: tokio::task::JoinHandle<()>,
     shutdown_tx: Option<tokio::sync::oneshot::Sender<()>>,
+    processor: TranscriptProcessor,
 }
 
 impl BatchState {
-    fn emit_streamed_response(
-        &self,
-        response: StreamResponse,
-        percentage: f64,
-    ) -> Result<(), ActorProcessingErr> {
-        BatchEvent::BatchResponseStreamed {
+    fn emit_progress(&self, delta: TranscriptDelta, percentage: f64) {
+        self.runtime.emit(BatchEvent::BatchProgress {
             session_id: self.session_id.clone(),
-            response,
+            delta,
             percentage,
-        }
-        .emit(&self.app)?;
-        Ok(())
+        });
     }
 
-    fn emit_failure(&self, error: String) -> Result<(), ActorProcessingErr> {
-        BatchEvent::BatchFailed {
+    fn flush_and_emit(&mut self) {
+        let delta = self.processor.flush();
+        if !delta.is_empty() {
+            self.emit_progress(delta, 1.0);
+        }
+    }
+
+    fn emit_failure(&self, error: String) {
+        self.runtime.emit(BatchEvent::BatchFailed {
             session_id: self.session_id.clone(),
             error,
-        }
-        .emit(&self.app)?;
-        Ok(())
+        });
+    }
+
+    fn emit_ended(&self) {
+        self.runtime.emit(BatchEvent::BatchEnded {
+            session_id: self.session_id.clone(),
+        });
     }
 }
 
-pub struct BatchActor;
+struct BatchActor;
 
 impl BatchActor {
-    pub fn name() -> ActorName {
+    fn name() -> ActorName {
         "batch_actor".into()
     }
 }
 
-pub async fn spawn_batch_actor(args: BatchArgs) -> Result<ActorRef<BatchMsg>, SpawnErr> {
+async fn spawn_batch_actor(args: BatchArgs) -> Result<ActorRef<BatchMsg>, SpawnErr> {
     let (batch_ref, _) = Actor::spawn(Some(BatchActor::name()), BatchActor, args).await?;
     Ok(batch_ref)
 }
@@ -140,10 +315,11 @@ impl Actor for BatchActor {
         let (rx_task, shutdown_tx) = spawn_batch_task(args.clone(), myself).await?;
 
         let state = BatchState {
-            app: args.app,
+            runtime: args.runtime,
             session_id: args.session_id,
             rx_task,
             shutdown_tx: Some(shutdown_tx),
+            processor: TranscriptProcessor::new(),
         };
 
         Ok(state)
@@ -158,6 +334,12 @@ impl Actor for BatchActor {
             let _ = shutdown_tx.send(());
             let _ = (&mut state.rx_task).await;
         }
+
+        let delta = state.processor.flush();
+        if !delta.is_empty() {
+            state.emit_progress(delta, 1.0);
+        }
+
         Ok(())
     }
 
@@ -173,31 +355,30 @@ impl Actor for BatchActor {
                 percentage,
             } => {
                 tracing::info!("batch stream response received");
-
-                let is_final = matches!(
-                    response.as_ref(),
-                    StreamResponse::TranscriptResponse { is_final, .. } if *is_final
-                );
-
-                if is_final {
-                    state.emit_streamed_response(*response, percentage)?;
+                if let Some(delta) = state.processor.process(&response) {
+                    if !delta.is_empty() {
+                        state.emit_progress(delta, percentage);
+                    }
                 }
             }
 
             BatchMsg::StreamStartFailed(error) => {
                 tracing::info!("batch_stream_start_failed: {}", error);
-                state.emit_failure(error.clone())?;
+                state.emit_failure(error.clone());
                 myself.stop(Some(format!("batch_stream_start_failed: {}", error)));
             }
 
             BatchMsg::StreamError(error) => {
                 tracing::info!("batch_stream_error: {}", error);
-                state.emit_failure(error.clone())?;
+                state.flush_and_emit();
+                state.emit_failure(error.clone());
                 myself.stop(None);
             }
 
             BatchMsg::StreamEnded => {
                 tracing::info!("batch_stream_ended");
+                state.flush_and_emit();
+                state.emit_ended();
                 myself.stop(None);
             }
         }
@@ -205,32 +386,7 @@ impl Actor for BatchActor {
     }
 }
 
-#[derive(Clone, Copy)]
-struct BatchStreamConfig {
-    chunk_ms: u64,
-    delay_ms: u64,
-}
-
-impl BatchStreamConfig {
-    fn new(chunk_ms: u64, delay_ms: u64) -> Self {
-        Self {
-            chunk_ms: chunk_ms.max(1),
-            delay_ms,
-        }
-    }
-
-    fn chunk_interval(&self) -> Duration {
-        Duration::from_millis(self.delay_ms)
-    }
-}
-
-fn notify_start_result(notifier: &BatchStartNotifier, result: Result<(), String>) {
-    if let Ok(mut guard) = notifier.lock()
-        && let Some(sender) = guard.take()
-    {
-        let _ = sender.send(result);
-    }
-}
+// --- Task spawning ---
 
 async fn spawn_batch_task(
     args: BatchArgs,
@@ -318,11 +474,13 @@ async fn spawn_argmax_streaming_batch_task(
 
         let response_timeout = Duration::from_secs(BATCH_STREAM_TIMEOUT_SECS);
         let mut response_count = 0;
+        let mut ended_cleanly = false;
 
         loop {
             tokio::select! {
                 _ = &mut shutdown_rx => {
                     tracing::info!("argmax streaming batch task: shutdown");
+                    ended_cleanly = true;
                     break;
                 }
                 result = tokio::time::timeout(response_timeout, StreamExt::next(&mut stream)) => {
@@ -349,6 +507,7 @@ async fn spawn_argmax_streaming_batch_task(
                             }
 
                             if is_from_finalize {
+                                ended_cleanly = true;
                                 break;
                             }
                         }
@@ -361,6 +520,7 @@ async fn spawn_argmax_streaming_batch_task(
                         }
                         Ok(None) => {
                             tracing::info!("argmax streaming batch completed (total: {})", response_count);
+                            ended_cleanly = true;
                             break;
                         }
                         Err(elapsed) => {
@@ -373,8 +533,10 @@ async fn spawn_argmax_streaming_batch_task(
             }
         }
 
-        if let Err(e) = myself.send_message(BatchMsg::StreamEnded) {
-            tracing::error!("failed to send stream ended message: {:?}", e);
+        if ended_cleanly {
+            if let Err(e) = myself.send_message(BatchMsg::StreamEnded) {
+                tracing::error!("failed to send stream ended message: {:?}", e);
+            }
         }
         tracing::info!("argmax streaming batch task exited");
     });
@@ -491,6 +653,35 @@ async fn spawn_batch_task_with_adapter<A: RealtimeSttAdapter>(
     Ok((rx_task, shutdown_tx))
 }
 
+// --- Stream processing ---
+
+#[derive(Clone, Copy)]
+struct BatchStreamConfig {
+    chunk_ms: u64,
+    delay_ms: u64,
+}
+
+impl BatchStreamConfig {
+    fn new(chunk_ms: u64, delay_ms: u64) -> Self {
+        Self {
+            chunk_ms: chunk_ms.max(1),
+            delay_ms,
+        }
+    }
+
+    fn chunk_interval(&self) -> Duration {
+        Duration::from_millis(self.delay_ms)
+    }
+}
+
+fn notify_start_result(notifier: &BatchStartNotifier, result: Result<(), String>) {
+    if let Ok(mut guard) = notifier.lock()
+        && let Some(sender) = guard.take()
+    {
+        let _ = sender.send(result);
+    }
+}
+
 async fn process_batch_stream<S, E>(
     mut listen_stream: std::pin::Pin<&mut S>,
     myself: ActorRef<BatchMsg>,
@@ -502,6 +693,7 @@ async fn process_batch_stream<S, E>(
 {
     let mut response_count = 0;
     let response_timeout = Duration::from_secs(BATCH_STREAM_TIMEOUT_SECS);
+    let mut ended_cleanly = false;
 
     loop {
         tracing::debug!(
@@ -512,6 +704,7 @@ async fn process_batch_stream<S, E>(
         tokio::select! {
             _ = &mut shutdown_rx => {
                 tracing::info!("batch_stream_shutdown");
+                ended_cleanly = true;
                 break;
             }
             result = tokio::time::timeout(
@@ -543,6 +736,7 @@ async fn process_batch_stream<S, E>(
                         }
 
                         if is_from_finalize {
+                            ended_cleanly = true;
                             break;
                         }
                     }
@@ -557,6 +751,7 @@ async fn process_batch_stream<S, E>(
                     }
                     Ok(None) => {
                         tracing::info!("batch stream completed (total responses: {})", response_count);
+                        ended_cleanly = true;
                         break;
                     }
                     Err(elapsed) => {
@@ -571,8 +766,10 @@ async fn process_batch_stream<S, E>(
         }
     }
 
-    if let Err(e) = myself.send_message(BatchMsg::StreamEnded) {
-        tracing::error!("failed to send stream ended message: {:?}", e);
+    if ended_cleanly {
+        if let Err(e) = myself.send_message(BatchMsg::StreamEnded) {
+            tracing::error!("failed to send stream ended message: {:?}", e);
+        }
     }
     tracing::info!("batch stream processing loop exited");
 }
