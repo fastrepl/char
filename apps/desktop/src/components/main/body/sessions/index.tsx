@@ -18,6 +18,7 @@ import { useSTTConnection } from "../../../../hooks/useSTTConnection";
 import { useTitleGeneration } from "../../../../hooks/useTitleGeneration";
 import * as main from "../../../../store/tinybase/store/main";
 import { type Tab, useTabs } from "../../../../store/zustand/tabs";
+import { SessionPreviewCard } from "../../../session-preview-card";
 import { StandardTabWrapper } from "../index";
 import { type TabItem, TabItemBase } from "../shared";
 import { CaretPositionProvider } from "./caret-position-context";
@@ -75,24 +76,26 @@ export const TabItemNote: TabItem<Extract<Tab, { type: "sessions" }>> = ({
   }, [isActive, stop, tab, handleCloseThis]);
 
   return (
-    <TabItemBase
-      icon={<StickyNoteIcon className="w-4 h-4" />}
-      title={title || "Untitled"}
-      selected={tab.active}
-      active={isActive}
-      accent={isActive ? "red" : "neutral"}
-      finalizing={showSpinner}
-      pinned={tab.pinned}
-      tabIndex={tabIndex}
-      showCloseConfirmation={showCloseConfirmation}
-      onCloseConfirmationChange={handleCloseConfirmationChange}
-      handleCloseThis={handleCloseWithStop}
-      handleSelectThis={() => handleSelectThis(tab)}
-      handleCloseOthers={handleCloseOthers}
-      handleCloseAll={handleCloseAll}
-      handlePinThis={() => handlePinThis(tab)}
-      handleUnpinThis={() => handleUnpinThis(tab)}
-    />
+    <SessionPreviewCard sessionId={tab.id} side="bottom" enabled={!tab.active}>
+      <TabItemBase
+        icon={<StickyNoteIcon className="w-4 h-4" />}
+        title={title || "Untitled"}
+        selected={tab.active}
+        active={isActive}
+        accent={isActive ? "red" : "neutral"}
+        finalizing={showSpinner}
+        pinned={tab.pinned}
+        tabIndex={tabIndex}
+        showCloseConfirmation={showCloseConfirmation}
+        onCloseConfirmationChange={handleCloseConfirmationChange}
+        handleCloseThis={handleCloseWithStop}
+        handleSelectThis={() => handleSelectThis(tab)}
+        handleCloseOthers={handleCloseOthers}
+        handleCloseAll={handleCloseAll}
+        handlePinThis={() => handlePinThis(tab)}
+        handleUnpinThis={() => handleUnpinThis(tab)}
+      />
+    </SessionPreviewCard>
   );
 };
 
