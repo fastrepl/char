@@ -89,12 +89,15 @@ function useNotificationEvents() {
           payload.type === "notification_confirm" ||
           payload.type === "notification_accept"
         ) {
+          const eventId =
+            payload.source?.type === "calendar_event"
+              ? payload.source.event_id
+              : null;
           const currentStore = storeRef.current;
           if (!currentStore) {
-            pendingAutoStart.current = { eventId: payload.event_id };
+            pendingAutoStart.current = { eventId };
             return;
           }
-          const eventId = payload.event_id;
           const sessionId = eventId
             ? getOrCreateSessionForEventId(
                 currentStore,

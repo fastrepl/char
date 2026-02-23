@@ -89,10 +89,19 @@ pub struct EventDetails {
     pub location: Option<String>,
 }
 
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
+#[serde(tag = "type")]
+pub enum NotificationSource {
+    #[serde(rename = "calendar_event")]
+    CalendarEvent { event_id: String },
+    #[serde(rename = "mic_detected")]
+    MicDetected { app_names: Vec<String> },
+}
+
 #[derive(Debug, Clone)]
 pub struct NotificationContext {
     pub key: String,
-    pub event_id: Option<String>,
+    pub source: Option<NotificationSource>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, specta::Type)]
@@ -101,7 +110,7 @@ pub struct Notification {
     pub title: String,
     pub message: String,
     pub timeout: Option<std::time::Duration>,
-    pub event_id: Option<String>,
+    pub source: Option<NotificationSource>,
     pub start_time: Option<i64>,
     pub participants: Option<Vec<Participant>>,
     pub event_details: Option<EventDetails>,
@@ -124,7 +133,7 @@ pub struct NotificationBuilder {
     title: Option<String>,
     message: Option<String>,
     timeout: Option<std::time::Duration>,
-    event_id: Option<String>,
+    source: Option<NotificationSource>,
     start_time: Option<i64>,
     participants: Option<Vec<Participant>>,
     event_details: Option<EventDetails>,
@@ -152,8 +161,8 @@ impl NotificationBuilder {
         self
     }
 
-    pub fn event_id(mut self, event_id: impl Into<String>) -> Self {
-        self.event_id = Some(event_id.into());
+    pub fn source(mut self, source: NotificationSource) -> Self {
+        self.source = Some(source);
         self
     }
 
@@ -183,7 +192,7 @@ impl NotificationBuilder {
             title: self.title.unwrap(),
             message: self.message.unwrap(),
             timeout: self.timeout,
-            event_id: self.event_id,
+            source: self.source,
             start_time: self.start_time,
             participants: self.participants,
             event_details: self.event_details,
