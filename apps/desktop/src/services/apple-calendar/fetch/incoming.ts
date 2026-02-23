@@ -72,13 +72,19 @@ async function normalizeAppleEvent(appleEvent: AppleEvent): Promise<{
     (await extractMeetingLink(appleEvent.notes, appleEvent.location));
 
   const eventParticipants: EventParticipant[] = [];
+  let normalizedOrganizer: EventParticipant | undefined;
 
   if (appleEvent.organizer) {
-    eventParticipants.push(normalizeParticipant(appleEvent.organizer, true));
+    normalizedOrganizer = normalizeParticipant(appleEvent.organizer, true);
+    eventParticipants.push(normalizedOrganizer);
   }
 
   for (const attendee of appleEvent.attendees) {
-    eventParticipants.push(normalizeParticipant(attendee, false));
+    const normalizedAttendee = normalizeParticipant(attendee, false);
+    if (normalizedAttendee.email === normalizedOrganizer?.email) {
+      continue;
+    }
+    eventParticipants.push(normalizedAttendee);
   }
 
   return {
