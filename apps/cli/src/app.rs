@@ -3,7 +3,7 @@ use hypr_listener_core::{
     DegradedError, SessionDataEvent, SessionErrorEvent, SessionLifecycleEvent,
     SessionProgressEvent, State,
 };
-use hypr_transcript::{FinalizedWord, PartialWord};
+use hypr_transcript::{FinalizedWord, PartialWord, TranscriptProcessor};
 
 use crate::runtime::ListenerEvent;
 
@@ -18,6 +18,7 @@ pub struct App {
     pub mic_muted: bool,
     pub words: Vec<FinalizedWord>,
     pub partials: Vec<PartialWord>,
+    transcript: TranscriptProcessor,
     pub started_at: std::time::Instant,
     pub scroll_offset: u16,
 }
@@ -35,6 +36,7 @@ impl App {
             mic_muted: false,
             words: Vec::new(),
             partials: Vec::new(),
+            transcript: TranscriptProcessor::new(),
             started_at: std::time::Instant::now(),
             scroll_offset: 0,
         }
@@ -133,12 +135,14 @@ impl App {
             SessionDataEvent::MicMuted { value, .. } => {
                 self.mic_muted = value;
             }
-            SessionDataEvent::TranscriptDelta { delta, .. } => {
-                if !delta.replaced_ids.is_empty() {
-                    self.words.retain(|w| !delta.replaced_ids.contains(&w.id));
+            SessionDataEvent::StreamResponse { response, .. } => {
+                if let Some(delta) = self.transcript.process(response.as_ref()) {
+                    if !delta.replaced_ids.is_empty() {
+                        self.words.retain(|w| !delta.replaced_ids.contains(&w.id));
+                    }
+                    self.words.extend(delta.new_words);
+                    self.partials = delta.partials;
                 }
-                self.words.extend(delta.new_words);
-                self.partials = delta.partials;
             }
         }
     }

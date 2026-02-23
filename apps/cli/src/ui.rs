@@ -119,7 +119,6 @@ fn draw_transcript(frame: &mut Frame, app: &App, area: Rect) {
         let style = match word.state {
             WordState::Final => Style::new(),
             WordState::Pending => Style::new().fg(Color::Yellow),
-            WordState::Partial => Style::new().fg(Color::DarkGray).italic(),
         };
         spans.push(Span::styled(&word.text, style));
         spans.push(Span::raw(" "));
