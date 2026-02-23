@@ -352,14 +352,21 @@ impl<S: AuthStorage> GoTrueClient<S> {
 
     /// POST to `/token?grant_type=refresh_token`.
     async fn api_refresh_token(&self, refresh_token: &str) -> Result<Session, GoTrueError> {
-        let inner = self.inner.read().await;
-        let url = format!("{}/token?grant_type=refresh_token", inner.url);
+        // Extract what we need from inner before making the HTTP request,
+        // so we don't hold the RwLock across .await points.
+        let (url, api_key, http_client) = {
+            let inner = self.inner.read().await;
+            (
+                format!("{}/token?grant_type=refresh_token", inner.url),
+                inner.api_key.clone(),
+                inner.http_client.clone(),
+            )
+        };
 
-        let response = inner
-            .http_client
+        let response = http_client
             .post(&url)
-            .header("apikey", &inner.api_key)
-            .header("Authorization", format!("Bearer {}", inner.api_key))
+            .header("apikey", &api_key)
+            .header("Authorization", format!("Bearer {}", api_key))
             .header("Content-Type", "application/json;charset=UTF-8")
             .json(&serde_json::json!({ "refresh_token": refresh_token }))
             .send()
@@ -387,13 +394,18 @@ impl<S: AuthStorage> GoTrueClient<S> {
 
     /// GET `/user` to fetch the current user.
     async fn get_user(&self, access_token: &str) -> Result<User, GoTrueError> {
-        let inner = self.inner.read().await;
-        let url = format!("{}/user", inner.url);
+        let (url, api_key, http_client) = {
+            let inner = self.inner.read().await;
+            (
+                format!("{}/user", inner.url),
+                inner.api_key.clone(),
+                inner.http_client.clone(),
+            )
+        };
 
-        let response = inner
-            .http_client
+        let response = http_client
             .get(&url)
-            .header("apikey", &inner.api_key)
+            .header("apikey", &api_key)
             .header("Authorization", format!("Bearer {}", access_token))
             .send()
             .await
@@ -424,8 +436,14 @@ impl<S: AuthStorage> GoTrueClient<S> {
         access_token: &str,
         scope: SignOutScope,
     ) -> Result<(), GoTrueError> {
-        let inner = self.inner.read().await;
-        let url = format!("{}/logout", inner.url);
+        let (url, api_key, http_client) = {
+            let inner = self.inner.read().await;
+            (
+                format!("{}/logout", inner.url),
+                inner.api_key.clone(),
+                inner.http_client.clone(),
+            )
+        };
 
         let scope_str = match scope {
             SignOutScope::Global => "global",
@@ -433,10 +451,9 @@ impl<S: AuthStorage> GoTrueClient<S> {
             SignOutScope::Others => "others",
         };
 
-        let response = inner
-            .http_client
+        let response = http_client
             .post(&url)
-            .header("apikey", &inner.api_key)
+            .header("apikey", &api_key)
             .header("Authorization", format!("Bearer {}", access_token))
             .header("Content-Type", "application/json;charset=UTF-8")
             .json(&serde_json::json!({ "scope": scope_str }))
@@ -554,7 +571,16 @@ async fn auto_refresh_tick<S: AuthStorage>(client: &GoTrueClient<S>) {
         (expires_at * 1000 - now) / AUTO_REFRESH_TICK_DURATION_MS as i64;
 
     if expires_in_ticks <= AUTO_REFRESH_TICK_THRESHOLD {
-        let _ = client.call_refresh_token(&session.refresh_token).await;
+        if let Err(e) = client.call_refresh_token(&session.refresh_token).await {
+            if e.is_fatal_session_error() {
+                // Fatal error: the refresh token is permanently invalid.
+                // Session has already been cleared by call_refresh_token -> _callRefreshToken logic.
+                // Log the error for observability.
+                eprintln!("[auth] auto-refresh fatal error, session cleared: {}", e);
+            } else {
+                eprintln!("[auth] auto-refresh transient error (will retry): {}", e);
+            }
+        }
     }
 }
 
