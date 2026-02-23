@@ -11,7 +11,6 @@ final class QuitInterceptor {
   }
 
   var keyMonitor: Any?
-  var globalKeyMonitor: Any?
   var panel: NSPanel?
   var progressLayer: CALayer?
   var pressLabel: NSTextField?
@@ -39,25 +38,6 @@ final class QuitInterceptor {
         return event
       default:
         return event
-      }
-    }
-
-    // Global monitor receives events even when the app has no key window
-    // (e.g., in Accessory activation mode with all windows hidden).
-    // Unlike local monitors, global monitors cannot modify or consume events.
-    globalKeyMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.keyDown, .keyUp, .flagsChanged]) {
-      [weak self] event in
-      guard let self else { return }
-
-      switch event.type {
-      case .keyDown:
-        self.handleGlobalKeyDown(event)
-      case .keyUp:
-        self.handleKeyUp(event)
-      case .flagsChanged:
-        self.handleFlagsChanged(event)
-      default:
-        break
       }
     }
   }
@@ -200,20 +180,6 @@ final class QuitInterceptor {
     if event.isARepeat { return nil }
     onCmdQPressed()
     return nil
-  }
-
-  func handleGlobalKeyDown(_ event: NSEvent) {
-    let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-    let isQ = event.charactersIgnoringModifiers?.lowercased() == "q"
-    guard flags.contains(.command), isQ else { return }
-
-    if flags.contains(.shift) {
-      performQuit()
-      return
-    }
-
-    if event.isARepeat { return }
-    onCmdQPressed()
   }
 
   func handleKeyUp(_ event: NSEvent) {
