@@ -103,6 +103,8 @@ impl Actor for SessionActor {
         .await
     }
 
+    // Listener is spawned in post_start so that a connection failure enters
+    // degraded mode instead of killing the session -- source and recorder keep running.
     async fn post_start(
         &self,
         myself: ActorRef<Self::Msg>,

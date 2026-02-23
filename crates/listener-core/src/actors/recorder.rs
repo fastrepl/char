@@ -184,6 +184,7 @@ impl Actor for RecorderActor {
     }
 }
 
+// Duplicated from plugins/fs-sync/src/session.rs to avoid Tauri plugin dependency.
 pub fn find_session_dir(sessions_base: &Path, session_id: &str) -> PathBuf {
     if let Some(found) = find_session_dir_recursive(sessions_base, session_id) {
         return found;
