@@ -2,8 +2,8 @@ import type { AppleEvent, Participant } from "@hypr/plugin-apple-calendar";
 import { commands as appleCalendarCommands } from "@hypr/plugin-apple-calendar";
 import { commands as miscCommands } from "@hypr/plugin-misc";
 
+import { eventMatchingKey } from "../../../utils/session-event";
 import type { Ctx } from "../ctx";
-import { getEventKey } from "../process/events/sync";
 import type {
   EventParticipant,
   IncomingEvent,
@@ -22,7 +22,10 @@ export class CalendarFetchError extends Error {
   }
 }
 
-export async function fetchIncomingEvents(ctx: Ctx): Promise<{
+export async function fetchIncomingEvents(
+  ctx: Ctx,
+  timezone?: string,
+): Promise<{
   events: IncomingEvent[];
   participants: IncomingParticipants;
 }> {
@@ -52,11 +55,7 @@ export async function fetchIncomingEvents(ctx: Ctx): Promise<{
     const { event, eventParticipants } = await normalizeAppleEvent(appleEvent);
     events.push(event);
     if (eventParticipants.length > 0) {
-      const key = getEventKey(
-        event.tracking_id_event,
-        event.started_at,
-        event.has_recurrence_rules,
-      );
+      const key = eventMatchingKey(event, timezone);
       participants.set(key, eventParticipants);
     }
   }

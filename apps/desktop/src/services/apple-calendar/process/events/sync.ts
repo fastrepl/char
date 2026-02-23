@@ -1,17 +1,7 @@
+import { eventMatchingKey } from "../../../../utils/session-event";
 import type { Ctx } from "../../ctx";
 import type { IncomingEvent } from "../../fetch/types";
 import type { EventsSyncInput, EventsSyncOutput } from "./types";
-
-export function getEventKey(
-  trackingId: string,
-  startedAt: string | undefined,
-  hasRecurrenceRules: boolean,
-): string {
-  if (hasRecurrenceRules && startedAt) {
-    return `${trackingId}::${startedAt}`;
-  }
-  return trackingId;
-}
 
 export function syncEvents(
   ctx: Ctx,
@@ -24,10 +14,7 @@ export function syncEvents(
   };
 
   const incomingEventMap = new Map(
-    incoming.map((e) => [
-      getEventKey(e.tracking_id_event, e.started_at, e.has_recurrence_rules),
-      e,
-    ]),
+    incoming.map((e) => [eventMatchingKey(e), e]),
   );
   const handledEventKeys = new Set<string>();
 
@@ -44,18 +31,26 @@ export function syncEvents(
       eventKey = undefined;
       matchingIncomingEvent = undefined;
     } else if (storeEvent.has_recurrence_rules === undefined) {
-      eventKey = getEventKey(trackingId, storeEvent.started_at, false);
+      eventKey = eventMatchingKey({
+        tracking_id_event: trackingId,
+        started_at: storeEvent.started_at,
+        has_recurrence_rules: false,
+      });
       matchingIncomingEvent = incomingEventMap.get(eventKey);
       if (!matchingIncomingEvent) {
-        eventKey = getEventKey(trackingId, storeEvent.started_at, true);
+        eventKey = eventMatchingKey({
+          tracking_id_event: trackingId,
+          started_at: storeEvent.started_at,
+          has_recurrence_rules: true,
+        });
         matchingIncomingEvent = incomingEventMap.get(eventKey);
       }
     } else {
-      eventKey = getEventKey(
-        trackingId,
-        storeEvent.started_at,
-        storeEvent.has_recurrence_rules,
-      );
+      eventKey = eventMatchingKey({
+        tracking_id_event: trackingId,
+        started_at: storeEvent.started_at,
+        has_recurrence_rules: storeEvent.has_recurrence_rules,
+      });
       matchingIncomingEvent = incomingEventMap.get(eventKey);
     }
 
@@ -78,11 +73,7 @@ export function syncEvents(
   }
 
   for (const incomingEvent of incoming) {
-    const incomingEventKey = getEventKey(
-      incomingEvent.tracking_id_event,
-      incomingEvent.started_at,
-      incomingEvent.has_recurrence_rules,
-    );
+    const incomingEventKey = eventMatchingKey(incomingEvent);
     if (!handledEventKeys.has(incomingEventKey)) {
       out.toAdd.push(incomingEvent);
     }

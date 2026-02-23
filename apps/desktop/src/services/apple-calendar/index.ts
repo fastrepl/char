@@ -45,7 +45,7 @@ async function run(
   let incomingParticipants;
 
   try {
-    const result = await fetchIncomingEvents(ctx);
+    const result = await fetchIncomingEvents(ctx, timezone);
     incoming = result.events;
     incomingParticipants = result.participants;
   } catch (error) {
@@ -61,13 +61,11 @@ async function run(
   const existing = fetchExistingEvents(ctx);
 
   const eventsOut = syncEvents(ctx, { incoming, existing });
-  const { eventKeyToEventId } = executeForEventsSync(ctx, eventsOut);
-
+  executeForEventsSync(ctx, eventsOut);
   syncSessionEmbeddedEvents(ctx, incoming, timezone);
 
   const participantsOut = syncParticipants(ctx, {
     incomingParticipants,
-    eventKeyToEventId,
     timezone,
   });
   executeForParticipantsSync(ctx, participantsOut);

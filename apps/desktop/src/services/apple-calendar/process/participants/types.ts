@@ -4,7 +4,6 @@ export type ParticipantMappingId = string;
 
 export type ParticipantsSyncInput = {
   incomingParticipants: IncomingParticipants;
-  eventKeyToEventId: Map<string, string>;
   timezone?: string;
 };
 

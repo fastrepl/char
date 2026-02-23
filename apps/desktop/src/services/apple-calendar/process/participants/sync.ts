@@ -1,6 +1,6 @@
 import type { Store } from "../../../../store/tinybase/store/main";
 import { id } from "../../../../utils";
-import { findSessionByEventId } from "../../../../utils/session-event";
+import { findSessionByKey } from "../../../../utils/session-event";
 import type { Ctx } from "../../ctx";
 import type { EventParticipant } from "../../fetch/types";
 import type {
@@ -24,12 +24,7 @@ export function syncParticipants(
   const humansToCreateMap = new Map<string, HumanToCreate>();
 
   for (const [eventKey, participants] of input.incomingParticipants) {
-    const eventId = input.eventKeyToEventId.get(eventKey);
-    if (!eventId) {
-      continue;
-    }
-
-    const sessionId = findSessionByEventId(ctx.store, eventId, input.timezone);
+    const sessionId = findSessionByKey(ctx.store, eventKey, input.timezone);
     if (!sessionId) {
       continue;
     }
@@ -136,12 +131,12 @@ function getExistingMappings(
 
   store.forEachRow("mapping_session_participant", (mappingId, _forEachCell) => {
     const mapping = store.getRow("mapping_session_participant", mappingId);
-    if (mapping?.session_id === sessionId) {
-      const humanId = String(mapping.human_id);
+    if (mapping?.session_id === sessionId && mapping.human_id) {
+      const humanId = mapping.human_id;
       mappings.set(humanId, {
         id: mappingId,
         humanId,
-        source: mapping.source as string | undefined,
+        source: mapping.source,
       });
     }
   });
