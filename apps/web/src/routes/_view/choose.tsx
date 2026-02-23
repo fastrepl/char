@@ -41,29 +41,38 @@ const TOPPING_OPTIONS = [
   { id: "basil", label: "Basil" },
 ];
 
-// 15 ring positions released in 3 waves: 4 → 9 → 15
-const RING_POSITIONS = [
-  // wave 1 — outer corners
-  { x: 100, y: 54 },
-  { x: 136, y: 80 },
-  { x: 136, y: 120 },
-  { x: 100, y: 146 },
-  // wave 2 — fill in
-  { x: 64, y: 120 },
-  { x: 64, y: 80 },
-  { x: 118, y: 100 },
-  { x: 82, y: 100 },
-  { x: 100, y: 78 },
-  // wave 3 — pack it in
-  { x: 100, y: 122 },
-  { x: 118, y: 64 },
-  { x: 82, y: 64 },
-  { x: 118, y: 136 },
-  { x: 82, y: 136 },
-  { x: 100, y: 100 },
-];
+const OVERRIDE_CRUST: Record<string, string> = {
+  thin: "sourdough",
+  thick: "thin",
+  sourdough: "thick",
+};
 
-const RINGS_BY_CLICK = [0, 4, 9, 15];
+const OVERRIDE_SAUCE: Record<string, string> = {
+  tomato: "pesto",
+  white: "tomato",
+  pesto: "white",
+};
+
+const RING_POSITIONS = [
+  // center
+  { x: 100, y: 100 },
+  // middle ring (r=26, starting 30°, every 60°)
+  { x: 123, y: 113 },
+  { x: 100, y: 126 },
+  { x: 78, y: 113 },
+  { x: 78, y: 87 },
+  { x: 100, y: 74 },
+  { x: 123, y: 87 },
+  // outer ring (r=50, starting 0°, every 45°)
+  { x: 150, y: 100 },
+  { x: 135, y: 135 },
+  { x: 100, y: 150 },
+  { x: 65, y: 135 },
+  { x: 50, y: 100 },
+  { x: 65, y: 65 },
+  { x: 100, y: 50 },
+  { x: 135, y: 65 },
+];
 
 const CRUST_EDGE: Record<string, string> = {
   thin: "#B8834A",
@@ -105,35 +114,70 @@ type Step = "crust" | "sauce" | "toppings" | "reveal";
 
 function Component() {
   const [step, setStep] = useState<Step>("crust");
+  const [forcing, setForcing] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [crust, setCrust] = useState<string | null>(null);
   const [sauce, setSauce] = useState<string | null>(null);
-  const [toppingClicks, setToppingClicks] = useState(0);
+  const [showPineapple, setShowPineapple] = useState(false);
 
-  const visibleRings = RINGS_BY_CLICK[Math.min(toppingClicks, 3)];
-  const overwhelmed = toppingClicks >= 3;
+  const handleCrustSelect = (id: string) => {
+    if (busy) return;
+    setBusy(true);
+    setCrust(id);
 
-  const handleReset = () => {
-    setStep("crust");
-    setCrust(null);
-    setSauce(null);
-    setToppingClicks(0);
+    setTimeout(() => {
+      const override = OVERRIDE_CRUST[id];
+      setForcing(true);
+      setCrust(override);
+    }, 350);
+
+    setTimeout(() => {
+      setForcing(false);
+      setBusy(false);
+      setStep("sauce");
+    }, 2000);
   };
 
-  const handleBack = () => {
-    if (step === "sauce") setStep("crust");
-    if (step === "toppings") setStep("sauce");
+  const handleSauceSelect = (id: string) => {
+    if (busy) return;
+    setBusy(true);
+    setSauce(id);
+
+    setTimeout(() => {
+      const override = OVERRIDE_SAUCE[id];
+      setForcing(true);
+      setSauce(override);
+    }, 350);
+
+    setTimeout(() => {
+      setForcing(false);
+      setBusy(false);
+      setStep("toppings");
+    }, 2000);
   };
 
-  const handleToppingClick = () => {
-    if (overwhelmed) return;
-    setToppingClicks((prev) => {
-      const next = Math.min(prev + 1, 3);
-      if (next >= 3) {
-        setTimeout(() => setStep("reveal"), 2500);
-      }
-      return next;
-    });
+  const handleToppingSelect = () => {
+    if (busy) return;
+    setBusy(true);
+
+    setTimeout(() => {
+      setForcing(true);
+      setShowPineapple(true);
+    }, 350);
+
+    setTimeout(() => {
+      setForcing(false);
+      setBusy(false);
+      setStep("reveal");
+    }, 1250);
   };
+
+  const overrideLabel =
+    step === "crust" && crust
+      ? (CRUST_OPTIONS.find((o) => o.id === crust)?.label ?? "")
+      : step === "sauce" && sauce
+        ? (SAUCE_OPTIONS.find((o) => o.id === sauce)?.label ?? "")
+        : "Pineapple.";
 
   if (step === "reveal") {
     return (
@@ -147,7 +191,7 @@ function Component() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <RevealSection />
+            <RevealSection crust={crust} sauce={sauce} />
           </motion.div>
         </div>
       </main>
@@ -165,176 +209,104 @@ function Component() {
             <PizzaGraphic
               crust={crust}
               sauce={sauce}
-              visibleRings={visibleRings}
-              overwhelmed={overwhelmed}
+              showPineapple={showPineapple}
             />
           </div>
 
-          <div className="flex flex-col justify-center p-8 md:p-12 md:flex-1 gap-6">
+          <div className="flex items-center p-8 md:p-12 md:flex-1">
             <AnimatePresence mode="wait">
-              {step === "crust" && (
+              {!forcing ? (
                 <motion.div
-                  key="crust"
+                  key={`${step}-options`}
                   initial={{ opacity: 0, x: 16 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -16 }}
-                  transition={{ duration: 0.22 }}
-                  className="flex flex-col gap-6"
+                  exit={{ opacity: 0, x: -8 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex flex-col gap-6 w-full"
                 >
                   <div>
                     <p className="text-xs font-medium text-neutral-400 uppercase tracking-widest mb-2">
-                      Step 1 of 3
+                      {step === "crust"
+                        ? "Step 1 of 3"
+                        : step === "sauce"
+                          ? "Step 2 of 3"
+                          : "Step 3 of 3"}
                     </p>
                     <h2 className="text-2xl sm:text-3xl font-serif text-stone-600">
-                      Pick your crust
+                      {step === "crust"
+                        ? "Pick your crust"
+                        : step === "sauce"
+                          ? "Choose your sauce"
+                          : "Pick your toppings"}
                     </h2>
                   </div>
-                  <div className="flex flex-col gap-3">
-                    {CRUST_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.id}
-                        onClick={() => setCrust(opt.id)}
-                        className={cn([
-                          "px-5 py-4 rounded-lg border text-left text-base font-medium transition-colors",
-                          crust === opt.id
-                            ? "border-stone-400 bg-stone-50 text-stone-700"
-                            : "border-neutral-200 text-neutral-600 hover:border-stone-300 hover:bg-stone-50/50",
-                        ])}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
+                  <div
+                    className={cn([
+                      step === "toppings"
+                        ? "grid grid-cols-2 gap-3"
+                        : "flex flex-col gap-3",
+                    ])}
+                  >
+                    {step === "crust" &&
+                      CRUST_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.id}
+                          onClick={() => handleCrustSelect(opt.id)}
+                          className={cn([
+                            "px-5 py-4 rounded-lg border text-left text-base font-medium transition-colors",
+                            crust === opt.id
+                              ? "border-stone-400 bg-stone-50 text-stone-700"
+                              : "border-neutral-200 text-neutral-600 hover:border-stone-300 hover:bg-stone-50/50",
+                          ])}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    {step === "sauce" &&
+                      SAUCE_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.id}
+                          onClick={() => handleSauceSelect(opt.id)}
+                          className={cn([
+                            "px-5 py-4 rounded-lg border text-left text-base font-medium transition-colors",
+                            sauce === opt.id
+                              ? "border-stone-400 bg-stone-50 text-stone-700"
+                              : "border-neutral-200 text-neutral-600 hover:border-stone-300 hover:bg-stone-50/50",
+                          ])}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    {step === "toppings" &&
+                      TOPPING_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.id}
+                          onClick={handleToppingSelect}
+                          className="px-4 py-3 rounded-lg border border-neutral-200 text-left text-sm font-medium text-neutral-600 hover:border-stone-300 hover:bg-stone-50/50 transition-colors"
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
                   </div>
-                  {crust && (
-                    <motion.button
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      onClick={() => setStep("sauce")}
-                      className={cn([
-                        "self-start px-6 py-2.5 rounded-full text-sm font-medium",
-                        "bg-linear-to-t from-stone-600 to-stone-500 text-white",
-                        "shadow-sm hover:shadow-md hover:scale-[102%] active:scale-[98%] transition-all",
-                      ])}
-                    >
-                      Continue →
-                    </motion.button>
-                  )}
                 </motion.div>
-              )}
-
-              {step === "sauce" && (
+              ) : (
                 <motion.div
-                  key="sauce"
-                  initial={{ opacity: 0, x: 16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -16 }}
-                  transition={{ duration: 0.22 }}
-                  className="flex flex-col gap-6"
+                  key={`${step}-override`}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.18 }}
+                  className="flex flex-col gap-2"
                 >
-                  <div>
-                    <p className="text-xs font-medium text-neutral-400 uppercase tracking-widest mb-2">
-                      Step 2 of 3
-                    </p>
-                    <h2 className="text-2xl sm:text-3xl font-serif text-stone-600">
-                      Choose your sauce
-                    </h2>
-                  </div>
-                  <div className="flex flex-col gap-3">
-                    {SAUCE_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.id}
-                        onClick={() => setSauce(opt.id)}
-                        className={cn([
-                          "px-5 py-4 rounded-lg border text-left text-base font-medium transition-colors",
-                          sauce === opt.id
-                            ? "border-stone-400 bg-stone-50 text-stone-700"
-                            : "border-neutral-200 text-neutral-600 hover:border-stone-300 hover:bg-stone-50/50",
-                        ])}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                  {sauce && (
-                    <motion.button
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      onClick={() => setStep("toppings")}
-                      className={cn([
-                        "self-start px-6 py-2.5 rounded-full text-sm font-medium",
-                        "bg-linear-to-t from-stone-600 to-stone-500 text-white",
-                        "shadow-sm hover:shadow-md hover:scale-[102%] active:scale-[98%] transition-all",
-                      ])}
-                    >
-                      Continue →
-                    </motion.button>
-                  )}
-                </motion.div>
-              )}
-
-              {step === "toppings" && (
-                <motion.div
-                  key="toppings"
-                  initial={{ opacity: 0, x: 16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -16 }}
-                  transition={{ duration: 0.22 }}
-                  className="flex flex-col gap-6"
-                >
-                  <div>
-                    <p className="text-xs font-medium text-neutral-400 uppercase tracking-widest mb-2">
-                      Step 3 of 3
-                    </p>
-                    <h2 className="text-2xl sm:text-3xl font-serif text-stone-600">
-                      Pick your toppings
-                    </h2>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    {TOPPING_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.id}
-                        onClick={handleToppingClick}
-                        disabled={overwhelmed}
-                        className={cn([
-                          "px-4 py-3 rounded-lg border text-left text-sm font-medium transition-colors",
-                          overwhelmed
-                            ? "border-neutral-100 text-neutral-300 cursor-not-allowed"
-                            : "border-neutral-200 text-neutral-600 hover:border-stone-300 hover:bg-stone-50/50",
-                        ])}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-
-                  <AnimatePresence mode="wait">
-                    {toppingClicks > 0 && (
-                      <motion.p
-                        key={toppingClicks}
-                        initial={{ opacity: 0, y: 4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="text-sm text-neutral-500 italic"
-                      >
-                        {toppingClicks === 1 && "Added: pineapple."}
-                        {toppingClicks === 2 && "More pineapple."}
-                        {toppingClicks >= 3 &&
-                          "We get it, you love pineapple. Chill!"}
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
+                  <p className="text-xs font-medium text-neutral-400 uppercase tracking-widest">
+                    We decided
+                  </p>
+                  <h2 className="text-5xl sm:text-6xl font-bold text-stone-700 leading-tight">
+                    {overrideLabel}
+                  </h2>
                 </motion.div>
               )}
             </AnimatePresence>
-
-            {step !== "crust" && !overwhelmed && (
-              <button
-                onClick={handleBack}
-                className="self-start text-xs text-neutral-400 hover:text-neutral-600 transition-colors"
-              >
-                ← back
-              </button>
-            )}
           </div>
         </div>
       </div>
@@ -345,13 +317,11 @@ function Component() {
 function PizzaGraphic({
   crust,
   sauce,
-  visibleRings,
-  overwhelmed,
+  showPineapple = false,
 }: {
   crust: string | null;
   sauce: string | null;
-  visibleRings: number;
-  overwhelmed: boolean;
+  showPineapple?: boolean;
 }) {
   const edgeColor = crust ? CRUST_EDGE[crust] : "#C49A5A";
   const bodyColor = crust ? CRUST_BODY[crust] : "#E0B870";
@@ -362,7 +332,6 @@ function PizzaGraphic({
       viewBox="0 0 200 200"
       className="w-52 h-52 sm:w-64 sm:h-64 md:w-72 md:h-72"
     >
-      {/* Outer crust edge */}
       <motion.circle
         cx="100"
         cy="100"
@@ -371,7 +340,6 @@ function PizzaGraphic({
         animate={{ fill: edgeColor }}
         transition={{ duration: 0.35 }}
       />
-      {/* Crust body */}
       <motion.circle
         cx="100"
         cy="100"
@@ -380,7 +348,6 @@ function PizzaGraphic({
         animate={{ fill: bodyColor }}
         transition={{ duration: 0.35 }}
       />
-      {/* Baked spots on crust */}
       {crust &&
         CRUST_SPOTS.map((pt, i) => (
           <circle
@@ -392,9 +359,7 @@ function PizzaGraphic({
             opacity="0.5"
           />
         ))}
-      {/* Dough base — warm cream, visible as soon as crust chosen */}
       {crust && <circle cx="100" cy="100" r="74" fill="#F2E0A0" />}
-      {/* Sauce — separate layer, only when sauce actually selected */}
       {sauceColor && (
         <motion.circle
           cx="100"
@@ -406,8 +371,7 @@ function PizzaGraphic({
           transition={{ duration: 0.35 }}
         />
       )}
-      {/* Full pineapple cover when overwhelmed */}
-      {overwhelmed && (
+      {showPineapple && (
         <motion.circle
           cx="100"
           cy="100"
@@ -418,15 +382,15 @@ function PizzaGraphic({
           transition={{ duration: 0.5 }}
         />
       )}
-      {/* Pineapple rings */}
-      {RING_POSITIONS.slice(0, visibleRings).map((pos, i) => (
-        <PineappleRing
-          key={i}
-          x={pos.x}
-          y={pos.y}
-          holeColor={sauceColor ?? "#F2E0A0"}
-        />
-      ))}
+      {showPineapple &&
+        RING_POSITIONS.map((pos, i) => (
+          <PineappleRing
+            key={i}
+            x={pos.x}
+            y={pos.y}
+            holeColor={sauceColor ?? "#F2E0A0"}
+          />
+        ))}
       {!crust && (
         <text
           x="100"
@@ -460,7 +424,6 @@ function PineappleRing({
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
       >
-        {/* Ring body */}
         <circle
           cx="0"
           cy="0"
@@ -469,9 +432,7 @@ function PineappleRing({
           stroke="#D97706"
           strokeWidth="0.9"
         />
-        {/* Center hole showing the sauce/dough through it */}
         <circle cx="0" cy="0" r="4" fill={holeColor} />
-        {/* Radial fiber lines — what makes it look like pineapple */}
         {RADIAL_ANGLES.map((deg) => {
           const rad = (deg * Math.PI) / 180;
           return (
@@ -492,33 +453,45 @@ function PineappleRing({
   );
 }
 
-function RevealSection() {
+function RevealSection({
+  crust,
+  sauce,
+}: {
+  crust: string | null;
+  sauce: string | null;
+}) {
   return (
     <>
       <section className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
-        <div className="flex flex-col items-center text-center gap-5 py-24 px-4">
-          <h2 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 max-w-2xl">
-            Most AI tools treat your data the same way.
-          </h2>
-          <p className="text-lg text-neutral-500 max-w-lg">
-            Which AI processes your notes, where they're stored, whether they
-            touch the cloud at all. You didn't pick any of it.
-          </p>
-          <p className="text-lg font-medium text-stone-600">
-            Char gives you the choice back.
-          </p>
-          <div className="pt-4">
-            <Link
-              to="/download/"
-              className={cn([
-                "px-8 py-3 text-base font-medium rounded-full",
-                "bg-linear-to-t from-stone-600 to-stone-500 text-white",
-                "shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
-                "transition-all",
-              ])}
-            >
-              Download Char, free
-            </Link>
+        <div className="flex flex-col md:flex-row items-center gap-12 py-20 px-8 max-w-5xl mx-auto">
+          <div className="flex-shrink-0">
+            <PizzaGraphic crust={crust} sauce={sauce} showPineapple={true} />
+          </div>
+          <div className="flex flex-col gap-5 text-center md:text-left">
+            <h2 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600">
+              Felt annoying, didn't it?
+            </h2>
+            <p className="text-lg text-neutral-500 max-w-lg">
+              That's what most AI note-takers do with your data. Which AI
+              touches it, where it lives, whether it ever leaves your device.
+              You get no say.
+            </p>
+            <p className="text-lg font-medium text-stone-600">
+              Char gives you the choice back.
+            </p>
+            <div className="pt-2">
+              <Link
+                to="/download/"
+                className={cn([
+                  "inline-block px-8 py-3 text-base font-medium rounded-full",
+                  "bg-linear-to-t from-stone-600 to-stone-500 text-white",
+                  "shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
+                  "transition-all",
+                ])}
+              >
+                Download Char, free
+              </Link>
+            </div>
           </div>
         </div>
       </section>
