@@ -187,7 +187,7 @@ fn build_channel_split_proxy(
         request = request.with_header(name, value);
     }
 
-    let initial_msg: Option<crate::relay::InitialMessage> = initial_message.map(|m| Arc::new(m));
+    let initial_msg: Option<crate::relay::InitialMessage> = initial_message.map(Arc::new);
     let response_transformer: Option<crate::relay::ResponseTransformer> =
         Some(Arc::new(build_response_transformer(provider)));
     let on_close = build_on_close_callback(config, provider, &analytics_ctx);
