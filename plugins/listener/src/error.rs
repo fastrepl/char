@@ -1,4 +1,6 @@
-use serde::{Deserialize, Serialize, ser::Serializer};
+use serde::{Serialize, ser::Serializer};
+
+pub use hypr_listener_core::DegradedError;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -29,17 +31,4 @@ impl Serialize for Error {
     {
         serializer.serialize_str(self.to_string().as_ref())
     }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, specta::Type)]
-#[serde(tag = "type")]
-pub enum DegradedError {
-    #[serde(rename = "authentication_failed")]
-    AuthenticationFailed { provider: String },
-    #[serde(rename = "upstream_unavailable")]
-    UpstreamUnavailable { message: String },
-    #[serde(rename = "connection_timeout")]
-    ConnectionTimeout,
-    #[serde(rename = "stream_error")]
-    StreamError { message: String },
 }

@@ -13,7 +13,6 @@ use crate::{
 };
 use hypr_audio::AudioInput;
 use hypr_audio_utils::{ResampleExtDynamicNew, chunk_size_for_stt};
-use tauri_specta::Event;
 
 use super::{SourceMsg, SourceState};
 
@@ -32,14 +31,11 @@ pub(super) async fn start_source_loop(
 
     let result = start_streams(myself, st).await;
 
-    if result.is_ok()
-        && let Err(error) = (SessionProgressEvent::AudioReady {
+    if result.is_ok() {
+        st.runtime.emit_progress(SessionProgressEvent::AudioReady {
             session_id: st.session_id.clone(),
             device: st.mic_device.clone(),
-        })
-        .emit(&st.app)
-    {
-        tracing::error!(?error, "failed_to_emit_audio_ready");
+        });
     }
 
     result
@@ -109,7 +105,6 @@ async fn run_stream_loop(ctx: StreamContext, mode: ChannelMode) {
         None
     };
 
-    // I believe this is not needed anymore since we do dynamic resampling with latest sample rate of device, but keep it just in case.
     if mode == ChannelMode::MicAndSpeaker {
         tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
     }

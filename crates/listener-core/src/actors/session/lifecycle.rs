@@ -1,10 +1,8 @@
 use std::collections::BTreeMap;
 
-use tauri_specta::Event;
-
 use super::SessionParams;
 use super::session_span;
-use crate::SessionLifecycleEvent;
+use crate::{ListenerRuntime, SessionLifecycleEvent};
 
 pub(crate) fn configure_sentry_session_context(params: &SessionParams) {
     sentry::configure_scope(|scope| {
@@ -40,26 +38,17 @@ pub(crate) fn clear_sentry_session_context() {
 }
 
 pub(crate) fn emit_session_ended(
-    app: &tauri::AppHandle,
+    runtime: &dyn ListenerRuntime,
     session_id: &str,
     failure_reason: Option<String>,
 ) {
     let span = session_span(session_id);
     let _guard = span.enter();
 
-    {
-        use tauri_plugin_tray::TrayPluginExt;
-        let _ = app.tray().set_start_disabled(false);
-    }
-
-    if let Err(error) = (SessionLifecycleEvent::Inactive {
+    runtime.emit_lifecycle(SessionLifecycleEvent::Inactive {
         session_id: session_id.to_string(),
         error: failure_reason.clone(),
-    })
-    .emit(app)
-    {
-        tracing::error!(?error, "failed_to_emit_inactive");
-    }
+    });
 
     if let Some(reason) = failure_reason {
         tracing::info!(failure_reason = %reason, "session_stopped");

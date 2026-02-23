@@ -75,6 +75,7 @@ hypr-importer-core = { path = "crates/importer-core", package = "importer-core" 
 hypr-intercept = { path = "crates/intercept", package = "intercept" }
 hypr-jina = { path = "crates/jina", package = "jina" }
 hypr-language = { path = "crates/language", package = "language" }
+hypr-listener-core = { path = "crates/listener-core", package = "listener-core" }
 hypr-llm-cactus = { path = "crates/llm-cactus", package = "llm-cactus" }
 hypr-llm-proxy = { path = "crates/llm-proxy", package = "llm-proxy" }
 hypr-llm-types = { path = "crates/llm-types", package = "llm-types" }

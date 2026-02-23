@@ -1,11 +1,11 @@
 mod adapters;
 mod stream;
 
+use std::sync::Arc;
 use std::time::{Duration, Instant, SystemTime};
 
 use bytes::Bytes;
 use ractor::{Actor, ActorName, ActorProcessingErr, ActorRef, SupervisionEvent};
-use tauri_specta::Event;
 use tokio::time::error::Elapsed;
 use tracing::Instrument;
 
@@ -13,7 +13,9 @@ use owhisper_interface::stream::StreamResponse;
 use owhisper_interface::{ControlMessage, MixedMessage};
 
 use super::session::session_span;
-use crate::{DegradedError, SessionDataEvent, SessionErrorEvent, SessionProgressEvent};
+use crate::{
+    DegradedError, ListenerRuntime, SessionDataEvent, SessionErrorEvent, SessionProgressEvent,
+};
 
 use adapters::spawn_rx_task;
 
@@ -32,7 +34,7 @@ pub enum ListenerMsg {
 
 #[derive(Clone)]
 pub struct ListenerArgs {
-    pub app: tauri::AppHandle,
+    pub runtime: Arc<dyn ListenerRuntime>,
     pub languages: Vec<hypr_language::Language>,
     pub onboarding: bool,
     pub model: String,
@@ -95,25 +97,18 @@ impl Actor for ListenerActor {
         let span = session_span(&session_id);
 
         async {
-            if let Err(error) = (SessionProgressEvent::Connecting {
-                session_id: session_id.clone(),
-            })
-            .emit(&args.app)
-            {
-                tracing::error!(?error, "failed_to_emit_connecting");
-            }
+            args.runtime
+                .emit_progress(SessionProgressEvent::Connecting {
+                    session_id: session_id.clone(),
+                });
 
             let (tx, rx_task, shutdown_tx, adapter_name) =
                 spawn_rx_task(args.clone(), myself).await?;
 
-            if let Err(error) = (SessionProgressEvent::Connected {
+            args.runtime.emit_progress(SessionProgressEvent::Connected {
                 session_id: session_id.clone(),
                 adapter: adapter_name,
-            })
-            .emit(&args.app)
-            {
-                tracing::error!(?error, "failed_to_emit_connected");
-            }
+            });
 
             let state = ListenerState {
                 args,
@@ -175,18 +170,20 @@ impl Actor for ListenerActor {
                         %provider,
                         "stream_provider_error"
                     );
-                    let _ = (SessionErrorEvent::ConnectionError {
-                        session_id: state.args.session_id.clone(),
-                        error: format!(
-                            "[{}] {} (code: {})",
-                            provider,
-                            error_message,
-                            error_code
-                                .map(|c| c.to_string())
-                                .unwrap_or_else(|| "none".to_string())
-                        ),
-                    })
-                    .emit(&state.args.app);
+                    state
+                        .args
+                        .runtime
+                        .emit_error(SessionErrorEvent::ConnectionError {
+                            session_id: state.args.session_id.clone(),
+                            error: format!(
+                                "[{}] {} (code: {})",
+                                provider,
+                                error_message,
+                                error_code
+                                    .map(|c| c.to_string())
+                                    .unwrap_or_else(|| "none".to_string())
+                            ),
+                        });
                     let degraded = match *error_code {
                         Some(401) | Some(403) => DegradedError::AuthenticationFailed {
                             provider: provider.clone(),
@@ -209,14 +206,13 @@ impl Actor for ListenerActor {
                     crate::actors::ChannelMode::MicAndSpeaker => {}
                 }
 
-                if let Err(error) = (SessionDataEvent::StreamResponse {
-                    session_id: state.args.session_id.clone(),
-                    response: Box::new(response),
-                })
-                .emit(&state.args.app)
-                {
-                    tracing::error!(?error, "stream_response_emit_failed");
-                }
+                state
+                    .args
+                    .runtime
+                    .emit_data(SessionDataEvent::StreamResponse {
+                        session_id: state.args.session_id.clone(),
+                        response: Box::new(response),
+                    });
             }
 
             ListenerMsg::StreamError(error) => {

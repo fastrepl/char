@@ -10279,6 +10279,38 @@ dependencies = [
 ]
 
 [[package]]
+name = "listener-core"
+version = "0.1.0"
+dependencies = [
+ "aec",
+ "audio",
+ "audio-utils",
+ "bytes",
+ "device-monitor",
+ "futures-util",
+ "host",
+ "hound",
+ "language",
+ "owhisper-client",
+ "owhisper-interface",
+ "ractor",
+ "sentry",
+ "serde",
+ "serde_json",
+ "specta",
+ "supervisor",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-stream",
+ "tokio-util",
+ "tracing",
+ "tracing-subscriber",
+ "uuid",
+ "vad-ext",
+ "vorbis_rs",
+]
+
+[[package]]
 name = "litemap"
 version = "0.7.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -11977,6 +12009,7 @@ name = "openrouter"
 version = "0.1.0"
 dependencies = [
  "async-stream",
+ "base64 0.22.1",
  "bytes",
  "futures-util",
  "reqwest 0.13.2",
@@ -12053,15 +12086,6 @@ name = "option-ext"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
-
-[[package]]
-name = "ordered-float"
-version = "5.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f4779c6901a562440c3786d08192c6fbda7c1c2060edd10006b05ee35d10f2d"
-dependencies = [
- "num-traits",
-]
 
 [[package]]
 name = "ordered-multimap"
@@ -18055,54 +18079,31 @@ dependencies = [
 name = "tauri-plugin-listener"
 version = "0.1.0"
 dependencies = [
- "aec",
  "audio",
- "audio-device",
- "audio-utils",
- "bytes",
- "chrono",
- "codes-iso-639",
- "device-monitor",
  "dirs 6.0.0",
- "futures-util",
- "host",
- "hound",
  "insta",
- "intercept",
  "language",
- "mac 0.1.0",
- "ordered-float",
+ "listener-core",
  "owhisper-client",
  "owhisper-interface",
  "quickcheck",
  "quickcheck_macros",
  "ractor",
  "rodio",
- "sentry",
  "serde",
  "serde_json",
  "specta",
  "specta-typescript",
- "strum 0.27.2",
- "supervisor",
  "tauri",
  "tauri-plugin",
- "tauri-plugin-fs-sync",
  "tauri-plugin-hooks",
  "tauri-plugin-local-stt",
  "tauri-plugin-settings",
  "tauri-plugin-tray",
  "tauri-specta",
  "thiserror 2.0.18",
- "tokio",
- "tokio-stream",
- "tokio-util",
  "tracing",
- "transcript",
- "url",
  "uuid",
- "vad-ext",
- "vorbis_rs",
 ]
 
 [[package]]

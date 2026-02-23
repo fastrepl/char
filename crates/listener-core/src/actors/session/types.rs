@@ -1,5 +1,8 @@
 use std::path::PathBuf;
+use std::sync::Arc;
 use std::time::{Instant, SystemTime};
+
+use crate::ListenerRuntime;
 
 pub const SESSION_SUPERVISOR_PREFIX: &str = "session_supervisor_";
 
@@ -7,7 +10,8 @@ pub fn session_span(session_id: &str) -> tracing::Span {
     tracing::info_span!("session", session_id = %session_id)
 }
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 pub struct SessionParams {
     pub session_id: String,
     pub languages: Vec<hypr_language::Language>,
@@ -21,7 +25,7 @@ pub struct SessionParams {
 
 #[derive(Clone)]
 pub struct SessionContext {
-    pub app: tauri::AppHandle,
+    pub runtime: Arc<dyn ListenerRuntime>,
     pub params: SessionParams,
     pub app_dir: PathBuf,
     pub started_at_instant: Instant,

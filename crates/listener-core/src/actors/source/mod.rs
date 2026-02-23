@@ -12,12 +12,11 @@ use tokio_util::sync::CancellationToken;
 use tracing::Instrument;
 
 use crate::{
-    SessionErrorEvent, SessionProgressEvent,
+    ListenerRuntime, SessionErrorEvent, SessionProgressEvent,
     actors::session::session_span,
     actors::{AudioChunk, ChannelMode},
 };
 use hypr_audio::AudioInput;
-use tauri_specta::Event;
 
 use pipeline::Pipeline;
 use stream::start_source_loop;
@@ -36,12 +35,12 @@ pub enum SourceMsg {
 pub struct SourceArgs {
     pub mic_device: Option<String>,
     pub onboarding: bool,
-    pub app: tauri::AppHandle,
+    pub runtime: Arc<dyn ListenerRuntime>,
     pub session_id: String,
 }
 
 pub struct SourceState {
-    pub(super) app: tauri::AppHandle,
+    pub(super) runtime: Arc<dyn ListenerRuntime>,
     pub(super) session_id: String,
     pub(super) mic_device: Option<String>,
     pub(super) onboarding: bool,
@@ -108,13 +107,10 @@ impl Actor for SourceActor {
         let span = session_span(&session_id);
 
         async {
-            if let Err(error) = (SessionProgressEvent::AudioInitializing {
-                session_id: session_id.clone(),
-            })
-            .emit(&args.app)
-            {
-                tracing::error!(?error, "failed_to_emit_audio_initializing");
-            }
+            args.runtime
+                .emit_progress(SessionProgressEvent::AudioInitializing {
+                    session_id: session_id.clone(),
+                });
 
             let device_watcher = DeviceChangeWatcher::spawn(myself.clone());
 
@@ -124,10 +120,10 @@ impl Actor for SourceActor {
                 .or_else(|| Some(AudioInput::get_default_device_name()));
             tracing::info!(mic_device = ?mic_device);
 
-            let pipeline = Pipeline::new(args.app.clone(), args.session_id.clone());
+            let pipeline = Pipeline::new(args.runtime.clone(), args.session_id.clone());
 
             let mut st = SourceState {
-                app: args.app,
+                runtime: args.runtime,
                 session_id: args.session_id,
                 mic_device,
                 onboarding: args.onboarding,
@@ -180,13 +176,12 @@ impl Actor for SourceActor {
             }
             SourceMsg::StreamFailed(reason) => {
                 tracing::error!(%reason, "source_stream_failed_stopping");
-                let _ = (SessionErrorEvent::AudioError {
+                st.runtime.emit_error(SessionErrorEvent::AudioError {
                     session_id: st.session_id.clone(),
                     error: reason.clone(),
                     device: st.mic_device.clone(),
                     is_fatal: true,
-                })
-                .emit(&st.app);
+                });
                 myself.stop(Some(reason));
             }
         }

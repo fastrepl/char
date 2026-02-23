@@ -1,30 +1,31 @@
+use std::sync::Arc;
 use std::time::{Instant, SystemTime};
 
 use ractor::{Actor, ActorCell, ActorProcessingErr, ActorRef, RpcReplyPort, SupervisionEvent};
-use tauri_plugin_settings::SettingsPluginExt;
-use tauri_specta::Event;
 use tracing::Instrument;
 
-use crate::SessionLifecycleEvent;
 use crate::actors::session::lifecycle::{
     clear_sentry_session_context, configure_sentry_session_context, emit_session_ended,
 };
 use crate::actors::{
     SessionContext, SessionMsg, SessionParams, session_span, spawn_session_supervisor,
 };
+use crate::{ListenerRuntime, SessionLifecycleEvent, State};
 
 pub enum RootMsg {
     StartSession(SessionParams, RpcReplyPort<bool>),
     StopSession(RpcReplyPort<()>),
-    GetState(RpcReplyPort<crate::State>),
+    GetState(RpcReplyPort<State>),
 }
 
 pub struct RootArgs {
-    pub app: tauri::AppHandle,
+    pub runtime: Arc<dyn ListenerRuntime>,
+    pub app_dir: std::path::PathBuf,
 }
 
 pub struct RootState {
-    app: tauri::AppHandle,
+    runtime: Arc<dyn ListenerRuntime>,
+    app_dir: std::path::PathBuf,
     session_id: Option<String>,
     supervisor: Option<ActorCell>,
     finalizing: bool,
@@ -50,7 +51,8 @@ impl Actor for RootActor {
         args: Self::Arguments,
     ) -> Result<Self::State, ActorProcessingErr> {
         Ok(RootState {
-            app: args.app,
+            runtime: args.runtime,
+            app_dir: args.app_dir,
             session_id: None,
             supervisor: None,
             finalizing: false,
@@ -74,11 +76,11 @@ impl Actor for RootActor {
             }
             RootMsg::GetState(reply) => {
                 let fsm_state = if state.finalizing {
-                    crate::State::Finalizing
+                    State::Finalizing
                 } else if state.supervisor.is_some() {
-                    crate::State::Active
+                    State::Active
                 } else {
-                    crate::State::Inactive
+                    State::Inactive
                 };
                 let _ = reply.send(fsm_state);
             }
@@ -105,7 +107,7 @@ impl Actor for RootActor {
                     state.supervisor = None;
                     state.finalizing = false;
 
-                    emit_session_ended(&state.app, &session_id, reason);
+                    emit_session_ended(&*state.runtime, &session_id, reason);
                 }
             }
             SupervisionEvent::ActorFailed(cell, error) => {
@@ -118,7 +120,7 @@ impl Actor for RootActor {
                     tracing::warn!(?error, "session_supervisor_failed");
                     state.supervisor = None;
                     state.finalizing = false;
-                    emit_session_ended(&state.app, &session_id, Some(format!("{:?}", error)));
+                    emit_session_ended(&*state.runtime, &session_id, Some(format!("{:?}", error)));
                 }
             }
         }
@@ -142,24 +144,10 @@ async fn start_session_impl(
 
         configure_sentry_session_context(&params);
 
-        let app_dir = match state.app.settings().cached_vault_base() {
-            Ok(base) => base.join("sessions").into_std_path_buf(),
-            Err(e) => {
-                tracing::error!(error = ?e, "failed_to_resolve_sessions_base_dir");
-                clear_sentry_session_context();
-                return false;
-            }
-        };
-
-        {
-            use tauri_plugin_tray::TrayPluginExt;
-            let _ = state.app.tray().set_start_disabled(true);
-        }
-
         let ctx = SessionContext {
-            app: state.app.clone(),
+            runtime: state.runtime.clone(),
             params: params.clone(),
-            app_dir,
+            app_dir: state.app_dir.clone(),
             started_at_instant: Instant::now(),
             started_at_system: SystemTime::now(),
         };
@@ -171,14 +159,10 @@ async fn start_session_impl(
                 state.session_id = Some(params.session_id.clone());
                 state.supervisor = Some(supervisor_cell);
 
-                if let Err(error) = (SessionLifecycleEvent::Active {
+                state.runtime.emit_lifecycle(SessionLifecycleEvent::Active {
                     session_id: params.session_id,
                     error: None,
-                })
-                .emit(&state.app)
-                {
-                    tracing::error!(?error, "failed_to_emit_active");
-                }
+                });
 
                 tracing::info!("session_started");
                 true
@@ -186,9 +170,6 @@ async fn start_session_impl(
             Err(e) => {
                 tracing::error!(error = ?e, "failed_to_start_session");
                 clear_sentry_session_context();
-
-                use tauri_plugin_tray::TrayPluginExt;
-                let _ = state.app.tray().set_start_disabled(false);
                 false
             }
         }
@@ -206,13 +187,11 @@ async fn stop_session_impl(state: &mut RootState) {
             let _guard = span.enter();
             tracing::info!("session_finalizing");
 
-            if let Err(error) = (SessionLifecycleEvent::Finalizing {
-                session_id: session_id.clone(),
-            })
-            .emit(&state.app)
-            {
-                tracing::error!(?error, "failed_to_emit_finalizing");
-            }
+            state
+                .runtime
+                .emit_lifecycle(SessionLifecycleEvent::Finalizing {
+                    session_id: session_id.clone(),
+                });
         }
 
         let session_ref: ActorRef<SessionMsg> = supervisor.clone().into();

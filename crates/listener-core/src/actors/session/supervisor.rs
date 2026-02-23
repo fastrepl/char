@@ -1,16 +1,14 @@
 use hypr_supervisor::{RestartBudget, RestartTracker, RetryStrategy, spawn_with_retry};
 use ractor::concurrency::Duration;
 use ractor::{Actor, ActorCell, ActorProcessingErr, ActorRef, SupervisionEvent};
-use tauri_specta::Event;
 use tracing::Instrument;
 
-use crate::DegradedError;
-use crate::SessionLifecycleEvent;
 use crate::actors::session::lifecycle;
 use crate::actors::session::types::{SessionContext, session_span, session_supervisor_name};
 use crate::actors::{
     ChannelMode, ListenerActor, ListenerArgs, RecArgs, RecorderActor, SourceActor, SourceArgs,
 };
+use crate::{DegradedError, SessionLifecycleEvent};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum ChildKind {
@@ -68,7 +66,7 @@ impl Actor for SessionActor {
                 SourceArgs {
                     mic_device: None,
                     onboarding: ctx.params.onboarding,
-                    app: ctx.app.clone(),
+                    runtime: ctx.runtime.clone(),
                     session_id: ctx.params.session_id.clone(),
                 },
                 myself.get_cell(),
@@ -105,8 +103,6 @@ impl Actor for SessionActor {
         .await
     }
 
-    // Listener is spawned in post_start so that a connection failure enters
-    // degraded mode instead of killing the session -- source and recorder keep running.
     async fn post_start(
         &self,
         myself: ActorRef<Self::Msg>,
@@ -120,7 +116,7 @@ impl Actor for SessionActor {
                 Some(ListenerActor::name()),
                 ListenerActor,
                 ListenerArgs {
-                    app: state.ctx.app.clone(),
+                    runtime: state.ctx.runtime.clone(),
                     languages: state.ctx.params.languages.clone(),
                     onboarding: state.ctx.params.onboarding,
                     model: state.ctx.params.model.clone(),
@@ -145,11 +141,13 @@ impl Actor for SessionActor {
                     let degraded = DegradedError::UpstreamUnavailable {
                         message: classify_connection_failure(base_url),
                     };
-                    let _ = (SessionLifecycleEvent::Active {
-                        session_id: state.ctx.params.session_id.clone(),
-                        error: Some(degraded),
-                    })
-                    .emit(&state.ctx.app);
+                    state
+                        .ctx
+                        .runtime
+                        .emit_lifecycle(SessionLifecycleEvent::Active {
+                            session_id: state.ctx.params.session_id.clone(),
+                            error: Some(degraded),
+                        });
                 }
             }
             Ok(())
@@ -212,11 +210,13 @@ impl Actor for SessionActor {
                         let degraded = parse_degraded_reason(reason.as_ref());
                         state.listener_cell = None;
 
-                        let _ = (SessionLifecycleEvent::Active {
-                            session_id: state.ctx.params.session_id.clone(),
-                            error: Some(degraded),
-                        })
-                        .emit(&state.ctx.app);
+                        state
+                            .ctx
+                            .runtime
+                            .emit_lifecycle(SessionLifecycleEvent::Active {
+                                session_id: state.ctx.params.session_id.clone(),
+                                error: Some(degraded),
+                            });
                     }
                     Some(ChildKind::Source) => {
                         tracing::info!(?reason, "source_terminated_attempting_restart");
@@ -248,11 +248,13 @@ impl Actor for SessionActor {
                     };
                     state.listener_cell = None;
 
-                    let _ = (SessionLifecycleEvent::Active {
-                        session_id: state.ctx.params.session_id.clone(),
-                        error: Some(degraded),
-                    })
-                    .emit(&state.ctx.app);
+                    state
+                        .ctx
+                        .runtime
+                        .emit_lifecycle(SessionLifecycleEvent::Active {
+                            session_id: state.ctx.params.session_id.clone(),
+                            error: Some(degraded),
+                        });
                 }
                 Some(ChildKind::Source) => {
                     tracing::warn!(?error, "source_failed_attempting_restart");
@@ -311,12 +313,12 @@ async fn try_restart_source(supervisor_cell: ActorCell, state: &mut SessionState
 
     let sup = supervisor_cell;
     let onboarding = state.ctx.params.onboarding;
-    let app = state.ctx.app.clone();
+    let runtime = state.ctx.runtime.clone();
     let session_id = state.ctx.params.session_id.clone();
 
     let cell = spawn_with_retry(&RETRY_STRATEGY, || {
         let sup = sup.clone();
-        let app = app.clone();
+        let runtime = runtime.clone();
         let session_id = session_id.clone();
         async move {
             let (r, _) = Actor::spawn_linked(
@@ -325,7 +327,7 @@ async fn try_restart_source(supervisor_cell: ActorCell, state: &mut SessionState
                 SourceArgs {
                     mic_device: None,
                     onboarding,
-                    app,
+                    runtime,
                     session_id,
                 },
                 sup,
