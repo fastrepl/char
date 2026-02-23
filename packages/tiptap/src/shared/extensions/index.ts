@@ -16,6 +16,7 @@ import StarterKit from "@tiptap/starter-kit";
 
 import { AIHighlight } from "../ai-highlight";
 import { StreamingAnimation } from "../animation";
+import { ClearMarksOnEnter } from "../clear-marks-on-enter";
 import { ClipboardTextSerializer } from "../clipboard";
 import CustomListKeymap from "../custom-list-keymap";
 import { Hashtag } from "../hashtag";
@@ -218,6 +219,7 @@ export const getExtensions = (
   Highlight,
   AIHighlight,
   CustomListKeymap,
+  ClearMarksOnEnter,
   StreamingAnimation,
   ClipboardTextSerializer,
   SearchAndReplace.configure({
