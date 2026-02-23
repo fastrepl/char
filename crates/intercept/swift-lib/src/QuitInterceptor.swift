@@ -86,6 +86,13 @@ final class QuitInterceptor {
     }
   }
 
+  /// Called from the Cmd+Q menu item. Since a menu click cannot be "held",
+  /// we simulate a quick press-and-release to transition to `.awaiting`.
+  func onMenuCmdQ() {
+    onCmdQPressed()
+    onKeyReleased()
+  }
+
   func onKeyReleased() {
     switch state {
     case .idle, .awaiting:

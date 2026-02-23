@@ -21,7 +21,7 @@ public func _showQuitOverlay() {
 @_cdecl("_trigger_cmd_q_pressed")
 public func _triggerCmdQPressed() {
   DispatchQueue.main.async {
-    QuitInterceptor.shared.onCmdQPressed()
+    QuitInterceptor.shared.onMenuCmdQ()
   }
 }
 
