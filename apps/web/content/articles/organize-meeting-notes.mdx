@@ -9,44 +9,34 @@ category: "Guides"
 date: "2026-02-22"
 ---
 
-You walk out of a meeting, send a summary to the team, and feel good about it. Three weeks later someone asks "what did we decide about the timeline?" and you spend twenty minutes digging through Slack, your inbox, and two different apps before giving up and scheduling another meeting to redecide something you already decided.
+You send meeting notes. Three weeks later, nobody can find them. You schedule another meeting to redecide what you already decided.
 
-Most meeting notes disappear because finding them three weeks later proves nearly impossible, even though people wrote them down at the time. Teams pick note systems without thinking about how they'll search for things later, and those notes end up abandoned within weeks.
+Meeting notes disappear because teams pick systems based on capture features and ignore retrieval entirely. The search method determines whether notes get used or abandoned.
 
-## Match Your System to Search Habits
+## Automated Capture and Transcription
 
-Most teams pick note tools based on features and then search using whatever method the tool provides. Match the tool to your instinct, whether you think in dates, people, or topics. I've watched teams adopt tools that work beautifully for someone else's workflow, then wonder a month later why nobody uses them.
+AI meeting assistants record and transcribe without requiring manual note-taking during conversations. Otter and Fireflies both search across projects and dates, though transcripts live on their servers and export options vary by plan. Char saves markdown locally on the device. These tools differ primarily in where files end up and how easily they transfer between systems.
 
-## Tools Worth Considering
+The capture method affects downstream organization. A transcript becomes searchable immediately, while manual notes require someone to write them during the meeting, and most teams underestimate how often meetings end without anyone taking notes at all. Automated recordings produce complete transcripts, but the resulting volume of unstructured text requires its own organization system.
 
-### **1. AI Meeting Assistants**
+## Structured Retrieval
 
-These tools record and transcribe automatically, so nobody has to take notes during the meeting. Otter and Fireflies search across projects and dates well enough for most teams, though your transcripts live on their servers and you should check export options before committing. Char saves markdown on your device, keeping files portable across editors.
+Note apps organize captured content in different ways. Notion stores notes as database rows that filter by properties like project, date, or attendee. Obsidian takes a linking approach where documents reference each other so relationships between meetings become visible over time. Logseq uses daily notes with built-in task management that enforces regular review. All three accept markdown imports, so AI transcripts from tools like Char or Otter feed directly into whichever structure the team already uses.
 
-### **2. Note Apps (Notion, Obsidian, Evernote, OneNote, Logseq)**
+A spreadsheet index with one row per meeting (date, attendees, project, decisions, action items, notes link) enables filtering by project or searching for every conversation involving a specific person. Scattered documents across multiple tools lack this capability. The spreadsheet approach becomes most useful when tracking how decisions evolved across conversations, or when reconstructing why the team chose a direction six months ago.
 
-Notion stores notes as database rows you can filter, while Obsidian links documents into a web where ideas connect across meetings. Logseq adds daily notes with built-in task management that forces regular review, which some teams find more useful than the flexibility of the other two. Markdown imports cleanly into all three, so AI transcripts can feed into whichever structure fits.
+CRMs like Salesforce, HubSpot, Attio, and Folk display complete conversation history when opening a contact. Most teams write notes elsewhere and import them because CRM text editors are clunky for real-time use. Sales teams, recruiters, and account managers use CRMs for this regardless of the editing experience, since customer conversations need to live in one central location.
 
-### **3. A Spreadsheet or Database Index**
+Wiki-style tools like Confluence, Notion, and GitHub Wiki require a designated content owner. Without clear ownership, teams contribute for two weeks, contradictions pile up, nobody fixes them because responsibility remains unclear, and within six months people stop checking the wiki entirely. Active wikis always have someone reviewing and correcting content on a schedule.
 
-A spreadsheet with one row per meeting (date, attendees, project, decisions, action items, notes link) lets you filter by project or search for every meeting where a specific person was involved. Scattered documents across multiple tools lack this capability. You end up using it most when you need to track how decisions evolved across conversations, or when someone asks why the team chose a specific direction six months ago.
+## Search Method and Workflow
 
-### **4. CRMs (Salesforce, HubSpot, Attio, Folk)**
+Teams pick note tools based on features and then search using whatever method the tool provides. The instinct to search by dates, people, or topics should drive the tool choice instead. A system that conflicts with natural search patterns gets abandoned regardless of its feature set.
 
-Opening a contact in your CRM should show the complete conversation history. Most teams write notes elsewhere and import them because CRM text editors are clunky for real-time note-taking. Sales teams, recruiters, and account managers end up here regardless, since the CRM is already central to their workflow and keeping customer conversations in one place outweighs the editing experience.
+Email-based note storage works for people whose workflow already centers on their inbox. Notes appear in the same place as other correspondence, and Gmail or Outlook search retrieves them by participant name, date range, or subject keywords. Multiple meetings per day create clutter, since the inbox fills up and notes lack any meaningful structure.
 
-### **5. Wiki-Style Tools (Confluence, Notion, GitHub Wiki)**
-
-Wikis need a designated owner. I've seen this fail repeatedly: teams set up a wiki, everyone contributes for two weeks, contradictions pile up, nobody fixes them because responsibility is unclear, and within six months people stop checking it. The wikis that survive always have someone who reviews and corrects content on a schedule.
-
-### **6. Email to Yourself**
-
-People who already live in their inbox tend to stick with this one. Notes land in the same place as everything else, and Gmail or Outlook search can find them by participant name, date range, or subject keywords. Multiple meetings per day make this messy though, since your inbox gets cluttered and notes lack any structure.
-
-### **7. GTD and Other Processing Methodologies**
-
-These systems ask you to write raw notes during meetings, then process them later into action items and reference material. Most teams skip the processing step. Raw notes accumulate, the weekly review never happens, and you end up with the same unorganized mess because most people overestimate their willingness to do regular reviews.
+GTD and similar processing methodologies require writing raw notes during meetings, then processing them into action items and reference material later. Most teams skip the processing step. Raw notes accumulate, the weekly review never happens, and the result is the same unorganized mess the system was supposed to prevent.
 
 ## File Format and Portability
 
-Your capture tool determines what happens to your notes when you eventually switch tools. Char saves markdown locally, and those same files open in Obsidian, Notion, VS Code, or any editor without conversion. Most teams change their note-taking setup every couple of years, so format portability matters more than people realize when they first pick a system.
+The capture tool determines what happens to notes when switching systems. Char saves markdown locally, and those files open in Obsidian, Notion, VS Code, or any editor without conversion. Most teams change their note-taking setup every couple of years, and format portability matters more than people expect when first picking a system. Locked-in formats make each tool migration painful.
