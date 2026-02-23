@@ -69,7 +69,7 @@ fn migrate_from_store_json(
         None => return Ok(()),
     };
 
-    let _: std::collections::HashMap<String, serde_json::Value> =
+    let _: std::collections::HashMap<String, String> =
         serde_json::from_str(&auth_str).map_err(invalid_data)?;
 
     store::atomic_write(auth_path, &auth_str)?;

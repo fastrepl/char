@@ -62,16 +62,17 @@ export type Notification = {
   message: string;
   timeout: Duration | null;
   event_id: string | null;
+  source: string | null;
   start_time: number | null;
   participants: Participant[] | null;
   event_details: EventDetails | null;
   action_label: string | null;
 };
 export type NotificationEvent =
-  | { type: "notification_confirm"; key: string; event_id: string | null }
-  | { type: "notification_accept"; key: string; event_id: string | null }
-  | { type: "notification_dismiss"; key: string; event_id: string | null }
-  | { type: "notification_timeout"; key: string; event_id: string | null };
+  | { type: "notification_confirm"; key: string; event_id: string | null; source: string | null }
+  | { type: "notification_accept"; key: string; event_id: string | null; source: string | null }
+  | { type: "notification_dismiss"; key: string; event_id: string | null; source: string | null }
+  | { type: "notification_timeout"; key: string; event_id: string | null; source: string | null };
 export type Participant = {
   name: string | null;
   email: string;

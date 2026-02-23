@@ -26,22 +26,35 @@ impl AuthStore {
 
     pub fn set(&self, key: String, value: String) -> crate::Result<()> {
         let mut data = self.data.lock().unwrap();
-        data.insert(key, value);
-        atomic_save(&self.path, &data)
+        let old = data.insert(key.clone(), value);
+        if let Err(e) = atomic_save(&self.path, &data) {
+            match old {
+                Some(prev) => { data.insert(key, prev); }
+                None => { data.remove(&key); }
+            }
+            return Err(e);
+        }
+        Ok(())
     }
 
     pub fn remove(&self, key: &str) -> crate::Result<()> {
         let mut data = self.data.lock().unwrap();
-        data.remove(key);
-        atomic_save(&self.path, &data)
+        let old = data.remove(key);
+        if let Err(e) = atomic_save(&self.path, &data) {
+            if let Some(prev) = old {
+                data.insert(key.to_string(), prev);
+            }
+            return Err(e);
+        }
+        Ok(())
     }
 
     pub fn clear(&self) -> crate::Result<()> {
         let mut data = self.data.lock().unwrap();
-        data.clear();
         if self.path.exists() {
             std::fs::remove_file(&self.path)?;
         }
+        data.clear();
         Ok(())
     }
 

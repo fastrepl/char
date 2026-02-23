@@ -13,6 +13,7 @@ pub fn init(app: tauri::AppHandle<tauri::Wry>) {
             let _ = NotificationEvent::Confirm {
                 key: ctx.key,
                 event_id: ctx.event_id,
+                source: ctx.source,
             }
             .emit(&app);
 
@@ -29,6 +30,7 @@ pub fn init(app: tauri::AppHandle<tauri::Wry>) {
             let _ = NotificationEvent::Accept {
                 key: ctx.key,
                 event_id: ctx.event_id,
+                source: ctx.source,
             }
             .emit(&app);
 
@@ -43,6 +45,7 @@ pub fn init(app: tauri::AppHandle<tauri::Wry>) {
             let _ = NotificationEvent::Dismiss {
                 key: ctx.key,
                 event_id: ctx.event_id,
+                source: ctx.source,
             }
             .emit(&app);
 
@@ -57,6 +60,7 @@ pub fn init(app: tauri::AppHandle<tauri::Wry>) {
             let _ = NotificationEvent::Timeout {
                 key: ctx.key,
                 event_id: ctx.event_id,
+                source: ctx.source,
             }
             .emit(&app);
 
