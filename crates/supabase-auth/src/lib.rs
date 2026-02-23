@@ -15,6 +15,8 @@ pub use error::*;
 mod jwks;
 use jwks::*;
 
+pub mod gotrue;
+
 #[derive(Clone)]
 pub struct SupabaseAuth {
     jwks: CachedJwks,
