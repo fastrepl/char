@@ -40,6 +40,7 @@ import { Route as ViewOpensourceRouteImport } from './routes/_view/opensource'
 import { Route as ViewFreeRouteImport } from './routes/_view/free'
 import { Route as ViewFileTranscriptionRouteImport } from './routes/_view/file-transcription'
 import { Route as ViewEnterpriseRouteImport } from './routes/_view/enterprise'
+import { Route as ViewChooseRouteImport } from './routes/_view/choose'
 import { Route as ViewBrandRouteImport } from './routes/_view/brand'
 import { Route as ViewAboutRouteImport } from './routes/_view/about'
 import { Route as ViewDocsRouteRouteImport } from './routes/_view/docs/route'
@@ -307,6 +308,11 @@ const ViewFileTranscriptionRoute = ViewFileTranscriptionRouteImport.update({
 const ViewEnterpriseRoute = ViewEnterpriseRouteImport.update({
   id: '/enterprise',
   path: '/enterprise',
+  getParentRoute: () => ViewRouteRoute,
+} as any)
+const ViewChooseRoute = ViewChooseRouteImport.update({
+  id: '/choose',
+  path: '/choose',
   getParentRoute: () => ViewRouteRoute,
 } as any)
 const ViewBrandRoute = ViewBrandRouteImport.update({
@@ -926,6 +932,7 @@ export interface FileRoutesByFullPath {
   '/docs': typeof ViewDocsRouteRouteWithChildren
   '/about': typeof ViewAboutRoute
   '/brand': typeof ViewBrandRoute
+  '/choose': typeof ViewChooseRoute
   '/enterprise': typeof ViewEnterpriseRoute
   '/file-transcription': typeof ViewFileTranscriptionRoute
   '/free': typeof ViewFreeRoute
@@ -1067,6 +1074,7 @@ export interface FileRoutesByTo {
   '/youtube': typeof YoutubeRoute
   '/about': typeof ViewAboutRoute
   '/brand': typeof ViewBrandRoute
+  '/choose': typeof ViewChooseRoute
   '/enterprise': typeof ViewEnterpriseRoute
   '/file-transcription': typeof ViewFileTranscriptionRoute
   '/free': typeof ViewFreeRoute
@@ -1215,6 +1223,7 @@ export interface FileRoutesById {
   '/_view/docs': typeof ViewDocsRouteRouteWithChildren
   '/_view/about': typeof ViewAboutRoute
   '/_view/brand': typeof ViewBrandRoute
+  '/_view/choose': typeof ViewChooseRoute
   '/_view/enterprise': typeof ViewEnterpriseRoute
   '/_view/file-transcription': typeof ViewFileTranscriptionRoute
   '/_view/free': typeof ViewFreeRoute
@@ -1364,6 +1373,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/about'
     | '/brand'
+    | '/choose'
     | '/enterprise'
     | '/file-transcription'
     | '/free'
@@ -1505,6 +1515,7 @@ export interface FileRouteTypes {
     | '/youtube'
     | '/about'
     | '/brand'
+    | '/choose'
     | '/enterprise'
     | '/file-transcription'
     | '/free'
@@ -1652,6 +1663,7 @@ export interface FileRouteTypes {
     | '/_view/docs'
     | '/_view/about'
     | '/_view/brand'
+    | '/_view/choose'
     | '/_view/enterprise'
     | '/_view/file-transcription'
     | '/_view/free'
@@ -2048,6 +2060,13 @@ declare module '@tanstack/react-router' {
       path: '/enterprise'
       fullPath: '/enterprise'
       preLoaderRoute: typeof ViewEnterpriseRouteImport
+      parentRoute: typeof ViewRouteRoute
+    }
+    '/_view/choose': {
+      id: '/_view/choose'
+      path: '/choose'
+      fullPath: '/choose'
+      preLoaderRoute: typeof ViewChooseRouteImport
       parentRoute: typeof ViewRouteRoute
     }
     '/_view/brand': {
@@ -2907,6 +2926,7 @@ interface ViewRouteRouteChildren {
   ViewDocsRouteRoute: typeof ViewDocsRouteRouteWithChildren
   ViewAboutRoute: typeof ViewAboutRoute
   ViewBrandRoute: typeof ViewBrandRoute
+  ViewChooseRoute: typeof ViewChooseRoute
   ViewEnterpriseRoute: typeof ViewEnterpriseRoute
   ViewFileTranscriptionRoute: typeof ViewFileTranscriptionRoute
   ViewFreeRoute: typeof ViewFreeRoute
@@ -2990,6 +3010,7 @@ const ViewRouteRouteChildren: ViewRouteRouteChildren = {
   ViewDocsRouteRoute: ViewDocsRouteRouteWithChildren,
   ViewAboutRoute: ViewAboutRoute,
   ViewBrandRoute: ViewBrandRoute,
+  ViewChooseRoute: ViewChooseRoute,
   ViewEnterpriseRoute: ViewEnterpriseRoute,
   ViewFileTranscriptionRoute: ViewFileTranscriptionRoute,
   ViewFreeRoute: ViewFreeRoute,
