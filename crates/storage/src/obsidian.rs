@@ -16,7 +16,8 @@ impl FromStr for ObsidianConfig {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, specta::Type)]
+#[derive(Debug, Deserialize, Serialize)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 pub struct ObsidianVault {
     pub path: PathBuf,
 }

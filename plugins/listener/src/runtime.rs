@@ -6,15 +6,25 @@ pub struct TauriRuntime {
     pub app: tauri::AppHandle,
 }
 
-impl ListenerRuntime for TauriRuntime {
-    fn sessions_dir(&self) -> Result<std::path::PathBuf, String> {
+impl hypr_storage::StorageRuntime for TauriRuntime {
+    fn global_base(&self) -> Result<std::path::PathBuf, hypr_storage::Error> {
+        self.app
+            .settings()
+            .global_base()
+            .map(|p| p.into_std_path_buf())
+            .map_err(|_| hypr_storage::Error::DataDirUnavailable)
+    }
+
+    fn vault_base(&self) -> Result<std::path::PathBuf, hypr_storage::Error> {
         self.app
             .settings()
             .cached_vault_base()
-            .map(|base| base.join("sessions").into_std_path_buf())
-            .map_err(|e| e.to_string())
+            .map(|p| p.into_std_path_buf())
+            .map_err(|_| hypr_storage::Error::DataDirUnavailable)
     }
+}
 
+impl ListenerRuntime for TauriRuntime {
     fn emit_lifecycle(&self, event: hypr_listener_core::SessionLifecycleEvent) {
         use tauri_plugin_tray::TrayPluginExt;
         match &event {

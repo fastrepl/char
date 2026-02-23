@@ -14,21 +14,27 @@ pub enum ListenerEvent {
 }
 
 pub struct TuiRuntime {
-    sessions_dir: PathBuf,
+    vault_base: PathBuf,
     tx: mpsc::UnboundedSender<ListenerEvent>,
 }
 
 impl TuiRuntime {
-    pub fn new(sessions_dir: PathBuf, tx: mpsc::UnboundedSender<ListenerEvent>) -> Self {
-        Self { sessions_dir, tx }
+    pub fn new(vault_base: PathBuf, tx: mpsc::UnboundedSender<ListenerEvent>) -> Self {
+        Self { vault_base, tx }
+    }
+}
+
+impl hypr_storage::StorageRuntime for TuiRuntime {
+    fn global_base(&self) -> Result<PathBuf, hypr_storage::Error> {
+        Ok(self.vault_base.clone())
+    }
+
+    fn vault_base(&self) -> Result<PathBuf, hypr_storage::Error> {
+        Ok(self.vault_base.clone())
     }
 }
 
 impl ListenerRuntime for TuiRuntime {
-    fn sessions_dir(&self) -> Result<PathBuf, String> {
-        Ok(self.sessions_dir.clone())
-    }
-
     fn emit_lifecycle(&self, event: SessionLifecycleEvent) {
         let _ = self.tx.send(ListenerEvent::Lifecycle(event));
     }

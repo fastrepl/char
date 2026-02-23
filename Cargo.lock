@@ -3068,6 +3068,7 @@ dependencies = [
  "ractor",
  "ratatui",
  "serde_json",
+ "storage",
  "tokio",
  "tokio-stream",
  "transcript",
@@ -9989,6 +9990,7 @@ dependencies = [
  "serde",
  "serde_json",
  "specta",
+ "storage",
  "supervisor",
  "thiserror 2.0.18",
  "tokio",
@@ -16084,6 +16086,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
+name = "storage"
+version = "0.1.0"
+dependencies = [
+ "camino",
+ "dirs 6.0.0",
+ "serde",
+ "serde_json",
+ "shellexpand",
+ "specta",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+]
+
+[[package]]
 name = "str_inflector"
 version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -17710,6 +17727,7 @@ dependencies = [
  "serde_json",
  "specta",
  "specta-typescript",
+ "storage",
  "tauri",
  "tauri-plugin",
  "tauri-plugin-hooks",
@@ -18130,16 +18148,14 @@ name = "tauri-plugin-settings"
 version = "0.1.0"
 dependencies = [
  "camino",
- "dirs 6.0.0",
  "serde",
  "serde_json",
- "shellexpand",
  "specta",
  "specta-typescript",
+ "storage",
  "tauri",
  "tauri-plugin",
  "tauri-specta",
- "tempfile",
  "thiserror 2.0.18",
  "tokio",
 ]

@@ -52,12 +52,10 @@ async fn main() {
     ];
 
     let session_id = uuid::Uuid::new_v4().to_string();
-    let sessions_dir = std::env::temp_dir()
-        .join("hypr-listener-cli")
-        .join("sessions");
+    let vault_base = std::env::temp_dir().join("hypr-listener-cli");
 
     let (listener_tx, listener_rx) = tokio::sync::mpsc::unbounded_channel();
-    let runtime = Arc::new(TuiRuntime::new(sessions_dir, listener_tx));
+    let runtime = Arc::new(TuiRuntime::new(vault_base, listener_tx));
 
     let (root_ref, _handle) = Actor::spawn(
         Some(RootActor::name()),

@@ -23,6 +23,7 @@ uuid = { workspace = true }
 hypr-audio = { workspace = true }
 hypr-language = { workspace = true }
 hypr-listener-core = { workspace = true, features = ["specta"] }
+hypr-storage = { workspace = true }
 hypr-transcript = { workspace = true }
 
 owhisper-client = { workspace = true }

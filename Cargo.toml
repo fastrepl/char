@@ -96,6 +96,7 @@ hypr-pyannote-local = { path = "crates/pyannote-local", package = "pyannote-loca
 hypr-recall = { path = "crates/recall", package = "recall" }
 hypr-s3 = { path = "crates/s3", package = "s3" }
 hypr-slack-web = { path = "crates/slack-web", package = "slack-web" }
+hypr-storage = { path = "crates/storage", package = "storage" }
 hypr-supabase-auth = { path = "crates/supabase-auth", package = "supabase-auth" }
 hypr-supabase-storage = { path = "crates/supabase-storage", package = "supabase-storage" }
 hypr-tcc = { path = "crates/tcc", package = "tcc" }

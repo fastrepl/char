@@ -141,8 +141,8 @@ async fn start_session_impl(
 
         configure_sentry_session_context(&params);
 
-        let app_dir = match state.runtime.sessions_dir() {
-            Ok(dir) => dir,
+        let app_dir = match state.runtime.vault_base() {
+            Ok(base) => base.join("sessions"),
             Err(e) => {
                 tracing::error!(error = %e, "failed_to_resolve_sessions_dir");
                 clear_sentry_session_context();
