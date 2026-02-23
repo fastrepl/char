@@ -11,8 +11,10 @@ import {
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
 import Underline from "@tiptap/extension-underline";
+import { Mark } from "@tiptap/pm/model";
 import { Plugin, PluginKey, Transaction } from "@tiptap/pm/state";
 import StarterKit from "@tiptap/starter-kit";
+import tldList from "tlds";
 
 import { AIHighlight } from "../ai-highlight";
 import { StreamingAnimation } from "../animation";
@@ -80,48 +82,7 @@ const AttachmentImage = Image.extend({
   },
 });
 
-const COMMON_TLDS = new Set([
-  "com",
-  "org",
-  "net",
-  "edu",
-  "gov",
-  "mil",
-  "int",
-  "info",
-  "biz",
-  "name",
-  "pro",
-  "app",
-  "dev",
-  "tech",
-  "xyz",
-  "online",
-  "site",
-  "store",
-  "cloud",
-  "design",
-  "studio",
-  "agency",
-  "blog",
-  "shop",
-  "media",
-  "news",
-  "world",
-  "global",
-  "digital",
-  "network",
-  "museum",
-  "aero",
-  "coop",
-  "travel",
-  "jobs",
-  "mobi",
-  "asia",
-  "tel",
-  "cat",
-  "post",
-]);
+const VALID_TLDS = new Set(tldList.map((t: string) => t.toLowerCase()));
 
 function isValidUrl(url: string): boolean {
   try {
@@ -131,8 +92,7 @@ function isValidUrl(url: string): boolean {
     const parts = parsed.hostname.split(".");
     if (parts.length < 2) return false;
     const tld = parts[parts.length - 1].toLowerCase();
-    if (tld.length === 2 && /^[a-z]{2}$/.test(tld)) return true;
-    return COMMON_TLDS.has(tld);
+    return VALID_TLDS.has(tld);
   } catch {
     return false;
   }
@@ -186,7 +146,7 @@ export const getExtensions = (
             let prevLink: {
               startPos: number;
               endPos: number;
-              mark: InstanceType<typeof linkType>;
+              mark: Mark;
             } | null = null;
             newState.doc.descendants((node, pos) => {
               if (!node.isText || !node.text) {

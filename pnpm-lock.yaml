@@ -1426,6 +1426,9 @@ importers:
       requestidlecallback-polyfill:
         specifier: ^1.0.2
         version: 1.0.2
+      tlds:
+        specifier: ^1.261.0
+        version: 1.261.0
       usehooks-ts:
         specifier: ^3.1.1
         version: 3.1.1(react@19.2.4)
@@ -15571,6 +15574,10 @@ packages:
 
   tinytick@1.2.8:
     resolution: {integrity: sha512-tT7/2EIfUcQN4yjREOx7xwL85pooPYg9vahoPcY9/sGdfurR/cp/bgfxlAAKQnIoXjcD8peYhqa6NS3em2PioA==}
+
+  tlds@1.261.0:
+    resolution: {integrity: sha512-QXqwfEl9ddlGBaRFXIvNKK6OhipSiLXuRuLJX5DErz0o0Q0rYxulWLdFryTkV5PkdZct5iMInwYEGe/eR++1AA==}
+    hasBin: true
 
   tldts-core@7.0.23:
     resolution: {integrity: sha512-0g9vrtDQLrNIiCj22HSe9d4mLVG3g5ph5DZ8zCKBr4OtrspmNB6ss7hVyzArAeE88ceZocIEGkyW1Ime7fxPtQ==}
@@ -33097,6 +33104,8 @@ snapshots:
   tinyspy@4.0.4: {}
 
   tinytick@1.2.8: {}
+
+  tlds@1.261.0: {}
 
   tldts-core@7.0.23: {}
 

@@ -46,6 +46,7 @@
     "prosemirror-model": "^1.25.4",
     "prosemirror-state": "^1.4.4",
     "requestidlecallback-polyfill": "^1.0.2",
+    "tlds": "^1.261.0",
     "usehooks-ts": "^3.1.1"
   },
   "devDependencies": {
