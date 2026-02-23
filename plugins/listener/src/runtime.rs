@@ -1,4 +1,5 @@
 use hypr_listener_core::ListenerRuntime;
+use tauri_plugin_settings::SettingsPluginExt;
 use tauri_specta::Event;
 
 pub struct TauriRuntime {
@@ -6,6 +7,14 @@ pub struct TauriRuntime {
 }
 
 impl ListenerRuntime for TauriRuntime {
+    fn sessions_dir(&self) -> Result<std::path::PathBuf, String> {
+        self.app
+            .settings()
+            .cached_vault_base()
+            .map(|base| base.join("sessions").into_std_path_buf())
+            .map_err(|e| e.to_string())
+    }
+
     fn emit_lifecycle(&self, event: hypr_listener_core::SessionLifecycleEvent) {
         use tauri_plugin_tray::TrayPluginExt;
         match &event {

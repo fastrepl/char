@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use ractor::Actor;
 use tauri::Manager;
-use tauri_plugin_settings::SettingsPluginExt;
 
 mod commands;
 mod error;
@@ -54,31 +53,15 @@ pub fn init() -> tauri::plugin::TauriPlugin<tauri::Wry> {
 
             let app_handle = app.app_handle().clone();
 
-            let app_dir = app_handle
-                .settings()
-                .cached_vault_base()
-                .map(|base| base.join("sessions").into_std_path_buf())
-                .unwrap_or_else(|e| {
-                    tracing::error!(error = ?e, "failed_to_resolve_sessions_base_dir_using_fallback");
-                    dirs::data_dir()
-                        .unwrap_or_else(std::env::temp_dir)
-                        .join("hyprnote")
-                        .join("sessions")
-                });
-
             let runtime = Arc::new(TauriRuntime {
                 app: app_handle.clone(),
             });
 
             tauri::async_runtime::spawn(async move {
-                Actor::spawn(
-                    Some(RootActor::name()),
-                    RootActor,
-                    RootArgs { runtime, app_dir },
-                )
-                .await
-                .map(|_| tracing::info!("root_actor_spawned"))
-                .map_err(|e| tracing::error!(?e, "failed_to_spawn_root_actor"))
+                Actor::spawn(Some(RootActor::name()), RootActor, RootArgs { runtime })
+                    .await
+                    .map(|_| tracing::info!("root_actor_spawned"))
+                    .map_err(|e| tracing::error!(?e, "failed_to_spawn_root_actor"))
             });
 
             Ok(())

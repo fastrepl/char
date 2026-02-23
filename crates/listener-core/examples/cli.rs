@@ -7,9 +7,15 @@ use listener_core::{
 };
 use ractor::Actor;
 
-struct CliRuntime;
+struct CliRuntime {
+    sessions_dir: std::path::PathBuf,
+}
 
 impl ListenerRuntime for CliRuntime {
+    fn sessions_dir(&self) -> Result<std::path::PathBuf, String> {
+        Ok(self.sessions_dir.clone())
+    }
+
     fn emit_lifecycle(&self, event: SessionLifecycleEvent) {
         match &event {
             SessionLifecycleEvent::Active { session_id, error } => {
@@ -104,16 +110,15 @@ async fn main() {
     ];
 
     let session_id = uuid::Uuid::new_v4().to_string();
-    let app_dir = std::env::temp_dir().join("listener-cli").join("sessions");
+    let sessions_dir = std::env::temp_dir().join("listener-cli").join("sessions");
 
-    let runtime = Arc::new(CliRuntime);
+    let runtime = Arc::new(CliRuntime { sessions_dir });
 
     let (root_ref, _handle) = Actor::spawn(
         Some(RootActor::name()),
         RootActor,
         RootArgs {
             runtime: runtime.clone(),
-            app_dir,
         },
     )
     .await

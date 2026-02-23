@@ -20,12 +20,10 @@ pub enum RootMsg {
 
 pub struct RootArgs {
     pub runtime: Arc<dyn ListenerRuntime>,
-    pub app_dir: std::path::PathBuf,
 }
 
 pub struct RootState {
     runtime: Arc<dyn ListenerRuntime>,
-    app_dir: std::path::PathBuf,
     session_id: Option<String>,
     supervisor: Option<ActorCell>,
     finalizing: bool,
@@ -52,7 +50,6 @@ impl Actor for RootActor {
     ) -> Result<Self::State, ActorProcessingErr> {
         Ok(RootState {
             runtime: args.runtime,
-            app_dir: args.app_dir,
             session_id: None,
             supervisor: None,
             finalizing: false,
@@ -144,10 +141,19 @@ async fn start_session_impl(
 
         configure_sentry_session_context(&params);
 
+        let app_dir = match state.runtime.sessions_dir() {
+            Ok(dir) => dir,
+            Err(e) => {
+                tracing::error!(error = %e, "failed_to_resolve_sessions_dir");
+                clear_sentry_session_context();
+                return false;
+            }
+        };
+
         let ctx = SessionContext {
             runtime: state.runtime.clone(),
             params: params.clone(),
-            app_dir: state.app_dir.clone(),
+            app_dir,
             started_at_instant: Instant::now(),
             started_at_system: SystemTime::now(),
         };

@@ -1,6 +1,7 @@
 use crate::events::*;
 
 pub trait ListenerRuntime: Send + Sync + 'static {
+    fn sessions_dir(&self) -> Result<std::path::PathBuf, String>;
     fn emit_lifecycle(&self, event: SessionLifecycleEvent);
     fn emit_progress(&self, event: SessionProgressEvent);
     fn emit_error(&self, event: SessionErrorEvent);
