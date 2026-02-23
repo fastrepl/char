@@ -4,18 +4,9 @@ import type {
   ResolvedWordFrame,
   SegmentBuilderOptions,
   SegmentKey,
-  SegmentPass,
   SpeakerIdentity,
 } from "./shared";
 import { SegmentKey as SegmentKeyUtils } from "./shared";
-
-export const segmentationPass: SegmentPass<"frames"> = {
-  id: "build_segments",
-  run(graph, ctx) {
-    const segments = collectSegments(graph.frames, ctx.options);
-    return { ...graph, segments };
-  },
-};
 
 function createSegmentKeyFromIdentity(
   channel: ChannelProfile,
@@ -48,7 +39,7 @@ type SegmentationReducerState = {
   channelState: Map<ChannelProfile, ChannelSegmentsState>;
 };
 
-function collectSegments(
+export function collectSegments(
   frames: ResolvedWordFrame[],
   options?: SegmentBuilderOptions,
 ): ProtoSegment[] {

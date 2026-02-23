@@ -164,12 +164,6 @@ export type SegmentBuilderOptions = {
   numSpeakers?: number;
 };
 
-export type StageId =
-  | "normalize_words"
-  | "resolve_speakers"
-  | "build_segments"
-  | "propagate_identity";
-
 export type SpeakerIdentity = {
   speaker_index?: number;
   human_id?: string;
@@ -185,30 +179,6 @@ export type ResolvedWordFrame = {
 export type ProtoSegment = {
   key: SegmentKey;
   words: ResolvedWordFrame[];
-};
-
-export type SegmentGraph = {
-  finalWords?: readonly WordLike[];
-  partialWords?: readonly WordLike[];
-  words?: NormalizedWord[];
-  frames?: ResolvedWordFrame[];
-  segments?: ProtoSegment[];
-};
-
-type RequireKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
-
-export type SegmentPass<TNeedsKeys extends keyof SegmentGraph = never> = {
-  id: StageId;
-  run: (
-    graph: RequireKeys<SegmentGraph, TNeedsKeys>,
-    ctx: SegmentPassContext,
-  ) => SegmentGraph;
-};
-
-export type SegmentPassContext = {
-  speakerHints: readonly RuntimeSpeakerHint[];
-  options: SegmentBuilderOptions;
-  speakerState: SpeakerState;
 };
 
 export type SpeakerState = {

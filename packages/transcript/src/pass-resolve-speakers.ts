@@ -1,5 +1,6 @@
 import type {
-  SegmentPass,
+  NormalizedWord,
+  ResolvedWordFrame,
   SegmentWord,
   SpeakerIdentity,
   SpeakerState,
@@ -24,23 +25,18 @@ type IdentityRule = (
   args: IdentityRuleArgs,
 ) => SpeakerIdentity;
 
-export const resolveIdentitiesPass: SegmentPass<"words"> = {
-  id: "resolve_speakers",
-  run(graph, ctx) {
-    const frames = graph.words.map((word, index) => {
-      const assignment = ctx.speakerState.assignmentByWordIndex.get(index);
-      const identity = applyIdentityRules(word, assignment, ctx.speakerState);
-      rememberIdentity(word, assignment, identity, ctx.speakerState);
+export function resolveIdentities(
+  words: NormalizedWord[],
+  speakerState: SpeakerState,
+): ResolvedWordFrame[] {
+  return words.map((word, index) => {
+    const assignment = speakerState.assignmentByWordIndex.get(index);
+    const identity = applyIdentityRules(word, assignment, speakerState);
+    rememberIdentity(word, assignment, identity, speakerState);
 
-      return {
-        word,
-        identity,
-      };
-    });
-
-    return { ...graph, frames };
-  },
-};
+    return { word, identity };
+  });
+}
 
 function applyIdentityRules(
   word: SegmentWord,
@@ -104,21 +100,14 @@ function rememberIdentity(
 }
 
 const applyExplicitAssignment: IdentityRule = (identity, { assignment }) => {
-  if (!assignment) {
-    return identity;
-  }
-
-  const updates: Partial<SpeakerIdentity> = {};
-  if (assignment.speaker_index !== undefined) {
-    updates.speaker_index = assignment.speaker_index;
-  }
-  if (assignment.human_id !== undefined) {
-    updates.human_id = assignment.human_id;
-  }
-
-  return Object.keys(updates).length > 0
-    ? { ...identity, ...updates }
-    : identity;
+  if (!assignment) return identity;
+  return {
+    ...identity,
+    ...(assignment.speaker_index !== undefined && {
+      speaker_index: assignment.speaker_index,
+    }),
+    ...(assignment.human_id !== undefined && { human_id: assignment.human_id }),
+  };
 };
 
 const applySpeakerIndexHumanId: IdentityRule = (identity, { snapshot }) => {
@@ -163,22 +152,15 @@ const carryPartialIdentityForward: IdentityRule = (
   }
 
   const last = snapshot.lastSpeakerByChannel.get(word.channel);
-  if (!last) {
-    return identity;
-  }
+  if (!last) return identity;
 
-  const updates: Partial<SpeakerIdentity> = {};
-  if (
-    identity.speaker_index === undefined &&
-    last.speaker_index !== undefined
-  ) {
-    updates.speaker_index = last.speaker_index;
-  }
-  if (identity.human_id === undefined && last.human_id !== undefined) {
-    updates.human_id = last.human_id;
-  }
-
-  return Object.keys(updates).length > 0
-    ? { ...identity, ...updates }
-    : identity;
+  return {
+    ...identity,
+    ...(identity.speaker_index === undefined &&
+      last.speaker_index !== undefined && {
+        speaker_index: last.speaker_index,
+      }),
+    ...(identity.human_id === undefined &&
+      last.human_id !== undefined && { human_id: last.human_id }),
+  };
 };

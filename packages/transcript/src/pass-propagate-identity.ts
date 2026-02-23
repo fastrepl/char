@@ -1,28 +1,15 @@
-import type {
-  ChannelProfile,
-  ProtoSegment,
-  SegmentPass,
-  SpeakerState,
-} from "./shared";
+import type { ChannelProfile, ProtoSegment, SpeakerState } from "./shared";
 import { SegmentKey as SegmentKeyUtils } from "./shared";
 
-export const identityPropagationPass: SegmentPass<"segments"> = {
-  id: "propagate_identity",
-  run(graph, ctx) {
-    postProcessSegments(graph.segments, ctx.speakerState);
-    return { ...graph, segments: graph.segments };
-  },
-};
-
-function postProcessSegments(
+export function propagateIdentity(
   segments: ProtoSegment[],
-  state: SpeakerState,
+  speakerState: SpeakerState,
 ): void {
   let writeIndex = 0;
   let lastKept: ProtoSegment | undefined;
 
   for (const segment of segments) {
-    assignCompleteChannelHumanId(segment, state);
+    assignCompleteChannelHumanId(segment, speakerState);
 
     if (
       lastKept &&

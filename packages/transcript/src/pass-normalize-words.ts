@@ -1,30 +1,17 @@
-import type { SegmentPass, SegmentWord, WordLike } from "./shared";
+import type { NormalizedWord, SegmentWord, WordLike } from "./shared";
 
-export const normalizeWordsPass: SegmentPass = {
-  id: "normalize_words",
-  run(graph) {
-    const normalized = normalizeWords(
-      graph.finalWords ?? [],
-      graph.partialWords ?? [],
-    ).map((word, order) => ({
-      ...word,
-      order,
-    }));
-
-    return { ...graph, words: normalized };
-  },
-};
-
-function normalizeWords<TFinal extends WordLike, TPartial extends WordLike>(
-  finalWords: readonly TFinal[],
-  partialWords: readonly TPartial[],
-): SegmentWord[] {
-  const normalized = [
+export function normalizeWords(
+  finalWords: readonly WordLike[],
+  partialWords: readonly WordLike[],
+): NormalizedWord[] {
+  const combined = [
     ...finalWords.map((word) => toSegmentWord(word, true)),
     ...partialWords.map((word) => toSegmentWord(word, false)),
   ];
 
-  return normalized.sort((a, b) => a.start_ms - b.start_ms);
+  return combined
+    .sort((a, b) => a.start_ms - b.start_ms)
+    .map((word, order) => ({ ...word, order }));
 }
 
 const toSegmentWord = (word: WordLike, isFinal: boolean): SegmentWord => {
