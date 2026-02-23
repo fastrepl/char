@@ -3,28 +3,6 @@ name = "transcript"
 version = "0.1.0"
 edition = "2024"
 
-[dev-dependencies]
-hypr-data = { workspace = true }
-libc = "0.2"
-
-serde_json = { workspace = true }
-strum = { workspace = true, features = ["derive"] }
-
-clap = { workspace = true, features = ["derive", "env"] }
-crossterm = "0.29"
-ratatui = { version = "0.30", features = ["crossterm_0_29"] }
-
-axum = { workspace = true }
-bytes = { workspace = true }
-futures-util = { workspace = true }
-hypr-audio = { workspace = true }
-hypr-audio-utils = { workspace = true }
-hypr-transcribe-cactus = { workspace = true }
-owhisper-client = { workspace = true }
-tokio = { workspace = true, features = ["rt", "macros", "sync", "net"] }
-tokio-stream = { workspace = true }
-tower = { workspace = true }
-
 [dependencies]
 owhisper-interface = { workspace = true }
 

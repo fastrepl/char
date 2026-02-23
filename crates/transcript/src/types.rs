@@ -1,10 +1,11 @@
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
-pub struct TranscriptWord {
-    pub id: String,
+/// Pre-finalization word data from the ASR pipeline, before ID assignment.
+#[derive(Debug, Clone)]
+pub struct RawWord {
     pub text: String,
     pub start_ms: i64,
     pub end_ms: i64,
     pub channel: i32,
+    pub speaker: Option<i32>,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
@@ -15,77 +16,60 @@ pub struct PartialWord {
     pub channel: i32,
 }
 
+/// Whether a finalized word is stable or awaiting correction.
+///
+/// A word is `Pending` when it has been confirmed by the STT model but a
+/// correction source (cloud STT fallback, LLM postprocessor, etc.) is still
+/// processing it. The word has an ID and is persisted, but its text may be
+/// replaced when the correction resolves via `TranscriptDelta::replaced_ids`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize, specta::Type)]
+#[serde(rename_all = "snake_case")]
+pub enum WordState {
+    Final,
+    Pending,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
+pub struct FinalizedWord {
+    pub id: String,
+    pub text: String,
+    pub start_ms: i64,
+    pub end_ms: i64,
+    pub channel: i32,
+    pub state: WordState,
+}
+
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
 pub struct SpeakerHint {
     pub word_id: String,
     pub speaker_index: i32,
 }
 
+/// Delta emitted to the frontend after processing.
+///
+/// The frontend should:
+/// 1. Remove words listed in `replaced_ids` from TinyBase
+/// 2. Persist `new_words` to TinyBase (honoring `state`)
+/// 3. Store `partials` in ephemeral Zustand state for rendering
+///
+/// This shape handles all correction flows uniformly:
+/// - Normal finalization: `new_words` with `Final`, empty `replaced_ids`
+/// - Pending correction submitted: `new_words` with `Pending`, `replaced_ids`
+///   pointing at the same words' previous `Final` versions
+/// - Correction resolved: `new_words` with `Final` (corrected text),
+///   `replaced_ids` pointing at the `Pending` versions
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
-pub struct TranscriptUpdate {
-    pub new_final_words: Vec<TranscriptWord>,
-    pub speaker_hints: Vec<SpeakerHint>,
-    /// Current partials across **all** channels — a global snapshot, not a
-    /// per-channel delta. When channel 0 finalizes, this field still includes
-    /// channel 1's in-progress words. Callers that only care about newly
-    /// finalized words can ignore this and call
-    /// [`crate::view::TranscriptView::frame`] for a complete frame snapshot.
-    pub partial_words: Vec<PartialWord>,
+pub struct TranscriptDelta {
+    pub new_words: Vec<FinalizedWord>,
+    pub hints: Vec<SpeakerHint>,
+    /// IDs of words superseded by `new_words`. Empty for normal finalization.
+    pub replaced_ids: Vec<String>,
+    /// Current in-progress words across all channels. Global snapshot.
+    pub partials: Vec<PartialWord>,
 }
 
-/// Complete snapshot of transcript state at a point in time.
-///
-/// This is the rendering contract: everything a UI layer needs to draw one
-/// frame, whether that UI is the terminal replay tool, the TypeScript
-/// frontend, or a test assertion. Produced by `TranscriptView::frame()`.
-#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, specta::Type)]
-pub struct TranscriptFrame {
-    pub final_words: Vec<TranscriptWord>,
-    pub partial_words: Vec<PartialWord>,
-    pub speaker_hints: Vec<SpeakerHint>,
-}
-
-// ── Internal pipeline type ───────────────────────────────────────────────────
-
-/// Pre-finalization word data — the lingua franca of the accumulator pipeline.
-///
-/// Produced by [`crate::accumulator::words::assemble`] from raw ASR tokens and
-/// consumed by the pipeline stages (`dedup`, `stitch`, `splice`, …) before
-/// being promoted to [`TranscriptWord`] via `finalize_words`.
-///
-/// Also carried in [`crate::input::TranscriptInput`], so callers that
-/// construct synthetic inputs (tests, non-ASR sources) work with this type.
-#[derive(Debug, Clone)]
-pub struct RawWord {
-    pub text: String,
-    pub start_ms: i64,
-    pub end_ms: i64,
-    pub channel: i32,
-    pub speaker: Option<i32>,
-}
-
-impl RawWord {
-    pub fn to_final(self, id: String) -> (TranscriptWord, Option<SpeakerHint>) {
-        let hint = self.speaker.map(|speaker_index| SpeakerHint {
-            word_id: id.clone(),
-            speaker_index,
-        });
-        let word = TranscriptWord {
-            id,
-            text: self.text,
-            start_ms: self.start_ms,
-            end_ms: self.end_ms,
-            channel: self.channel,
-        };
-        (word, hint)
-    }
-
-    pub fn to_partial(&self) -> PartialWord {
-        PartialWord {
-            text: self.text.clone(),
-            start_ms: self.start_ms,
-            end_ms: self.end_ms,
-            channel: self.channel,
-        }
+impl TranscriptDelta {
+    pub fn is_empty(&self) -> bool {
+        self.new_words.is_empty() && self.replaced_ids.is_empty() && self.partials.is_empty()
     }
 }

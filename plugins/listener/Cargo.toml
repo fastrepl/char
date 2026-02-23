@@ -32,6 +32,8 @@ hypr-mac = { workspace = true }
 hypr-vad-ext = { workspace = true }
 tauri-plugin-fs-sync = { workspace = true }
 
+hypr-transcript = { workspace = true }
+
 owhisper-client = { workspace = true }
 owhisper-interface = { workspace = true }
 
