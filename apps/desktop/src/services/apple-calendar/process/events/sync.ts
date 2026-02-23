@@ -5,7 +5,7 @@ import type { EventsSyncInput, EventsSyncOutput } from "./types";
 
 export function syncEvents(
   ctx: Ctx,
-  { incoming, existing }: EventsSyncInput,
+  { incoming, existing, incomingParticipants, timezone }: EventsSyncInput,
 ): EventsSyncOutput {
   const out: EventsSyncOutput = {
     toDelete: [],
@@ -14,7 +14,7 @@ export function syncEvents(
   };
 
   const incomingEventMap = new Map(
-    incoming.map((e) => [eventMatchingKey(e), e]),
+    incoming.map((e) => [eventMatchingKey(e, timezone), e]),
   );
   const handledEventKeys = new Set<string>();
 
@@ -31,26 +31,35 @@ export function syncEvents(
       eventKey = undefined;
       matchingIncomingEvent = undefined;
     } else if (storeEvent.has_recurrence_rules === undefined) {
-      eventKey = eventMatchingKey({
-        tracking_id_event: trackingId,
-        started_at: storeEvent.started_at,
-        has_recurrence_rules: false,
-      });
-      matchingIncomingEvent = incomingEventMap.get(eventKey);
-      if (!matchingIncomingEvent) {
-        eventKey = eventMatchingKey({
+      eventKey = eventMatchingKey(
+        {
           tracking_id_event: trackingId,
           started_at: storeEvent.started_at,
-          has_recurrence_rules: true,
-        });
+          has_recurrence_rules: false,
+        },
+        timezone,
+      );
+      matchingIncomingEvent = incomingEventMap.get(eventKey);
+      if (!matchingIncomingEvent) {
+        eventKey = eventMatchingKey(
+          {
+            tracking_id_event: trackingId,
+            started_at: storeEvent.started_at,
+            has_recurrence_rules: true,
+          },
+          timezone,
+        );
         matchingIncomingEvent = incomingEventMap.get(eventKey);
       }
     } else {
-      eventKey = eventMatchingKey({
-        tracking_id_event: trackingId,
-        started_at: storeEvent.started_at,
-        has_recurrence_rules: storeEvent.has_recurrence_rules,
-      });
+      eventKey = eventMatchingKey(
+        {
+          tracking_id_event: trackingId,
+          started_at: storeEvent.started_at,
+          has_recurrence_rules: storeEvent.has_recurrence_rules,
+        },
+        timezone,
+      );
       matchingIncomingEvent = incomingEventMap.get(eventKey);
     }
 
@@ -64,6 +73,7 @@ export function syncEvents(
         created_at: storeEvent.created_at,
         calendar_id: storeEvent.calendar_id,
         has_recurrence_rules: matchingIncomingEvent.has_recurrence_rules,
+        participants: incomingParticipants.get(eventKey) ?? [],
       });
       handledEventKeys.add(eventKey);
       continue;
@@ -73,9 +83,12 @@ export function syncEvents(
   }
 
   for (const incomingEvent of incoming) {
-    const incomingEventKey = eventMatchingKey(incomingEvent);
+    const incomingEventKey = eventMatchingKey(incomingEvent, timezone);
     if (!handledEventKeys.has(incomingEventKey)) {
-      out.toAdd.push(incomingEvent);
+      out.toAdd.push({
+        ...incomingEvent,
+        participants: incomingParticipants.get(incomingEventKey) ?? [],
+      });
     }
   }
 

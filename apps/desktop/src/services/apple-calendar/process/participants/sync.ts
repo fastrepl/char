@@ -10,7 +10,7 @@ import type {
   ParticipantsSyncOutput,
 } from "./types";
 
-export function syncParticipants(
+export function syncSessionParticipants(
   ctx: Ctx,
   input: ParticipantsSyncInput,
 ): ParticipantsSyncOutput {

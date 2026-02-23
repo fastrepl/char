@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import type { Ctx } from "../../ctx";
-import { syncParticipants } from "./sync";
+import { syncSessionParticipants } from "./sync";
 
 type MockStoreData = {
   humans: Record<string, { email?: string; name?: string }>;
@@ -50,9 +50,8 @@ describe("syncParticipants", () => {
     });
     const ctx = createMockCtx(store);
 
-    const result = syncParticipants(ctx, {
+    const result = syncSessionParticipants(ctx, {
       incomingParticipants: new Map(),
-      eventKeyToEventId: new Map(),
     });
 
     expect(result.toAdd).toHaveLength(0);
@@ -69,11 +68,10 @@ describe("syncParticipants", () => {
     });
     const ctx = createMockCtx(store);
 
-    const result = syncParticipants(ctx, {
+    const result = syncSessionParticipants(ctx, {
       incomingParticipants: new Map([
         ["tracking-1", [{ email: "test@example.com", name: "Test" }]],
       ]),
-      eventKeyToEventId: new Map([["tracking-1", "event-1"]]),
     });
 
     expect(result.toAdd).toHaveLength(0);
@@ -93,11 +91,10 @@ describe("syncParticipants", () => {
     });
     const ctx = createMockCtx(store);
 
-    const result = syncParticipants(ctx, {
+    const result = syncSessionParticipants(ctx, {
       incomingParticipants: new Map([
         ["tracking-1", [{ email: "new@example.com", name: "New Person" }]],
       ]),
-      eventKeyToEventId: new Map([["tracking-1", "event-1"]]),
     });
 
     expect(result.humansToCreate).toHaveLength(1);
@@ -118,11 +115,10 @@ describe("syncParticipants", () => {
     });
     const ctx = createMockCtx(store);
 
-    const result = syncParticipants(ctx, {
+    const result = syncSessionParticipants(ctx, {
       incomingParticipants: new Map([
         ["tracking-1", [{ email: "existing@example.com", name: "Existing" }]],
       ]),
-      eventKeyToEventId: new Map([["tracking-1", "event-1"]]),
     });
 
     expect(result.humansToCreate).toHaveLength(0);
@@ -149,9 +145,8 @@ describe("syncParticipants", () => {
     });
     const ctx = createMockCtx(store);
 
-    const result = syncParticipants(ctx, {
+    const result = syncSessionParticipants(ctx, {
       incomingParticipants: new Map([["tracking-1", []]]),
-      eventKeyToEventId: new Map([["tracking-1", "event-1"]]),
     });
 
     expect(result.toDelete).toContain("mapping-1");
@@ -176,9 +171,8 @@ describe("syncParticipants", () => {
     });
     const ctx = createMockCtx(store);
 
-    const result = syncParticipants(ctx, {
+    const result = syncSessionParticipants(ctx, {
       incomingParticipants: new Map([["tracking-1", []]]),
-      eventKeyToEventId: new Map([["tracking-1", "event-1"]]),
     });
 
     expect(result.toDelete).not.toContain("mapping-1");

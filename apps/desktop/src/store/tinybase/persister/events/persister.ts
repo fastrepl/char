@@ -6,5 +6,8 @@ export function createEventPersister(store: Store) {
     tableName: "events",
     filename: "events.json",
     label: "EventPersister",
+    jsonFields: {
+      participants_json: "participants",
+    },
   });
 }

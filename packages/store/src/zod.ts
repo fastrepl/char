@@ -51,6 +51,13 @@ export const ignoredRecurringSeriesEntrySchema = z.object({
   last_seen: z.string(),
 });
 
+export const eventParticipantSchema = z.object({
+  name: z.string().optional(),
+  email: z.string().optional(),
+  is_organizer: z.boolean().optional(),
+  is_current_user: z.boolean().optional(),
+});
+
 export const eventSchema = z.object({
   user_id: z.string(),
   created_at: z.string(),
@@ -72,6 +79,10 @@ export const eventSchema = z.object({
     z.boolean().optional(),
   ),
   is_all_day: z.preprocess((val) => val ?? undefined, z.boolean().optional()),
+  participants_json: z.preprocess(
+    (val) => val ?? undefined,
+    z.string().optional(),
+  ),
 });
 
 export const calendarProviderSchema = z.enum(["apple", "google", "outlook"]);
@@ -290,6 +301,7 @@ export type IgnoredEvent = z.infer<typeof ignoredEventEntrySchema>;
 export type IgnoredRecurringSeries = z.infer<
   typeof ignoredRecurringSeriesEntrySchema
 >;
+export type EventParticipant = z.infer<typeof eventParticipantSchema>;
 export type Event = z.infer<typeof eventSchema>;
 export type Calendar = z.infer<typeof calendarSchema>;
 export type CalendarStorage = ToStorageType<typeof calendarSchema>;

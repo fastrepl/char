@@ -1,11 +1,6 @@
-import { EventStorage } from "@hypr/store";
+import type { EventParticipant, EventStorage } from "@hypr/store";
 
-export type EventParticipant = {
-  name?: string;
-  email?: string;
-  is_organizer?: boolean;
-  is_current_user?: boolean;
-};
+export type { EventParticipant };
 
 export type IncomingEvent = {
   tracking_id_event: string;

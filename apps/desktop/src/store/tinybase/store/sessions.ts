@@ -1,5 +1,11 @@
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
-import type { Event, SessionEvent } from "@hypr/store";
+import type {
+  Event,
+  EventParticipant,
+  HumanStorage,
+  MappingSessionParticipantStorage,
+  SessionEvent,
+} from "@hypr/store";
 import { json2md } from "@hypr/tiptap/shared";
 
 import { DEFAULT_USER_ID } from "../../../utils";
@@ -67,6 +73,9 @@ export function getOrCreateSessionForEventId(
     raw_md: "",
     user_id: DEFAULT_USER_ID,
   });
+
+  createParticipantsFromEvent(store, sessionId, event);
+
   void analyticsCommands.event({
     event: "note_created",
     has_event_id: true,
@@ -146,4 +155,59 @@ export function isSessionEmpty(store: Store, sessionId: string): boolean {
   }
 
   return true;
+}
+
+function createParticipantsFromEvent(
+  store: Store,
+  sessionId: string,
+  event: Event,
+): void {
+  if (!event.participants_json) return;
+
+  let participants: EventParticipant[];
+  try {
+    participants = JSON.parse(event.participants_json);
+  } catch {
+    return;
+  }
+
+  if (!Array.isArray(participants) || participants.length === 0) return;
+
+  const humansByEmail = new Map<string, string>();
+  store.forEachRow("humans", (humanId, _forEachCell) => {
+    const human = store.getRow("humans", humanId);
+    const email = human?.email;
+    if (email && typeof email === "string" && email.trim()) {
+      humansByEmail.set(email.toLowerCase(), humanId);
+    }
+  });
+
+  for (const participant of participants) {
+    if (!participant.email) continue;
+
+    const emailLower = participant.email.toLowerCase();
+    let humanId = humansByEmail.get(emailLower);
+
+    if (!humanId) {
+      humanId = id();
+      store.setRow("humans", humanId, {
+        user_id: DEFAULT_USER_ID,
+        name: participant.name || participant.email,
+        email: participant.email,
+        org_id: "",
+        job_title: "",
+        linkedin_username: "",
+        memo: "",
+        pinned: false,
+      } satisfies HumanStorage);
+      humansByEmail.set(emailLower, humanId);
+    }
+
+    store.setRow("mapping_session_participant", id(), {
+      user_id: DEFAULT_USER_ID,
+      session_id: sessionId,
+      human_id: humanId,
+      source: "auto",
+    } satisfies MappingSessionParticipantStorage);
+  }
 }

@@ -12,8 +12,8 @@ import {
   executeForEventsSync,
   executeForParticipantsSync,
   syncEvents,
-  syncParticipants,
   syncSessionEmbeddedEvents,
+  syncSessionParticipants,
 } from "./process";
 
 export const CALENDAR_SYNC_TASK_ID = "calendarSync";
@@ -60,11 +60,16 @@ async function run(
 
   const existing = fetchExistingEvents(ctx);
 
-  const eventsOut = syncEvents(ctx, { incoming, existing });
+  const eventsOut = syncEvents(ctx, {
+    incoming,
+    existing,
+    incomingParticipants,
+    timezone,
+  });
   executeForEventsSync(ctx, eventsOut);
   syncSessionEmbeddedEvents(ctx, incoming, timezone);
 
-  const participantsOut = syncParticipants(ctx, {
+  const participantsOut = syncSessionParticipants(ctx, {
     incomingParticipants,
     timezone,
   });
