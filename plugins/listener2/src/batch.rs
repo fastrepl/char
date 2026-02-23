@@ -3,6 +3,7 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use futures_util::StreamExt;
+use hypr_transcript::TranscriptProcessor;
 use owhisper_client::{
     AdapterKind, ArgmaxAdapter, AssemblyAIAdapter, CactusAdapter, DashScopeAdapter,
     DeepgramAdapter, ElevenLabsAdapter, FireworksAdapter, GladiaAdapter, HyprnoteAdapter,
@@ -86,20 +87,23 @@ pub struct BatchState {
     pub session_id: String,
     rx_task: tokio::task::JoinHandle<()>,
     shutdown_tx: Option<tokio::sync::oneshot::Sender<()>>,
+    transcript: TranscriptProcessor,
 }
 
 impl BatchState {
     fn emit_streamed_response(
-        &self,
+        &mut self,
         response: StreamResponse,
         percentage: f64,
     ) -> Result<(), ActorProcessingErr> {
-        BatchEvent::BatchResponseStreamed {
-            session_id: self.session_id.clone(),
-            response,
-            percentage,
+        if let Some(delta) = self.transcript.process(&response) {
+            BatchEvent::BatchResponseStreamed {
+                session_id: self.session_id.clone(),
+                delta,
+                percentage,
+            }
+            .emit(&self.app)?;
         }
-        .emit(&self.app)?;
         Ok(())
     }
 
@@ -144,6 +148,7 @@ impl Actor for BatchActor {
             session_id: args.session_id,
             rx_task,
             shutdown_tx: Some(shutdown_tx),
+            transcript: TranscriptProcessor::new(),
         };
 
         Ok(state)
@@ -158,6 +163,20 @@ impl Actor for BatchActor {
             let _ = shutdown_tx.send(());
             let _ = (&mut state.rx_task).await;
         }
+
+        let delta = state.transcript.flush();
+        if !delta.is_empty() {
+            if let Err(error) = (BatchEvent::BatchResponseStreamed {
+                session_id: state.session_id.clone(),
+                delta,
+                percentage: 1.0,
+            })
+            .emit(&state.app)
+            {
+                tracing::error!(?error, "batch_transcript_flush_emit_failed");
+            }
+        }
+
         Ok(())
     }
 
@@ -173,15 +192,7 @@ impl Actor for BatchActor {
                 percentage,
             } => {
                 tracing::info!("batch stream response received");
-
-                let is_final = matches!(
-                    response.as_ref(),
-                    StreamResponse::TranscriptResponse { is_final, .. } if *is_final
-                );
-
-                if is_final {
-                    state.emit_streamed_response(*response, percentage)?;
-                }
+                state.emit_streamed_response(*response, percentage)?;
             }
 
             BatchMsg::StreamStartFailed(error) => {
@@ -345,7 +356,7 @@ async fn spawn_argmax_streaming_batch_task(
                                 response: Box::new(event.response),
                                 percentage: event.percentage,
                             }) {
-                                tracing::error!("failed to send stream response message: {:?}", e);
+                                tracing::error!("failed to send stream response: {:?}", e);
                             }
 
                             if is_from_finalize {

@@ -1,4 +1,4 @@
-use owhisper_interface::stream::StreamResponse;
+use hypr_transcript::TranscriptDelta;
 
 #[macro_export]
 macro_rules! common_event_derives {
@@ -75,10 +75,10 @@ common_event_derives! {
         },
         #[serde(rename = "mic_muted")]
         MicMuted { session_id: String, value: bool },
-        #[serde(rename = "stream_response")]
-        StreamResponse {
+        #[serde(rename = "transcript_delta")]
+        TranscriptDelta {
             session_id: String,
-            response: Box<StreamResponse>,
+            delta: Box<TranscriptDelta>,
         },
     }
 }

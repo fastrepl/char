@@ -1,5 +1,6 @@
 use std::sync::{Arc, Mutex};
 
+use hypr_transcript::TranscriptProcessor;
 use owhisper_client::BatchSttAdapter;
 use tauri_specta::Event;
 use tracing::Instrument;
@@ -190,13 +191,15 @@ async fn run_batch_with_adapter<A: BatchSttAdapter>(
 
         tracing::info!("batch transcription completed");
 
-        BatchEvent::BatchResponse {
+        let delta = TranscriptProcessor::process_batch_response(&response);
+        BatchEvent::BatchResponseStreamed {
             session_id: params.session_id.clone(),
-            response,
+            delta,
+            percentage: 1.0,
         }
         .emit(&app)
         .map_err(|e| {
-            crate::Error::BatchStartFailed(format!("failed to emit BatchResponse event: {e}"))
+            crate::Error::BatchStartFailed(format!("failed to emit batch delta event: {e}"))
         })?;
 
         Ok(())

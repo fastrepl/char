@@ -5,13 +5,7 @@ import type { BatchParams } from "@hypr/plugin-listener2";
 import { useConfigValue } from "../config/use-config";
 import { useListener } from "../contexts/listener";
 import * as main from "../store/tinybase/store/main";
-import type { SpeakerHintWithId, WordWithId } from "../store/transcript/types";
-import {
-  parseTranscriptHints,
-  parseTranscriptWords,
-  updateTranscriptHints,
-  updateTranscriptWords,
-} from "../store/transcript/utils";
+import { makePersistCallback } from "../store/transcript/utils";
 import type { HandlePersistCallback } from "../store/zustand/listener/transcript";
 import { type Tab, useTabs } from "../store/zustand/tabs";
 import { id } from "../utils";
@@ -99,71 +93,8 @@ export const useRunBatch = (sessionId: string) => {
         speaker_hints: "[]",
       });
 
-      const handlePersist: HandlePersistCallback | undefined =
-        options?.handlePersist;
-
-      const persist =
-        handlePersist ??
-        ((words, hints) => {
-          if (words.length === 0) {
-            return;
-          }
-
-          const existingWords = parseTranscriptWords(store, transcriptId);
-          const existingHints = parseTranscriptHints(store, transcriptId);
-
-          const newWords: WordWithId[] = [];
-          const newWordIds: string[] = [];
-
-          words.forEach((word) => {
-            const wordId = id();
-
-            newWords.push({
-              id: wordId,
-              text: word.text,
-              start_ms: word.start_ms,
-              end_ms: word.end_ms,
-              channel: word.channel,
-            });
-
-            newWordIds.push(wordId);
-          });
-
-          const newHints: SpeakerHintWithId[] = [];
-
-          hints.forEach((hint) => {
-            if (hint.data.type !== "provider_speaker_index") {
-              return;
-            }
-
-            const wordId = newWordIds[hint.wordIndex];
-            const word = words[hint.wordIndex];
-
-            if (!wordId || !word) {
-              return;
-            }
-
-            newHints.push({
-              id: id(),
-              word_id: wordId,
-              type: "provider_speaker_index",
-              value: JSON.stringify({
-                provider: hint.data.provider ?? conn.provider,
-                channel: hint.data.channel ?? word.channel,
-                speaker_index: hint.data.speaker_index,
-              }),
-            });
-          });
-
-          updateTranscriptWords(store, transcriptId, [
-            ...existingWords,
-            ...newWords,
-          ]);
-          updateTranscriptHints(store, transcriptId, [
-            ...existingHints,
-            ...newHints,
-          ]);
-        });
+      const persist: HandlePersistCallback =
+        options?.handlePersist ?? makePersistCallback(store, transcriptId);
 
       const params: BatchParams = {
         session_id: sessionId,

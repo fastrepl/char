@@ -37,76 +37,29 @@ describe("General Listener Slice", () => {
 
     test("getSessionMode returns running_batch when session is in batch", () => {
       const sessionId = "session-456";
-      const { handleBatchResponseStreamed, getSessionMode } = store.getState();
+      const { handleBatchEvent, getSessionMode } = store.getState();
 
-      const mockResponse = {
-        type: "Results" as const,
-        start: 0,
-        duration: 5,
-        is_final: false,
-        speech_final: false,
-        from_finalize: false,
-        channel: {
-          alternatives: [
-            {
-              transcript: "test",
-              words: [],
-              confidence: 0.9,
-            },
-          ],
-        },
-        metadata: {
-          request_id: "test-request",
-          model_info: {
-            name: "test-model",
-            version: "1.0",
-            arch: "test-arch",
-          },
-          model_uuid: "test-uuid",
-        },
-        channel_index: [0],
-      };
-
-      handleBatchResponseStreamed(sessionId, mockResponse, 0.5);
+      handleBatchEvent(sessionId, {
+        type: "batchProgress",
+        session_id: sessionId,
+        delta: { new_words: [], hints: [], replaced_ids: [], partials: [] },
+        percentage: 0.5,
+      });
       expect(getSessionMode(sessionId)).toBe("running_batch");
     });
   });
 
   describe("Batch State", () => {
-    test("handleBatchResponseStreamed tracks progress per session", () => {
+    test("handleBatchEvent tracks progress per session", () => {
       const sessionId = "session-progress";
-      const { handleBatchResponseStreamed, clearBatchSession } =
-        store.getState();
+      const { handleBatchEvent, clearBatchSession } = store.getState();
 
-      const mockResponse = {
-        type: "Results" as const,
-        start: 0,
-        duration: 5,
-        is_final: false,
-        speech_final: false,
-        from_finalize: false,
-        channel: {
-          alternatives: [
-            {
-              transcript: "test",
-              words: [],
-              confidence: 0.9,
-            },
-          ],
-        },
-        metadata: {
-          request_id: "test-request",
-          model_info: {
-            name: "test-model",
-            version: "1.0",
-            arch: "test-arch",
-          },
-          model_uuid: "test-uuid",
-        },
-        channel_index: [0],
-      };
-
-      handleBatchResponseStreamed(sessionId, mockResponse, 0.5);
+      handleBatchEvent(sessionId, {
+        type: "batchProgress",
+        session_id: sessionId,
+        delta: { new_words: [], hints: [], replaced_ids: [], partials: [] },
+        percentage: 0.5,
+      });
       expect(store.getState().batch[sessionId]).toEqual({
         percentage: 0.5,
         isComplete: false,

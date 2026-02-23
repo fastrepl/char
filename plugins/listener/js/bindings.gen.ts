@@ -110,19 +110,48 @@ sessionProgressEvent: "plugin:listener:session-progress-event"
 /** user-defined types **/
 
 export type DegradedError = { type: "authentication_failed"; provider: string } | { type: "upstream_unavailable"; message: string } | { type: "connection_timeout" } | { type: "stream_error"; message: string }
-export type SessionDataEvent = { type: "audio_amplitude"; session_id: string; mic: number; speaker: number } | { type: "mic_muted"; session_id: string; value: boolean } | { type: "stream_response"; session_id: string; response: StreamResponse }
+export type FinalizedWord = { id: string; text: string; start_ms: number; end_ms: number; channel: number; state: WordState }
+export type PartialWord = { text: string; start_ms: number; end_ms: number; channel: number }
+export type SessionDataEvent = { type: "audio_amplitude"; session_id: string; mic: number; speaker: number } | { type: "mic_muted"; session_id: string; value: boolean } | { type: "transcript_delta"; session_id: string; delta: TranscriptDelta }
 export type SessionErrorEvent = { type: "audio_error"; session_id: string; error: string; device: string | null; is_fatal: boolean } | { type: "connection_error"; session_id: string; error: string }
 export type SessionLifecycleEvent = { type: "inactive"; session_id: string; error: string | null } | { type: "active"; session_id: string; error?: DegradedError | null } | { type: "finalizing"; session_id: string }
 export type SessionParams = { session_id: string; languages: string[]; onboarding: boolean; record_enabled: boolean; model: string; base_url: string; api_key: string; keywords: string[] }
 export type SessionProgressEvent = { type: "audio_initializing"; session_id: string } | { type: "audio_ready"; session_id: string; device: string | null } | { type: "connecting"; session_id: string } | { type: "connected"; session_id: string; adapter: string }
+export type SpeakerHint = { word_id: string; speaker_index: number }
 export type State = "active" | "inactive" | "finalizing"
-export type StreamAlternatives = { transcript: string; words: StreamWord[]; confidence: number; languages?: string[] }
-export type StreamChannel = { alternatives: StreamAlternatives[] }
-export type StreamExtra = { started_unix_millis: number }
-export type StreamMetadata = { request_id: string; model_info: StreamModelInfo; model_uuid: string; extra?: StreamExtra }
-export type StreamModelInfo = { name: string; version: string; arch: string }
-export type StreamResponse = { type: "Results"; start: number; duration: number; is_final: boolean; speech_final: boolean; from_finalize: boolean; channel: StreamChannel; metadata: StreamMetadata; channel_index: number[] } | { type: "Metadata"; request_id: string; created: string; duration: number; channels: number } | { type: "SpeechStarted"; channel: number[]; timestamp: number } | { type: "UtteranceEnd"; channel: number[]; last_word_end: number } | { type: "Error"; error_code: number | null; error_message: string; provider: string }
-export type StreamWord = { word: string; start: number; end: number; confidence: number; speaker: number | null; punctuated_word: string | null; language: string | null }
+/**
+ * Delta emitted to the frontend after processing.
+ * 
+ * The frontend should:
+ * 1. Remove words listed in `replaced_ids` from TinyBase
+ * 2. Persist `new_words` to TinyBase (honoring `state`)
+ * 3. Store `partials` in ephemeral Zustand state for rendering
+ * 
+ * This shape handles all correction flows uniformly:
+ * - Normal finalization: `new_words` with `Final`, empty `replaced_ids`
+ * - Pending correction submitted: `new_words` with `Pending`, `replaced_ids`
+ * pointing at the same words' previous `Final` versions
+ * - Correction resolved: `new_words` with `Final` (corrected text),
+ * `replaced_ids` pointing at the `Pending` versions
+ */
+export type TranscriptDelta = { new_words: FinalizedWord[]; hints: SpeakerHint[]; 
+/**
+ * IDs of words superseded by `new_words`. Empty for normal finalization.
+ */
+replaced_ids: string[]; 
+/**
+ * Current in-progress words across all channels. Global snapshot.
+ */
+partials: PartialWord[] }
+/**
+ * Whether a finalized word is stable or awaiting correction.
+ * 
+ * A word is `Pending` when it has been confirmed by the STT model but a
+ * correction source (cloud STT fallback, LLM postprocessor, etc.) is still
+ * processing it. The word has an ID and is persisted, but its text may be
+ * replaced when the correction resolves via `TranscriptDelta::replaced_ids`.
+ */
+export type WordState = "final" | "pending"
 
 /** tauri-specta globals **/
 

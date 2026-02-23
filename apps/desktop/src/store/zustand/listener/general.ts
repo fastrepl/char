@@ -15,7 +15,6 @@ import {
   type SessionLifecycleEvent,
   type SessionParams,
   type SessionProgressEvent,
-  type StreamResponse,
 } from "@hypr/plugin-listener";
 import {
   type BatchParams,
@@ -311,9 +310,8 @@ export const createGeneralSlice = <
             };
           }),
         );
-      } else if (payload.type === "stream_response") {
-        const response = payload.response;
-        get().handleTranscriptResponse(response as unknown as StreamResponse);
+      } else if (payload.type === "transcript_delta") {
+        get().handleTranscriptDelta(payload.delta);
       } else if (payload.type === "mic_muted") {
         set((state) =>
           mutate(state, (draft) => {
@@ -526,21 +524,6 @@ export const createGeneralSlice = <
             return;
           }
 
-          if (payload.type === "batchProgress") {
-            get().handleBatchResponseStreamed(
-              sessionId,
-              payload.response,
-              payload.percentage,
-            );
-
-            const batchState = get().batch[sessionId];
-            if (batchState?.isComplete) {
-              cleanup();
-              resolve();
-            }
-            return;
-          }
-
           if (payload.type === "batchFailed") {
             get().handleBatchFailed(sessionId, payload.error);
             cleanup(false);
@@ -548,16 +531,16 @@ export const createGeneralSlice = <
             return;
           }
 
-          if (payload.type !== "batchResponse") {
-            return;
-          }
-
           try {
-            get().handleBatchResponse(sessionId, payload.response);
-            cleanup();
-            resolve();
+            get().handleBatchEvent(sessionId, payload);
+
+            const batchState = get().batch[sessionId];
+            if (batchState?.isComplete) {
+              cleanup();
+              resolve();
+            }
           } catch (error) {
-            console.error("[runBatch] error handling batch response", error);
+            console.error("[runBatch] error handling batch event", error);
             const errorMessage =
               error instanceof Error ? error.message : String(error);
             get().handleBatchFailed(sessionId, errorMessage);

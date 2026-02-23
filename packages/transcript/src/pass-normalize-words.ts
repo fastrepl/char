@@ -34,6 +34,7 @@ const toSegmentWord = (word: WordLike, isFinal: boolean): SegmentWord => {
     end_ms: word.end_ms,
     channel: word.channel,
     isFinal,
+    isPending: isFinal && word.state === "pending",
   };
 
   if ("id" in word && word.id) {

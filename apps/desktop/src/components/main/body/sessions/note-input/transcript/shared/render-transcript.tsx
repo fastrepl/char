@@ -1,10 +1,6 @@
 import { memo, useEffect, useMemo } from "react";
 
-import type {
-  PartialWord,
-  RuntimeSpeakerHint,
-  Segment,
-} from "@hypr/transcript";
+import type { PartialWord, Segment } from "@hypr/transcript";
 import { cn } from "@hypr/utils";
 
 import * as main from "../../../../../../../store/tinybase/store/main";
@@ -31,7 +27,6 @@ export function RenderTranscript({
   editable,
   transcriptId,
   partialWords,
-  partialHints,
   operations,
 }: {
   scrollElement: HTMLDivElement | null;
@@ -40,7 +35,6 @@ export function RenderTranscript({
   editable: boolean;
   transcriptId: string;
   partialWords: PartialWord[];
-  partialHints: RuntimeSpeakerHint[];
   operations?: Operations;
 }) {
   const finalWords = useFinalWords(transcriptId);
@@ -54,14 +48,7 @@ export function RenderTranscript({
   ) as string | undefined;
   const numSpeakers = useSessionSpeakers(sessionId);
 
-  const allSpeakerHints = useMemo(() => {
-    const finalWordsCount = finalWords.length;
-    const adjustedPartialHints = partialHints.map((hint) => ({
-      ...hint,
-      wordIndex: finalWordsCount + hint.wordIndex,
-    }));
-    return [...finalSpeakerHints, ...adjustedPartialHints];
-  }, [finalWords.length, finalSpeakerHints, partialHints]);
+  const allSpeakerHints = useMemo(() => finalSpeakerHints, [finalSpeakerHints]);
 
   const segments = useStableSegments(
     finalWords,

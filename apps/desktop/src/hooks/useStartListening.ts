@@ -5,14 +5,7 @@ import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { useConfigValue } from "../config/use-config";
 import { useListener } from "../contexts/listener";
 import * as main from "../store/tinybase/store/main";
-import type { SpeakerHintWithId, WordWithId } from "../store/transcript/types";
-import {
-  parseTranscriptHints,
-  parseTranscriptWords,
-  updateTranscriptHints,
-  updateTranscriptWords,
-} from "../store/transcript/utils";
-import type { HandlePersistCallback } from "../store/zustand/listener/transcript";
+import { makePersistCallback } from "../store/transcript/utils";
 import { id } from "../utils";
 import { getSessionEventById } from "../utils/session-event";
 import { useKeywords } from "./useKeywords";
@@ -55,70 +48,6 @@ export function useStartListening(sessionId: string) {
       stt_model: conn.model,
     });
 
-    const handlePersist: HandlePersistCallback = (words, hints) => {
-      if (words.length === 0) {
-        return;
-      }
-
-      store.transaction(() => {
-        const existingWords = parseTranscriptWords(store, transcriptId);
-        const existingHints = parseTranscriptHints(store, transcriptId);
-
-        const newWords: WordWithId[] = [];
-        const newWordIds: string[] = [];
-
-        words.forEach((word) => {
-          const wordId = id();
-
-          newWords.push({
-            id: wordId,
-            text: word.text,
-            start_ms: word.start_ms,
-            end_ms: word.end_ms,
-            channel: word.channel,
-          });
-
-          newWordIds.push(wordId);
-        });
-
-        const newHints: SpeakerHintWithId[] = [];
-
-        if (conn.provider === "deepgram") {
-          hints.forEach((hint) => {
-            if (hint.data.type !== "provider_speaker_index") {
-              return;
-            }
-
-            const wordId = newWordIds[hint.wordIndex];
-            const word = words[hint.wordIndex];
-            if (!wordId || !word) {
-              return;
-            }
-
-            newHints.push({
-              id: id(),
-              word_id: wordId,
-              type: "provider_speaker_index",
-              value: JSON.stringify({
-                provider: hint.data.provider ?? conn.provider,
-                channel: hint.data.channel ?? word.channel,
-                speaker_index: hint.data.speaker_index,
-              }),
-            });
-          });
-        }
-
-        updateTranscriptWords(store, transcriptId, [
-          ...existingWords,
-          ...newWords,
-        ]);
-        updateTranscriptHints(store, transcriptId, [
-          ...existingHints,
-          ...newHints,
-        ]);
-      });
-    };
-
     start(
       {
         session_id: sessionId,
@@ -131,7 +60,7 @@ export function useStartListening(sessionId: string) {
         keywords,
       },
       {
-        handlePersist,
+        handlePersist: makePersistCallback(store, transcriptId),
       },
     );
   }, [

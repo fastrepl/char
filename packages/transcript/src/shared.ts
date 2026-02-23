@@ -9,11 +9,16 @@ export type WordLike = {
   start_ms: number;
   end_ms: number;
   channel: ChannelProfile;
+  state?: string;
 };
 
 export type PartialWord = WordLike;
 
-export type SegmentWord = WordLike & { isFinal: boolean; id?: string };
+export type SegmentWord = WordLike & {
+  isFinal: boolean;
+  isPending: boolean;
+  id?: string;
+};
 
 type SpeakerHintData =
   | {

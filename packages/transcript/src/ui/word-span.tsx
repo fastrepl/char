@@ -47,8 +47,9 @@ function ViewerWordSpan({
       cn([
         audioExists && "cursor-pointer hover:bg-neutral-200/60",
         !word.isFinal && ["opacity-60", "italic"],
+        word.isPending && ["opacity-80", "text-amber-600"],
       ]),
-    [audioExists, word.isFinal],
+    [audioExists, word.isFinal, word.isPending],
   );
 
   const handleClick = useCallback(() => {
@@ -85,8 +86,9 @@ function EditorWordSpan({
       cn([
         audioExists && "cursor-pointer hover:bg-neutral-200/60",
         !word.isFinal && ["opacity-60", "italic"],
+        word.isPending && ["opacity-80", "text-amber-600"],
       ]),
-    [audioExists, word.isFinal],
+    [audioExists, word.isFinal, word.isPending],
   );
 
   const handleClick = useCallback(() => {

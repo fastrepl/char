@@ -14,6 +14,7 @@ use owhisper_interface::{ControlMessage, MixedMessage};
 
 use super::session::session_span;
 use crate::{DegradedError, SessionDataEvent, SessionErrorEvent, SessionProgressEvent};
+use hypr_transcript::TranscriptProcessor;
 
 use adapters::spawn_rx_task;
 
@@ -50,6 +51,7 @@ pub struct ListenerState {
     tx: ChannelSender,
     rx_task: tokio::task::JoinHandle<()>,
     shutdown_tx: Option<tokio::sync::oneshot::Sender<()>>,
+    transcript: TranscriptProcessor,
 }
 
 pub(super) enum ChannelSender {
@@ -120,6 +122,7 @@ impl Actor for ListenerActor {
                 tx,
                 rx_task,
                 shutdown_tx: Some(shutdown_tx),
+                transcript: TranscriptProcessor::new(),
             };
 
             Ok(state)
@@ -137,6 +140,19 @@ impl Actor for ListenerActor {
             let _ = shutdown_tx.send(());
             let _ = (&mut state.rx_task).await;
         }
+
+        let delta = state.transcript.flush();
+        if !delta.is_empty() {
+            if let Err(error) = (SessionDataEvent::TranscriptDelta {
+                session_id: state.args.session_id.clone(),
+                delta: Box::new(delta),
+            })
+            .emit(&state.args.app)
+            {
+                tracing::error!(?error, "transcript_flush_emit_failed");
+            }
+        }
+
         Ok(())
     }
 
@@ -209,13 +225,15 @@ impl Actor for ListenerActor {
                     crate::actors::ChannelMode::MicAndSpeaker => {}
                 }
 
-                if let Err(error) = (SessionDataEvent::StreamResponse {
-                    session_id: state.args.session_id.clone(),
-                    response: Box::new(response),
-                })
-                .emit(&state.args.app)
-                {
-                    tracing::error!(?error, "stream_response_emit_failed");
+                if let Some(delta) = state.transcript.process(&response) {
+                    if let Err(error) = (SessionDataEvent::TranscriptDelta {
+                        session_id: state.args.session_id.clone(),
+                        delta: Box::new(delta),
+                    })
+                    .emit(&state.args.app)
+                    {
+                        tracing::error!(?error, "transcript_delta_emit_failed");
+                    }
                 }
             }
 

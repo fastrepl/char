@@ -1,5 +1,4 @@
-use owhisper_interface::batch::Response as BatchResponse;
-use owhisper_interface::stream::StreamResponse;
+use hypr_transcript::TranscriptDelta;
 
 #[macro_export]
 macro_rules! common_event_derives {
@@ -14,15 +13,10 @@ common_event_derives! {
     pub enum BatchEvent {
         #[serde(rename = "batchStarted")]
         BatchStarted { session_id: String },
-        #[serde(rename = "batchResponse")]
-        BatchResponse {
-            session_id: String,
-            response: BatchResponse,
-        },
         #[serde(rename = "batchProgress")]
         BatchResponseStreamed {
             session_id: String,
-            response: StreamResponse,
+            delta: TranscriptDelta,
             percentage: f64,
         },
         #[serde(rename = "batchFailed")]

@@ -1,14 +1,8 @@
 import type { StoreApi } from "zustand";
 
-import type { BatchResponse, StreamResponse } from "@hypr/plugin-listener2";
+import type { BatchEvent } from "@hypr/plugin-listener2";
 
-import {
-  ChannelProfile,
-  type RuntimeSpeakerHint,
-  type WordLike,
-} from "../../../utils/segment";
 import type { HandlePersistCallback } from "./transcript";
-import { transformWordEntries } from "./utils";
 
 export type BatchPhase = "importing" | "transcribing";
 
@@ -27,12 +21,7 @@ export type BatchState = {
 
 export type BatchActions = {
   handleBatchStarted: (sessionId: string, phase?: BatchPhase) => void;
-  handleBatchResponse: (sessionId: string, response: BatchResponse) => void;
-  handleBatchResponseStreamed: (
-    sessionId: string,
-    response: StreamResponse,
-    percentage: number,
-  ) => void;
+  handleBatchEvent: (sessionId: string, event: BatchEvent) => void;
   handleBatchFailed: (sessionId: string, error: string) => void;
   clearBatchSession: (sessionId: string) => void;
   setBatchPersist: (sessionId: string, callback: HandlePersistCallback) => void;
@@ -60,62 +49,29 @@ export const createBatchSlice = <T extends BatchState>(
     }));
   },
 
-  handleBatchResponse: (sessionId, response) => {
+  handleBatchEvent: (sessionId, event) => {
     const persist = get().batchPersist[sessionId];
 
-    const [words, hints] = transformBatch(response);
-    if (!words.length) {
-      return;
-    }
+    if (event.type === "batchProgress") {
+      const { delta, percentage } = event;
+      const isComplete = percentage >= 1;
 
-    persist?.(words, hints);
-
-    set((state) => {
-      if (!state.batch[sessionId]) {
-        return state;
+      if (delta.new_words.length > 0 || delta.replaced_ids.length > 0) {
+        persist?.(delta);
       }
 
-      const { [sessionId]: _, ...rest } = state.batch;
-      return {
+      set((state) => ({
         ...state,
-        batch: rest,
-      };
-    });
-  },
-
-  handleBatchResponseStreamed: (sessionId, response, percentage) => {
-    const persist = get().batchPersist[sessionId];
-
-    if (persist && response.type === "Results") {
-      const channelIndex = response.channel_index[0];
-      const alternative = response.channel.alternatives[0];
-
-      if (channelIndex !== undefined && alternative) {
-        const [words, hints] = transformWordEntries(
-          alternative.words,
-          alternative.transcript,
-          channelIndex,
-        );
-
-        if (words.length > 0) {
-          persist(words, hints);
-        }
-      }
-    }
-
-    const isComplete = response.type === "Results" && response.from_finalize;
-
-    set((state) => ({
-      ...state,
-      batch: {
-        ...state.batch,
-        [sessionId]: {
-          percentage,
-          isComplete: isComplete || false,
-          phase: "transcribing",
+        batch: {
+          ...state.batch,
+          [sessionId]: {
+            percentage,
+            isComplete: isComplete || false,
+            phase: "transcribing",
+          },
         },
-      },
-    }));
+      }));
+    }
   },
 
   handleBatchFailed: (sessionId, error) => {
@@ -137,12 +93,8 @@ export const createBatchSlice = <T extends BatchState>(
       if (!(sessionId in state.batch)) {
         return state;
       }
-
       const { [sessionId]: _, ...rest } = state.batch;
-      return {
-        ...state,
-        batch: rest,
-      };
+      return { ...state, batch: rest };
     });
   },
 
@@ -161,44 +113,8 @@ export const createBatchSlice = <T extends BatchState>(
       if (!(sessionId in state.batchPersist)) {
         return state;
       }
-
       const { [sessionId]: _, ...rest } = state.batchPersist;
-      return {
-        ...state,
-        batchPersist: rest,
-      };
+      return { ...state, batchPersist: rest };
     });
   },
 });
-
-function transformBatch(
-  response: BatchResponse,
-): [WordLike[], RuntimeSpeakerHint[]] {
-  const allWords: WordLike[] = [];
-  const allHints: RuntimeSpeakerHint[] = [];
-  let wordOffset = 0;
-
-  response.results.channels.forEach((channel) => {
-    const alternative = channel.alternatives[0];
-    if (!alternative || !alternative.words || !alternative.words.length) {
-      return;
-    }
-
-    const [words, hints] = transformWordEntries(
-      alternative.words,
-      alternative.transcript,
-      ChannelProfile.MixedCapture,
-    );
-
-    hints.forEach((hint) => {
-      allHints.push({
-        ...hint,
-        wordIndex: hint.wordIndex + wordOffset,
-      });
-    });
-    allWords.push(...words);
-    wordOffset += words.length;
-  });
-
-  return [allWords, allHints];
-}
