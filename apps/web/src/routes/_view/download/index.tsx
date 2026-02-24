@@ -1,13 +1,11 @@
 import { Icon } from "@iconify-icon/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 
 import { cn } from "@hypr/utils";
 
 import { Image } from "@/components/image";
 import { SlashSeparator } from "@/components/slash-separator";
-import { usePlatform } from "@/hooks/use-platform";
 import { useAnalytics } from "@/hooks/use-posthog";
 
 export const Route = createFileRoute("/_view/download/")({
@@ -15,9 +13,6 @@ export const Route = createFileRoute("/_view/download/")({
 });
 
 function Component() {
-  const platform = usePlatform();
-  const isMacDesktop = platform === "mac";
-
   return (
     <div
       className="bg-linear-to-b from-white via-blue-50/20 to-white min-h-screen"
@@ -35,8 +30,7 @@ function Component() {
         >
           <span>
             Mac (Apple Silicon) features on-device speech-to-text. Intel Mac
-            available with cloud-based transcription. Windows and Linux coming
-            March 2026.
+            available with cloud-based transcription.
           </span>
         </div>
 
@@ -53,161 +47,22 @@ function Component() {
 
             <div className="mb-16">
               <h2 className="text-2xl font-serif tracking-tight mb-6 text-center">
-                Desktop
+                macOS
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
                 <DownloadCard
                   iconName="simple-icons:apple"
                   spec="macOS 14.2+ (Apple Silicon)"
                   downloadUrl="/download/apple-silicon"
-                  available={true}
+                  nightlyDownloadUrl="/download/nightly/apple-silicon"
                   platform="macos-apple-silicon"
                 />
                 <DownloadCard
                   iconName="simple-icons:apple"
                   spec="macOS 14.2+ (Intel)"
                   downloadUrl="/download/apple-intel"
-                  available={true}
+                  nightlyDownloadUrl="/download/nightly/apple-intel"
                   platform="macos-intel"
-                />
-                <DownloadCard
-                  iconName="simple-icons:windows"
-                  spec="Windows"
-                  downloadUrl="#"
-                  available={false}
-                  platform="windows"
-                />
-              </div>
-
-              <h2 className="text-2xl font-serif tracking-tight mb-6 mt-16 text-center">
-                Linux
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-                <DownloadCard
-                  iconName="simple-icons:linux"
-                  spec="Linux (AppImage)"
-                  downloadUrl="#"
-                  available={false}
-                  platform="linux-appimage"
-                />
-                <DownloadCard
-                  iconName="simple-icons:linux"
-                  spec="Linux (.deb)"
-                  downloadUrl="#"
-                  available={false}
-                  platform="linux-deb"
-                />
-              </div>
-            </div>
-
-            {isMacDesktop && (
-              <div className="mb-16">
-                <h2 className="text-2xl font-serif tracking-tight mb-6 text-center">
-                  Homebrew
-                </h2>
-                <div className="max-w-2xl mx-auto">
-                  <HomebrewCard />
-                </div>
-              </div>
-            )}
-
-            <div className="mb-16">
-              <div className="flex flex-col items-center gap-2 mb-6">
-                <h2 className="text-2xl font-serif tracking-tight text-center">
-                  Nightly Builds
-                </h2>
-                <p className="text-sm text-neutral-500 text-center max-w-lg">
-                  Get the latest features before they are officially released.
-                  Nightly builds may be less stable.
-                </p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <DownloadCard
-                  iconName="simple-icons:apple"
-                  spec="macOS 14.2+ (Apple Silicon)"
-                  downloadUrl="/download/nightly/apple-silicon"
-                  available={true}
-                  platform="macos-apple-silicon-nightly"
-                  beta={true}
-                />
-                <DownloadCard
-                  iconName="simple-icons:apple"
-                  spec="macOS 14.2+ (Intel)"
-                  downloadUrl="/download/nightly/apple-intel"
-                  available={true}
-                  platform="macos-intel-nightly"
-                  beta={true}
-                />
-                <DownloadCard
-                  iconName="simple-icons:windows"
-                  spec="Windows"
-                  downloadUrl="/download/nightly/windows"
-                  available={false}
-                  platform="windows-nightly"
-                  beta={true}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto mt-6">
-                <DownloadCard
-                  iconName="simple-icons:linux"
-                  spec="Linux (AppImage)"
-                  downloadUrl="/download/nightly/linux-appimage"
-                  available={false}
-                  platform="linux-appimage-nightly"
-                  beta={true}
-                />
-                <DownloadCard
-                  iconName="simple-icons:linux"
-                  spec="Linux (.deb)"
-                  downloadUrl="/download/nightly/linux-deb"
-                  available={false}
-                  platform="linux-deb-nightly"
-                  beta={true}
-                />
-                <DownloadCard
-                  iconName="simple-icons:linux"
-                  spec="Linux ARM (AppImage)"
-                  downloadUrl="/download/nightly/linux-appimage-aarch64"
-                  available={false}
-                  platform="linux-appimage-aarch64-nightly"
-                  beta={true}
-                />
-                <DownloadCard
-                  iconName="simple-icons:linux"
-                  spec="Linux ARM (.deb)"
-                  downloadUrl="/download/nightly/linux-deb-aarch64"
-                  available={false}
-                  platform="linux-deb-aarch64-nightly"
-                  beta={true}
-                />
-              </div>
-
-              {isMacDesktop && (
-                <div className="max-w-2xl mx-auto mt-6">
-                  <HomebrewNightlyCard />
-                </div>
-              )}
-            </div>
-
-            <div>
-              <h2 className="text-2xl font-serif tracking-tight mb-6 text-center">
-                Mobile
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-                <DownloadCard
-                  iconName="simple-icons:ios"
-                  spec="iOS 15+"
-                  downloadUrl="#"
-                  available={false}
-                  platform="ios"
-                />
-                <DownloadCard
-                  iconName="simple-icons:android"
-                  spec="Android 10+"
-                  downloadUrl="#"
-                  available={false}
-                  platform="android"
                 />
               </div>
             </div>
@@ -222,172 +77,70 @@ function Component() {
   );
 }
 
-function HomebrewCard() {
-  const [copied, setCopied] = useState(false);
-  const command = "brew tap fastrepl/hyprnote && brew install hyprnote --cask";
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(command);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <div className="flex flex-col items-center p-6 rounded-xs border border-neutral-100 bg-white">
-      <Icon
-        icon="simple-icons:homebrew"
-        className="text-5xl text-neutral-700 mb-4"
-      />
-      <p className="text-sm text-neutral-600 mb-4 text-center">
-        Install via Homebrew on macOS
-      </p>
-      <div className="w-full group relative">
-        <code className="flex items-center justify-between w-full px-4 py-3 bg-stone-50 border border-neutral-200 rounded-lg text-sm font-mono text-stone-700">
-          <span className="flex-1 text-center">{command}</span>
-          <button
-            onClick={handleCopy}
-            className={cn([
-              "cursor-pointer flex items-center justify-center transition-all relative",
-              "ml-2 px-2 py-1 rounded",
-              copied
-                ? ["opacity-100 text-green-600"]
-                : [
-                    "opacity-30 group-hover:opacity-100 text-neutral-600 hover:bg-stone-100",
-                  ],
-            ])}
-          >
-            {copied ? (
-              <Check className="size-4" />
-            ) : (
-              <Copy className="size-4" />
-            )}
-            {copied && (
-              <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-stone-800 text-white text-xs rounded whitespace-nowrap">
-                Copied!
-              </span>
-            )}
-          </button>
-        </code>
-      </div>
-    </div>
-  );
-}
-
-function HomebrewNightlyCard() {
-  const [copied, setCopied] = useState(false);
-  const command =
-    "brew tap fastrepl/hyprnote && brew install char@nightly --cask";
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(command);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <div className="flex flex-col items-center p-6 rounded-xs border border-neutral-100 bg-white">
-      <Icon
-        icon="simple-icons:homebrew"
-        className="text-5xl text-neutral-700 mb-4"
-      />
-      <p className="text-sm text-neutral-600 mb-4 text-center">
-        Install nightly via Homebrew on macOS
-      </p>
-      <div className="w-full group relative">
-        <code className="flex items-center justify-between w-full px-4 py-3 bg-stone-50 border border-neutral-200 rounded-lg text-sm font-mono text-stone-700">
-          <span className="flex-1 text-center">{command}</span>
-          <button
-            onClick={handleCopy}
-            className={cn([
-              "cursor-pointer flex items-center justify-center transition-all relative",
-              "ml-2 px-2 py-1 rounded",
-              copied
-                ? ["opacity-100 text-green-600"]
-                : [
-                    "opacity-30 group-hover:opacity-100 text-neutral-600 hover:bg-stone-100",
-                  ],
-            ])}
-          >
-            {copied ? (
-              <Check className="size-4" />
-            ) : (
-              <Copy className="size-4" />
-            )}
-            {copied && (
-              <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-stone-800 text-white text-xs rounded whitespace-nowrap">
-                Copied!
-              </span>
-            )}
-          </button>
-        </code>
-      </div>
-    </div>
-  );
-}
-
 function DownloadCard({
   iconName,
   spec,
   downloadUrl,
-  available,
+  nightlyDownloadUrl,
   platform,
-  beta = false,
 }: {
   iconName: string;
   spec: string;
   downloadUrl: string;
-  available: boolean;
+  nightlyDownloadUrl: string;
   platform: string;
-  beta?: boolean;
 }) {
   const { track } = useAnalytics();
+  const [isNightly, setIsNightly] = useState(false);
 
   const handleClick = () => {
     track("download_clicked", {
-      platform,
+      platform: isNightly ? `${platform}-nightly` : platform,
       spec,
       source: "download_page",
     });
   };
 
   return (
-    <div className="flex flex-col items-center p-6 rounded-xs border border-neutral-100 bg-white hover:bg-stone-50 transition-all duration-200">
+    <div
+      className={cn([
+        "flex flex-col items-center p-6 rounded-xs border transition-all duration-200",
+        isNightly
+          ? ["bg-blue-50/50 border-blue-200"]
+          : ["bg-white border-neutral-100 hover:bg-stone-50"],
+      ])}
+    >
       <Icon icon={iconName} className="text-5xl text-neutral-700 mb-4" />
       <p className="text-sm text-neutral-600 mb-6 text-center">{spec}</p>
 
-      {available ? (
-        <div className="relative w-full group/tooltip">
-          <a
-            href={downloadUrl}
-            download
-            onClick={handleClick}
-            className="group gap-2 w-full px-4 h-11 flex items-center justify-center bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%] transition-all text-base font-medium"
-          >
-            {beta ? (
-              <>
-                Download <span className="font-mono">Nightly</span>
-              </>
-            ) : (
-              "Download"
-            )}
-            <Icon
-              icon="ph:arrow-circle-right"
-              className="text-xl group-hover:translate-x-1 transition-transform"
-            />
-          </a>
-        </div>
-      ) : (
-        <button
-          disabled
+      <div className="relative w-full group/tooltip">
+        <a
+          href={isNightly ? nightlyDownloadUrl : downloadUrl}
+          download
+          onClick={handleClick}
           className={cn([
-            "w-full px-4 h-11 rounded-full font-medium cursor-not-allowed",
-            "bg-linear-to-t from-stone-600 to-stone-500 text-white",
-            "opacity-50",
+            "group gap-2 w-full px-4 h-11 flex items-center justify-center rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%] transition-all text-base font-medium",
+            isNightly
+              ? ["bg-linear-to-b from-[#03BCF1] to-[#127FE5] text-white"]
+              : ["bg-linear-to-t from-stone-600 to-stone-500 text-white"],
           ])}
         >
-          Planned
-        </button>
-      )}
+          {isNightly ? "Download Nightly" : "Download"}
+          <Icon
+            icon="ph:arrow-circle-right"
+            className="text-xl group-hover:translate-x-1 transition-transform"
+          />
+        </a>
+      </div>
+
+      <button
+        onClick={() => setIsNightly(!isNightly)}
+        className="mt-3 text-xs text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer"
+      >
+        {isNightly
+          ? "It might be less stable though."
+          : "Want to get faster updates?"}
+      </button>
     </div>
   );
 }
@@ -397,7 +150,7 @@ function FAQSection() {
     {
       question: "Which platforms are currently supported?",
       answer:
-        "macOS 14.2+ with Apple Silicon is currently available. Windows and Linux are planned for March 2026, and iOS/Android for April 2026. Please note that these dates are subject to change and may be delayed.",
+        "macOS 14.2+ with both Apple Silicon and Intel is currently available. Windows and Linux are planned for March 2026, and iOS/Android for April 2026.",
     },
     {
       question: "What's special about the Mac version?",
