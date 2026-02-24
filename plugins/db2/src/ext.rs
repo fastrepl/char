@@ -50,7 +50,8 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Database2<'a, R, M> {
                 )",
                 (),
             )
-            .await?;
+            .await
+            .map_err(|e| hypr_db_core::Error::from(e))?;
 
             conn.execute(
                 "CREATE TABLE IF NOT EXISTS sync_pending_ops (
@@ -63,7 +64,8 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Database2<'a, R, M> {
                 )",
                 (),
             )
-            .await?;
+            .await
+            .map_err(|e| hypr_db_core::Error::from(e))?;
 
             conn.execute(
                 "CREATE TABLE IF NOT EXISTS sync_cursor (
@@ -73,7 +75,8 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Database2<'a, R, M> {
                 )",
                 (),
             )
-            .await?;
+            .await
+            .map_err(|e| hypr_db_core::Error::from(e))?;
         }
 
         Ok(())
