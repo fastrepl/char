@@ -12,6 +12,31 @@ use ractor::{Actor, ActorName, ActorProcessingErr, ActorRef};
 
 const FLUSH_INTERVAL: std::time::Duration = std::time::Duration::from_millis(1000);
 
+/// Trait for encoding a finalized WAV file into a compressed format.
+///
+/// The recorder always writes WAV internally during recording. After the
+/// recording stops, it hands the WAV file to the encoder which converts it
+/// to the target format. This keeps the recording path simple and makes the
+/// output format easily swappable.
+pub trait AudioEncoder: Send + Sync + 'static {
+    /// File extension for the encoded output (e.g. `"mp3"`).
+    fn extension(&self) -> &str;
+
+    /// Encode a WAV file into the target format.
+    fn encode_wav(
+        &self,
+        wav_path: &Path,
+        output_path: &Path,
+    ) -> Result<(), Box<dyn std::error::Error>>;
+
+    /// Decode an encoded file back to WAV (for resuming/appending).
+    fn decode_to_wav(
+        &self,
+        encoded_path: &Path,
+        wav_path: &Path,
+    ) -> Result<(), Box<dyn std::error::Error>>;
+}
+
 pub enum RecMsg {
     AudioSingle(Arc<[f32]>),
     AudioDual(Arc<[f32]>, Arc<[f32]>),
@@ -31,16 +56,30 @@ pub struct RecState {
     is_stereo: bool,
 }
 
-pub struct RecorderActor;
+pub struct RecorderActor<E: AudioEncoder = Mp3Encoder> {
+    encoder: E,
+}
 
 impl RecorderActor {
+    pub fn new() -> Self {
+        Self {
+            encoder: Mp3Encoder,
+        }
+    }
+
     pub fn name() -> ActorName {
         "recorder_actor".into()
     }
 }
 
+impl<E: AudioEncoder> RecorderActor<E> {
+    pub fn with_encoder(encoder: E) -> Self {
+        Self { encoder }
+    }
+}
+
 #[ractor::async_trait]
-impl Actor for RecorderActor {
+impl<E: AudioEncoder> Actor for RecorderActor<E> {
     type Msg = RecMsg;
     type State = RecState;
     type Arguments = RecArgs;
@@ -56,6 +95,17 @@ impl Actor for RecorderActor {
         let filename_base = "audio".to_string();
         let wav_path = dir.join(format!("{}.wav", filename_base));
         let ogg_path = dir.join(format!("{}.ogg", filename_base));
+        let encoded_path = dir.join(format!("{}.{}", filename_base, self.encoder.extension()));
+
+        // If an encoded file exists from a previous recording, decode it back to WAV for appending.
+        if encoded_path.exists() && !wav_path.exists() {
+            self.encoder
+                .decode_to_wav(&encoded_path, &wav_path)
+                .map_err(|e| -> ActorProcessingErr {
+                    Box::new(std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))
+                })?;
+            std::fs::remove_file(&encoded_path)?;
+        }
 
         let is_stereo = if ogg_path.exists() {
             let has_identical = ogg_has_identical_channels(&ogg_path).map_err(into_actor_err)?;
@@ -176,8 +226,23 @@ impl Actor for RecorderActor {
         finalize_writer(&mut st.writer_spk, None)?;
 
         if st.wav_path.exists() {
-            sync_file(&st.wav_path);
-            sync_dir(&st.wav_path);
+            let encoded_path = st.wav_path.with_extension(self.encoder.extension());
+            match self.encoder.encode_wav(&st.wav_path, &encoded_path) {
+                Ok(()) => {
+                    std::fs::remove_file(&st.wav_path)?;
+                    sync_file(&encoded_path);
+                    sync_dir(&encoded_path);
+                }
+                Err(e) => {
+                    tracing::error!(
+                        "Encoding to {} failed, keeping WAV: {}",
+                        self.encoder.extension(),
+                        e
+                    );
+                    sync_file(&st.wav_path);
+                    sync_dir(&st.wav_path);
+                }
+            }
         }
 
         Ok(())
@@ -312,4 +377,135 @@ fn sync_dir(path: &std::path::Path) {
     {
         let _ = dir.sync_all();
     }
+}
+
+// ---------------------------------------------------------------------------
+// MP3 encoder implementation
+// ---------------------------------------------------------------------------
+
+use mp3lame_encoder::{Builder as LameBuilder, DualPcm, FlushNoGap, MonoPcm};
+
+pub struct Mp3Encoder;
+
+impl AudioEncoder for Mp3Encoder {
+    fn extension(&self) -> &str {
+        "mp3"
+    }
+
+    fn encode_wav(
+        &self,
+        wav_path: &Path,
+        mp3_path: &Path,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let mut reader = hound::WavReader::open(wav_path)?;
+        let spec = reader.spec();
+        let num_channels = spec.channels as u8;
+        let sample_rate = spec.sample_rate;
+
+        let mut mp3_builder = LameBuilder::new().ok_or("Failed to create LAME builder")?;
+        mp3_builder
+            .set_num_channels(num_channels)
+            .map_err(|e| format!("set channels error: {:?}", e))?;
+        mp3_builder
+            .set_sample_rate(sample_rate)
+            .map_err(|e| format!("set sample rate error: {:?}", e))?;
+        mp3_builder
+            .set_brate(mp3lame_encoder::Bitrate::Kbps128)
+            .map_err(|e| format!("set bitrate error: {:?}", e))?;
+        mp3_builder
+            .set_quality(mp3lame_encoder::Quality::Best)
+            .map_err(|e| format!("set quality error: {:?}", e))?;
+        let mut encoder = mp3_builder
+            .build()
+            .map_err(|e| format!("LAME build error: {:?}", e))?;
+
+        let samples: Vec<f32> = reader.samples::<f32>().collect::<Result<Vec<_>, _>>()?;
+        let mut mp3_out = Vec::new();
+
+        const CHUNK_SAMPLES: usize = 4096;
+
+        if num_channels == 1 {
+            for chunk in samples.chunks(CHUNK_SAMPLES) {
+                let pcm_i16: Vec<i16> = chunk.iter().map(|&s| f32_to_i16(s)).collect();
+                let input = MonoPcm(&pcm_i16);
+                mp3_out.reserve(mp3lame_encoder::max_required_buffer_size(pcm_i16.len()));
+                let encoded_size = encoder
+                    .encode(input, mp3_out.spare_capacity_mut())
+                    .map_err(|e| format!("encode error: {:?}", e))?;
+                unsafe {
+                    mp3_out.set_len(mp3_out.len().wrapping_add(encoded_size));
+                }
+            }
+        } else {
+            let mut left = Vec::with_capacity(samples.len() / 2);
+            let mut right = Vec::with_capacity(samples.len() / 2);
+            for pair in samples.chunks(2) {
+                left.push(f32_to_i16(pair[0]));
+                right.push(if pair.len() > 1 {
+                    f32_to_i16(pair[1])
+                } else {
+                    0i16
+                });
+            }
+
+            for (l_chunk, r_chunk) in
+                left.chunks(CHUNK_SAMPLES).zip(right.chunks(CHUNK_SAMPLES))
+            {
+                let input = DualPcm {
+                    left: l_chunk,
+                    right: r_chunk,
+                };
+                mp3_out.reserve(mp3lame_encoder::max_required_buffer_size(l_chunk.len()));
+                let encoded_size = encoder
+                    .encode(input, mp3_out.spare_capacity_mut())
+                    .map_err(|e| format!("encode error: {:?}", e))?;
+                unsafe {
+                    mp3_out.set_len(mp3_out.len().wrapping_add(encoded_size));
+                }
+            }
+        }
+
+        mp3_out.reserve(mp3lame_encoder::max_required_buffer_size(0));
+        let encoded_size = encoder
+            .flush::<FlushNoGap>(mp3_out.spare_capacity_mut())
+            .map_err(|e| format!("flush error: {:?}", e))?;
+        unsafe {
+            mp3_out.set_len(mp3_out.len().wrapping_add(encoded_size));
+        }
+
+        std::fs::write(mp3_path, &mp3_out)?;
+        Ok(())
+    }
+
+    fn decode_to_wav(
+        &self,
+        mp3_path: &Path,
+        wav_path: &Path,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        use hypr_audio_utils::Source;
+
+        let source = hypr_audio_utils::source_from_path(mp3_path)?;
+        let channels = source.channels();
+        let sample_rate = source.sample_rate();
+        let samples: Vec<f32> = source.collect();
+
+        let spec = hound::WavSpec {
+            channels,
+            sample_rate,
+            bits_per_sample: 32,
+            sample_format: hound::SampleFormat::Float,
+        };
+
+        let mut writer = hound::WavWriter::create(wav_path, spec)?;
+        for s in &samples {
+            writer.write_sample(*s)?;
+        }
+        writer.finalize()?;
+        Ok(())
+    }
+}
+
+fn f32_to_i16(sample: f32) -> i16 {
+    let clamped = sample.clamp(-1.0, 1.0);
+    (clamped * i16::MAX as f32) as i16
 }

@@ -76,7 +76,7 @@ impl Actor for SessionActor {
             let recorder_cell = if ctx.params.record_enabled {
                 let (recorder_ref, _) = Actor::spawn_linked(
                     Some(RecorderActor::name()),
-                    RecorderActor,
+                    RecorderActor::new(),
                     RecArgs {
                         app_dir: ctx.app_dir.clone(),
                         session_id: ctx.params.session_id.clone(),
@@ -369,7 +369,7 @@ async fn try_restart_recorder(supervisor_cell: ActorCell, state: &mut SessionSta
         async move {
             let (r, _) = Actor::spawn_linked(
                 Some(RecorderActor::name()),
-                RecorderActor,
+                RecorderActor::new(),
                 RecArgs {
                     app_dir,
                     session_id,

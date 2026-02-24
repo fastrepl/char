@@ -23,6 +23,7 @@ owhisper-client = { workspace = true }
 owhisper-interface = { workspace = true }
 
 hound = { workspace = true }
+mp3lame-encoder = { workspace = true }
 vorbis_rs = { workspace = true }
 
 ractor = { workspace = true, features = ["async-trait"] }
