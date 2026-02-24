@@ -21,3 +21,4 @@ jobs:
       - uses: dprint/check@v2.3
         with:
           config-path: dprint.json
+          args: --excludes "**/*.swift"
