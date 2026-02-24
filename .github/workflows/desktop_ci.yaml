@@ -75,7 +75,8 @@ jobs:
             --exclude vad2 \
             --exclude vad \
             --exclude vvad \
-            --exclude vad-ext \
+            --exclude vad-masking \
+            --exclude vad-chunking \
             --exclude onnx \
             --exclude pyannote-local \
             --exclude llama \
