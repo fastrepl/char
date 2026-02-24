@@ -236,9 +236,10 @@ impl<E: AudioEncoder> Actor for RecorderActor<E> {
             let encoded_path = st.wav_path.with_extension(self.encoder.extension());
             match self.encoder.encode_wav(&st.wav_path, &encoded_path) {
                 Ok(()) => {
-                    std::fs::remove_file(&st.wav_path)?;
                     sync_file(&encoded_path);
                     sync_dir(&encoded_path);
+                    std::fs::remove_file(&st.wav_path)?;
+                    sync_dir(&st.wav_path);
                 }
                 Err(e) => {
                     tracing::error!(
