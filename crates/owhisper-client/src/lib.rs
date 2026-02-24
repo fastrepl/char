@@ -15,8 +15,6 @@ pub use providers::{Auth, Provider, is_meta_model};
 
 use std::marker::PhantomData;
 
-#[cfg(feature = "argmax")]
-pub use adapter::StreamingBatchConfig;
 pub use adapter::deepgram::DeepgramModel;
 pub use adapter::{
     AdapterKind, ArgmaxAdapter, AssemblyAIAdapter, BatchSttAdapter, CactusAdapter, CallbackResult,
@@ -26,7 +24,15 @@ pub use adapter::{
     documented_language_codes_batch, documented_language_codes_live, is_hyprnote_proxy,
     is_local_host, normalize_languages,
 };
-pub use adapter::{StreamingBatchEvent, StreamingBatchStream};
+
+fn is_azure_openai(api_base: &str) -> bool {
+    url::Url::parse(api_base)
+        .ok()
+        .and_then(|u| u.host_str().map(OpenAIAdapter::is_azure_host))
+        .unwrap_or(false)
+}
+#[cfg(feature = "argmax")]
+pub use adapter::{StreamingBatchConfig, StreamingBatchEvent, StreamingBatchStream};
 
 pub use batch::{BatchClient, BatchClientBuilder};
 pub use error::Error;
@@ -116,6 +122,10 @@ impl<A: RealtimeSttAdapter> ListenClientBuilder<A> {
             }
             for (name, value) in &self.extra_headers {
                 request = request.with_header(name, value);
+            }
+        } else if is_azure_openai(original_api_base) {
+            if let Some(api_key) = self.api_key.as_deref() {
+                request = request.with_header("api-key", api_key);
             }
         } else if let Some((header_name, header_value)) =
             adapter.build_auth_header(self.api_key.as_deref())

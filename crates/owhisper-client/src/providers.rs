@@ -236,7 +236,14 @@ impl Provider {
 
     pub fn is_host(&self, host: &str) -> bool {
         let domain = self.domain();
-        host == domain || host.ends_with(&format!(".{}", domain))
+        let matches_domain = host == domain || host.ends_with(&format!(".{}", domain));
+
+        // Also match Azure OpenAI (*.openai.azure.com) as OpenAI provider
+        if *self == Self::OpenAI && host.ends_with(".openai.azure.com") {
+            return true;
+        }
+
+        matches_domain
     }
 
     pub fn matches_url(&self, base_url: &str) -> bool {
