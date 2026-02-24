@@ -52,10 +52,10 @@ impl AuthStore {
 
     pub fn clear(&self) -> crate::Result<()> {
         let mut data = self.data.lock().unwrap();
+        data.clear();
         if self.path.exists() {
             std::fs::remove_file(&self.path)?;
         }
-        data.clear();
         Ok(())
     }
 
