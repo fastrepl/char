@@ -10,8 +10,8 @@ use axum::{
 use crate::config::SubscriptionConfig;
 use crate::state::AppState;
 
-pub use account::DeleteAccountResponse;
 pub use crate::trial::{Interval, StartTrialReason, StartTrialResponse};
+pub use account::DeleteAccountResponse;
 pub use rpc::{CanStartTrialReason, CanStartTrialResponse};
 
 pub fn router(config: SubscriptionConfig) -> Router {
