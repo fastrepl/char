@@ -2,7 +2,7 @@ import { Icon } from "@iconify-icon/react";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { ArrowLeftIcon, MailIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 
 import { cn } from "@hypr/utils";
@@ -57,6 +57,8 @@ export const Route = createFileRoute("/auth")({
         }
       }
     }
+
+    return { existingUser: user };
   },
 });
 
@@ -64,7 +66,17 @@ type AuthView = "main" | "email";
 
 function Component() {
   const { flow, scheme, redirect, provider, rra } = Route.useSearch();
+  const { existingUser } = Route.useRouteContext();
   const [view, setView] = useState<AuthView>("main");
+
+  if (existingUser && flow === "desktop") {
+    return (
+      <Container>
+        <Header />
+        <DesktopReauthView email={existingUser.email} scheme={scheme} />
+      </Container>
+    );
+  }
 
   const showGoogle = !provider || provider === "google";
   const showGithub = !provider || provider === "github";
@@ -163,6 +175,59 @@ function Header() {
       <h1 className="text-3xl font-serif text-stone-800 mb-2">
         Welcome to Char
       </h1>
+    </div>
+  );
+}
+
+function DesktopReauthView({
+  email,
+  scheme,
+}: {
+  email: string;
+  scheme: string;
+}) {
+  const retryMutation = useMutation({
+    mutationFn: () => createDesktopSession({ data: { email } }),
+    onSuccess: (result) => {
+      if (result) {
+        const params = new URLSearchParams();
+        params.set("flow", "desktop");
+        params.set("scheme", scheme);
+        params.set("access_token", result.access_token);
+        params.set("refresh_token", result.refresh_token);
+        window.location.href = `/callback/auth?${params.toString()}`;
+      }
+    },
+  });
+
+  useEffect(() => {
+    retryMutation.mutate();
+  }, []);
+
+  const hasRetryFailed =
+    retryMutation.isError || (retryMutation.isSuccess && !retryMutation.data);
+
+  return (
+    <div className="flex flex-col gap-4">
+      {!hasRetryFailed && (
+        <div className="text-center">
+          <p className="text-neutral-600">Signing in as {email}...</p>
+        </div>
+      )}
+      {hasRetryFailed && (
+        <>
+          <div className="text-center">
+            <p className="text-neutral-600 mb-1">Signed in as {email}</p>
+            <p className="text-sm text-neutral-400">
+              Sign in with your provider to continue to the app
+            </p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <OAuthButton flow="desktop" scheme={scheme} provider="google" />
+            <OAuthButton flow="desktop" scheme={scheme} provider="github" />
+          </div>
+        </>
+      )}
     </div>
   );
 }

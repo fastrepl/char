@@ -253,6 +253,10 @@ export const createDesktopSession = createServerFn({ method: "POST" })
         });
 
       if (linkError || !linkData.properties?.hashed_token) {
+        console.error(
+          "[createDesktopSession] generateLink failed:",
+          linkError?.message ?? "no hashed_token",
+        );
         return null;
       }
 
@@ -263,6 +267,10 @@ export const createDesktopSession = createServerFn({ method: "POST" })
       });
 
       if (error || !authData.session) {
+        console.error(
+          "[createDesktopSession] verifyOtp failed:",
+          error?.message ?? "no session",
+        );
         return null;
       }
 
@@ -270,7 +278,8 @@ export const createDesktopSession = createServerFn({ method: "POST" })
         access_token: authData.session.access_token,
         refresh_token: authData.session.refresh_token,
       };
-    } catch {
+    } catch (e) {
+      console.error("[createDesktopSession] unexpected error:", e);
       return null;
     }
   });
