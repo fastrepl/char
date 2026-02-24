@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
@@ -67,19 +66,10 @@ impl AuthStore {
 
 fn atomic_save(path: &Path, data: &HashMap<String, String>) -> crate::Result<()> {
     let content = serde_json::to_string(data)?;
-    atomic_write(path, &content)?;
+    hypr_storage::fs::atomic_write(path, &content)?;
     Ok(())
 }
 
 pub(crate) fn atomic_write(target: &Path, content: &str) -> std::io::Result<()> {
-    let parent = target.parent().ok_or_else(|| {
-        std::io::Error::new(std::io::ErrorKind::InvalidInput, "target has no parent")
-    })?;
-    std::fs::create_dir_all(parent)?;
-
-    let mut temp = tempfile::NamedTempFile::new_in(parent)?;
-    temp.write_all(content.as_bytes())?;
-    temp.as_file().sync_all()?;
-    temp.persist(target).map_err(|e| e.error)?;
-    Ok(())
+    hypr_storage::fs::atomic_write(target, content)
 }
