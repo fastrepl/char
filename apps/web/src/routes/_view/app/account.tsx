@@ -58,6 +58,8 @@ function Component() {
 
           {/* <IntegrationsSettingsCard /> */}
 
+          <DeleteAccountSection />
+
           <SignOutSection />
         </div>
       </div>
@@ -279,6 +281,48 @@ function AccountSettingsCard() {
         {renderPlanButton()}
       </div>
     </div>
+  );
+}
+
+function DeleteAccountSection() {
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  return (
+    <section>
+      <h2 className="text-lg font-medium mb-2 font-serif">Delete Account</h2>
+      <p className="text-sm text-neutral-500 mb-4">
+        Char is a local-first app — your notes, transcripts, and meeting data
+        are stored locally on your device and will not be affected by account
+        deletion. Deleting your account only removes your cloud-stored data.
+      </p>
+      {showConfirm ? (
+        <div className="p-4 border border-red-200 rounded-md bg-red-50">
+          <p className="text-sm text-red-800 mb-3">
+            To request account deletion, please email us at{" "}
+            <a
+              href="mailto:privacy@char.com?subject=Account%20Deletion%20Request"
+              className="underline font-medium"
+            >
+              privacy@char.com
+            </a>
+            . We will delete your cloud data within 30 days.
+          </p>
+          <button
+            onClick={() => setShowConfirm(false)}
+            className="px-4 h-8 flex items-center text-sm bg-linear-to-b from-white to-stone-50 border border-neutral-300 text-neutral-700 rounded-full shadow-xs hover:shadow-md hover:scale-[102%] active:scale-[98%] transition-all"
+          >
+            Cancel
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setShowConfirm(true)}
+          className="cursor-pointer px-4 h-8 flex items-center text-sm text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-full transition-all"
+        >
+          Request Account Deletion
+        </button>
+      )}
+    </section>
   );
 }
 

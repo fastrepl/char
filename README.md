@@ -56,6 +56,8 @@ If you noticed the GIF above, you can see that Char works without any internet c
 
 <img width="780" height="585" alt="no-wifi" src="https://github.com/user-attachments/assets/ecf08a9e-3b6c-4fb6-ab38-0bc572f54859" />
 
+> **Note on accounts:** During onboarding, Char creates an account so you can experience the full product — including cloud-powered transcription and summarization — at its best quality. All your notes, transcripts, and data are stored locally on your machine in a local SQLite database. If you prefer not to keep an account, you can request deletion anytime at [char.com/app/account](https://char.com/app/account). Char will continue to work fully offline with a local LLM.
+
 ### Bring Your Own LLM
 
 Prefer something custom? You can swap in your own language model:
