@@ -17,5 +17,7 @@ common_event_derives! {
         Dismiss { key: String, source: Option<hypr_notification::NotificationSource> },
         #[serde(rename = "notification_timeout")]
         Timeout { key: String, source: Option<hypr_notification::NotificationSource> },
+        #[serde(rename = "notification_option_selected")]
+        OptionSelected { key: String, source: Option<hypr_notification::NotificationSource>, selected_index: i32 },
     }
 }

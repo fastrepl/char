@@ -257,9 +257,25 @@ class ClickableView: NSView {
     alphaValue = 0.95
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { self.alphaValue = 1.0 }
     if let notification = notification {
-      RustBridge.onCollapsedConfirm(key: notification.key)
-      notification.dismiss()
+      if notification.payload.hasOptions, let optionsButton = findOptionsButton(in: self) {
+        optionsButton.showOptionsMenu()
+      } else {
+        RustBridge.onCollapsedConfirm(key: notification.key)
+        notification.dismiss()
+      }
     }
+  }
+
+  private func findOptionsButton(in view: NSView) -> OptionsButton? {
+    for subview in view.subviews {
+      if let button = subview as? OptionsButton {
+        return button
+      }
+      if let found = findOptionsButton(in: subview) {
+        return found
+      }
+    }
+    return nil
   }
 
   override func viewDidMoveToWindow() {

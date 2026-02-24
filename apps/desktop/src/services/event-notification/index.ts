@@ -157,6 +157,7 @@ export function checkEventNotifications(
         participants: participants,
         event_details: eventDetails,
         action_label: "Start listening",
+        options: null,
       });
     } else if (timeUntilStart <= 0) {
       notifiedEvents.delete(notificationKey);

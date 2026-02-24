@@ -95,7 +95,11 @@ pub enum NotificationSource {
     #[serde(rename = "calendar_event")]
     CalendarEvent { event_id: String },
     #[serde(rename = "mic_detected")]
-    MicDetected { app_names: Vec<String> },
+    MicDetected {
+        app_names: Vec<String>,
+        #[serde(default)]
+        event_ids: Vec<String>,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -115,6 +119,7 @@ pub struct Notification {
     pub participants: Option<Vec<Participant>>,
     pub event_details: Option<EventDetails>,
     pub action_label: Option<String>,
+    pub options: Option<Vec<String>>,
 }
 
 impl Notification {
@@ -138,6 +143,7 @@ pub struct NotificationBuilder {
     participants: Option<Vec<Participant>>,
     event_details: Option<EventDetails>,
     action_label: Option<String>,
+    options: Option<Vec<String>>,
 }
 
 impl NotificationBuilder {
@@ -186,6 +192,11 @@ impl NotificationBuilder {
         self
     }
 
+    pub fn options(mut self, options: Vec<String>) -> Self {
+        self.options = Some(options);
+        self
+    }
+
     pub fn build(self) -> Notification {
         Notification {
             key: self.key,
@@ -197,6 +208,7 @@ impl NotificationBuilder {
             participants: self.participants,
             event_details: self.event_details,
             action_label: self.action_label,
+            options: self.options,
         }
     }
 }

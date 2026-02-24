@@ -96,7 +96,7 @@ where
     #[cfg(all(feature = "legacy", target_os = "macos"))]
     {
         let f = f.clone();
-        hypr_notification_macos::setup_dismiss_handler(move |key| {
+        hypr_notification_macos::setup_dismiss_handler(move |key, _tag| {
             f(get_context(&key));
         });
     }
@@ -121,7 +121,7 @@ where
     #[cfg(all(feature = "legacy", target_os = "macos"))]
     {
         let f = f.clone();
-        hypr_notification_macos::setup_collapsed_confirm_handler(move |key| {
+        hypr_notification_macos::setup_collapsed_confirm_handler(move |key, _tag| {
             f(get_context(&key));
         });
     }
@@ -146,7 +146,7 @@ where
     #[cfg(all(feature = "legacy", target_os = "macos"))]
     {
         let f = f.clone();
-        hypr_notification_macos::setup_expanded_accept_handler(move |key| {
+        hypr_notification_macos::setup_expanded_accept_handler(move |key, _tag| {
             f(get_context(&key));
         });
     }
@@ -171,7 +171,7 @@ where
     #[cfg(all(feature = "legacy", target_os = "macos"))]
     {
         let f = f.clone();
-        hypr_notification_macos::setup_collapsed_timeout_handler(move |key| {
+        hypr_notification_macos::setup_collapsed_timeout_handler(move |key, _tag| {
             f(get_context(&key));
         });
     }
@@ -181,6 +181,23 @@ where
         let f = f.clone();
         hypr_notification_linux::setup_notification_timeout_handler(move |key| {
             f(get_context(&key));
+        });
+    }
+
+    let _ = f;
+}
+
+pub fn setup_option_selected_handler<F>(f: F)
+where
+    F: Fn(NotificationContext, i32) + Send + Sync + 'static,
+{
+    let f = std::sync::Arc::new(f);
+
+    #[cfg(all(feature = "legacy", target_os = "macos"))]
+    {
+        let f = f.clone();
+        hypr_notification_macos::setup_option_selected_handler(move |key, tag| {
+            f(get_context(&key), tag);
         });
     }
 

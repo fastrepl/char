@@ -64,4 +64,21 @@ pub fn init(app: tauri::AppHandle<tauri::Wry>) {
                 .event_fire_and_forget(AnalyticsPayload::builder("collapsed_timeout").build());
         });
     }
+
+    {
+        let app = app.clone();
+        hypr_notification::setup_option_selected_handler(move |ctx, selected_index| {
+            if let Err(_e) = app.windows().show(tauri_plugin_windows::AppWindow::Main) {}
+
+            let _ = NotificationEvent::OptionSelected {
+                key: ctx.key,
+                source: ctx.source,
+                selected_index,
+            }
+            .emit(&app);
+
+            app.analytics()
+                .event_fire_and_forget(AnalyticsPayload::builder("option_selected").build());
+        });
+    }
 }
