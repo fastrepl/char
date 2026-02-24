@@ -9,9 +9,7 @@ import type {
 } from "../../../../utils/timeline";
 
 export const CurrentTimeIndicator = forwardRef<HTMLDivElement>((_, ref) => (
-  <div ref={ref} className="px-3 py-2" aria-hidden>
-    <div className="h-px bg-red-500" />
-  </div>
+  <div ref={ref} className="py-0.5" aria-hidden />
 ));
 
 export function useCurrentTimeMs() {
