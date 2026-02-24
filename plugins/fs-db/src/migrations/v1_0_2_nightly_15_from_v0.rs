@@ -32,32 +32,6 @@ fn sanitize_filename(name: &str) -> String {
         .to_string()
 }
 
-<<<<<<< HEAD:plugins/fs-db/src/migrations/v1_0_2_nightly_1_from_v0.rs
-fn group_by_session_id<T, F>(items: &[T], get_id: F) -> HashMap<&str, Vec<&T>>
-where
-    F: Fn(&T) -> &str,
-{
-    let mut map: HashMap<&str, Vec<&T>> = HashMap::new();
-    for item in items {
-        map.entry(get_id(item)).or_default().push(item);
-    }
-    map
-}
-
-||||||| 15704006b:plugins/fs-db/src/migrations/v1_0_2_nightly_1_from_v0.rs
-fn group_by_session_id<'a, T, F>(items: &'a [T], get_id: F) -> HashMap<&'a str, Vec<&'a T>>
-where
-    F: Fn(&T) -> &str,
-{
-    let mut map: HashMap<&str, Vec<&T>> = HashMap::new();
-    for item in items {
-        map.entry(get_id(item)).or_default().push(item);
-    }
-    map
-}
-
-=======
->>>>>>> origin/main:plugins/fs-db/src/migrations/v1_0_2_nightly_15_from_v0.rs
 fn build_tag_names(data: &Collection) -> HashMap<&str, &str> {
     data.tags
         .iter()
