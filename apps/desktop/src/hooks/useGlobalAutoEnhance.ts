@@ -10,6 +10,11 @@ import { createTaskId } from "../store/zustand/ai-task/task-configs";
 import { useTabs } from "../store/zustand/tabs";
 import type { Tab } from "../store/zustand/tabs/schema";
 import { getEligibility } from "./autoEnhance/eligibility";
+import {
+  clearTrackedStopSession,
+  type GlobalAutoEnhanceRunResult,
+  processPendingStopSessions,
+} from "./autoEnhance/global-stop-queue";
 import { getStoppedSessionToAutoEnhance } from "./autoEnhance/global-trigger";
 import { useCreateEnhancedNote } from "./useEnhancedNotes";
 import { useLanguageModel, useLLMConnection } from "./useLLMConnection";
@@ -22,6 +27,7 @@ export function useGlobalAutoEnhance() {
 
   const store = main.UI.useStore(main.STORE_ID) as main.Store | undefined;
   const indexes = main.UI.useIndexes(main.STORE_ID);
+  const transcriptsTable = main.UI.useTable("transcripts", main.STORE_ID);
   const selectedTemplateId = settings.UI.useValue(
     "selected_template_id",
     settings.STORE_ID,
@@ -36,6 +42,7 @@ export function useGlobalAutoEnhance() {
   const liveSessionId = useListener((state) => state.live.sessionId);
 
   const handledStopRef = useRef<Set<string>>(new Set());
+  const pendingStopRef = useRef<Set<string>>(new Set());
   const startedTasksRef = useRef<Set<string>>(new Set());
   const prevRef = useRef({
     status: listenerStatus,
@@ -43,9 +50,9 @@ export function useGlobalAutoEnhance() {
   });
 
   const runForSession = useCallback(
-    (sessionId: string) => {
+    (sessionId: string): GlobalAutoEnhanceRunResult => {
       if (!store || !indexes || !model) {
-        return;
+        return "retryable";
       }
 
       const transcriptIds = indexes.getSliceRowIds(
@@ -55,13 +62,13 @@ export function useGlobalAutoEnhance() {
       const hasTranscript = transcriptIds.length > 0;
       const eligibility = getEligibility(hasTranscript, transcriptIds, store);
       if (!eligibility.eligible) {
-        return;
+        return "retryable";
       }
 
       const templateId = selectedTemplateId || undefined;
       const enhancedNoteId = createEnhancedNote(sessionId, templateId);
       if (!enhancedNoteId) {
-        return;
+        return "retryable";
       }
 
       const tabsState = useTabs.getState();
@@ -83,7 +90,7 @@ export function useGlobalAutoEnhance() {
         existingTask?.status === "generating" ||
         existingTask?.status === "success"
       ) {
-        return;
+        return "handled";
       }
 
       if (!startedTasksRef.current.has(enhancedNoteId)) {
@@ -101,6 +108,7 @@ export function useGlobalAutoEnhance() {
         taskType: "enhance",
         args: { sessionId, enhancedNoteId, templateId },
       });
+      return "handled";
     },
     [
       store,
@@ -115,9 +123,21 @@ export function useGlobalAutoEnhance() {
     ],
   );
 
+  const processPendingStops = useCallback(() => {
+    processPendingStopSessions({
+      pendingStops: pendingStopRef.current,
+      handledStops: handledStopRef.current,
+      runForSession,
+    });
+  }, [runForSession]);
+
   useEffect(() => {
     if (listenerStatus === "active" && liveSessionId) {
-      handledStopRef.current.delete(liveSessionId);
+      clearTrackedStopSession({
+        sessionId: liveSessionId,
+        pendingStops: pendingStopRef.current,
+        handledStops: handledStopRef.current,
+      });
     }
   }, [listenerStatus, liveSessionId]);
 
@@ -133,13 +153,16 @@ export function useGlobalAutoEnhance() {
       handledStops: handledStopRef.current,
     });
     if (stoppedSessionId) {
-      handledStopRef.current.add(stoppedSessionId);
-      runForSession(stoppedSessionId);
+      pendingStopRef.current.add(stoppedSessionId);
     }
 
     prevRef.current = {
       status: listenerStatus,
       sessionId: liveSessionId,
     };
-  }, [listenerStatus, liveSessionId, runForSession]);
+  }, [listenerStatus, liveSessionId]);
+
+  useEffect(() => {
+    processPendingStops();
+  }, [processPendingStops, listenerStatus, liveSessionId, transcriptsTable]);
 }
