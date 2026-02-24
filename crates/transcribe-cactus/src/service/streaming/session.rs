@@ -53,9 +53,16 @@ pub(super) async fn handle_websocket(
     let total_channels = (params.channels as i32).max(1) as usize;
     let chunk_size_ms = 300;
 
+    let custom_vocabulary = if params.keywords.is_empty() {
+        None
+    } else {
+        Some(params.keywords.clone())
+    };
+
     let options = hypr_cactus::TranscribeOptions {
         language: hypr_cactus::constrain_to(&params.languages),
         min_chunk_size: Some((cactus_config.min_chunk_sec * SAMPLE_RATE as f32) as u32),
+        custom_vocabulary,
         ..Default::default()
     };
 

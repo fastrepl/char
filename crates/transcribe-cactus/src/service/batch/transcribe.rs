@@ -25,8 +25,15 @@ pub(super) fn transcribe_batch(
 
     let model = hypr_cactus::Model::new(model_path)?;
 
+    let custom_vocabulary = if params.keywords.is_empty() {
+        None
+    } else {
+        Some(params.keywords.clone())
+    };
+
     let options = hypr_cactus::TranscribeOptions {
         language: hypr_cactus::constrain_to(&params.languages),
+        custom_vocabulary,
         ..Default::default()
     };
 

@@ -36,4 +36,8 @@ pub struct TranscribeOptions {
     pub min_chunk_size: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub confirmation_threshold: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub custom_vocabulary: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub vocabulary_boost: Option<f32>,
 }
