@@ -55,7 +55,7 @@
         ]
       },
       {
-        "command": "xcrun swift-format format",
+        "command": "swift format",
         "exts": [
           "swift"
         ]
