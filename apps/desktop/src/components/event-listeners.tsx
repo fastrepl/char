@@ -111,6 +111,31 @@ function useNotificationEvents() {
             id: sessionId,
             state: { view: null, autoStart: true },
           });
+        } else if (payload.type === "notification_option_selected") {
+          const currentStore = storeRef.current;
+          if (!currentStore) return;
+
+          const selectedIndex = payload.selected_index;
+          const eventIds =
+            payload.source?.type === "mic_detected"
+              ? (payload.source.event_ids ?? [])
+              : [];
+
+          const sessionId =
+            selectedIndex < eventIds.length
+              ? getOrCreateSessionForEventId(
+                  currentStore,
+                  eventIds[selectedIndex],
+                  undefined,
+                  timezoneRef.current,
+                )
+              : createSession(currentStore);
+
+          openNewRef.current({
+            type: "sessions",
+            id: sessionId,
+            state: { view: null, autoStart: true },
+          });
         }
       })
       .then((f) => {

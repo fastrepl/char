@@ -6,6 +6,7 @@ import { events as detectEvents } from "@hypr/plugin-detect";
 import { commands as notificationCommands } from "@hypr/plugin-notification";
 
 import { useConfigValue } from "../config/use-config";
+import * as main from "../store/tinybase/store/main";
 import {
   createListenerStore,
   type ListenerStore,
@@ -48,10 +49,44 @@ export const useListener = <T,>(
   return useStore(store, useShallow(selector));
 };
 
+function getNearbyEvents(
+  tinybaseStore: NonNullable<ReturnType<typeof main.UI.useStore>>,
+): { id: string; title: string }[] {
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000;
+  const results: { id: string; title: string; startedAt: number }[] = [];
+
+  tinybaseStore.forEachRow("events", (eventId, _forEachCell) => {
+    const event = tinybaseStore.getRow("events", eventId);
+    if (!event?.started_at) return;
+    if (event.is_all_day) return;
+
+    const startTime = new Date(String(event.started_at)).getTime();
+    if (isNaN(startTime)) return;
+
+    if (Math.abs(startTime - now) <= windowMs) {
+      results.push({
+        id: eventId,
+        title: String(event.title || "Untitled Event"),
+        startedAt: startTime,
+      });
+    }
+  });
+
+  results.sort((a, b) => a.startedAt - b.startedAt);
+  return results.map(({ id, title }) => ({ id, title }));
+}
+
 const useHandleDetectEvents = (store: ListenerStore) => {
   const stop = useStore(store, (state) => state.stop);
   const setMuted = useStore(store, (state) => state.setMuted);
   const notificationDetectEnabled = useConfigValue("notification_detect");
+  const tinybaseStore = main.UI.useStore(main.STORE_ID);
+
+  const tinybaseStoreRef = useRef(tinybaseStore);
+  useEffect(() => {
+    tinybaseStoreRef.current = tinybaseStore;
+  }, [tinybaseStore]);
 
   const notificationDetectEnabledRef = useRef(notificationDetectEnabled);
   useEffect(() => {
@@ -73,6 +108,14 @@ const useHandleDetectEvents = (store: ListenerStore) => {
             return;
           }
 
+          const currentTinybaseStore = tinybaseStoreRef.current;
+          const nearbyEvents = currentTinybaseStore
+            ? getNearbyEvents(currentTinybaseStore)
+            : [];
+
+          const options =
+            nearbyEvents.length > 0 ? nearbyEvents.map((e) => e.title) : null;
+
           void notificationCommands.showNotification({
             key: payload.key,
             title: "Meeting in progress?",
@@ -82,11 +125,13 @@ const useHandleDetectEvents = (store: ListenerStore) => {
             source: {
               type: "mic_detected",
               app_names: payload.apps.map((a) => a.name),
+              event_ids: nearbyEvents.map((e) => e.id),
             },
             start_time: null,
             participants: null,
             event_details: null,
             action_label: null,
+            options,
           });
         } else if (payload.type === "micStopped") {
           stop();

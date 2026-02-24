@@ -68,7 +68,7 @@ export function getOrCreateSessionForEventId(
   const sessionId = id();
   store.setRow("sessions", sessionId, {
     event_json: JSON.stringify(sessionEvent),
-    title: title ?? "",
+    title: title ?? sessionEvent.title,
     created_at: new Date().toISOString(),
     raw_md: "",
     user_id: DEFAULT_USER_ID,
