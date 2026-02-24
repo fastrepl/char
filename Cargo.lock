@@ -2646,7 +2646,7 @@ dependencies = [
 [[package]]
 name = "cactus-sys"
 version = "0.1.0"
-source = "git+https://github.com/cactus-compute/cactus?rev=a31f1a2#a31f1a23c3d423cf652db407f6a85384e1242b60"
+source = "git+https://github.com/cactus-compute/cactus?rev=b1c378b#b1c378bb847439bc7cf6e06d3994ceb3f212e214"
 dependencies = [
  "bindgen 0.72.1",
  "cmake",
