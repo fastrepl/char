@@ -1,0 +1,11 @@
+[package]
+name = "vad"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+earshot = ["dep:earshot"]
+
+[dependencies]
+earshot = { workspace = true, optional = true }
+thiserror = { workspace = true }

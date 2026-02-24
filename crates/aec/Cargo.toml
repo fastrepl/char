@@ -8,8 +8,6 @@ default = ["128"]
 128 = []
 256 = []
 512 = []
-load-dynamic = ["hypr-onnx/load-dynamic"]
-
 [dependencies]
 hypr-onnx = { workspace = true }
 

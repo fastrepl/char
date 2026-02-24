@@ -23,7 +23,7 @@ tauri-specta = { workspace = true, features = ["derive", "typescript"] }
 
 json-patch = "4.1"
 jsonschema = { workspace = true }
-schemars = { workspace = true, features = ["chrono"] }
+schemars = { workspace = true, features = ["chrono04"] }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 specta = { workspace = true, features = ["chrono"] }

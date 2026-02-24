@@ -105,7 +105,7 @@ export function createToastRegistry({
         description: (
           <>
             <strong className="font-mono">Transcription model</strong> is needed
-            to make Hyprnote listen to your conversations.
+            to make Char listen to your conversations.
           </>
         ),
         primaryAction: {
@@ -122,7 +122,7 @@ export function createToastRegistry({
         description: (
           <>
             <strong className="font-mono">Language model</strong> is needed to
-            make Hyprnote summarize and chat about your conversations.
+            make Char summarize and chat about your conversations.
           </>
         ),
         primaryAction: {
@@ -140,7 +140,7 @@ export function createToastRegistry({
         icon: (
           <img
             src="/assets/hyprnote-pro.png"
-            alt="Hyprnote Pro"
+            alt="Char Pro"
             className="size-5"
           />
         ),
@@ -162,7 +162,7 @@ export function createToastRegistry({
         icon: (
           <img
             src="/assets/hyprnote-pro.png"
-            alt="Hyprnote Pro"
+            alt="Char Pro"
             className="size-5"
           />
         ),

@@ -3,9 +3,11 @@ import {
   commands as notificationCommands,
   type Participant,
 } from "@hypr/plugin-notification";
+import { format, TZDate } from "@hypr/utils";
 
 import type * as main from "../../store/tinybase/store/main";
 import type * as settings from "../../store/tinybase/store/settings";
+import { findSessionByEventId } from "../../utils/session-event";
 
 export const EVENT_NOTIFICATION_TASK_ID = "eventNotification";
 export const EVENT_NOTIFICATION_INTERVAL = 30 * 1000; // 30 sec
@@ -14,20 +16,6 @@ const NOTIFY_WINDOW_MS = 5 * 60 * 1000; // 5 minutes before
 const NOTIFIED_EVENTS_TTL_MS = 10 * 60 * 1000; // 10 minutes TTL for cleanup
 
 export type NotifiedEventsMap = Map<string, number>;
-
-function getSessionIdForEvent(
-  store: main.Store,
-  eventId: string,
-): string | null {
-  let sessionId: string | null = null;
-  store.forEachRow("sessions", (rowId, _forEachCell) => {
-    const session = store.getRow("sessions", rowId);
-    if (session?.event_id === eventId) {
-      sessionId = rowId;
-    }
-  });
-  return sessionId;
-}
 
 function getParticipantsForSession(
   store: main.Store,
@@ -73,6 +61,42 @@ export function checkEventNotifications(
     }
   }
 
+  const ignoredNonRecurrentIds = new Set<string>();
+  const ignoredRecurrentMap = new Map<string, Set<string>>();
+  const ignoredSeriesIds = new Set<string>();
+
+  try {
+    const raw = store.getValue("ignored_events") as string | undefined;
+    if (raw) {
+      for (const e of JSON.parse(raw) as Array<{
+        tracking_id: string;
+        is_recurrent: boolean;
+        day?: string;
+      }>) {
+        if (e.is_recurrent) {
+          const set = ignoredRecurrentMap.get(e.tracking_id) ?? new Set();
+          if (e.day) set.add(e.day);
+          ignoredRecurrentMap.set(e.tracking_id, set);
+        } else {
+          ignoredNonRecurrentIds.add(e.tracking_id);
+        }
+      }
+    }
+  } catch {}
+
+  try {
+    const raw = store.getValue("ignored_recurring_series") as
+      | string
+      | undefined;
+    if (raw) {
+      for (const e of JSON.parse(raw) as Array<{ id: string }>) {
+        ignoredSeriesIds.add(e.id);
+      }
+    }
+  } catch {}
+
+  const timezone = settingsStore?.getValue("timezone") as string | undefined;
+
   store.forEachRow("events", (eventId, _forEachCell) => {
     const event = store.getRow("events", eventId);
     if (!event?.started_at) return;
@@ -80,6 +104,22 @@ export function checkEventNotifications(
     const startTime = new Date(String(event.started_at));
     const timeUntilStart = startTime.getTime() - now;
     const notificationKey = `event-${eventId}-${startTime.getTime()}`;
+
+    const trackingId = event.tracking_id_event as string | undefined;
+    const recurrenceSeriesId = event.recurrence_series_id as string | undefined;
+
+    if (trackingId) {
+      if (!recurrenceSeriesId) {
+        if (ignoredNonRecurrentIds.has(trackingId)) return;
+      } else {
+        const day = format(
+          timezone ? new TZDate(startTime, timezone) : startTime,
+          "yyyy-MM-dd",
+        );
+        if (ignoredRecurrentMap.get(trackingId)?.has(day)) return;
+        if (ignoredSeriesIds.has(recurrenceSeriesId)) return;
+      }
+    }
 
     if (timeUntilStart > 0 && timeUntilStart <= NOTIFY_WINDOW_MS) {
       if (notifiedEvents.has(notificationKey)) {
@@ -99,7 +139,7 @@ export function checkEventNotifications(
       };
 
       let participants: Participant[] | null = null;
-      const sessionId = getSessionIdForEvent(store, eventId);
+      const sessionId = findSessionByEventId(store, eventId, timezone);
       if (sessionId) {
         const sessionParticipants = getParticipantsForSession(store, sessionId);
         if (sessionParticipants.length > 0) {
@@ -112,7 +152,7 @@ export function checkEventNotifications(
         title: title,
         message: `Starting in ${minutesUntil} minute${minutesUntil !== 1 ? "s" : ""}`,
         timeout: { secs: 30, nanos: 0 },
-        event_id: eventId,
+        source: { type: "calendar_event", event_id: eventId },
         start_time: Math.floor(startTime.getTime() / 1000),
         participants: participants,
         event_details: eventDetails,

@@ -1,11 +1,15 @@
 import { type RefObject, useCallback, useMemo, useRef, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 
+import type { DegradedError } from "@hypr/plugin-listener";
+import type { RuntimeSpeakerHint } from "@hypr/transcript";
+import { DancingSticks } from "@hypr/ui/components/ui/dancing-sticks";
 import { cn } from "@hypr/utils";
 
 import { useAudioPlayer } from "../../../../../../../contexts/audio-player/provider";
 import { useListener } from "../../../../../../../contexts/listener";
 import * as main from "../../../../../../../store/tinybase/store/main";
-import type { RuntimeSpeakerHint } from "../../../../../../../utils/segment";
+import { TranscriptEmptyState } from "../empty-state";
 import {
   useAutoScroll,
   usePlaybackAutoScroll,
@@ -33,6 +37,7 @@ export function TranscriptContainer({
   );
 
   const sessionMode = useListener((state) => state.getSessionMode(sessionId));
+  const degraded = useListener((state) => state.live.degraded);
   const currentActive =
     sessionMode === "active" || sessionMode === "finalizing";
   const editable =
@@ -93,9 +98,24 @@ export function TranscriptContainer({
   const { isAtBottom, autoScrollEnabled, scrollToBottom } =
     useScrollDetection(containerRef);
 
-  const { time, state: playerState } = useAudioPlayer();
+  const { time, state: playerState, pause, resume, start } = useAudioPlayer();
   const currentMs = time.current * 1000;
   const isPlaying = playerState === "playing";
+
+  useHotkeys(
+    "space",
+    (e) => {
+      e.preventDefault();
+      if (playerState === "playing") {
+        pause();
+      } else if (playerState === "paused") {
+        resume();
+      } else if (playerState === "stopped") {
+        start();
+      }
+    },
+    { enableOnFormTags: false },
+  );
 
   usePlaybackAutoScroll(containerRef, currentMs, isPlaying);
   const shouldAutoScroll = currentActive && autoScrollEnabled;
@@ -107,8 +127,14 @@ export function TranscriptContainer({
 
   const shouldShowButton = !isAtBottom && currentActive;
 
+  // TOOD: this can't handle words=[]
   if (transcriptIds.length === 0) {
-    return null;
+    if (currentActive && degraded) {
+      return <DegradedState error={degraded} />;
+    }
+    return (
+      <TranscriptEmptyState isBatching={sessionMode === "running_batch"} />
+    );
   }
 
   const handleSelectionAction = (action: string, selectedText: string) => {
@@ -127,29 +153,33 @@ export function TranscriptContainer({
           "pb-16 scroll-pb-32 scrollbar-hide",
         ])}
       >
-        {transcriptIds.map((transcriptId, index) => (
-          <div key={transcriptId} className="flex flex-col gap-8">
-            <RenderTranscript
-              scrollElement={scrollElement}
-              isLastTranscript={index === transcriptIds.length - 1}
-              isAtBottom={isAtBottom}
-              editable={editable}
-              transcriptId={transcriptId}
-              partialWords={
-                index === transcriptIds.length - 1 && currentActive
-                  ? partialWords
-                  : []
-              }
-              partialHints={
-                index === transcriptIds.length - 1 && currentActive
-                  ? partialHints
-                  : []
-              }
-              operations={operations}
-            />
-            {index < transcriptIds.length - 1 && <TranscriptSeparator />}
-          </div>
-        ))}
+        {currentActive && degraded ? (
+          <DegradedState error={degraded} />
+        ) : (
+          transcriptIds.map((transcriptId, index) => (
+            <div key={transcriptId} className="flex flex-col gap-8">
+              <RenderTranscript
+                scrollElement={scrollElement}
+                isLastTranscript={index === transcriptIds.length - 1}
+                isAtBottom={isAtBottom}
+                editable={editable}
+                transcriptId={transcriptId}
+                partialWords={
+                  index === transcriptIds.length - 1 && currentActive
+                    ? partialWords
+                    : []
+                }
+                partialHints={
+                  index === transcriptIds.length - 1 && currentActive
+                    ? partialHints
+                    : []
+                }
+                operations={operations}
+              />
+              {index < transcriptIds.length - 1 && <TranscriptSeparator />}
+            </div>
+          ))
+        )}
 
         {editable && (
           <SelectionMenu
@@ -188,6 +218,42 @@ function TranscriptSeparator() {
       <div className="flex-1 border-t border-neutral-200/40" />
       <span>~ ~ ~ ~ ~ ~ ~ ~ ~</span>
       <div className="flex-1 border-t border-neutral-200/40" />
+    </div>
+  );
+}
+
+function degradedMessage(error: DegradedError): string {
+  switch (error.type) {
+    case "authentication_failed":
+      return `Authentication failed (${error.provider})`;
+    case "upstream_unavailable":
+      return error.message;
+    case "connection_timeout":
+      return "Transcription connection timed out";
+    case "stream_error":
+      return "Transcription stream error";
+  }
+}
+
+function DegradedState({ error }: { error: DegradedError }) {
+  const amplitude = useListener((state) => state.live.amplitude);
+
+  return (
+    <div className="h-full flex flex-col items-center justify-center gap-6">
+      <DancingSticks
+        amplitude={Math.min((amplitude.mic + amplitude.speaker) / 2000, 1)}
+        color="#a3a3a3"
+        height={40}
+        width={80}
+        stickWidth={3}
+        gap={3}
+      />
+      <div className="flex flex-col items-center gap-1.5 text-center">
+        <p className="text-sm font-medium text-neutral-600">
+          Recording continues
+        </p>
+        <p className="text-xs text-neutral-400">{degradedMessage(error)}</p>
+      </div>
     </div>
   );
 }

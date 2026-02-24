@@ -16,7 +16,10 @@ export function TranscriptionProgress({ sessionId }: { sessionId: string }) {
 
   const statusLabel = useMemo(() => {
     if (!progressRaw || progressRaw.percentage === 0) {
-      return "...";
+      if (progressRaw?.phase === "importing") {
+        return "Importing audio...";
+      }
+      return "Processing...";
     }
 
     const percent = Math.round(progressRaw.percentage * 100);
@@ -45,7 +48,11 @@ export function TranscriptionProgress({ sessionId }: { sessionId: string }) {
     <div className="mb-3">
       <div className="flex w-fit items-center gap-2 rounded-full bg-neutral-900 px-3 py-1 text-xs text-white shadow-xs">
         <Spinner size={12} className="text-white/80" />
-        <span>Processing · {statusLabel}</span>
+        <span>
+          {!progressRaw || progressRaw.percentage === 0
+            ? statusLabel
+            : `Processing · ${statusLabel}`}
+        </span>
       </div>
     </div>
   );

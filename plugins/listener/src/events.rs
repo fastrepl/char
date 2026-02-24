@@ -1,5 +1,7 @@
 use owhisper_interface::stream::StreamResponse;
 
+use hypr_listener_core as core;
+
 #[macro_export]
 macro_rules! common_event_derives {
     ($item:item) => {
@@ -19,7 +21,11 @@ common_event_derives! {
             error: Option<String>,
         },
         #[serde(rename = "active")]
-        Active { session_id: String },
+        Active {
+            session_id: String,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            error: Option<crate::DegradedError>,
+        },
         #[serde(rename = "finalizing")]
         Finalizing { session_id: String },
     }
@@ -38,7 +44,10 @@ common_event_derives! {
         #[serde(rename = "connecting")]
         Connecting { session_id: String },
         #[serde(rename = "connected")]
-        Connected { session_id: String, adapter: String },
+        Connected {
+            session_id: String,
+            adapter: String,
+        },
     }
 }
 
@@ -76,5 +85,91 @@ common_event_derives! {
             session_id: String,
             response: Box<StreamResponse>,
         },
+    }
+}
+
+impl From<core::SessionLifecycleEvent> for SessionLifecycleEvent {
+    fn from(event: core::SessionLifecycleEvent) -> Self {
+        match event {
+            core::SessionLifecycleEvent::Inactive { session_id, error } => {
+                SessionLifecycleEvent::Inactive { session_id, error }
+            }
+            core::SessionLifecycleEvent::Active { session_id, error } => {
+                SessionLifecycleEvent::Active { session_id, error }
+            }
+            core::SessionLifecycleEvent::Finalizing { session_id } => {
+                SessionLifecycleEvent::Finalizing { session_id }
+            }
+        }
+    }
+}
+
+impl From<core::SessionProgressEvent> for SessionProgressEvent {
+    fn from(event: core::SessionProgressEvent) -> Self {
+        match event {
+            core::SessionProgressEvent::AudioInitializing { session_id } => {
+                SessionProgressEvent::AudioInitializing { session_id }
+            }
+            core::SessionProgressEvent::AudioReady { session_id, device } => {
+                SessionProgressEvent::AudioReady { session_id, device }
+            }
+            core::SessionProgressEvent::Connecting { session_id } => {
+                SessionProgressEvent::Connecting { session_id }
+            }
+            core::SessionProgressEvent::Connected {
+                session_id,
+                adapter,
+            } => SessionProgressEvent::Connected {
+                session_id,
+                adapter,
+            },
+        }
+    }
+}
+
+impl From<core::SessionErrorEvent> for SessionErrorEvent {
+    fn from(event: core::SessionErrorEvent) -> Self {
+        match event {
+            core::SessionErrorEvent::AudioError {
+                session_id,
+                error,
+                device,
+                is_fatal,
+            } => SessionErrorEvent::AudioError {
+                session_id,
+                error,
+                device,
+                is_fatal,
+            },
+            core::SessionErrorEvent::ConnectionError { session_id, error } => {
+                SessionErrorEvent::ConnectionError { session_id, error }
+            }
+        }
+    }
+}
+
+impl From<core::SessionDataEvent> for SessionDataEvent {
+    fn from(event: core::SessionDataEvent) -> Self {
+        match event {
+            core::SessionDataEvent::AudioAmplitude {
+                session_id,
+                mic,
+                speaker,
+            } => SessionDataEvent::AudioAmplitude {
+                session_id,
+                mic,
+                speaker,
+            },
+            core::SessionDataEvent::MicMuted { session_id, value } => {
+                SessionDataEvent::MicMuted { session_id, value }
+            }
+            core::SessionDataEvent::StreamResponse {
+                session_id,
+                response,
+            } => SessionDataEvent::StreamResponse {
+                session_id,
+                response,
+            },
+        }
     }
 }

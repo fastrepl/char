@@ -113,7 +113,7 @@ describe("settingsPersister roundtrip", () => {
     store.setValues(values);
     const result = storeToSettings(store);
 
-    expect(result).toEqual(original);
+    expect(result).toEqual({ ...original, cactus: {} });
   });
 
   test("store -> settings -> store preserves all data", () => {
@@ -123,17 +123,17 @@ describe("settingsPersister roundtrip", () => {
 
     const originalTables = {
       ai_providers: {
-        openai: {
+        "llm:openai": {
           type: "llm",
           base_url: "https://api.openai.com",
           api_key: "sk-123",
         },
-        anthropic: {
+        "llm:anthropic": {
           type: "llm",
           base_url: "https://api.anthropic.com",
           api_key: "sk-456",
         },
-        deepgram: {
+        "stt:deepgram": {
           type: "stt",
           base_url: "https://api.deepgram.com",
           api_key: "dg-789",
@@ -180,6 +180,7 @@ describe("settingsPersister roundtrip", () => {
 
     expect(result).toEqual({
       ai: { llm: {}, stt: {} },
+      cactus: {},
       notification: {},
       general: {},
       language: {},

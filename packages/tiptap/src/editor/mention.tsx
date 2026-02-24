@@ -8,12 +8,27 @@ import {
   type VirtualElement,
 } from "@floating-ui/dom";
 import Mention from "@tiptap/extension-mention";
-import { PluginKey } from "@tiptap/pm/state";
+import { type EditorState, PluginKey } from "@tiptap/pm/state";
 import { ReactRenderer } from "@tiptap/react";
 import { type SuggestionOptions } from "@tiptap/suggestion";
+import {
+  Building2Icon,
+  MessageSquareIcon,
+  StickyNoteIcon,
+  UserIcon,
+} from "lucide-react";
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 
 const GLOBAL_NAVIGATE_FUNCTION = "__HYPR_NAVIGATE__";
+
+const mentionPluginKeys: PluginKey[] = [];
+
+export function isMentionActive(state: EditorState): boolean {
+  return mentionPluginKeys.some((key) => {
+    const pluginState = key.getState(state);
+    return pluginState?.active === true;
+  });
+}
 
 export interface MentionItem {
   id: string;
@@ -109,6 +124,15 @@ const Component = forwardRef<
             key={item.id}
             onClick={() => selectItem(index)}
           >
+            {item.type === "session" ? (
+              <StickyNoteIcon className="mention-type-icon mention-type-session" />
+            ) : item.type === "human" ? (
+              <UserIcon className="mention-type-icon mention-type-human" />
+            ) : item.type === "organization" ? (
+              <Building2Icon className="mention-type-icon mention-type-organization" />
+            ) : item.type === "chat_shortcut" ? (
+              <MessageSquareIcon className="mention-type-icon mention-type-chat-shortcut" />
+            ) : null}
             <span className="mention-label">{item.label}</span>
           </button>
         );
@@ -146,9 +170,12 @@ const suggestion = (
     }
   };
 
+  const pluginKey = new PluginKey(`mention-${config.trigger}`);
+  mentionPluginKeys.push(pluginKey);
+
   return {
     char: config.trigger,
-    pluginKey: new PluginKey(`mention-${config.trigger}`),
+    pluginKey,
     command: ({ editor, range, props }) => {
       const item = props as MentionItem;
       if (item.content) {
@@ -177,16 +204,13 @@ const suggestion = (
       }
     },
     items: async ({ query }) => {
-      if (!query || query.length < 1) {
-        loading = false;
-        return [];
-      }
+      const normalizedQuery = query ?? "";
 
-      if (query === currentQuery && cachedItems.length > 0) {
+      if (normalizedQuery === currentQuery && cachedItems.length > 0) {
         return cachedItems;
       }
 
-      currentQuery = query;
+      currentQuery = normalizedQuery;
 
       if (abortController) {
         abortController.abort();
@@ -196,7 +220,7 @@ const suggestion = (
       loading = true;
 
       setTimeout(() => {
-        Promise.resolve(config.handleSearch(query))
+        Promise.resolve(config.handleSearch(normalizedQuery))
           .then((items: MentionItem[]) => {
             cachedItems = items.slice(0, 5);
             loading = false;
@@ -221,7 +245,7 @@ const suggestion = (
       const update = () => {
         void computePosition(referenceEl, floatingEl, {
           placement: "bottom-start",
-          middleware: [offset(0), flip(), shift({ limiter: limitShift() })],
+          middleware: [offset(4), flip(), shift({ limiter: limitShift() })],
         }).then(({ x, y }) => {
           Object.assign(floatingEl.style, {
             left: `${x}px`,

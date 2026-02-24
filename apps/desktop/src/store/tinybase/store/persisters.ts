@@ -7,6 +7,7 @@ import { useChatPersister } from "../persister/chat";
 import { useChatShortcutPersister } from "../persister/chat-shortcuts";
 import { useEventsPersister } from "../persister/events";
 import { useHumanPersister } from "../persister/human";
+import { useMemoryPersister } from "../persister/memory";
 import { useOrganizationPersister } from "../persister/organization";
 import { usePromptPersister } from "../persister/prompts";
 import { useSessionPersister } from "../persister/session";
@@ -27,6 +28,7 @@ export function useMainPersisters(store: Store) {
   const promptPersister = usePromptPersister(store);
   const templatePersister = useTemplatePersister(store);
   const calendarPersister = useCalendarPersister(store);
+  const memoryPersister = useMemoryPersister(store);
 
   useEffect(() => {
     if (getCurrentWebviewWindowLabel() !== "main") {
@@ -44,6 +46,7 @@ export function useMainPersisters(store: Store) {
       { id: "prompt", persister: promptPersister },
       { id: "template", persister: templatePersister },
       { id: "calendar", persister: calendarPersister },
+      { id: "memory", persister: memoryPersister },
     ];
 
     const unsubscribes = persisters
@@ -68,9 +71,14 @@ export function useMainPersisters(store: Store) {
     promptPersister,
     templatePersister,
     calendarPersister,
+    memoryPersister,
   ]);
 
-  useInitializeStore(store);
+  useInitializeStore(store, {
+    session: sessionPersister,
+    human: humanPersister,
+    values: valuesPersister,
+  });
 
   return {
     valuesPersister,
@@ -83,5 +91,6 @@ export function useMainPersisters(store: Store) {
     promptPersister,
     templatePersister,
     calendarPersister,
+    memoryPersister,
   };
 }

@@ -1,16 +1,16 @@
+#[cfg(feature = "chunking")]
 mod continuous;
-mod continuous2;
 mod error;
 mod masking;
 mod streaming;
 
+#[cfg(feature = "chunking")]
 pub use continuous::*;
-pub use continuous2::*;
 pub use error::*;
 pub use masking::*;
 pub use streaming::*;
 
-#[cfg(test)]
+#[cfg(all(test, feature = "chunking"))]
 pub mod tests {
 
     use futures_util::StreamExt;
@@ -25,16 +25,19 @@ pub mod tests {
         .unwrap()
         .collect::<Vec<_>>();
 
-        let vad = rodio::Decoder::new(std::io::BufReader::new(
-            std::fs::File::open(hypr_data::english_1::AUDIO_PATH).unwrap(),
-        ))
-        .unwrap()
-        .with_vad(silero_rs::VadConfig::default());
+        let vad = continuous::ContinuousVadStream::new(
+            rodio::Decoder::new(std::io::BufReader::new(
+                std::fs::File::open(hypr_data::english_1::AUDIO_PATH).unwrap(),
+            ))
+            .unwrap(),
+            silero_rs::VadConfig::default(),
+        )
+        .unwrap();
 
         let all_audio_from_vad = vad
             .filter_map(|item| async move {
                 match item {
-                    Ok(VadStreamItem::AudioSamples(samples)) => Some(samples),
+                    Ok(continuous::VadStreamItem::AudioSamples(samples)) => Some(samples),
                     _ => None,
                 }
             })

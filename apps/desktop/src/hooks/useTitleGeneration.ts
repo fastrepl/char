@@ -8,7 +8,7 @@ import { useLanguageModel } from "./useLLMConnection";
 
 export function useTitleGeneration(tab: Extract<Tab, { type: "sessions" }>) {
   const sessionId = tab.id;
-  const model = useLanguageModel();
+  const model = useLanguageModel("title");
 
   const titleTaskId = createTaskId(sessionId, "title");
 

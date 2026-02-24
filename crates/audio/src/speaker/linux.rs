@@ -6,6 +6,7 @@ use std::thread;
 use anyhow::{Context, Result};
 use futures_util::Stream;
 use libpulse_binding as pulse;
+use pin_project::pin_project;
 use pulse::context::{Context as PaContext, FlagSet as ContextFlagSet};
 use pulse::mainloop::threaded::Mainloop;
 use pulse::sample::{Format, Spec};
@@ -28,6 +29,7 @@ struct WakerState {
     has_data: bool,
 }
 
+#[pin_project(PinnedDrop)]
 pub struct SpeakerStream {
     consumer: HeapCons<f32>,
     waker_state: Arc<Mutex<WakerState>>,
@@ -310,11 +312,11 @@ impl Stream for SpeakerStream {
     type Item = Vec<f32>;
 
     fn poll_next(
-        mut self: std::pin::Pin<&mut Self>,
+        self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
     ) -> Poll<Option<Self::Item>> {
-        let this = self.as_mut().get_mut();
-        let popped = this.consumer.pop_slice(&mut this.read_buffer);
+        let this = self.project();
+        let popped = this.consumer.pop_slice(this.read_buffer);
 
         if popped > 0 {
             return Poll::Ready(Some(this.read_buffer[..popped].to_vec()));
@@ -330,10 +332,12 @@ impl Stream for SpeakerStream {
     }
 }
 
-impl Drop for SpeakerStream {
-    fn drop(&mut self) {
-        self.stop_signal.store(true, Ordering::Release);
-        if let Ok(mut state) = self.waker_state.lock()
+#[pin_project::pinned_drop]
+impl PinnedDrop for SpeakerStream {
+    fn drop(self: std::pin::Pin<&mut Self>) {
+        let this = self.project();
+        this.stop_signal.store(true, Ordering::Release);
+        if let Ok(mut state) = this.waker_state.lock()
             && let Some(waker) = state.waker.take()
         {
             waker.wake();

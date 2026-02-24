@@ -5,7 +5,13 @@ import { DropdownMenuItem } from "@hypr/ui/components/ui/dropdown-menu";
 import { useListener } from "../../../../../../contexts/listener";
 import { useStartListening } from "../../../../../../hooks/useStartListening";
 
-export function Listening({ sessionId }: { sessionId: string }) {
+export function Listening({
+  sessionId,
+  hasTranscript,
+}: {
+  sessionId: string;
+  hasTranscript: boolean;
+}) {
   const { mode, stop } = useListener((state) => ({
     mode: state.getSessionMode(sessionId),
     stop: state.stop,
@@ -27,6 +33,8 @@ export function Listening({ sessionId }: { sessionId: string }) {
     }
   };
 
+  const startLabel = hasTranscript ? "Resume listening" : "Start listening";
+
   return (
     <DropdownMenuItem
       className="cursor-pointer"
@@ -39,7 +47,7 @@ export function Listening({ sessionId }: { sessionId: string }) {
           ? "Batch processing"
           : isListening
             ? "Stop listening"
-            : "Start listening"}
+            : startLabel}
       </span>
     </DropdownMenuItem>
   );

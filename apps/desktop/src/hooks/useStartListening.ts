@@ -14,6 +14,7 @@ import {
 } from "../store/transcript/utils";
 import type { HandlePersistCallback } from "../store/zustand/listener/transcript";
 import { id } from "../utils";
+import { getSessionEventById } from "../utils/session-event";
 import { useKeywords } from "./useKeywords";
 import { useSTTConnection } from "./useSTTConnection";
 
@@ -47,10 +48,9 @@ export function useStartListening(sessionId: string) {
       speaker_hints: "[]",
     });
 
-    const eventId = store.getCell("sessions", sessionId, "event_id");
     void analyticsCommands.event({
       event: "session_started",
-      has_calendar_event: !!eventId,
+      has_calendar_event: !!getSessionEventById(store, sessionId),
       stt_provider: conn.provider,
       stt_model: conn.model,
     });
@@ -69,17 +69,13 @@ export function useStartListening(sessionId: string) {
 
         words.forEach((word) => {
           const wordId = id();
-          const createdAt = new Date().toISOString();
 
           newWords.push({
             id: wordId,
-            transcript_id: transcriptId,
             text: word.text,
             start_ms: word.start_ms,
             end_ms: word.end_ms,
             channel: word.channel,
-            user_id: user_id ?? "",
-            created_at: createdAt,
           });
 
           newWordIds.push(wordId);
@@ -101,7 +97,6 @@ export function useStartListening(sessionId: string) {
 
             newHints.push({
               id: id(),
-              transcript_id: transcriptId,
               word_id: wordId,
               type: "provider_speaker_index",
               value: JSON.stringify({
@@ -109,8 +104,6 @@ export function useStartListening(sessionId: string) {
                 channel: hint.data.channel ?? word.channel,
                 speaker_index: hint.data.speaker_index,
               }),
-              user_id: user_id ?? "",
-              created_at: new Date().toISOString(),
             });
           });
         }

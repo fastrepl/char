@@ -34,8 +34,8 @@ declare module "@hypr/store" {
     enhancedNotesBySession: string;
   };
   export const QUERIES: {
-    eventsWithoutSession: string;
-    sessionsWithMaybeEvent: string;
+    timelineEvents: string;
+    timelineSessions: string;
     visibleOrganizations: string;
     visibleHumans: string;
     visibleTemplates: string;
@@ -373,6 +373,12 @@ declare module "@hypr/ui/components/ui/resizable" {
   >;
 }
 
+declare module "@hypr/ui/components/ui/scroll-fade" {
+  import type * as React from "react";
+  export const useScrollFade: React.ComponentType<Record<string, unknown>>;
+  export const ScrollFadeOverlay: React.ComponentType<Record<string, unknown>>;
+}
+
 declare module "@hypr/ui/components/ui/select" {
   import type * as React from "react";
   export const Select: React.ComponentType<Record<string, unknown>>;
@@ -486,8 +492,8 @@ declare module "hyprnote" {
       enhancedNotesBySession: string;
     };
     QUERIES: {
-      eventsWithoutSession: string;
-      sessionsWithMaybeEvent: string;
+      timelineEvents: string;
+      timelineSessions: string;
       visibleOrganizations: string;
       visibleHumans: string;
       visibleTemplates: string;
@@ -723,6 +729,10 @@ declare module "hyprnote" {
       ResizableHandle: React.ComponentType<Record<string, unknown>>;
       ResizablePanel: React.ComponentType<Record<string, unknown>>;
       ResizablePanelGroup: React.ComponentType<Record<string, unknown>>;
+    };
+    scrollFade: {
+      useScrollFade: React.ComponentType<Record<string, unknown>>;
+      ScrollFadeOverlay: React.ComponentType<Record<string, unknown>>;
     };
     select: {
       Select: React.ComponentType<Record<string, unknown>>;

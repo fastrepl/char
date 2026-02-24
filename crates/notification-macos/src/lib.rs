@@ -24,6 +24,8 @@ macro_rules! define_notification_callback {
         /// # Safety
         /// `key_ptr` must be a valid, non-null pointer to a null-terminated C string.
         #[unsafe(no_mangle)]
+        /// # Safety
+        /// `key_ptr` must be a valid, non-null pointer to a null-terminated C string.
         pub unsafe extern "C" fn $extern_fn(key_ptr: *const c_char) {
             if let Some(cb) = $static_name.lock().unwrap().as_ref() {
                 let key = unsafe { CStr::from_ptr(key_ptr) }
@@ -76,7 +78,7 @@ pub fn show(notification: &hypr_notification_interface::Notification) {
         .key
         .as_deref()
         .unwrap_or(notification.title.as_str());
-    let timeout_seconds = notification.timeout.map(|d| d.as_secs_f64()).unwrap_or(5.0);
+    let timeout_seconds = notification.timeout.map(|d| d.as_secs_f64()).unwrap_or(0.0);
 
     let payload = NotificationPayload {
         key,

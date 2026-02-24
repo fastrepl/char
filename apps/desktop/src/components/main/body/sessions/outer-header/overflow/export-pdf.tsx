@@ -13,6 +13,7 @@ import {
 import { json2md } from "@hypr/tiptap/shared";
 import { DropdownMenuItem } from "@hypr/ui/components/ui/dropdown-menu";
 
+import { useSessionEvent } from "../../../../../../hooks/tinybase";
 import * as main from "../../../../../../store/tinybase/store/main";
 import {
   parseTranscriptHints,
@@ -74,19 +75,8 @@ export function ExportPDF({
     main.STORE_ID,
   ) as string | undefined;
 
-  const eventId = main.UI.useCell(
-    "sessions",
-    sessionId,
-    "event_id",
-    main.STORE_ID,
-  ) as string | undefined;
-
-  const eventTitle = main.UI.useCell(
-    "events",
-    eventId ?? "",
-    "title",
-    main.STORE_ID,
-  ) as string | undefined;
+  const event = useSessionEvent(sessionId);
+  const eventTitle = event?.title;
 
   const rawMd = main.UI.useCell(
     "sessions",
@@ -150,15 +140,31 @@ export function ExportPDF({
       channel: number;
     }> = [];
 
+    const firstStartedAt = store.getCell(
+      "transcripts",
+      transcriptIds[0],
+      "started_at",
+    );
+
     for (const transcriptId of transcriptIds) {
+      const startedAt = store.getCell(
+        "transcripts",
+        transcriptId,
+        "started_at",
+      );
+      const offset =
+        typeof startedAt === "number" && typeof firstStartedAt === "number"
+          ? startedAt - firstStartedAt
+          : 0;
+
       const words = parseTranscriptWords(store, transcriptId);
       for (const word of words) {
         if (word.text === undefined || word.start_ms === undefined) continue;
         collectedWords.push({
           id: word.id,
           text: word.text,
-          start_ms: word.start_ms,
-          end_ms: word.end_ms ?? word.start_ms,
+          start_ms: word.start_ms + offset,
+          end_ms: (word.end_ms ?? word.start_ms) + offset,
           channel: word.channel ?? 0,
         });
       }

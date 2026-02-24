@@ -13,6 +13,7 @@ export type SessionMetaJson = Pick<
   "user_id" | "created_at" | "title"
 > & {
   id: string;
+  event?: Record<string, unknown>;
   event_id?: string;
   participants: ParticipantData[];
   tags?: string[];

@@ -8,6 +8,7 @@ import {
 } from "@hypr/plugin-updater2";
 import { getCurrentWebviewWindowLabel } from "@hypr/plugin-windows";
 
+import { useConfigValue } from "../config/use-config";
 import * as main from "../store/tinybase/store/main";
 import {
   createSession,
@@ -46,21 +47,25 @@ function useUpdaterEvents() {
 function useNotificationEvents() {
   const store = main.UI.useStore(main.STORE_ID);
   const openNew = useTabs((state) => state.openNew);
+  const timezone = useConfigValue("timezone") || undefined;
   const pendingAutoStart = useRef<{ eventId: string | null } | null>(null);
   const storeRef = useRef(store);
   const openNewRef = useRef(openNew);
+  const timezoneRef = useRef(timezone);
 
   useEffect(() => {
     storeRef.current = store;
     openNewRef.current = openNew;
-  }, [store, openNew]);
+    timezoneRef.current = timezone;
+  }, [store, openNew, timezone]);
 
   useEffect(() => {
     if (pendingAutoStart.current && store) {
       const { eventId } = pendingAutoStart.current;
+      const timezone = timezoneRef.current;
       pendingAutoStart.current = null;
       const sessionId = eventId
-        ? getOrCreateSessionForEventId(store, eventId)
+        ? getOrCreateSessionForEventId(store, eventId, undefined, timezone)
         : createSession(store);
       openNew({
         type: "sessions",
@@ -84,13 +89,22 @@ function useNotificationEvents() {
           payload.type === "notification_confirm" ||
           payload.type === "notification_accept"
         ) {
+          const eventId =
+            payload.source?.type === "calendar_event"
+              ? payload.source.event_id
+              : null;
           const currentStore = storeRef.current;
           if (!currentStore) {
-            pendingAutoStart.current = { eventId: payload.event_id };
+            pendingAutoStart.current = { eventId };
             return;
           }
-          const sessionId = payload.event_id
-            ? getOrCreateSessionForEventId(currentStore, payload.event_id)
+          const sessionId = eventId
+            ? getOrCreateSessionForEventId(
+                currentStore,
+                eventId,
+                undefined,
+                timezoneRef.current,
+              )
             : createSession(currentStore);
           openNewRef.current({
             type: "sessions",

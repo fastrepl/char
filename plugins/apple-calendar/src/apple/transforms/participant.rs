@@ -23,7 +23,8 @@ pub fn transform_participant(participant: &EKParticipant) -> Participant {
         url_obj.and_then(|u| u.absoluteString().map(|s| s.to_string()))
     };
 
-    let (email, contact) = contacts::resolve_participant_contact(participant, url.as_deref());
+    let (email, contact) =
+        contacts::resolve_participant_contact(participant, url.as_deref(), name.as_deref());
 
     Participant {
         name,

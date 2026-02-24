@@ -3,8 +3,10 @@ import { useForm } from "@tanstack/react-form";
 import type { Template, TemplateSection, TemplateStorage } from "@hypr/store";
 import { Input } from "@hypr/ui/components/ui/input";
 import { Textarea } from "@hypr/ui/components/ui/textarea";
+import { cn } from "@hypr/utils";
 
 import * as main from "../../../../store/tinybase/store/main";
+import * as settings from "../../../../store/tinybase/store/settings";
 import { DangerZone } from "../resource-list";
 import { RelatedSessions } from "./related-sessions";
 import { SectionsList } from "./sections-editor";
@@ -62,6 +64,19 @@ export function TemplateForm({
   const row = main.UI.useRow("templates", id, main.STORE_ID);
   const value = row ? normalizeTemplatePayload(row) : undefined;
 
+  const selectedTemplateId = settings.UI.useValue(
+    "selected_template_id",
+    settings.STORE_ID,
+  ) as string | undefined;
+  const isDefault = selectedTemplateId === id;
+
+  const setSelectedTemplateId = settings.UI.useSetValueCallback(
+    "selected_template_id",
+    () => (isDefault ? "" : id),
+    [id, isDefault],
+    settings.STORE_ID,
+  );
+
   const handleUpdate = main.UI.useSetPartialRowCallback(
     "templates",
     id,
@@ -109,16 +124,31 @@ export function TemplateForm({
   return (
     <div className="flex-1 flex flex-col h-full">
       <div className="px-6 py-4 border-b border-neutral-200">
-        <form.Field name="title">
-          {(field) => (
-            <Input
-              value={field.state.value}
-              onChange={(e) => field.handleChange(e.target.value)}
-              placeholder="Enter template title"
-              className="border-0 shadow-none text-lg font-semibold px-0 focus-visible:ring-0 h-8"
-            />
-          )}
-        </form.Field>
+        <div className="flex items-center gap-2">
+          <form.Field name="title">
+            {(field) => (
+              <Input
+                value={field.state.value}
+                onChange={(e) => field.handleChange(e.target.value)}
+                placeholder="Enter template title"
+                className="border-0 shadow-none text-lg font-semibold px-0 focus-visible:ring-0 h-8 flex-1"
+              />
+            )}
+          </form.Field>
+          <button
+            type="button"
+            onClick={setSelectedTemplateId}
+            title={isDefault ? "Remove as default" : "Set as default"}
+            className={cn([
+              "shrink-0 text-xs px-2 py-0.5 rounded border transition-colors",
+              isDefault
+                ? "border-neutral-800 bg-neutral-800 text-white"
+                : "border-neutral-300 text-neutral-500 hover:border-neutral-500 hover:text-neutral-700",
+            ])}
+          >
+            {isDefault ? "Default" : "Set default"}
+          </button>
+        </div>
         <form.Field name="description">
           {(field) => (
             <Textarea

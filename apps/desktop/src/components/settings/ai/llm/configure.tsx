@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+
 import {
   Accordion,
   AccordionContent,
@@ -6,8 +8,15 @@ import {
 } from "@hypr/ui/components/ui/accordion";
 import { cn } from "@hypr/utils";
 
+import { useAuth } from "../../../../auth";
 import { useBillingAccess } from "../../../../billing";
-import { NonHyprProviderCard, StyledStreamdown } from "../shared";
+import * as settings from "../../../../store/tinybase/store/settings";
+import {
+  HyprCloudCTAButton,
+  HyprProviderRow,
+  NonHyprProviderCard,
+  StyledStreamdown,
+} from "../shared";
 import { useLlmSettings } from "./context";
 import { ProviderId, PROVIDERS } from "./shared";
 
@@ -27,9 +36,8 @@ export function ConfigureProviders() {
         <HyprProviderCard
           providerId="hyprnote"
           providerName="Hyprnote"
-          icon={
-            <img src="/assets/icon.png" alt="Hyprnote" className="size-5" />
-          }
+          icon={<img src="/assets/icon.png" alt="Char" className="size-5" />}
+          badge={PROVIDERS.find((p) => p.id === "hyprnote")?.badge}
         />
         {PROVIDERS.filter((provider) => provider.id !== "hyprnote").map(
           (provider) => (
@@ -51,12 +59,16 @@ function HyprProviderCard({
   providerId,
   providerName,
   icon,
+  badge,
 }: {
   providerId: ProviderId;
   providerName: string;
   icon: React.ReactNode;
+  badge?: string | null;
 }) {
   const { hyprAccordionRef, shouldHighlight } = useLlmSettings();
+  const auth = useAuth();
+  const isConfigured = !!auth?.session;
 
   return (
     <AccordionItem
@@ -64,41 +76,82 @@ function HyprProviderCard({
       value={providerId}
       className={cn([
         "rounded-xl border-2 bg-neutral-50",
-        "border-solid border-neutral-300",
+        isConfigured ? "border-solid border-neutral-300" : "border-dashed",
       ])}
     >
       <AccordionTrigger className="capitalize gap-2 px-4 hover:no-underline">
         <div className="flex items-center gap-2">
           {icon}
           <span>{providerName}</span>
-          <span className="text-xs text-neutral-500 font-light border border-neutral-300 rounded-full px-2">
-            Recommended
-          </span>
+          {badge && (
+            <span className="text-xs text-neutral-500 font-light border border-neutral-300 rounded-full px-2">
+              {badge}
+            </span>
+          )}
         </div>
       </AccordionTrigger>
       <AccordionContent className="px-4">
-        <ProviderContext providerId={providerId} highlight={shouldHighlight} />
+        <ProviderContext providerId={providerId} />
+        <div className="flex flex-col gap-3">
+          <HyprProviderAutoRow highlight={shouldHighlight} />
+        </div>
       </AccordionContent>
     </AccordionItem>
   );
 }
 
-function ProviderContext({
-  providerId,
-  highlight,
-}: {
-  providerId: ProviderId;
-  highlight?: boolean;
-}) {
+function HyprProviderAutoRow({ highlight }: { highlight?: boolean }) {
   const { isPro, canStartTrial, upgradeToPro } = useBillingAccess();
 
+  const handleSelectProvider = settings.UI.useSetValueCallback(
+    "current_llm_provider",
+    (provider: string) => provider,
+    [],
+    settings.STORE_ID,
+  );
+
+  const handleSelectModel = settings.UI.useSetValueCallback(
+    "current_llm_model",
+    (model: string) => model,
+    [],
+    settings.STORE_ID,
+  );
+
+  const handleClick = useCallback(() => {
+    if (!isPro) {
+      upgradeToPro();
+    } else {
+      handleSelectProvider("hyprnote");
+      handleSelectModel("Auto");
+    }
+  }, [isPro, upgradeToPro, handleSelectProvider, handleSelectModel]);
+
+  return (
+    <HyprProviderRow>
+      <div className="flex-1">
+        <span className="text-sm font-medium">Hyprnote Cloud</span>
+        <p className="text-xs text-neutral-500">
+          Use the Hyprnote Cloud API for AI assistance.
+        </p>
+      </div>
+      <HyprCloudCTAButton
+        isPro={isPro}
+        canStartTrial={canStartTrial.data}
+        highlight={highlight}
+        onClick={handleClick}
+      />
+    </HyprProviderRow>
+  );
+}
+
+function ProviderContext({ providerId }: { providerId: ProviderId }) {
   const content =
     providerId === "hyprnote"
       ? "A curated set of models we continuously test to provide the **best performance & reliability**."
       : providerId === "lmstudio"
-        ? "- Ensure LM Studio server is **running.** (Default port is 1234)\n- Enable **CORS** in LM Studio config.\n\nSee our [setup guide](https://hyprnote.com/docs/faq/local-llm-setup#lm-studio-setup) for detailed instructions."
+        ? "- Ensure LM Studio server is **running.** (Default port is 1234)\n- Enable **CORS** in LM Studio config."
         : providerId === "ollama"
-          ? "- Ensure Ollama is **running** (`ollama serve`)\n- Pull a model first (`ollama pull llama3.2`)\n\nSee our [setup guide](https://hyprnote.com/docs/faq/local-llm-setup#ollama-setup) for detailed instructions."
+          ? "- Ensure Ollama is **running** (`ollama serve`)\n- Pull a model first (`ollama pull llama3.2`)"
           : providerId === "custom"
             ? "We only support **OpenAI-compatible** endpoints for now."
             : providerId === "openrouter"
@@ -107,42 +160,9 @@ function ProviderContext({
                 ? "Visit [AI Studio](https://aistudio.google.com/api-keys) to create an API key."
                 : "";
 
-  const buttonLabel = canStartTrial ? "Start Free Trial" : "Upgrade to Pro";
-
-  if (providerId === "hyprnote" && !isPro) {
-    return (
-      <div className="flex flex-col gap-3">
-        <StyledStreamdown>{content}</StyledStreamdown>
-        <button
-          onClick={upgradeToPro}
-          className={cn([
-            "relative overflow-hidden w-fit h-8.5",
-            "px-4 rounded-full text-xs font-mono text-center",
-            "bg-linear-to-t from-stone-600 to-stone-500 text-white",
-            "shadow-xs hover:shadow-md",
-            "transition-all duration-150",
-            "hover:scale-[102%] active:scale-[98%]",
-            "flex items-center justify-center gap-2",
-          ])}
-        >
-          {highlight && (
-            <div
-              className={cn([
-                "absolute inset-0",
-                "bg-linear-to-r from-transparent via-white/30 to-transparent",
-                "animate-shimmer",
-              ])}
-            />
-          )}
-          <span className="relative">{buttonLabel}</span>
-        </button>
-      </div>
-    );
-  }
-
   if (!content) {
     return null;
   }
 
-  return <StyledStreamdown>{content}</StyledStreamdown>;
+  return <StyledStreamdown className="mb-3">{content}</StyledStreamdown>;
 }

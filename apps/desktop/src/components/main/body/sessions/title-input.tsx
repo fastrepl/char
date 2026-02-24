@@ -10,10 +10,16 @@ import {
   useState,
 } from "react";
 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@hypr/ui/components/ui/tooltip";
 import { cn } from "@hypr/utils";
 
 import { useTitleGenerating } from "../../../../hooks/useTitleGenerating";
 import * as main from "../../../../store/tinybase/store/main";
+import { useLiveTitle } from "../../../../store/zustand/live-title";
 import { type Tab } from "../../../../store/zustand/tabs";
 
 export const TitleInput = forwardRef<
@@ -114,6 +120,8 @@ const TitleInputInner = memo(
       const isFocused = useRef(false);
       const internalRef = useRef<HTMLInputElement>(null);
       const store = main.UI.useStore(main.STORE_ID);
+      const setLiveTitle = useLiveTitle((s) => s.setTitle);
+      const clearLiveTitle = useLiveTitle((s) => s.clearTitle);
 
       useImperativeHandle(ref, () => internalRef.current!, []);
 
@@ -142,37 +150,6 @@ const TitleInputInner = memo(
         (title: string) => ({ title }),
         [],
         main.STORE_ID,
-      );
-
-      const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-      const pendingValueRef = useRef<string | null>(null);
-
-      const flushDebounce = useCallback(() => {
-        if (debounceRef.current) {
-          clearTimeout(debounceRef.current);
-          debounceRef.current = null;
-        }
-        if (pendingValueRef.current !== null) {
-          setStoreTitle(pendingValueRef.current);
-          pendingValueRef.current = null;
-        }
-      }, [setStoreTitle]);
-
-      const debouncedPersist = useCallback(
-        (value: string) => {
-          pendingValueRef.current = value;
-          if (debounceRef.current) {
-            clearTimeout(debounceRef.current);
-          }
-          debounceRef.current = setTimeout(() => {
-            if (pendingValueRef.current !== null) {
-              setStoreTitle(pendingValueRef.current);
-              pendingValueRef.current = null;
-            }
-            debounceRef.current = null;
-          }, 150);
-        },
-        [setStoreTitle],
       );
 
       useEffect(() => {
@@ -233,8 +210,8 @@ const TitleInputInner = memo(
           const beforeCursor = input.value.slice(0, cursorPos);
           const afterCursor = input.value.slice(cursorPos);
 
-          flushDebounce();
           setStoreTitle(beforeCursor);
+          clearLiveTitle(sessionId);
 
           if (afterCursor) {
             setTimeout(() => {
@@ -293,8 +270,9 @@ const TitleInputInner = memo(
             placeholder="Untitled"
             type="text"
             onChange={(e) => {
-              setLocalTitle(e.target.value);
-              debouncedPersist(e.target.value);
+              const value = e.target.value;
+              setLocalTitle(value);
+              setLiveTitle(sessionId, value);
             }}
             onKeyDown={handleKeyDown}
             onFocus={() => {
@@ -302,7 +280,8 @@ const TitleInputInner = memo(
             }}
             onBlur={() => {
               isFocused.current = false;
-              flushDebounce();
+              setStoreTitle(localTitle);
+              clearLiveTitle(sessionId);
             }}
             value={localTitle}
             className={cn([
@@ -326,20 +305,25 @@ const GenerateButton = memo(function GenerateButton({
   onGenerateTitle: () => void;
 }) {
   return (
-    <button
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onGenerateTitle();
-      }}
-      onMouseDown={(e) => e.preventDefault()}
-      className={cn([
-        "shrink-0",
-        "text-muted-foreground hover:text-foreground",
-        "opacity-50 hover:opacity-100 transition-opacity",
-      ])}
-    >
-      <SparklesIcon className="w-4 h-4" />
-    </button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onGenerateTitle();
+          }}
+          onMouseDown={(e) => e.preventDefault()}
+          className={cn([
+            "shrink-0",
+            "text-muted-foreground hover:text-foreground",
+            "opacity-50 hover:opacity-100 transition-opacity",
+          ])}
+        >
+          <SparklesIcon className="w-4 h-4" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="bottom">Regenerate title</TooltipContent>
+    </Tooltip>
   );
 });

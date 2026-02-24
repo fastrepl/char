@@ -1,0 +1,29 @@
+[package]
+name = "listener2-core"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = []
+specta = ["dep:specta"]
+
+[dependencies]
+hypr-audio-utils = { workspace = true }
+hypr-host = { workspace = true }
+hypr-language = { workspace = true }
+
+owhisper-client = { workspace = true, features = ["argmax"] }
+owhisper-interface = { workspace = true }
+
+serde = { workspace = true }
+specta = { workspace = true, optional = true }
+thiserror = { workspace = true }
+
+ractor = { workspace = true, features = ["async-trait"] }
+
+futures-util = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+tokio-stream = { workspace = true }
+tracing = { workspace = true }
+
+aspasia = "0.2.1"

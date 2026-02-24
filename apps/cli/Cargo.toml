@@ -1,0 +1,30 @@
+[package]
+name = "cli"
+version = "0.1.0"
+edition = "2024"
+homepage = "https://char.com"
+license = "GPL-3.0"
+repository = "https://github.com/fastrepl/char"
+description = "Live transcription TUI"
+
+[[bin]]
+name = "char"
+path = "src/main.rs"
+
+[dependencies]
+hypr-language = { workspace = true }
+hypr-listener-core = { workspace = true }
+hypr-listener2-core = { workspace = true }
+hypr-storage = { workspace = true }
+hypr-transcript = { workspace = true }
+
+clap = { workspace = true, features = ["derive", "env"] }
+crossterm = { workspace = true }
+ratatui = { workspace = true }
+
+open = { workspace = true }
+ractor = { workspace = true, features = ["async-trait"] }
+serde_json = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros", "signal", "sync", "time"] }
+tokio-stream = { workspace = true }
+uuid = { workspace = true, features = ["v4"] }

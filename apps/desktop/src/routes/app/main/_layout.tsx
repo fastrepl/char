@@ -3,12 +3,12 @@ import {
   Outlet,
   useRouteContext,
 } from "@tanstack/react-router";
-import { usePrevious } from "@uidotdev/usehooks";
+import { isTauri } from "@tauri-apps/api/core";
 import { useCallback, useEffect, useRef } from "react";
 
+import { hydrateSessionContextFromFs } from "../../../chat/session-context-hydrator";
 import { buildChatTools } from "../../../chat/tools";
 import { AITaskProvider } from "../../../contexts/ai-task";
-import { useListener } from "../../../contexts/listener";
 import { NotificationProvider } from "../../../contexts/notifications";
 import { useSearchEngine } from "../../../contexts/search/engine";
 import { SearchEngineProvider } from "../../../contexts/search/engine";
@@ -17,7 +17,16 @@ import { ShellProvider } from "../../../contexts/shell";
 import { useRegisterTools } from "../../../contexts/tool";
 import { ToolRegistryProvider } from "../../../contexts/tool";
 import { useDeeplinkHandler } from "../../../hooks/useDeeplinkHandler";
-import { useTabs } from "../../../store/zustand/tabs";
+import { deleteSessionCascade } from "../../../store/tinybase/store/deleteSession";
+import * as main from "../../../store/tinybase/store/main";
+import { isSessionEmpty } from "../../../store/tinybase/store/sessions";
+import { listenerStore } from "../../../store/zustand/listener/instance";
+import {
+  restorePinnedTabsToStore,
+  restoreRecentlyOpenedToStore,
+  useTabs,
+} from "../../../store/zustand/tabs";
+import { commands } from "../../../types/tauri.gen";
 
 export const Route = createFileRoute("/app/main/_layout")({
   component: Component,
@@ -27,12 +36,17 @@ function Component() {
   const { persistedStore, aiTaskStore, toolRegistry } = useRouteContext({
     from: "__root__",
   });
-  const { registerOnEmpty, registerCanClose, openNew, pin } = useTabs();
-  const tabs = useTabs((state) => state.tabs);
+  const {
+    registerOnEmpty,
+    registerCanClose,
+    registerOnClose,
+    openNew,
+    pin,
+    invalidateResource,
+  } = useTabs();
   const hasOpenedInitialTab = useRef(false);
-  const liveSessionId = useListener((state) => state.live.sessionId);
-  const liveStatus = useListener((state) => state.live.status);
-  const prevLiveStatus = usePrevious(liveStatus);
+  const store = main.UI.useStore(main.STORE_ID);
+  const indexes = main.UI.useIndexes(main.STORE_ID);
 
   useDeeplinkHandler();
 
@@ -41,31 +55,58 @@ function Component() {
   }, [openNew]);
 
   useEffect(() => {
-    if (tabs.length === 0 && !hasOpenedInitialTab.current) {
-      hasOpenedInitialTab.current = true;
-      openDefaultEmptyTab();
-    }
-
-    registerOnEmpty(openDefaultEmptyTab);
-  }, [tabs.length, openDefaultEmptyTab, registerOnEmpty]);
-
-  useEffect(() => {
-    const justStartedListening =
-      prevLiveStatus !== "active" && liveStatus === "active";
-    if (justStartedListening && liveSessionId) {
-      const currentTabs = useTabs.getState().tabs;
-      const sessionTab = currentTabs.find(
-        (t) => t.type === "sessions" && t.id === liveSessionId,
-      );
-      if (sessionTab && !sessionTab.pinned) {
-        pin(sessionTab);
+    const initializeTabs = async () => {
+      if (!hasOpenedInitialTab.current) {
+        hasOpenedInitialTab.current = true;
+        if (!isTauri()) {
+          openDefaultEmptyTab();
+          return;
+        }
+        await restorePinnedTabsToStore(
+          openNew,
+          pin,
+          () => useTabs.getState().tabs,
+        );
+        await restoreRecentlyOpenedToStore((ids) => {
+          useTabs.setState({ recentlyOpenedSessionIds: ids });
+        });
+        const currentTabs = useTabs.getState().tabs;
+        if (currentTabs.length === 0) {
+          const result = await commands.getOnboardingNeeded();
+          if (result.status === "ok" && result.data) {
+            openNew({ type: "onboarding" });
+          } else {
+            openDefaultEmptyTab();
+          }
+        }
       }
-    }
-  }, [liveStatus, prevLiveStatus, liveSessionId, pin]);
+    };
+
+    initializeTabs();
+    registerOnEmpty(openDefaultEmptyTab);
+  }, [openNew, pin, openDefaultEmptyTab, registerOnEmpty]);
 
   useEffect(() => {
     registerCanClose(() => true);
   }, [registerCanClose]);
+
+  useEffect(() => {
+    if (!store) {
+      return;
+    }
+    registerOnClose((tab) => {
+      if (tab.type === "sessions") {
+        const sessionId = tab.id;
+        const isBatchRunning =
+          listenerStore.getState().getSessionMode(sessionId) ===
+          "running_batch";
+        if (!isBatchRunning && isSessionEmpty(store, sessionId)) {
+          invalidateResource("sessions", sessionId);
+          void deleteSessionCascade(store, indexes, sessionId);
+        }
+      }
+    });
+  }, [registerOnClose, invalidateResource, store, indexes]);
 
   if (!aiTaskStore) {
     return null;
@@ -91,8 +132,18 @@ function Component() {
 
 function ToolRegistration() {
   const { search } = useSearchEngine();
+  const store = main.UI.useStore(main.STORE_ID);
 
-  useRegisterTools("chat", () => buildChatTools({ search }), [search]);
+  useRegisterTools(
+    "chat-general",
+    () =>
+      buildChatTools({
+        search,
+        resolveSessionContext: (sessionId) =>
+          hydrateSessionContextFromFs(store, sessionId),
+      }),
+    [search, store],
+  );
 
   return null;
 }

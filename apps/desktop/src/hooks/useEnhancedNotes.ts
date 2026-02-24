@@ -4,6 +4,7 @@ import { useHasTranscript } from "../components/main/body/sessions/shared";
 import { useAITask } from "../contexts/ai-task";
 import { useListener } from "../contexts/listener";
 import * as main from "../store/tinybase/store/main";
+import * as settings from "../store/tinybase/store/settings";
 import { createTaskId } from "../store/zustand/ai-task/task-configs";
 
 export function useCreateEnhancedNote() {
@@ -138,6 +139,10 @@ export function useEnsureDefaultSummary(sessionId: string) {
     main.STORE_ID,
   );
   const createEnhancedNote = useCreateEnhancedNote();
+  const selectedTemplateId = settings.UI.useValue(
+    "selected_template_id",
+    settings.STORE_ID,
+  ) as string | undefined;
 
   useEffect(() => {
     if (
@@ -150,13 +155,14 @@ export function useEnsureDefaultSummary(sessionId: string) {
       return;
     }
 
-    createEnhancedNote(sessionId);
+    createEnhancedNote(sessionId, selectedTemplateId || undefined);
   }, [
     hasTranscript,
     sessionMode,
     sessionId,
     enhancedNoteIds?.length,
     createEnhancedNote,
+    selectedTemplateId,
   ]);
 }
 
