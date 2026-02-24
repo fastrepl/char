@@ -106,7 +106,10 @@ impl<E: AudioEncoder> Actor for RecorderActor<E> {
             self.encoder
                 .decode_to_wav(&encoded_path, &wav_path)
                 .map_err(|e| -> ActorProcessingErr {
-                    Box::new(std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))
+                    Box::new(std::io::Error::new(
+                        std::io::ErrorKind::Other,
+                        e.to_string(),
+                    ))
                 })?;
             std::fs::remove_file(&encoded_path)?;
         }

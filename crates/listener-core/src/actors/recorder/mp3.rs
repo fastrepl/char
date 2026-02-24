@@ -67,9 +67,7 @@ impl AudioEncoder for Mp3Encoder {
                 });
             }
 
-            for (l_chunk, r_chunk) in
-                left.chunks(CHUNK_SAMPLES).zip(right.chunks(CHUNK_SAMPLES))
-            {
+            for (l_chunk, r_chunk) in left.chunks(CHUNK_SAMPLES).zip(right.chunks(CHUNK_SAMPLES)) {
                 let input = DualPcm {
                     left: l_chunk,
                     right: r_chunk,
