@@ -15,6 +15,7 @@ impl AppState {
         let supabase = SupabaseClient::new(
             config.supabase.supabase_url.clone(),
             config.supabase.supabase_anon_key.clone(),
+            config.supabase.supabase_service_role_key.clone(),
         );
 
         let stripe = StripeClient::new(&config.stripe.stripe_secret_key);

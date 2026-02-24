@@ -12,14 +12,20 @@ fn url_encode(s: &str) -> String {
 pub struct SupabaseClient {
     base_url: String,
     anon_key: String,
+    service_role_key: String,
     http_client: Client,
 }
 
 impl SupabaseClient {
-    pub fn new(supabase_url: impl Into<String>, anon_key: impl Into<String>) -> Self {
+    pub fn new(
+        supabase_url: impl Into<String>,
+        anon_key: impl Into<String>,
+        service_role_key: impl Into<String>,
+    ) -> Self {
         Self {
             base_url: supabase_url.into().trim_end_matches('/').to_string(),
             anon_key: anon_key.into(),
+            service_role_key: service_role_key.into(),
             http_client: Client::new(),
         }
     }
@@ -143,6 +149,33 @@ impl SupabaseClient {
             return Err(SubscriptionError::SupabaseRequest(format!(
                 "UPDATE {} failed: {} - {}",
                 table, status, body
+            )));
+        }
+
+        Ok(())
+    }
+
+    pub async fn admin_delete_user(&self, user_id: &str) -> Result<()> {
+        let url = format!("{}/auth/v1/admin/users/{}", self.base_url, url_encode(user_id));
+
+        let response = self
+            .http_client
+            .delete(&url)
+            .header("Authorization", format!("Bearer {}", self.service_role_key))
+            .header("apikey", &self.service_role_key)
+            .send()
+            .await
+            .map_err(|e| SubscriptionError::SupabaseRequest(e.to_string()))?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let body = response
+                .text()
+                .await
+                .unwrap_or_else(|_| "unknown".to_string());
+            return Err(SubscriptionError::SupabaseRequest(format!(
+                "DELETE user {} failed: {} - {}",
+                user_id, status, body
             )));
         }
 
