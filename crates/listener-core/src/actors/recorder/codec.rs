@@ -1,10 +1,8 @@
 use std::path::Path;
 
-use super::AudioEncoder;
+pub struct Mp3Codec;
 
-pub struct Mp3Encoder;
-
-impl AudioEncoder for Mp3Encoder {
+impl AudioCodec for Mp3Codec {
     fn extension(&self) -> &str {
         "mp3"
     }
@@ -16,4 +14,10 @@ impl AudioEncoder for Mp3Encoder {
     fn decode(&self, input: &Path, output: &Path) -> Result<(), Box<dyn std::error::Error>> {
         hypr_mp3::decode_to_wav(input, output)
     }
+}
+
+pub trait AudioCodec: Send + Sync + 'static {
+    fn extension(&self) -> &str;
+    fn encode(&self, input: &Path, output: &Path) -> Result<(), Box<dyn std::error::Error>>;
+    fn decode(&self, input: &Path, output: &Path) -> Result<(), Box<dyn std::error::Error>>;
 }

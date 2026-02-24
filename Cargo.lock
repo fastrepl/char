@@ -10652,6 +10652,7 @@ dependencies = [
  "audio-utils",
  "hound",
  "mp3lame-encoder",
+ "tempfile",
 ]
 
 [[package]]
