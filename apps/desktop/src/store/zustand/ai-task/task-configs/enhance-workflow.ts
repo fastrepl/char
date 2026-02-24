@@ -274,6 +274,9 @@ IMPORTANT: Previous attempt failed. ${previousFeedback}`;
       onRetrySuccess: () => {
         onProgress({ type: "generating" });
       },
+      onGiveUp: () => {
+        onProgress({ type: "generating" });
+      },
     },
   );
 }
