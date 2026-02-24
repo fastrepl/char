@@ -178,17 +178,6 @@ function Component() {
     if (search.flow === "web" && !search.error) {
       navigate({ to: search.redirect || "/app/account/" });
     }
-
-    if (
-      search.flow === "desktop" &&
-      search.access_token &&
-      search.refresh_token
-    ) {
-      const params = new URLSearchParams();
-      params.set("access_token", search.access_token);
-      params.set("refresh_token", search.refresh_token);
-      window.location.href = `${search.scheme}://auth/callback?${params.toString()}`;
-    }
   }, [search, navigate]);
 
   if (search.error) {
