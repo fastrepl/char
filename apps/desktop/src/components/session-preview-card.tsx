@@ -188,9 +188,7 @@ export function SessionPreviewCard({
     setOpenDelay(isWarmedUp() ? OPEN_DELAY_WARM : OPEN_DELAY_COLD);
   }, []);
 
-  const hasContent = title || previewText;
-
-  if (!enabled || !hasContent) {
+  if (!enabled) {
     return <>{children}</>;
   }
 
@@ -216,19 +214,18 @@ export function SessionPreviewCard({
         align="start"
         sideOffset={8}
         followStyle={style}
-        className={cn(["w-72 p-3", "pointer-events-none"])}
+        className={cn(["w-72 p-4", "pointer-events-none"])}
       >
-        <div className="flex flex-col gap-2">
-          <div className="font-medium text-sm">{title || "Untitled"}</div>
-
+        <div className="flex flex-col gap-1">
           {dateDisplay && (
-            <div className="text-xs text-neutral-400">{dateDisplay}</div>
+            <div className="text-xs text-neutral-500">{dateDisplay}</div>
           )}
 
+          <div className="font-medium text-sm">{title || "Untitled"}</div>
           <ParticipantsList mappingIds={participantMappingIds} />
 
           {previewText && (
-            <div className="text-xs leading-relaxed line-clamp-4">
+            <div className="text-xs leading-relaxed line-clamp-4 text-gradient-to-b from-neutral-700 to-transparent">
               {previewText}
             </div>
           )}
