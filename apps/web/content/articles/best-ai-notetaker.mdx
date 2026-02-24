@@ -22,7 +22,7 @@ I've spent considerable time testing these tools. I even built one myself. If yo
 
 | Tool          | Platform                            | Best For                              | Pricing                                    |
 | ------------- | ----------------------------------- | ------------------------------------- | ------------------------------------------ |
-| Char      | macOS                               | local-first processing, data control  | Free (Pro $8/mo)                           |
+| Char      | macOS                               | Zero lock-in, complete control        | Free forever (local + BYOK). Cloud $8/mo   |
 | Obsidian + AI | Windows, macOS, Linux, iOS, Android | Knowledge management                  | Free (Sync $5/mo, Publish $10/mo)          |
 | Granola       | macOS, iPhone                       | Active note takers during meetings    | Free trial, then $14/mo                    |
 | Notion        | Web, Windows, macOS, iOS, Android   | Teams already using Notion            | Free (Business $24/mo for AI)              |
@@ -59,21 +59,21 @@ The AI assists with drafting, summarizing long documents, answering questions ab
 
 I'm Char's founder. I'm putting my tool first, though I'll explain why rather than asking you to trust me.
 
-Every AI note-taking tool I tested before building [Char](https://www.google.com/url?q=https://char.com/&sa=D&source=editors&ust=1768759307552236&usg=AOvVaw1mbgP0wxtMwkRVvxunIkkE) forced the same choice: use their cloud, their models, their rules. My data went where they decided, processed how they decided. I had no say.
+Every AI note-taking tool I tested before building [Char](https://www.google.com/url?q=https://char.com/&sa=D&source=editors&ust=1768759307552236&usg=AOvVaw1mbgP0wxtMwkRVvxunIkkE) forced the same choice: use their cloud, their models, their rules. My data went where they decided, stored how they decided. No way to switch, no way out.
 
-Char exists because of that. It runs on your device by default—Whisper models for transcription, our custom HyperLLM-V1 for summarization. Nothing leaves your machine unless you choose to sync. No bots. No forced uploads.
+Char exists because of that. It's an open-source AI notepad for meetings that stores everything as plain markdown files on your device. Zero lock-in. You choose your AI stack: managed cloud, bring your own API keys, or run local models. No bots. No vendor dependency.
 
-Want better AI? Plug in your own OpenAI, Mistral, or any endpoint you prefer. Your data, your choice.
+Want better AI? Plug in your own OpenAI, Mistral, or any endpoint you prefer. Your files, your AI, your workflow.
 
-This works best for companies where cloud tools like Otter are restricted, healthcare professionals handling HIPAA data, or anyone who wants control over where their data goes.
+This works best for engineers and developers who want files over apps, companies where cloud tools like Otter are banned, privacy-conscious professionals in healthcare and legal, or anyone who refuses to compromise on control.
 
 #### Key Features:
 
-- Complete local processing: Speech-to-text and AI summarization on your device using Whisper models and HyperLLM-V1 (a custom 1.1GB model that outperforms larger alternatives)
-- Universal meeting compatibility: Works with Zoom, Teams, Meet, and every other platform without bots—captures your microphone and system audio directly
+- Plain markdown files: Stored locally, works with any tool (Obsidian, Notion, VS Code)—zero lock-in
+- Your choice of AI stack: Managed cloud, bring your own API keys, or run local models via Ollama
+- Universal meeting compatibility: Works with Zoom, Teams, Meet, and every other platform without bots—system audio capture, no calendar permissions
 - Works offline: Take notes, record, and transcribe without internet connectivity
-- Flexible AI options: Go fully local, connect to OpenAI/Mistral/Ollama, or use custom endpoints
-- Open-source: Inspect the code, contribute, or customize it for your needs
+- Open-source: Inspect the code, contribute, or customize. Zero vendor lock-in
 - Enterprise deployment: On-prem, VPC, or hybrid options with SSO, consent management, and admin controls
 - Custom templates: Tailored formats for therapy sessions, legal meetings, job interviews, or casual coffee chats
 - Search your meeting history: Ask "What did Sarah say about the budget?" instead of scrolling through months of notes
@@ -83,9 +83,9 @@ This works best for companies where cloud tools like Otter are restricted, healt
 
 #### Pros:
 
-- Free for core functionality. No per-token charges or surprise bills
-- Security teams approve it (reduces compliance surface area)
-- No vendor lock-in. You can swap AI providers anytime
+- Free forever for local transcription, BYOK, and all core features
+- Zero lock-in—switch AI providers anytime, export files anywhere
+- IT teams can audit the code and approve the AI provider
 - Real notepad experience from the moment you open it
 
 #### Cons:
@@ -96,7 +96,7 @@ This works best for companies where cloud tools like Otter are restricted, healt
 
 #### Pricing:
 
-Char's core transcription and note-taking features are free forever. Upgrade to Pro ($8/month or $59/year, save 65%) for cloud services without managing API keys.
+Char is free forever for local transcription, BYOK, and all core features. Managed cloud service is $8/month for the easiest setup without managing API keys.
 
 ### 2. Obsidian with AI Plugins - Best for Knowledge Management
 
@@ -370,7 +370,7 @@ Offers a free tier, but real use requires Pro at $12/month.
 
 Yes. AI note-taking tools transcribe conversations, generate summaries, extract action items, and help you search across everything you've captured. They're particularly useful for meetings, lectures, interviews, or anytime you need to focus on the conversation instead of frantically typing notes.
 
-The right tool depends on your needs. If you work with sensitive information, go local-first (Char). If you need CRM integration, use something built for sales (Fathom). If you want AI to organize your messy thoughts, try Mem.ai.
+The right tool depends on your needs. If you want zero lock-in and complete control, use Char. If you need CRM integration, use something built for sales (Fathom). If you want AI to organize your messy thoughts, try Mem.ai.
 
 ### 2. Can ChatGPT take notes?
 
@@ -388,7 +388,7 @@ For work meetings, check your company's policy. For healthcare, legal, or financ
 
 ### 4. Which AI note-taking app doesn't join video calls?
 
-Char records your microphone and system audio directly on your Mac. No bot, no cloud uploads, everything stays local.
+Char records your microphone and system audio directly on your Mac. No bot, no cloud dependency, everything stored as plain markdown files you own.
 
 Bot-based tools like Otter, Fireflies, and most meeting-focused AI note-takers join as visible participants. If you want invisible recording, use Char—just make sure you tell people you're recording.
 
@@ -400,6 +400,6 @@ That said, AI transcription accuracy is generally 85-95% with good audio quality
 
 ### 6. Which AI note taker is secure?
 
-Char is the most secure because everything runs on your device by default. Your audio, transcripts, and notes never leave your Mac unless you choose to sync. Security teams approve it because there's no cloud dependency for core features. Open-source means you can audit the code.
+Char gives you complete control because everything is stored as plain markdown files on your device. You choose which AI processes your data—or keep it fully local. IT teams can audit the open-source code, and you can use the AI provider your security team approves.
 
-Avoid tools with known security issues. Otter has a federal lawsuit about unauthorized recording. Fireflies has reports of bots joining meetings after account deletion. If security matters, go local-first.
+Avoid tools with known security issues. Otter has a federal lawsuit about unauthorized recording. Fireflies has reports of bots joining meetings after account deletion. If control matters, use an open-source tool with zero lock-in.
