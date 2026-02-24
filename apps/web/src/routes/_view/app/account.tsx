@@ -43,8 +43,8 @@ function Component() {
   }, [search.success, search.trial, search.scheme]);
 
   return (
-    <div className="min-h-[calc(100vh-200px)]">
-      <div className="max-w-6xl mx-auto border-x border-neutral-100">
+    <div>
+      <div className="max-w-6xl mx-auto border-x border-neutral-100 min-h-[calc(100vh-200px)]">
         <div className="flex items-center justify-center py-20 bg-linear-to-b from-stone-50/30 to-stone-100/30 border-b border-neutral-100">
           <h1 className="font-serif text-3xl font-medium text-center">
             Welcome back {user?.email?.split("@")[0] || "Guest"}
