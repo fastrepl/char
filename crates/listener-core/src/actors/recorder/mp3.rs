@@ -9,19 +9,11 @@ impl AudioEncoder for Mp3Encoder {
         "mp3"
     }
 
-    fn encode_wav(
-        &self,
-        wav_path: &Path,
-        output_path: &Path,
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        hypr_mp3::encode_wav(wav_path, output_path)
+    fn encode(&self, input: &Path, output: &Path) -> Result<(), Box<dyn std::error::Error>> {
+        hypr_mp3::encode_wav(input, output)
     }
 
-    fn decode_to_wav(
-        &self,
-        encoded_path: &Path,
-        wav_path: &Path,
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        hypr_mp3::decode_to_wav(encoded_path, wav_path)
+    fn decode(&self, input: &Path, output: &Path) -> Result<(), Box<dyn std::error::Error>> {
+        hypr_mp3::decode_to_wav(input, output)
     }
 }

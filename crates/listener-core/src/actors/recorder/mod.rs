@@ -1,5 +1,7 @@
+mod encoder;
 mod mp3;
 
+pub use encoder::AudioEncoder;
 pub use mp3::Mp3Encoder;
 
 use std::fs::File;
@@ -15,31 +17,6 @@ use hypr_audio_utils::{
 use ractor::{Actor, ActorName, ActorProcessingErr, ActorRef};
 
 const FLUSH_INTERVAL: std::time::Duration = std::time::Duration::from_millis(1000);
-
-/// Trait for encoding a finalized WAV file into a compressed format.
-///
-/// The recorder always writes WAV internally during recording. After the
-/// recording stops, it hands the WAV file to the encoder which converts it
-/// to the target format. This keeps the recording path simple and makes the
-/// output format easily swappable.
-pub trait AudioEncoder: Send + Sync + 'static {
-    /// File extension for the encoded output (e.g. `"mp3"`).
-    fn extension(&self) -> &str;
-
-    /// Encode a WAV file into the target format.
-    fn encode_wav(
-        &self,
-        wav_path: &Path,
-        output_path: &Path,
-    ) -> Result<(), Box<dyn std::error::Error>>;
-
-    /// Decode an encoded file back to WAV (for resuming/appending).
-    fn decode_to_wav(
-        &self,
-        encoded_path: &Path,
-        wav_path: &Path,
-    ) -> Result<(), Box<dyn std::error::Error>>;
-}
 
 pub enum RecMsg {
     AudioSingle(Arc<[f32]>),
@@ -101,10 +78,9 @@ impl<E: AudioEncoder> Actor for RecorderActor<E> {
         let ogg_path = dir.join(format!("{}.ogg", filename_base));
         let encoded_path = dir.join(format!("{}.{}", filename_base, self.encoder.extension()));
 
-        // If an encoded file exists from a previous recording, decode it back to WAV for appending.
         if encoded_path.exists() && !wav_path.exists() {
             self.encoder
-                .decode_to_wav(&encoded_path, &wav_path)
+                .decode(&encoded_path, &wav_path)
                 .map_err(|e| -> ActorProcessingErr {
                     Box::new(std::io::Error::new(
                         std::io::ErrorKind::Other,
@@ -234,7 +210,7 @@ impl<E: AudioEncoder> Actor for RecorderActor<E> {
 
         if st.wav_path.exists() {
             let encoded_path = st.wav_path.with_extension(self.encoder.extension());
-            match self.encoder.encode_wav(&st.wav_path, &encoded_path) {
+            match self.encoder.encode(&st.wav_path, &encoded_path) {
                 Ok(()) => {
                     sync_file(&encoded_path);
                     sync_dir(&encoded_path);
@@ -257,7 +233,6 @@ impl<E: AudioEncoder> Actor for RecorderActor<E> {
     }
 }
 
-// Duplicated from plugins/fs-sync/src/session.rs to avoid Tauri plugin dependency.
 pub fn find_session_dir(sessions_base: &Path, session_id: &str) -> PathBuf {
     if let Some(found) = find_session_dir_recursive(sessions_base, session_id) {
         return found;
