@@ -23,7 +23,7 @@ You can also use it for taking notes for lectures or organizing your thoughts.
 ## Installation
 
 ```bash
-brew install --cask fastrepl/hyprnote/hyprnote@nightly
+brew install --cask fastrepl/fastrepl/char@nightly
 ```
 
 - [macOS](https://hyprnote.com/download) (public beta)
