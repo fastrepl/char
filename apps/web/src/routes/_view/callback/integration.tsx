@@ -10,11 +10,13 @@ const validateSearch = z.object({
   status: z.string(),
   flow: z.enum(["desktop", "web"]).default("desktop"),
   scheme: z.string().default("hyprnote"),
+  return_to: z.string().optional(),
 });
 
 type IntegrationDeeplinkParams = {
   integration_id: string;
   status: string;
+  return_to?: string;
 };
 
 export const Route = createFileRoute("/_view/callback/integration")({
@@ -33,6 +35,9 @@ function buildDeeplinkUrl(
     integration_id: search.integration_id,
     status: search.status,
   });
+  if (search.return_to) {
+    params.set("return_to", search.return_to);
+  }
   return `${scheme}://integration/callback?${params.toString()}`;
 }
 
@@ -69,6 +74,22 @@ function Component() {
       void navigate({ to: "/app/account/" });
     }
   }, [search.flow, navigate]);
+
+  useEffect(() => {
+    if (search.flow === "desktop" && search.status === "success") {
+      const deeplink = getDeeplink();
+      const timer = setTimeout(() => {
+        window.location.href = deeplink;
+      }, 250);
+      return () => clearTimeout(timer);
+    }
+  }, [
+    search.flow,
+    search.status,
+    search.scheme,
+    search.integration_id,
+    search.return_to,
+  ]);
 
   const isSuccess = search.status === "success";
 

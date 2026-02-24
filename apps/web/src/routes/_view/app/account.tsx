@@ -1,7 +1,10 @@
+import { Icon } from "@iconify-icon/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
+
+import { cn } from "@hypr/utils";
 
 import { signOutFn, updateUserEmail } from "@/functions/auth";
 import {
@@ -10,6 +13,7 @@ import {
   createTrialCheckoutSession,
   syncAfterSuccess,
 } from "@/functions/billing";
+import { useConnections } from "@/hooks/use-connections";
 
 const VALID_SCHEMES = [
   "hyprnote",
@@ -56,7 +60,7 @@ function Component() {
 
           <AccountSettingsCard />
 
-          {/* <IntegrationsSettingsCard /> */}
+          <IntegrationsSettingsCard />
 
           <SignOutSection />
         </div>
@@ -278,6 +282,77 @@ function AccountSettingsCard() {
         </div>
         {renderPlanButton()}
       </div>
+    </div>
+  );
+}
+
+const NANGO_PROVIDERS = [
+  {
+    nangoIntegrationId: "google-calendar",
+    displayName: "Google Calendar",
+    icon: <Icon icon="logos:google-calendar" className="text-xl" />,
+  },
+] as const;
+
+function IntegrationsSettingsCard() {
+  const navigate = useNavigate();
+  const { data: connections } = useConnections();
+
+  const handleConnect = (integrationId: string) => {
+    void navigate({
+      to: "/app/integration/",
+      search: {
+        integration_id: integrationId,
+        flow: "web",
+        scheme: "hyprnote",
+      },
+    });
+  };
+
+  return (
+    <div className="border border-neutral-100 rounded-xs">
+      <div className="p-4">
+        <h3 className="font-serif text-lg font-semibold mb-2">Integrations</h3>
+        <p className="text-sm text-neutral-600">
+          Manage your connected apps and services
+        </p>
+      </div>
+
+      {NANGO_PROVIDERS.map((provider) => {
+        const connection = connections?.find(
+          (c) => c.integration_id === provider.nangoIntegrationId,
+        );
+        return (
+          <div
+            key={provider.nangoIntegrationId}
+            className="flex items-center justify-between border-t border-neutral-100 p-4"
+          >
+            <div className="flex items-center gap-3">
+              {provider.icon}
+              <div className="flex flex-col gap-0.5">
+                <span className="text-sm font-medium">
+                  {provider.displayName}
+                </span>
+                {connection && (
+                  <span className="text-xs text-green-600">Connected</span>
+                )}
+              </div>
+            </div>
+
+            <button
+              onClick={() => handleConnect(provider.nangoIntegrationId)}
+              className={cn([
+                "cursor-pointer px-4 h-8 flex items-center text-sm rounded-full shadow-xs transition-all",
+                connection
+                  ? "bg-linear-to-b from-white to-stone-50 border border-neutral-300 text-neutral-700 hover:shadow-md hover:scale-[102%] active:scale-[98%]"
+                  : "bg-linear-to-t from-stone-600 to-stone-500 text-white shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
+              ])}
+            >
+              {connection ? "Reconnect" : "Connect"}
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }

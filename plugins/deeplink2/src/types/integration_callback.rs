@@ -7,6 +7,7 @@ use specta::Type;
 pub struct IntegrationCallbackSearch {
     pub integration_id: String,
     pub status: String,
+    pub return_to: Option<String>,
 }
 
 impl IntegrationCallbackSearch {
@@ -25,6 +26,7 @@ impl IntegrationCallbackSearch {
         Ok(Self {
             integration_id: integration_id.to_string(),
             status: status.to_string(),
+            return_to: query_params.get("return_to").cloned(),
         })
     }
 }

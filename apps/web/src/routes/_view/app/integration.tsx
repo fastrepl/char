@@ -1,17 +1,20 @@
 import Nango from "@nangohq/frontend";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 
+import { createConnectSession } from "@hypr/api-client";
+import { createClient } from "@hypr/api-client/client";
 import { cn } from "@hypr/utils";
 
-import { nangoCreateConnectSession } from "../../../functions/nango";
+import { env } from "@/env";
+import { getAccessToken } from "@/functions/access-token";
 
 const validateSearch = z.object({
   integration_id: z.string().default("google-calendar"),
   flow: z.enum(["desktop", "web"]).default("web"),
   scheme: z.string().default("hyprnote"),
+  return_to: z.string().optional(),
 });
 
 const INTEGRATION_DISPLAY: Record<
@@ -45,9 +48,7 @@ export const Route = createFileRoute("/_view/app/integration")({
 
 function Component() {
   const search = Route.useSearch();
-  const { user } = Route.useRouteContext();
   const navigate = useNavigate();
-  const getSessionToken = useServerFn(nangoCreateConnectSession);
   const [nango] = useState(() => new Nango());
   const [status, setStatus] = useState<
     "idle" | "connecting" | "success" | "error"
@@ -60,7 +61,6 @@ function Component() {
   const display = getIntegrationDisplay(search.integration_id);
 
   const handleConnect = async () => {
-    if (!user) return;
     setStatus("connecting");
 
     const connect = nango.openConnectUI({
@@ -81,6 +81,7 @@ function Component() {
               status: "success",
               flow: search.flow,
               scheme: search.scheme,
+              return_to: search.return_to,
             },
           });
         }
@@ -88,16 +89,29 @@ function Component() {
     });
 
     try {
-      const { sessionToken } = await getSessionToken({
-        data: {
-          allowedIntegrations: [search.integration_id],
-        },
+      const token = await getAccessToken();
+      const client = createClient({
+        baseUrl: env.VITE_API_URL,
+        headers: { Authorization: `Bearer ${token}` },
       });
-      connect.setSessionToken(sessionToken);
+      const { data, error } = await createConnectSession({ client });
+      if (error || !data) {
+        setStatus("error");
+        return;
+      }
+      connect.setSessionToken(data.token);
     } catch {
       setStatus("error");
     }
   };
+
+  useEffect(() => {
+    if (search.flow === "desktop") {
+      void handleConnect();
+    }
+    // Intentionally runs once on mount — handleConnect is not a stable ref
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white flex items-center justify-center p-6">

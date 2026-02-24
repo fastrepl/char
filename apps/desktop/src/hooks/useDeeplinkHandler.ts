@@ -5,10 +5,12 @@ import { useEffect } from "react";
 import { events as deeplink2Events } from "@hypr/plugin-deeplink2";
 
 import { useAuth } from "../auth";
+import { useTabs } from "../store/zustand/tabs";
 
 export function useDeeplinkHandler() {
   const auth = useAuth();
   const queryClient = useQueryClient();
+  const openNew = useTabs((state) => state.openNew);
 
   useEffect(() => {
     if (!isTauri()) {
@@ -26,12 +28,15 @@ export function useDeeplinkHandler() {
           void auth.refreshSession();
         }
       } else if (payload.to === "/integration/callback") {
-        const { integration_id, status } = payload.search;
+        const { integration_id, return_to, status } = payload.search;
         if (status === "success") {
           console.log(`[deeplink] integration connected: ${integration_id}`);
           void queryClient.invalidateQueries({
             queryKey: ["integration-status"],
           });
+          if (return_to === "calendar") {
+            openNew({ type: "calendar" });
+          }
         }
       }
     });
@@ -39,5 +44,5 @@ export function useDeeplinkHandler() {
     return () => {
       void unlisten.then((fn) => fn());
     };
-  }, [auth, queryClient]);
+  }, [auth, openNew, queryClient]);
 }

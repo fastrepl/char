@@ -36,6 +36,7 @@ export function OAuthProviderContent({ config }: { config: CalendarProvider }) {
     if (!config.nangoIntegrationId) return;
     const url = await buildWebAppUrl("/app/integration", {
       integration_id: config.nangoIntegrationId,
+      return_to: "calendar",
     });
     await openerCommands.openUrl(url, null);
   }, [config.nangoIntegrationId]);
