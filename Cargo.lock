@@ -9994,7 +9994,7 @@ dependencies = [
  "host",
  "hound",
  "language",
- "mp3lame-encoder",
+ "mp3",
  "owhisper-client",
  "owhisper-interface",
  "ractor",
@@ -10643,6 +10643,15 @@ checksum = "ac9557c559cd6fc9867e122e20d2cbefc9ca29d80d027a8e39310920ed2f0a97"
 dependencies = [
  "num-traits",
  "pxfm",
+]
+
+[[package]]
+name = "mp3"
+version = "0.1.0"
+dependencies = [
+ "audio-utils",
+ "hound",
+ "mp3lame-encoder",
 ]
 
 [[package]]
