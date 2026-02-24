@@ -1,3 +1,4 @@
+use std::io::Write;
 use std::path::Path;
 
 use tempfile::NamedTempFile;
@@ -8,8 +9,9 @@ pub fn atomic_write(target: &Path, content: &str) -> std::io::Result<()> {
     })?;
     std::fs::create_dir_all(parent)?;
 
-    let temp = NamedTempFile::new_in(parent)?;
-    std::fs::write(temp.path(), content)?;
+    let mut temp = NamedTempFile::new_in(parent)?;
+    temp.write_all(content.as_bytes())?;
+    temp.as_file().sync_all()?;
     temp.persist(target)?;
     Ok(())
 }

@@ -1,13 +1,13 @@
+use std::collections::HashMap;
+
 use hypr_template_support::AccountInfo;
-use tauri_plugin_store2::Store2PluginExt;
 
-pub(crate) fn parse_account_info(scope_str: &str) -> Result<Option<AccountInfo>, crate::Error> {
-    let entries: serde_json::Map<String, serde_json::Value> = serde_json::from_str(scope_str)?;
-
-    // Supabase SDK stores the session under a key matching `sb-{ref}-auth-token`
-    let session_str = entries
+pub(crate) fn parse_account_info(
+    data: &HashMap<String, String>,
+) -> Result<Option<AccountInfo>, crate::Error> {
+    let session_str = data
         .iter()
-        .find_map(|(k, v)| k.ends_with("-auth-token").then(|| v.as_str()).flatten());
+        .find_map(|(k, v)| k.ends_with("-auth-token").then_some(v.as_str()));
 
     let Some(session_str) = session_str else {
         return Ok(None);
@@ -49,44 +49,25 @@ pub trait AuthPluginExt<R: tauri::Runtime> {
     fn get_account_info(&self) -> Result<Option<AccountInfo>, crate::Error>;
 }
 
-impl<R: tauri::Runtime, T: tauri::Manager<R>> crate::AuthPluginExt<R> for T {
+impl<R: tauri::Runtime, T: tauri::Manager<R>> AuthPluginExt<R> for T {
     fn get_item(&self, key: String) -> Result<Option<String>, crate::Error> {
-        let store = self.store2().scoped_store(crate::PLUGIN_NAME)?;
-        store.get::<String>(key).map_err(Into::into)
+        Ok(self.state::<crate::store::AuthStore>().get(&key))
     }
 
     fn set_item(&self, key: String, value: String) -> Result<(), crate::Error> {
-        let store = self.store2().scoped_store(crate::PLUGIN_NAME)?;
-        store.set(key, value)?;
-        store.save()?;
-        Ok(())
+        self.state::<crate::store::AuthStore>().set(key, value)
     }
 
     fn remove_item(&self, key: String) -> Result<(), crate::Error> {
-        let store = self.store2().scoped_store(crate::PLUGIN_NAME)?;
-        store.delete(key)?;
-        store.save()?;
-        Ok(())
+        self.state::<crate::store::AuthStore>().remove(&key)
     }
 
     fn clear_auth(&self) -> Result<(), crate::Error> {
-        let store = self.store2().scoped_store::<String>(crate::PLUGIN_NAME)?;
-        store.clear()?;
-        store.save()?;
-        Ok(())
+        self.state::<crate::store::AuthStore>().clear()
     }
 
     fn get_account_info(&self) -> Result<Option<AccountInfo>, crate::Error> {
-        let raw_store = self.store2().store()?;
-
-        let scope_str = match raw_store
-            .get(crate::PLUGIN_NAME)
-            .and_then(|v| v.as_str().map(String::from))
-        {
-            Some(s) => s,
-            None => return Ok(None),
-        };
-
-        parse_account_info(&scope_str)
+        let data = self.state::<crate::store::AuthStore>().snapshot();
+        parse_account_info(&data)
     }
 }
