@@ -5,7 +5,19 @@ edition = "2024"
 
 [features]
 earshot = ["dep:earshot"]
+silero = ["dep:silero-rs"]
+cactus = ["dep:hypr-cactus"]
 
 [dependencies]
 earshot = { workspace = true, optional = true }
+hypr-cactus = { workspace = true, optional = true }
+silero-rs = { workspace = true, optional = true }
 thiserror = { workspace = true }
+
+[dev-dependencies]
+criterion = { workspace = true }
+hypr-data = { workspace = true }
+
+[[bench]]
+name = "vad"
+harness = false
