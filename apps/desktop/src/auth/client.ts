@@ -19,10 +19,16 @@ export const tauriStorage: SupportedStorage = {
     return result.data;
   },
   async setItem(key: string, value: string): Promise<void> {
-    await authCommands.setItem(key, value);
+    const result = await authCommands.setItem(key, value);
+    if (result.status === "error") {
+      throw new Error(`auth storage setItem failed: ${result.error}`);
+    }
   },
   async removeItem(key: string): Promise<void> {
-    await authCommands.removeItem(key);
+    const result = await authCommands.removeItem(key);
+    if (result.status === "error") {
+      throw new Error(`auth storage removeItem failed: ${result.error}`);
+    }
   },
 };
 

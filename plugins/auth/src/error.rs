@@ -3,9 +3,9 @@ use serde::{Serialize, ser::Serializer};
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error(transparent)]
-    Store2Error(#[from] tauri_plugin_store2::Error),
+    Io(#[from] std::io::Error),
     #[error(transparent)]
-    SerdeJsonError(#[from] serde_json::Error),
+    Json(#[from] serde_json::Error),
 }
 
 impl Serialize for Error {

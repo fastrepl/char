@@ -1,7 +1,7 @@
 mod commands;
 mod error;
 mod ext;
-mod store;
+pub(crate) mod store;
 
 pub use error::{Error, Result};
 pub use ext::*;
@@ -28,8 +28,61 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
 
     tauri::plugin::Builder::new(PLUGIN_NAME)
         .invoke_handler(specta_builder.invoke_handler())
-        .setup(|_app, _api| Ok(()))
+        .setup(|app, _api| {
+            use tauri::Manager;
+            use tauri_plugin_settings::SettingsPluginExt;
+
+            let base = app.settings().global_base().map_err(|e| e.to_string())?;
+            let auth_path = std::path::Path::new(base.as_str()).join("auth.json");
+
+            if !auth_path.exists() {
+                migrate_from_store_json(
+                    &std::path::Path::new(base.as_str()).join("store.json"),
+                    &auth_path,
+                )
+                .ok();
+            }
+
+            app.manage(store::AuthStore::load(auth_path));
+            Ok(())
+        })
         .build()
+}
+
+fn migrate_from_store_json(
+    store_json_path: &std::path::Path,
+    auth_path: &std::path::Path,
+) -> std::io::Result<()> {
+    if !store_json_path.exists() {
+        return Ok(());
+    }
+
+    let content = std::fs::read_to_string(store_json_path)?;
+    let mut store: serde_json::Map<String, serde_json::Value> =
+        serde_json::from_str(&content).map_err(invalid_data)?;
+
+    let auth_str = match store
+        .remove(PLUGIN_NAME)
+        .and_then(|v| v.as_str().map(|s| s.to_owned()))
+    {
+        Some(s) => s,
+        None => return Ok(()),
+    };
+
+    let _: std::collections::HashMap<String, String> =
+        serde_json::from_str(&auth_str).map_err(invalid_data)?;
+
+    store::atomic_write(auth_path, &auth_str)?;
+    store::atomic_write(
+        store_json_path,
+        &serde_json::to_string(&store).map_err(invalid_data)?,
+    )?;
+
+    Ok(())
+}
+
+fn invalid_data(e: impl std::fmt::Display) -> std::io::Error {
+    std::io::Error::new(std::io::ErrorKind::InvalidData, e.to_string())
 }
 
 #[cfg(test)]
@@ -55,41 +108,17 @@ mod test {
 
     fn create_app<R: tauri::Runtime>(builder: tauri::Builder<R>) -> tauri::App<R> {
         builder
-            .plugin(tauri_plugin_store::Builder::new().build())
-            .plugin(tauri_plugin_store2::init())
+            .plugin(tauri_plugin_settings::init())
             .plugin(init())
             .build(tauri::test::mock_context(tauri::test::noop_assets()))
             .unwrap()
     }
 
-    #[tokio::test]
-    async fn test_auth() {
+    #[test]
+    fn test_auth() {
         let app = create_app(tauri::test::mock_builder());
 
         let _ = app.set_item("test_key".to_string(), "test_value".to_string());
         let _ = app.get_item("test_key".to_string());
-    }
-
-    #[test]
-    fn test_parse_account_info() {
-        let store_path = dirs::data_dir()
-            .unwrap()
-            .join("hyprnote")
-            .join("store.json");
-
-        let store_content: serde_json::Value =
-            serde_json::from_str(&std::fs::read_to_string(&store_path).unwrap()).unwrap();
-
-        let scope_str = store_content[PLUGIN_NAME].as_str().unwrap();
-        let result = ext::parse_account_info(scope_str).unwrap();
-        let info = result.expect("should have account info");
-
-        assert!(!info.user_id.is_empty());
-        assert!(info.email.is_some());
-        assert!(info.full_name.is_some());
-        assert!(info.avatar_url.is_some());
-        assert!(info.stripe_customer_id.is_some());
-
-        eprintln!("{:#?}", info);
     }
 }

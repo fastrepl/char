@@ -17273,7 +17273,6 @@ dependencies = [
 name = "tauri-plugin-auth"
 version = "0.1.0"
 dependencies = [
- "dirs 6.0.0",
  "serde",
  "serde_json",
  "specta",
@@ -17282,12 +17281,11 @@ dependencies = [
  "supabase-auth",
  "tauri",
  "tauri-plugin",
- "tauri-plugin-store",
- "tauri-plugin-store2",
+ "tauri-plugin-settings",
  "tauri-specta",
+ "tempfile",
  "template-support",
  "thiserror 2.0.18",
- "tokio",
 ]
 
 [[package]]
@@ -20595,7 +20593,11 @@ dependencies = [
 name = "vad"
 version = "0.1.0"
 dependencies = [
+ "cactus",
+ "criterion",
+ "data",
  "earshot",
+ "silero",
  "thiserror 2.0.18",
 ]
 
