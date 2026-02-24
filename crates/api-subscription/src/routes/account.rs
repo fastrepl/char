@@ -6,6 +6,7 @@ use axum::{
 };
 use hypr_api_auth::AuthContext;
 use serde::Serialize;
+use stripe_core::customer::DeleteCustomer;
 use utoipa::ToSchema;
 
 use crate::state::AppState;
@@ -34,6 +35,52 @@ pub async fn delete_account(
 ) -> Response {
     let user_id = &auth.claims.sub;
 
+    // 1. Delete Stripe customer (also cancels active subscriptions).
+    //    The webhook sync engine will update the `stripe` schema accordingly.
+    match state.supabase.admin_get_stripe_customer_id(user_id).await {
+        Ok(Some(customer_id)) => {
+            match DeleteCustomer::new(&*customer_id).send(&state.stripe).await {
+                Ok(_) => {
+                    tracing::info!(user_id = %user_id, customer_id = %customer_id, "stripe_customer_deleted");
+                }
+                Err(e) => {
+                    tracing::error!(user_id = %user_id, customer_id = %customer_id, error = %e, "stripe_customer_deletion_failed");
+                    sentry::capture_message(
+                        &format!("stripe customer deletion failed for {}: {}", user_id, e),
+                        sentry::Level::Error,
+                    );
+                    return (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        Json(DeleteAccountResponse {
+                            deleted: false,
+                            error: Some("stripe_customer_deletion_failed".to_string()),
+                        }),
+                    )
+                        .into_response();
+                }
+            }
+        }
+        Ok(None) => {
+            tracing::info!(user_id = %user_id, "no_stripe_customer_to_delete");
+        }
+        Err(e) => {
+            tracing::warn!(user_id = %user_id, error = %e, "failed_to_lookup_stripe_customer");
+            // Continue — not having a stripe customer shouldn't block deletion
+        }
+    }
+
+    // 2. Delete storage objects (audio files).
+    if let Err(e) = state
+        .supabase
+        .admin_delete_storage_objects("audio-files", user_id)
+        .await
+    {
+        tracing::warn!(user_id = %user_id, error = %e, "storage_cleanup_failed");
+        // Continue — storage cleanup failure shouldn't block account deletion
+    }
+
+    // 3. Delete Supabase auth user.
+    //    This cascades: profiles, nango_connections, transcription_jobs.
     match state.supabase.admin_delete_user(user_id).await {
         Ok(()) => {
             tracing::info!(user_id = %user_id, "account_deleted");

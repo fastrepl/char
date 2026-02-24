@@ -155,6 +155,108 @@ impl SupabaseClient {
         Ok(())
     }
 
+    pub async fn admin_get_stripe_customer_id(&self, user_id: &str) -> Result<Option<String>> {
+        let url = format!(
+            "{}/rest/v1/profiles?select=stripe_customer_id&id=eq.{}",
+            self.base_url,
+            url_encode(user_id)
+        );
+
+        let response = self
+            .http_client
+            .get(&url)
+            .header("Authorization", format!("Bearer {}", self.service_role_key))
+            .header("apikey", &self.service_role_key)
+            .send()
+            .await
+            .map_err(|e| SubscriptionError::SupabaseRequest(e.to_string()))?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let body = response
+                .text()
+                .await
+                .unwrap_or_else(|_| "unknown".to_string());
+            return Err(SubscriptionError::SupabaseRequest(format!(
+                "GET stripe_customer_id for {} failed: {} - {}",
+                user_id, status, body
+            )));
+        }
+
+        #[derive(Deserialize)]
+        struct Row {
+            stripe_customer_id: Option<String>,
+        }
+
+        let rows: Vec<Row> = response
+            .json()
+            .await
+            .map_err(|e| SubscriptionError::SupabaseRequest(e.to_string()))?;
+
+        Ok(rows.into_iter().next().and_then(|r| r.stripe_customer_id))
+    }
+
+    pub async fn admin_delete_storage_objects(
+        &self,
+        bucket: &str,
+        user_id: &str,
+    ) -> Result<()> {
+        // List objects in the user's folder
+        let list_url = format!("{}/storage/v1/object/list/{}", self.base_url, bucket);
+
+        let response = self
+            .http_client
+            .post(&list_url)
+            .header("Authorization", format!("Bearer {}", self.service_role_key))
+            .header("apikey", &self.service_role_key)
+            .json(&serde_json::json!({
+                "prefix": format!("{}/", user_id),
+                "limit": 1000
+            }))
+            .send()
+            .await
+            .map_err(|e| SubscriptionError::SupabaseRequest(e.to_string()))?;
+
+        if !response.status().is_success() {
+            // Not critical — storage may be empty
+            tracing::warn!(user_id = %user_id, "failed to list storage objects, skipping cleanup");
+            return Ok(());
+        }
+
+        #[derive(Deserialize)]
+        struct StorageObject {
+            name: String,
+        }
+
+        let objects: Vec<StorageObject> = response
+            .json()
+            .await
+            .unwrap_or_default();
+
+        if objects.is_empty() {
+            return Ok(());
+        }
+
+        // Delete all objects in the user's folder
+        let delete_url = format!("{}/storage/v1/object/{}", self.base_url, bucket);
+        let prefixes: Vec<String> = objects
+            .into_iter()
+            .map(|o| format!("{}/{}", user_id, o.name))
+            .collect();
+
+        let _response = self
+            .http_client
+            .delete(&delete_url)
+            .header("Authorization", format!("Bearer {}", self.service_role_key))
+            .header("apikey", &self.service_role_key)
+            .json(&serde_json::json!({ "prefixes": prefixes }))
+            .send()
+            .await
+            .map_err(|e| SubscriptionError::SupabaseRequest(e.to_string()))?;
+
+        Ok(())
+    }
+
     pub async fn admin_delete_user(&self, user_id: &str) -> Result<()> {
         let url = format!("{}/auth/v1/admin/users/{}", self.base_url, url_encode(user_id));
 
