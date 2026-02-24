@@ -147,7 +147,7 @@ function ParticipantsList({ mappingIds }: { mappingIds: string[] }) {
     <div className="text-xs text-neutral-500 line-clamp-2">
       {visible.join(", ")}
       {remaining > 0 && (
-        <span className="text-neutral-400"> and {remaining} more</span>
+        <span className="text-neutral-500"> and {remaining} more</span>
       )}
     </div>
   );
