@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
-import { md2json } from "@hypr/tiptap/shared";
 
 import { useAITask } from "../../contexts/ai-task";
 import { useListener } from "../../contexts/listener";
@@ -11,7 +10,6 @@ import { createTaskId } from "../../store/zustand/ai-task/task-configs";
 import { getTaskState } from "../../store/zustand/ai-task/tasks";
 import { useTabs } from "../../store/zustand/tabs";
 import type { Tab } from "../../store/zustand/tabs/schema";
-import { useAITaskTask } from "../useAITaskTask";
 import { useCreateEnhancedNote } from "../useEnhancedNotes";
 import { useLanguageModel, useLLMConnection } from "../useLLMConnection";
 import { getEligibility } from "./eligibility";
@@ -56,8 +54,6 @@ export function useAutoEnhanceRunner(
     }
   }, [listenerStatus, liveSessionId, sessionId]);
 
-  const titleTaskId = createTaskId(sessionId, "title");
-
   const {
     generate,
     tasks,
@@ -67,68 +63,6 @@ export function useAutoEnhanceRunner(
     tasks: state.tasks,
     getState: state.getState,
   }));
-
-  const handleTitleSuccess = useCallback(
-    ({ text }: { text: string }) => {
-      if (text && store) {
-        const trimmed = text.trim();
-        if (trimmed && trimmed !== "<EMPTY>") {
-          store.setPartialRow("sessions", sessionId, { title: trimmed });
-        }
-      }
-    },
-    [store, sessionId],
-  );
-
-  const titleTask = useAITaskTask(titleTaskId, "title", {
-    onSuccess: handleTitleSuccess,
-  });
-
-  const handleEnhanceSuccess = useCallback(
-    (text: string) => {
-      const noteId = currentNoteIdRef.current;
-      if (!text || !store || !noteId) return;
-
-      try {
-        const jsonContent = md2json(text);
-        store.setPartialRow("enhanced_notes", noteId, {
-          content: JSON.stringify(jsonContent),
-        });
-
-        const currentTitle = store.getCell("sessions", sessionId, "title");
-        const trimmedTitle =
-          typeof currentTitle === "string" ? currentTitle.trim() : "";
-
-        if (!trimmedTitle && model) {
-          void titleTask.start({ model, args: { sessionId } });
-        }
-      } catch (error) {
-        console.error("Failed to convert markdown to JSON:", error);
-      }
-    },
-    [store, sessionId, model, titleTask.start],
-  );
-
-  const prevEnhanceStatusRef = useRef<string>("idle");
-
-  useEffect(() => {
-    const noteId = currentNoteIdRef.current;
-    if (!noteId) return;
-
-    const enhanceTaskId = createTaskId(noteId, "enhance");
-    const taskState = getTaskState(tasks, enhanceTaskId);
-    const status = taskState?.status ?? "idle";
-
-    if (
-      prevEnhanceStatusRef.current === "generating" &&
-      status === "success" &&
-      taskState?.streamedText
-    ) {
-      handleEnhanceSuccess(taskState.streamedText);
-    }
-
-    prevEnhanceStatusRef.current = status;
-  }, [tasks, handleEnhanceSuccess]);
 
   const run = useCallback((): RunResult => {
     if (hasRunRef.current) {

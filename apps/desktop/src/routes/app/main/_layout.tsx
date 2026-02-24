@@ -17,6 +17,7 @@ import { ShellProvider } from "../../../contexts/shell";
 import { useRegisterTools } from "../../../contexts/tool";
 import { ToolRegistryProvider } from "../../../contexts/tool";
 import { useDeeplinkHandler } from "../../../hooks/useDeeplinkHandler";
+import { useGlobalAutoEnhance } from "../../../hooks/useGlobalAutoEnhance";
 import { deleteSessionCascade } from "../../../store/tinybase/store/deleteSession";
 import * as main from "../../../store/tinybase/store/main";
 import { isSessionEmpty } from "../../../store/tinybase/store/sessions";
@@ -120,6 +121,7 @@ function Component() {
             <AITaskProvider store={aiTaskStore}>
               <NotificationProvider>
                 <ToolRegistration />
+                <GlobalAutoEnhance />
                 <Outlet />
               </NotificationProvider>
             </AITaskProvider>
@@ -144,6 +146,12 @@ function ToolRegistration() {
       }),
     [search, store],
   );
+
+  return null;
+}
+
+function GlobalAutoEnhance() {
+  useGlobalAutoEnhance();
 
   return null;
 }

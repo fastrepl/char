@@ -8,7 +8,6 @@ import { useCallback, useState } from "react";
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 import { commands as listener2Commands } from "@hypr/plugin-listener2";
-import { md2json } from "@hypr/tiptap/shared";
 import { Button } from "@hypr/ui/components/ui/button";
 import {
   Popover,
@@ -104,40 +103,6 @@ export function OptionsMenu({
       model,
       taskType: "enhance",
       args: { sessionId, enhancedNoteId, templateId },
-      onComplete: (text) => {
-        if (!text || !store) return;
-        try {
-          const jsonContent = md2json(text);
-          store.setPartialRow("enhanced_notes", enhancedNoteId, {
-            content: JSON.stringify(jsonContent),
-          });
-
-          const currentTitle = store.getCell("sessions", sessionId, "title");
-          const trimmedTitle =
-            typeof currentTitle === "string" ? currentTitle.trim() : "";
-
-          if (!trimmedTitle && model) {
-            const titleTaskId = createTaskId(sessionId, "title");
-            void generate(titleTaskId, {
-              model,
-              taskType: "title",
-              args: { sessionId },
-              onComplete: (titleText) => {
-                if (titleText && store) {
-                  const trimmed = titleText.trim();
-                  if (trimmed && trimmed !== "<EMPTY>") {
-                    store.setPartialRow("sessions", sessionId, {
-                      title: trimmed,
-                    });
-                  }
-                }
-              },
-            });
-          }
-        } catch (error) {
-          console.error("Failed to convert markdown to JSON:", error);
-        }
-      },
     });
   }, [
     store,

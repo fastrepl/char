@@ -7,7 +7,6 @@ import {
   type AttachmentInfo,
   commands as fsSyncCommands,
 } from "@hypr/plugin-fs-sync";
-import { md2json } from "@hypr/tiptap/shared";
 import { NoteTab } from "@hypr/ui/components/ui/note-tab";
 import {
   Popover,
@@ -304,22 +303,8 @@ function CreateOtherFormatButton({
   const model = useLanguageModel("enhance");
   const openNew = useTabs((state) => state.openNew);
 
-  const store = main.UI.useStore(main.STORE_ID);
   const taskId = createTaskId(pendingNote?.id || "placeholder", "enhance");
-  const enhanceTask = useAITaskTask(taskId, "enhance", {
-    onSuccess: ({ text }) => {
-      if (text && pendingNote && store) {
-        try {
-          const jsonContent = md2json(text);
-          store.setPartialRow("enhanced_notes", pendingNote.id, {
-            content: JSON.stringify(jsonContent),
-          });
-        } catch (error) {
-          console.error("Failed to convert markdown to JSON:", error);
-        }
-      }
-    },
-  });
+  const enhanceTask = useAITaskTask(taskId, "enhance");
 
   useEffect(() => {
     if (pendingNote && model && !startedTasksRef.current.has(pendingNote.id)) {
@@ -618,7 +603,6 @@ function useEnhanceLogic(sessionId: string, enhancedNoteId: string) {
     null,
   );
 
-  const store = main.UI.useStore(main.STORE_ID);
   const noteTemplateId =
     (main.UI.useCell(
       "enhanced_notes",
@@ -627,20 +611,7 @@ function useEnhanceLogic(sessionId: string, enhancedNoteId: string) {
       main.STORE_ID,
     ) as string | undefined) || undefined;
 
-  const enhanceTask = useAITaskTask(taskId, "enhance", {
-    onSuccess: ({ text }) => {
-      if (text && store) {
-        try {
-          const jsonContent = md2json(text);
-          store.setPartialRow("enhanced_notes", enhancedNoteId, {
-            content: JSON.stringify(jsonContent),
-          });
-        } catch (error) {
-          console.error("Failed to convert markdown to JSON:", error);
-        }
-      }
-    },
-  });
+  const enhanceTask = useAITaskTask(taskId, "enhance");
 
   const onRegenerate = useCallback(
     async (templateId: string | null) => {
