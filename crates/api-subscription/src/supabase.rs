@@ -196,11 +196,7 @@ impl SupabaseClient {
         Ok(rows.into_iter().next().and_then(|r| r.stripe_customer_id))
     }
 
-    pub async fn admin_delete_storage_objects(
-        &self,
-        bucket: &str,
-        user_id: &str,
-    ) -> Result<()> {
+    pub async fn admin_delete_storage_objects(&self, bucket: &str, user_id: &str) -> Result<()> {
         // List objects in the user's folder
         let list_url = format!("{}/storage/v1/object/list/{}", self.base_url, bucket);
 
@@ -228,10 +224,7 @@ impl SupabaseClient {
             name: String,
         }
 
-        let objects: Vec<StorageObject> = response
-            .json()
-            .await
-            .unwrap_or_default();
+        let objects: Vec<StorageObject> = response.json().await.unwrap_or_default();
 
         if objects.is_empty() {
             return Ok(());
@@ -258,7 +251,11 @@ impl SupabaseClient {
     }
 
     pub async fn admin_delete_user(&self, user_id: &str) -> Result<()> {
-        let url = format!("{}/auth/v1/admin/users/{}", self.base_url, url_encode(user_id));
+        let url = format!(
+            "{}/auth/v1/admin/users/{}",
+            self.base_url,
+            url_encode(user_id)
+        );
 
         let response = self
             .http_client

@@ -10,7 +10,7 @@ use axum::{
 use crate::config::SubscriptionConfig;
 use crate::state::AppState;
 
-pub use account::{DeleteAccountResponse};
+pub use account::DeleteAccountResponse;
 pub use crate::trial::{Interval, StartTrialReason, StartTrialResponse};
 pub use rpc::{CanStartTrialReason, CanStartTrialResponse};
 
