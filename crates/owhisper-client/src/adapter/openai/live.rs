@@ -29,8 +29,18 @@ impl RealtimeSttAdapter for OpenAIAdapter {
         false
     }
 
-    fn build_ws_url(&self, api_base: &str, _params: &ListenParams, _channels: u8) -> url::Url {
-        let (mut url, existing_params) = Self::build_ws_url_from_base(api_base);
+    fn build_ws_url(&self, api_base: &str, params: &ListenParams, _channels: u8) -> url::Url {
+        // Detect Azure from the base URL and store flag for initial_message
+        if let Ok(parsed) = api_base.parse::<url::Url>() {
+            if let Some(host) = parsed.host_str() {
+                if Self::is_azure_host(host) {
+                    self.set_azure(true);
+                }
+            }
+        }
+
+        let model = params.model.as_deref();
+        let (mut url, existing_params) = Self::build_ws_url_from_base_with_model(api_base, model);
 
         if !existing_params.is_empty() {
             let mut query_pairs = url.query_pairs_mut();
@@ -77,6 +87,11 @@ impl RealtimeSttAdapter for OpenAIAdapter {
             Some(m) => m,
             None => default,
         };
+
+        // Use the Azure flag set during build_ws_url (detected from api_base URL)
+        if self.is_azure() {
+            return self.build_azure_initial_message(model, language);
+        }
 
         let session_config = SessionUpdateEvent {
             event_type: "session.update".to_string(),
@@ -209,6 +224,76 @@ impl RealtimeSttAdapter for OpenAIAdapter {
             }
         }
     }
+}
+
+impl OpenAIAdapter {
+    /// Build Azure OpenAI-specific initial message
+    /// Azure uses a different session update format: transcription_session.update
+    fn build_azure_initial_message(
+        &self,
+        model: &str,
+        language: Option<String>,
+    ) -> Option<Message> {
+        let session_update = AzureTranscriptionSessionUpdate {
+            event_type: "transcription_session.update".to_string(),
+            session: AzureSessionConfig {
+                input_audio_format: "pcm16".to_string(),
+                input_audio_transcription: AzureTranscriptionConfig {
+                    model: model.to_string(),
+                    prompt: None,
+                    language,
+                },
+                turn_detection: Some(AzureTurnDetection {
+                    detection_type: VAD_DETECTION_TYPE.to_string(),
+                    threshold: Some(VAD_THRESHOLD),
+                    prefix_padding_ms: Some(VAD_PREFIX_PADDING_MS),
+                    silence_duration_ms: Some(VAD_SILENCE_DURATION_MS),
+                }),
+            },
+        };
+
+        let json = serde_json::to_string(&session_update).ok()?;
+        tracing::debug!(payload = %json, "azure_openai_session_update_payload");
+        Some(Message::Text(json.into()))
+    }
+}
+
+// Azure OpenAI specific session message types
+
+#[derive(Debug, Serialize)]
+struct AzureTranscriptionSessionUpdate {
+    #[serde(rename = "type")]
+    event_type: String,
+    session: AzureSessionConfig,
+}
+
+#[derive(Debug, Serialize)]
+struct AzureSessionConfig {
+    input_audio_format: String,
+    input_audio_transcription: AzureTranscriptionConfig,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    turn_detection: Option<AzureTurnDetection>,
+}
+
+#[derive(Debug, Serialize)]
+struct AzureTranscriptionConfig {
+    model: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    prompt: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    language: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+struct AzureTurnDetection {
+    #[serde(rename = "type")]
+    detection_type: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    threshold: Option<f32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    prefix_padding_ms: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    silence_duration_ms: Option<u32>,
 }
 
 #[derive(Debug, Serialize)]
