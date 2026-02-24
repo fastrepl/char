@@ -1,8 +1,7 @@
 use std::path::{Path, PathBuf};
-use std::pin::Pin;
 use std::time::Duration;
 
-use futures_util::{Stream, StreamExt};
+use futures_util::StreamExt;
 use hypr_audio_utils::{Source, f32_to_i16_bytes, resample_audio, source_from_path};
 use owhisper_interface::batch::Response as BatchResponse;
 use owhisper_interface::stream::StreamResponse;
@@ -11,7 +10,9 @@ use tokio_stream::StreamExt as TokioStreamExt;
 
 use crate::ListenClientBuilder;
 use crate::adapter::deepgram_compat::build_batch_url;
-use crate::adapter::{BatchFuture, BatchSttAdapter, ClientWithMiddleware};
+use crate::adapter::{
+    BatchFuture, BatchSttAdapter, ClientWithMiddleware, StreamingBatchEvent, StreamingBatchStream,
+};
 use crate::error::Error;
 
 use super::{ArgmaxAdapter, keywords::ArgmaxKeywordStrategy, language::ArgmaxLanguageStrategy};
@@ -150,15 +151,6 @@ impl StreamingBatchConfig {
         Duration::from_millis(self.delay_ms)
     }
 }
-
-#[derive(Debug, Clone)]
-pub struct StreamingBatchEvent {
-    pub response: StreamResponse,
-    pub percentage: f64,
-}
-
-pub type StreamingBatchStream =
-    Pin<Box<dyn Stream<Item = Result<StreamingBatchEvent, Error>> + Send>>;
 
 impl ArgmaxAdapter {
     pub async fn transcribe_file_streaming<P: AsRef<Path>>(
