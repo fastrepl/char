@@ -2,6 +2,8 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
+/// In-memory state is the source of truth, not the file.
+/// This lets the session survive disk write failures.
 pub struct AuthStore {
     path: PathBuf,
     data: Mutex<HashMap<String, String>>,
