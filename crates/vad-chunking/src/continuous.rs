@@ -43,7 +43,6 @@ impl<S: AsyncSource> ContinuousVadStream<S> {
     pub(crate) fn new(source: S, mut config: VadConfig) -> Result<Self, crate::Error> {
         config.sample_rate = source.sample_rate() as usize;
 
-        // https://github.com/emotechlab/silero-rs/blob/26a6460/src/lib.rs#L775
         let chunk_duration = Duration::from_millis(30);
         let chunk_samples = (chunk_duration.as_secs_f64() * config.sample_rate as f64) as usize;
 
@@ -151,7 +150,6 @@ impl<S: AsyncSource> Stream for ContinuousVadStream<S> {
                 if let Some(item) = this.pending_items.pop_front() {
                     Poll::Ready(Some(Ok(item)))
                 } else {
-                    // Should never happen since we always push audio
                     Poll::Pending
                 }
             }

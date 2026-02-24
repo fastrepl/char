@@ -17,7 +17,7 @@ hypr-language = { workspace = true }
 hypr-storage = { workspace = true }
 hypr-supervisor = { workspace = true }
 hypr-transcript = { workspace = true }
-hypr-vad-ext = { workspace = true }
+hypr-vad-masking = { workspace = true }
 
 owhisper-client = { workspace = true }
 owhisper-interface = { workspace = true }

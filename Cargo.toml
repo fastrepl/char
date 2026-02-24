@@ -17,7 +17,7 @@ members = [
   "crates/*",
   "plugins/*",
 ]
-exclude = ["plugins/cli2", "plugins/db", "plugins/export"]
+exclude = ["plugins/cli2", "plugins/db", "plugins/export", "crates/vad-ext"]
 
 [workspace.dependencies]
 hypr-aec = { path = "crates/aec", package = "aec" }
@@ -112,7 +112,8 @@ hypr-transcribe-proxy = { path = "crates/transcribe-proxy", package = "transcrib
 hypr-transcribe-whisper-local = { path = "crates/transcribe-whisper-local", package = "transcribe-whisper-local" }
 hypr-transcript = { path = "crates/transcript", package = "transcript" }
 hypr-vad = { path = "crates/vad", package = "vad" }
-hypr-vad-ext = { path = "crates/vad-ext", package = "vad-ext" }
+hypr-vad-chunking = { path = "crates/vad-chunking", package = "vad-chunking" }
+hypr-vad-masking = { path = "crates/vad-masking", package = "vad-masking" }
 hypr-version = { path = "crates/version", package = "version" }
 hypr-whisper = { path = "crates/whisper", package = "whisper" }
 hypr-whisper-local = { path = "crates/whisper-local", package = "whisper-local" }

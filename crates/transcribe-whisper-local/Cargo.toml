@@ -22,7 +22,7 @@ owhisper-client = { workspace = true }
 [dependencies]
 hypr-audio-utils = { workspace = true }
 hypr-pyannote-local = { workspace = true }
-hypr-vad-ext = { workspace = true, features = ["chunking"] }
+hypr-vad-chunking = { workspace = true }
 hypr-whisper = { workspace = true }
 hypr-whisper-local = { workspace = true }
 hypr-ws-utils = { workspace = true }

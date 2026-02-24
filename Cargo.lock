@@ -218,7 +218,7 @@ dependencies = [
  "data",
  "hound",
  "rodio",
- "vad-ext",
+ "vad-masking",
 ]
 
 [[package]]
@@ -10012,7 +10012,7 @@ dependencies = [
  "tracing-subscriber",
  "transcript",
  "uuid",
- "vad-ext",
+ "vad-masking",
  "vorbis_rs",
 ]
 
@@ -19651,7 +19651,7 @@ dependencies = [
  "tokio-util",
  "tower 0.5.3",
  "tracing",
- "vad-ext",
+ "vad-chunking",
  "whisper",
  "whisper-local",
  "ws-utils",
@@ -20643,21 +20643,28 @@ dependencies = [
 ]
 
 [[package]]
-name = "vad-ext"
+name = "vad-chunking"
 version = "0.1.0"
 dependencies = [
  "audio-interface",
- "audio-utils",
  "data",
  "futures-util",
  "hound",
  "pin-project",
  "rodio",
- "serde",
  "silero",
  "thiserror 2.0.18",
  "tokio",
- "tracing",
+]
+
+[[package]]
+name = "vad-masking"
+version = "0.1.0"
+dependencies = [
+ "audio-utils",
+ "data",
+ "hound",
+ "rodio",
  "vad",
 ]
 
