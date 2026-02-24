@@ -53,8 +53,6 @@
 @import "tailwind-scrollbar-hide/v4";
 @plugin "@tailwindcss/typography";
 
-@source "../../../packages/transcript/src";
-
 @theme {
   --font-sans: "SF Pro", system-ui, -apple-system, sans-serif;
   --font-serif: "Lora", Georgia, serif;
@@ -127,12 +125,6 @@
     scroll-margin-top: 69px;
   }
 
-  @media (max-width: 639px) {
-    [data-blog-article] [id] {
-      scroll-margin-top: 113px;
-    }
-  }
-
   .prose code:not(pre code) {
     overflow-wrap: break-word;
     word-break: break-all;
@@ -144,52 +136,6 @@
 
   .prose a.anchor:hover {
     text-decoration: underline dotted !important;
-  }
-
-  .prose ul:has(> li > input[type="checkbox"]) {
-    list-style: none !important;
-    padding-left: 0 !important;
-    margin-left: 0 !important;
-  }
-
-  .prose li:has(> input[type="checkbox"]) {
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-    padding-left: 0 !important;
-    margin-left: 0 !important;
-  }
-
-  .prose li > input[type="checkbox"] {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 1rem;
-    height: 1rem;
-    min-width: 1rem;
-    border: 1.5px solid #a8a29e;
-    border-radius: 0.25rem;
-    background-color: transparent;
-    cursor: pointer;
-    position: relative;
-    top: 0.125rem;
-    margin: 0;
-  }
-
-  .prose li > input[type="checkbox"]:checked {
-    background-color: #57534e;
-    border-color: #57534e;
-  }
-
-  .prose li > input[type="checkbox"]:checked::after {
-    content: "";
-    position: absolute;
-    left: 0.2rem;
-    top: 0.05rem;
-    width: 0.35rem;
-    height: 0.6rem;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
   }
 }
 
@@ -261,30 +207,6 @@
 
   .animate-fade-in-out {
     animation: fade-in-out 3s ease-in-out infinite;
-  }
-
-  @keyframes shimmer {
-    0% {
-      background-position: 200% 0;
-    }
-
-    100% {
-      background-position: -200% 0;
-    }
-  }
-
-  .text-shimmer {
-    background: linear-gradient(
-      90deg,
-      #a3a3a3 0%,
-      #525252 50%,
-      #a3a3a3 100%
-    );
-    background-size: 200% 100%;
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shimmer 2s ease-in-out infinite;
   }
 }
 

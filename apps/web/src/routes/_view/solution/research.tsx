@@ -7,16 +7,16 @@ export const Route = createFileRoute("/_view/solution/research")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "AI Meeting Notes for Researchers - Char" },
+      { title: "AI Meeting Notes for Researchers - Hyprnote" },
       {
         name: "description",
         content:
-          "Capture interviews, observations, and research insights with AI-powered meeting notes. Analyze faster with Char.",
+          "Capture interviews, observations, and research insights with AI-powered meeting notes. Analyze faster with Hyprnote.",
       },
       { name: "robots", content: "noindex, nofollow" },
       {
         property: "og:title",
-        content: "AI Meeting Notes for Researchers - Char",
+        content: "AI Meeting Notes for Researchers - Hyprnote",
       },
       {
         property: "og:description",
@@ -125,8 +125,8 @@ function HeroSection() {
             AI-powered meeting notes
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto">
-            Focus on asking questions and observing while Char captures every
-            detail, identifies themes, and helps you analyze research
+            Focus on asking questions and observing while Hyprnote captures
+            every detail, identifies themes, and helps you analyze research
             conversations.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
@@ -196,8 +196,8 @@ function UseCasesSection() {
           For every research method
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
-          Whatever your research approach, Char helps you capture and analyze
-          every conversation.
+          Whatever your research approach, Hyprnote helps you capture and
+          analyze every conversation.
         </p>
         <div className="grid md:grid-cols-2 gap-6">
           {useCases.map((useCase) => (

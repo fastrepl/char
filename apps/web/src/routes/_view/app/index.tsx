@@ -1,10 +1,10 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_view/app/")({
-  beforeLoad: async () => {
-    throw redirect({
-      to: "/app/file-transcription/",
-      search: { id: undefined, tab: undefined },
-    });
+  beforeLoad: async ({ context }) => {
+    if (!context.user) {
+      throw redirect({ to: "/app/account/" });
+    }
   },
+  loader: async ({ context }) => ({ user: context.user }),
 });

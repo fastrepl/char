@@ -251,11 +251,11 @@ function OpenSourceButton({
     n > 1000 ? `${(n / 1000).toFixed(1)}k` : n;
 
   return (
-    <div className="text-center flex flex-col items-center gap-4 w-full max-w-md mx-auto">
+    <div className="text-center flex flex-col gap-4 w-full max-w-md mx-auto">
       <h2 className="text-2xl font-serif text-stone-600">Open source</h2>
       <p className="text-neutral-600">
         {
-          "Char values privacy and community, so it's been transparent from day one."
+          "Hyprnote values privacy and community, so it's been transparent from day one."
         }
       </p>
       <a

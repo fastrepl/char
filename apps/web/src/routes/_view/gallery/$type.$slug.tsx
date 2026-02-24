@@ -45,7 +45,7 @@ export const Route = createFileRoute("/_view/gallery/$type/$slug")({
 
     return {
       meta: [
-        { title: `${item.title} - ${typeLabel} - Char` },
+        { title: `${item.title} - ${typeLabel} - Hyprnote` },
         { name: "description", content: item.description },
         {
           property: "og:title",
@@ -346,7 +346,7 @@ function RightSidebar({
 }) {
   const isTemplate = type === "template";
   const contentDir = isTemplate ? "templates" : "shortcuts";
-  const rawMdxUrl = `https://github.com/fastrepl/char/blob/main/apps/web/content/${contentDir}/${item.slug}.mdx?plain=1`;
+  const rawMdxUrl = `https://github.com/fastrepl/hyprnote/blob/main/apps/web/content/${contentDir}/${item.slug}.mdx?plain=1`;
 
   return (
     <aside className="hidden sm:block w-80 shrink-0">
@@ -356,8 +356,8 @@ function RightSidebar({
             Use this {isTemplate ? "template" : "shortcut"}
           </h3>
           <p className="text-sm text-neutral-600 mb-6">
-            Download Char to use this {isTemplate ? "template" : "shortcut"} and
-            get AI-powered meeting notes.
+            Download Hyprnote to use this {isTemplate ? "template" : "shortcut"}{" "}
+            and get AI-powered meeting notes.
           </p>
           <DownloadButton />
           <p className="text-xs text-neutral-500 mt-4">
@@ -381,7 +381,7 @@ function RightSidebar({
             Have an idea? Submit a PR and help the community.
           </p>
           <a
-            href={`https://github.com/fastrepl/char/tree/main/apps/web/content/${contentDir}`}
+            href={`https://github.com/fastrepl/hyprnote/tree/main/apps/web/content/${contentDir}`}
             target="_blank"
             rel="noopener noreferrer"
             className={cn([

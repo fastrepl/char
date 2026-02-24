@@ -8,11 +8,11 @@ export const Route = createFileRoute("/_view/product/integrations")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "Integrations & Workflows - Char" },
+      { title: "Integrations & Workflows - Hyprnote" },
       {
         name: "description",
         content:
-          "Connect Char with your favorite tools and automate your meeting workflow. Integrations coming soon.",
+          "Connect Hyprnote with your favorite tools and automate your meeting workflow. Integrations coming soon.",
       },
       { name: "robots", content: "noindex, nofollow" },
     ],
@@ -101,8 +101,8 @@ function Component() {
                 Integrations & Workflows
               </h1>
               <p className="text-lg sm:text-xl text-neutral-600 leading-relaxed max-w-3xl mx-auto">
-                Connect Char with your favorite tools. Automate repetitive tasks
-                with powerful workflows. No coding required.
+                Connect Hyprnote with your favorite tools. Automate repetitive
+                tasks with powerful workflows. No coding required.
               </p>
               <div className="mt-8">
                 <button

@@ -7,8 +7,6 @@ export function MockWindow({
   className,
   title,
   prefixIcons,
-  headerClassName,
-  audioIndicatorColor,
   children,
 }: {
   showAudioIndicator?: boolean;
@@ -16,8 +14,6 @@ export function MockWindow({
   className?: string;
   title?: string;
   prefixIcons?: React.ReactNode;
-  headerClassName?: string;
-  audioIndicatorColor?: string;
   children: React.ReactNode;
 }) {
   const isMobile = variant === "mobile";
@@ -30,12 +26,7 @@ export function MockWindow({
         className,
       ])}
     >
-      <div
-        className={cn([
-          "relative flex items-center gap-2 px-4 h-[38px] border-b border-neutral-200 bg-neutral-50",
-          headerClassName,
-        ])}
-      >
+      <div className="relative flex items-center gap-2 px-4 h-[38px] border-b border-neutral-200 bg-neutral-50">
         <div className="flex gap-2">
           <div className="size-3 rounded-full bg-red-400"></div>
           <div className="size-3 rounded-full bg-yellow-400"></div>
@@ -59,7 +50,7 @@ export function MockWindow({
             <DancingSticks
               amplitude={1}
               height={isMobile ? 10 : 12}
-              color={audioIndicatorColor ?? "#a3a3a3"}
+              color="#a3a3a3"
             />
           </div>
         )}

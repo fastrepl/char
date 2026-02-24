@@ -6,7 +6,7 @@ export const Route = createFileRoute("/_view/product/markdown")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "Markdown Files - Char" },
+      { title: "Markdown Files - Hyprnote" },
       {
         name: "description",
         content:

@@ -10,7 +10,7 @@ export const Route = createFileRoute("/_view/product/notepad")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "Notepad - Char" },
+      { title: "Notepad - Hyprnote" },
       {
         name: "description",
         content:
@@ -56,7 +56,7 @@ function Component() {
               No bots. Local-first.
             </h1>
             <p className="text-lg sm:text-xl text-neutral-600 mb-8 max-w-2xl mx-auto">
-              Char takes your memos and transcripts to make crazy good notes
+              Hyprnote takes your memos and transcripts to make crazy good notes
             </p>
 
             <AnimatedNotesDemo />

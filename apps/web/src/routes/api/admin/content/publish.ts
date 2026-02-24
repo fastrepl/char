@@ -16,6 +16,7 @@ interface ArticleMetadata {
   author?: string;
   date?: string;
   coverImage?: string;
+  published?: boolean;
   featured?: boolean;
   category?: string;
 }
@@ -133,6 +134,7 @@ export const Route = createFileRoute("/api/admin/content/publish")({
           if (metadata.author) frontmatterObj.author = metadata.author;
           if (metadata.coverImage)
             frontmatterObj.coverImage = metadata.coverImage;
+          frontmatterObj.published = action === "publish";
           if (metadata.featured !== undefined)
             frontmatterObj.featured = metadata.featured;
           if (metadata.date) frontmatterObj.date = metadata.date;

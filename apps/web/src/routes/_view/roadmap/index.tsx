@@ -14,11 +14,11 @@ export const Route = createFileRoute("/_view/roadmap/")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "Roadmap - Char" },
+      { title: "Roadmap - Hyprnote" },
       {
         name: "description",
         content:
-          "See what we're building next for Char. Our product roadmap and future plans.",
+          "See what we're building next for Hyprnote. Our product roadmap and future plans.",
       },
     ],
   }),
@@ -257,7 +257,7 @@ function CTASection({
         <div className="mb-4 size-40 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[48px] bg-transparent">
           <Image
             src="/api/images/hyprnote/icon.png"
-            alt="Char"
+            alt="Hyprnote"
             width={144}
             height={144}
             className="size-36 mx-auto rounded-[40px] border border-neutral-100"
@@ -268,7 +268,8 @@ function CTASection({
           <br className="sm:hidden" /> stay yours
         </h2>
         <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-          Start using Char today and bring clarity to your back-to-back meetings
+          Start using Hyprnote today and bring clarity to your back-to-back
+          meetings
         </p>
         <div className="pt-6 flex flex-col sm:flex-row gap-4 justify-center items-center">
           {platformCTA.action === "download" ? (

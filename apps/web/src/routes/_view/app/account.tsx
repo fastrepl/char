@@ -299,7 +299,7 @@ function AccountSettingsCard() {
 //       <div className="flex items-center justify-between border-t border-neutral-100 p-4">
 //         <div className="text-sm">
 //           {connectedApps} {connectedApps === 1 ? "app is" : "apps are"}{" "}
-//           connected to Char
+//           connected to Hyprnote
 //         </div>
 //         <Link
 //           to="/app/integration/"

@@ -15,14 +15,14 @@ export const Route = createFileRoute("/_view/product/ai-notetaking")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "AI Notetaking - Char" },
+      { title: "AI Notetaking - Hyprnote" },
       {
         name: "description",
         content:
           "Complete AI-powered notetaking solution. Record meetings, transcribe audio, and get intelligent summaries with customizable templates. Works with any video conferencing tool.",
       },
       { name: "robots", content: "noindex, nofollow" },
-      { property: "og:title", content: "AI Notetaking - Char" },
+      { property: "og:title", content: "AI Notetaking - Hyprnote" },
       {
         property: "og:description",
         content:
@@ -103,11 +103,11 @@ function HeroSection() {
       <div className="px-6 py-12 lg:py-20">
         <header className="mb-12 text-center max-w-4xl mx-auto">
           <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
-            AI Notepad for Smarter Meeting Notes
+            Never Miss a Detail From Your Meetings
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600">
-            You focus on the conversation. AI transcribes, summarizes,
-            <br className="hidden sm:inline" /> and fills in what you missed.
+            Hyprnote captures everything said, combines it with your notes,
+            <br className="hidden sm:inline" /> and creates a perfect summary.
           </p>
           <div className="mt-8">
             <Link
@@ -144,8 +144,8 @@ function EditorSection() {
               Simple, Familiar Notepad
             </h2>
             <p className="text-base text-neutral-600 leading-relaxed">
-              Char comes with a easy-to-use text editor where you can jot down
-              stuff in markdown.
+              Hyprnote comes with a easy-to-use text editor where you can jot
+              down stuff in markdown.
             </p>
             <ul className="flex flex-col gap-3">
               <li className="flex items-start gap-3">
@@ -184,7 +184,7 @@ function EditorSection() {
             Simple, Familiar Notepad
           </h2>
           <p className="text-sm text-neutral-600 leading-relaxed mb-4">
-            Char comes with a easy-to-use text editor where you can jot down
+            Hyprnote comes with a easy-to-use text editor where you can jot down
             stuff in markdown.
           </p>
           <ul className="flex flex-col gap-3">
@@ -599,7 +599,7 @@ function TranscriptionSection() {
     <section id="transcription" className="border-y border-neutral-100">
       <div className="text-center py-12 px-4 lg:px-0">
         <h2 className="text-3xl font-serif text-stone-600 mb-4">
-          Live meetings to recorded audio, Char transcribes it all
+          Live meetings to recorded audio, Hyprnote transcribes it all
         </h2>
       </div>
 
@@ -765,8 +765,8 @@ function SummariesSection() {
             <div className="p-8 flex flex-col gap-4">
               <p className="text-lg font-serif text-neutral-600 leading-relaxed">
                 <span className="font-semibold">While you take notes,</span>{" "}
-                Char listens and keeps track of everything that happens during
-                the meeting.
+                Hyprnote listens and keeps track of everything that happens
+                during the meeting.
               </p>
             </div>
             <div className="flex-1 flex items-end justify-center px-8 pb-0 bg-stone-50/30">
@@ -799,7 +799,8 @@ function SummariesSection() {
                 <span className="font-semibold">
                   After the meeting is over,
                 </span>{" "}
-                Char combines your notes with transcripts to create a summary.
+                Hyprnote combines your notes with transcripts to create a
+                summary.
               </p>
             </div>
             <div className="flex-1 flex items-end justify-center px-8 pb-0 bg-stone-50/30">
@@ -888,8 +889,8 @@ function SummariesSection() {
             <div className="p-6 pb-2">
               <p className="text-base font-serif text-neutral-600 leading-relaxed mb-4">
                 <span className="font-semibold">While you take notes,</span>{" "}
-                Char listens and keeps track of everything that happens during
-                the meeting.
+                Hyprnote listens and keeps track of everything that happens
+                during the meeting.
               </p>
             </div>
             <div className="px-6 pb-0 bg-stone-50/30 overflow-clip">
@@ -922,7 +923,8 @@ function SummariesSection() {
                 <span className="font-semibold">
                   After the meeting is over,
                 </span>{" "}
-                Char combines your notes with transcripts to create a summary.
+                Hyprnote combines your notes with transcripts to create a
+                summary.
               </p>
             </div>
             <div className="px-6 pb-0 bg-stone-50/30 overflow-clip">
@@ -2428,7 +2430,7 @@ function CTASection() {
         <div className="mb-4 size-40 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[48px] bg-transparent">
           <img
             src="/api/images/hyprnote/icon.png"
-            alt="Char"
+            alt="Hyprnote"
             width={144}
             height={144}
             className="size-36 mx-auto rounded-[40px] border border-neutral-100"

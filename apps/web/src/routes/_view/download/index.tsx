@@ -44,10 +44,10 @@ function Component() {
           <section className="py-16 px-4 sm:px-6">
             <div className="flex flex-col gap-6 max-w-2xl mx-auto text-center mb-16">
               <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600">
-                Download Char
+                Download Hyprnote
               </h1>
               <p className="text-lg sm:text-xl text-neutral-600">
-                Choose your platform to get started with Char
+                Choose your platform to get started with Hyprnote
               </p>
             </div>
 
@@ -316,7 +316,7 @@ function CTASection() {
         <div className="mb-4 size-40 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[48px] bg-transparent">
           <Image
             src="/api/images/hyprnote/icon.png"
-            alt="Char"
+            alt="Hyprnote"
             width={144}
             height={144}
             className="size-36 mx-auto rounded-[40px] border border-neutral-100"

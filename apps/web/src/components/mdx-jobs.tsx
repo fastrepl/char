@@ -87,7 +87,7 @@ const TOOL_NAMES: Record<string, string> = {
   figma: "Figma",
   slack: "Slack",
   github: "GitHub",
-  hyprnote: "Char",
+  hyprnote: "Hyprnote",
 };
 
 function ToolWithIcon({ tool }: { tool: string }) {
@@ -229,7 +229,7 @@ export function HyprnoteIcon() {
   return (
     <img
       src="/api/images/hyprnote/icon.png"
-      alt="Char"
+      alt="Hyprnote"
       className="inline-block align-middle size-4.5 mb-0.75 rounded-md"
     />
   );

@@ -7,7 +7,7 @@ export const Route = createFileRoute("/_view/free")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "Free AI Meeting Notes - Char" },
+      { title: "Free AI Meeting Notes - Hyprnote" },
       {
         name: "description",
         content:
@@ -15,12 +15,12 @@ export const Route = createFileRoute("/_view/free")({
       },
       {
         property: "og:title",
-        content: "Free AI Meeting Notes - Char",
+        content: "Free AI Meeting Notes - Hyprnote",
       },
       {
         property: "og:description",
         content:
-          "Char offers free AI-powered meeting transcription and notes. Local processing, unlimited recordings, and no usage limits. Download now.",
+          "Hyprnote offers free AI-powered meeting transcription and notes. Local processing, unlimited recordings, and no usage limits. Download now.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://hyprnote.com/free" },
@@ -230,14 +230,14 @@ function ComparisonSection() {
             More value than paid alternatives
           </h2>
           <p className="text-lg text-neutral-600">
-            See how Char compares to other meeting note tools
+            See how Hyprnote compares to other meeting note tools
           </p>
         </div>
         <div className="bg-white border border-neutral-200 rounded-lg overflow-hidden">
           <div className="grid grid-cols-3 bg-stone-100 border-b border-neutral-200">
             <div className="p-4 font-medium text-stone-700">Feature</div>
             <div className="p-4 font-medium text-stone-700 text-center border-x border-neutral-200">
-              <span className="text-stone-600">Char</span>
+              <span className="text-stone-600">Hyprnote</span>
               <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
                 Free
               </span>
@@ -300,7 +300,7 @@ function UseCasesSection() {
             Built for every conversation
           </h2>
           <p className="text-lg text-neutral-600">
-            From sales calls to lectures, Char adapts to your needs
+            From sales calls to lectures, Hyprnote adapts to your needs
           </p>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -341,13 +341,13 @@ function OpenSourceSection() {
               Transparent by design
             </h2>
             <p className="text-neutral-600 mb-6 leading-relaxed">
-              Char is fully open source. Inspect the code, contribute
+              Hyprnote is fully open source. Inspect the code, contribute
               improvements, or self-host on your own infrastructure. No vendor
               lock-in, no hidden data collection.
             </p>
             <div className="flex flex-wrap gap-4">
               <a
-                href="https://github.com/fastrepl/char"
+                href="https://github.com/fastrepl/hyprnote"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn([
@@ -406,7 +406,7 @@ function CTASection() {
     <section className="px-6 py-16 lg:py-24 border-t border-neutral-100">
       <div className="max-w-2xl mx-auto text-center">
         <h2 className="text-3xl sm:text-4xl font-serif text-stone-600 mb-4">
-          Ready to try Char?
+          Ready to try Hyprnote?
         </h2>
         <p className="text-lg text-neutral-600 mb-8">
           Download now and start capturing better meeting notes in minutes. No

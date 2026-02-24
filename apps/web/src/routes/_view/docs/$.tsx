@@ -54,11 +54,11 @@ export const Route = createFileRoute("/_view/docs/$")({
 
     return {
       meta: [
-        { title: `${doc.title} - Char Documentation` },
+        { title: `${doc.title} - Hyprnote Documentation` },
         { name: "description", content: doc.summary || doc.title },
         {
           property: "og:title",
-          content: `${doc.title} - Char Documentation`,
+          content: `${doc.title} - Hyprnote Documentation`,
         },
         {
           property: "og:description",
@@ -70,7 +70,7 @@ export const Route = createFileRoute("/_view/docs/$")({
         { name: "twitter:card", content: "summary_large_image" },
         {
           name: "twitter:title",
-          content: `${doc.title} - Char Documentation`,
+          content: `${doc.title} - Hyprnote Documentation`,
         },
         {
           name: "twitter:description",

@@ -7,16 +7,16 @@ export const Route = createFileRoute("/_view/solution/journalism")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "AI Meeting Notes for Journalists - Char" },
+      { title: "AI Meeting Notes for Journalists - Hyprnote" },
       {
         name: "description",
         content:
-          "Capture interviews, press briefings, and source conversations with AI-powered meeting notes. Report with confidence using Char.",
+          "Capture interviews, press briefings, and source conversations with AI-powered meeting notes. Report with confidence using Hyprnote.",
       },
       { name: "robots", content: "noindex, nofollow" },
       {
         property: "og:title",
-        content: "AI Meeting Notes for Journalists - Char",
+        content: "AI Meeting Notes for Journalists - Hyprnote",
       },
       {
         property: "og:description",
@@ -125,8 +125,8 @@ function HeroSection() {
             AI-powered meeting notes
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto">
-            Focus on asking the right questions while Char captures every quote,
-            verifies accuracy, and helps you tell compelling stories.
+            Focus on asking the right questions while Hyprnote captures every
+            quote, verifies accuracy, and helps you tell compelling stories.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -195,7 +195,7 @@ function UseCasesSection() {
           For every beat and story
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
-          Whatever you cover, Char helps you capture and verify every
+          Whatever you cover, Hyprnote helps you capture and verify every
           conversation.
         </p>
         <div className="grid md:grid-cols-2 gap-6">

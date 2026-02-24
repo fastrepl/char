@@ -78,7 +78,7 @@ export function VideoModal({ playbackId, isOpen, onClose }: VideoModalProps) {
           accentColor="#78716c"
           className="w-full h-full rounded-lg"
           metadata={{
-            videoTitle: "Char Feature Demo",
+            videoTitle: "Hyprnote Feature Demo",
           }}
         />
       </div>

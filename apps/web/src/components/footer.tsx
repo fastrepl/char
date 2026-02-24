@@ -1,8 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ExternalLinkIcon, MailIcon } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { cn } from "@hypr/utils";
+import { Image } from "@/components/image";
 
 const vsList = [
   { slug: "otter", name: "Otter.ai" },
@@ -50,16 +50,16 @@ export function Footer() {
 function BrandSection({ currentYear }: { currentYear: number }) {
   return (
     <div className="lg:flex-1">
-      <Link
-        to="/"
-        className="inline-block mb-4 font-semibold text-2xl font-serif"
-      >
-        Char
+      <Link to="/" className="inline-block mb-4">
+        <Image
+          src="/api/images/hyprnote/logo.svg"
+          alt="Hyprnote"
+          className="h-6"
+        />
       </Link>
       <p className="text-sm text-neutral-500 mb-4">Fastrepl © {currentYear}</p>
       <p className="text-sm text-neutral-600 mb-3">
-        Are you in back-to-back meetings?
-        <br />
+        Are you in back-to-back meetings?{" "}
         <Link
           to="/auth/"
           className="text-neutral-600 hover:text-stone-600 transition-colors underline decoration-solid"
@@ -141,7 +141,7 @@ function ProductLinks() {
         </li>
         <li>
           <a
-            href="https://github.com/fastrepl/char"
+            href="https://github.com/fastrepl/hyprnote"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-neutral-600 hover:text-stone-600 transition-colors inline-flex items-center gap-1 no-underline hover:underline hover:decoration-dotted"
@@ -166,50 +166,17 @@ function ProductLinks() {
   );
 }
 
-function useRotatingIndex(listLength: number, interval: number) {
-  const [index, setIndex] = useState(0);
-  const [fading, setFading] = useState(false);
-  const pausedRef = useRef(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    setIndex(Math.floor(Math.random() * listLength));
-  }, [listLength]);
-
-  const advance = useCallback(() => {
-    if (pausedRef.current) return;
-    setFading(true);
-    timeoutRef.current = setTimeout(() => {
-      if (pausedRef.current) return;
-      setIndex((prev) => (prev + 1) % listLength);
-      setFading(false);
-    }, 200);
-  }, [listLength]);
-
-  useEffect(() => {
-    const id = setInterval(advance, interval);
-    return () => {
-      clearInterval(id);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, [advance, interval]);
-
-  const pause = useCallback(() => {
-    pausedRef.current = true;
-  }, []);
-  const resume = useCallback(() => {
-    pausedRef.current = false;
-  }, []);
-
-  return { index, fading, pause, resume };
-}
-
 function ResourcesLinks() {
-  const vs = useRotatingIndex(vsList.length, 3000);
-  const useCase = useRotatingIndex(useCasesList.length, 4000);
+  const [vsIndex, setVsIndex] = useState(0);
+  const [useCaseIndex, setUseCaseIndex] = useState(0);
 
-  const currentVs = vsList[vs.index];
-  const currentUseCase = useCasesList[useCase.index];
+  useEffect(() => {
+    setVsIndex(Math.floor(Math.random() * vsList.length));
+    setUseCaseIndex(Math.floor(Math.random() * useCasesList.length));
+  }, []);
+
+  const currentVs = vsList[vsIndex];
+  const currentUseCase = useCasesList[useCaseIndex];
 
   return (
     <div>
@@ -251,7 +218,7 @@ function ResourcesLinks() {
         </li>
         <li>
           <a
-            href="https://github.com/fastrepl/char/discussions"
+            href="https://github.com/fastrepl/hyprnote/discussions"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-neutral-600 hover:text-stone-600 transition-colors inline-flex items-center gap-1 no-underline hover:underline hover:decoration-dotted"
@@ -269,52 +236,30 @@ function ResourcesLinks() {
             <MailIcon className="size-3" />
           </a>
         </li>
-        <li onMouseEnter={useCase.pause} onMouseLeave={useCase.resume}>
+        <li>
           <Link
             to={currentUseCase.to}
-            className={cn(
-              "text-sm text-neutral-600 hover:text-stone-600 transition-colors no-underline hover:underline hover:decoration-dotted",
-              "inline-flex items-center gap-1",
-            )}
-            aria-label={`Char for ${currentUseCase.label}`}
+            className="text-sm text-neutral-600 hover:text-stone-600 transition-colors no-underline hover:underline hover:decoration-dotted"
+            aria-label={`Hyprnote for ${currentUseCase.label}`}
           >
-            👍 for{" "}
-            <span
-              className={cn(
-                "transition-opacity duration-200",
-                useCase.fading ? "opacity-0" : "opacity-100",
-              )}
-            >
-              {currentUseCase.label}
-            </span>
+            👍 for {currentUseCase.label}
           </Link>
         </li>
-        <li onMouseEnter={vs.pause} onMouseLeave={vs.resume}>
+        <li>
           <Link
             to="/vs/$slug/"
             params={{ slug: currentVs.slug }}
-            className={cn(
-              "text-sm text-neutral-600 hover:text-stone-600 transition-colors no-underline hover:underline hover:decoration-dotted",
-              "inline-flex items-center gap-1",
-            )}
+            className="text-sm text-neutral-600 hover:text-stone-600 transition-colors no-underline hover:underline hover:decoration-dotted"
             aria-label={`Versus ${currentVs.name}`}
           >
             <img
               src="/api/images/hyprnote/icon.png"
-              alt="Char"
+              alt="Hyprnote"
               width={12}
               height={12}
               className="size-4 rounded border border-neutral-100 inline"
             />{" "}
-            vs{" "}
-            <span
-              className={cn(
-                "transition-opacity duration-200",
-                vs.fading ? "opacity-0" : "opacity-100",
-              )}
-            >
-              {currentVs.name}
-            </span>
+            vs {currentVs.name}
           </Link>
         </li>
       </ul>

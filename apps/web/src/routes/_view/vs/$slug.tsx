@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_view/vs/$slug")({
     }
 
     const { doc } = loaderData;
-    const metaTitle = `Char vs ${doc.name} - Privacy-First AI Notetaking`;
+    const metaTitle = `Hyprnote vs ${doc.name} - Privacy-First AI Notetaking`;
 
     return {
       meta: [
@@ -127,7 +127,7 @@ function HeroSection({
             <div className="absolute bottom-0 right-0 size-28 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-4xl bg-white z-10">
               <img
                 src="/api/images/hyprnote/icon.png"
-                alt="Char"
+                alt="Hyprnote"
                 className="size-24 rounded-[28px] border border-neutral-100"
               />
             </div>
@@ -146,7 +146,7 @@ function HeroSection({
             <div className="size-32 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[40px] bg-transparent scale-110">
               <img
                 src="/api/images/hyprnote/icon.png"
-                alt="Char"
+                alt="Hyprnote"
                 className="size-28 rounded-4xl border border-neutral-100"
               />
             </div>
@@ -169,7 +169,7 @@ function HeroSection({
               "hover:scale-105 active:scale-95 transition-transform",
             ])}
           >
-            Download Char for free
+            Download Hyprnote for free
           </Link>
         </div>
       </header>

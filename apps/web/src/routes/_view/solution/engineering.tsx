@@ -218,9 +218,9 @@ const apiFeatures = [
 
 const faqs = [
   {
-    question: "Can I build commercial products on Char?",
+    question: "Can I build commercial products on Hyprnote?",
     answer:
-      "Yes. The open source license permits commercial use. Build integrations, sell extensions, or embed Char in your own products—no licensing fees, no revenue sharing requirements.",
+      "Yes. The open source license permits commercial use. Build integrations, sell extensions, or embed Hyprnote in your own products—no licensing fees, no revenue sharing requirements.",
   },
   {
     question: "Is the entire codebase open?",
@@ -230,7 +230,7 @@ const faqs = [
   {
     question: "Can I run it completely offline?",
     answer:
-      "Yes. Download Whisper models once, run a local LLM server (LM Studio/Ollama), and Char never needs internet. Audio processing, transcription, AI summaries—all on-device. Perfect for air-gapped environments or when you don't trust cloud providers.",
+      "Yes. Download Whisper models once, run a local LLM server (LM Studio/Ollama), and Hyprnote never needs internet. Audio processing, transcription, AI summaries—all on-device. Perfect for air-gapped environments or when you don't trust cloud providers.",
   },
   {
     question: "What's the extension security model?",
@@ -240,7 +240,7 @@ const faqs = [
   {
     question: "Do you train AI models on my data?",
     answer:
-      "No. Char doesn't collect transcripts, recordings, or notes for training. When you use cloud STT providers, your data is processed per their privacy policies (most don't retain audio post-transcription), but Char itself never trains on your data.",
+      "No. Hyprnote doesn't collect transcripts, recordings, or notes for training. When you use cloud STT providers, your data is processed per their privacy policies (most don't retain audio post-transcription), but Hyprnote itself never trains on your data.",
   },
 ];
 
@@ -294,7 +294,7 @@ function HeroSection() {
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="https://github.com/fastrepl/char"
+              href="https://github.com/fastrepl/hyprnote"
               target="_blank"
               rel="noopener noreferrer"
               className={cn([
@@ -314,7 +314,7 @@ function HeroSection() {
                 "hover:bg-stone-50 transition-colors",
               ])}
             >
-              Download Char
+              Download Hyprnote
             </Link>
           </div>
         </header>
@@ -511,7 +511,7 @@ function FAQSection() {
           Frequently Asked Questions
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
-          Common questions about building with Char.
+          Common questions about building with Hyprnote.
         </p>
         <Accordion type="single" collapsible className="space-y-2">
           {faqs.map((faq, index) => (
@@ -545,7 +545,7 @@ function CTASection() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a
-            href="https://github.com/fastrepl/char"
+            href="https://github.com/fastrepl/hyprnote"
             target="_blank"
             rel="noopener noreferrer"
             className={cn([
@@ -565,7 +565,7 @@ function CTASection() {
               "hover:bg-stone-500/50 transition-colors",
             ])}
           >
-            Download Char
+            Download Hyprnote
           </Link>
         </div>
       </div>

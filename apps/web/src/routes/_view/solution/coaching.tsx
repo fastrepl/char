@@ -7,16 +7,16 @@ export const Route = createFileRoute("/_view/solution/coaching")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "AI Meeting Notes for Coaches - Char" },
+      { title: "AI Meeting Notes for Coaches - Hyprnote" },
       {
         name: "description",
         content:
-          "Capture coaching sessions, client progress, and breakthrough moments with AI-powered meeting notes. Focus on your clients with Char.",
+          "Capture coaching sessions, client progress, and breakthrough moments with AI-powered meeting notes. Focus on your clients with Hyprnote.",
       },
       { name: "robots", content: "noindex, nofollow" },
       {
         property: "og:title",
-        content: "AI Meeting Notes for Coaches - Char",
+        content: "AI Meeting Notes for Coaches - Hyprnote",
       },
       {
         property: "og:description",
@@ -125,7 +125,7 @@ function HeroSection() {
             AI-powered meeting notes
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto">
-            Be fully present with your clients while Char captures every
+            Be fully present with your clients while Hyprnote captures every
             insight, tracks progress, and helps you deliver transformational
             coaching.
           </p>
@@ -196,8 +196,8 @@ function UseCasesSection() {
           For every coaching practice
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
-          Whatever your coaching specialty, Char helps you capture and leverage
-          every client session.
+          Whatever your coaching specialty, Hyprnote helps you capture and
+          leverage every client session.
         </p>
         <div className="grid md:grid-cols-2 gap-6">
           {useCases.map((useCase) => (

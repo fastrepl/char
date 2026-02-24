@@ -7,7 +7,7 @@ export const Route = createFileRoute("/_view/solution/knowledge-workers")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "AI Meeting Notes for Knowledge Workers - Char" },
+      { title: "AI Meeting Notes for Knowledge Workers - Hyprnote" },
       {
         name: "description",
         content:
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_view/solution/knowledge-workers")({
       { name: "robots", content: "noindex, nofollow" },
       {
         property: "og:title",
-        content: "AI Meeting Notes for Knowledge Workers - Char",
+        content: "AI Meeting Notes for Knowledge Workers - Hyprnote",
       },
       {
         property: "og:description",
@@ -125,9 +125,9 @@ function HeroSection() {
             not on taking notes
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto">
-            Stop scrambling to capture everything. Char records your meetings,
-            transcribes conversations, and creates smart summaries so you can
-            stay present.
+            Stop scrambling to capture everything. Hyprnote records your
+            meetings, transcribes conversations, and creates smart summaries so
+            you can stay present.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -196,7 +196,7 @@ function UseCasesSection() {
           For every conversation
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
-          From team syncs to client calls, Char helps you capture and act on
+          From team syncs to client calls, Hyprnote helps you capture and act on
           every interaction.
         </p>
         <div className="grid md:grid-cols-2 gap-6">

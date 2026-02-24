@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_view/eval/")({
   loader: () => EVAL_DATA,
   head: () => ({
     meta: [
-      { title: "LLM Model Evaluation for Meeting Notes - Char" },
+      { title: "LLM Model Evaluation for Meeting Notes - Hyprnote" },
       {
         name: "description",
         content:
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_view/eval/")({
       },
       {
         property: "og:title",
-        content: "LLM Model Evaluation for Meeting Notes - Char",
+        content: "LLM Model Evaluation for Meeting Notes - Hyprnote",
       },
       {
         property: "og:description",
@@ -94,7 +94,7 @@ function Component() {
               "hover:scale-105 active:scale-95 transition-transform",
             ])}
           >
-            Try Char Free
+            Try Hyprnote Free
           </Link>
         </div>
 
@@ -141,10 +141,10 @@ function Component() {
               relevance of outputs.
             </p>
             <p className="text-neutral-600 leading-relaxed">
-              Char supports multiple AI providers, allowing you to choose the
-              model that best fits your needs. Whether you prioritize accuracy,
-              speed, or privacy with local models, our flexible architecture
-              adapts to your workflow.
+              Hyprnote supports multiple AI providers, allowing you to choose
+              the model that best fits your needs. Whether you prioritize
+              accuracy, speed, or privacy with local models, our flexible
+              architecture adapts to your workflow.
             </p>
           </div>
         </div>

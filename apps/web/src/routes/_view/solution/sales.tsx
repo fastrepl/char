@@ -7,16 +7,16 @@ export const Route = createFileRoute("/_view/solution/sales")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "AI Meeting Notes for Sales Teams - Char" },
+      { title: "AI Meeting Notes for Sales Teams - Hyprnote" },
       {
         name: "description",
         content:
-          "Capture every sales call detail with AI-powered meeting notes. Get automatic transcriptions, deal insights, and CRM-ready summaries. Close more deals with Char.",
+          "Capture every sales call detail with AI-powered meeting notes. Get automatic transcriptions, deal insights, and CRM-ready summaries. Close more deals with Hyprnote.",
       },
       { name: "robots", content: "noindex, nofollow" },
       {
         property: "og:title",
-        content: "AI Meeting Notes for Sales Teams - Char",
+        content: "AI Meeting Notes for Sales Teams - Hyprnote",
       },
       {
         property: "og:description",
@@ -126,8 +126,8 @@ function HeroSection() {
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto">
             Stop taking notes during sales calls. Focus on building
-            relationships while Char captures every detail, extracts insights,
-            and prepares your follow-ups.
+            relationships while Hyprnote captures every detail, extracts
+            insights, and prepares your follow-ups.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -196,7 +196,7 @@ function UseCasesSection() {
           For every sales conversation
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
-          From first touch to closed-won, Char helps you capture and act on
+          From first touch to closed-won, Hyprnote helps you capture and act on
           every interaction.
         </p>
         <div className="grid md:grid-cols-2 gap-6">

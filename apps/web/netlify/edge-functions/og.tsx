@@ -303,7 +303,7 @@ function renderChangelogTemplate(params: z.infer<typeof changelogSchema>) {
             display: "flex",
           }}
         >
-          Char.
+          Hyprnote.
         </div>
         <div
           style={{
@@ -401,7 +401,7 @@ function renderChangelogTemplate(params: z.infer<typeof changelogSchema>) {
           display: "flex",
         }}
       >
-        Char.
+        Hyprnote.
       </div>
       <div
         style={{
@@ -443,10 +443,7 @@ function getAuthorAvatar(author: string): string {
 }
 
 function renderBlogTemplate(params: z.infer<typeof blogSchema>) {
-  const authors = params.author
-    .split(",")
-    .map((a) => a.trim())
-    .filter(Boolean);
+  const avatarUrl = getAuthorAvatar(params.author);
 
   return (
     <div
@@ -474,28 +471,21 @@ function renderBlogTemplate(params: z.infer<typeof blogSchema>) {
           {preventWidow(params.title)}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          {authors.map((name, i) => (
-            <div
-              key={i}
-              style={{ display: "flex", alignItems: "center", gap: 8 }}
-            >
-              <img
-                style={{ width: 44, height: 44, borderRadius: 1000 }}
-                src={getAuthorAvatar(name)}
-              />
-              <div
-                style={{
-                  color: "#292524",
-                  fontSize: 28,
-                  fontFamily: "Lora",
-                  fontWeight: "400",
-                  wordWrap: "break-word",
-                }}
-              >
-                {name}
-              </div>
-            </div>
-          ))}
+          <img
+            style={{ width: 44, height: 44, borderRadius: 1000 }}
+            src={avatarUrl}
+          />
+          <div
+            style={{
+              color: "#292524",
+              fontSize: 28,
+              fontFamily: "Lora",
+              fontWeight: "400",
+              wordWrap: "break-word",
+            }}
+          >
+            {params.author}
+          </div>
         </div>
         <div
           style={{
@@ -535,7 +525,7 @@ function renderBlogTemplate(params: z.infer<typeof blogSchema>) {
               wordWrap: "break-word",
             }}
           >
-            Char.
+            Hyprnote.
           </div>
         </div>
       </div>
@@ -646,7 +636,7 @@ function renderGenericTemplate({
 
 function renderDocsTemplate(params: z.infer<typeof docsSchema>) {
   return renderGenericTemplate({
-    headerText: "Char / Docs",
+    headerText: "Hyprnote / Docs",
     category: params.section,
     title: params.title,
     description: params.description,
@@ -655,7 +645,7 @@ function renderDocsTemplate(params: z.infer<typeof docsSchema>) {
 
 function renderHandbookTemplate(params: z.infer<typeof handbookSchema>) {
   return renderGenericTemplate({
-    headerText: "Char / Company Handbook",
+    headerText: "Hyprnote / Company Handbook",
     category: params.section,
     title: params.title,
     description: params.description,
@@ -664,7 +654,7 @@ function renderHandbookTemplate(params: z.infer<typeof handbookSchema>) {
 
 function renderTemplatesTemplate(params: z.infer<typeof templatesSchema>) {
   return renderGenericTemplate({
-    headerText: "Char / Meeting Templates",
+    headerText: "Hyprnote / Meeting Templates",
     category: params.category,
     title: params.title,
     description: params.description,
@@ -673,7 +663,7 @@ function renderTemplatesTemplate(params: z.infer<typeof templatesSchema>) {
 
 function renderShortcutsTemplate(params: z.infer<typeof shortcutsSchema>) {
   return renderGenericTemplate({
-    headerText: "Char / Shortcuts",
+    headerText: "Hyprnote / Shortcuts",
     category: params.category,
     title: params.title,
     description: params.description,

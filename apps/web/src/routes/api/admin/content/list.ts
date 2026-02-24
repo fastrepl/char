@@ -23,7 +23,7 @@ export const Route = createFileRoute("/api/admin/content/list")({
           const path = url.searchParams.get("path") || "";
 
           const owner = "fastrepl";
-          const repo = "char";
+          const repo = "hyprnote";
           const branch = "main";
           const contentPath = `apps/web/content/${path}`;
 

@@ -17,7 +17,7 @@ export type VersionEntry = {
 };
 
 const GITHUB_REPO_OWNER = "fastrepl";
-const GITHUB_REPO_NAME = "char";
+const GITHUB_REPO_NAME = "hyprnote";
 
 type GithubTagResponse = {
   name: string;

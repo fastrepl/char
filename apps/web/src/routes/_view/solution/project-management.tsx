@@ -7,16 +7,16 @@ export const Route = createFileRoute("/_view/solution/project-management")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "AI Meeting Notes for Project Management - Char" },
+      { title: "AI Meeting Notes for Project Management - Hyprnote" },
       {
         name: "description",
         content:
-          "Capture every project meeting with AI-powered notes. Track decisions, action items, and stakeholder discussions. Keep projects on track with Char.",
+          "Capture every project meeting with AI-powered notes. Track decisions, action items, and stakeholder discussions. Keep projects on track with Hyprnote.",
       },
       { name: "robots", content: "noindex, nofollow" },
       {
         property: "og:title",
-        content: "AI Meeting Notes for Project Management - Char",
+        content: "AI Meeting Notes for Project Management - Hyprnote",
       },
       {
         property: "og:description",
@@ -125,7 +125,7 @@ function HeroSection() {
             with AI-powered notes
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto">
-            Focus on leading your projects, not taking notes. Char captures
+            Focus on leading your projects, not taking notes. Hyprnote captures
             every meeting detail so nothing falls through the cracks.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">

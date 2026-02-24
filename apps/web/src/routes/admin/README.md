@@ -1,6 +1,6 @@
 # Admin Interface
 
-The admin interface at `/admin` provides content management capabilities for the Char website.
+The admin interface at `/admin` provides content management capabilities for the Hyprnote website.
 
 ## Authentication
 
@@ -52,23 +52,43 @@ Complete flow from editing to publication:
 **1. User Edits a Published Article**
 - Open `/admin/collections` and select a published article
 - Make changes in the editor
-- Auto-save runs every 60 seconds, or save manually with ⌘S / Save button
 
-**2. Save Creates a PR**
+**2. User Clicks "Save"**
 - Creates a new branch `blog/{slug}-{timestamp}` (or uses existing one)
-- Creates a non-draft PR to `main`, ready to merge
-- Assigns `harshikaalagh-netizen` as reviewer on PR creation
-- A banner appears in the editor linking to the PR
+- Commits with `ready_for_review: false` in frontmatter
+- Creates/updates PR to `main`
 
 **3. GitHub Actions Trigger**
 - `blog-grammar-check.yml` - Runs AI grammar check, posts suggestions as PR comment
+- `blog-slack-notify.yml` - Sends Slack notification (green border):
+  ```
+  ✏️ @user made changes to *Article Title*
+  ```
 
 **4. User Continues Editing (Optional)**
-- Each save updates the same PR branch
-- Each push triggers the grammar check again
+- Each "Save" updates the same PR branch
+- Each push triggers workflows again
 
-**5. Reviewer Merges PR**
+**5. User Clicks "Submit for Review"**
+- Updates frontmatter to `ready_for_review: true`
+- Adds `ComputelessComputer` as PR reviewer
+
+**6. GitHub Actions Trigger Again**
+- Slack notification changes to (blue border):
+  ```
+  👀 *Article submitted for review*
+  @john please review
+  ```
+
+**7. Reviewer Merges PR**
 - Article goes live on the website
+
+**Slack Notification Summary:**
+
+| Action | `ready_for_review` | Slack Message | Border |
+|--------|-------------------|---------------|--------|
+| Save | `false` | "✏️ made changes" | Green |
+| Submit for Review | `true` | "👀 submitted for review" @john | Blue |
 
 ## API Endpoints
 
@@ -97,7 +117,7 @@ All API endpoints require admin authentication.
 - `POST /api/admin/content/save` - Save content (creates PR for published articles)
 - `POST /api/admin/content/create` - Create new content file
 - `POST /api/admin/content/publish` - Publish/unpublish an article
-
+- `POST /api/admin/content/submit-for-review` - Submit article for editorial review
 - `POST /api/admin/content/rename` - Rename a content file
 - `POST /api/admin/content/duplicate` - Duplicate a content file
 - `POST /api/admin/content/delete` - Delete a content file
@@ -107,8 +127,9 @@ All API endpoints require admin authentication.
 The editorial workflow is powered by two GitHub Actions workflows in `.github/workflows/`:
 
 - **`blog-grammar-check.yml`** - Runs AI-powered grammar check on article PRs and posts suggestions as comments
+- **`blog-slack-notify.yml`** - Sends Slack notifications for article changes with editorial status detection
 
-Triggers on PRs to `main` that modify `apps/web/content/articles/**` on `blog/` branches.
+Both trigger on PRs to `main` that modify `apps/web/content/articles/**` on `blog/` branches.
 
 ## Environment Variables
 

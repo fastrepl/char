@@ -6,11 +6,11 @@ export const Route = createFileRoute("/_view/product/extensions")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "Extensions - Char" },
+      { title: "Extensions - Hyprnote" },
       {
         name: "description",
         content:
-          "Connect Char with your favorite tools and build custom integrations with our API. Extensions coming soon.",
+          "Connect Hyprnote with your favorite tools and build custom integrations with our API. Extensions coming soon.",
       },
       { name: "robots", content: "noindex, nofollow" },
     ],
@@ -45,8 +45,8 @@ function Component() {
               Build Beyond the Defaults
             </h1>
             <p className="text-lg sm:text-xl text-neutral-600 mb-10">
-              Extend Char with custom themes, plugins, and views. Build together
-              with the community.
+              Extend Hyprnote with custom themes, plugins, and views. Build
+              together with the community.
             </p>
 
             <div className="mb-10">

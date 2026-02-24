@@ -115,12 +115,14 @@ export function getSitemap(): Sitemap<TRoutes> {
             console.warn("allArticles is not an array:", typeof allArticles);
             return [];
           }
-          return allArticles.map((article: any) => ({
-            path: `/blog/${article.slug}`,
-            priority: 0.7,
-            changeFrequency: "weekly" as const,
-            lastModified: article.date,
-          }));
+          return allArticles
+            .filter((article: any) => article.published !== false)
+            .map((article: any) => ({
+              path: `/blog/${article.slug}`,
+              priority: 0.7,
+              changeFrequency: "weekly" as const,
+              lastModified: article.date,
+            }));
         } catch (error) {
           console.warn("Failed to load blog articles for sitemap:", error);
           return [];

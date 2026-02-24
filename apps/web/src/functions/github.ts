@@ -3,13 +3,13 @@ import { createServerFn } from "@tanstack/react-start";
 
 import { env } from "../env";
 
-const GITHUB_ORG_REPO = "fastrepl/char";
+const GITHUB_ORG_REPO = "fastrepl/hyprnote";
 const CACHE_TTL = HOUR;
 
 function getGitHubHeaders(): Record<string, string> {
   const headers: Record<string, string> = {
     Accept: "application/vnd.github.v3+json",
-    "User-Agent": "Char-Web",
+    "User-Agent": "Hyprnote-Web",
   };
   if (env.GITHUB_TOKEN) {
     headers["Authorization"] = `token ${env.GITHUB_TOKEN}`;

@@ -69,10 +69,6 @@ export const ADMIN_EMAILS = [
   "marketing@hyprnote.com",
   "harshika.alagh@gmail.com",
   "yunhyungjo@yonsei.ac.kr",
-  "goranmoomin@daum.net",
-  "artem@hyprnote.com",
-  "stua@fastmail.com",
-  "thestua@gmail.com",
 ];
 
 export const TEAM_PHOTOS = [

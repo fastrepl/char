@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_view/product/mini-apps")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "Mini Apps - Char" },
+      { title: "Mini Apps - Hyprnote" },
       {
         name: "description",
         content:
@@ -592,7 +592,7 @@ function CTASection() {
         <div className="mb-4 size-40 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[48px] bg-transparent">
           <img
             src="/api/images/hyprnote/icon.png"
-            alt="Char"
+            alt="Hyprnote"
             width={144}
             height={144}
             className="size-36 mx-auto rounded-[40px] border border-neutral-100"
@@ -602,8 +602,8 @@ function CTASection() {
           Get the complete experience
         </h2>
         <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-          Download Char to start using contacts, calendar, and folders today.
-          Daily notes coming soon
+          Download Hyprnote to start using contacts, calendar, and folders
+          today. Daily notes coming soon
         </p>
         <div className="pt-6 flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Link

@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_view/legal/$slug")({
 
     return {
       meta: [
-        { title: `${doc.title} - Char` },
+        { title: `${doc.title} - Hyprnote` },
         { name: "description", content: doc.summary },
         { property: "og:title", content: doc.title },
         { property: "og:description", content: doc.summary },

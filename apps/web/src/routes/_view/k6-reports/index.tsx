@@ -81,7 +81,7 @@ function Component() {
                 </div>
                 {report.run_id && (
                   <a
-                    href={`https://github.com/fastrepl/char/actions/runs/${report.run_id}`}
+                    href={`https://github.com/fastrepl/hyprnote/actions/runs/${report.run_id}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}

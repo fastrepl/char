@@ -9,26 +9,26 @@ export const Route = createFileRoute("/_view/privacy")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "Privacy - Char" },
+      { title: "Privacy - Hyprnote" },
       {
         name: "description",
         content:
-          "Your privacy is not just a feature at Char—it's our foundation. Learn how we protect your meeting data with local-first architecture and zero data collection.",
+          "Your privacy is not just a feature at Hyprnote—it's our foundation. Learn how we protect your meeting data with local-first architecture and zero data collection.",
       },
-      { property: "og:title", content: "Privacy - Char" },
+      { property: "og:title", content: "Privacy - Hyprnote" },
       {
         property: "og:description",
         content:
-          "We believe your conversations belong to you, not to us or anyone else. Discover how Char puts your privacy first.",
+          "We believe your conversations belong to you, not to us or anyone else. Discover how Hyprnote puts your privacy first.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://hyprnote.com/privacy" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Privacy - Char" },
+      { name: "twitter:title", content: "Privacy - Hyprnote" },
       {
         name: "twitter:description",
         content:
-          "We believe your conversations belong to you, not to us or anyone else. Discover how Char puts your privacy first.",
+          "We believe your conversations belong to you, not to us or anyone else. Discover how Hyprnote puts your privacy first.",
       },
     ],
   }),
@@ -74,10 +74,10 @@ function HeroSection() {
             belong to you
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 leading-relaxed max-w-3xl mx-auto">
-            At Char, we believe privacy isn't just a feature—it's a fundamental
-            right. Your meeting conversations contain your most sensitive ideas,
-            strategies, and personal moments. We've built Char to ensure they
-            stay yours, and yours alone.
+            At Hyprnote, we believe privacy isn't just a feature—it's a
+            fundamental right. Your meeting conversations contain your most
+            sensitive ideas, strategies, and personal moments. We've built
+            Hyprnote to ensure they stay yours, and yours alone.
           </p>
         </header>
       </div>
@@ -103,7 +103,7 @@ function PrivacyPromiseSection() {
       icon: "mdi:account-off",
       title: "No account required",
       description:
-        "Use Char without creating an account. Your identity remains private, and there's no profile data for us to store or leak.",
+        "Use Hyprnote without creating an account. Your identity remains private, and there's no profile data for us to store or leak.",
     },
     {
       icon: "mdi:chart-line",
@@ -156,8 +156,9 @@ function DataOwnershipSection() {
             You own your data, completely
           </h2>
           <p className="text-neutral-600 max-w-2xl mx-auto">
-            With Char, data ownership isn't a marketing term—it's a technical
-            reality. Your data lives on your device, in formats you control.
+            With Hyprnote, data ownership isn't a marketing term—it's a
+            technical reality. Your data lives on your device, in formats you
+            control.
           </p>
         </div>
 
@@ -211,7 +212,7 @@ function DataOwnershipSection() {
                 If you choose to sync across devices, your data is encrypted
                 before it leaves your device. We use end-to-end encryption so
                 even our servers can't read your content. But sync is entirely
-                optional—Char works perfectly as a standalone, offline
+                optional—Hyprnote works perfectly as a standalone, offline
                 application.
               </p>
             </div>
@@ -253,8 +254,8 @@ function NoTrackingSection() {
                 </h3>
                 <p className="text-neutral-600">
                   Your transcripts and notes are never used to train AI models.
-                  The AI features in Char run locally on your device, and your
-                  content stays private.
+                  The AI features in Hyprnote run locally on your device, and
+                  your content stays private.
                 </p>
               </div>
             </div>
@@ -316,8 +317,8 @@ function TransparencySection() {
             Verify, don't trust
           </h2>
           <p className="text-neutral-600 max-w-2xl mx-auto">
-            We don't ask you to take our word for it. Char is fully open source,
-            so you can verify every privacy claim yourself.
+            We don't ask you to take our word for it. Hyprnote is fully open
+            source, so you can verify every privacy claim yourself.
           </p>
         </div>
 
@@ -354,7 +355,7 @@ function TransparencySection() {
 
         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
           <a
-            href="https://github.com/fastrepl/char"
+            href="https://github.com/fastrepl/hyprnote"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 text-stone-600 hover:text-stone-800 font-medium"
@@ -419,7 +420,7 @@ function PrivacyComparisonSection() {
             How we compare
           </h2>
           <p className="text-neutral-600 max-w-2xl mx-auto">
-            Most meeting tools treat your data as their asset. We built Char
+            Most meeting tools treat your data as their asset. We built Hyprnote
             differently.
           </p>
         </div>
@@ -432,7 +433,7 @@ function PrivacyComparisonSection() {
                   Feature
                 </th>
                 <th className="text-center py-4 px-4 font-medium text-stone-600 bg-stone-50">
-                  Char
+                  Hyprnote
                 </th>
                 <th className="text-center py-4 px-4 font-medium text-neutral-500">
                   Others
@@ -490,7 +491,7 @@ function CTASection() {
             ])}
           >
             <Icon icon="mdi:download" className="text-lg" />
-            Download Char
+            Download Hyprnote
           </Link>
           <Link
             to="/security/"

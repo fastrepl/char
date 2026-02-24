@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_view/integrations/$category/$slug")({
     }
 
     const { doc } = loaderData;
-    const metaTitle = `${doc.platform} ${doc.slug.charAt(0).toUpperCase() + doc.slug.slice(1).replace(/-/g, " ")} - Char`;
+    const metaTitle = `${doc.platform} ${doc.slug.charAt(0).toUpperCase() + doc.slug.slice(1).replace(/-/g, " ")} - Hyprnote`;
 
     return {
       meta: [
@@ -134,7 +134,7 @@ function HeroSection({
           <div className="size-32 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[36px] bg-white">
             <img
               src="/api/images/hyprnote/icon.png"
-              alt="Char"
+              alt="Hyprnote"
               className="size-24 rounded-[28px]"
             />
           </div>
@@ -169,7 +169,7 @@ function HeroSection({
               "hover:scale-105 active:scale-95 transition-transform",
             ])}
           >
-            Download Char for free
+            Download Hyprnote for free
           </Link>
         </div>
       </header>

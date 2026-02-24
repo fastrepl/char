@@ -50,7 +50,7 @@ export const Route = createFileRoute("/api/admin/content/history")({
         const { token } = credentials;
 
         const owner = "fastrepl";
-        const repo = "char";
+        const repo = "hyprnote";
         const branch = "main";
         const fullPath = filePath.startsWith("apps/web/content")
           ? filePath

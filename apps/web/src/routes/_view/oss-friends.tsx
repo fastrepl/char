@@ -12,13 +12,13 @@ export const Route = createFileRoute("/_view/oss-friends")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "OSS Friends - Char" },
+      { title: "OSS Friends - Hyprnote" },
       {
         name: "description",
         content:
-          "Discover amazing open source projects and tools built by our friends in the community. Char is proud to be part of the open source ecosystem.",
+          "Discover amazing open source projects and tools built by our friends in the community. Hyprnote is proud to be part of the open source ecosystem.",
       },
-      { property: "og:title", content: "OSS Friends - Char" },
+      { property: "og:title", content: "OSS Friends - Hyprnote" },
       {
         property: "og:description",
         content:
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_view/oss-friends")({
         content: "https://hyprnote.com/oss-friends",
       },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "OSS Friends - Char" },
+      { name: "twitter:title", content: "OSS Friends - Hyprnote" },
       {
         name: "twitter:description",
         content:
@@ -224,7 +224,7 @@ function JoinSection() {
           featured on this page, we'd love to hear from you.
         </p>
         <a
-          href="https://github.com/fastrepl/char/issues/new?title=OSS%20Friends%20Request&body=Project%20Name:%0AProject%20URL:%0ADescription:"
+          href="https://github.com/fastrepl/hyprnote/issues/new?title=OSS%20Friends%20Request&body=Project%20Name:%0AProject%20URL:%0ADescription:"
           target="_blank"
           rel="noopener noreferrer"
           className={cn([

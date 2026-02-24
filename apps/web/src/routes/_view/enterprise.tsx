@@ -7,7 +7,7 @@ export const Route = createFileRoute("/_view/enterprise")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "Meeting AI Configured For Your Organization - Char" },
+      { title: "Meeting AI Configured For Your Organization - Hyprnote" },
       {
         name: "description",
         content:
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_view/enterprise")({
       },
       {
         property: "og:title",
-        content: "Meeting AI Configured For Your Organization - Char",
+        content: "Meeting AI Configured For Your Organization - Hyprnote",
       },
       {
         property: "og:description",
@@ -114,13 +114,13 @@ const faqs = [
     question:
       "How can I boost my team's productivity while ensuring data sovereignty?",
     answer:
-      "Deploy Char on your own infrastructure to maintain complete control over your data. Your meeting recordings and transcripts never leave your network, ensuring full compliance with data residency requirements.",
+      "Deploy Hyprnote on your own infrastructure to maintain complete control over your data. Your meeting recordings and transcripts never leave your network, ensuring full compliance with data residency requirements.",
   },
   {
     question:
       "Is there a way to ensure consents are properly granted and managed?",
     answer:
-      "Char provides multiple consent options including voice-activated consent during meetings, pre-meeting consent links, and explicit consent prompts when joining. We prioritize transparency and respect in every recording scenario.",
+      "Hyprnote provides multiple consent options including voice-activated consent during meetings, pre-meeting consent links, and explicit consent prompts when joining. We prioritize transparency and respect in every recording scenario.",
   },
   {
     question: "How secure is the platform?",
@@ -135,7 +135,7 @@ const faqs = [
   {
     question: "What deployment options are available?",
     answer:
-      "Char adapts to your workflow with multiple form factors: native desktop applications (currently available for macOS), web interface, mobile apps, or even bot integration for remote meeting capture. Choose the deployment method that works best for your team.",
+      "Hyprnote adapts to your workflow with multiple form factors: native desktop applications (currently available for macOS), web interface, mobile apps, or even bot integration for remote meeting capture. Choose the deployment method that works best for your team.",
   },
 ];
 

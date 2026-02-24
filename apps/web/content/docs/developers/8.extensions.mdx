@@ -1,14 +1,14 @@
 ---
 title: "Extensions"
 section: "Developers"
-description: "Learn how to create and develop extensions for Char"
+description: "Learn how to create and develop extensions for Hyprnote"
 ---
 
 # Overview
 
-Extensions allow you to add custom functionality to Char through panels that appear in the sidebar. Each extension can define one or more panels with custom React-based UIs that integrate seamlessly with the application.
+Extensions allow you to add custom functionality to Hyprnote through panels that appear in the sidebar. Each extension can define one or more panels with custom React-based UIs that integrate seamlessly with the application.
 
-Extensions consist of two main parts: a runtime script (`main.js`) that runs in a sandboxed Deno environment, and optional UI panels (`ui.tsx`) that render React components within the Char interface.
+Extensions consist of two main parts: a runtime script (`main.js`) that runs in a sandboxed Deno environment, and optional UI panels (`ui.tsx`) that render React components within the Hyprnote interface.
 
 # Extension Structure
 
@@ -33,7 +33,7 @@ The `extension.json` manifest defines your extension's metadata and configuratio
   "name": "My Extension",
   "version": "0.1.0",
   "api_version": "0.1",
-  "description": "A custom extension for Char",
+  "description": "A custom extension for Hyprnote",
   "entry": "main.js",
   "panels": [
     {
@@ -51,7 +51,7 @@ The manifest fields are:
 - `id`: Unique identifier for your extension (lowercase, hyphenated)
 - `name`: Display name shown in the UI
 - `version`: Semantic version of your extension
-- `api_version`: Char extension API version (currently `0.1`)
+- `api_version`: Hyprnote extension API version (currently `0.1`)
 - `description`: Brief description of what your extension does
 - `entry`: Path to the runtime script
 - `panels`: Array of panel definitions
@@ -92,7 +92,7 @@ The runtime script is required in the manifest but currently serves primarily fo
 
 # Panel UI
 
-Panel UIs are React components that render within the Char interface. Create a `ui.tsx` file with a default export:
+Panel UIs are React components that render within the Hyprnote interface. Create a `ui.tsx` file with a default export:
 
 ```tsx
 import { useState } from "react";
@@ -125,14 +125,14 @@ export default function MyExtensionView({ extensionId }: ExtensionViewProps) {
 
 # Available Globals
 
-Extension UIs have access to the following globals provided by Char:
+Extension UIs have access to the following globals provided by Hyprnote:
 
 ## React and UI
 
 - `react` - React library
 - `react-dom` - React DOM library
-- `@hypr/ui` - Char UI component library (Button, ButtonGroup, Card, Checkbox, Popover)
-- `@hypr/utils` - Char utility functions (cn, date-fns helpers, etc.)
+- `@hypr/ui` - Hyprnote UI component library (Button, ButtonGroup, Card, Checkbox, Popover)
+- `@hypr/utils` - Hyprnote utility functions (cn, date-fns helpers, etc.)
 
 ## State Management
 
@@ -154,7 +154,7 @@ import { useTabs } from "@hypr/tabs";
 
 # State Synchronization
 
-Extensions can read state from the main Char application using TinyBase. The synchronization happens automatically via postMessage between the iframe and parent window.
+Extensions can read state from the main Hyprnote application using TinyBase. The synchronization happens automatically via postMessage between the iframe and parent window.
 
 ## Reading State
 
@@ -278,7 +278,7 @@ cp -r extensions/my-extension %APPDATA%/com.hyprnote.dev/extensions/
 
 ## 7. Test
 
-Launch Char in development mode and navigate to your extension panel.
+Launch Hyprnote in development mode and navigate to your extension panel.
 
 # Security Model
 
@@ -324,7 +324,7 @@ pnpm build:hello-world
 pnpm install:dev
 ```
 
-Then launch Char with `ONBOARDING=0 pnpm -F desktop tauri dev` and click on the profile area (shows "Unknown" by default) to expand the menu, then click "Hello World" to see the extension panel.
+Then launch Hyprnote with `ONBOARDING=0 pnpm -F desktop tauri dev` and click on the profile area (shows "Unknown" by default) to expand the menu, then click "Hello World" to see the extension panel.
 
 # Example: Calendar
 

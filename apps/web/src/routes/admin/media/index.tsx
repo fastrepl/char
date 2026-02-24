@@ -102,7 +102,6 @@ function MediaLibrary() {
   const [isMounted, setIsMounted] = useState(false);
   const [loadingPaths, setLoadingPaths] = useState<Set<string>>(new Set());
 
-  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [itemToMove, setItemToMove] = useState<MediaItem | null>(null);
 
@@ -399,7 +398,6 @@ function MediaLibrary() {
   const handleCreateFolder = (name: string) => {
     const parentFolder = currentTab?.type === "folder" ? currentTab.path : "";
     createFolderMutation.mutate({ name, parentFolder });
-    setIsCreatingFolder(false);
   };
 
   const handleMoveFile = (destinationFolder: string) => {
@@ -548,10 +546,7 @@ function MediaLibrary() {
             uploadPending={uploadMutation.isPending}
             fileInputRef={fileInputRef}
             onUpload={handleUpload}
-            isCreatingFolder={isCreatingFolder}
-            onCreateFolderClick={() => setIsCreatingFolder(true)}
-            onCreateFolder={handleCreateFolder}
-            onCancelCreateFolder={() => setIsCreatingFolder(false)}
+            onCreateFolder={() => handleCreateFolder("untitled")}
             createFolderPending={createFolderMutation.isPending}
             currentTab={currentTab}
             onRename={handleRename}
@@ -605,7 +600,7 @@ function MediaLibrary() {
             onOpenFolder={(path, name) => navigateToFolder(path, name)}
             onMove={openMoveModal}
             onRename={handleRename}
-            onCreateFolder={() => setIsCreatingFolder(true)}
+            onCreateFolder={() => handleCreateFolder("untitled")}
             fileInputRef={fileInputRef}
             createFolderPending={createFolderMutation.isPending}
             uploadPending={uploadMutation.isPending}
@@ -649,10 +644,7 @@ function Sidebar({
   uploadPending,
   fileInputRef,
   onUpload,
-  isCreatingFolder,
-  onCreateFolderClick,
   onCreateFolder,
-  onCancelCreateFolder,
   createFolderPending,
   currentTab,
   onRename,
@@ -669,10 +661,7 @@ function Sidebar({
   uploadPending: boolean;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   onUpload: (files: FileList) => void;
-  isCreatingFolder: boolean;
-  onCreateFolderClick: () => void;
-  onCreateFolder: (name: string) => void;
-  onCancelCreateFolder: () => void;
+  onCreateFolder: () => void;
   createFolderPending: boolean;
   currentTab: Tab | undefined;
   onRename: (path: string, newName: string) => void;
@@ -708,14 +697,6 @@ function Sidebar({
         {!atStart && <ScrollFadeOverlay position="top" />}
         {!atEnd && <ScrollFadeOverlay position="bottom" />}
         <div ref={scrollRef} className="h-full overflow-y-auto">
-          {isCreatingFolder && (
-            <NewFolderInlineInput
-              existingNames={filteredTreeNodes.map((n) => n.name)}
-              onSubmit={onCreateFolder}
-              onCancel={onCancelCreateFolder}
-              isLoading={createFolderPending}
-            />
-          )}
           {filteredTreeNodes.map((node) => (
             <TreeNodeItem
               key={node.path}
@@ -735,107 +716,12 @@ function Sidebar({
       </div>
 
       <AddMenu
-        onCreateFolder={onCreateFolderClick}
-        createFolderPending={createFolderPending || isCreatingFolder}
+        onCreateFolder={onCreateFolder}
+        createFolderPending={createFolderPending}
         uploadPending={uploadPending}
         fileInputRef={fileInputRef}
         onUpload={onUpload}
       />
-    </div>
-  );
-}
-
-function NewFolderInlineInput({
-  existingNames,
-  onSubmit,
-  onCancel,
-  isLoading,
-}: {
-  existingNames: string[];
-  onSubmit: (name: string) => void;
-  onCancel: () => void;
-  isLoading: boolean;
-}) {
-  const [value, setValue] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  const validate = (name: string): string | null => {
-    if (!name.trim()) {
-      return "Name cannot be empty";
-    }
-    if (existingNames.some((n) => n.toLowerCase() === name.toLowerCase())) {
-      return "A folder with this name already exists";
-    }
-    return null;
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      const name = value.trim();
-      const validationError = validate(name);
-      if (validationError) {
-        setError(validationError);
-      } else {
-        setError(null);
-        onSubmit(name);
-      }
-    } else if (e.key === "Escape") {
-      onCancel();
-    }
-  };
-
-  const handleBlur = () => {
-    if (!value.trim()) {
-      onCancel();
-      return;
-    }
-    const name = value.trim();
-    const validationError = validate(name);
-    if (validationError) {
-      setError(validationError);
-      setTimeout(() => inputRef.current?.focus(), 0);
-    } else {
-      setError(null);
-      onSubmit(name);
-    }
-  };
-
-  return (
-    <div>
-      <div
-        className={cn([
-          "flex items-center gap-1.5 py-1.5 pl-3 pr-2 text-sm",
-          error ? "bg-red-50" : "bg-neutral-100",
-        ])}
-      >
-        <FolderPlusIcon className="size-4 text-neutral-400 shrink-0" />
-        <input
-          ref={inputRef}
-          type="text"
-          value={value}
-          onChange={(e) => {
-            setValue(e.target.value);
-            if (error) setError(null);
-          }}
-          onKeyDown={handleKeyDown}
-          onBlur={handleBlur}
-          disabled={isLoading}
-          placeholder="folder-name"
-          className={cn([
-            "flex-1 text-sm bg-transparent outline-hidden",
-            error ? "text-red-700" : "text-neutral-600",
-            "placeholder:text-neutral-400",
-          ])}
-        />
-      </div>
-      {error && (
-        <div className="px-3 py-1 text-xs text-red-600 bg-red-50">{error}</div>
-      )}
     </div>
   );
 }

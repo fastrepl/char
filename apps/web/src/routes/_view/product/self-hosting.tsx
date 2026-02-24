@@ -12,18 +12,18 @@ export const Route = createFileRoute("/_view/product/self-hosting")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "Self-Hosting - Char" },
+      { title: "Self-Hosting - Hyprnote" },
       {
         name: "description",
         content:
-          "Deploy Char on your own infrastructure. Complete control over your meeting data with on-premises deployment, air-gapped environments, and full data sovereignty.",
+          "Deploy Hyprnote on your own infrastructure. Complete control over your meeting data with on-premises deployment, air-gapped environments, and full data sovereignty.",
       },
       { name: "robots", content: "noindex, nofollow" },
-      { property: "og:title", content: "Self-Hosting - Char" },
+      { property: "og:title", content: "Self-Hosting - Hyprnote" },
       {
         property: "og:description",
         content:
-          "Run Char entirely on your own servers. Enterprise-grade meeting transcription with complete infrastructure control, compliance-ready deployment, and zero external dependencies.",
+          "Run Hyprnote entirely on your own servers. Enterprise-grade meeting transcription with complete infrastructure control, compliance-ready deployment, and zero external dependencies.",
       },
       { property: "og:type", content: "website" },
       {
@@ -69,14 +69,14 @@ function HeroSection() {
       <div className="flex flex-col items-center text-center gap-6 py-24 px-4">
         <div className="flex flex-col gap-6 max-w-4xl">
           <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600">
-            Run Char on
+            Run Hyprnote on
             <br />
             your infrastructure
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 max-w-3xl mx-auto">
-            Deploy Char entirely on your own servers. Complete control over your
-            meeting data with on-premises deployment, air-gapped environments,
-            and full data sovereignty.
+            Deploy Hyprnote entirely on your own servers. Complete control over
+            your meeting data with on-premises deployment, air-gapped
+            environments, and full data sovereignty.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 pt-6 items-center">
@@ -140,7 +140,7 @@ function WhySelfHostSection() {
             Air-gapped deployment
           </h3>
           <p className="text-neutral-600">
-            Run Char in completely isolated environments with zero internet
+            Run Hyprnote in completely isolated environments with zero internet
             connectivity. Perfect for defense, government, and high-security
             organizations.
           </p>
@@ -228,7 +228,7 @@ function ComparisonSection() {
           <div className="flex items-center gap-2 mb-6">
             <Icon icon="mdi:server" className="text-2xl text-green-600" />
             <h3 className="font-serif text-lg text-green-900">
-              Char Self-hosted
+              Hyprnote Self-hosted
             </h3>
           </div>
           <ul className="flex flex-col gap-4 text-green-900">
@@ -503,12 +503,12 @@ function OpenSourceSection() {
             Fully auditable codebase
           </h3>
           <p className="text-neutral-600 mb-4">
-            Char is open source under GPL-3.0. Inspect every line of code,
+            Hyprnote is open source under GPL-3.0. Inspect every line of code,
             verify security practices, and customize to your needs. No black
             boxes, no hidden data collection.
           </p>
           <a
-            href="https://github.com/fastrepl/char"
+            href="https://github.com/fastrepl/hyprnote"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-stone-600 hover:text-stone-800 font-medium"

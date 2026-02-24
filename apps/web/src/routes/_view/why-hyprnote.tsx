@@ -2,7 +2,6 @@ import { Icon } from "@iconify-icon/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useRef } from "react";
 
-import { Image } from "@/components/image";
 import { SlashSeparator } from "@/components/slash-separator";
 import { CTASection } from "@/routes/_view/index";
 
@@ -10,22 +9,22 @@ export const Route = createFileRoute("/_view/why-hyprnote")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "Why Char - AI Meeting Notes You Actually Own" },
+      { title: "Why Hyprnote - AI Meeting Notes You Actually Own" },
       {
         name: "description",
         content:
           "Your meeting notes should be files on your computer, not rows in someone else's database. Plain Markdown files, AI providers you can switch, no bots, no lock-in.",
       },
-      { property: "og:title", content: "Why Char" },
+      { property: "og:title", content: "Why Hyprnote" },
       {
         property: "og:description",
         content:
-          "Most AI note-takers lock your data in their database. We thought that was bullshit. So we built Char differently.",
+          "Most AI note-takers lock your data in their database. We thought that was bullshit. So we built Hyprnote differently.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://hyprnote.com/why-hyprnote" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Why Char" },
+      { name: "twitter:title", content: "Why Hyprnote" },
       {
         name: "twitter:description",
         content:
@@ -66,7 +65,7 @@ function HeroSection() {
       <div className="px-6 py-16 lg:py-24">
         <div className="text-center max-w-3xl mx-auto">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif tracking-tight text-stone-600 mb-8">
-            Why Char exists
+            Why Hyprnote exists
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 leading-relaxed mb-6">
             Most AI note-takers lock your data in their database, force you to
@@ -117,7 +116,7 @@ function WhyWereDifferentSection() {
     <section className="px-6 py-16 lg:py-24 bg-stone-50/30">
       <div className="max-w-4xl mx-auto">
         <h2 className="text-3xl sm:text-4xl font-serif text-stone-600 mb-12 text-center">
-          So we built Char to give you back control.
+          So we built Hyprnote to give you back control.
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -188,13 +187,13 @@ const audiences = [
   {
     title: "You're an open-source advocate who self-hosts everything",
     description:
-      "You run Nextcloud, care about FOSS, and need to verify no data leaves your infrastructure. Char lets you audit the code and run everything locally.",
+      "You run Nextcloud, care about FOSS, and need to verify no data leaves your infrastructure. Hyprnote lets you audit the code and run everything locally.",
     icon: "mdi:server-outline",
   },
   {
     title: "You just want a simple notepad that works",
     description:
-      "You don't care about the philosophy. You want to take notes during calls without thinking about it. Char does that.",
+      "You don't care about the philosophy. You want to take notes during calls without thinking about it. Hyprnote does that.",
     icon: "mdi:notebook-outline",
   },
 ];
@@ -204,7 +203,7 @@ function WhoThisIsForSection() {
     <section className="px-6 py-16 lg:py-24">
       <div className="max-w-4xl mx-auto">
         <h2 className="text-3xl sm:text-4xl font-serif text-stone-600 mb-4 text-center">
-          Char's for you, if
+          Hyprnote's for you, if
         </h2>
 
         <div className="flex flex-col gap-8">
@@ -234,86 +233,30 @@ function WhoThisIsForSection() {
 
 function WhatWereBuildingTowardSection() {
   return (
-    <section className="py-16 px-4 laptop:px-0 bg-[linear-gradient(to_right,#f5f5f5_1px,transparent_1px),linear-gradient(to_bottom,#f5f5f5_1px,transparent_1px)] bg-size-[24px_24px] bg-position-[12px_12px,12px_12px]">
-      <div className="max-w-4xl mx-auto">
-        <div
-          className="border border-neutral-200 p-4"
-          style={{
-            backgroundImage: "url(/api/images/texture/white-leather.png)",
-          }}
-        >
-          <div
-            className="bg-stone-50 border border-neutral-200 rounded-xs p-8 sm:p-12"
-            style={{
-              backgroundImage: "url(/api/images/texture/paper.png)",
-            }}
-          >
-            <h2 className="text-2xl sm:text-3xl font-serif text-stone-600 mb-4">
-              What we're building toward
-            </h2>
+    <section className="px-6 py-16 lg:py-24 bg-stone-50/30">
+      <div className="max-w-3xl mx-auto text-center">
+        <h2 className="text-3xl sm:text-4xl font-serif text-stone-600 mb-8">
+          What we're building toward
+        </h2>
 
-            <div className="flex flex-col gap-4 text-neutral-700 leading-relaxed">
-              <p>
-                We're not betting on GPT-5 or Claude Opus 7 or whatever comes
-                next.
-              </p>
+        <div className="flex flex-col gap-6 text-lg text-neutral-600 leading-relaxed">
+          <p>
+            We're not betting on GPT-5 or Claude Opus 7 or whatever comes next.
+          </p>
 
-              <p>We're betting on files.</p>
+          <p>We're betting on files.</p>
 
-              <p>
-                Files outlive apps. Files work with every tool. Files don't
-                disappear when a startup shuts down.
-              </p>
+          <p>
+            Files outlive apps. Files work with every tool. Files don't
+            disappear when a startup shuts down.
+          </p>
 
-              <p>
-                AI providers will come and go. SaaS platforms will rise and
-                fall. But Markdown files from 2006 still open perfectly in 2026.
-              </p>
+          <p>
+            AI providers will come and go. SaaS platforms will rise and fall.
+            But Markdown files from 2006 still open perfectly in 2026.
+          </p>
 
-              <p>
-                That's the foundation. Everything else is just software on top.
-              </p>
-            </div>
-
-            <div className="flex gap-2 mt-12 mb-4">
-              <Image
-                src="/api/images/team/john.png"
-                alt="John Jeong"
-                width={32}
-                height={32}
-                className="rounded-full object-cover border border-neutral-200"
-              />
-              <Image
-                src="/api/images/team/yujong.png"
-                alt="Yujong Lee"
-                width={32}
-                height={32}
-                className="rounded-full object-cover border border-neutral-200"
-              />
-            </div>
-
-            <div className="flex flex-col gap-4">
-              <div>
-                <p className="text-base text-neutral-600 font-medium italic font-serif">
-                  Char
-                </p>
-                <p className="text-sm text-neutral-500">
-                  John Jeong, Yujong Lee
-                </p>
-              </div>
-
-              <div>
-                <Image
-                  src="/api/images/hyprnote/signature-dark.svg"
-                  alt="Char Signature"
-                  width={124}
-                  height={60}
-                  layout="constrained"
-                  className="opacity-80 object-contain"
-                />
-              </div>
-            </div>
-          </div>
+          <p>That's the foundation. Everything else is just software on top.</p>
         </div>
       </div>
     </section>
@@ -369,7 +312,7 @@ function HereForTheLongHaulSection() {
               hash="hero"
               className="font-semibold text-stone-700 hover:underline decoration-dotted"
             >
-              download Char and try it
+              download Hyprnote and try it
             </Link>
             .
           </p>

@@ -33,11 +33,11 @@ export const Route = createFileRoute("/_view/brand")({
   },
   head: () => ({
     meta: [
-      { title: "Brand - Char Press Kit" },
+      { title: "Brand - Hyprnote Press Kit" },
       {
         name: "description",
         content:
-          "Download Char logos, icons, and brand assets. Learn about our visual identity, typography, and color palette.",
+          "Download Hyprnote logos, icons, and brand assets. Learn about our visual identity, typography, and color palette.",
       },
     ],
   }),
@@ -48,19 +48,19 @@ const VISUAL_ASSETS = [
     id: "icon",
     name: "Icon",
     url: "/api/images/hyprnote/icon.png",
-    description: "Char app icon",
+    description: "Hyprnote app icon",
   },
   {
     id: "logo",
     name: "Logo",
     url: "/api/images/hyprnote/logo.png",
-    description: "Char wordmark logo",
+    description: "Hyprnote wordmark logo",
   },
   {
     id: "symbol-logo",
     name: "Symbol + Logo",
     url: "/api/images/hyprnote/symbol+logo.png",
-    description: "Char icon with wordmark",
+    description: "Hyprnote icon with wordmark",
   },
   {
     id: "og-image",
@@ -213,8 +213,8 @@ function HeroSection() {
           Brand
         </h1>
         <p className="text-lg sm:text-xl text-neutral-600">
-          Download Char logos, icons, and brand assets. Learn about our visual
-          identity, typography, and color palette.
+          Download Hyprnote logos, icons, and brand assets. Learn about our
+          visual identity, typography, and color palette.
         </p>
       </div>
     </div>

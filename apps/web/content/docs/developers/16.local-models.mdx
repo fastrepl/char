@@ -1,7 +1,7 @@
 ---
 title: "Local Models"
 section: "Developers"
-description: "Learn about local models in Char"
+description: "Learn about local models in Hyprnote"
 ---
 
 ## Language Models (LLM)
@@ -9,12 +9,9 @@ description: "Learn about local models in Char"
 - https://lmstudio.ai
 - https://lemonade-server.ai
 
-For step-by-step setup instructions for LM Studio and Ollama, see the [Local LLM Setup guide](/docs/faq/local-llm-setup).
-
 ## Speech-to-Text (STT)
 
 - All STT models are stored in `~/Library/Application Support/hyprnote/models/stt/`
-- The built-in whisper-cpp backend is now an optional compile-time feature. Production builds on macOS Apple Silicon use the Argmax sidecar by default. Whisper-cpp quantized models have been removed from the settings UI.
 
 ### Manual Download
 
@@ -24,8 +21,6 @@ For step-by-step setup instructions for LM Studio and Ollama, see the [Local LLM
 | https://huggingface.co/argmaxinc/parakeetkit-pro/tree/main/nvidia_parakeet-v2_476MB               | `nvidia_parakeet-v2_476MB`                |
 | https://huggingface.co/argmaxinc/parakeetkit-pro/tree/main/nvidia_parakeet-v3_494MB               | `nvidia_parakeet-v3_494MB`                |
 | https://huggingface.co/argmaxinc/ctckit-pro/tree/main/parakeet-tdt_ctc-110m                       | `parakeet-tdt_ctc-110m`                   |
-
-For details on how your data is handled when using local vs cloud models, see [AI Models & Data Privacy](/docs/faq/ai-models-and-privacy).
 
 If you have [Huggingface CLI](https://huggingface.co/docs/huggingface_hub/guides/cli) installed:
 

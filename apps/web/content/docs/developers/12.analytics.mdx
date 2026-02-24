@@ -1,7 +1,7 @@
 ---
 title: "Analytics"
 section: "Developers"
-description: "Learn about analytics in Char"
+description: "Learn about analytics in Hyprnote"
 ---
 
 ## What are we tracking?
@@ -29,7 +29,6 @@ Events tracked when users first launch the desktop app:
 | Event | Description | Properties |
 |-------|-------------|------------|
 | `show_main_window` | Main window is shown (fires on every app launch) | - |
-| `onboarding_step_viewed` | User views an onboarding step | `step`, `platform`, `skip_login` |
 | `account_skipped` | User proceeds without account (local mode) | - |
 | `user_signed_in` | User signs in (triggers `$identify` to link anonymous ID) | - |
 | `ai_provider_configured` | User configures an AI provider | `provider` |
@@ -137,23 +136,6 @@ To track the user journey from website visit to active usage, use PostHog's funn
 5. `note_enhanced` (desktop) - User uses AI enhancement
 
 PostHog's `$identify` event links anonymous device IDs to authenticated user IDs, enabling accurate conversion analysis across the entire user journey.
-
-## Feature Flags
-
-Char uses PostHog feature flags to control feature rollouts. The system is built on two layers:
-
-- **`crates/flag`** - A standalone Rust client for the PostHog feature flags API (`/flags?v=2`). It fetches flags by `distinct_id` and supports groups, person properties, and group properties.
-- **`plugins/flag`** - A Tauri plugin that wraps the flag client with caching and provides the `FlagPluginExt` trait for checking flags from application code via `app.flag().is_enabled(feature)`.
-
-Each feature defines a `FlagStrategy`:
-
-| Strategy | Behavior |
-|----------|----------|
-| `Debug` | Enabled only in debug builds |
-| `Posthog(key)` | Resolved via PostHog API (cached after first fetch) |
-| `Hardcoded(bool)` | Always enabled or disabled |
-
-Features can also be overridden at build time using environment variables (e.g., `CHAT=1` forces the Chat feature on).
 
 ## How to make changes?
 
