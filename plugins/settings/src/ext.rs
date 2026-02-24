@@ -50,6 +50,22 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Settings<'a, R, M> {
         state.load().await
     }
 
+    /// Returns the sync device ID, generating and persisting one if it doesn't exist yet.
+    pub async fn sync_device_id(&self) -> crate::Result<uuid::Uuid> {
+        let settings = self.load().await?;
+
+        if let Some(id_str) = settings.get("sync_device_id").and_then(|v| v.as_str()) {
+            if let Ok(id) = uuid::Uuid::parse_str(id_str) {
+                return Ok(id);
+            }
+        }
+
+        let id = uuid::Uuid::new_v4();
+        self.save(serde_json::json!({ "sync_device_id": id.to_string() }))
+            .await?;
+        Ok(id)
+    }
+
     pub async fn save(&self, settings: serde_json::Value) -> crate::Result<()> {
         let state = self.manager.state::<crate::state::State>();
         state.save(settings).await

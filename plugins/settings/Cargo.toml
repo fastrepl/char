@@ -27,3 +27,4 @@ specta = { workspace = true, features = ["derive", "serde_json"] }
 
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["fs"] }
+uuid = { workspace = true, features = ["v4"] }

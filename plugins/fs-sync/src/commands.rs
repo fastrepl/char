@@ -9,6 +9,7 @@ use tauri_plugin_settings::SettingsPluginExt;
 
 use crate::FsSyncPluginExt;
 use crate::frontmatter::ParsedDocument;
+use crate::hash;
 use crate::session::find_session_dir;
 use crate::session_content::load_session_content as load_session_content_from_fs;
 use crate::types::{CleanupTarget, ListFoldersResult, ScanResult, SessionContentData};
@@ -362,4 +363,11 @@ pub(crate) async fn attachment_remove<R: tauri::Runtime>(
             .attachment_remove(&session_id, &attachment_id)
             .map_err(|e| e.to_string())
     })
+}
+
+#[tauri::command]
+#[specta::specta]
+pub(crate) async fn content_hash(file_path: String) -> Result<String, String> {
+    let path = PathBuf::from(&file_path);
+    spawn_blocking!({ hash::hash_file(&path).map_err(|e| e.to_string()) })
 }

@@ -479,6 +479,7 @@ dependencies = [
  "api-research",
  "api-subscription",
  "api-support",
+ "api-sync",
  "axum 0.8.8",
  "dotenvy",
  "envy",
@@ -679,6 +680,7 @@ name = "api-sync"
 version = "0.1.0"
 dependencies = [
  "axum 0.8.8",
+ "chrono",
  "reqwest 0.13.2",
  "sentry",
  "serde",
@@ -688,6 +690,7 @@ dependencies = [
  "tokio",
  "tracing",
  "utoipa",
+ "uuid",
 ]
 
 [[package]]
@@ -17602,6 +17605,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_yaml",
+ "sha2",
  "specta",
  "specta-typescript",
  "tauri",
@@ -18198,6 +18202,7 @@ dependencies = [
  "tauri-specta",
  "thiserror 2.0.18",
  "tokio",
+ "uuid",
 ]
 
 [[package]]
