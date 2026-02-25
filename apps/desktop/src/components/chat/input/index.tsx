@@ -1,13 +1,13 @@
-import { CircleArrowUpIcon, SquareIcon } from "lucide-react";
+import { SquareIcon } from "lucide-react";
 import { useRef } from "react";
 
 import type { TiptapEditor } from "@hypr/tiptap/chat";
 import ChatEditor from "@hypr/tiptap/chat";
 import type { PlaceholderFunction } from "@hypr/tiptap/shared";
 import { Button } from "@hypr/ui/components/ui/button";
+import { Kbd } from "@hypr/ui/components/ui/kbd";
 import { cn } from "@hypr/utils";
 
-import { useShell } from "../../../contexts/shell";
 import {
   useAutoFocusEditor,
   useDraftState,
@@ -22,6 +22,7 @@ export function ChatMessageInput({
   draftKey,
   onSendMessage,
   disabled: disabledProp,
+  hasContextBar,
   isStreaming,
   onStop,
   mcpIndicator,
@@ -32,6 +33,7 @@ export function ChatMessageInput({
     parts: Array<{ type: "text"; text: string }>,
   ) => void;
   disabled?: boolean | { disabled: boolean; message?: string };
+  hasContextBar?: boolean;
   isStreaming?: boolean;
   onStop?: () => void;
   mcpIndicator?: McpIndicator;
@@ -40,7 +42,7 @@ export function ChatMessageInput({
   const disabled =
     typeof disabledProp === "object" ? disabledProp.disabled : disabledProp;
 
-  const { hasContent, initialContent, handleEditorUpdate } = useDraftState({
+  const { initialContent, handleEditorUpdate } = useDraftState({
     draftKey,
   });
   const handleSubmit = useSubmit({
@@ -53,7 +55,7 @@ export function ChatMessageInput({
   const slashCommandConfig = useSlashCommandConfig();
 
   return (
-    <Container>
+    <Container hasContextBar={hasContextBar}>
       <div className="flex flex-col px-3 pt-3 pb-2">
         <div className="flex-1 mb-1">
           <ChatEditor
@@ -87,40 +89,43 @@ export function ChatMessageInput({
               onClick={handleSubmit}
               disabled={disabled}
               className={cn([
-                "flex items-center justify-center h-7 w-7 rounded-full transition-colors",
+                "group inline-flex items-center gap-1.5 h-7 px-1.5 rounded-lg text-xs font-medium transition-colors",
                 disabled
                   ? "text-neutral-300 cursor-default"
-                  : "text-neutral-400 hover:text-neutral-600",
+                  : "text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100",
               ])}
             >
-              <CircleArrowUpIcon size={22} />
+              Send
+              <Kbd
+                className={cn([
+                  "transition-all duration-100",
+                  "group-hover:-translate-y-0.5 group-hover:shadow-[0_2px_0_0_rgba(0,0,0,0.15),inset_0_1px_0_0_rgba(255,255,255,0.8)]",
+                  "group-active:translate-y-0.5 group-active:shadow-none",
+                ])}
+              >
+                ⌘ ↩
+              </Kbd>
             </button>
           )}
         </div>
       </div>
-      {hasContent && (
-        <span className="absolute bottom-1.5 right-5 text-[8px] text-neutral-400">
-          Enter to send, Shift + Enter for new line
-        </span>
-      )}
     </Container>
   );
 }
 
-function Container({ children }: { children: React.ReactNode }) {
-  const { chat } = useShell();
-
+function Container({
+  children,
+  hasContextBar,
+}: {
+  children: React.ReactNode;
+  hasContextBar?: boolean;
+}) {
   return (
-    <div
-      className={cn([
-        "relative",
-        chat.mode !== "RightPanelOpen" && "px-2 pb-2",
-      ])}
-    >
+    <div className={cn(["relative", "px-2 pb-2"])}>
       <div
         className={cn([
           "flex flex-col border border-neutral-200 rounded-xl",
-          chat.mode === "RightPanelOpen" && "rounded-t-none border-t-0",
+          hasContextBar && "rounded-t-none border-t-0",
         ])}
       >
         {children}

@@ -74,7 +74,7 @@ const ChatEditor = forwardRef<{ editor: TiptapEditor | null }, ChatEditorProps>(
           name: "submitOnEnter",
           addKeyboardShortcuts() {
             return {
-              Enter: ({ editor }) => {
+              "Mod-Enter": ({ editor }) => {
                 if (isMentionActive(editor.state)) {
                   return false;
                 }

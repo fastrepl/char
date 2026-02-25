@@ -65,6 +65,7 @@ export function ChatContent({
       <ChatMessageInput
         draftKey={sessionId}
         disabled={disabled}
+        hasContextBar={contextEntities.length > 0}
         onSendMessage={(content, parts) =>
           handleSendMessage(content, parts, sendMessage)
         }

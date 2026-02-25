@@ -35,10 +35,7 @@ export function ChatHeader({
   return (
     <div
       data-tauri-drag-region={chat.mode === "RightPanelOpen"}
-      className={cn([
-        "flex items-center justify-between px-1 border-b border-neutral-200 h-9",
-        chat.mode === "RightPanelOpen" && "border rounded-xl",
-      ])}
+      className="flex items-center justify-between px-1 border-b border-neutral-200 h-9"
     >
       <div className="flex items-center">
         <ChatGroups
@@ -123,7 +120,7 @@ function ChatGroups({
         >
           <MessageCircle className="w-3.5 h-3.5 text-neutral-400 group-hover:text-neutral-600 transition-colors" />
           <h3 className="font-medium text-neutral-700 text-xs truncate">
-            {currentChatTitle || "Ask Hyprnote anything"}
+            {currentChatTitle || "Ask Char anything"}
           </h3>
           <ChevronDown
             className={cn([

@@ -36,10 +36,7 @@ export function ChatFloatingButton({
   }
 
   return (
-    <InteractiveContainer
-      width={window.innerWidth * 0.4}
-      height={window.innerHeight * 0.7}
-    >
+    <InteractiveContainer width={400} height={window.innerHeight * 0.7}>
       <ChatView />
     </InteractiveContainer>
   );
