@@ -4,14 +4,7 @@ The admin interface at `/admin` provides content management capabilities for the
 
 ## Authentication
 
-Access is restricted to whitelisted email addresses defined in `src/lib/team.ts` (`ADMIN_EMAILS`):
-
-- yujonglee@hyprnote.com
-- yujonglee.dev@gmail.com
-- john@hyprnote.com
-- marketing@hyprnote.com
-- harshika.alagh@gmail.com
-- yunhyungjo@yonsei.ac.kr
+Access is restricted to whitelisted email addresses defined in `src/lib/team.ts` (`ADMIN_EMAILS`).
 
 Users must be authenticated via Supabase to access admin routes. Non-admin users are redirected to the home page. In development mode, authentication is bypassed with a mock `dev@local` user.
 
