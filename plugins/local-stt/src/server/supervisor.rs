@@ -11,6 +11,8 @@ use ractor::{ActorCell, ActorProcessingErr, ActorRef, concurrency::Duration, reg
 use super::internal::{InternalSTTActor, InternalSTTArgs};
 #[cfg(target_arch = "aarch64")]
 use super::internal2::{Internal2STTActor, Internal2STTArgs};
+#[cfg(target_os = "macos")]
+use super::internal3::{Internal3STTActor, Internal3STTArgs};
 use super::{
     ServerType,
     external::{ExternalSTTActor, ExternalSTTArgs},
@@ -21,6 +23,8 @@ pub type SupervisorRef = ActorRef<DynamicSupervisorMsg>;
 pub const INTERNAL_STT_ACTOR_NAME: &str = "internal_stt";
 #[cfg(target_arch = "aarch64")]
 pub const INTERNAL2_STT_ACTOR_NAME: &str = "internal2_stt";
+#[cfg(target_os = "macos")]
+pub const INTERNAL3_STT_ACTOR_NAME: &str = "internal3_stt";
 pub const EXTERNAL_STT_ACTOR_NAME: &str = "external_stt";
 pub const SUPERVISOR_NAME: &str = "stt_supervisor";
 
@@ -63,6 +67,15 @@ pub async fn start_internal2_stt(
     args: Internal2STTArgs,
 ) -> Result<(), ActorProcessingErr> {
     let child_spec = create_internal2_child_spec_with_args(args);
+    DynamicSupervisor::spawn_child(supervisor.clone(), child_spec).await
+}
+
+#[cfg(target_os = "macos")]
+pub async fn start_internal3_stt(
+    supervisor: &ActorRef<DynamicSupervisorMsg>,
+    args: Internal3STTArgs,
+) -> Result<(), ActorProcessingErr> {
+    let child_spec = create_internal3_child_spec_with_args(args);
     DynamicSupervisor::spawn_child(supervisor.clone(), child_spec).await
 }
 
@@ -120,6 +133,29 @@ fn create_internal2_child_spec_with_args(args: Internal2STTArgs) -> DynChildSpec
     }
 }
 
+#[cfg(target_os = "macos")]
+fn create_internal3_child_spec_with_args(args: Internal3STTArgs) -> DynChildSpec {
+    let spawn_fn = DynSpawnFn::new(move |supervisor: ActorCell, child_id: String| {
+        let args = args.clone();
+        async move {
+            let (actor_ref, _handle) =
+                DynamicSupervisor::spawn_linked(child_id, Internal3STTActor, args, supervisor)
+                    .await?;
+            Ok(actor_ref.get_cell())
+        }
+    });
+
+    DynChildSpec {
+        id: INTERNAL3_STT_ACTOR_NAME.to_string(),
+        spawn_fn,
+        restart: RestartPolicy::Transient,
+        backoff_fn: Some(ChildBackoffFn::new(|_, _, _, _| {
+            Some(Duration::from_millis(500))
+        })),
+        reset_after: None,
+    }
+}
+
 fn create_external_child_spec_with_args(args: ExternalSTTArgs) -> DynChildSpec {
     let spawn_fn = DynSpawnFn::new(move |supervisor: ActorCell, child_id: String| {
         let args = args.clone();
@@ -148,18 +184,15 @@ pub async fn stop_stt_server(
 ) -> Result<(), ActorProcessingErr> {
     let child_ids: Vec<&str> = match server_type {
         ServerType::Internal => {
-            #[cfg(all(target_arch = "aarch64", feature = "whisper-cpp"))]
-            {
-                vec![INTERNAL2_STT_ACTOR_NAME, INTERNAL_STT_ACTOR_NAME]
-            }
-            #[cfg(all(target_arch = "aarch64", not(feature = "whisper-cpp")))]
-            {
-                vec![INTERNAL2_STT_ACTOR_NAME]
-            }
-            #[cfg(not(target_arch = "aarch64"))]
-            {
-                vec![]
-            }
+            #[allow(unused_mut)]
+            let mut ids = Vec::new();
+            #[cfg(target_arch = "aarch64")]
+            ids.push(INTERNAL2_STT_ACTOR_NAME);
+            #[cfg(feature = "whisper-cpp")]
+            ids.push(INTERNAL_STT_ACTOR_NAME);
+            #[cfg(target_os = "macos")]
+            ids.push(INTERNAL3_STT_ACTOR_NAME);
+            ids
         }
         ServerType::External => vec![EXTERNAL_STT_ACTOR_NAME],
     };
@@ -184,6 +217,8 @@ pub async fn stop_stt_server(
             wait_for_actor_shutdown(Internal2STTActor::name()).await;
             #[cfg(feature = "whisper-cpp")]
             wait_for_actor_shutdown(InternalSTTActor::name()).await;
+            #[cfg(target_os = "macos")]
+            wait_for_actor_shutdown(Internal3STTActor::name()).await;
         }
         ServerType::External => wait_for_actor_shutdown(ExternalSTTActor::name()).await,
     }

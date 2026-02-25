@@ -14,6 +14,8 @@ use hypr_file::download_file_parallel_cancellable;
 use crate::server::internal;
 #[cfg(target_arch = "aarch64")]
 use crate::server::internal2;
+#[cfg(target_os = "macos")]
+use crate::server::internal3;
 use crate::{
     model::SupportedSttModel,
     server::{ServerInfo, ServerStatus, ServerType, external, supervisor},
@@ -87,6 +89,8 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
                     Err(crate::Error::UnsupportedModelType)
                 }
             }
+            // SpeechAnalyzer uses the system model, no download needed
+            SupportedSttModel::SpeechAnalyzer => Ok(true),
         }
     }
 
@@ -94,15 +98,19 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
     pub async fn start_server(&self, model: SupportedSttModel) -> Result<String, crate::Error> {
         let server_type = match &model {
             SupportedSttModel::Am(_) => ServerType::External,
-            SupportedSttModel::Whisper(_) | SupportedSttModel::Cactus(_) => ServerType::Internal,
+            SupportedSttModel::Whisper(_)
+            | SupportedSttModel::Cactus(_)
+            | SupportedSttModel::SpeechAnalyzer => ServerType::Internal,
         };
 
-        let current_info = match server_type {
+        let current_info = match (&model, server_type) {
+            #[cfg(target_os = "macos")]
+            (SupportedSttModel::SpeechAnalyzer, _) => internal3_health().await,
             #[cfg(target_arch = "aarch64")]
-            ServerType::Internal => internal2_health().await,
+            (_, ServerType::Internal) => internal2_health().await,
             #[cfg(not(target_arch = "aarch64"))]
-            ServerType::Internal => None,
-            ServerType::External => external_health().await,
+            (_, ServerType::Internal) => None,
+            (_, ServerType::External) => external_health().await,
         };
 
         if let Some(info) = current_info.as_ref()
@@ -127,8 +135,12 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
             .await
             .map_err(|e| crate::Error::ServerStopFailed(e.to_string()))?;
 
-        match server_type {
-            ServerType::Internal => {
+        match (&model, server_type) {
+            #[cfg(target_os = "macos")]
+            (SupportedSttModel::SpeechAnalyzer, _) => {
+                start_internal3_server(&supervisor).await
+            }
+            (_, ServerType::Internal) => {
                 #[cfg(target_arch = "aarch64")]
                 {
                     use hypr_transcribe_cactus::CactusConfig;
@@ -149,7 +161,7 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
                 #[cfg(not(target_arch = "aarch64"))]
                 Err(crate::Error::UnsupportedModelType)
             }
-            ServerType::External => {
+            (_, ServerType::External) => {
                 let data_dir = self.models_dir();
                 let am_model = match model {
                     SupportedSttModel::Am(m) => m,
@@ -188,15 +200,19 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
     ) -> Result<Option<ServerInfo>, crate::Error> {
         let server_type = match model {
             SupportedSttModel::Am(_) => ServerType::External,
-            SupportedSttModel::Whisper(_) | SupportedSttModel::Cactus(_) => ServerType::Internal,
+            SupportedSttModel::Whisper(_)
+            | SupportedSttModel::Cactus(_)
+            | SupportedSttModel::SpeechAnalyzer => ServerType::Internal,
         };
 
-        let info = match server_type {
+        let info = match (model, server_type) {
+            #[cfg(target_os = "macos")]
+            (SupportedSttModel::SpeechAnalyzer, _) => internal3_health().await,
             #[cfg(target_arch = "aarch64")]
-            ServerType::Internal => internal2_health().await,
+            (_, ServerType::Internal) => internal2_health().await,
             #[cfg(not(target_arch = "aarch64"))]
-            ServerType::Internal => None,
-            ServerType::External => external_health().await,
+            (_, ServerType::Internal) => None,
+            (_, ServerType::External) => external_health().await,
         };
 
         Ok(info)
@@ -204,17 +220,57 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
 
     #[tracing::instrument(skip_all)]
     pub async fn get_servers(&self) -> Result<HashMap<ServerType, ServerInfo>, crate::Error> {
-        #[cfg(target_arch = "aarch64")]
-        let internal_info = internal2_health().await.unwrap_or(ServerInfo {
-            url: None,
-            status: ServerStatus::Unreachable,
-            model: None,
-        });
-        #[cfg(not(target_arch = "aarch64"))]
-        let internal_info = ServerInfo {
-            url: None,
-            status: ServerStatus::Unreachable,
-            model: None,
+        let internal_info = {
+            #[cfg(target_os = "macos")]
+            {
+                if let Some(info) = internal3_health().await {
+                    info
+                } else {
+                    #[cfg(target_arch = "aarch64")]
+                    {
+                        internal2_health().await.unwrap_or(ServerInfo {
+                            url: None,
+                            status: ServerStatus::Unreachable,
+                            model: None,
+                        })
+                    }
+                    #[cfg(all(not(target_arch = "aarch64"), feature = "whisper-cpp"))]
+                    {
+                        internal_health().await.unwrap_or(ServerInfo {
+                            url: None,
+                            status: ServerStatus::Unreachable,
+                            model: None,
+                        })
+                    }
+                    #[cfg(all(not(target_arch = "aarch64"), not(feature = "whisper-cpp")))]
+                    {
+                        ServerInfo {
+                            url: None,
+                            status: ServerStatus::Unreachable,
+                            model: None,
+                        }
+                    }
+                }
+            }
+            #[cfg(not(target_os = "macos"))]
+            {
+                #[cfg(target_arch = "aarch64")]
+                {
+                    internal2_health().await.unwrap_or(ServerInfo {
+                        url: None,
+                        status: ServerStatus::Unreachable,
+                        model: None,
+                    })
+                }
+                #[cfg(not(target_arch = "aarch64"))]
+                {
+                    ServerInfo {
+                        url: None,
+                        status: ServerStatus::Unreachable,
+                        model: None,
+                    }
+                }
+            }
         };
 
         let external_info = external_health().await.unwrap_or(ServerInfo {
@@ -295,6 +351,10 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
         };
 
         let task = match model.clone() {
+            SupportedSttModel::SpeechAnalyzer => {
+                // SpeechAnalyzer uses the system model; no download required.
+                return Ok(());
+            }
             SupportedSttModel::Am(m) => {
                 let tar_path = self.models_dir().join(format!("{}.tar", m.model_dir()));
                 let final_path = self.models_dir();
@@ -398,6 +458,7 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
                     let zip_path = self.cactus_models_dir().join(m.zip_name());
                     let _ = std::fs::remove_file(&zip_path);
                 }
+                SupportedSttModel::SpeechAnalyzer => {}
             }
 
             let _ = DownloadProgressPayload {
@@ -449,6 +510,8 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
                         .map_err(|e| crate::Error::ModelDeleteFailed(e.to_string()))?;
                 }
             }
+            // SpeechAnalyzer uses the system model, nothing to delete
+            SupportedSttModel::SpeechAnalyzer => {}
         }
 
         Ok(())
@@ -492,6 +555,26 @@ async fn start_internal2_server(
     .map_err(|e| crate::Error::ServerStartFailed(e.to_string()))?;
 
     internal2_health()
+        .await
+        .and_then(|info| info.url)
+        .ok_or_else(|| crate::Error::ServerStartFailed("empty_health".to_string()))
+}
+
+#[cfg(target_os = "macos")]
+async fn start_internal3_server(
+    supervisor: &supervisor::SupervisorRef,
+) -> Result<String, crate::Error> {
+    supervisor::start_internal3_stt(
+        supervisor,
+        internal3::Internal3STTArgs {
+            locale: "en-US".to_string(),
+            sample_rate: 16_000,
+        },
+    )
+    .await
+    .map_err(|e| crate::Error::ServerStartFailed(e.to_string()))?;
+
+    internal3_health()
         .await
         .and_then(|info| info.url)
         .ok_or_else(|| crate::Error::ServerStartFailed("empty_health".to_string()))
@@ -565,6 +648,17 @@ async fn start_external_server<R: Runtime, T: Manager<R>>(
         .await
         .and_then(|info| info.url)
         .ok_or_else(|| crate::Error::ServerStartFailed("empty_health".to_string()))
+}
+
+#[cfg(target_os = "macos")]
+async fn internal3_health() -> Option<ServerInfo> {
+    match registry::where_is(internal3::Internal3STTActor::name()) {
+        Some(cell) => {
+            let actor: ActorRef<internal3::Internal3STTMessage> = cell.into();
+            call_t!(actor, internal3::Internal3STTMessage::GetHealth, 10 * 1000).ok()
+        }
+        None => None,
+    }
 }
 
 #[cfg(target_arch = "aarch64")]

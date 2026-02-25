@@ -17989,6 +17989,7 @@ dependencies = [
  "tower-http 0.6.8",
  "tracing",
  "transcribe-cactus",
+ "transcribe-speech-analyzer",
  "transcribe-whisper-local",
  "whisper-local",
  "whisper-local-model",
@@ -19756,6 +19757,26 @@ dependencies = [
  "urlencoding",
  "utoipa",
  "uuid",
+]
+
+[[package]]
+name = "transcribe-speech-analyzer"
+version = "0.1.0"
+dependencies = [
+ "audio-utils",
+ "axum 0.8.8",
+ "futures-util",
+ "owhisper-interface",
+ "serde",
+ "serde_json",
+ "serde_qs",
+ "swift-rs 1.0.7 (git+https://github.com/yujonglee/swift-rs?rev=41a1605)",
+ "thiserror 2.0.18",
+ "tokio",
+ "tower 0.5.3",
+ "tracing",
+ "uuid",
+ "ws-utils",
 ]
 
 [[package]]

@@ -3,6 +3,8 @@ pub mod external;
 pub mod internal;
 #[cfg(target_arch = "aarch64")]
 pub mod internal2;
+#[cfg(target_os = "macos")]
+pub mod internal3;
 pub mod supervisor;
 
 #[derive(
