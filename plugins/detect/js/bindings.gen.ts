@@ -87,8 +87,9 @@ detectEvent: "plugin:detect:detect-event"
 
 /** user-defined types **/
 
-export type DetectEvent = { type: "micDetected"; key: string; apps: InstalledApp[]; duration_secs: number } | { type: "micStopped"; apps: InstalledApp[] } | { type: "micMuted"; value: boolean } | { type: "sleepStateChanged"; value: boolean }
+export type DetectEvent = { type: "micDetected"; key: string; apps: InstalledApp[]; duration_secs: number } | { type: "micStopped"; apps: InstalledApp[] } | { type: "micMuted"; value: boolean } | { type: "sleepStateChanged"; value: boolean } | { type: "googleMeetParticipants"; participants: MeetParticipant[] }
 export type InstalledApp = { id: string; name: string }
+export type MeetParticipant = { name: string; is_self: boolean }
 
 /** tauri-specta globals **/
 

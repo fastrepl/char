@@ -80,6 +80,10 @@ function getNearbyEvents(
 const useHandleDetectEvents = (store: ListenerStore) => {
   const stop = useStore(store, (state) => state.stop);
   const setMuted = useStore(store, (state) => state.setMuted);
+  const setMeetParticipants = useStore(
+    store,
+    (state) => state.setMeetParticipants,
+  );
   const notificationDetectEnabled = useConfigValue("notification_detect");
   const tinybaseStore = main.UI.useStore(main.STORE_ID);
 
@@ -141,6 +145,8 @@ const useHandleDetectEvents = (store: ListenerStore) => {
           }
         } else if (payload.type === "micMuted") {
           setMuted(payload.value);
+        } else if (payload.type === "googleMeetParticipants") {
+          setMeetParticipants(payload.participants);
         }
       })
       .then((fn) => {
@@ -158,5 +164,5 @@ const useHandleDetectEvents = (store: ListenerStore) => {
       cancelled = true;
       unlisten?.();
     };
-  }, [stop, setMuted]);
+  }, [stop, setMuted, setMeetParticipants]);
 };

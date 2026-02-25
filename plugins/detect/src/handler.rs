@@ -50,6 +50,21 @@ pub(crate) fn handle_detect_event<E: Env>(
         hypr_detect::DetectEvent::SleepStateChanged { value } => {
             env.emit(DetectEvent::SleepStateChanged { value });
         }
+        #[cfg(feature = "google-meet")]
+        hypr_detect::DetectEvent::GoogleMeetMuteStateChanged { value } => {
+            env.emit(DetectEvent::MicMuteStateChanged { value });
+        }
+        #[cfg(feature = "google-meet")]
+        hypr_detect::DetectEvent::GoogleMeetParticipantsChanged { participants } => {
+            let participants = participants
+                .into_iter()
+                .map(|p| crate::events::MeetParticipant {
+                    name: p.name,
+                    is_self: p.is_self,
+                })
+                .collect();
+            env.emit(DetectEvent::GoogleMeetParticipantsChanged { participants });
+        }
     }
 }
 

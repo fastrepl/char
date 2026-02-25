@@ -39,6 +39,11 @@ export type LoadingPhase =
   | "connecting"
   | "connected";
 
+export type MeetParticipant = {
+  name: string;
+  is_self: boolean;
+};
+
 export type GeneralState = {
   live: {
     eventUnlisteners?: (() => void)[];
@@ -53,6 +58,7 @@ export type GeneralState = {
     lastError: string | null;
     device: string | null;
     degraded: DegradedError | null;
+    meetParticipants: MeetParticipant[];
   };
 };
 
@@ -63,6 +69,7 @@ export type GeneralActions = {
   ) => void;
   stop: () => void;
   setMuted: (value: boolean) => void;
+  setMeetParticipants: (participants: MeetParticipant[]) => void;
   runBatch: (
     params: BatchParams,
     options?: { handlePersist?: HandlePersistCallback; sessionId?: string },
@@ -82,6 +89,7 @@ const initialState: GeneralState = {
     lastError: null,
     device: null,
     degraded: null,
+    meetParticipants: [],
   },
 };
 
@@ -233,6 +241,7 @@ export const createGeneralSlice = <
             draft.live.device = null;
             draft.live.degraded = null;
             draft.live.muted = initialState.live.muted;
+            draft.live.meetParticipants = [];
           }),
         );
 
@@ -406,6 +415,7 @@ export const createGeneralSlice = <
               draft.live.seconds = 0;
               draft.live.sessionId = null;
               draft.live.muted = initialState.live.muted;
+              draft.live.meetParticipants = [];
               draft.live.lastError = null;
               draft.live.device = null;
               draft.live.degraded = null;
@@ -467,6 +477,13 @@ export const createGeneralSlice = <
       mutate(state, (draft) => {
         draft.live.muted = value;
         void listenerCommands.setMicMuted(value);
+      }),
+    );
+  },
+  setMeetParticipants: (participants) => {
+    set((state) =>
+      mutate(state, (draft) => {
+        draft.live.meetParticipants = participants;
       }),
     );
   },

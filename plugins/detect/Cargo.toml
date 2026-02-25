@@ -8,10 +8,11 @@ links = "tauri-plugin-detect"
 description = ""
 
 [features]
-default = ["zoom", "sleep"]
+default = ["zoom", "sleep", "google-meet"]
 zoom = ["hypr-detect/zoom"]
 language = ["hypr-detect/language"]
 sleep = ["hypr-detect/sleep"]
+google-meet = ["hypr-detect/google-meet"]
 
 [build-dependencies]
 tauri-plugin = { workspace = true, features = ["build"] }
@@ -21,7 +22,7 @@ specta-typescript = { workspace = true }
 tokio = { workspace = true, features = ["test-util"] }
 
 [dependencies]
-hypr-detect = { workspace = true, features = ["mic", "list", "language", "sleep"] }
+hypr-detect = { workspace = true, features = ["mic", "list", "language", "sleep", "google-meet"] }
 hypr-host = { workspace = true }
 hypr-notification-interface = { workspace = true }
 
@@ -31,7 +32,9 @@ tauri-plugin-windows = { workspace = true }
 specta = { workspace = true }
 tauri-specta = { workspace = true, features = ["derive", "typescript"] }
 
+dirs = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
 thiserror = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }
 

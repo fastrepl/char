@@ -1,5 +1,7 @@
 use std::sync::{Arc, Mutex};
 
+#[cfg(feature = "google-meet")]
+use hypr_detect::GoogleMeetRuntime;
 use tauri::Manager;
 
 mod commands;
@@ -8,6 +10,8 @@ mod env;
 mod error;
 mod events;
 mod ext;
+#[cfg(feature = "google-meet")]
+mod google_meet_runtime;
 mod handler;
 mod mic_usage_tracker;
 mod policy;
@@ -66,6 +70,16 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
 
             app.manage(DetectorState::default());
             app.manage(ProcessorState::default());
+
+            #[cfg(feature = "google-meet")]
+            {
+                let runtime = std::sync::Arc::new(google_meet_runtime::TauriGoogleMeetRuntime);
+                runtime.register_chrome_native_host();
+
+                let detector_state = app.state::<DetectorState>();
+                let mut detector = detector_state.lock().unwrap();
+                detector.set_google_meet_runtime(runtime);
+            }
 
             let app_handle = app.app_handle().clone();
             tauri::async_runtime::spawn(async move {

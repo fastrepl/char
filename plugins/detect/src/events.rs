@@ -23,5 +23,15 @@ common_event_derives! {
         MicMuteStateChanged { value: bool },
         #[serde(rename = "sleepStateChanged")]
         SleepStateChanged { value: bool },
+        #[serde(rename = "googleMeetParticipants")]
+        GoogleMeetParticipantsChanged {
+            participants: Vec<MeetParticipant>,
+        },
     }
+}
+
+#[derive(serde::Serialize, Clone, specta::Type)]
+pub struct MeetParticipant {
+    pub name: String,
+    pub is_self: bool,
 }

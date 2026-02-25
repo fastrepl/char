@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Hyprnote",
+  "version": "0.1.0",
+  "description": "Google Meet integration for Hyprnote",
+  "permissions": ["nativeMessaging"],
+  "content_scripts": [
+    {
+      "matches": ["https://meet.google.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}

@@ -41,6 +41,11 @@ pub use zoom::*;
 #[cfg(all(target_os = "macos", feature = "sleep"))]
 pub use sleep::*;
 
+#[cfg(feature = "google-meet")]
+mod google_meet;
+#[cfg(feature = "google-meet")]
+pub use google_meet::*;
+
 #[cfg(feature = "mic")]
 #[derive(Debug, Clone)]
 pub enum DetectEvent {
@@ -53,6 +58,14 @@ pub enum DetectEvent {
     #[cfg(all(target_os = "macos", feature = "sleep"))]
     SleepStateChanged {
         value: bool,
+    },
+    #[cfg(feature = "google-meet")]
+    GoogleMeetMuteStateChanged {
+        value: bool,
+    },
+    #[cfg(feature = "google-meet")]
+    GoogleMeetParticipantsChanged {
+        participants: Vec<MeetParticipant>,
     },
 }
 
@@ -81,10 +94,17 @@ pub struct Detector {
     zoom_watcher: ZoomMuteWatcher,
     #[cfg(all(target_os = "macos", feature = "sleep"))]
     sleep_detector: SleepDetector,
+    #[cfg(feature = "google-meet")]
+    google_meet_watcher: GoogleMeetWatcher,
 }
 
 #[cfg(feature = "mic")]
 impl Detector {
+    #[cfg(feature = "google-meet")]
+    pub fn set_google_meet_runtime(&mut self, runtime: std::sync::Arc<dyn GoogleMeetRuntime>) {
+        self.google_meet_watcher.set_runtime(runtime);
+    }
+
     pub fn start(&mut self, f: DetectCallback) {
         self.mic_detector.start(f.clone());
 
@@ -92,7 +112,10 @@ impl Detector {
         self.zoom_watcher.start(f.clone());
 
         #[cfg(all(target_os = "macos", feature = "sleep"))]
-        self.sleep_detector.start(f);
+        self.sleep_detector.start(f.clone());
+
+        #[cfg(feature = "google-meet")]
+        self.google_meet_watcher.start(f);
     }
 
     pub fn stop(&mut self) {
@@ -103,5 +126,8 @@ impl Detector {
 
         #[cfg(all(target_os = "macos", feature = "sleep"))]
         self.sleep_detector.stop();
+
+        #[cfg(feature = "google-meet")]
+        self.google_meet_watcher.stop();
     }
 }

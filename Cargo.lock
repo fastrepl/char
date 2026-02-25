@@ -2968,6 +2968,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "58b52a9840ffff5d4d0058ae529fa066a75e794e3125546acfc61c23ad755e49"
 
 [[package]]
+name = "chrome-native-host"
+version = "0.1.0"
+dependencies = [
+ "dirs 6.0.0",
+ "serde",
+ "serde_json",
+ "tempfile",
+]
+
+[[package]]
 name = "chrono"
 version = "0.4.43"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4656,6 +4666,7 @@ dependencies = [
  "plist",
  "regex",
  "serde",
+ "serde_json",
  "specta",
  "sysinfo",
  "thiserror 2.0.18",
@@ -17566,9 +17577,11 @@ name = "tauri-plugin-detect"
 version = "0.1.0"
 dependencies = [
  "detect",
+ "dirs 6.0.0",
  "host",
  "notification-interface",
  "serde",
+ "serde_json",
  "specta",
  "specta-typescript",
  "tauri",
