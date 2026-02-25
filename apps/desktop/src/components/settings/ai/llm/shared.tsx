@@ -1,6 +1,8 @@
 import { Icon } from "@iconify-icon/react";
 import {
   Anthropic,
+  Azure,
+  AzureAI,
   LmStudio,
   Mistral,
   Ollama,
@@ -109,6 +111,26 @@ const _PROVIDERS = [
     icon: <Mistral size={16} />,
     baseUrl: "https://api.mistral.ai/v1",
     requirements: [{ kind: "requires_config", fields: ["api_key"] }],
+  },
+  {
+    id: "azure_openai",
+    displayName: "Azure OpenAI",
+    badge: "Beta",
+    icon: <Azure size={16} />,
+    baseUrl: undefined,
+    requirements: [
+      { kind: "requires_config", fields: ["base_url", "api_key"] },
+    ],
+  },
+  {
+    id: "azure_ai",
+    displayName: "Azure AI Foundry",
+    badge: "Beta",
+    icon: <AzureAI size={16} />,
+    baseUrl: undefined,
+    requirements: [
+      { kind: "requires_config", fields: ["base_url", "api_key"] },
+    ],
   },
   {
     id: "google_generative_ai",
