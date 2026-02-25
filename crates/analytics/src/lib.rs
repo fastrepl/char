@@ -400,11 +400,16 @@ impl AnalyticsPayloadBuilder {
 pub struct AnalyticsService {
     client: AnalyticsClient,
     runtime: Arc<dyn AnalyticsRuntime>,
+    tokio_handle: tokio::runtime::Handle,
 }
 
 impl AnalyticsService {
     pub fn new(client: AnalyticsClient, runtime: Arc<dyn AnalyticsRuntime>) -> Self {
-        Self { client, runtime }
+        Self {
+            client,
+            runtime,
+            tokio_handle: tokio::runtime::Handle::current(),
+        }
     }
 
     pub async fn event(&self, mut payload: AnalyticsPayload) -> Result<(), Error> {
@@ -423,7 +428,7 @@ impl AnalyticsService {
         self.runtime.enrich(&mut payload);
         let distinct_id = self.runtime.distinct_id();
         let client = self.client.clone();
-        tokio::spawn(async move {
+        self.tokio_handle.spawn(async move {
             let _ = client.event(distinct_id, payload).await;
         });
     }
