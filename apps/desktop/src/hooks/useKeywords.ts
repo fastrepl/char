@@ -25,9 +25,7 @@ export function useKeywords(sessionId: string) {
         ? extractKeywordsFromMarkdown(rawMd)
         : { keywords: [], keyphrases: [] };
 
-    const customVocab = Object.values(vocabTable ?? {}).map(
-      (row) => row.text,
-    );
+    const customVocab = Object.values(vocabTable ?? {}).map((row) => row.text);
 
     return combineKeywords([...customVocab, ...keywords, ...keyphrases]);
   }, [rawMd, vocabTable]);
