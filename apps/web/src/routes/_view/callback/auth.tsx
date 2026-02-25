@@ -181,6 +181,7 @@ function Component() {
     if (search.flow === "web" && !search.error) {
       navigate({
         to: search.redirect || "/app/account/",
+        search: {},
         replace: true,
       });
     }
