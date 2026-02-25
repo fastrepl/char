@@ -80,11 +80,7 @@ pub async fn start_trial(
 
             match create_trial_subscription(&state.stripe, &customer_id, price_id, user_id).await {
                 Ok(()) => TrialOutcome::Started(query.interval),
-                Err(e) => {
-                    tracing::error!(error = %e, "failed to create Stripe subscription");
-                    sentry::capture_message(&e.to_string(), sentry::Level::Error);
-                    TrialOutcome::StripeError
-                }
+                Err(e) => TrialOutcome::StripeError(e.to_string()),
             }
         };
 

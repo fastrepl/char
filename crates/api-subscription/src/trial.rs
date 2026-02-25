@@ -44,7 +44,7 @@ pub struct StartTrialResponse {
 
 pub(crate) enum TrialOutcome {
     NotEligible,
-    StripeError,
+    StripeError(String),
     Started(Interval),
 }
 
@@ -54,7 +54,7 @@ impl ToAnalyticsPayload for TrialOutcome {
             Self::NotEligible => AnalyticsPayload::builder("trial_skipped")
                 .with("reason", "not_eligible")
                 .build(),
-            Self::StripeError => AnalyticsPayload::builder("trial_failed")
+            Self::StripeError(_) => AnalyticsPayload::builder("trial_failed")
                 .with("reason", "stripe_error")
                 .build(),
             Self::Started(interval) => {
@@ -93,10 +93,10 @@ impl IntoResponse for TrialOutcome {
                 reason: Some(StartTrialReason::NotEligible),
             })
             .into_response(),
-            Self::StripeError => hypr_api_error::error_response(
+            Self::StripeError(msg) => hypr_api_error::error_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "failed_to_create_subscription",
-                "failed to create subscription",
+                &msg,
             ),
             Self::Started(_) => Json(StartTrialResponse {
                 started: true,
