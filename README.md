@@ -27,8 +27,8 @@ brew install --cask fastrepl/fastrepl/char@nightly
 ```
 
 - [macOS](https://hyprnote.com/download) (public beta)
-- [Windows](https://github.com/fastrepl/char/issues/66) (q1 2026)
-- [Linux](https://github.com/fastrepl/char/issues/67) (q1 2026)
+- [Windows](https://github.com/fastrepl/char/issues/66) (q2 2026)
+- [Linux](https://github.com/fastrepl/char/issues/67) (q2 2026)
 
 ## Highlights
 
