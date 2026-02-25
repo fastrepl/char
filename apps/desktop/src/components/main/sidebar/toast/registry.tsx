@@ -146,7 +146,7 @@ export function createToastRegistry({
         ),
         title: "Sign in required",
         description:
-          "You have Hyprnote Pro models configured. Please sign in to use them.",
+          "You have Char Pro models configured. Please sign in to use them.",
         primaryAction: {
           label: "Sign in",
           onClick: onSignIn,

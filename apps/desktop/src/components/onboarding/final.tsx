@@ -18,7 +18,7 @@ const SOCIALS = [
     label: "GitHub",
     icon: "simple-icons:github",
     size: 14,
-    url: "https://github.com/fastrepl/hyprnote",
+    url: "https://github.com/fastrepl/char",
   },
   {
     label: "X",

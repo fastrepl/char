@@ -200,9 +200,7 @@ export function AccountSettings() {
     return (
       <div className="flex flex-col items-center gap-6 text-center">
         <div className="flex flex-col gap-2">
-          <h2 className="text-2xl font-semibold font-serif">
-            Sign in to Hyprnote
-          </h2>
+          <h2 className="text-2xl font-semibold font-serif">Sign in to Char</h2>
           <p className="text-base text-neutral-500">
             Get started without an account. Sign in to unlock more.
           </p>

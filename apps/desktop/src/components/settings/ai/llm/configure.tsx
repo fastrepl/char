@@ -35,7 +35,7 @@ export function ConfigureProviders() {
       >
         <HyprProviderCard
           providerId="hyprnote"
-          providerName="Hyprnote"
+          providerName="Char"
           icon={<img src="/assets/icon.png" alt="Char" className="size-5" />}
           badge={PROVIDERS.find((p) => p.id === "hyprnote")?.badge}
         />
@@ -129,9 +129,9 @@ function HyprProviderAutoRow({ highlight }: { highlight?: boolean }) {
   return (
     <HyprProviderRow>
       <div className="flex-1">
-        <span className="text-sm font-medium">Hyprnote Cloud</span>
+        <span className="text-sm font-medium">Char Cloud</span>
         <p className="text-xs text-neutral-500">
-          Use the Hyprnote Cloud API for AI assistance.
+          Use the Char Cloud API for AI assistance.
         </p>
       </div>
       <HyprCloudCTAButton
