@@ -2,6 +2,7 @@ use hypr_onnx::ndarray::{Array3, ArrayView1};
 use hypr_onnx::ort::value::Tensor;
 
 pub const CHUNK_SIZE_16KHZ: usize = 512;
+const CONTEXT_SIZE_16KHZ: usize = 64;
 const STATE_SIZE: usize = 128;
 
 #[derive(Debug, thiserror::Error)]
@@ -17,6 +18,15 @@ pub enum Error {
 pub struct SileroVad {
     session: hypr_onnx::ort::session::Session,
     state: Array3<f32>,
+    context: Vec<f32>,
+}
+
+const MODEL_BYTES: &[u8] = include_bytes!("../../data/models/silero_v6.2.onnx");
+
+impl Default for SileroVad {
+    fn default() -> Self {
+        Self::new_from_bytes(MODEL_BYTES).unwrap()
+    }
 }
 
 impl SileroVad {
@@ -25,6 +35,7 @@ impl SileroVad {
         Ok(Self {
             session,
             state: Array3::zeros((2, 1, STATE_SIZE)),
+            context: vec![0.0; CONTEXT_SIZE_16KHZ],
         })
     }
 
@@ -33,11 +44,13 @@ impl SileroVad {
         Ok(Self {
             session,
             state: Array3::zeros((2, 1, STATE_SIZE)),
+            context: vec![0.0; CONTEXT_SIZE_16KHZ],
         })
     }
 
     pub fn reset_states(&mut self) {
         self.state = Array3::zeros((2, 1, STATE_SIZE));
+        self.context = vec![0.0; CONTEXT_SIZE_16KHZ];
     }
 
     pub fn process_chunk(&mut self, x: &ArrayView1<f32>, sr: u32) -> Result<f32, Error> {
@@ -52,14 +65,18 @@ impl SileroVad {
             )));
         }
 
-        let input_data: Vec<f32> = x.to_vec();
+        let mut input_data: Vec<f32> = Vec::with_capacity(CONTEXT_SIZE_16KHZ + CHUNK_SIZE_16KHZ);
+        input_data.extend_from_slice(&self.context);
+        input_data.extend_from_slice(x.as_slice().unwrap());
+        self.context = input_data[CHUNK_SIZE_16KHZ..].to_vec();
+
         let state_shape = self.state.shape().to_vec();
         let (state_data, _) = self.state.clone().into_raw_vec_and_offset();
 
         let inputs = vec![
             (
                 "input",
-                Tensor::from_array((vec![1, x.len()], input_data))?.into_dyn(),
+                Tensor::from_array((vec![1, input_data.len()], input_data))?.into_dyn(),
             ),
             (
                 "state",
@@ -145,8 +162,6 @@ mod tests {
         }
     }
 
-    const MODEL_BYTES: &[u8] = include_bytes!("../../data/models/silero_v6.2.onnx");
-
     fn pcm_bytes_to_i16(bytes: &[u8]) -> Vec<i16> {
         bytes
             .chunks_exact(2)
@@ -154,11 +169,10 @@ mod tests {
             .collect()
     }
 
-    #[test]
-    fn test_silero_v6_english_1() {
-        let mut model = SileroVad::new_from_bytes(MODEL_BYTES).unwrap();
+    fn run_snapshot_test(audio_bytes: &[u8], snapshot_name: &str) {
+        let mut model = SileroVad::default();
 
-        let samples_f32: Vec<f32> = pcm_i16_to_f32(&pcm_bytes_to_i16(hypr_data::english_1::AUDIO));
+        let samples_f32: Vec<f32> = pcm_i16_to_f32(&pcm_bytes_to_i16(audio_bytes));
 
         let mut probabilities = Vec::new();
         for chunk in samples_f32.chunks(CHUNK_SIZE_16KHZ) {
@@ -180,8 +194,8 @@ mod tests {
             mean_probability,
         };
 
-        let snapshot_path =
-            Path::new(env!("CARGO_MANIFEST_DIR")).join("data/snapshots/silero_v6_english_1.json");
+        let snapshot_path = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join(format!("data/snapshots/{snapshot_name}.json"));
 
         if std::env::var("UPDATE_SNAPSHOTS").is_ok() {
             save_snapshot(&actual, &snapshot_path);
@@ -190,5 +204,30 @@ mod tests {
             let expected = load_snapshot(&snapshot_path);
             assert_snapshot_eq(&actual, &expected);
         }
+    }
+
+    #[test]
+    fn test_silero_v6_english_1() {
+        run_snapshot_test(hypr_data::english_1::AUDIO, "silero_v6_english_1");
+    }
+
+    #[test]
+    fn test_silero_v6_english_2() {
+        run_snapshot_test(hypr_data::english_2::AUDIO, "silero_v6_english_2");
+    }
+
+    #[test]
+    fn test_silero_v6_english_3() {
+        run_snapshot_test(hypr_data::english_3::AUDIO, "silero_v6_english_3");
+    }
+
+    #[test]
+    fn test_silero_v6_korean_1() {
+        run_snapshot_test(hypr_data::korean_1::AUDIO, "silero_v6_korean_1");
+    }
+
+    #[test]
+    fn test_silero_v6_korean_2() {
+        run_snapshot_test(hypr_data::korean_2::AUDIO, "silero_v6_korean_2");
     }
 }
