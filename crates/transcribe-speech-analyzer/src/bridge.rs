@@ -97,7 +97,8 @@ impl SpeechAnalyzerSession {
     pub fn get_results(&self) -> Vec<SpeechAnalyzerResult> {
         #[cfg(all(target_os = "macos", feature = "speech-analyzer"))]
         {
-            let json: String = unsafe { ffi::_speech_analyzer_get_results(self.handle) }.to_string();
+            let json: String =
+                unsafe { ffi::_speech_analyzer_get_results(self.handle) }.to_string();
             serde_json::from_str(&json).unwrap_or_default()
         }
         #[cfg(not(all(target_os = "macos", feature = "speech-analyzer")))]

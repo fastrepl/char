@@ -137,9 +137,7 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
 
         match (&model, server_type) {
             #[cfg(target_os = "macos")]
-            (SupportedSttModel::SpeechAnalyzer, _) => {
-                start_internal3_server(&supervisor).await
-            }
+            (SupportedSttModel::SpeechAnalyzer, _) => start_internal3_server(&supervisor).await,
             (_, ServerType::Internal) => {
                 #[cfg(target_arch = "aarch64")]
                 {

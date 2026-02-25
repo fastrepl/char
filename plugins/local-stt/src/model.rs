@@ -65,8 +65,7 @@ impl SupportedSttModel {
                 }
             }
             SupportedSttModel::SpeechAnalyzer => {
-                cfg!(target_os = "macos")
-                    && hypr_transcribe_speech_analyzer::is_available()
+                cfg!(target_os = "macos") && hypr_transcribe_speech_analyzer::is_available()
             }
         }
     }
@@ -97,7 +96,8 @@ impl SupportedSttModel {
             SupportedSttModel::SpeechAnalyzer => SttModelInfo {
                 key: self.clone(),
                 display_name: "Apple Speech Analyzer".to_string(),
-                description: "Native macOS 26 on-device speech recognition. No download required.".to_string(),
+                description: "Native macOS 26 on-device speech recognition. No download required."
+                    .to_string(),
                 size_bytes: 0,
                 model_type: SttModelType::SpeechAnalyzer,
             },
