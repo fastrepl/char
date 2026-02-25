@@ -2,7 +2,7 @@ import { md2json } from "@hypr/tiptap/shared";
 
 import { createTaskId, type TaskConfig } from ".";
 
-const onSuccess: NonNullable<TaskConfig<"enhance">["onSuccess"]> = async ({
+const onSuccess: NonNullable<TaskConfig<"enhance">["onSuccess"]> = ({
   text,
   args,
   model,
