@@ -408,5 +408,5 @@ jobs:
         with:
           tag: desktop_v${{ needs.compute-version.outputs.version }}
           name: desktop_v${{ needs.compute-version.outputs.version }}
-          body: "https://hyprnote.com/changelog/${{ needs.compute-version.outputs.version }}"
+          body: "https://char.com/changelog/${{ needs.compute-version.outputs.version }}"
           artifacts: ${{ steps.artifacts.outputs.list }}
