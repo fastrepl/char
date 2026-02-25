@@ -105,10 +105,12 @@ private struct TranscriptionResultJSON: Codable {
     func feedAudio(samples: UnsafePointer<Float>, count: Int) {
       guard !isFinished else { return }
 
-      guard let pcmBuffer = AVAudioPCMBuffer(
-        pcmFormat: audioFormat,
-        frameCapacity: AVAudioFrameCount(count)
-      ) else { return }
+      guard
+        let pcmBuffer = AVAudioPCMBuffer(
+          pcmFormat: audioFormat,
+          frameCapacity: AVAudioFrameCount(count)
+        )
+      else { return }
 
       pcmBuffer.frameLength = AVAudioFrameCount(count)
 
@@ -228,12 +230,14 @@ public func _speech_analyzer_create(localeId: SRString, sampleRate: Int) -> Int6
 
       let analyzer = SpeechAnalyzer(modules: [transcriber])
 
-      guard let audioFormat = AVAudioFormat(
-        commonFormat: .pcmFormatFloat32,
-        sampleRate: Double(sampleRate),
-        channels: 1,
-        interleaved: false
-      ) else {
+      guard
+        let audioFormat = AVAudioFormat(
+          commonFormat: .pcmFormatFloat32,
+          sampleRate: Double(sampleRate),
+          channels: 1,
+          interleaved: false
+        )
+      else {
         return -2
       }
 
