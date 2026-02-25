@@ -517,6 +517,7 @@ dependencies = [
 name = "api-bot"
 version = "0.1.0"
 dependencies = [
+ "api-error",
  "axum 0.8.8",
  "recall",
  "sentry",
@@ -532,6 +533,7 @@ dependencies = [
 name = "api-calendar"
 version = "0.1.0"
 dependencies = [
+ "api-error",
  "api-nango",
  "axum 0.8.8",
  "chrono",
@@ -554,9 +556,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "api-error"
+version = "0.1.0"
+dependencies = [
+ "axum 0.8.8",
+ "sentry",
+ "serde",
+ "tracing",
+ "utoipa",
+]
+
+[[package]]
 name = "api-messenger"
 version = "0.1.0"
 dependencies = [
+ "api-error",
  "axum 0.8.8",
  "hypr-http-utils",
  "serde",
@@ -572,6 +586,7 @@ version = "0.1.0"
 dependencies = [
  "api-auth",
  "api-env",
+ "api-error",
  "axum 0.8.8",
  "chrono",
  "nango",
@@ -607,6 +622,7 @@ dependencies = [
 name = "api-storage"
 version = "0.1.0"
 dependencies = [
+ "api-error",
  "api-nango",
  "axum 0.8.8",
  "google-drive",
@@ -626,6 +642,7 @@ dependencies = [
  "analytics",
  "api-auth",
  "api-env",
+ "api-error",
  "async-stripe",
  "async-stripe-billing",
  "async-stripe-core",
@@ -680,6 +697,7 @@ dependencies = [
 name = "api-sync"
 version = "0.1.0"
 dependencies = [
+ "api-error",
  "axum 0.8.8",
  "reqwest 0.13.2",
  "sentry",

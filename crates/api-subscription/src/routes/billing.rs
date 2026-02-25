@@ -7,7 +7,6 @@ use axum::{
 use hypr_analytics::{AnalyticsClient, ToAnalyticsPayload};
 use hypr_api_auth::AuthContext;
 
-use crate::error::ErrorResponse;
 use crate::state::AppState;
 use crate::stripe::{create_trial_subscription, get_or_create_customer};
 use crate::trial::{Interval, StartTrialQuery, StartTrialReason, StartTrialResponse, TrialOutcome};
@@ -59,24 +58,18 @@ pub async fn start_trial(
                 {
                     Ok(Some(id)) => id,
                     Ok(None) => {
-                        return (
+                        return hypr_api_error::error_response(
                             StatusCode::INTERNAL_SERVER_ERROR,
-                            Json(ErrorResponse {
-                                error: "stripe_customer_id_missing".to_string(),
-                            }),
-                        )
-                            .into_response();
+                            "stripe_customer_id_missing",
+                            "stripe customer ID missing",
+                        );
                     }
                     Err(e) => {
-                        tracing::error!(error = %e, "get_or_create_customer failed");
-                        sentry::capture_message(&e.to_string(), sentry::Level::Error);
-                        return (
+                        return hypr_api_error::error_response(
                             StatusCode::INTERNAL_SERVER_ERROR,
-                            Json(ErrorResponse {
-                                error: "failed_to_create_customer".to_string(),
-                            }),
-                        )
-                            .into_response();
+                            "failed_to_create_customer",
+                            &e.to_string(),
+                        );
                     }
                 };
 

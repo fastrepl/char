@@ -8,8 +8,6 @@ use hypr_analytics::{AnalyticsPayload, PropertiesPayload, ToAnalyticsPayload};
 use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToSchema};
 
-use crate::error::ErrorResponse;
-
 #[derive(Debug, Deserialize, IntoParams)]
 pub struct StartTrialQuery {
     #[serde(default = "default_interval")]
@@ -95,13 +93,11 @@ impl IntoResponse for TrialOutcome {
                 reason: Some(StartTrialReason::NotEligible),
             })
             .into_response(),
-            Self::StripeError => (
+            Self::StripeError => hypr_api_error::error_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ErrorResponse {
-                    error: "failed_to_create_subscription".to_string(),
-                }),
-            )
-                .into_response(),
+                "failed_to_create_subscription",
+                "failed to create subscription",
+            ),
             Self::Started(_) => Json(StartTrialResponse {
                 started: true,
                 reason: Some(StartTrialReason::Started),
