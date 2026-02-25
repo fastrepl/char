@@ -4391,6 +4391,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "denoise"
+version = "0.1.0"
+dependencies = [
+ "criterion",
+ "data",
+ "onnx",
+ "realfft",
+ "serde",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "der"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
