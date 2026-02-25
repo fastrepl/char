@@ -22,145 +22,145 @@ remote_images = [
 # Auth paths MUST redirect so PKCE cookies stay on one domain.
 
 [[redirects]]
-from = "https://char.com/auth"
+from = "https://hyprnote.com/auth"
 to = "https://char.com/auth"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/callback/*"
+from = "https://hyprnote.com/callback/*"
 to = "https://char.com/callback/:splat"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/blog/*"
+from = "https://hyprnote.com/blog/*"
 to = "https://char.com/blog/:splat"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/docs/*"
+from = "https://hyprnote.com/docs/*"
 to = "https://char.com/docs/:splat"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/changelog/*"
+from = "https://hyprnote.com/changelog/*"
 to = "https://char.com/changelog/:splat"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/gallery/*"
+from = "https://hyprnote.com/gallery/*"
 to = "https://char.com/gallery/:splat"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/integrations/*"
+from = "https://hyprnote.com/integrations/*"
 to = "https://char.com/integrations/:splat"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/legal/*"
+from = "https://hyprnote.com/legal/*"
 to = "https://char.com/legal/:splat"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/jobs/*"
+from = "https://hyprnote.com/jobs/*"
 to = "https://char.com/jobs/:splat"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/roadmap/*"
+from = "https://hyprnote.com/roadmap/*"
 to = "https://char.com/roadmap/:splat"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/vs/*"
+from = "https://hyprnote.com/vs/*"
 to = "https://char.com/vs/:splat"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/product/*"
+from = "https://hyprnote.com/product/*"
 to = "https://char.com/product/:splat"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/solution/*"
+from = "https://hyprnote.com/solution/*"
 to = "https://char.com/solution/:splat"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/company-handbook/*"
+from = "https://hyprnote.com/company-handbook/*"
 to = "https://char.com/company-handbook/:splat"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/press-kit/*"
+from = "https://hyprnote.com/press-kit/*"
 to = "https://char.com/press-kit/:splat"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/download"
+from = "https://hyprnote.com/download"
 to = "https://char.com/download"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/pricing"
+from = "https://hyprnote.com/pricing"
 to = "https://char.com/pricing"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/about"
+from = "https://hyprnote.com/about"
 to = "https://char.com/about"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/opensource"
+from = "https://hyprnote.com/opensource"
 to = "https://char.com/opensource"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/enterprise"
+from = "https://hyprnote.com/enterprise"
 to = "https://char.com/enterprise"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/security"
+from = "https://hyprnote.com/security"
 to = "https://char.com/security"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/free"
+from = "https://hyprnote.com/free"
 to = "https://char.com/free"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com/contact"
+from = "https://hyprnote.com/contact"
 to = "https://char.com/contact"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://char.com"
+from = "https://hyprnote.com"
 to = "https://char.com"
 status = 301
 force = true
