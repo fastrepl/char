@@ -1,0 +1,21 @@
+[package]
+name = "tauri-plugin-shortcut"
+version = "0.1.0"
+authors = ["You"]
+edition = "2024"
+exclude = ["/node_modules"]
+links = "tauri-plugin-shortcut"
+description = ""
+
+[build-dependencies]
+tauri-plugin = { workspace = true, features = ["build"] }
+
+[dev-dependencies]
+askama = { workspace = true }
+specta-typescript = { workspace = true }
+
+[dependencies]
+serde = { workspace = true }
+specta = { workspace = true }
+tauri = { workspace = true, features = ["test"] }
+tauri-specta = { workspace = true, features = ["derive", "typescript"] }

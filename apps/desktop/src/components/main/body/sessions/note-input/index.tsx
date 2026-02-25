@@ -8,7 +8,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 import type { TiptapEditor } from "@hypr/tiptap/editor";
@@ -20,6 +19,7 @@ import { cn } from "@hypr/utils";
 
 import { useListener } from "../../../../../contexts/listener";
 import { useScrollPreservation } from "../../../../../hooks/useScrollPreservation";
+import { useScopedShortcut } from "../../../../../hooks/useShortcutRegistry";
 import * as main from "../../../../../store/tinybase/store/main";
 import {
   parseTranscriptWords,
@@ -674,8 +674,14 @@ function useTabShortcuts({
   currentTab: EditorView;
   handleTabChange: (view: EditorView) => void;
 }) {
-  useHotkeys(
-    "alt+s",
+  const scopedOptions = {
+    preventDefault: true,
+    enableOnFormTags: true,
+    enableOnContentEditable: true,
+  };
+
+  useScopedShortcut(
+    "switch_to_enhanced",
     () => {
       const enhancedTabs = editorTabs.filter((t) => t.type === "enhanced");
       if (enhancedTabs.length === 0) return;
@@ -690,48 +696,36 @@ function useTabShortcuts({
         handleTabChange(enhancedTabs[0]);
       }
     },
-    {
-      preventDefault: true,
-      enableOnFormTags: true,
-      enableOnContentEditable: true,
-    },
+    scopedOptions,
     [currentTab, editorTabs, handleTabChange],
   );
 
-  useHotkeys(
-    "alt+m",
+  useScopedShortcut(
+    "switch_to_raw",
     () => {
       const rawTab = editorTabs.find((t) => t.type === "raw");
       if (rawTab && currentTab.type !== "raw") {
         handleTabChange(rawTab);
       }
     },
-    {
-      preventDefault: true,
-      enableOnFormTags: true,
-      enableOnContentEditable: true,
-    },
+    scopedOptions,
     [currentTab, editorTabs, handleTabChange],
   );
 
-  useHotkeys(
-    "alt+t",
+  useScopedShortcut(
+    "switch_to_transcript",
     () => {
       const transcriptTab = editorTabs.find((t) => t.type === "transcript");
       if (transcriptTab && currentTab.type !== "transcript") {
         handleTabChange(transcriptTab);
       }
     },
-    {
-      preventDefault: true,
-      enableOnFormTags: true,
-      enableOnContentEditable: true,
-    },
+    scopedOptions,
     [currentTab, editorTabs, handleTabChange],
   );
 
-  useHotkeys(
-    "ctrl+alt+left",
+  useScopedShortcut(
+    "prev_panel_tab",
     () => {
       const currentIndex = editorTabs.findIndex(
         (t) =>
@@ -744,16 +738,12 @@ function useTabShortcuts({
         handleTabChange(editorTabs[currentIndex - 1]);
       }
     },
-    {
-      preventDefault: true,
-      enableOnFormTags: true,
-      enableOnContentEditable: true,
-    },
+    scopedOptions,
     [currentTab, editorTabs, handleTabChange],
   );
 
-  useHotkeys(
-    "ctrl+alt+right",
+  useScopedShortcut(
+    "next_panel_tab",
     () => {
       const currentIndex = editorTabs.findIndex(
         (t) =>
@@ -766,11 +756,7 @@ function useTabShortcuts({
         handleTabChange(editorTabs[currentIndex + 1]);
       }
     },
-    {
-      preventDefault: true,
-      enableOnFormTags: true,
-      enableOnContentEditable: true,
-    },
+    scopedOptions,
     [currentTab, editorTabs, handleTabChange],
   );
 }

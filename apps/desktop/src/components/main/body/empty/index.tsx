@@ -1,10 +1,10 @@
 import { AppWindowIcon } from "lucide-react";
 import { useCallback, useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 
 import { Kbd } from "@hypr/ui/components/ui/kbd";
 import { cn } from "@hypr/utils";
 
+import { useScopedShortcut } from "../../../../hooks/useShortcutRegistry";
 import { type Tab, useTabs } from "../../../../store/zustand/tabs";
 import { useNewNote } from "../../shared";
 import { StandardTabWrapper } from "../index";
@@ -77,10 +77,13 @@ function EmptyView() {
     [openCurrent],
   );
 
-  useHotkeys(
-    "mod+o",
+  useScopedShortcut(
+    "open_note_dialog",
     () => setOpenNoteDialogOpen(true),
-    { preventDefault: true, enableOnFormTags: true },
+    {
+      preventDefault: true,
+      enableOnFormTags: true,
+    },
     [setOpenNoteDialogOpen],
   );
 

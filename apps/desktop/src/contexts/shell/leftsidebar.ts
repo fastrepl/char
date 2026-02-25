@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
+
+import { useScopedShortcut } from "../../hooks/useShortcutRegistry";
 
 export function useLeftSidebar() {
   const [expanded, setExpanded] = useState(true);
@@ -13,8 +14,8 @@ export function useLeftSidebar() {
     setShowDevtool((prev) => !prev);
   }, []);
 
-  useHotkeys(
-    "mod+\\",
+  useScopedShortcut(
+    "toggle_sidebar",
     toggleExpanded,
     {
       preventDefault: true,
