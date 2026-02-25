@@ -8,7 +8,6 @@ default = []
 # Enable the Swift+SpeechAnalyzer integration (requires macOS 26 SDK).
 speech-analyzer = []
 
-
 [target.'cfg(target_os = "macos")'.build-dependencies]
 swift-rs = { workspace = true, features = ["build"] }
 

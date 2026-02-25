@@ -112,8 +112,8 @@ hypr-template-eval = { path = "crates/template-eval", package = "template-eval" 
 hypr-template-support = { path = "crates/template-support", package = "template-support" }
 hypr-tiptap = { path = "crates/tiptap", package = "tiptap" }
 hypr-transcribe-cactus = { path = "crates/transcribe-cactus", package = "transcribe-cactus" }
-hypr-transcribe-speech-analyzer = { path = "crates/transcribe-speech-analyzer", package = "transcribe-speech-analyzer" }
 hypr-transcribe-proxy = { path = "crates/transcribe-proxy", package = "transcribe-proxy" }
+hypr-transcribe-speech-analyzer = { path = "crates/transcribe-speech-analyzer", package = "transcribe-speech-analyzer" }
 hypr-transcribe-whisper-local = { path = "crates/transcribe-whisper-local", package = "transcribe-whisper-local" }
 hypr-transcript = { path = "crates/transcript", package = "transcript" }
 hypr-vad = { path = "crates/vad", package = "vad" }
