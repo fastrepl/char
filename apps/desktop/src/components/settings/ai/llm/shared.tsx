@@ -36,7 +36,7 @@ type Provider = {
 const _PROVIDERS = [
   {
     id: "hyprnote",
-    displayName: "Hyprnote",
+    displayName: "Char",
     badge: "Recommended",
     icon: <img src="/assets/icon.png" alt="Char" className="size-5" />,
     baseUrl: new URL("/llm", env.VITE_API_URL).toString(),
@@ -57,7 +57,7 @@ const _PROVIDERS = [
       models: { label: "Available models", url: "https://lmstudio.ai/models" },
       setup: {
         label: "Setup guide",
-        url: "https://hyprnote.com/docs/faq/local-llm-setup/#lm-studio-setup",
+        url: "https://char.com/docs/faq/local-llm-setup/#lm-studio-setup",
       },
     },
   },
@@ -76,7 +76,7 @@ const _PROVIDERS = [
       models: { label: "Available models", url: "https://ollama.com/library" },
       setup: {
         label: "Setup guide",
-        url: "https://hyprnote.com/docs/faq/local-llm-setup/#ollama-setup",
+        url: "https://char.com/docs/faq/local-llm-setup/#ollama-setup",
       },
     },
   },

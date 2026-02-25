@@ -194,7 +194,7 @@ function ChangelogHeader({
             className="gap-1.5 text-neutral-600 hover:text-black"
             onClick={() =>
               openerCommands.openUrl(
-                `https://hyprnote.com/changelog/${version}`,
+                `https://char.com/changelog/${version}`,
                 null,
               )
             }
@@ -211,7 +211,7 @@ function ChangelogHeader({
 async function fetchChangelogFromGitHub(
   version: string,
 ): Promise<string | null> {
-  const url = `https://raw.githubusercontent.com/fastrepl/hyprnote/main/apps/web/content/changelog/${version}.mdx`;
+  const url = `https://raw.githubusercontent.com/fastrepl/char/main/apps/web/content/changelog/${version}.mdx`;
   try {
     const response = await fetch(url);
     if (!response.ok) {
