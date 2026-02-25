@@ -33,7 +33,7 @@ export const Route = createFileRoute("/_view/eval/")({
           "Interactive comparison of AI models for meeting transcription tasks. Benchmark results for summarization, Q&A, action items, and speaker identification.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://hyprnote.com/eval" },
+      { property: "og:url", content: "https://char.com/eval" },
     ],
   }),
 });

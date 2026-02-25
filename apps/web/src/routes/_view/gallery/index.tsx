@@ -45,7 +45,7 @@ export const Route = createFileRoute("/_view/gallery/")({
           "Browse our collection of AI meeting templates and shortcuts. From engineering standups to sales discovery calls, find the perfect tool for your workflow.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://hyprnote.com/gallery" },
+      { property: "og:url", content: "https://char.com/gallery" },
     ],
   }),
 });

@@ -37,7 +37,7 @@ export const Route = createFileRoute("/_view/solution/engineering")({
       { property: "og:type", content: "website" },
       {
         property: "og:url",
-        content: "https://hyprnote.com/solution/engineering",
+        content: "https://char.com/solution/engineering",
       },
       { name: "twitter:card", content: "summary_large_image" },
       {

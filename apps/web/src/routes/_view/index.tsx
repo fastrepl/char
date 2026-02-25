@@ -119,7 +119,7 @@ function Component() {
       style={{ backgroundImage: "url(/patterns/dots.svg)" }}
     >
       <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
-        <YCombinatorBanner />
+        <AnnouncementBanner />
         <HeroSection
           onVideoExpand={setExpandedVideo}
           heroInputRef={heroInputRef}
@@ -159,7 +159,7 @@ function Component() {
   );
 }
 
-function YCombinatorBanner() {
+function AnnouncementBanner() {
   return (
     <Link
       to="/blog/$slug/"
@@ -475,7 +475,7 @@ Cheers!"
         author="Flavius Catalin Miron"
         role="Product Engineer"
         company="Waveful"
-        body="Guys at Hyprnote (YC S25) are wild.
+        body="Guys at Char are wild.
 
 Had a call with John Jeong about their product (privacy-first AI notepad).
 
@@ -555,7 +555,7 @@ Cheers!"
           author="Flavius Catalin Miron"
           role="Product Engineer"
           company="Waveful"
-          body="Guys at Hyprnote (YC S25) are wild.
+          body="Guys at Char are wild.
 
 Had a call with John Jeong about their product (privacy-first AI notepad).
 
@@ -1737,7 +1737,7 @@ function BlogSection() {
         {sortedArticles.map((article) => {
           const ogImage =
             article.coverImage ||
-            `https://hyprnote.com/og?type=blog&title=${encodeURIComponent(article.title ?? "")}${article.author.length > 0 ? `&author=${encodeURIComponent(article.author.join(", "))}` : ""}${article.date ? `&date=${encodeURIComponent(new Date(article.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }))}` : ""}&v=1`;
+            `https://char.com/og?type=blog&title=${encodeURIComponent(article.title ?? "")}${article.author.length > 0 ? `&author=${encodeURIComponent(article.author.join(", "))}` : ""}${article.date ? `&date=${encodeURIComponent(new Date(article.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }))}` : ""}&v=1`;
 
           return (
             <Link

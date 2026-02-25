@@ -38,10 +38,10 @@ export const Route = createFileRoute("/_view/gallery/$type/$slug")({
 
     const { type, item } = loaderData;
     const typeLabel = type === "template" ? "Template" : "Shortcut";
-    const url = `https://hyprnote.com/gallery/${type}/${item.slug}`;
+    const url = `https://char.com/gallery/${type}/${item.slug}`;
 
     const ogType = type === "template" ? "templates" : "shortcuts";
-    const ogImageUrl = `https://hyprnote.com/og?type=${ogType}&title=${encodeURIComponent(item.title)}&category=${encodeURIComponent(item.category)}${item.description ? `&description=${encodeURIComponent(item.description)}` : ""}&v=1`;
+    const ogImageUrl = `https://char.com/og?type=${ogType}&title=${encodeURIComponent(item.title)}&category=${encodeURIComponent(item.category)}${item.description ? `&description=${encodeURIComponent(item.description)}` : ""}&v=1`;
 
     return {
       meta: [

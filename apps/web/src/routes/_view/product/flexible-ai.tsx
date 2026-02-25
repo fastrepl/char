@@ -89,7 +89,7 @@ function AISetupSection() {
         <div className="p-8 border-r border-b border-neutral-100 md:border-b-0">
           <Icon icon="mdi:cloud" className="text-3xl text-stone-600 mb-4" />
           <h3 className="text-xl font-serif text-stone-600 mb-1">
-            Hyprnote Cloud ($8/month)
+            Char Cloud ($8/month)
           </h3>
           <p className="text-neutral-600">
             Managed service that works out of the box. No setup, no API keys, no
@@ -176,7 +176,7 @@ function SwitchSection() {
             Start with Cloud
           </h3>
           <p className="text-neutral-600">
-            Try Hyprnote's managed service free for 14 days.
+            Try Char's managed service free for 14 days.
           </p>
         </div>
         <div className="p-8 border-b border-neutral-100 md:border-b-0">
@@ -246,8 +246,8 @@ function FAQSection() {
           </h2>
         </div>
         <FAQ>
-          <FAQItem question="Which AI models does Hyprnote use?">
-            Hyprnote Cloud routes requests to the best models for each task.
+          <FAQItem question="Which AI models does Char use?">
+            Char Cloud routes requests to the best models for each task.
           </FAQItem>
           <FAQItem question="Can I use different models for different meetings?">
             Yes. You can switch providers before any meeting or re-process
@@ -260,11 +260,11 @@ function FAQSection() {
           <FAQItem question="Is local AI good enough?">
             Local models are improving rapidly. For most meetings, local Whisper
             + Llama 3 works well. For complex summaries or technical
-            discussions, cloud models (Hyprnote Cloud or BYOK) tend to perform
+            discussions, cloud models (Char Cloud or BYOK) tend to perform
             better.
           </FAQItem>
-          <FAQItem question="Does Hyprnote train AI models on my data?">
-            No. Hyprnote does not use your recordings, transcripts, or notes to
+          <FAQItem question="Does Char train AI models on my data?">
+            No. Char does not use your recordings, transcripts, or notes to
             train AI models. When using cloud providers, your data is processed
             according to their privacy policies.
           </FAQItem>
