@@ -5,7 +5,7 @@ import { cn } from "@hypr/utils";
 export function SidebarDownloadCard() {
   return (
     <div className="border border-neutral-200 rounded-xs overflow-hidden bg-white bg-[linear-gradient(to_right,#f5f5f5_1px,transparent_1px),linear-gradient(to_bottom,#f5f5f5_1px,transparent_1px)] bg-size-[24px_24px] bg-position-[12px_12px,12px_12px] p-4">
-      <h3 className="font-serif text-sm text-stone-600 mb-3 text-center">
+      <h3 className="font-serif text-sm text-stone-700 mb-3 text-center">
         Try Char for yourself
       </h3>
       <Link
@@ -45,7 +45,7 @@ export function CtaCard({
   return (
     <div className="my-12 border border-neutral-200 rounded-xs overflow-hidden bg-white bg-[linear-gradient(to_right,#f5f5f5_1px,transparent_1px),linear-gradient(to_bottom,#f5f5f5_1px,transparent_1px)] bg-size-[24px_24px] bg-position-[12px_12px,12px_12px]">
       <div className="p-8 text-center">
-        <h3 className="font-serif text-2xl text-stone-600 mb-3">{title}</h3>
+        <h3 className="font-serif text-2xl text-stone-700 mb-3">{title}</h3>
         {description && (
           <p className="text-base text-neutral-600 mb-6 max-w-2xl mx-auto">
             {description}

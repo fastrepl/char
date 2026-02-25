@@ -260,7 +260,7 @@ function HeroSection({
           className="flex flex-col items-center text-center gap-12 py-24 px-4 laptop:px-0"
         >
           <div className="flex flex-col gap-6">
-            <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600">
+            <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700">
               {heroContent.title}
             </h1>
             <p className="text-lg sm:text-xl text-neutral-600">
@@ -415,10 +415,10 @@ function ValuePropsGrid({
             "border-neutral-100",
           ])}
         >
-          <h3 className="font-medium mb-1 text-neutral-900 font-mono">
+          <h3 className="font-medium mb-1 text-stone-700 font-serif">
             {prop.title}
           </h3>
-          <p className="text-sm text-neutral-600 leading-relaxed">
+          <p className="text-base text-neutral-600 leading-relaxed">
             {prop.description}
           </p>
         </div>
@@ -625,7 +625,7 @@ export function CoolStuffSection() {
                 icon="mdi:robot-off-outline"
                 className="text-3xl text-stone-600"
               />
-              <h3 className="text-2xl font-serif text-stone-600">No bots</h3>
+              <h3 className="text-2xl font-serif text-stone-700">No bots</h3>
             </div>
             <p className="text-base text-neutral-600 leading-relaxed">
               Captures system audio—no bots join your calls.
@@ -643,7 +643,7 @@ export function CoolStuffSection() {
           <div className="p-8 flex flex-col gap-4">
             <div className="flex items-center gap-3">
               <Icon icon="mdi:wifi-off" className="text-3xl text-stone-600" />
-              <h3 className="text-2xl font-serif text-stone-600">
+              <h3 className="text-2xl font-serif text-stone-700">
                 Fully local option
               </h3>
             </div>
@@ -669,9 +669,9 @@ export function CoolStuffSection() {
                 icon="mdi:robot-off-outline"
                 className="text-2xl text-stone-600"
               />
-              <h3 className="text-xl font-serif text-stone-600">No bots</h3>
+              <h3 className="text-xl font-serif text-stone-700">No bots</h3>
             </div>
-            <p className="text-sm text-neutral-600 leading-relaxed mb-4">
+            <p className="text-base text-neutral-600 leading-relaxed mb-4">
               Captures system audio—no bots join your calls.
             </p>
           </div>
@@ -687,11 +687,11 @@ export function CoolStuffSection() {
           <div className="p-6">
             <div className="flex items-center gap-3 mb-3">
               <Icon icon="mdi:wifi-off" className="text-2xl text-stone-600" />
-              <h3 className="text-xl font-serif text-stone-600">
+              <h3 className="text-xl font-serif text-stone-700">
                 Fully local option
               </h3>
             </div>
-            <p className="text-sm text-neutral-600 leading-relaxed mb-4">
+            <p className="text-base text-neutral-600 leading-relaxed mb-4">
               Audio, transcripts, and notes stay on your device as files.
             </p>
           </div>
@@ -1126,7 +1126,7 @@ export function MainFeaturesSection({
             className="size-24 rounded-3xl border border-neutral-100"
           />
         </div>
-        <h2 className="text-3xl font-serif text-stone-600 mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 mb-4">
           Works like charm
         </h2>
         <p className="text-neutral-600 max-w-lg mx-auto">
@@ -1222,11 +1222,11 @@ function FeaturesMobileCarousel({
                       icon={feature.icon}
                       className="text-2xl text-stone-600"
                     />
-                    <h3 className="text-lg font-serif text-stone-600">
+                    <h3 className="text-lg font-serif text-stone-700">
                       {feature.title}
                     </h3>
                   </div>
-                  <p className="text-sm text-neutral-600">
+                  <p className="text-base text-neutral-600">
                     {feature.description}
                   </p>
                 </div>
@@ -1429,11 +1429,11 @@ function FeaturesDesktopGrid() {
           <div className="p-6 flex-1">
             <div className="flex items-center gap-3 mb-2">
               <Icon icon={feature.icon} className="text-2xl text-stone-600" />
-              <h3 className="text-lg font-serif text-stone-600">
+              <h3 className="text-lg font-serif text-stone-700">
                 {feature.title}
               </h3>
             </div>
-            <p className="text-sm text-neutral-600">{feature.description}</p>
+            <p className="text-base text-neutral-600">{feature.description}</p>
           </div>
         </div>
       ))}
@@ -1474,7 +1474,7 @@ export function TemplatesSection() {
   return (
     <section>
       <div className="text-center py-12 px-4 laptop:px-0">
-        <h2 className="text-3xl font-serif text-stone-600 mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 mb-4">
           A template for every meeting
         </h2>
         <p className="text-neutral-600">
@@ -1518,11 +1518,11 @@ function TemplatesMobileView() {
         >
           <div className="flex items-center gap-3 mb-3">
             <Icon icon={category.icon} className="text-2xl text-stone-600" />
-            <h3 className="text-lg font-serif text-stone-600">
+            <h3 className="text-lg font-serif text-stone-700">
               {category.category}
             </h3>
           </div>
-          <p className="text-sm text-neutral-600 mb-4">
+          <p className="text-base text-neutral-600 mb-4">
             {category.description}
           </p>
           <div className="text-left">
@@ -1556,11 +1556,11 @@ function TemplatesDesktopView() {
         >
           <div className="flex items-center gap-3 mb-3">
             <Icon icon={category.icon} className="text-2xl text-stone-600" />
-            <h3 className="text-lg font-serif text-stone-600">
+            <h3 className="text-lg font-serif text-stone-700">
               {category.category}
             </h3>
           </div>
-          <p className="text-sm text-neutral-600 mb-4">
+          <p className="text-base text-neutral-600 mb-4">
             {category.description}
           </p>
           <div className="text-left">
@@ -1585,7 +1585,7 @@ function FAQSection() {
     <section className="py-16 px-4 laptop:px-0">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-serif text-stone-600 mb-4">
+          <h2 className="text-3xl font-serif text-stone-700 mb-4">
             Frequently Asked Questions
           </h2>
         </div>
@@ -1641,7 +1641,7 @@ function ManifestoSection() {
               backgroundImage: "url(/api/images/texture/paper.png)",
             }}
           >
-            <h2 className="text-2xl sm:text-3xl font-serif text-stone-600 mb-4">
+            <h2 className="text-2xl sm:text-3xl font-serif text-stone-700 mb-4">
               Our manifesto
             </h2>
 
@@ -1725,7 +1725,7 @@ function BlogSection() {
   return (
     <section className="border-t border-neutral-100 py-16">
       <div className="text-center mb-12 px-4">
-        <h2 className="text-3xl font-serif text-stone-600 mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 mb-4">
           Latest from our blog
         </h2>
         <p className="text-neutral-600 max-w-lg mx-auto">
@@ -1756,11 +1756,11 @@ function BlogSection() {
                 </div>
 
                 <div className="p-6 flex flex-col flex-1">
-                  <h3 className="text-xl font-serif text-stone-600 mb-2 group-hover:text-stone-800 transition-colors line-clamp-2">
+                  <h3 className="text-xl font-serif text-stone-700 mb-2 group-hover:text-stone-800 transition-colors line-clamp-2">
                     {article.display_title || article.meta_title}
                   </h3>
 
-                  <p className="text-sm text-neutral-600 leading-relaxed mb-4 line-clamp-3 flex-1">
+                  <p className="text-base text-neutral-600 leading-relaxed mb-4 line-clamp-3 flex-1">
                     {article.meta_description}
                   </p>
 
@@ -1861,7 +1861,7 @@ export function CTASection({
             className="size-36 mx-auto rounded-[40px] border border-neutral-100"
           />
         </div>
-        <h2 className="text-2xl sm:text-3xl font-serif">
+        <h2 className="text-2xl sm:text-3xl font-serif text-stone-700">
           Your meetings. Your data.
           <br className="sm:hidden" /> Your control.
         </h2>

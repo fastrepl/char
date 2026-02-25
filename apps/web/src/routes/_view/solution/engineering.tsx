@@ -282,7 +282,7 @@ function HeroSection() {
             <Icon icon="mdi:code-braces" className="text-lg" />
             <span>For Developers</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
+          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
             The Only Meeting AI You Can
             <br />
             Fork, Fix & Make Your Own
@@ -327,7 +327,7 @@ function TechnicalSpecsSection() {
   return (
     <section className="px-6 py-16">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-600 text-center mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
           Technical Specs
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
@@ -401,7 +401,7 @@ function BYOKSection() {
   return (
     <section className="px-6 py-16">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-600 text-center mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
           Bring Your Own Key
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
@@ -418,7 +418,7 @@ function AutomationHooksSection() {
   return (
     <section className="px-6 py-16 bg-stone-50/30">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-600 text-center mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
           Automation Hooks
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
@@ -435,7 +435,7 @@ function ExtensibilitySection() {
   return (
     <section className="px-6 py-16">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-600 text-center mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
           Fully Extensible
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
@@ -452,7 +452,7 @@ function CLISection() {
   return (
     <section className="px-6 py-16 bg-stone-50/30">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-600 text-center mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
           Cross-Platform CLI
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
@@ -470,7 +470,7 @@ function APISection() {
     <section className="px-6 py-16">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-serif text-stone-600 mb-4">
+          <h2 className="text-3xl font-serif text-stone-700 mb-4">
             API Access
           </h2>
           <p className="text-neutral-600 max-w-2xl mx-auto">
@@ -507,7 +507,7 @@ function FAQSection() {
   return (
     <section className="px-6 py-16">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-600 text-center mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
           Frequently Asked Questions
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">

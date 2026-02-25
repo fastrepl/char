@@ -50,7 +50,7 @@ function HeroSection() {
     <section className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
       <div className="flex flex-col items-center text-center gap-6 py-24 px-4">
         <div className="flex flex-col gap-6 max-w-4xl">
-          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600">
+          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700">
             Search your entire meeting history in seconds
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 max-w-3xl mx-auto">
@@ -79,14 +79,14 @@ function HowItWorksSection() {
   return (
     <section className="bg-stone-50/30">
       <div className="p-8">
-        <h2 className="text-3xl font-serif text-stone-600 mb-8 text-center">
+        <h2 className="text-3xl font-serif text-stone-700 mb-8 text-center">
           How it works
         </h2>
       </div>
       <div className="grid md:grid-cols-2">
         <div className="p-8 border-r border-neutral-100">
-          <Icon icon="mdi:magnify" className="text-3xl text-stone-600 mb-4" />
-          <h3 className="text-xl font-serif text-stone-600 mb-2">
+          <Icon icon="mdi:magnify" className="text-3xl text-stone-700 mb-4" />
+          <h3 className="text-xl font-serif text-stone-700 mb-2">
             Quick search
           </h3>
           <p className="text-neutral-600">
@@ -97,9 +97,9 @@ function HowItWorksSection() {
         <div className="p-8">
           <Icon
             icon="mdi:filter-variant"
-            className="text-3xl text-stone-600 mb-4"
+            className="text-3xl text-stone-700 mb-4"
           />
-          <h3 className="text-xl font-serif text-stone-600 mb-2">
+          <h3 className="text-xl font-serif text-stone-700 mb-2">
             Advanced search
           </h3>
           <p className="text-neutral-600">
@@ -116,7 +116,7 @@ function UseCasesSection() {
   return (
     <section>
       <div className="p-8">
-        <h2 className="text-3xl font-serif text-stone-600 mb-4 text-center">
+        <h2 className="text-3xl font-serif text-stone-700 mb-4 text-center">
           Your meeting history becomes useful
         </h2>
         <p className="text-lg text-neutral-600 text-center max-w-2xl mx-auto">
@@ -126,8 +126,8 @@ function UseCasesSection() {
       </div>
       <div className="grid md:grid-cols-2">
         <div className="p-8 border-r border-b border-neutral-100">
-          <Icon icon="mdi:phone" className="text-3xl text-stone-600 mb-4" />
-          <h3 className="text-xl font-serif text-stone-600 mb-2">
+          <Icon icon="mdi:phone" className="text-3xl text-stone-700 mb-4" />
+          <h3 className="text-xl font-serif text-stone-700 mb-2">
             Before a client call
           </h3>
           <p className="text-neutral-600">
@@ -138,9 +138,9 @@ function UseCasesSection() {
         <div className="p-8 border-b border-neutral-100">
           <Icon
             icon="mdi:chart-timeline-variant"
-            className="text-3xl text-stone-600 mb-4"
+            className="text-3xl text-stone-700 mb-4"
           />
-          <h3 className="text-xl font-serif text-stone-600 mb-2">
+          <h3 className="text-xl font-serif text-stone-700 mb-2">
             During quarterly reviews
           </h3>
           <p className="text-neutral-600">
@@ -150,9 +150,9 @@ function UseCasesSection() {
         <div className="p-8 border-r border-neutral-100">
           <Icon
             icon="mdi:account-plus"
-            className="text-3xl text-stone-600 mb-4"
+            className="text-3xl text-stone-700 mb-4"
           />
-          <h3 className="text-xl font-serif text-stone-600 mb-2">
+          <h3 className="text-xl font-serif text-stone-700 mb-2">
             When onboarding someone
           </h3>
           <p className="text-neutral-600">
@@ -163,9 +163,9 @@ function UseCasesSection() {
         <div className="p-8">
           <Icon
             icon="mdi:comment-question"
-            className="text-3xl text-stone-600 mb-4"
+            className="text-3xl text-stone-700 mb-4"
           />
-          <h3 className="text-xl font-serif text-stone-600 mb-2">
+          <h3 className="text-xl font-serif text-stone-700 mb-2">
             Settling disagreements
           </h3>
           <p className="text-neutral-600">
@@ -182,7 +182,7 @@ function FlexibilitySection() {
   return (
     <section className="bg-stone-50/30">
       <div className="p-8">
-        <h2 className="text-3xl font-serif text-stone-600 mb-4 text-center">
+        <h2 className="text-3xl font-serif text-stone-700 mb-4 text-center">
           You're not restricted to Char's built-in search
         </h2>
         <p className="text-lg text-neutral-600 text-center max-w-3xl mx-auto">

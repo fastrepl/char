@@ -82,7 +82,7 @@ function Component() {
       <div className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white flex items-center justify-center p-6">
         <div className="max-w-md w-full text-center flex flex-col gap-8">
           <div className="flex flex-col gap-3">
-            <h1 className="text-3xl font-serif tracking-tight text-stone-600">
+            <h1 className="text-3xl font-serif tracking-tight text-stone-700">
               {isSuccess ? "Connection successful" : "Connection failed"}
             </h1>
             <p className="text-neutral-600">

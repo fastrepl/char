@@ -142,7 +142,7 @@ function HeroSection() {
       <div className="px-6 py-12 lg:py-20 relative z-10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_800px_400px_at_50%_50%,white_0%,rgba(255,255,255,0.8)_40%,transparent_70%)] pointer-events-none" />
         <header className="py-6 text-center max-w-4xl mx-auto relative">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif text-stone-600 mb-6">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif text-stone-700 mb-6">
             Built in the open,
             <br />
             for everyone
@@ -185,7 +185,7 @@ function LetterSection() {
         </div>
 
         <article>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-stone-600 text-center mb-12">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-stone-700 text-center mb-12">
             Why Open Source is Inevitable
             <br />
             in the Age of AI
@@ -425,7 +425,7 @@ function TechStackSection() {
     <section>
       <div>
         <div className="py-12 lg:py-16">
-          <h2 className="text-3xl font-serif text-stone-600 mb-4 text-center">
+          <h2 className="text-3xl font-serif text-stone-700 mb-4 text-center">
             Our Tech Stack
           </h2>
           <p className="text-neutral-600 text-center max-w-2xl mx-auto">
@@ -439,7 +439,7 @@ function TechStackSection() {
             return (
               <Fragment key={section.category}>
                 <div className="col-span-6 p-6 border-t border-b border-neutral-100 bg-stone-50/50">
-                  <h3 className="text-xl font-serif text-stone-600">
+                  <h3 className="text-xl font-serif text-stone-700">
                     {section.category}
                   </h3>
                 </div>
@@ -491,10 +491,10 @@ function TechStackSection() {
                         ) : (
                           <Icon
                             icon={tech.icon}
-                            className="text-2xl text-stone-600 group-hover:text-stone-800 transition-colors"
+                            className="text-2xl text-stone-700 group-hover:text-stone-800 transition-colors"
                           />
                         )}
-                        <h4 className="font-medium text-stone-600 group-hover:text-stone-800 transition-colors">
+                        <h4 className="font-medium text-stone-700 group-hover:text-stone-800 transition-colors">
                           {tech.name}
                         </h4>
                       </div>
@@ -518,7 +518,7 @@ function SponsorsSection() {
     <section>
       <div>
         <div className="py-12 lg:py-16">
-          <h2 className="text-3xl font-serif text-stone-600 mb-4 text-center">
+          <h2 className="text-3xl font-serif text-stone-700 mb-4 text-center">
             Paying It Forward
           </h2>
           <p className="text-neutral-600 text-center max-w-2xl mx-auto">
@@ -529,7 +529,7 @@ function SponsorsSection() {
 
         <div className="grid grid-cols-6">
           <div className="col-span-6 p-6 border-t border-b border-neutral-100 bg-stone-50/50">
-            <h3 className="text-xl font-serif text-stone-600">
+            <h3 className="text-xl font-serif text-stone-700">
               Projects We Sponsor
             </h3>
           </div>
@@ -561,10 +561,10 @@ function SponsorsSection() {
                   ) : (
                     <Icon
                       icon={sponsor.icon}
-                      className="text-2xl text-stone-600 group-hover:text-stone-800 transition-colors"
+                      className="text-2xl text-stone-700 group-hover:text-stone-800 transition-colors"
                     />
                   )}
-                  <h4 className="font-medium text-stone-600 group-hover:text-stone-800 transition-colors">
+                  <h4 className="font-medium text-stone-700 group-hover:text-stone-800 transition-colors">
                     {sponsor.name}
                   </h4>
                 </div>
@@ -576,7 +576,7 @@ function SponsorsSection() {
           })}
           <div className="col-span-6 p-6 border-t border-neutral-100 bg-stone-50/50 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h3 className="text-xl font-serif text-stone-600">
+              <h3 className="text-xl font-serif text-stone-700">
                 We Appreciate Your Support
               </h3>
               <p className="text-sm text-neutral-600 mt-2">
@@ -712,7 +712,7 @@ function StatCard({
         ) : null}
       </div>
       <div>
-        <p className="text-2xl font-bold text-stone-600">{value}</p>
+        <p className="text-2xl font-bold text-stone-700">{value}</p>
         <p className="text-sm text-neutral-500">{label}</p>
       </div>
     </div>
@@ -761,7 +761,7 @@ function ProgressSection() {
     <section>
       <div>
         <div className="py-12 lg:py-16">
-          <h2 className="text-3xl font-serif text-stone-600 mb-4 text-center">
+          <h2 className="text-3xl font-serif text-stone-700 mb-4 text-center">
             How We're Doing
           </h2>
           <p className="text-neutral-600 text-center max-w-2xl mx-auto">
@@ -837,7 +837,7 @@ function JoinMovementSection() {
     <section className="bg-stone-50/30">
       <div>
         <div className="py-12 lg:py-16 px-6">
-          <h2 className="text-3xl font-serif text-stone-600 mb-4 text-center">
+          <h2 className="text-3xl font-serif text-stone-700 mb-4 text-center">
             Be Part of the Movement
           </h2>
           <p className="text-neutral-600 text-center max-w-2xl mx-auto">
@@ -870,7 +870,7 @@ function JoinMovementSection() {
                 ])}
               >
                 <div>
-                  <h3 className="font-medium text-stone-600 mb-2">
+                  <h3 className="font-medium text-stone-700 mb-2">
                     {item.title}
                   </h3>
                   <p className="text-sm text-neutral-600">{item.description}</p>

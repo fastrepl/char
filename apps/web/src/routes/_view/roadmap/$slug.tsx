@@ -90,7 +90,7 @@ function Component() {
 
         <article>
           <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-stone-600 mb-4">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-stone-700 mb-4">
               {item.title}
             </h1>
 
@@ -143,7 +143,7 @@ function Component() {
           </div>
 
           <div className="mt-12 pt-8 border-t border-neutral-100">
-            <h3 className="text-xl font-serif text-stone-600 mb-6">
+            <h3 className="text-xl font-serif text-stone-700 mb-6">
               Related GitHub Issues
             </h3>
             {item.githubIssues && item.githubIssues.length > 0 ? (

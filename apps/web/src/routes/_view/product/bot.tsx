@@ -45,7 +45,7 @@ function Component() {
 
         <div className="bg-[linear-gradient(to_bottom,rgba(245,245,244,0.2),white_50%,rgba(245,245,244,0.3))] px-6 h-full flex items-center justify-center relative z-10 pointer-events-none">
           <div className="text-center max-w-4xl mx-auto pointer-events-auto">
-            <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
+            <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
               Char Bot
             </h1>
             <p className="text-lg sm:text-xl text-neutral-600">

@@ -78,7 +78,7 @@ function Component() {
     <main className="flex-1 bg-white min-h-screen">
       <div className="max-w-7xl mx-auto border-x border-neutral-100">
         <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30 px-6 py-12 lg:py-16 text-center">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-stone-600 mb-4">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-stone-700 mb-4">
             LLM Model Evaluation
           </h1>
           <p className="text-lg text-neutral-600 max-w-2xl mx-auto mb-6">
@@ -131,7 +131,7 @@ function Component() {
 
         <div className="px-6 py-12 bg-stone-50/50 border-t border-neutral-100">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl font-serif text-stone-600 mb-4 text-center">
+            <h2 className="text-2xl font-serif text-stone-700 mb-4 text-center">
               About Our Evaluation
             </h2>
             <p className="text-neutral-600 mb-4 leading-relaxed">

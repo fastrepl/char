@@ -100,7 +100,7 @@ function Component() {
                 className="size-32 rounded-2xl"
               />
               <div className="flex flex-col items-center gap-2">
-                <h1 className="text-3xl sm:text-4xl font-mono font-medium text-stone-600">
+                <h1 className="text-3xl sm:text-4xl font-mono font-medium text-stone-700">
                   {changelog.version}
                 </h1>
                 <time
@@ -131,7 +131,7 @@ function Component() {
                 className="size-16 rounded-2xl"
               />
               <div className="flex flex-col items-center gap-2">
-                <h1 className="text-3xl font-mono font-medium text-stone-600">
+                <h1 className="text-3xl font-mono font-medium text-stone-700">
                   {changelog.version}
                 </h1>
                 <time
@@ -150,7 +150,7 @@ function Component() {
             <DownloadLinksHeroMobile version={changelog.version} />
           </div>
 
-          <article className="mt-12 prose prose-stone prose-headings:font-serif prose-headings:font-semibold prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3 prose-h4:text-lg prose-h4:mt-4 prose-h4:mb-2 prose-a:text-stone-600 prose-a:underline prose-a:decoration-dotted hover:prose-a:text-stone-800 prose-headings:no-underline prose-headings:decoration-transparent prose-code:bg-stone-50 prose-code:border prose-code:border-neutral-200 prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:font-mono prose-code:text-stone-700 prose-pre:bg-stone-50 prose-pre:border prose-pre:border-neutral-200 prose-pre:rounded-xs prose-pre:prose-code:bg-transparent prose-pre:prose-code:border-0 prose-pre:prose-code:p-0 prose-img:rounded-lg prose-img:border prose-img:border-neutral-200 prose-img:my-6 max-w-none">
+          <article className="mt-12 prose prose-stone prose-headings:font-serif prose-headings:font-semibold prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3 prose-h4:text-lg prose-h4:mt-4 prose-h4:mb-2 prose-a:text-stone-700 prose-a:underline prose-a:decoration-dotted hover:prose-a:text-stone-800 prose-headings:no-underline prose-headings:decoration-transparent prose-code:bg-stone-50 prose-code:border prose-code:border-neutral-200 prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:font-mono prose-code:text-stone-700 prose-pre:bg-stone-50 prose-pre:border prose-pre:border-neutral-200 prose-pre:rounded-xs prose-pre:prose-code:bg-transparent prose-pre:prose-code:border-0 prose-pre:prose-code:p-0 prose-img:rounded-lg prose-img:border prose-img:border-neutral-200 prose-img:my-6 max-w-none">
             <MDXContent
               code={changelog.mdx}
               components={defaultMDXComponents}
@@ -162,7 +162,7 @@ function Component() {
           <>
             <div className="border-t border-neutral-100" />
             <div className="max-w-3xl mx-auto px-6 py-16 flex flex-col items-center text-center">
-              <h2 className="text-3xl font-serif text-stone-600 mb-2">
+              <h2 className="text-3xl font-serif text-stone-700 mb-2">
                 View the Code
               </h2>
               <p className="text-neutral-600 mb-6">
@@ -318,7 +318,7 @@ function RelatedReleases({
   return (
     <section>
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-serif text-stone-600 mb-2">
+        <h2 className="text-3xl font-serif text-stone-700 mb-2">
           Other Releases
         </h2>
         <p className="text-neutral-600">Explore more versions of Char</p>
@@ -366,7 +366,7 @@ function RelatedReleases({
                 <div className="flex items-center gap-1.5">
                   <h3
                     className={cn([
-                      "text-sm font-mono font-medium text-stone-600 transition-colors",
+                      "text-sm font-mono font-medium text-stone-700 transition-colors",
                       !isCurrent && "group-hover:text-stone-800",
                     ])}
                   >
@@ -375,7 +375,7 @@ function RelatedReleases({
                       : release.version}
                   </h3>
                   {nightlyNumber !== null && (
-                    <span className="inline-flex items-center px-1.5 py-0.5 text-xs font-medium bg-stone-200 text-stone-600 rounded-full">
+                    <span className="inline-flex items-center px-1.5 py-0.5 text-xs font-medium bg-stone-200 text-stone-700 rounded-full">
                       #{nightlyNumber}
                     </span>
                   )}
