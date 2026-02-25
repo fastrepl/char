@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { downloadDir, join } from "@tauri-apps/api/path";
+import { FileTextIcon, Loader2Icon } from "lucide-react";
 import { useMemo, useState } from "react";
-import { createPortal } from "react-dom";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
@@ -11,7 +11,25 @@ import {
   type TranscriptItem,
 } from "@hypr/plugin-pdf";
 import { json2md } from "@hypr/tiptap/shared";
-import { cn } from "@hypr/utils";
+import { Button } from "@hypr/ui/components/ui/button";
+import { Checkbox } from "@hypr/ui/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@hypr/ui/components/ui/dialog";
+import { DropdownMenuItem } from "@hypr/ui/components/ui/dropdown-menu";
+import { Label } from "@hypr/ui/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@hypr/ui/components/ui/select";
 
 import { useSessionEvent } from "../../../../../../hooks/tinybase";
 import * as main from "../../../../../../store/tinybase/store/main";
@@ -56,16 +74,14 @@ function formatDuration(startMs: number, endMs: number): string {
 export function ExportModal({
   sessionId,
   currentView,
-  open,
-  onOpenChange,
 }: {
   sessionId: string;
   currentView: EditorView;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
 }) {
+  const [open, setOpen] = useState(false);
   const [format, setFormat] = useState<FileFormat>("pdf");
   const [includeSummary, setIncludeSummary] = useState(true);
+  const [includeMemos, setIncludeMemos] = useState(false);
   const [includeTranscript, setIncludeTranscript] = useState(false);
 
   const store = main.UI.useStore(main.STORE_ID);
@@ -88,7 +104,15 @@ export function ExportModal({
   const event = useSessionEvent(sessionId);
   const eventTitle = event?.title;
 
-  const enhancedNoteId = currentView.type === "enhanced" ? currentView.id : "";
+  const rawMd = main.UI.useCell(
+    "sessions",
+    sessionId,
+    "raw_md",
+    main.STORE_ID,
+  ) as string | undefined;
+
+  const enhancedNoteId =
+    currentView.type === "enhanced" ? currentView.id : "";
   const enhancedNoteContent = main.UI.useCell(
     "enhanced_notes",
     enhancedNoteId,
@@ -238,6 +262,16 @@ export function ExportModal({
     }
   };
 
+  const getMemoMd = (): string => {
+    if (!rawMd) return "";
+    try {
+      const parsed = JSON.parse(rawMd);
+      return json2md(parsed);
+    } catch {
+      return "";
+    }
+  };
+
   const getTranscriptText = (): string => {
     if (transcriptItems.length === 0) return "";
     return transcriptItems
@@ -286,6 +320,20 @@ export function ExportModal({
       }
     }
 
+    if (includeMemos) {
+      const memo = getMemoMd();
+      if (memo) {
+        sections.push("");
+        if (isMd) {
+          sections.push("## Memos");
+        } else {
+          sections.push("Memos");
+          sections.push("-".repeat(5));
+        }
+        sections.push(isMd ? memo : memo.replace(/^#{1,6}\s/gm, ""));
+      }
+    }
+
     if (includeTranscript) {
       const transcript = getTranscriptText();
       if (transcript) {
@@ -321,6 +369,11 @@ export function ExportModal({
     if (includeSummary) {
       const summary = getSummaryMd();
       if (summary) parts.push(summary);
+    }
+
+    if (includeMemos) {
+      const memo = getMemoMd();
+      if (memo) parts.push(memo);
     }
 
     return {
@@ -365,101 +418,117 @@ export function ExportModal({
           event: "session_exported",
           format,
           include_summary: includeSummary,
+          include_memos: includeMemos,
           include_transcript: includeTranscript,
         });
         void openerCommands.revealItemInDir(path);
       }
-      onOpenChange(false);
+      setOpen(false);
     },
     onError: console.error,
   });
 
-  const hasAnyContentSelected = includeSummary || includeTranscript;
-  if (!open) {
-    return null;
-  }
+  const hasAnyContentSelected =
+    includeSummary || includeMemos || includeTranscript;
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-50 bg-black/20 backdrop-blur-xs"
-      onClick={() => onOpenChange(false)}
-    >
-      <div
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xs px-4"
-        onClick={(e) => e.stopPropagation()}
+  return (
+    <>
+      <DropdownMenuItem
+        onClick={(e) => {
+          e.preventDefault();
+          setOpen(true);
+        }}
+        className="cursor-pointer"
       >
-        <div
-          className={cn([
-            "bg-[#faf8f5] rounded-xl border border-neutral-200/80",
-            "shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]",
-            "p-5 flex flex-col gap-4 text-center",
-          ])}
-        >
-          <div className="flex flex-col gap-1">
-            <h2 className="text-base font-semibold">Export</h2>
-            <p className="text-sm text-neutral-500">
+        <FileTextIcon />
+        <span>Export</span>
+      </DropdownMenuItem>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Export</DialogTitle>
+            <DialogDescription>
               Choose a file format and what to include.
-            </p>
-          </div>
+            </DialogDescription>
+          </DialogHeader>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 py-2">
             <div className="flex flex-col gap-2">
-              <span className="text-sm font-medium">File format</span>
-              <div className="flex justify-center gap-4">
-                {(["pdf", "txt", "md"] as const).map((f) => (
-                  <label
-                    key={f}
-                    className="flex items-center gap-1.5 cursor-pointer text-sm"
-                  >
-                    <input
-                      type="radio"
-                      name="export-format"
-                      checked={format === f}
-                      onChange={() => setFormat(f)}
-                      className="accent-stone-800"
-                    />
-                    {f === "md" ? "Markdown" : f.toUpperCase()}
-                  </label>
-                ))}
-              </div>
+              <Label className="text-sm font-medium">File format</Label>
+              <Select
+                value={format}
+                onValueChange={(v) => setFormat(v as FileFormat)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pdf">PDF</SelectItem>
+                  <SelectItem value="txt">TXT</SelectItem>
+                  <SelectItem value="md">Markdown</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <span className="text-sm font-medium">Include</span>
-              <div className="flex justify-center gap-4">
-                {(
-                  [
-                    ["Summary", includeSummary, setIncludeSummary],
-                    ["Transcript", includeTranscript, setIncludeTranscript],
-                  ] as const
-                ).map(([label, checked, setter]) => (
-                  <label
-                    key={label}
-                    className="flex items-center gap-1.5 cursor-pointer text-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={(e) => setter(e.target.checked)}
-                      className="accent-stone-800"
-                    />
-                    {label}
-                  </label>
-                ))}
+            <div className="flex flex-col gap-3">
+              <Label className="text-sm font-medium">Include</Label>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="include-summary"
+                  checked={includeSummary}
+                  onCheckedChange={(checked) =>
+                    setIncludeSummary(checked === true)
+                  }
+                />
+                <Label htmlFor="include-summary" className="text-sm">
+                  Summary
+                </Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="include-memos"
+                  checked={includeMemos}
+                  onCheckedChange={(checked) =>
+                    setIncludeMemos(checked === true)
+                  }
+                />
+                <Label htmlFor="include-memos" className="text-sm">
+                  Memos
+                </Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="include-transcript"
+                  checked={includeTranscript}
+                  onCheckedChange={(checked) =>
+                    setIncludeTranscript(checked === true)
+                  }
+                />
+                <Label htmlFor="include-transcript" className="text-sm">
+                  Transcript
+                </Label>
               </div>
             </div>
           </div>
 
-          <button
-            onClick={() => mutate(null)}
-            disabled={isPending || !hasAnyContentSelected}
-            className="w-full h-10 rounded-full bg-stone-800 hover:bg-stone-700 text-white text-sm font-medium border-2 border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isPending ? "Exporting..." : "Export"}
-          </button>
-        </div>
-      </div>
-    </div>,
-    document.body,
+          <DialogFooter>
+            <Button
+              onClick={() => mutate(null)}
+              disabled={isPending || !hasAnyContentSelected}
+            >
+              {isPending ? (
+                <>
+                  <Loader2Icon className="animate-spin" />
+                  <span>Exporting...</span>
+                </>
+              ) : (
+                <span>Export</span>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
