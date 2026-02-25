@@ -4,7 +4,7 @@ use criterion::{BatchSize, Criterion, criterion_group, criterion_main};
 use vad::{
     cactus::{Model, VadOptions},
     earshot::{VoiceActivityDetector as EarshotVad, choose_optimal_frame_size},
-    silero::{CHUNK_30MS_16KHZ, VadConfig, VadSession},
+    silero::{CHUNK_SIZE_16KHZ, SileroVad},
 };
 
 fn pcm_bytes_to_i16(bytes: &[u8]) -> Vec<i16> {
@@ -50,27 +50,39 @@ fn bench_earshot(c: &mut Criterion) {
     });
 }
 
+fn silero_model() -> SileroVad {
+    let path = std::env::var("SILERO_VAD_MODEL").unwrap_or_else(|_| {
+        let home = std::env::var("HOME").unwrap();
+        format!(
+            "{}/Library/Application Support/com.hyprnote.dev/models/silero/silero_vad.onnx",
+            home
+        )
+    });
+    SileroVad::new(&path).unwrap()
+}
+
 fn bench_silero(c: &mut Criterion) {
     let pcm_bytes = hypr_data::english_1::AUDIO;
 
     c.bench_function("silero english_1", |b| {
         b.iter_batched(
             || {
-                let session = VadSession::new(VadConfig::default()).unwrap();
+                let model = silero_model();
                 let samples_f32: Vec<f32> = pcm_bytes_to_i16(pcm_bytes)
                     .into_iter()
                     .map(|s| s as f32 / 32768.0)
                     .collect();
-                (session, samples_f32)
+                (model, samples_f32)
             },
-            |(mut session, samples_f32): (VadSession, Vec<f32>)| {
-                let mut transitions = Vec::new();
-                for chunk in black_box(&samples_f32).chunks(CHUNK_30MS_16KHZ) {
-                    if chunk.len() == CHUNK_30MS_16KHZ {
-                        transitions.extend(session.process(chunk).unwrap());
+            |(mut model, samples_f32): (SileroVad, Vec<f32>)| {
+                let mut probs = Vec::new();
+                for chunk in black_box(&samples_f32).chunks(CHUNK_SIZE_16KHZ) {
+                    if chunk.len() == CHUNK_SIZE_16KHZ {
+                        let view = hypr_onnx::ndarray::ArrayView1::from(chunk);
+                        probs.push(model.process_chunk(&view, 16000).unwrap());
                     }
                 }
-                black_box(transitions)
+                black_box(probs)
             },
             BatchSize::SmallInput,
         )

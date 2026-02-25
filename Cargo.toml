@@ -315,7 +315,6 @@ ratatui = "0.30"
 realfft = "3.5.0"
 ringbuf = "0.4.8"
 rodio = "0.21"
-silero-rs = { git = "https://github.com/emotechlab/silero-rs", rev = "193542c", package = "silero" }
 vorbis_rs = "0.5.5"
 
 deepgram = { version = "0.7", default-features = false }

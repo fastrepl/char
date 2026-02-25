@@ -20647,11 +20647,14 @@ dependencies = [
 name = "vad"
 version = "0.1.0"
 dependencies = [
+ "approx",
  "cactus",
  "criterion",
  "data",
  "earshot",
- "silero",
+ "onnx",
+ "serde",
+ "serde_json",
  "thiserror 2.0.18",
 ]
 

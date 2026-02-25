@@ -5,18 +5,22 @@ edition = "2024"
 
 [features]
 earshot = ["dep:earshot"]
-silero = ["dep:silero-rs"]
+silero = ["dep:hypr-onnx"]
 cactus = ["dep:hypr-cactus"]
 
 [dependencies]
 earshot = { workspace = true, optional = true }
 hypr-cactus = { workspace = true, optional = true }
-silero-rs = { workspace = true, optional = true }
+hypr-onnx = { workspace = true, optional = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]
+approx = { workspace = true }
 criterion = { workspace = true }
 hypr-data = { workspace = true }
+hypr-onnx = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
 
 [[bench]]
 name = "vad"
