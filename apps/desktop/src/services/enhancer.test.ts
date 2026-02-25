@@ -120,18 +120,18 @@ describe("EnhancerService", () => {
       expect(result).toEqual({ type: "no_model" });
     });
 
-    it("returns skipped when no transcript exists", () => {
+    it("returns skipped when no transcript exists (auto)", () => {
       const deps = createDeps();
       const service = new EnhancerService(deps);
 
-      const result = service.enhance("session-1");
+      const result = service.enhance("session-1", { isAuto: true });
       expect(result).toEqual({
         type: "skipped",
         reason: "No transcript recorded",
       });
     });
 
-    it("returns skipped when not enough words", () => {
+    it("returns skipped when not enough words (auto)", () => {
       const tables = createTables({
         transcripts: {
           "t-1": {
@@ -146,8 +146,16 @@ describe("EnhancerService", () => {
       });
       const service = new EnhancerService(deps);
 
-      const result = service.enhance("session-1");
+      const result = service.enhance("session-1", { isAuto: true });
       expect(result.type).toBe("skipped");
+    });
+
+    it("does not skip manual enhance when no transcript exists", () => {
+      const deps = createDeps();
+      const service = new EnhancerService(deps);
+
+      const result = service.enhance("session-1");
+      expect(result.type).toBe("started");
     });
 
     it("creates note and starts generation when eligible", () => {

@@ -47,6 +47,9 @@ export function useAutoEnhance(tab: Extract<Tab, { type: "sessions" }>) {
     prevSessionModeRef.current = sessionMode;
     prevTranscriptCountRef.current = currentCount;
 
+    const liveJustStopped =
+      (prevMode === "active" || prevMode === "finalizing") &&
+      sessionMode === "inactive";
     const batchJustCompleted =
       prevMode === "running_batch" && sessionMode === "inactive";
     const transcriptJustUploaded =
@@ -56,7 +59,7 @@ export function useAutoEnhance(tab: Extract<Tab, { type: "sessions" }>) {
       sessionMode === "inactive" &&
       !loading;
 
-    if (batchJustCompleted || transcriptJustUploaded) {
+    if (liveJustStopped || batchJustCompleted || transcriptJustUploaded) {
       const service = getEnhancerService();
       service?.queueAutoEnhance(sessionId);
     }

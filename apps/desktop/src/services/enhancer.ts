@@ -147,9 +147,16 @@ export class EnhancerService {
 
     const transcriptIds = this.getTranscriptIds(sessionId);
     const hasTranscript = transcriptIds.length > 0;
-    const eligibility = getEligibility(hasTranscript, transcriptIds, mainStore);
-    if (!eligibility.eligible) {
-      return { type: "skipped", reason: eligibility.reason };
+
+    if (opts?.isAuto) {
+      const eligibility = getEligibility(
+        hasTranscript,
+        transcriptIds,
+        mainStore,
+      );
+      if (!eligibility.eligible) {
+        return { type: "skipped", reason: eligibility.reason };
+      }
     }
 
     const templateId = opts?.templateId || getSelectedTemplateId();
