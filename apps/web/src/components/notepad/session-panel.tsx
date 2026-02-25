@@ -13,7 +13,6 @@ import type { JSONContent, TiptapEditor } from "@hypr/tiptap/editor";
 import { parseJsonContent } from "@hypr/tiptap/shared";
 import "@hypr/tiptap/styles.css";
 import type { Segment } from "@hypr/transcript";
-
 import {
   Tooltip,
   TooltipContent,
@@ -213,7 +212,9 @@ export function SessionPanel({
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
-                  ) : activeTab === "summary" && transcript && !isSummarizing ? (
+                  ) : activeTab === "summary" &&
+                    transcript &&
+                    !isSummarizing ? (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
