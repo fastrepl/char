@@ -58,12 +58,7 @@ export function useAutoEnhance(tab: Extract<Tab, { type: "sessions" }>) {
 
     if (batchJustCompleted || transcriptJustUploaded) {
       const service = getEnhancerService();
-      if (service) {
-        const result = service.enhance(sessionId, { isAuto: true });
-        if (result.type === "skipped") {
-          setSkipReason(result.reason);
-        }
-      }
+      service?.queueAutoEnhance(sessionId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionMode, transcriptIds?.length, loading]);

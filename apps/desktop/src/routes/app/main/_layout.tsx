@@ -162,6 +162,7 @@ function EnhancerInit() {
 
   const model = useLanguageModel("enhance");
   const { conn: llmConn } = useLLMConnection();
+  const indexes = main.UI.useIndexes(main.STORE_ID);
   const selectedTemplateId = settings.UI.useValue(
     "selected_template_id",
     settings.STORE_ID,
@@ -175,10 +176,11 @@ function EnhancerInit() {
   templateIdRef.current = selectedTemplateId;
 
   useEffect(() => {
-    if (!persistedStore || !aiTaskStore) return;
+    if (!persistedStore || !aiTaskStore || !indexes) return;
 
     const service = initEnhancerService({
       mainStore: persistedStore,
+      indexes,
       aiTaskStore,
       getModel: () => modelRef.current,
       getLLMConn: () => llmConnRef.current,
@@ -186,7 +188,7 @@ function EnhancerInit() {
     });
 
     return () => service.dispose();
-  }, [persistedStore, aiTaskStore]);
+  }, [persistedStore, aiTaskStore, indexes]);
 
   return null;
 }

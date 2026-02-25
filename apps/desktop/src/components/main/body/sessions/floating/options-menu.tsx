@@ -64,7 +64,10 @@ export function OptionsMenu({
   });
 
   const triggerEnhance = useCallback(() => {
-    getEnhancerService()?.enhance(sessionId);
+    const result = getEnhancerService()?.enhance(sessionId);
+    if (result?.type === "no_model") {
+      console.warn("[enhance] skipped: no model configured");
+    }
   }, [sessionId]);
 
   const handleFilePath = useCallback(

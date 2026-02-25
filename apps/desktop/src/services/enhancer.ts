@@ -4,6 +4,7 @@ import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 
 import { getEligibility } from "../hooks/autoEnhance/eligibility";
 import type { Store as MainStore } from "../store/tinybase/store/main";
+import { INDEXES } from "../store/tinybase/store/main";
 import { createTaskId } from "../store/zustand/ai-task/task-configs";
 import { listenerStore } from "../store/zustand/listener/instance";
 import { type Tab, useTabs } from "../store/zustand/tabs";
@@ -24,6 +25,7 @@ type EnhancerEvent =
 
 type EnhancerDeps = {
   mainStore: MainStore;
+  indexes: { getSliceRowIds: (indexId: string, sliceId: string) => string[] };
   aiTaskStore: { getState: () => any };
   getModel: () => LanguageModel | null;
   getLLMConn: () => { providerId?: string; modelId?: string } | null;
@@ -45,7 +47,6 @@ export function initEnhancerService(deps: EnhancerDeps): EnhancerService {
 
 export class EnhancerService {
   private autoEnhanced = new Set<string>();
-  private generatingNotes = new Set<string>();
   private pendingRetries = new Map<string, ReturnType<typeof setTimeout>>();
   private unsubscribe: (() => void) | null = null;
   private eventListeners = new Set<(event: EnhancerEvent) => void>();
@@ -53,11 +54,6 @@ export class EnhancerService {
   constructor(private deps: EnhancerDeps) {}
 
   start() {
-    let prev = {
-      status: listenerStore.getState().live.status,
-      sessionId: listenerStore.getState().live.sessionId,
-    };
-
     this.unsubscribe = listenerStore.subscribe((state) => {
       const { status, sessionId } = state.live;
 
@@ -65,14 +61,6 @@ export class EnhancerService {
         this.autoEnhanced.delete(sessionId);
         this.clearRetry(sessionId);
       }
-
-      const wasActive =
-        prev.status === "active" || prev.status === "finalizing";
-      if (wasActive && status === "inactive" && prev.sessionId) {
-        this.queueAutoEnhance(prev.sessionId);
-      }
-
-      prev = { status, sessionId };
     });
   }
 
@@ -93,7 +81,7 @@ export class EnhancerService {
     this.eventListeners.forEach((fn) => fn(event));
   }
 
-  private queueAutoEnhance(sessionId: string) {
+  queueAutoEnhance(sessionId: string) {
     if (this.autoEnhanced.has(sessionId)) return;
     this.autoEnhanced.add(sessionId);
     this.tryAutoEnhance(sessionId, 0);
@@ -162,11 +150,6 @@ export class EnhancerService {
       return { type: "skipped", reason: "Failed to create note" };
     }
 
-    if (this.generatingNotes.has(enhancedNoteId)) {
-      this.switchToEnhancedView(sessionId, enhancedNoteId);
-      return { type: "started", noteId: enhancedNoteId };
-    }
-
     const enhanceTaskId = createTaskId(enhancedNoteId, "enhance");
     const existingTask = aiTaskStore.getState().getState(enhanceTaskId);
     if (
@@ -177,7 +160,6 @@ export class EnhancerService {
       return { type: "started", noteId: enhancedNoteId };
     }
 
-    this.generatingNotes.add(enhancedNoteId);
     this.switchToEnhancedView(sessionId, enhancedNoteId);
 
     const llmConn = getLLMConn();
@@ -186,40 +168,30 @@ export class EnhancerService {
       is_auto: opts?.isAuto ?? false,
       llm_provider: llmConn?.providerId,
       llm_model: llmConn?.modelId,
+      template_id: templateId,
     });
 
-    void aiTaskStore
-      .getState()
-      .generate(enhanceTaskId, {
-        model,
-        taskType: "enhance",
-        args: { sessionId, enhancedNoteId, templateId },
-      })
-      .finally(() => {
-        this.generatingNotes.delete(enhancedNoteId);
-      });
+    void aiTaskStore.getState().generate(enhanceTaskId, {
+      model,
+      taskType: "enhance",
+      args: { sessionId, enhancedNoteId, templateId },
+    });
 
     return { type: "started", noteId: enhancedNoteId };
   }
 
   private getTranscriptIds(sessionId: string): string[] {
-    const store = this.deps.mainStore;
-    const ids: string[] = [];
-    store.forEachRow("transcripts", (transcriptId, _forEachCell) => {
-      const sid = store.getCell("transcripts", transcriptId, "session_id");
-      if (sid === sessionId) ids.push(transcriptId);
-    });
-    return ids;
+    return this.deps.indexes.getSliceRowIds(
+      INDEXES.transcriptBySession,
+      sessionId,
+    );
   }
 
   private getEnhancedNoteIds(sessionId: string): string[] {
-    const store = this.deps.mainStore;
-    const ids: string[] = [];
-    store.forEachRow("enhanced_notes", (noteId, _forEachCell) => {
-      const sid = store.getCell("enhanced_notes", noteId, "session_id");
-      if (sid === sessionId) ids.push(noteId);
-    });
-    return ids;
+    return this.deps.indexes.getSliceRowIds(
+      INDEXES.enhancedNotesBySession,
+      sessionId,
+    );
   }
 
   private findOrCreateNote(

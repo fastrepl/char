@@ -27,27 +27,23 @@ vi.mock("../store/zustand/tabs", () => ({
   },
 }));
 
-function createMockStore(data?: {
+type Tables = Record<string, Record<string, Record<string, any>>>;
+
+function createTables(data?: {
   transcripts?: Record<string, { session_id: string; words: string }>;
   enhanced_notes?: Record<string, { session_id: string; template_id?: string }>;
   sessions?: Record<string, { title: string }>;
-}) {
-  const tables: Record<string, Record<string, Record<string, any>>> = {
+}): Tables {
+  return {
     transcripts: data?.transcripts ?? {},
     enhanced_notes: data?.enhanced_notes ?? {},
     sessions: data?.sessions ?? {},
     templates: {},
   };
+}
 
+function createMockStore(tables: Tables) {
   return {
-    forEachRow: vi.fn(
-      (table: string, cb: (rowId: string, forEachCell: any) => void) => {
-        const rows = tables[table] ?? {};
-        for (const rowId of Object.keys(rows)) {
-          cb(rowId, () => {});
-        }
-      },
-    ),
     getCell: vi.fn((table: string, rowId: string, cellId: string) => {
       return tables[table]?.[rowId]?.[cellId];
     }),
@@ -63,11 +59,38 @@ function createMockStore(data?: {
   } as any;
 }
 
+function createMockIndexes(tables: Tables) {
+  return {
+    getSliceRowIds: vi.fn((indexId: string, sliceId: string) => {
+      if (indexId === "transcriptBySession") {
+        return Object.keys(tables.transcripts ?? {}).filter(
+          (id) => tables.transcripts[id]?.session_id === sliceId,
+        );
+      }
+      if (indexId === "enhancedNotesBySession") {
+        return Object.keys(tables.enhanced_notes ?? {}).filter(
+          (id) => tables.enhanced_notes[id]?.session_id === sliceId,
+        );
+      }
+      return [];
+    }),
+  };
+}
+
 function createMockAITaskStore() {
+  const generatingTasks = new Set<string>();
   return {
     getState: vi.fn().mockReturnValue({
-      generate: vi.fn().mockResolvedValue(undefined),
-      getState: vi.fn().mockReturnValue(undefined),
+      generate: vi.fn().mockImplementation((taskId: string) => {
+        generatingTasks.add(taskId);
+        return Promise.resolve();
+      }),
+      getState: vi.fn().mockImplementation((taskId: string) => {
+        if (generatingTasks.has(taskId)) {
+          return { status: "generating" };
+        }
+        return undefined;
+      }),
     }),
   };
 }
@@ -75,8 +98,10 @@ function createMockAITaskStore() {
 function createDeps(
   overrides?: Partial<ConstructorParameters<typeof EnhancerService>[0]>,
 ) {
+  const tables = createTables();
   return {
-    mainStore: createMockStore(),
+    mainStore: createMockStore(tables),
+    indexes: createMockIndexes(tables),
     aiTaskStore: createMockAITaskStore(),
     getModel: () => ({}) as LanguageModel,
     getLLMConn: () => ({ providerId: "test", modelId: "test-model" }),
@@ -107,7 +132,7 @@ describe("EnhancerService", () => {
     });
 
     it("returns skipped when not enough words", () => {
-      const store = createMockStore({
+      const tables = createTables({
         transcripts: {
           "t-1": {
             session_id: "session-1",
@@ -115,7 +140,10 @@ describe("EnhancerService", () => {
           },
         },
       });
-      const deps = createDeps({ mainStore: store });
+      const deps = createDeps({
+        mainStore: createMockStore(tables),
+        indexes: createMockIndexes(tables),
+      });
       const service = new EnhancerService(deps);
 
       const result = service.enhance("session-1");
@@ -126,7 +154,7 @@ describe("EnhancerService", () => {
       const words = Array.from({ length: 10 }, (_, i) => ({
         text: `word${i}`,
       }));
-      const store = createMockStore({
+      const tables = createTables({
         transcripts: {
           "t-1": {
             session_id: "session-1",
@@ -134,8 +162,13 @@ describe("EnhancerService", () => {
           },
         },
       });
+      const store = createMockStore(tables);
       const aiTaskStore = createMockAITaskStore();
-      const deps = createDeps({ mainStore: store, aiTaskStore });
+      const deps = createDeps({
+        mainStore: store,
+        indexes: createMockIndexes(tables),
+        aiTaskStore,
+      });
       const service = new EnhancerService(deps);
 
       const result = service.enhance("session-1");
@@ -155,7 +188,7 @@ describe("EnhancerService", () => {
       const words = Array.from({ length: 10 }, (_, i) => ({
         text: `word${i}`,
       }));
-      const store = createMockStore({
+      const tables = createTables({
         transcripts: {
           "t-1": {
             session_id: "session-1",
@@ -169,7 +202,11 @@ describe("EnhancerService", () => {
           },
         },
       });
-      const deps = createDeps({ mainStore: store });
+      const store = createMockStore(tables);
+      const deps = createDeps({
+        mainStore: store,
+        indexes: createMockIndexes(tables),
+      });
       const service = new EnhancerService(deps);
 
       const result = service.enhance("session-1");
@@ -188,7 +225,7 @@ describe("EnhancerService", () => {
       const words = Array.from({ length: 10 }, (_, i) => ({
         text: `word${i}`,
       }));
-      const store = createMockStore({
+      const tables = createTables({
         transcripts: {
           "t-1": {
             session_id: "session-1",
@@ -207,7 +244,11 @@ describe("EnhancerService", () => {
         generate: vi.fn(),
         getState: vi.fn().mockReturnValue({ status: "generating" }),
       });
-      const deps = createDeps({ mainStore: store, aiTaskStore });
+      const deps = createDeps({
+        mainStore: createMockStore(tables),
+        indexes: createMockIndexes(tables),
+        aiTaskStore,
+      });
       const service = new EnhancerService(deps);
 
       const result = service.enhance("session-1");
@@ -221,7 +262,7 @@ describe("EnhancerService", () => {
       const words = Array.from({ length: 10 }, (_, i) => ({
         text: `word${i}`,
       }));
-      const store = createMockStore({
+      const tables = createTables({
         transcripts: {
           "t-1": {
             session_id: "session-1",
@@ -230,7 +271,11 @@ describe("EnhancerService", () => {
         },
       });
       const aiTaskStore = createMockAITaskStore();
-      const deps = createDeps({ mainStore: store, aiTaskStore });
+      const deps = createDeps({
+        mainStore: createMockStore(tables),
+        indexes: createMockIndexes(tables),
+        aiTaskStore,
+      });
       const service = new EnhancerService(deps);
 
       const result1 = service.enhance("session-1", { isAuto: true });
@@ -246,7 +291,7 @@ describe("EnhancerService", () => {
       const words = Array.from({ length: 10 }, (_, i) => ({
         text: `word${i}`,
       }));
-      const store = createMockStore({
+      const tables = createTables({
         transcripts: {
           "t-1": {
             session_id: "session-1",
@@ -255,7 +300,11 @@ describe("EnhancerService", () => {
         },
       });
       const aiTaskStore = createMockAITaskStore();
-      const deps = createDeps({ mainStore: store, aiTaskStore });
+      const deps = createDeps({
+        mainStore: createMockStore(tables),
+        indexes: createMockIndexes(tables),
+        aiTaskStore,
+      });
       const service = new EnhancerService(deps);
 
       service.enhance("session-1", { isAuto: true });
