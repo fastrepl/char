@@ -3,11 +3,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 
-import { deleteAccount, signOutFn, updateUserEmail } from "@/functions/auth";
+import { signOutFn, updateUserEmail } from "@/functions/auth";
 import {
   canStartTrial,
   createPortalSession,
   createTrialCheckoutSession,
+  deleteAccount,
   syncAfterSuccess,
 } from "@/functions/billing";
 
@@ -289,13 +290,7 @@ function DeleteAccountSection() {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const deleteAccountMutation = useMutation({
-    mutationFn: async () => {
-      const res = await deleteAccount();
-      if ("error" in res && res.error) {
-        throw new Error(res.error);
-      }
-      return res;
-    },
+    mutationFn: () => deleteAccount(),
     onSuccess: () => {
       navigate({ to: "/" });
     },

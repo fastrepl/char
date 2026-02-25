@@ -79,7 +79,7 @@ async fn app() -> Router {
     );
     let nango_connection_state = hypr_api_nango::NangoConnectionState::from_config(&nango_config);
     let subscription_config =
-        hypr_api_subscription::SubscriptionConfig::new(&env.supabase, &env.stripe)
+        hypr_api_subscription::SubscriptionConfig::new(&env.supabase, &env.stripe, &env.loops)
             .with_analytics(analytics.clone());
     let support_config = hypr_api_support::SupportConfig::new(
         &env.github_app,

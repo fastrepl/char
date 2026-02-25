@@ -423,25 +423,3 @@ export const updateUserEmail = createServerFn({ method: "POST" })
         "A confirmation email has been sent to your new email address. Please check your inbox and click the link to confirm the change.",
     };
   });
-
-export const deleteAccount = createServerFn({ method: "POST" }).handler(
-  async () => {
-    const supabase = getSupabaseServerClient();
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-
-    if (userError || !userData.user) {
-      return { success: false, error: "Not authenticated" };
-    }
-
-    const admin = getSupabaseAdminClient();
-    const { error } = await admin.auth.admin.deleteUser(userData.user.id);
-
-    if (error) {
-      return { success: false, error: error.message };
-    }
-
-    await supabase.auth.signOut({ scope: "local" });
-
-    return { success: true };
-  },
-);

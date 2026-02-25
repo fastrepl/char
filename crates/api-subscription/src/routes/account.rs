@@ -76,10 +76,24 @@ pub async fn delete_account(
         .await
     {
         tracing::warn!(user_id = %user_id, error = %e, "storage_cleanup_failed");
-        // Continue — storage cleanup failure shouldn't block account deletion
     }
 
-    // 3. Delete Supabase auth user.
+    // 3. Delete Loops contact (best-effort, before auth user deletion).
+    match state.supabase.get_user_email(&auth.token).await {
+        Ok(Some(email)) => {
+            if let Err(e) = state.loops.delete_contact_by_email(&email).await {
+                tracing::warn!(user_id = %user_id, error = %e, "loops_contact_deletion_failed");
+            }
+        }
+        Ok(None) => {
+            tracing::warn!(user_id = %user_id, "no_email_for_loops_deletion");
+        }
+        Err(e) => {
+            tracing::warn!(user_id = %user_id, error = %e, "failed_to_get_email_for_loops");
+        }
+    }
+
+    // 4. Delete Supabase auth user.
     //    This cascades: profiles, nango_connections, transcription_jobs.
     match state.supabase.admin_delete_user(user_id).await {
         Ok(()) => {
