@@ -85,6 +85,7 @@ hypr-llm-types = { path = "crates/llm-types", package = "llm-types" }
 hypr-loops = { path = "crates/loops", package = "loops" }
 hypr-mac = { path = "crates/mac", package = "mac" }
 hypr-mcp = { path = "crates/mcp", package = "mcp" }
+hypr-mobile-bridge = { path = "crates/mobile-bridge", package = "mobile-bridge" }
 hypr-mp3 = { path = "crates/mp3", package = "mp3" }
 hypr-nango = { path = "crates/nango", package = "nango" }
 hypr-notification = { path = "crates/notification", package = "notification" }
