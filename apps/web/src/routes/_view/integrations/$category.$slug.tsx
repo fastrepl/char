@@ -44,7 +44,7 @@ export const Route = createFileRoute("/_view/integrations/$category/$slug")({
         { property: "og:type", content: "website" },
         {
           property: "og:url",
-          content: `https://hyprnote.com/integrations/${doc.category}/${doc.slug}`,
+          content: `https://char.com/integrations/${doc.category}/${doc.slug}`,
         },
         { name: "twitter:card", content: "summary" },
         { name: "twitter:title", content: metaTitle },

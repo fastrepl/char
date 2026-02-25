@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_view/product/local-ai")({
       { property: "og:type", content: "website" },
       {
         property: "og:url",
-        content: "https://hyprnote.com/product/local-ai",
+        content: "https://char.com/product/local-ai",
       },
     ],
   }),

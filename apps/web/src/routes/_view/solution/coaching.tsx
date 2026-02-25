@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_view/solution/coaching")({
       { property: "og:type", content: "website" },
       {
         property: "og:url",
-        content: "https://hyprnote.com/solution/coaching",
+        content: "https://char.com/solution/coaching",
       },
     ],
   }),

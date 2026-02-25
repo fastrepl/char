@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_view/security")({
           "Your meeting data deserves the highest level of protection. Learn how Char's security-first architecture keeps your conversations safe.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://hyprnote.com/security" },
+      { property: "og:url", content: "https://char.com/security" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Security - Char" },
       {

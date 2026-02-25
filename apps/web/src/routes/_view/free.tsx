@@ -23,7 +23,7 @@ export const Route = createFileRoute("/_view/free")({
           "Char offers free AI-powered meeting transcription and notes. Local processing, unlimited recordings, and no usage limits. Download now.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://hyprnote.com/free" },
+      { property: "og:url", content: "https://char.com/free" },
     ],
   }),
 });
