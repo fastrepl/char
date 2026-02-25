@@ -315,8 +315,12 @@ describe("EnhancerService", () => {
   });
 
   describe("event emission", () => {
-    it("emits auto-enhance-skipped when enhancement fails", () => {
-      const deps = createDeps();
+    it("emits auto-enhance-skipped when enhancement is skipped after max retries", () => {
+      const tables = createTables();
+      const deps = createDeps({
+        mainStore: createMockStore(tables),
+        indexes: createMockIndexes(tables),
+      });
       const service = new EnhancerService(deps);
       const events: any[] = [];
       service.on((event) => events.push(event));
@@ -328,6 +332,27 @@ describe("EnhancerService", () => {
         sessionId: "session-1",
         reason: expect.any(String),
       });
+    });
+
+    it("clears autoEnhanced on no_model after max retries so it can be reattempted", () => {
+      const deps = createDeps({ getModel: () => null });
+      const service = new EnhancerService(deps);
+
+      (service as any).autoEnhanced.add("session-1");
+      (service as any).tryAutoEnhance("session-1", 20);
+
+      expect((service as any).autoEnhanced.has("session-1")).toBe(false);
+    });
+
+    it("retries on no_model before max attempts", () => {
+      vi.useFakeTimers();
+      const deps = createDeps({ getModel: () => null });
+      const service = new EnhancerService(deps);
+
+      (service as any).tryAutoEnhance("session-1", 0);
+
+      expect((service as any).pendingRetries.has("session-1")).toBe(true);
+      vi.useRealTimers();
     });
   });
 

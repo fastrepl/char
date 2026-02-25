@@ -65,10 +65,16 @@ export function OptionsMenu({
 
   const triggerEnhance = useCallback(() => {
     const result = getEnhancerService()?.enhance(sessionId);
+    if (result?.type === "started" && sessionTab) {
+      updateSessionTabState(sessionTab, {
+        ...sessionTab.state,
+        view: { type: "enhanced", id: result.noteId },
+      });
+    }
     if (result?.type === "no_model") {
       console.warn("[enhance] skipped: no model configured");
     }
-  }, [sessionId]);
+  }, [sessionId, sessionTab, updateSessionTabState]);
 
   const handleFilePath = useCallback(
     (selection: FileSelection, kind: "audio" | "transcript") => {

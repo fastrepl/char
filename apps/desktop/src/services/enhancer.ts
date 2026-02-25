@@ -91,6 +91,7 @@ export class EnhancerService {
     const result = this.enhance(sessionId, { isAuto: true });
 
     if (result.type === "started") {
+      this.switchToEnhancedView(sessionId, result.noteId);
       this.emit({
         type: "auto-enhance-started",
         sessionId,
@@ -99,7 +100,10 @@ export class EnhancerService {
       return;
     }
 
-    if (result.type === "skipped" && attempt < 20) {
+    if (
+      (result.type === "skipped" || result.type === "no_model") &&
+      attempt < 20
+    ) {
       const timer = setTimeout(() => {
         this.pendingRetries.delete(sessionId);
         this.tryAutoEnhance(sessionId, attempt + 1);
@@ -114,6 +118,10 @@ export class EnhancerService {
         sessionId,
         reason: result.reason,
       });
+    }
+
+    if (result.type === "no_model") {
+      this.autoEnhanced.delete(sessionId);
     }
   }
 
@@ -156,11 +164,8 @@ export class EnhancerService {
       existingTask?.status === "generating" ||
       existingTask?.status === "success"
     ) {
-      this.switchToEnhancedView(sessionId, enhancedNoteId);
       return { type: "started", noteId: enhancedNoteId };
     }
-
-    this.switchToEnhancedView(sessionId, enhancedNoteId);
 
     const llmConn = getLLMConn();
     void analyticsCommands.event({
