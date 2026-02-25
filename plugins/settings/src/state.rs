@@ -32,11 +32,15 @@ impl State {
 
     pub async fn load(&self) -> crate::Result<serde_json::Value> {
         let _guard = self.lock.read().await;
-        self.read_or_default().await
+        let mut settings = self.read_or_default().await?;
+        crate::keychain::inject_api_keys(&mut settings);
+        Ok(settings)
     }
 
-    pub async fn save(&self, settings: serde_json::Value) -> crate::Result<()> {
+    pub async fn save(&self, mut settings: serde_json::Value) -> crate::Result<()> {
         let _guard = self.lock.write().await;
+
+        crate::keychain::extract_and_store_keys(&mut settings);
 
         let existing = self.read_or_default().await?;
         let merged = merge_settings(existing, settings);
@@ -49,6 +53,27 @@ impl State {
     pub fn reset(&self) -> crate::Result<()> {
         hypr_storage::fs::atomic_write(&self.path(), "{}")?;
         Ok(())
+    }
+
+    /// Migrate any plaintext API keys from settings.json into the OS keychain.
+    /// Called once during plugin setup so that existing keys are moved to
+    /// secure storage and stripped from the JSON file on disk.
+    pub fn migrate_keys_to_keychain(&self) {
+        let content = match std::fs::read_to_string(self.path()) {
+            Ok(c) => c,
+            Err(_) => return,
+        };
+
+        let mut settings: serde_json::Value = match serde_json::from_str(&content) {
+            Ok(v) => v,
+            Err(_) => return,
+        };
+
+        if crate::keychain::extract_and_store_keys(&mut settings) {
+            if let Ok(stripped) = serde_json::to_string_pretty(&settings) {
+                let _ = hypr_storage::fs::atomic_write(&self.path(), &stripped);
+            }
+        }
     }
 }
 

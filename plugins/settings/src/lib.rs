@@ -3,6 +3,7 @@ use tauri::Manager;
 mod commands;
 mod error;
 mod ext;
+mod keychain;
 mod state;
 
 pub use error::{Error, Result};
@@ -38,6 +39,7 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
 
             let vault_base = app.settings().fresh_vault_base().unwrap();
             let state = state::State::new(vault_base);
+            state.migrate_keys_to_keychain();
             assert!(app.manage(state));
             Ok(())
         })
