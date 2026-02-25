@@ -65,7 +65,10 @@ export function OptionsMenu({
 
   const triggerEnhance = useCallback(() => {
     const result = getEnhancerService()?.enhance(sessionId);
-    if (result?.type === "started" && sessionTab) {
+    if (
+      (result?.type === "started" || result?.type === "already_active") &&
+      sessionTab
+    ) {
       updateSessionTabState(sessionTab, {
         ...sessionTab.state,
         view: { type: "enhanced", id: result.noteId },

@@ -7,11 +7,10 @@ import type { Store as MainStore } from "../store/tinybase/store/main";
 import { INDEXES } from "../store/tinybase/store/main";
 import { createTaskId } from "../store/zustand/ai-task/task-configs";
 import { listenerStore } from "../store/zustand/listener/instance";
-import { type Tab, useTabs } from "../store/zustand/tabs";
 
 type EnhanceResult =
   | { type: "started"; noteId: string }
-  | { type: "skipped"; reason: string }
+  | { type: "already_active"; noteId: string }
   | { type: "no_model" };
 
 type EnhanceOpts = {
@@ -21,7 +20,8 @@ type EnhanceOpts = {
 
 type EnhancerEvent =
   | { type: "auto-enhance-skipped"; sessionId: string; reason: string }
-  | { type: "auto-enhance-started"; sessionId: string; noteId: string };
+  | { type: "auto-enhance-started"; sessionId: string; noteId: string }
+  | { type: "auto-enhance-no-model"; sessionId: string };
 
 type EnhancerDeps = {
   mainStore: MainStore;
@@ -46,7 +46,7 @@ export function initEnhancerService(deps: EnhancerDeps): EnhancerService {
 }
 
 export class EnhancerService {
-  private autoEnhanced = new Set<string>();
+  private activeAutoEnhance = new Set<string>();
   private pendingRetries = new Map<string, ReturnType<typeof setTimeout>>();
   private unsubscribe: (() => void) | null = null;
   private eventListeners = new Set<(event: EnhancerEvent) => void>();
@@ -58,7 +58,7 @@ export class EnhancerService {
       const { status, sessionId } = state.live;
 
       if (status === "active" && sessionId) {
-        this.autoEnhanced.delete(sessionId);
+        this.activeAutoEnhance.delete(sessionId);
         this.clearRetry(sessionId);
       }
     });
@@ -81,48 +81,56 @@ export class EnhancerService {
     this.eventListeners.forEach((fn) => fn(event));
   }
 
+  checkEligibility(sessionId: string) {
+    const transcriptIds = this.getTranscriptIds(sessionId);
+    return getEligibility(
+      transcriptIds.length > 0,
+      transcriptIds,
+      this.deps.mainStore,
+    );
+  }
+
   queueAutoEnhance(sessionId: string) {
-    if (this.autoEnhanced.has(sessionId)) return;
-    this.autoEnhanced.add(sessionId);
+    if (this.activeAutoEnhance.has(sessionId)) return;
+    this.activeAutoEnhance.add(sessionId);
     this.tryAutoEnhance(sessionId, 0);
   }
 
   private tryAutoEnhance(sessionId: string, attempt: number) {
-    const result = this.enhance(sessionId, { isAuto: true });
+    const eligibility = this.checkEligibility(sessionId);
+    if (!eligibility.eligible) {
+      if (attempt < 20) {
+        const timer = setTimeout(() => {
+          this.pendingRetries.delete(sessionId);
+          this.tryAutoEnhance(sessionId, attempt + 1);
+        }, 500);
+        this.pendingRetries.set(sessionId, timer);
+        return;
+      }
 
-    if (result.type === "started") {
-      this.switchToEnhancedView(sessionId, result.noteId);
-      this.emit({
-        type: "auto-enhance-started",
-        sessionId,
-        noteId: result.noteId,
-      });
-      return;
-    }
-
-    if (
-      (result.type === "skipped" || result.type === "no_model") &&
-      attempt < 20
-    ) {
-      const timer = setTimeout(() => {
-        this.pendingRetries.delete(sessionId);
-        this.tryAutoEnhance(sessionId, attempt + 1);
-      }, 500);
-      this.pendingRetries.set(sessionId, timer);
-      return;
-    }
-
-    if (result.type === "skipped") {
+      this.activeAutoEnhance.delete(sessionId);
       this.emit({
         type: "auto-enhance-skipped",
         sessionId,
-        reason: result.reason,
+        reason: eligibility.reason,
       });
+      return;
     }
 
+    const result = this.enhance(sessionId, { isAuto: true });
+
     if (result.type === "no_model") {
-      this.autoEnhanced.delete(sessionId);
+      this.activeAutoEnhance.delete(sessionId);
+      this.emit({ type: "auto-enhance-no-model", sessionId });
+      return;
     }
+
+    this.activeAutoEnhance.delete(sessionId);
+    this.emit({
+      type: "auto-enhance-started",
+      sessionId,
+      noteId: result.noteId,
+    });
   }
 
   private clearRetry(sessionId: string) {
@@ -134,35 +142,16 @@ export class EnhancerService {
   }
 
   enhance(sessionId: string, opts?: EnhanceOpts): EnhanceResult {
-    const {
-      mainStore,
-      aiTaskStore,
-      getModel,
-      getLLMConn,
-      getSelectedTemplateId,
-    } = this.deps;
+    const { aiTaskStore, getModel, getLLMConn, getSelectedTemplateId } =
+      this.deps;
 
     const model = getModel();
     if (!model) return { type: "no_model" };
 
-    const transcriptIds = this.getTranscriptIds(sessionId);
-    const hasTranscript = transcriptIds.length > 0;
-
-    if (opts?.isAuto) {
-      const eligibility = getEligibility(
-        hasTranscript,
-        transcriptIds,
-        mainStore,
-      );
-      if (!eligibility.eligible) {
-        return { type: "skipped", reason: eligibility.reason };
-      }
-    }
-
     const templateId = opts?.templateId || getSelectedTemplateId();
-    const enhancedNoteId = this.findOrCreateNote(sessionId, templateId);
+    const enhancedNoteId = this.ensureNote(sessionId, templateId);
     if (!enhancedNoteId) {
-      return { type: "skipped", reason: "Failed to create note" };
+      return { type: "no_model" };
     }
 
     const enhanceTaskId = createTaskId(enhancedNoteId, "enhance");
@@ -171,7 +160,7 @@ export class EnhancerService {
       existingTask?.status === "generating" ||
       existingTask?.status === "success"
     ) {
-      return { type: "started", noteId: enhancedNoteId };
+      return { type: "already_active", noteId: enhancedNoteId };
     }
 
     const llmConn = getLLMConn();
@@ -206,10 +195,7 @@ export class EnhancerService {
     );
   }
 
-  private findOrCreateNote(
-    sessionId: string,
-    templateId?: string,
-  ): string | null {
+  ensureNote(sessionId: string, templateId?: string): string | null {
     const store = this.deps.mainStore;
     const normalizedTemplateId = templateId || undefined;
 
@@ -246,20 +232,5 @@ export class EnhancerService {
     });
 
     return enhancedNoteId;
-  }
-
-  private switchToEnhancedView(sessionId: string, enhancedNoteId: string) {
-    const tabsState = useTabs.getState();
-    const sessionTab = tabsState.tabs.find(
-      (tab): tab is Extract<Tab, { type: "sessions" }> =>
-        tab.type === "sessions" && tab.id === sessionId,
-    );
-
-    if (sessionTab) {
-      tabsState.updateSessionTabState(sessionTab, {
-        ...sessionTab.state,
-        view: { type: "enhanced", id: enhancedNoteId },
-      });
-    }
   }
 }

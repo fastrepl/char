@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useListener } from "../contexts/listener";
 import { getEnhancerService } from "../services/enhancer";
 import * as main from "../store/tinybase/store/main";
-import type { Tab } from "../store/zustand/tabs/schema";
+import { type Tab, useTabs } from "../store/zustand/tabs";
 
 export function useAutoEnhance(tab: Extract<Tab, { type: "sessions" }>) {
   const sessionId = tab.id;
@@ -28,6 +28,22 @@ export function useAutoEnhance(tab: Extract<Tab, { type: "sessions" }>) {
       if (event.sessionId !== sessionId) return;
       if (event.type === "auto-enhance-skipped") {
         setSkipReason(event.reason);
+      }
+      if (event.type === "auto-enhance-started") {
+        const tabsState = useTabs.getState();
+        const sessionTab = tabsState.tabs.find(
+          (t): t is Extract<Tab, { type: "sessions" }> =>
+            t.type === "sessions" && t.id === sessionId,
+        );
+        if (sessionTab) {
+          tabsState.updateSessionTabState(sessionTab, {
+            ...sessionTab.state,
+            view: { type: "enhanced", id: event.noteId },
+          });
+        }
+      }
+      if (event.type === "auto-enhance-no-model") {
+        setSkipReason("No AI model configured");
       }
     });
   }, [sessionId]);

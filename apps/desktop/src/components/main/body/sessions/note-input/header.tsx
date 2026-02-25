@@ -302,7 +302,7 @@ function CreateOtherFormatButton({
       if (!service) return;
 
       const result = service.enhance(sessionId, { templateId });
-      if (result.type === "started") {
+      if (result.type === "started" || result.type === "already_active") {
         handleTabChange({ type: "enhanced", id: result.noteId });
       }
     },

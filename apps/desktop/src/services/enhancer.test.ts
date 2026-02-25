@@ -18,15 +18,6 @@ vi.mock("../store/zustand/listener/instance", () => ({
   },
 }));
 
-vi.mock("../store/zustand/tabs", () => ({
-  useTabs: {
-    getState: vi.fn().mockReturnValue({
-      tabs: [],
-      updateSessionTabState: vi.fn(),
-    }),
-  },
-}));
-
 type Tables = Record<string, Record<string, Record<string, any>>>;
 
 function createTables(data?: {
@@ -120,36 +111,6 @@ describe("EnhancerService", () => {
       expect(result).toEqual({ type: "no_model" });
     });
 
-    it("returns skipped when no transcript exists (auto)", () => {
-      const deps = createDeps();
-      const service = new EnhancerService(deps);
-
-      const result = service.enhance("session-1", { isAuto: true });
-      expect(result).toEqual({
-        type: "skipped",
-        reason: "No transcript recorded",
-      });
-    });
-
-    it("returns skipped when not enough words (auto)", () => {
-      const tables = createTables({
-        transcripts: {
-          "t-1": {
-            session_id: "session-1",
-            words: JSON.stringify([{ text: "hi" }, { text: "there" }]),
-          },
-        },
-      });
-      const deps = createDeps({
-        mainStore: createMockStore(tables),
-        indexes: createMockIndexes(tables),
-      });
-      const service = new EnhancerService(deps);
-
-      const result = service.enhance("session-1", { isAuto: true });
-      expect(result.type).toBe("skipped");
-    });
-
     it("does not skip manual enhance when no transcript exists", () => {
       const deps = createDeps();
       const service = new EnhancerService(deps);
@@ -158,18 +119,8 @@ describe("EnhancerService", () => {
       expect(result.type).toBe("started");
     });
 
-    it("creates note and starts generation when eligible", () => {
-      const words = Array.from({ length: 10 }, (_, i) => ({
-        text: `word${i}`,
-      }));
-      const tables = createTables({
-        transcripts: {
-          "t-1": {
-            session_id: "session-1",
-            words: JSON.stringify(words),
-          },
-        },
-      });
+    it("creates note and starts generation", () => {
+      const tables = createTables();
       const store = createMockStore(tables);
       const aiTaskStore = createMockAITaskStore();
       const deps = createDeps({
@@ -193,16 +144,7 @@ describe("EnhancerService", () => {
     });
 
     it("reuses existing note with same template", () => {
-      const words = Array.from({ length: 10 }, (_, i) => ({
-        text: `word${i}`,
-      }));
       const tables = createTables({
-        transcripts: {
-          "t-1": {
-            session_id: "session-1",
-            words: JSON.stringify(words),
-          },
-        },
         enhanced_notes: {
           "existing-note": {
             session_id: "session-1",
@@ -229,17 +171,8 @@ describe("EnhancerService", () => {
       );
     });
 
-    it("does not start generation if task already running", () => {
-      const words = Array.from({ length: 10 }, (_, i) => ({
-        text: `word${i}`,
-      }));
+    it("returns already_active when task is generating", () => {
       const tables = createTables({
-        transcripts: {
-          "t-1": {
-            session_id: "session-1",
-            words: JSON.stringify(words),
-          },
-        },
         enhanced_notes: {
           "note-1": {
             session_id: "session-1",
@@ -260,8 +193,129 @@ describe("EnhancerService", () => {
       const service = new EnhancerService(deps);
 
       const result = service.enhance("session-1");
-      expect(result).toEqual({ type: "started", noteId: "note-1" });
+      expect(result).toEqual({ type: "already_active", noteId: "note-1" });
       expect(aiTaskStore.getState().generate).not.toHaveBeenCalled();
+    });
+
+    it("returns already_active when task has succeeded", () => {
+      const tables = createTables({
+        enhanced_notes: {
+          "note-1": {
+            session_id: "session-1",
+            template_id: undefined as any,
+          },
+        },
+      });
+      const aiTaskStore = createMockAITaskStore();
+      aiTaskStore.getState.mockReturnValue({
+        generate: vi.fn(),
+        getState: vi.fn().mockReturnValue({ status: "success" }),
+      });
+      const deps = createDeps({
+        mainStore: createMockStore(tables),
+        indexes: createMockIndexes(tables),
+        aiTaskStore,
+      });
+      const service = new EnhancerService(deps);
+
+      const result = service.enhance("session-1");
+      expect(result).toEqual({ type: "already_active", noteId: "note-1" });
+      expect(aiTaskStore.getState().generate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("checkEligibility()", () => {
+    it("returns not eligible when no transcript exists", () => {
+      const deps = createDeps();
+      const service = new EnhancerService(deps);
+
+      const result = service.checkEligibility("session-1");
+      expect(result.eligible).toBe(false);
+    });
+
+    it("returns not eligible when not enough words", () => {
+      const tables = createTables({
+        transcripts: {
+          "t-1": {
+            session_id: "session-1",
+            words: JSON.stringify([{ text: "hi" }, { text: "there" }]),
+          },
+        },
+      });
+      const deps = createDeps({
+        mainStore: createMockStore(tables),
+        indexes: createMockIndexes(tables),
+      });
+      const service = new EnhancerService(deps);
+
+      const result = service.checkEligibility("session-1");
+      expect(result.eligible).toBe(false);
+    });
+
+    it("returns eligible when enough words", () => {
+      const words = Array.from({ length: 10 }, (_, i) => ({
+        text: `word${i}`,
+      }));
+      const tables = createTables({
+        transcripts: {
+          "t-1": {
+            session_id: "session-1",
+            words: JSON.stringify(words),
+          },
+        },
+      });
+      const deps = createDeps({
+        mainStore: createMockStore(tables),
+        indexes: createMockIndexes(tables),
+      });
+      const service = new EnhancerService(deps);
+
+      const result = service.checkEligibility("session-1");
+      expect(result.eligible).toBe(true);
+    });
+  });
+
+  describe("ensureNote()", () => {
+    it("creates a new note when none exists", () => {
+      const tables = createTables();
+      const store = createMockStore(tables);
+      const deps = createDeps({
+        mainStore: store,
+        indexes: createMockIndexes(tables),
+      });
+      const service = new EnhancerService(deps);
+
+      const noteId = service.ensureNote("session-1");
+      expect(noteId).toBeTruthy();
+      expect(store.setRow).toHaveBeenCalledWith(
+        "enhanced_notes",
+        noteId,
+        expect.objectContaining({
+          session_id: "session-1",
+          title: "Summary",
+        }),
+      );
+    });
+
+    it("returns existing note with same template", () => {
+      const tables = createTables({
+        enhanced_notes: {
+          "existing-note": {
+            session_id: "session-1",
+            template_id: undefined as any,
+          },
+        },
+      });
+      const store = createMockStore(tables);
+      const deps = createDeps({
+        mainStore: store,
+        indexes: createMockIndexes(tables),
+      });
+      const service = new EnhancerService(deps);
+
+      const noteId = service.ensureNote("session-1");
+      expect(noteId).toBe("existing-note");
+      expect(store.setRow).not.toHaveBeenCalled();
     });
   });
 
@@ -290,7 +344,7 @@ describe("EnhancerService", () => {
       expect(result1.type).toBe("started");
 
       const result2 = service.enhance("session-1", { isAuto: true });
-      expect(result2.type).toBe("started");
+      expect(result2.type).toBe("already_active");
 
       expect(aiTaskStore.getState().generate).toHaveBeenCalledTimes(1);
     });
@@ -322,8 +376,8 @@ describe("EnhancerService", () => {
     });
   });
 
-  describe("event emission", () => {
-    it("emits auto-enhance-skipped when enhancement is skipped after max retries", () => {
+  describe("tryAutoEnhance", () => {
+    it("emits auto-enhance-skipped when not eligible after max retries", () => {
       const tables = createTables();
       const deps = createDeps({
         mainStore: createMockStore(tables),
@@ -342,25 +396,96 @@ describe("EnhancerService", () => {
       });
     });
 
-    it("clears autoEnhanced on no_model after max retries so it can be reattempted", () => {
-      const deps = createDeps({ getModel: () => null });
+    it("clears activeAutoEnhance on skipped after max retries", () => {
+      const tables = createTables();
+      const deps = createDeps({
+        mainStore: createMockStore(tables),
+        indexes: createMockIndexes(tables),
+      });
       const service = new EnhancerService(deps);
 
-      (service as any).autoEnhanced.add("session-1");
+      (service as any).activeAutoEnhance.add("session-1");
       (service as any).tryAutoEnhance("session-1", 20);
 
-      expect((service as any).autoEnhanced.has("session-1")).toBe(false);
+      expect((service as any).activeAutoEnhance.has("session-1")).toBe(false);
     });
 
-    it("retries on no_model before max attempts", () => {
+    it("retries when not eligible and under max attempts", () => {
       vi.useFakeTimers();
-      const deps = createDeps({ getModel: () => null });
+      const tables = createTables();
+      const deps = createDeps({
+        mainStore: createMockStore(tables),
+        indexes: createMockIndexes(tables),
+      });
       const service = new EnhancerService(deps);
 
       (service as any).tryAutoEnhance("session-1", 0);
 
       expect((service as any).pendingRetries.has("session-1")).toBe(true);
       vi.useRealTimers();
+    });
+
+    it("emits auto-enhance-no-model and does not retry when no model", () => {
+      const words = Array.from({ length: 10 }, (_, i) => ({
+        text: `word${i}`,
+      }));
+      const tables = createTables({
+        transcripts: {
+          "t-1": {
+            session_id: "session-1",
+            words: JSON.stringify(words),
+          },
+        },
+      });
+      const deps = createDeps({
+        mainStore: createMockStore(tables),
+        indexes: createMockIndexes(tables),
+        getModel: () => null,
+      });
+      const service = new EnhancerService(deps);
+      const events: any[] = [];
+      service.on((event) => events.push(event));
+
+      (service as any).activeAutoEnhance.add("session-1");
+      (service as any).tryAutoEnhance("session-1", 0);
+
+      expect(events).toContainEqual({
+        type: "auto-enhance-no-model",
+        sessionId: "session-1",
+      });
+      expect((service as any).activeAutoEnhance.has("session-1")).toBe(false);
+      expect((service as any).pendingRetries.has("session-1")).toBe(false);
+    });
+
+    it("emits auto-enhance-started and clears activeAutoEnhance on success", () => {
+      const words = Array.from({ length: 10 }, (_, i) => ({
+        text: `word${i}`,
+      }));
+      const tables = createTables({
+        transcripts: {
+          "t-1": {
+            session_id: "session-1",
+            words: JSON.stringify(words),
+          },
+        },
+      });
+      const deps = createDeps({
+        mainStore: createMockStore(tables),
+        indexes: createMockIndexes(tables),
+      });
+      const service = new EnhancerService(deps);
+      const events: any[] = [];
+      service.on((event) => events.push(event));
+
+      (service as any).activeAutoEnhance.add("session-1");
+      (service as any).tryAutoEnhance("session-1", 0);
+
+      expect(events).toContainEqual({
+        type: "auto-enhance-started",
+        sessionId: "session-1",
+        noteId: expect.any(String),
+      });
+      expect((service as any).activeAutoEnhance.has("session-1")).toBe(false);
     });
   });
 
