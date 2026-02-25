@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_view/changelog/")({
         content: "Track every update, improvement, and fix to Char",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://hyprnote.com/changelog" },
+      { property: "og:url", content: "https://char.com/changelog" },
     ],
   }),
 });
