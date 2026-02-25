@@ -73,7 +73,11 @@ fn silero_cactus_mask(audio: &[u8], total_samples: usize) -> Vec<bool> {
 
 fn agreement(a: &[bool], b: &[bool]) -> f64 {
     let len = a.len().min(b.len());
-    let matching = a[..len].iter().zip(&b[..len]).filter(|(x, y)| x == y).count();
+    let matching = a[..len]
+        .iter()
+        .zip(&b[..len])
+        .filter(|(x, y)| x == y)
+        .count();
     matching as f64 / len as f64 * 100.0
 }
 
