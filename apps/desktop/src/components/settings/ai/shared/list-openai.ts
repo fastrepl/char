@@ -85,15 +85,6 @@ export async function listGenericModels(
           if (shouldIgnoreCommonKeywords(model.id)) {
             reasons.push("common_keyword");
           }
-          if (isNonChatModel(model.id)) {
-            reasons.push("not_chat_model");
-          }
-          if (isOldModel(model.id)) {
-            reasons.push("old_model");
-          }
-          if (isDateSnapshot(model.id)) {
-            reasons.push("date_snapshot");
-          }
           return reasons.length > 0 ? reasons : null;
         },
         (model) => model.id,

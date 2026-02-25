@@ -21,13 +21,11 @@ export class CustomChatTransport implements ChatTransport<HyprUIMessage> {
     private systemPrompt?: string,
   ) {}
 
-  sendMessages: ChatTransport<HyprUIMessage>["sendMessages"] = async (
-    options,
-  ) => {
-    const agent = new ToolLoopAgent({
+  private createAgent(tools: ToolSet) {
+    return new ToolLoopAgent({
       model: this.model,
       instructions: this.systemPrompt,
-      tools: this.tools,
+      tools,
       stopWhen: stepCountIs(MAX_TOOL_STEPS),
       prepareStep: async ({ messages }) => {
         if (messages.length > MESSAGE_WINDOW_THRESHOLD) {
@@ -37,11 +35,12 @@ export class CustomChatTransport implements ChatTransport<HyprUIMessage> {
         return {};
       },
     });
+  }
 
-    const result = await agent.stream({
-      messages: await convertToModelMessages(options.messages),
-    });
-
+  private toUIStream(
+    result: Awaited<ReturnType<ToolLoopAgent["stream"]>>,
+    options: Parameters<ChatTransport<HyprUIMessage>["sendMessages"]>[0],
+  ) {
     return result.toUIMessageStream({
       originalMessages: options.messages,
       messageMetadata: ({ part }: { part: { type: string } }) => {
@@ -64,6 +63,30 @@ export class CustomChatTransport implements ChatTransport<HyprUIMessage> {
         }
       },
     });
+  }
+
+  sendMessages: ChatTransport<HyprUIMessage>["sendMessages"] = async (
+    options,
+  ) => {
+    const messages = await convertToModelMessages(options.messages);
+    const hasTools = Object.keys(this.tools).length > 0;
+
+    try {
+      const agent = this.createAgent(this.tools);
+      const result = await agent.stream({ messages });
+      return this.toUIStream(result, options);
+    } catch (error) {
+      if (hasTools) {
+        console.warn(
+          "[CustomChatTransport] Request with tools failed, retrying without tools:",
+          error,
+        );
+        const agent = this.createAgent({});
+        const result = await agent.stream({ messages });
+        return this.toUIStream(result, options);
+      }
+      throw error;
+    }
   };
 
   reconnectToStream: ChatTransport<HyprUIMessage>["reconnectToStream"] =

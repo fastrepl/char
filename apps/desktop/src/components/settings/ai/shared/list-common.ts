@@ -82,7 +82,6 @@ export const isNonChatModel = (id: string): boolean => {
   if (/^gpt-4o-/.test(name)) return true;
   if (/^gpt-4\.1/.test(name)) return true;
   if (name.startsWith("ft:") || lowerId.startsWith("ft:")) return true;
-  if (/^gemma/.test(name)) return true;
   if (/^nano-banana/.test(name)) return true;
 
   return false;
