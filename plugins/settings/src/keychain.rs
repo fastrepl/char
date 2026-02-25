@@ -28,7 +28,10 @@ fn store_api_key(provider_type: &str, provider_id: &str, api_key: &str) -> bool 
             }
         },
         Err(e) => {
-            warn!("failed to create keychain entry for {}:{}: {}", provider_type, provider_id, e);
+            warn!(
+                "failed to create keychain entry for {}:{}: {}",
+                provider_type, provider_id, e
+            );
             false
         }
     }
@@ -134,10 +137,7 @@ pub fn inject_api_keys(settings: &mut serde_json::Value) {
 
             if !has_key {
                 if let Some(api_key) = get_api_key(provider_type, provider_id) {
-                    obj.insert(
-                        "api_key".to_string(),
-                        serde_json::Value::String(api_key),
-                    );
+                    obj.insert("api_key".to_string(), serde_json::Value::String(api_key));
                 }
             }
         }
@@ -212,9 +212,7 @@ mod tests {
         let _ = extract_and_store_keys(&mut settings);
 
         // Empty key should be removed (cleanup)
-        assert!(settings["ai"]["llm"]["anthropic"]
-            .get("api_key")
-            .is_none());
+        assert!(settings["ai"]["llm"]["anthropic"].get("api_key").is_none());
     }
 
     #[test]
