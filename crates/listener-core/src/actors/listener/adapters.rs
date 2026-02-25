@@ -4,7 +4,7 @@ use bytes::Bytes;
 use ractor::{ActorProcessingErr, ActorRef};
 
 use owhisper_client::{
-    AdapterKind, ArgmaxAdapter, AssemblyAIAdapter, CactusAdapter, DashScopeAdapter,
+    AdapterKind, ArgmaxAdapter, AssemblyAIAdapter, BedrockAdapter, CactusAdapter, DashScopeAdapter,
     DeepgramAdapter, ElevenLabsAdapter, FireworksAdapter, GladiaAdapter, HyprnoteAdapter,
     MistralAdapter, OpenAIAdapter, RealtimeSttAdapter, SonioxAdapter,
 };
@@ -94,6 +94,12 @@ pub(super) async fn spawn_rx_task(
         }
         (AdapterKind::Mistral, true) => {
             spawn_rx_task_dual_with_adapter::<MistralAdapter>(args, myself).await
+        }
+        (AdapterKind::Bedrock, false) => {
+            spawn_rx_task_single_with_adapter::<BedrockAdapter>(args, myself).await
+        }
+        (AdapterKind::Bedrock, true) => {
+            spawn_rx_task_dual_with_adapter::<BedrockAdapter>(args, myself).await
         }
         (AdapterKind::Hyprnote, false) => {
             spawn_rx_task_single_with_adapter::<HyprnoteAdapter>(args, myself).await

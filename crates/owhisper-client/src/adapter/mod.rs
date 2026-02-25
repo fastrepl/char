@@ -1,6 +1,7 @@
 mod argmax;
 pub(crate) mod assemblyai;
 mod cactus;
+mod bedrock;
 mod dashscope;
 pub mod deepgram;
 mod deepgram_compat;
@@ -19,6 +20,7 @@ mod url_builder;
 
 pub use argmax::*;
 pub use assemblyai::*;
+pub use bedrock::*;
 pub use cactus::*;
 pub use dashscope::*;
 pub use deepgram::*;
@@ -362,6 +364,8 @@ pub enum AdapterKind {
     DashScope,
     #[strum(serialize = "mistral")]
     Mistral,
+    #[strum(serialize = "bedrock")]
+    Bedrock,
     #[strum(serialize = "hyprnote")]
     Hyprnote,
     #[strum(serialize = "cactus")]
@@ -413,6 +417,7 @@ impl AdapterKind {
             Self::DashScope => DashScopeAdapter::language_support_live(languages),
             Self::Argmax => ArgmaxAdapter::language_support_live(languages, model),
             Self::Mistral => MistralAdapter::language_support_live(languages),
+            Self::Bedrock => BedrockAdapter::language_support_live(languages),
             Self::Hyprnote | Self::Cactus => LanguageSupport::Supported {
                 quality: LanguageQuality::NoData,
             },
@@ -438,6 +443,7 @@ impl AdapterKind {
             Self::DashScope => DashScopeAdapter::language_support_batch(languages),
             Self::Argmax => ArgmaxAdapter::language_support_batch(languages, model),
             Self::Mistral => MistralAdapter::language_support_batch(languages),
+            Self::Bedrock => BedrockAdapter::language_support_batch(languages),
             Self::Hyprnote | Self::Cactus => LanguageSupport::Supported {
                 quality: LanguageQuality::NoData,
             },
@@ -484,6 +490,7 @@ impl From<crate::providers::Provider> for AdapterKind {
             Provider::ElevenLabs => Self::ElevenLabs,
             Provider::DashScope => Self::DashScope,
             Provider::Mistral => Self::Mistral,
+            Provider::Bedrock => Self::Bedrock,
         }
     }
 }

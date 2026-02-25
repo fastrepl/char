@@ -202,6 +202,16 @@ const _PROVIDERS = [
   },
   {
     disabled: false,
+    id: "bedrock",
+    displayName: "Amazon Bedrock",
+    badge: "Beta",
+    icon: <Icon icon="simple-icons:amazonaws" className="size-4" />,
+    baseUrl: "https://bedrock-mantle.us-east-1.api.aws/v1",
+    models: ["openai.gpt-4o-transcribe", "openai.whisper-1"],
+    requirements: [{ kind: "requires_config", fields: ["api_key"] }],
+  },
+  {
+    disabled: false,
     id: "custom",
     displayName: "Custom",
     badge: null,
