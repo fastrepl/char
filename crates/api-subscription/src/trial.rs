@@ -47,6 +47,8 @@ pub struct StartTrialResponse {
 pub(crate) enum TrialOutcome {
     NotEligible,
     StripeError,
+    CustomerError,
+    RpcError,
     Started(Interval),
 }
 
@@ -58,6 +60,12 @@ impl ToAnalyticsPayload for TrialOutcome {
                 .build(),
             Self::StripeError => AnalyticsPayload::builder("trial_failed")
                 .with("reason", "stripe_error")
+                .build(),
+            Self::CustomerError => AnalyticsPayload::builder("trial_failed")
+                .with("reason", "customer_error")
+                .build(),
+            Self::RpcError => AnalyticsPayload::builder("trial_failed")
+                .with("reason", "rpc_error")
                 .build(),
             Self::Started(interval) => {
                 let plan = match interval {
@@ -99,6 +107,21 @@ impl IntoResponse for TrialOutcome {
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ErrorResponse {
                     error: "failed_to_create_subscription".to_string(),
+                }),
+            )
+                .into_response(),
+            Self::CustomerError => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ErrorResponse {
+                    error: "failed_to_create_customer".to_string(),
+                }),
+            )
+                .into_response(),
+            Self::RpcError => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(StartTrialResponse {
+                    started: false,
+                    reason: Some(StartTrialReason::Error),
                 }),
             )
                 .into_response(),
