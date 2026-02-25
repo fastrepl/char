@@ -14,8 +14,7 @@ import {
 import type { EditorView } from "../../../../../../store/zustand/tabs/schema";
 import { useHasTranscript } from "../../shared";
 import { DeleteNote, DeleteRecording } from "./delete";
-import { ExportPDF } from "./export-pdf";
-import { ExportTranscript } from "./export-transcript";
+import { ExportModal } from "./export-modal";
 import { Listening } from "./listening";
 import { Copy, Folder, RevealInFinder, ShowInFinder } from "./misc";
 
@@ -53,8 +52,7 @@ export function OverflowButton({
       <DropdownMenuContent align="end" className="w-56">
         <Copy />
         <Folder sessionId={sessionId} setOpen={setOpen} />
-        <ExportPDF sessionId={sessionId} currentView={currentView} />
-        {hasTranscript && <ExportTranscript sessionId={sessionId} />}
+        <ExportModal sessionId={sessionId} currentView={currentView} />
         <DropdownMenuSeparator />
         <Listening sessionId={sessionId} hasTranscript={hasTranscript} />
         <DropdownMenuSeparator />
