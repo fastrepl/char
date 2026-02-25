@@ -21,7 +21,6 @@ exclude = ["plugins/cli2", "plugins/db", "plugins/export", "crates/vad-ext"]
 
 [workspace.dependencies]
 hypr-aec = { path = "crates/aec", package = "aec" }
-hypr-denoise = { path = "crates/denoise", package = "denoise" }
 hypr-afconvert = { path = "crates/afconvert", package = "afconvert" }
 hypr-agc = { path = "crates/agc", package = "agc" }
 hypr-am = { path = "crates/am", package = "am" }
@@ -55,6 +54,7 @@ hypr-data = { path = "crates/data", package = "data" }
 hypr-db-core = { path = "crates/db-core", package = "db-core" }
 hypr-db-parser = { path = "crates/db-parser", package = "db-parser" }
 hypr-db-user = { path = "crates/db-user", package = "db-user" }
+hypr-denoise = { path = "crates/denoise", package = "denoise" }
 hypr-detect = { path = "crates/detect", package = "detect" }
 hypr-device-monitor = { path = "crates/device-monitor", package = "device-monitor" }
 hypr-docs = { path = "crates/docs", package = "docs" }

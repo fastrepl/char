@@ -6,7 +6,9 @@ use hound::WavReader;
 use aec::AEC;
 
 fn load_test_data() -> (Vec<f32>, Vec<f32>) {
-    let data_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("data").join("inputs");
+    let data_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("data")
+        .join("inputs");
 
     let lpb_sample = WavReader::open(data_dir.join("doubletalk_lpb_sample.wav")).unwrap();
     let mic_sample = WavReader::open(data_dir.join("doubletalk_mic_sample.wav")).unwrap();
