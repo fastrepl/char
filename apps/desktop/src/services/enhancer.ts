@@ -54,6 +54,10 @@ export class EnhancerService {
   constructor(private deps: EnhancerDeps) {}
 
   start() {
+    let prevLiveStatus = listenerStore.getState().live.status;
+    let prevLiveSessionId = listenerStore.getState().live.sessionId;
+    let prevBatch = listenerStore.getState().batch;
+
     this.unsubscribe = listenerStore.subscribe((state) => {
       const { status, sessionId } = state.live;
 
@@ -61,6 +65,27 @@ export class EnhancerService {
         this.activeAutoEnhance.delete(sessionId);
         this.clearRetry(sessionId);
       }
+
+      if (
+        (prevLiveStatus === "active" || prevLiveStatus === "finalizing") &&
+        status === "inactive" &&
+        prevLiveSessionId
+      ) {
+        this.queueAutoEnhance(prevLiveSessionId);
+      }
+
+      for (const batchSessionId of Object.keys(prevBatch)) {
+        if (!prevBatch[batchSessionId]?.error) {
+          const curr = state.batch[batchSessionId];
+          if (!curr || curr.error) {
+            this.queueAutoEnhance(batchSessionId);
+          }
+        }
+      }
+
+      prevLiveStatus = status;
+      prevLiveSessionId = sessionId;
+      prevBatch = state.batch;
     });
   }
 
@@ -69,7 +94,9 @@ export class EnhancerService {
     this.unsubscribe = null;
     for (const timer of this.pendingRetries.values()) clearTimeout(timer);
     this.pendingRetries.clear();
+    this.activeAutoEnhance.clear();
     this.eventListeners.clear();
+    if (instance === this) instance = null;
   }
 
   on(listener: (event: EnhancerEvent) => void): () => void {

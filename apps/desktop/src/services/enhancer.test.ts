@@ -1,6 +1,7 @@
 import type { LanguageModel } from "ai";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { listenerStore } from "../store/zustand/listener/instance";
 import { EnhancerService } from "./enhancer";
 
 vi.mock("@hypr/plugin-analytics", () => ({
@@ -13,6 +14,7 @@ vi.mock("../store/zustand/listener/instance", () => ({
   listenerStore: {
     getState: vi.fn().mockReturnValue({
       live: { status: "inactive", sessionId: null },
+      batch: {},
     }),
     subscribe: vi.fn().mockReturnValue(() => {}),
   },
@@ -489,12 +491,178 @@ describe("EnhancerService", () => {
     });
   });
 
-  describe("dispose()", () => {
-    it("cleans up subscriptions and timers", () => {
+  describe("start() subscriber", () => {
+    let subscriber: ((state: any) => void) | undefined;
+
+    beforeEach(() => {
+      vi.mocked(listenerStore.subscribe).mockImplementation((cb: any) => {
+        subscriber = cb;
+        return () => {
+          subscriber = undefined;
+        };
+      });
+    });
+
+    afterEach(() => {
+      subscriber = undefined;
+      vi.mocked(listenerStore.subscribe).mockReturnValue(() => {});
+    });
+
+    function createEligibleDeps() {
+      const words = Array.from({ length: 10 }, (_, i) => ({
+        text: `word${i}`,
+      }));
+      const tables = createTables({
+        transcripts: {
+          "t-1": {
+            session_id: "session-1",
+            words: JSON.stringify(words),
+          },
+        },
+      });
+      return createDeps({
+        mainStore: createMockStore(tables),
+        indexes: createMockIndexes(tables),
+      });
+    }
+
+    it("triggers auto-enhance when live session stops", () => {
+      const deps = createEligibleDeps();
+      const service = new EnhancerService(deps);
+      const events: any[] = [];
+      service.on((event) => events.push(event));
+      service.start();
+
+      subscriber?.({
+        live: { status: "active", sessionId: "session-1" },
+        batch: {},
+      });
+      subscriber?.({
+        live: { status: "inactive", sessionId: null },
+        batch: {},
+      });
+
+      expect(events).toContainEqual({
+        type: "auto-enhance-started",
+        sessionId: "session-1",
+        noteId: expect.any(String),
+      });
+    });
+
+    it("triggers auto-enhance when finalizing session stops", () => {
+      const deps = createEligibleDeps();
+      const service = new EnhancerService(deps);
+      const events: any[] = [];
+      service.on((event) => events.push(event));
+      service.start();
+
+      subscriber?.({
+        live: { status: "finalizing", sessionId: "session-1" },
+        batch: {},
+      });
+      subscriber?.({
+        live: { status: "inactive", sessionId: null },
+        batch: {},
+      });
+
+      expect(events).toContainEqual({
+        type: "auto-enhance-started",
+        sessionId: "session-1",
+        noteId: expect.any(String),
+      });
+    });
+
+    it("triggers auto-enhance when batch completes", () => {
+      const deps = createEligibleDeps();
+      const service = new EnhancerService(deps);
+      const events: any[] = [];
+      service.on((event) => events.push(event));
+      service.start();
+
+      subscriber?.({
+        live: { status: "inactive", sessionId: null },
+        batch: { "session-1": { percentage: 50 } },
+      });
+      subscriber?.({
+        live: { status: "inactive", sessionId: null },
+        batch: {},
+      });
+
+      expect(events).toContainEqual({
+        type: "auto-enhance-started",
+        sessionId: "session-1",
+        noteId: expect.any(String),
+      });
+    });
+
+    it("triggers auto-enhance when batch errors", () => {
+      const deps = createEligibleDeps();
+      const service = new EnhancerService(deps);
+      const events: any[] = [];
+      service.on((event) => events.push(event));
+      service.start();
+
+      subscriber?.({
+        live: { status: "inactive", sessionId: null },
+        batch: { "session-1": { percentage: 50 } },
+      });
+      subscriber?.({
+        live: { status: "inactive", sessionId: null },
+        batch: { "session-1": { percentage: 50, error: "failed" } },
+      });
+
+      expect(events).toContainEqual({
+        type: "auto-enhance-started",
+        sessionId: "session-1",
+        noteId: expect.any(String),
+      });
+    });
+
+    it("cancels retries when session becomes active", () => {
+      vi.useFakeTimers();
       const deps = createDeps();
       const service = new EnhancerService(deps);
       service.start();
+
+      service.queueAutoEnhance("session-1");
+      expect((service as any).pendingRetries.has("session-1")).toBe(true);
+
+      subscriber?.({
+        live: { status: "active", sessionId: "session-1" },
+        batch: {},
+      });
+
+      expect((service as any).pendingRetries.has("session-1")).toBe(false);
+      expect((service as any).activeAutoEnhance.has("session-1")).toBe(false);
+      vi.useRealTimers();
+    });
+
+    it("does not trigger on inactive-to-inactive", () => {
+      const deps = createEligibleDeps();
+      const service = new EnhancerService(deps);
+      const events: any[] = [];
+      service.on((event) => events.push(event));
+      service.start();
+
+      subscriber?.({
+        live: { status: "inactive", sessionId: null },
+        batch: {},
+      });
+
+      expect(events).toHaveLength(0);
+    });
+  });
+
+  describe("dispose()", () => {
+    it("cleans up subscriptions, timers, and singleton", () => {
+      const deps = createDeps();
+      const service = new EnhancerService(deps);
+      service.start();
+
+      (service as any).activeAutoEnhance.add("session-1");
       service.dispose();
+
+      expect((service as any).activeAutoEnhance.size).toBe(0);
     });
   });
 });
