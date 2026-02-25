@@ -111,8 +111,7 @@ export function ExportModal({
     main.STORE_ID,
   ) as string | undefined;
 
-  const enhancedNoteId =
-    currentView.type === "enhanced" ? currentView.id : "";
+  const enhancedNoteId = currentView.type === "enhanced" ? currentView.id : "";
   const enhancedNoteContent = main.UI.useCell(
     "enhanced_notes",
     enhancedNoteId,
