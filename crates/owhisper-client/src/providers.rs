@@ -84,10 +84,12 @@ pub enum Provider {
     DashScope,
     #[strum(serialize = "mistral")]
     Mistral,
+    #[strum(serialize = "cloudflare")]
+    Cloudflare,
 }
 
 impl Provider {
-    const ALL: [Provider; 9] = [
+    const ALL: [Provider; 10] = [
         Self::Deepgram,
         Self::AssemblyAI,
         Self::Soniox,
@@ -97,6 +99,7 @@ impl Provider {
         Self::ElevenLabs,
         Self::DashScope,
         Self::Mistral,
+        Self::Cloudflare,
     ];
 
     pub fn from_host(host: &str) -> Option<Self> {
@@ -139,6 +142,10 @@ impl Provider {
                 name: "Authorization",
                 prefix: Some("Bearer "),
             },
+            Self::Cloudflare => Auth::Header {
+                name: "Authorization",
+                prefix: Some("Bearer "),
+            },
         }
     }
 
@@ -161,6 +168,7 @@ impl Provider {
             Self::ElevenLabs => "api.elevenlabs.io",
             Self::DashScope => "dashscope-intl.aliyuncs.com",
             Self::Mistral => "api.mistral.ai",
+            Self::Cloudflare => "api.cloudflare.com",
         }
     }
 
@@ -175,6 +183,7 @@ impl Provider {
             Self::ElevenLabs => "api.elevenlabs.io",
             Self::DashScope => "dashscope-intl.aliyuncs.com",
             Self::Mistral => "api.mistral.ai",
+            Self::Cloudflare => "api.cloudflare.com",
         }
     }
 
@@ -189,6 +198,7 @@ impl Provider {
             Self::ElevenLabs => "/v1/speech-to-text/realtime",
             Self::DashScope => "/api-ws/v1/realtime",
             Self::Mistral => "/v1/audio/transcriptions/realtime",
+            Self::Cloudflare => "/v1/listen",
         }
     }
 
@@ -203,6 +213,7 @@ impl Provider {
             Self::ElevenLabs => Some("https://api.elevenlabs.io/v1"),
             Self::DashScope => None,
             Self::Mistral => None,
+            Self::Cloudflare => None,
         }
     }
 
@@ -217,6 +228,7 @@ impl Provider {
             Self::ElevenLabs => "https://api.elevenlabs.io",
             Self::DashScope => "https://dashscope-intl.aliyuncs.com",
             Self::Mistral => "https://api.mistral.ai/v1",
+            Self::Cloudflare => "https://api.cloudflare.com/client/v4",
         }
     }
 
@@ -231,6 +243,7 @@ impl Provider {
             Self::ElevenLabs => "elevenlabs.io",
             Self::DashScope => "aliyuncs.com",
             Self::Mistral => "mistral.ai",
+            Self::Cloudflare => "cloudflare.com",
         }
     }
 
@@ -263,6 +276,7 @@ impl Provider {
             Self::ElevenLabs => "ELEVENLABS_API_KEY",
             Self::DashScope => "DASHSCOPE_API_KEY",
             Self::Mistral => "MISTRAL_API_KEY",
+            Self::Cloudflare => "CLOUDFLARE_API_TOKEN",
         }
     }
 
@@ -277,13 +291,14 @@ impl Provider {
             Self::ElevenLabs => "scribe_v2_realtime",
             Self::DashScope => "qwen3-asr-flash-realtime",
             Self::Mistral => "voxtral-mini-transcribe-realtime-2602",
+            Self::Cloudflare => "@cf/openai/whisper-large-v3-turbo",
         }
     }
 
     pub fn default_live_sample_rate(&self) -> u32 {
         match self {
             Self::OpenAI => 24000,
-            Self::ElevenLabs | Self::DashScope | Self::Mistral => 16000,
+            Self::ElevenLabs | Self::DashScope | Self::Mistral | Self::Cloudflare => 16000,
             _ => 16000,
         }
     }
@@ -299,6 +314,7 @@ impl Provider {
             Self::ElevenLabs => "scribe_v2",
             Self::DashScope => "qwen3-asr-flash-filetrans",
             Self::Mistral => "voxtral-mini-2602",
+            Self::Cloudflare => "@cf/openai/whisper-large-v3-turbo",
         }
     }
 
@@ -306,7 +322,7 @@ impl Provider {
         match self {
             Self::Deepgram => &[("model", "nova-3-general"), ("mip_opt_out", "false")],
             Self::OpenAI => &[("intent", "transcription")],
-            Self::DashScope | Self::Mistral => &[],
+            Self::DashScope | Self::Mistral | Self::Cloudflare => &[],
             _ => &[],
         }
     }
@@ -320,7 +336,8 @@ impl Provider {
             | Self::OpenAI
             | Self::ElevenLabs
             | Self::DashScope
-            | Self::Mistral => false,
+            | Self::Mistral
+            | Self::Cloudflare => false,
         }
     }
 
@@ -333,7 +350,7 @@ impl Provider {
             Self::OpenAI => &[],
             Self::Gladia => &[],
             Self::ElevenLabs => &["commit"],
-            Self::DashScope | Self::Mistral => &[],
+            Self::DashScope | Self::Mistral | Self::Cloudflare => &[],
         }
     }
 
@@ -352,7 +369,7 @@ impl Provider {
                     "words_accurate_timestamps": true
                 }
             })),
-            Self::Mistral => None,
+            Self::Mistral | Self::Cloudflare => None,
             _ => None,
         }
     }
@@ -363,7 +380,8 @@ impl Provider {
             Self::Soniox => soniox::error::detect_error(data),
             Self::ElevenLabs => elevenlabs::error::detect_error(data),
             Self::AssemblyAI => assemblyai::error::detect_error(data),
-            Self::Fireworks | Self::OpenAI | Self::Gladia | Self::DashScope | Self::Mistral => None,
+            Self::Fireworks | Self::OpenAI | Self::Gladia | Self::DashScope | Self::Mistral
+            | Self::Cloudflare => None,
         }
     }
 

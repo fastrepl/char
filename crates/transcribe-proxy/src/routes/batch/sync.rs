@@ -8,8 +8,8 @@ use axum::{
 };
 use backon::{ExponentialBuilder, Retryable};
 use owhisper_client::{
-    AssemblyAIAdapter, BatchClient, DeepgramAdapter, ElevenLabsAdapter, GladiaAdapter,
-    MistralAdapter, OpenAIAdapter, Provider, SonioxAdapter,
+    AssemblyAIAdapter, BatchClient, CloudflareAdapter, DeepgramAdapter, ElevenLabsAdapter,
+    GladiaAdapter, MistralAdapter, OpenAIAdapter, Provider, SonioxAdapter,
 };
 use owhisper_interface::ListenParams;
 use owhisper_interface::batch::Response as BatchResponse;
@@ -185,6 +185,7 @@ pub(super) async fn transcribe_with_provider(
         Provider::Gladia => batch_transcribe!(GladiaAdapter),
         Provider::ElevenLabs => batch_transcribe!(ElevenLabsAdapter),
         Provider::Mistral => batch_transcribe!(MistralAdapter),
+        Provider::Cloudflare => batch_transcribe!(CloudflareAdapter),
         Provider::Fireworks | Provider::DashScope => {
             return Err(format!(
                 "{:?} does not support batch transcription",

@@ -10,6 +10,7 @@ mod gladia;
 pub mod http;
 mod hyprnote;
 mod language;
+mod cloudflare;
 mod mistral;
 mod openai;
 mod owhisper;
@@ -27,6 +28,7 @@ pub use fireworks::*;
 pub use gladia::*;
 pub use hyprnote::*;
 pub use language::{LanguageQuality, LanguageSupport};
+pub use cloudflare::*;
 pub use mistral::*;
 pub use openai::*;
 pub use soniox::*;
@@ -362,6 +364,8 @@ pub enum AdapterKind {
     DashScope,
     #[strum(serialize = "mistral")]
     Mistral,
+    #[strum(serialize = "cloudflare")]
+    Cloudflare,
     #[strum(serialize = "hyprnote")]
     Hyprnote,
     #[strum(serialize = "cactus")]
@@ -413,6 +417,7 @@ impl AdapterKind {
             Self::DashScope => DashScopeAdapter::language_support_live(languages),
             Self::Argmax => ArgmaxAdapter::language_support_live(languages, model),
             Self::Mistral => MistralAdapter::language_support_live(languages),
+            Self::Cloudflare => CloudflareAdapter::language_support_live(languages),
             Self::Hyprnote | Self::Cactus => LanguageSupport::Supported {
                 quality: LanguageQuality::NoData,
             },
@@ -438,6 +443,7 @@ impl AdapterKind {
             Self::DashScope => DashScopeAdapter::language_support_batch(languages),
             Self::Argmax => ArgmaxAdapter::language_support_batch(languages, model),
             Self::Mistral => MistralAdapter::language_support_batch(languages),
+            Self::Cloudflare => CloudflareAdapter::language_support_batch(languages),
             Self::Hyprnote | Self::Cactus => LanguageSupport::Supported {
                 quality: LanguageQuality::NoData,
             },
@@ -484,6 +490,7 @@ impl From<crate::providers::Provider> for AdapterKind {
             Provider::ElevenLabs => Self::ElevenLabs,
             Provider::DashScope => Self::DashScope,
             Provider::Mistral => Self::Mistral,
+            Provider::Cloudflare => Self::Cloudflare,
         }
     }
 }

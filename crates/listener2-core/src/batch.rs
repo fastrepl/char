@@ -5,8 +5,9 @@ use std::time::Duration;
 use futures_util::StreamExt;
 use owhisper_client::{
     AdapterKind, ArgmaxAdapter, AssemblyAIAdapter, BatchSttAdapter, CactusAdapter,
-    DashScopeAdapter, DeepgramAdapter, ElevenLabsAdapter, FireworksAdapter, GladiaAdapter,
-    HyprnoteAdapter, MistralAdapter, OpenAIAdapter, RealtimeSttAdapter, SonioxAdapter,
+    CloudflareAdapter, DashScopeAdapter, DeepgramAdapter, ElevenLabsAdapter, FireworksAdapter,
+    GladiaAdapter, HyprnoteAdapter, MistralAdapter, OpenAIAdapter, RealtimeSttAdapter,
+    SonioxAdapter,
 };
 use owhisper_interface::stream::StreamResponse;
 use owhisper_interface::{ControlMessage, MixedMessage};
@@ -390,6 +391,9 @@ async fn spawn_batch_task(
             spawn_batch_task_with_adapter::<DashScopeAdapter>(args, myself).await
         }
         AdapterKind::Mistral => spawn_batch_task_with_adapter::<MistralAdapter>(args, myself).await,
+        AdapterKind::Cloudflare => {
+            spawn_batch_task_with_adapter::<CloudflareAdapter>(args, myself).await
+        }
         AdapterKind::Hyprnote => {
             spawn_batch_task_with_adapter::<HyprnoteAdapter>(args, myself).await
         }

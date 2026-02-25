@@ -202,6 +202,18 @@ const _PROVIDERS = [
   },
   {
     disabled: false,
+    id: "cloudflare",
+    displayName: "Cloudflare Workers AI",
+    badge: "Beta",
+    icon: <Icon icon="simple-icons:cloudflare" className="size-4" />,
+    baseUrl: undefined,
+    models: ["@cf/openai/whisper-large-v3-turbo", "@cf/openai/whisper"],
+    requirements: [
+      { kind: "requires_config", fields: ["base_url", "api_key"] },
+    ],
+  },
+  {
+    disabled: false,
     id: "custom",
     displayName: "Custom",
     badge: null,
