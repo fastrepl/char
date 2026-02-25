@@ -18,7 +18,7 @@ export const handbookStructure = {
     onboarding: "Onboarding",
   } as Record<string, string>,
   defaultPages: {
-    about: "about/what-hyprnote-is",
+    about: "about/what-char-is",
     "how-we-work": "how-we-work/work-styles",
     teams: "teams/one-team",
     "who-we-want": "who-we-want/core-traits",

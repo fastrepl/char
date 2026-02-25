@@ -25,12 +25,12 @@ export const Route = createFileRoute("/_view/company-handbook/$")({
     }
 
     if (!doc) {
-      if (normalizedSplat === "about/what-hyprnote-is") {
+      if (normalizedSplat === "about/what-char-is") {
         return;
       }
       throw redirect({
         to: "/company-handbook/$/",
-        params: { _splat: "about/what-hyprnote-is" },
+        params: { _splat: "about/what-char-is" },
       });
     }
   },
@@ -51,7 +51,7 @@ export const Route = createFileRoute("/_view/company-handbook/$")({
     }
 
     const { doc } = loaderData;
-    const url = `https://hyprnote.com/company-handbook/${doc.slug}`;
+    const url = `https://char.com/company-handbook/${doc.slug}`;
 
     const params = new URLSearchParams({
       type: "handbook",
