@@ -7,7 +7,6 @@ import {
   type AttachmentInfo,
   commands as fsSyncCommands,
 } from "@hypr/plugin-fs-sync";
-import { md2json } from "@hypr/tiptap/shared";
 import { NoteTab } from "@hypr/ui/components/ui/note-tab";
 import {
   Popover,
@@ -24,15 +23,13 @@ import { cn } from "@hypr/utils";
 import { useAudioPlayer } from "../../../../../contexts/audio-player/provider";
 import { useListener } from "../../../../../contexts/listener";
 import { useAITaskTask } from "../../../../../hooks/useAITaskTask";
-import {
-  useCreateEnhancedNote,
-  useEnsureDefaultSummary,
-} from "../../../../../hooks/useEnhancedNotes";
+import { useEnsureDefaultSummary } from "../../../../../hooks/useEnhancedNotes";
 import {
   useLanguageModel,
   useLLMConnectionStatus,
 } from "../../../../../hooks/useLLMConnection";
 import { useRunBatch } from "../../../../../hooks/useRunBatch";
+import { getEnhancerService } from "../../../../../services/enhancer";
 import * as main from "../../../../../store/tinybase/store/main";
 import { createTaskId } from "../../../../../store/zustand/ai-task/task-configs";
 import { type TaskStepInfo } from "../../../../../store/zustand/ai-task/tasks";
@@ -291,75 +288,25 @@ function CreateOtherFormatButton({
   handleTabChange: (view: EditorView) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [pendingNote, setPendingNote] = useState<{
-    id: string;
-    templateId: string;
-  } | null>(null);
-  const startedTasksRef = useRef(new Set<string>());
   const templates = main.UI.useResultTable(
     main.QUERIES.visibleTemplates,
     main.STORE_ID,
   );
-  const createEnhancedNote = useCreateEnhancedNote();
-  const model = useLanguageModel("enhance");
   const openNew = useTabs((state) => state.openNew);
-
-  const store = main.UI.useStore(main.STORE_ID);
-  const taskId = createTaskId(pendingNote?.id || "placeholder", "enhance");
-  const enhanceTask = useAITaskTask(taskId, "enhance", {
-    onSuccess: ({ text }) => {
-      if (text && pendingNote && store) {
-        try {
-          const jsonContent = md2json(text);
-          store.setPartialRow("enhanced_notes", pendingNote.id, {
-            content: JSON.stringify(jsonContent),
-          });
-        } catch (error) {
-          console.error("Failed to convert markdown to JSON:", error);
-        }
-      }
-    },
-  });
-
-  useEffect(() => {
-    if (pendingNote && model && !startedTasksRef.current.has(pendingNote.id)) {
-      startedTasksRef.current.add(pendingNote.id);
-      void enhanceTask.start({
-        model,
-        args: {
-          sessionId,
-          enhancedNoteId: pendingNote.id,
-          templateId: pendingNote.templateId,
-        },
-      });
-    }
-  }, [pendingNote, model, sessionId, enhanceTask.start]);
 
   const handleTemplateClick = useCallback(
     (templateId: string) => {
       setOpen(false);
 
-      if (!model) {
-        console.error("No language model available");
-        return;
+      const service = getEnhancerService();
+      if (!service) return;
+
+      const result = service.enhance(sessionId, { templateId });
+      if (result.type === "started" || result.type === "already_active") {
+        handleTabChange({ type: "enhanced", id: result.noteId });
       }
-
-      const enhancedNoteId = createEnhancedNote(sessionId, templateId);
-      if (!enhancedNoteId) {
-        console.error("Failed to create enhanced note");
-        return;
-      }
-
-      void analyticsCommands.event({
-        event: "note_enhanced",
-        template_id: templateId,
-        is_auto: false,
-      });
-
-      handleTabChange({ type: "enhanced", id: enhancedNoteId });
-      setPendingNote({ id: enhancedNoteId, templateId });
     },
-    [sessionId, createEnhancedNote, model, handleTabChange],
+    [sessionId, handleTabChange],
   );
 
   return (
@@ -618,7 +565,6 @@ function useEnhanceLogic(sessionId: string, enhancedNoteId: string) {
     null,
   );
 
-  const store = main.UI.useStore(main.STORE_ID);
   const noteTemplateId =
     (main.UI.useCell(
       "enhanced_notes",
@@ -627,20 +573,7 @@ function useEnhanceLogic(sessionId: string, enhancedNoteId: string) {
       main.STORE_ID,
     ) as string | undefined) || undefined;
 
-  const enhanceTask = useAITaskTask(taskId, "enhance", {
-    onSuccess: ({ text }) => {
-      if (text && store) {
-        try {
-          const jsonContent = md2json(text);
-          store.setPartialRow("enhanced_notes", enhancedNoteId, {
-            content: JSON.stringify(jsonContent),
-          });
-        } catch (error) {
-          console.error("Failed to convert markdown to JSON:", error);
-        }
-      }
-    },
-  });
+  const enhanceTask = useAITaskTask(taskId, "enhance");
 
   const onRegenerate = useCallback(
     async (templateId: string | null) => {
