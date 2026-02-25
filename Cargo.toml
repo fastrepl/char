@@ -42,6 +42,7 @@ hypr-audio = { path = "crates/audio", package = "audio" }
 hypr-audio-device = { path = "crates/audio-device", package = "audio-device" }
 hypr-audio-interface = { path = "crates/audio-interface", package = "audio-interface" }
 hypr-audio-mime = { path = "crates/audio-mime", package = "audio-mime" }
+hypr-audio-snapshot = { path = "crates/audio-snapshot", package = "audio-snapshot" }
 hypr-audio-utils = { path = "crates/audio-utils", package = "audio-utils" }
 hypr-buffer = { path = "crates/buffer", package = "buffer" }
 hypr-bundle = { path = "crates/bundle", package = "bundle" }
