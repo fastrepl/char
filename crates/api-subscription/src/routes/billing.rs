@@ -41,12 +41,11 @@ pub async fn start_trial(
     {
         Ok(v) => v,
         Err(e) => {
-            tracing::error!(error = %e, "can_start_trial RPC failed in start-trial");
             return emit_and_respond(
                 state.config.analytics.as_deref(),
                 user_id,
                 source,
-                TrialOutcome::RpcError,
+                TrialOutcome::RpcError(e.to_string()),
             )
             .await;
         }
@@ -66,18 +65,16 @@ pub async fn start_trial(
                             state.config.analytics.as_deref(),
                             user_id,
                             source,
-                            TrialOutcome::CustomerError,
+                            TrialOutcome::CustomerError("customer not found".to_string()),
                         )
                         .await;
                     }
                     Err(e) => {
-                        tracing::error!(error = %e, "get_or_create_customer failed");
-                        sentry::capture_message(&e.to_string(), sentry::Level::Error);
                         return emit_and_respond(
                             state.config.analytics.as_deref(),
                             user_id,
                             source,
-                            TrialOutcome::CustomerError,
+                            TrialOutcome::CustomerError(e.to_string()),
                         )
                         .await;
                     }
@@ -90,11 +87,7 @@ pub async fn start_trial(
 
             match create_trial_subscription(&state.stripe, &customer_id, price_id, user_id).await {
                 Ok(()) => TrialOutcome::Started(query.interval),
-                Err(e) => {
-                    tracing::error!(error = %e, "failed to create Stripe subscription");
-                    sentry::capture_message(&e.to_string(), sentry::Level::Error);
-                    TrialOutcome::StripeError
-                }
+                Err(e) => TrialOutcome::StripeError(e.to_string()),
             }
         };
 

@@ -26,3 +26,7 @@ serde_json = { workspace = true }
 name = "vad"
 harness = false
 required-features = ["earshot", "silero-onnx", "silero-cactus"]
+
+[[test]]
+name = "compare"
+required-features = ["earshot", "silero-onnx", "silero-cactus"]

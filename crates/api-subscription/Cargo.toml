@@ -7,12 +7,12 @@ edition = "2024"
 hypr-analytics = { workspace = true }
 hypr-api-auth = { workspace = true }
 hypr-api-env = { workspace = true }
+hypr-api-error = { workspace = true }
 
 utoipa = { workspace = true }
 
 axum = { workspace = true }
 reqwest = { workspace = true, features = ["json"] }
-sentry = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
 

@@ -29,6 +29,7 @@ hypr-api-auth = { path = "crates/api-auth", package = "api-auth" }
 hypr-api-bot = { path = "crates/api-bot", package = "api-bot" }
 hypr-api-calendar = { path = "crates/api-calendar", package = "api-calendar" }
 hypr-api-env = { path = "crates/api-env", package = "api-env" }
+hypr-api-error = { path = "crates/api-error", package = "api-error" }
 hypr-api-messenger = { path = "crates/api-messenger", package = "api-messenger" }
 hypr-api-nango = { path = "crates/api-nango", package = "api-nango" }
 hypr-api-research = { path = "crates/api-research", package = "api-research" }

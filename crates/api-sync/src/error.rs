@@ -1,17 +1,10 @@
 use axum::{
-    Json,
     http::StatusCode,
     response::{IntoResponse, Response},
 };
-use serde::Serialize;
 use thiserror::Error;
 
 pub type Result<T> = std::result::Result<T, SyncError>;
-
-#[derive(Debug, Serialize)]
-pub struct ErrorResponse {
-    pub error: String,
-}
 
 #[derive(Debug, Error)]
 pub enum SyncError {
@@ -33,20 +26,16 @@ impl From<hypr_supabase_auth::Error> for SyncError {
 
 impl IntoResponse for SyncError {
     fn into_response(self) -> Response {
-        let (status, error_code) = match &self {
-            Self::Auth(_) => (StatusCode::UNAUTHORIZED, "unauthorized"),
-            Self::BadRequest(_) => (StatusCode::BAD_REQUEST, "bad_request"),
-            Self::Internal(msg) => {
-                tracing::error!(error = %msg, "internal_error");
-                sentry::capture_message(msg, sentry::Level::Error);
-                (StatusCode::INTERNAL_SERVER_ERROR, "internal_server_error")
-            }
+        let (status, code, message) = match self {
+            Self::Auth(message) => (StatusCode::UNAUTHORIZED, "unauthorized", message),
+            Self::BadRequest(message) => (StatusCode::BAD_REQUEST, "bad_request", message),
+            Self::Internal(message) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "internal_server_error",
+                message,
+            ),
         };
 
-        let body = Json(ErrorResponse {
-            error: error_code.to_string(),
-        });
-
-        (status, body).into_response()
+        hypr_api_error::error_response(status, &code, &message)
     }
 }
