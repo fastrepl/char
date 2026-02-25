@@ -87,6 +87,7 @@ pub fn env_with_provider(provider: Provider, api_key: String) -> transcribe_prox
         Provider::ElevenLabs => env.stt.elevenlabs_api_key = Some(api_key),
         Provider::DashScope => env.stt.dashscope_api_key = Some(api_key),
         Provider::Mistral => env.stt.mistral_api_key = Some(api_key),
+        Provider::Cloudflare => env.stt.cloudflare_api_key = Some(api_key),
     }
     env
 }
