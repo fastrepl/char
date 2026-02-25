@@ -269,6 +269,10 @@ export type WebhookResponse = {
     status: string;
 };
 
+export type CreateConnectSessionRequest = {
+    allowed_integrations?: Array<string>;
+};
+
 export type ListCalendarsData = {
     body?: never;
     path?: never;
@@ -419,7 +423,7 @@ export type LlmChatCompletionsResponses = {
 };
 
 export type CreateConnectSessionData = {
-    body?: never;
+    body: CreateConnectSessionRequest;
     path?: never;
     query?: never;
     url: '/nango/connect-session';

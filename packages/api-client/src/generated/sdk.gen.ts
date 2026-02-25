@@ -55,10 +55,14 @@ export const submit = <ThrowOnError extends boolean = false>(options: Options<Su
 
 export const llmChatCompletions = <ThrowOnError extends boolean = false>(options?: Options<LlmChatCompletionsData, ThrowOnError>) => (options?.client ?? client).post<LlmChatCompletionsResponses, LlmChatCompletionsErrors, ThrowOnError>({ url: '/llm/chat/completions', ...options });
 
-export const createConnectSession = <ThrowOnError extends boolean = false>(options?: Options<CreateConnectSessionData, ThrowOnError>) => (options?.client ?? client).post<CreateConnectSessionResponses, CreateConnectSessionErrors, ThrowOnError>({
+export const createConnectSession = <ThrowOnError extends boolean = false>(options: Options<CreateConnectSessionData, ThrowOnError>) => (options.client ?? client).post<CreateConnectSessionResponses, CreateConnectSessionErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/nango/connect-session',
-    ...options
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 export const listConnections = <ThrowOnError extends boolean = false>(options?: Options<ListConnectionsData, ThrowOnError>) => (options?.client ?? client).get<ListConnectionsResponses, ListConnectionsErrors, ThrowOnError>({

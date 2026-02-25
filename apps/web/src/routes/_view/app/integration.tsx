@@ -94,7 +94,12 @@ function Component() {
         baseUrl: env.VITE_API_URL,
         headers: { Authorization: `Bearer ${token}` },
       });
-      const { data, error } = await createConnectSession({ client });
+      const { data, error } = await createConnectSession({
+        client,
+        body: {
+          allowed_integrations: [search.integration_id],
+        },
+      });
       if (error || !data) {
         setStatus("error");
         return;
