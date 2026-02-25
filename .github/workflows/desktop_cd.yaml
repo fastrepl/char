@@ -108,7 +108,7 @@ jobs:
       - run: pnpm -F ui build
       - if: ${{ matrix.include_am }}
         run: |
-          aws s3 cp s3://argmax/stt apps/desktop/src-tauri/binaries/hyprnote-sidecar-stt-${{ matrix.target }} \
+          aws s3 cp s3://argmax/stt apps/desktop/src-tauri/binaries/char-sidecar-stt-${{ matrix.target }} \
             --endpoint-url ${{ secrets.CLOUDFLARE_R2_ENDPOINT_URL }} \
             --region auto
         env:
@@ -116,8 +116,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
       - if: ${{ matrix.include_am }}
         run: |
-          chmod +x ./apps/desktop/src-tauri/binaries/hyprnote-sidecar-stt-${{ matrix.target }}
-          ./scripts/sidecar.sh "./apps/desktop/${{ env.TAURI_CONF_PATH }}" "binaries/hyprnote-sidecar-stt"
+          chmod +x ./apps/desktop/src-tauri/binaries/char-sidecar-stt-${{ matrix.target }}
+          ./scripts/sidecar.sh "./apps/desktop/${{ env.TAURI_CONF_PATH }}" "binaries/char-sidecar-stt"
       # - run: ./scripts/resource.sh "./apps/desktop/${{ env.TAURI_CONF_PATH }}" "resources/libonnxruntime.dylib"
       - uses: ./.github/actions/apple_cert
         id: apple-cert
