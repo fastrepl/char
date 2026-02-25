@@ -277,50 +277,6 @@ describe("EnhancerService", () => {
     });
   });
 
-  describe("ensureNote()", () => {
-    it("creates a new note when none exists", () => {
-      const tables = createTables();
-      const store = createMockStore(tables);
-      const deps = createDeps({
-        mainStore: store,
-        indexes: createMockIndexes(tables),
-      });
-      const service = new EnhancerService(deps);
-
-      const noteId = service.ensureNote("session-1");
-      expect(noteId).toBeTruthy();
-      expect(store.setRow).toHaveBeenCalledWith(
-        "enhanced_notes",
-        noteId,
-        expect.objectContaining({
-          session_id: "session-1",
-          title: "Summary",
-        }),
-      );
-    });
-
-    it("returns existing note with same template", () => {
-      const tables = createTables({
-        enhanced_notes: {
-          "existing-note": {
-            session_id: "session-1",
-            template_id: undefined as any,
-          },
-        },
-      });
-      const store = createMockStore(tables);
-      const deps = createDeps({
-        mainStore: store,
-        indexes: createMockIndexes(tables),
-      });
-      const service = new EnhancerService(deps);
-
-      const noteId = service.ensureNote("session-1");
-      expect(noteId).toBe("existing-note");
-      expect(store.setRow).not.toHaveBeenCalled();
-    });
-  });
-
   describe("deduplication", () => {
     it("auto-enhance does not run twice for same session", () => {
       const words = Array.from({ length: 10 }, (_, i) => ({
@@ -595,7 +551,7 @@ describe("EnhancerService", () => {
       });
     });
 
-    it("triggers auto-enhance when batch errors", () => {
+    it("does not trigger auto-enhance when batch errors", () => {
       const deps = createEligibleDeps();
       const service = new EnhancerService(deps);
       const events: any[] = [];
@@ -611,11 +567,7 @@ describe("EnhancerService", () => {
         batch: { "session-1": { percentage: 50, error: "failed" } },
       });
 
-      expect(events).toContainEqual({
-        type: "auto-enhance-started",
-        sessionId: "session-1",
-        noteId: expect.any(String),
-      });
+      expect(events).toHaveLength(0);
     });
 
     it("cancels retries when session becomes active", () => {

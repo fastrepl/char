@@ -6,6 +6,7 @@ import { getEligibility } from "../hooks/autoEnhance/eligibility";
 import type { Store as MainStore } from "../store/tinybase/store/main";
 import { INDEXES } from "../store/tinybase/store/main";
 import { createTaskId } from "../store/zustand/ai-task/task-configs";
+import type { TasksActions } from "../store/zustand/ai-task/tasks";
 import { listenerStore } from "../store/zustand/listener/instance";
 
 type EnhanceResult =
@@ -26,7 +27,7 @@ type EnhancerEvent =
 type EnhancerDeps = {
   mainStore: MainStore;
   indexes: { getSliceRowIds: (indexId: string, sliceId: string) => string[] };
-  aiTaskStore: { getState: () => any };
+  aiTaskStore: { getState: () => Pick<TasksActions, "generate" | "getState"> };
   getModel: () => LanguageModel | null;
   getLLMConn: () => { providerId?: string; modelId?: string } | null;
   getSelectedTemplateId: () => string | undefined;
@@ -76,8 +77,7 @@ export class EnhancerService {
 
       for (const batchSessionId of Object.keys(prevBatch)) {
         if (!prevBatch[batchSessionId]?.error) {
-          const curr = state.batch[batchSessionId];
-          if (!curr || curr.error) {
+          if (!state.batch[batchSessionId]) {
             this.queueAutoEnhance(batchSessionId);
           }
         }
@@ -177,10 +177,6 @@ export class EnhancerService {
 
     const templateId = opts?.templateId || getSelectedTemplateId();
     const enhancedNoteId = this.ensureNote(sessionId, templateId);
-    if (!enhancedNoteId) {
-      return { type: "no_model" };
-    }
-
     const enhanceTaskId = createTaskId(enhancedNoteId, "enhance");
     const existingTask = aiTaskStore.getState().getState(enhanceTaskId);
     if (
@@ -222,7 +218,7 @@ export class EnhancerService {
     );
   }
 
-  ensureNote(sessionId: string, templateId?: string): string | null {
+  ensureNote(sessionId: string, templateId?: string): string {
     const store = this.deps.mainStore;
     const normalizedTemplateId = templateId || undefined;
 
