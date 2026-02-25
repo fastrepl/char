@@ -17,7 +17,7 @@ jobs:
         with:
           api_key: ${{ secrets.DEVIN_API_KEY }}
           prompt: |
-            A user has submitted an issue via the Hyprnote app. Please explore the codebase and provide helpful context on this issue.
+            A user has submitted an issue via the Char app. Please explore the codebase and provide helpful context on this issue.
 
             ## Issue Details
             - **Title**: {{ title }}
@@ -37,7 +37,7 @@ jobs:
                - Identify any related issues or PRs
 
             3. **Comment on the Issue**
-               - Post a comment on the GitHub issue (fastrepl/hyprnote#{{ number }}) with your findings:
+               - Post a comment on the GitHub issue (fastrepl/char#{{ number }}) with your findings:
                  * Which files and components are relevant
                  * Any recent changes that may be related
                  * Potential approaches or considerations for addressing the issue

@@ -19,7 +19,7 @@
     - koyeb_was
     request:
       method: GET
-      url: https://hyprnote.com
+      url: https://char.com
     retry: 3
 "8351":
   ID: 8351
@@ -65,7 +65,7 @@
     - koyeb_was
     request:
       method: GET
-      url: https://hyprnote.com
+      url: https://char.com
     retry: 3
 "8355":
   ID: 8355

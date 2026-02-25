@@ -25,7 +25,12 @@
     "schemas": {
       "NoteEventData": {
         "type": "object",
-        "required": ["note_id", "title", "tags", "created_at"],
+        "required": [
+          "note_id",
+          "title",
+          "tags",
+          "created_at"
+        ],
         "properties": {
           "note_id": {
             "type": "string",
@@ -38,7 +43,10 @@
             "example": "Meeting Notes - Q1 Planning"
           },
           "content": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Content of the note (may be truncated for large notes)",
             "example": "Today we discussed..."
           },
@@ -48,7 +56,11 @@
               "type": "string"
             },
             "description": "Tags associated with the note",
-            "example": ["meeting", "planning", "q1"]
+            "example": [
+              "meeting",
+              "planning",
+              "q1"
+            ]
           },
           "created_at": {
             "type": "string",
@@ -56,7 +68,10 @@
             "example": "2024-01-10T10:00:00Z"
           },
           "updated_at": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "ISO 8601 timestamp when the note was last updated",
             "example": "2024-01-10T10:30:00Z"
           }
@@ -64,7 +79,11 @@
       },
       "RecordingEventData": {
         "type": "object",
-        "required": ["recording_id", "status", "started_at"],
+        "required": [
+          "recording_id",
+          "status",
+          "started_at"
+        ],
         "properties": {
           "recording_id": {
             "type": "string",
@@ -72,14 +91,20 @@
             "example": "rec_xyz789"
           },
           "duration_seconds": {
-            "type": ["integer", "null"],
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int32",
             "description": "Duration of the recording in seconds",
             "example": 300,
             "minimum": 0
           },
           "file_size_bytes": {
-            "type": ["integer", "null"],
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int64",
             "description": "File size in bytes",
             "example": 1048576,
@@ -95,7 +120,10 @@
             "example": "2024-01-10T10:00:00Z"
           },
           "completed_at": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "ISO 8601 timestamp when recording completed",
             "example": "2024-01-10T10:05:00Z"
           }
@@ -103,11 +131,21 @@
       },
       "RecordingStatus": {
         "type": "string",
-        "enum": ["started", "in_progress", "completed", "failed"]
+        "enum": [
+          "started",
+          "in_progress",
+          "completed",
+          "failed"
+        ]
       },
       "TranscriptionEventData": {
         "type": "object",
-        "required": ["recording_id", "transcription_id", "text", "processing_time_ms"],
+        "required": [
+          "recording_id",
+          "transcription_id",
+          "text",
+          "processing_time_ms"
+        ],
         "properties": {
           "recording_id": {
             "type": "string",
@@ -125,12 +163,18 @@
             "example": "Hello, this is the transcribed text from the recording."
           },
           "language": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Language detected in the transcription",
             "example": "en"
           },
           "confidence": {
-            "type": ["number", "null"],
+            "type": [
+              "number",
+              "null"
+            ],
             "format": "float",
             "description": "Confidence score of the transcription (0.0 to 1.0)",
             "example": 0.95
@@ -146,7 +190,10 @@
       },
       "WebhookDeliveryRequest": {
         "type": "object",
-        "required": ["event", "signature"],
+        "required": [
+          "event",
+          "signature"
+        ],
         "properties": {
           "event": {
             "$ref": "#/components/schemas/WebhookEvent",
@@ -161,21 +208,32 @@
       },
       "WebhookDeliveryResponse": {
         "type": "object",
-        "required": ["success"],
+        "required": [
+          "success"
+        ],
         "properties": {
           "success": {
             "type": "boolean",
             "description": "Whether the webhook was successfully processed"
           },
           "message": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Optional message from the receiver"
           }
         }
       },
       "WebhookEvent": {
         "type": "object",
-        "required": ["id", "event_type", "timestamp", "api_version", "data"],
+        "required": [
+          "id",
+          "event_type",
+          "timestamp",
+          "api_version",
+          "data"
+        ],
         "properties": {
           "id": {
             "type": "string",
