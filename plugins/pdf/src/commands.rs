@@ -14,10 +14,7 @@ pub(crate) async fn export<R: tauri::Runtime>(
 
 #[tauri::command]
 #[specta::specta]
-pub(crate) async fn export_text(
-    path: PathBuf,
-    content: String,
-) -> Result<(), String> {
+pub(crate) async fn export_text(path: PathBuf, content: String) -> Result<(), String> {
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
     }
