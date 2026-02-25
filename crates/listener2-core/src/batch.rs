@@ -390,9 +390,7 @@ async fn spawn_batch_task(
             spawn_batch_task_with_adapter::<DashScopeAdapter>(args, myself).await
         }
         AdapterKind::Mistral => spawn_batch_task_with_adapter::<MistralAdapter>(args, myself).await,
-        AdapterKind::Bedrock => {
-            spawn_batch_task_with_adapter::<BedrockAdapter>(args, myself).await
-        }
+        AdapterKind::Bedrock => spawn_batch_task_with_adapter::<BedrockAdapter>(args, myself).await,
         AdapterKind::Hyprnote => {
             spawn_batch_task_with_adapter::<HyprnoteAdapter>(args, myself).await
         }

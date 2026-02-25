@@ -8,8 +8,8 @@ use owhisper_interface::batch::{
 use serde::Deserialize;
 
 use super::BedrockAdapter;
-use crate::adapter::{BatchFuture, BatchSttAdapter, ClientWithMiddleware};
 use crate::adapter::http::mime_type_from_extension;
+use crate::adapter::{BatchFuture, BatchSttAdapter, ClientWithMiddleware};
 use crate::error::Error;
 use crate::providers::{Provider, is_meta_model};
 
@@ -34,9 +34,7 @@ impl BatchSttAdapter for BedrockAdapter {
         file_path: P,
     ) -> BatchFuture<'a> {
         let path = file_path.as_ref().to_path_buf();
-        Box::pin(async move {
-            do_transcribe_file(client, api_base, api_key, params, &path).await
-        })
+        Box::pin(async move { do_transcribe_file(client, api_base, api_key, params, &path).await })
     }
 }
 

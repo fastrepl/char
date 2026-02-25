@@ -1,7 +1,7 @@
 mod argmax;
 pub(crate) mod assemblyai;
-mod cactus;
 mod bedrock;
+mod cactus;
 mod dashscope;
 pub mod deepgram;
 mod deepgram_compat;

@@ -381,7 +381,11 @@ impl Provider {
             Self::Soniox => soniox::error::detect_error(data),
             Self::ElevenLabs => elevenlabs::error::detect_error(data),
             Self::AssemblyAI => assemblyai::error::detect_error(data),
-            Self::Fireworks | Self::OpenAI | Self::Gladia | Self::DashScope | Self::Mistral
+            Self::Fireworks
+            | Self::OpenAI
+            | Self::Gladia
+            | Self::DashScope
+            | Self::Mistral
             | Self::Bedrock => None,
         }
     }
