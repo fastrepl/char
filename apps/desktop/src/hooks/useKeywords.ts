@@ -14,6 +14,10 @@ import * as main from "../store/tinybase/store/main";
 
 export function useKeywords(sessionId: string) {
   const rawMd = main.UI.useCell("sessions", sessionId, "raw_md", main.STORE_ID);
+  const vocabTable = main.UI.useResultTable(
+    main.QUERIES.visibleVocabs,
+    main.STORE_ID,
+  );
 
   return useMemo(() => {
     const { keywords, keyphrases } =
@@ -21,8 +25,12 @@ export function useKeywords(sessionId: string) {
         ? extractKeywordsFromMarkdown(rawMd)
         : { keywords: [], keyphrases: [] };
 
-    return combineKeywords([...keywords, ...keyphrases]);
-  }, [rawMd]);
+    const customVocab = Object.values(vocabTable ?? {}).map(
+      (row) => row.text,
+    );
+
+    return combineKeywords([...customVocab, ...keywords, ...keyphrases]);
+  }, [rawMd, vocabTable]);
 }
 
 export const extractKeywordsFromMarkdown = (
