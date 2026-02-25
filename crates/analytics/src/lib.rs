@@ -4,8 +4,10 @@ use std::time::Duration;
 
 mod error;
 mod outlit;
+pub mod runtime;
 
 pub use error::*;
+pub use runtime::AnalyticsRuntime;
 
 use outlit::OutlitClient;
 use posthog_rs::{ClientOptions, Event};
@@ -391,6 +393,67 @@ impl AnalyticsPayloadBuilder {
             event: self.event.unwrap(),
             props: self.props,
         }
+    }
+}
+
+#[derive(Clone)]
+pub struct AnalyticsService {
+    client: AnalyticsClient,
+    runtime: Arc<dyn AnalyticsRuntime>,
+}
+
+impl AnalyticsService {
+    pub fn new(client: AnalyticsClient, runtime: Arc<dyn AnalyticsRuntime>) -> Self {
+        Self { client, runtime }
+    }
+
+    pub async fn event(&self, mut payload: AnalyticsPayload) -> Result<(), Error> {
+        if self.runtime.is_disabled() {
+            return Ok(());
+        }
+        self.runtime.enrich(&mut payload);
+        let distinct_id = self.runtime.distinct_id();
+        self.client.event(distinct_id, payload).await
+    }
+
+    pub fn event_fire_and_forget(&self, mut payload: AnalyticsPayload) {
+        if self.runtime.is_disabled() {
+            return;
+        }
+        self.runtime.enrich(&mut payload);
+        let distinct_id = self.runtime.distinct_id();
+        let client = self.client.clone();
+        tokio::spawn(async move {
+            let _ = client.event(distinct_id, payload).await;
+        });
+    }
+
+    pub async fn set_properties(&self, payload: PropertiesPayload) -> Result<(), Error> {
+        if self.runtime.is_disabled() {
+            return Ok(());
+        }
+        let distinct_id = self.runtime.distinct_id();
+        self.client.set_properties(distinct_id, payload).await
+    }
+
+    pub async fn identify(
+        &self,
+        user_id: impl Into<String>,
+        payload: PropertiesPayload,
+    ) -> Result<(), Error> {
+        if self.runtime.is_disabled() {
+            return Ok(());
+        }
+        let distinct_id = self.runtime.distinct_id();
+        self.client.identify(user_id, distinct_id, payload).await
+    }
+
+    pub fn is_disabled(&self) -> bool {
+        self.runtime.is_disabled()
+    }
+
+    pub fn set_disabled(&self, disabled: bool) -> Result<(), Error> {
+        self.runtime.set_disabled(disabled)
     }
 }
 
