@@ -115,7 +115,7 @@ const _PROVIDERS = [
   {
     id: "azure_openai",
     displayName: "Azure OpenAI",
-    badge: null,
+    badge: "Beta",
     icon: <Azure size={16} />,
     baseUrl: undefined,
     requirements: [
@@ -125,7 +125,7 @@ const _PROVIDERS = [
   {
     id: "azure_ai",
     displayName: "Azure AI Foundry",
-    badge: null,
+    badge: "Beta",
     icon: <AzureAI size={16} />,
     baseUrl: undefined,
     requirements: [
