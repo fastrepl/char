@@ -300,7 +300,7 @@ function IntegrationsSettingsCard() {
 
   const handleConnect = (integrationId: string) => {
     void navigate({
-      to: "/app/integration/",
+      to: "/app/integration",
       search: {
         integration_id: integrationId,
         flow: "web",

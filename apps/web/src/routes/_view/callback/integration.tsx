@@ -50,6 +50,7 @@ function Component() {
     return buildDeeplinkUrl(search.scheme, {
       integration_id: search.integration_id,
       status: search.status,
+      return_to: search.return_to,
     });
   };
 
