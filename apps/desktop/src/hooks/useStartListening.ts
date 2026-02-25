@@ -56,12 +56,7 @@ export function useStartListening(sessionId: string) {
     if (!existingPreMeetingMemo) {
       const currentRawMd = store.getCell("sessions", sessionId, "raw_md");
       if (typeof currentRawMd === "string" && currentRawMd) {
-        store.setCell(
-          "sessions",
-          sessionId,
-          "pre_meeting_memo",
-          currentRawMd,
-        );
+        store.setCell("sessions", sessionId, "pre_meeting_memo", currentRawMd);
       }
     }
 
