@@ -1,2 +1,3 @@
 *.wav
-!data/*
+!data/inputs/*.wav
+data/outputs/*.wav

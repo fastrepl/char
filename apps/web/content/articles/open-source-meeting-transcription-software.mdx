@@ -16,7 +16,7 @@ We'll compare Char, Meetily, and Amical—the only three open-source meeting tra
 
 | Feature                | Char                            | Meetily                   | Amical                       |
 | ---------------------- | ----------------------------------- | ------------------------- | ---------------------------- |
-| **Best For**           | Combining notes with transcripts    | Pure transcription needs  | Hands-free typing everywhere |
+| **Best For**           | Control over data and AI stack      | Pure transcription needs  | Hands-free typing everywhere |
 | **Transcription**      | Real-time via Whisper               | Real-time via Whisper.cpp | Real-time via Whisper        |
 | **Platforms**          | macOS (Windows soon)                | Windows, macOS, Linux     | macOS (Windows in progress)  |
 | **License**            | GPL-3.0                             | MIT                       | MIT                          |
@@ -31,7 +31,7 @@ We'll compare Char, Meetily, and Amical—the only three open-source meeting tra
 
 ### 1. Char
 
-[Char](/) is a local-first AI notepad that combines manual note-taking with real-time transcription.
+[Char](/) is an open-source AI notepad for meetings that gives you complete control over your data and AI stack. Everything is stored as plain markdown files.
 
 The interface works like Apple Notes. You open it and start typing. No list of past meetings to navigate, no calendar integration. Just a blank canvas ready to use.
 
@@ -43,7 +43,7 @@ While you're writing, Char listens to both your microphone and system audio. Onc
 
 #### Top Features
 
-- **Local-first transcription with Whisper models:** Choose from Tiny, Base, or V3 Large Turbo models that run entirely on your device. No cloud processing required for transcription.
+- **On-device transcription with Whisper models:** Choose from Tiny, Base, or V3 Large Turbo models that run entirely on your device. No cloud processing required for transcription.
 - **Custom HyperLLM-V1 for meeting summaries:** Open source, 1.1GB model specifically trained for meeting summarization. Runs locally and outperforms generic cloud models.
 - **Bot-free meeting capture:** Records system audio and microphone directly without joining as a participant. Works with any platform—Zoom, Teams, Meet, or in-person meetings.
 - **Open source transparency (GPL-3.0):** Full code available on GitHub for security audits and customization. Verify exactly how your data is processed.
@@ -69,7 +69,7 @@ While you're writing, Char listens to both your microphone and system audio. Onc
 
 #### Pricing
 
-Core features (unlimited transcription, AI summaries) are free. Pro adds advanced search and unlimited AI chat at $8/month. Enterprise offers on-premises deployment.
+Free forever for local transcription, BYOK, and all core features. Managed cloud service is $8/month for the easiest setup. Enterprise offers on-premises deployment.
 
 <CtaCard/>
 
@@ -154,7 +154,7 @@ Completely free with no paid tiers.
 
 ## Which Open-Source Transcription Tool Should You Choose?
 
-For most developers and privacy-conscious professionals, **Char** stands out. It delivers local-first architecture without sacrificing usability. The custom HyperLLM-V1 model outperforms generic cloud APIs for meeting summarization, and the manual note integration gives you control over what the AI focuses on.
+For most developers and privacy-conscious professionals, **Char** stands out. It delivers zero lock-in with complete control over your data and AI stack. Plain markdown files work with any tool, you choose your AI provider, and the manual note integration gives you control over what the AI focuses on.
 
 The code is open source (GPL-3.0), so you can verify exactly how your data is processed. Need enterprise deployment? Self-host it on your own infrastructure. Want to modify the summarization logic? Fork it and make it yours.
 
@@ -166,7 +166,7 @@ Ready to try it? [Download Char for macOS](/download) or [check out the source c
 
 ### 1. Are open-source transcription tools really free?
 
-Yes, all three are open source. Char and Amical are free for all users. Char includes an optional Pro tier ($8/month) and Enterprise tier (custom pricing), but core transcription and summarization remain free.
+Yes, all three are open source. Char and Amical are free for all users. Char is free forever for local transcription and BYOK. The managed cloud service is $8/month, and Enterprise tier has custom pricing.
 
 Meetily is free for individual users under the MIT license. Organizations (2-100 users) and enterprises (100+ users) can request custom plans, but pricing isn't publicly listed.
 

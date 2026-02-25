@@ -1,16 +1,14 @@
 use axum::{
-    Extension, Json,
+    Extension,
     extract::{Query, State},
-    http::StatusCode,
     response::{IntoResponse, Response},
 };
-use hypr_analytics::{AnalyticsClient, ToAnalyticsPayload};
+use hypr_analytics::{AnalyticsClient, DeviceFingerprint, ToAnalyticsPayload};
 use hypr_api_auth::AuthContext;
 
-use crate::error::ErrorResponse;
 use crate::state::AppState;
 use crate::stripe::{create_trial_subscription, get_or_create_customer};
-use crate::trial::{Interval, StartTrialQuery, StartTrialReason, StartTrialResponse, TrialOutcome};
+use crate::trial::{Interval, StartTrialQuery, StartTrialResponse, TrialOutcome};
 
 #[utoipa::path(
     post,
@@ -27,8 +25,14 @@ pub async fn start_trial(
     State(state): State<AppState>,
     Query(query): Query<StartTrialQuery>,
     Extension(auth): Extension<AuthContext>,
+    device_fingerprint: Option<Extension<DeviceFingerprint>>,
 ) -> Response {
     let user_id = &auth.claims.sub;
+    let source = if device_fingerprint.is_some() {
+        "desktop"
+    } else {
+        "web"
+    };
 
     let can_start: bool = match state
         .supabase
@@ -37,15 +41,13 @@ pub async fn start_trial(
     {
         Ok(v) => v,
         Err(e) => {
-            tracing::error!(error = %e, "can_start_trial RPC failed in start-trial");
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(StartTrialResponse {
-                    started: false,
-                    reason: Some(StartTrialReason::Error),
-                }),
+            return emit_and_respond(
+                state.config.analytics.as_deref(),
+                user_id,
+                source,
+                TrialOutcome::RpcError(e.to_string()),
             )
-                .into_response();
+            .await;
         }
     };
 
@@ -59,24 +61,22 @@ pub async fn start_trial(
                 {
                     Ok(Some(id)) => id,
                     Ok(None) => {
-                        return (
-                            StatusCode::INTERNAL_SERVER_ERROR,
-                            Json(ErrorResponse {
-                                error: "stripe_customer_id_missing".to_string(),
-                            }),
+                        return emit_and_respond(
+                            state.config.analytics.as_deref(),
+                            user_id,
+                            source,
+                            TrialOutcome::CustomerError("customer not found".to_string()),
                         )
-                            .into_response();
+                        .await;
                     }
                     Err(e) => {
-                        tracing::error!(error = %e, "get_or_create_customer failed");
-                        sentry::capture_message(&e.to_string(), sentry::Level::Error);
-                        return (
-                            StatusCode::INTERNAL_SERVER_ERROR,
-                            Json(ErrorResponse {
-                                error: "failed_to_create_customer".to_string(),
-                            }),
+                        return emit_and_respond(
+                            state.config.analytics.as_deref(),
+                            user_id,
+                            source,
+                            TrialOutcome::CustomerError(e.to_string()),
                         )
-                            .into_response();
+                        .await;
                     }
                 };
 
@@ -87,29 +87,26 @@ pub async fn start_trial(
 
             match create_trial_subscription(&state.stripe, &customer_id, price_id, user_id).await {
                 Ok(()) => TrialOutcome::Started(query.interval),
-                Err(e) => {
-                    tracing::error!(error = %e, "failed to create Stripe subscription");
-                    sentry::capture_message(&e.to_string(), sentry::Level::Error);
-                    TrialOutcome::StripeError
-                }
+                Err(e) => TrialOutcome::StripeError(e.to_string()),
             }
         };
 
-    emit_and_respond(state.config.analytics.as_deref(), user_id, outcome).await
+    emit_and_respond(state.config.analytics.as_deref(), user_id, source, outcome).await
 }
 
 async fn emit_and_respond<O>(
     analytics: Option<&AnalyticsClient>,
     user_id: &str,
+    source: &str,
     outcome: O,
 ) -> Response
 where
     O: IntoResponse + ToAnalyticsPayload,
 {
     if let Some(analytics) = analytics {
-        let _ = analytics
-            .event(user_id, outcome.to_analytics_payload())
-            .await;
+        let mut payload = outcome.to_analytics_payload();
+        payload.props.insert("source".to_string(), source.into());
+        let _ = analytics.event(user_id, payload).await;
         if let Some(props) = outcome.to_analytics_properties() {
             let _ = analytics.set_properties(user_id, props).await;
         }

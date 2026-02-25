@@ -1,5 +1,7 @@
-use axum::http::StatusCode;
-use axum::response::{IntoResponse, Response};
+use axum::{
+    http::StatusCode,
+    response::{IntoResponse, Response},
+};
 use thiserror::Error;
 
 pub type Result<T> = std::result::Result<T, MessengerError>;
@@ -21,10 +23,25 @@ pub enum MessengerError {
 
 impl IntoResponse for MessengerError {
     fn into_response(self) -> Response {
-        let status = match &self {
-            MessengerError::BadRequest(_) => StatusCode::BAD_REQUEST,
-            _ => StatusCode::INTERNAL_SERVER_ERROR,
+        let (status, code, message) = match self {
+            Self::BadRequest(msg) => (StatusCode::BAD_REQUEST, "bad_request", msg),
+            Self::Slack(err) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "slack_error",
+                err.to_string(),
+            ),
+            Self::Teams(err) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "teams_error",
+                err.to_string(),
+            ),
+            Self::Internal(msg) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "internal_server_error",
+                msg,
+            ),
         };
-        (status, self.to_string()).into_response()
+
+        hypr_api_error::error_response(status, &code, &message)
     }
 }

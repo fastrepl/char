@@ -7,7 +7,7 @@ import { signOutFn, updateUserEmail } from "@/functions/auth";
 import {
   canStartTrial,
   createPortalSession,
-  createTrialCheckoutSession,
+  startTrial,
   syncAfterSuccess,
 } from "@/functions/billing";
 
@@ -192,11 +192,10 @@ function AccountSettingsCard() {
   });
 
   const startTrialMutation = useMutation({
-    mutationFn: async () => {
-      const { url } = await createTrialCheckoutSession({ data: {} });
-      if (url) {
-        window.location.href = url;
-      }
+    mutationFn: () => startTrial(),
+    onSuccess: () => {
+      billingQuery.refetch();
+      canTrialQuery.refetch();
     },
   });
 

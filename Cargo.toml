@@ -29,6 +29,7 @@ hypr-api-auth = { path = "crates/api-auth", package = "api-auth" }
 hypr-api-bot = { path = "crates/api-bot", package = "api-bot" }
 hypr-api-calendar = { path = "crates/api-calendar", package = "api-calendar" }
 hypr-api-env = { path = "crates/api-env", package = "api-env" }
+hypr-api-error = { path = "crates/api-error", package = "api-error" }
 hypr-api-messenger = { path = "crates/api-messenger", package = "api-messenger" }
 hypr-api-nango = { path = "crates/api-nango", package = "api-nango" }
 hypr-api-research = { path = "crates/api-research", package = "api-research" }
@@ -42,6 +43,7 @@ hypr-audio = { path = "crates/audio", package = "audio" }
 hypr-audio-device = { path = "crates/audio-device", package = "audio-device" }
 hypr-audio-interface = { path = "crates/audio-interface", package = "audio-interface" }
 hypr-audio-mime = { path = "crates/audio-mime", package = "audio-mime" }
+hypr-audio-snapshot = { path = "crates/audio-snapshot", package = "audio-snapshot" }
 hypr-audio-utils = { path = "crates/audio-utils", package = "audio-utils" }
 hypr-buffer = { path = "crates/buffer", package = "buffer" }
 hypr-bundle = { path = "crates/bundle", package = "bundle" }
@@ -314,7 +316,6 @@ ratatui = "0.30"
 realfft = "3.5.0"
 ringbuf = "0.4.8"
 rodio = "0.21"
-silero-rs = { git = "https://github.com/emotechlab/silero-rs", rev = "193542c", package = "silero" }
 vorbis_rs = "0.5.5"
 
 deepgram = { version = "0.7", default-features = false }

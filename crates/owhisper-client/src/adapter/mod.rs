@@ -230,7 +230,9 @@ pub(crate) fn host_matches(base_url: &str, predicate: impl Fn(&str) -> bool) -> 
 }
 
 fn is_hyprnote_cloud(base_url: &str) -> bool {
-    host_matches(base_url, |h| h.contains("hyprnote.com"))
+    host_matches(base_url, |h| {
+        h.contains("hyprnote.com") || h.contains("char.com")
+    })
 }
 
 fn is_hyprnote_local_proxy(base_url: &str) -> bool {
@@ -550,6 +552,8 @@ mod tests {
     fn test_is_hyprnote_proxy() {
         assert!(is_hyprnote_proxy("https://api.hyprnote.com/stt"));
         assert!(is_hyprnote_proxy("https://api.hyprnote.com"));
+        assert!(is_hyprnote_proxy("https://api.char.com/stt"));
+        assert!(is_hyprnote_proxy("https://api.char.com"));
         assert!(is_hyprnote_proxy("http://localhost:3001/stt"));
         assert!(is_hyprnote_proxy("http://127.0.0.1:3001/stt"));
 
@@ -750,6 +754,7 @@ mod tests {
 
         let proxy_urls = &[
             "https://api.hyprnote.com/stt",
+            "https://api.char.com/stt",
             "http://localhost:3001/stt",
             "http://127.0.0.1:3001/stt",
         ];
