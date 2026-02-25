@@ -69,21 +69,12 @@ export function useTrialFlow(onContinue: () => void) {
       return;
     }
 
-    if (billing.canStartTrial.isPending) return;
-
     hasTriggeredRef.current = true;
-
-    if (!billing.canStartTrial.data) {
-      setTimeout(onContinue, 1500);
-      return;
-    }
-
     mutation.mutate();
   }, [auth, billing, store, mutation, onContinue]);
 
   if (!auth?.session) return null;
-  if (!billing.isReady || billing.canStartTrial.isPending)
-    return "checking" as const;
+  if (!billing.isReady) return "checking" as const;
 
   if (billing.isPro && !billing.isTrialing) return "already-pro" as const;
   if (billing.isTrialing) return "already-trialing" as const;
@@ -97,10 +88,6 @@ export function useTrialFlow(onContinue: () => void) {
 
   if (mutation.isError) {
     return { done: "error" as StartTrialReason };
-  }
-
-  if (!billing.canStartTrial.data) {
-    return { done: "not_eligible" as StartTrialReason };
   }
 
   return "checking" as const;

@@ -1,16 +1,14 @@
 use axum::{
-    Extension, Json,
+    Extension,
     extract::{Query, State},
-    http::StatusCode,
     response::{IntoResponse, Response},
 };
 use hypr_analytics::{AnalyticsClient, ToAnalyticsPayload};
 use hypr_api_auth::AuthContext;
 
-use crate::error::ErrorResponse;
 use crate::state::AppState;
 use crate::stripe::{create_trial_subscription, get_or_create_customer};
-use crate::trial::{Interval, StartTrialQuery, StartTrialReason, StartTrialResponse, TrialOutcome};
+use crate::trial::{Interval, StartTrialQuery, StartTrialResponse, TrialOutcome};
 
 #[utoipa::path(
     post,
@@ -38,14 +36,12 @@ pub async fn start_trial(
         Ok(v) => v,
         Err(e) => {
             tracing::error!(error = %e, "can_start_trial RPC failed in start-trial");
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(StartTrialResponse {
-                    started: false,
-                    reason: Some(StartTrialReason::Error),
-                }),
+            return emit_and_respond(
+                state.config.analytics.as_deref(),
+                user_id,
+                TrialOutcome::RpcError,
             )
-                .into_response();
+            .await;
         }
     };
 
@@ -59,24 +55,22 @@ pub async fn start_trial(
                 {
                     Ok(Some(id)) => id,
                     Ok(None) => {
-                        return (
-                            StatusCode::INTERNAL_SERVER_ERROR,
-                            Json(ErrorResponse {
-                                error: "stripe_customer_id_missing".to_string(),
-                            }),
+                        return emit_and_respond(
+                            state.config.analytics.as_deref(),
+                            user_id,
+                            TrialOutcome::CustomerError,
                         )
-                            .into_response();
+                        .await;
                     }
                     Err(e) => {
                         tracing::error!(error = %e, "get_or_create_customer failed");
                         sentry::capture_message(&e.to_string(), sentry::Level::Error);
-                        return (
-                            StatusCode::INTERNAL_SERVER_ERROR,
-                            Json(ErrorResponse {
-                                error: "failed_to_create_customer".to_string(),
-                            }),
+                        return emit_and_respond(
+                            state.config.analytics.as_deref(),
+                            user_id,
+                            TrialOutcome::CustomerError,
                         )
-                            .into_response();
+                        .await;
                     }
                 };
 
