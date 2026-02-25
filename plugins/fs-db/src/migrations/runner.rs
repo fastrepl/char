@@ -41,8 +41,34 @@ pub async fn run(base_dir: &Path, app_version: &Version) -> Result<()> {
     }
 
     for migration in migrations_to_apply(&detected, app_version) {
-        migration.run(base_dir).await?;
-        write_version(base_dir, migration.introduced_in())?;
+        let version = migration.introduced_in();
+        let base_dir_owned = base_dir.to_path_buf();
+
+        let result = tokio::task::spawn_blocking(move || {
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                let rt = tokio::runtime::Builder::new_current_thread()
+                    .enable_all()
+                    .build()
+                    .expect("failed to create migration runtime");
+                rt.block_on(migration.run(&base_dir_owned))
+            }))
+        })
+        .await;
+
+        match result {
+            Ok(Ok(Ok(()))) => {
+                write_version(base_dir, version)?;
+            }
+            Ok(Ok(Err(e))) => {
+                tracing::error!(version = %version, error = %e, "migration failed");
+            }
+            Ok(Err(_)) => {
+                tracing::error!(version = %version, "migration panicked");
+            }
+            Err(e) => {
+                tracing::error!(version = %version, error = %e, "migration task failed");
+            }
+        }
     }
 
     write_version(base_dir, app_version)?;

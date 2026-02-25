@@ -52,7 +52,7 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
                 },
             );
 
-            std::thread::spawn({
+            let migration_result = std::thread::spawn({
                 let base_dir = base_dir.clone();
                 let app_version = app_version.clone();
                 move || {
@@ -63,8 +63,17 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
                     rt.block_on(migrations::run(&base_dir, &app_version))
                 }
             })
-            .join()
-            .expect("migration thread panicked")?;
+            .join();
+
+            match migration_result {
+                Ok(Ok(())) => {}
+                Ok(Err(e)) => {
+                    tracing::error!("migration failed: {e}");
+                }
+                Err(_) => {
+                    tracing::error!("migration thread panicked");
+                }
+            }
 
             Ok(())
         })
