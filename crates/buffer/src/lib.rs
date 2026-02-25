@@ -320,8 +320,8 @@ mod tests {
 - Offers powerful extensions—like real-time transcripts and CRM uploads (e.g. Twenty).
 
 ## Stay Connected
-- Follow updates on [X](https://hyprnote.com/x).
-- Join the community and chat on [Discord](https://hyprnote.com/discord). 
+- Follow updates on [X](https://char.com/x).
+- Join the community and chat on [Discord](https://char.com/discord). 
 
 # Participants:
 
@@ -359,8 +359,8 @@ mod tests {
 
         # Stay Connected
 
-        - Follow updates on [X](https://hyprnote.com/x).
-        - Join the community and chat on [Discord](https://hyprnote.com/discord).
+        - Follow updates on [X](https://char.com/x).
+        - Join the community and chat on [Discord](https://char.com/discord).
 
          
 
@@ -396,10 +396,10 @@ mod tests {
 
 # Benefits: Streamlines meetings, improves productivity, and enhances data capture.
 
-# Further Information: Follow updates on [X](https://hyprnote.com/x) and [Discord](https://hyprnote.com/discord).
+# Further Information: Follow updates on [X](https://char.com/x) and [Discord](https://char.com/discord).
         "#;
 
-        insta::assert_snapshot!(md_to_md(input).unwrap().to_string(), @"# Further Information: Follow updates on [X](https://hyprnote.com/x) and [Discord](https://hyprnote.com/discord).");
+        insta::assert_snapshot!(md_to_md(input).unwrap().to_string(), @"# Further Information: Follow updates on [X](https://char.com/x) and [Discord](https://char.com/discord).");
     }
 
     #[test]
@@ -422,8 +422,8 @@ mod tests {
 - Offers powerful extensions—like real-time transcripts and CRM uploads (e.g. Twenty).
 
 ## Stay Connected
-- Follow updates on [X](https://hyprnote.com/x).
-- Join the community and chat on [Discord](https://hyprnote.com/discord).
+- Follow updates on [X](https://char.com/x).
+- Join the community and chat on [Discord](https://char.com/discord).
 "#;
 
         insta::assert_snapshot!(opinionated_md_to_html(input).unwrap().to_string(), @r#"
@@ -450,8 +450,8 @@ mod tests {
         <p> </p>
         <h1>Stay Connected</h1>
         <ul>
-        <li>Follow updates on <a href="https://hyprnote.com/x">X</a>.</li>
-        <li>Join the community and chat on <a href="https://hyprnote.com/discord">Discord</a>.</li>
+        <li>Follow updates on <a href="https://char.com/x">X</a>.</li>
+        <li>Join the community and chat on <a href="https://char.com/discord">Discord</a>.</li>
         </ul>
         "#);
     }

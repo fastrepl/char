@@ -31,7 +31,7 @@ export const Route = createFileRoute("/_view/product/ai-notetaking")({
       { property: "og:type", content: "website" },
       {
         property: "og:url",
-        content: "https://hyprnote.com/product/ai-notetaking",
+        content: "https://char.com/product/ai-notetaking",
       },
     ],
   }),

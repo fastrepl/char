@@ -51,7 +51,7 @@ export const Route = createFileRoute("/_view/company-handbook/$")({
     }
 
     const { doc } = loaderData;
-    const url = `https://hyprnote.com/company-handbook/${doc.slug}`;
+    const url = `https://char.com/company-handbook/${doc.slug}`;
 
     const params = new URLSearchParams({
       type: "handbook",

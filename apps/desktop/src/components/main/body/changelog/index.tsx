@@ -194,7 +194,7 @@ function ChangelogHeader({
             className="gap-1.5 text-neutral-600 hover:text-black"
             onClick={() =>
               openerCommands.openUrl(
-                `https://hyprnote.com/changelog/${version}`,
+                `https://char.com/changelog/${version}`,
                 null,
               )
             }

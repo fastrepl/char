@@ -23,7 +23,7 @@ export const Route = createFileRoute("/_view/why-hyprnote")({
           "Most AI note-takers lock your data in their database. We thought that was bullshit. So we built Char differently.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://hyprnote.com/why-hyprnote" },
+      { property: "og:url", content: "https://char.com/why-hyprnote" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Why Char" },
       {

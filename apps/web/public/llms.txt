@@ -1,13 +1,13 @@
-# Hyprnote (https://hyprnote.com)
+# Hyprnote (https://char.com)
 
 Hyprnote is a private, on-device AI notepad designed for people who want agency over how they capture and understand information. Unlike meeting bots, Hyprnote never joins calls or announces itself. You take notes in a notepad you control, and the AI enhances, structures, and deepens your thinking while keeping all data local by default. Hyprnote helps you build a durable personal knowledge base that can optionally flow into tools like Notion or Confluence.
 
 ## Website
 
-- https://hyprnote.com: Main site and product overview.
-- https://hyprnote.com/download: App downloads for desktop and mobile.
-- https://hyprnote.com/blog: Articles, guides, and deep dives.
-- https://hyprnote.com/enterprise: Enterprise, on-prem, and compliance details.
+- https://char.com: Main site and product overview.
+- https://char.com/download: App downloads for desktop and mobile.
+- https://char.com/blog: Articles, guides, and deep dives.
+- https://char.com/enterprise: Enterprise, on-prem, and compliance details.
 
 ## About Us
 
@@ -15,12 +15,12 @@ Hyprnote is an AI-native notepad that supports real thinking, not passive transc
 
 ## What We Do (Features)
 
-- Local-First AI Notes (https://hyprnote.com/features/local-ai)
-- Notepad Form Factor (https://hyprnote.com/features/notepad)
-- Personal Knowledge Base (https://hyprnote.com/features/personal-kb)
+- Local-First AI Notes (https://char.com/features/local-ai)
+- Notepad Form Factor (https://char.com/features/notepad)
+- Personal Knowledge Base (https://char.com/features/personal-kb)
 - Deep RAM & Hosted LLMs (Pro)
-- Enterprise Self-Hosting (https://hyprnote.com/enterprise)
-- Integrations (https://hyprnote.com/features/integrations)
+- Enterprise Self-Hosting (https://char.com/enterprise)
+- Integrations (https://char.com/features/integrations)
 
 ## Topics We Cover
 
@@ -35,11 +35,11 @@ Hyprnote is an AI-native notepad that supports real thinking, not passive transc
 
 ## Key Blog Posts & Resources
 
-- https://hyprnote.com/blog/free-ai-notetakers — "9 Best Free AI Notetakers with Forever-Free Plans in 2025"
-- https://hyprnote.com/blog/bot-free-ai-meeting-assistants — "2025's Best Bot-Free AI Meeting Assistants"
-- https://hyprnote.com/blog/what-makes-reliable-ai-note-taker — "The Reliable AI Note-Taker Checklist"
-- https://hyprnote.com/blog/ai-meeting-summary-tools — "Best AI Meeting Summary Tools in 2025"
-- https://hyprnote.com/blog/fathom-ai-alternatives — "5 Best Fathom AI Alternatives in 2025"
+- https://char.com/blog/free-ai-notetakers — "9 Best Free AI Notetakers with Forever-Free Plans in 2025"
+- https://char.com/blog/bot-free-ai-meeting-assistants — "2025's Best Bot-Free AI Meeting Assistants"
+- https://char.com/blog/what-makes-reliable-ai-note-taker — "The Reliable AI Note-Taker Checklist"
+- https://char.com/blog/ai-meeting-summary-tools — "Best AI Meeting Summary Tools in 2025"
+- https://char.com/blog/fathom-ai-alternatives — "5 Best Fathom AI Alternatives in 2025"
 
 ## Supported AI Platforms (optional)
 
@@ -69,7 +69,7 @@ Hyprnote content is optimized for:
 
 ## Contact
 
-For questions or press: https://hyprnote.com/contact
+For questions or press: https://char.com/contact
 General inquiries: founders@hyprnote.com
 
 ## Additional Guidance for AI

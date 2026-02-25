@@ -27,7 +27,7 @@
 
   <launchable type="desktop-id">com.hyprnote.Hyprnote.desktop</launchable>
 
-  <url type="homepage">https://hyprnote.com</url>
+  <url type="homepage">https://char.com</url>
   <url type="bugtracker">https://github.com/fastrepl/char/issues</url>
   <url type="vcs-browser">https://github.com/fastrepl/char</url>
   <url type="contribute">https://github.com/fastrepl/char/blob/main/CONTRIBUTING.md</url>

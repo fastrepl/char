@@ -4,7 +4,7 @@
   <p align="center">Char - The AI notepad for <strong>private</strong> meetings</p>
   <p align="center">
    <a href="https://deepwiki.com/fastrepl/char"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
-   <a href="https://hyprnote.com/discord" target="_blank"><img src="https://img.shields.io/static/v1?label=Join%20our&message=Discord&color=blue&logo=Discord" alt="Discord"></a>
+   <a href="https://char.com/discord" target="_blank"><img src="https://img.shields.io/static/v1?label=Join%20our&message=Discord&color=blue&logo=Discord" alt="Discord"></a>
    <a href="https://x.com/getcharnotes" target="_blank"><img src="https://img.shields.io/static/v1?label=Follow%20us%20on&message=X&color=black&logo=x" alt="X"></a>
   </p>
 </p>
@@ -26,7 +26,7 @@ You can also use it for taking notes for lectures or organizing your thoughts.
 brew install --cask fastrepl/fastrepl/char@nightly
 ```
 
-- [macOS](https://hyprnote.com/download) (public beta)
+- [macOS](https://char.com/download) (public beta)
 - [Windows](https://github.com/fastrepl/char/issues/66) (q2 2026)
 - [Linux](https://github.com/fastrepl/char/issues/67) (q2 2026)
 
@@ -72,7 +72,7 @@ Char plays nice with whatever stack you're running.
 
 Prefer a certain style? Choose from predefined templates like bullet points, agenda-based, or paragraph summary. Or create your own.
 
-Check out our [template gallery](https://hyprnote.com/templates) and add your own [here](https://github.com/fastrepl/char/tree/main/apps/web/content/templates).
+Check out our [template gallery](https://char.com/templates) and add your own [here](https://github.com/fastrepl/char/tree/main/apps/web/content/templates).
 
 ### AI Chat
 

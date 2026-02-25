@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_view/privacy")({
           "We believe your conversations belong to you, not to us or anyone else. Discover how Char puts your privacy first.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://hyprnote.com/privacy" },
+      { property: "og:url", content: "https://char.com/privacy" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Privacy - Char" },
       {

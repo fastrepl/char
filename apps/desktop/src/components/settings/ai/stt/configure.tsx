@@ -157,7 +157,7 @@ function HyprProviderCard({
               <div className="flex items-center gap-3 py-2">
                 <div className="flex-1 border-t border-dashed border-neutral-300" />
                 <a
-                  href="https://hyprnote.com/docs/developers/local-models"
+                  href="https://char.com/docs/developers/local-models"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs text-neutral-400 hover:underline flex items-center gap-1"
