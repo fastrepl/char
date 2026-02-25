@@ -1,49 +1,42 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useListener } from "../contexts/listener";
+import { getEnhancerService } from "../services/enhancer";
 import * as main from "../store/tinybase/store/main";
 import type { Tab } from "../store/zustand/tabs/schema";
-import { useAutoEnhanceRunner } from "./autoEnhance/runner";
-import { useListenerStopTrigger } from "./autoEnhance/trigger";
 
 export function useAutoEnhance(tab: Extract<Tab, { type: "sessions" }>) {
   const sessionId = tab.id;
+  const [skipReason, setSkipReason] = useState<string | null>(null);
 
+  const sessionMode = useListener((state) => state.getSessionMode(sessionId));
+  const loading = useListener((state) => state.live.loading);
   const transcriptIds = main.UI.useSliceRowIds(
     main.INDEXES.transcriptBySession,
     sessionId,
     main.STORE_ID,
   );
-  const hasTranscript = !!transcriptIds && transcriptIds.length > 0;
 
-  const { justStopped, reset } = useListenerStopTrigger(sessionId);
-  const runner = useAutoEnhanceRunner(tab, transcriptIds ?? [], hasTranscript);
-
-  const [skipReason, setSkipReason] = useState<string | null>(null);
-
-  const sessionMode = useListener((state) => state.getSessionMode(sessionId));
-  const loading = useListener((state) => state.live.loading);
   const prevSessionModeRef = useRef(sessionMode);
   const prevTranscriptCountRef = useRef(transcriptIds?.length ?? 0);
   const isInitialRenderRef = useRef(true);
 
   useEffect(() => {
-    if (justStopped) {
-      reset();
-      const result = runner.run();
-      if (result.type === "skipped") {
-        setSkipReason(result.reason);
+    const service = getEnhancerService();
+    if (!service) return;
+    return service.on((event) => {
+      if (event.sessionId !== sessionId) return;
+      if (event.type === "auto-enhance-skipped") {
+        setSkipReason(event.reason);
       }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [justStopped, reset]);
+    });
+  }, [sessionId]);
 
   useEffect(() => {
     if (isInitialRenderRef.current) {
       isInitialRenderRef.current = false;
       prevSessionModeRef.current = sessionMode;
       prevTranscriptCountRef.current = transcriptIds?.length ?? 0;
-
       return;
     }
 
@@ -64,9 +57,12 @@ export function useAutoEnhance(tab: Extract<Tab, { type: "sessions" }>) {
       !loading;
 
     if (batchJustCompleted || transcriptJustUploaded) {
-      const result = runner.run();
-      if (result.type === "skipped") {
-        setSkipReason(result.reason);
+      const service = getEnhancerService();
+      if (service) {
+        const result = service.enhance(sessionId, { isAuto: true });
+        if (result.type === "skipped") {
+          setSkipReason(result.reason);
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
