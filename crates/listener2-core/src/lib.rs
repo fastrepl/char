@@ -41,6 +41,7 @@ pub fn suggest_providers_for_languages_batch(languages: &[hypr_language::Languag
         AdapterKind::ElevenLabs,
         AdapterKind::DashScope,
         AdapterKind::Mistral,
+        AdapterKind::Bedrock,
     ];
 
     let mut with_support: Vec<_> = all_providers

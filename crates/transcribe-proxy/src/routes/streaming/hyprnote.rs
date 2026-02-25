@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use owhisper_client::{
-    AssemblyAIAdapter, Auth, DashScopeAdapter, DeepgramAdapter, ElevenLabsAdapter,
+    AssemblyAIAdapter, Auth, BedrockAdapter, DashScopeAdapter, DeepgramAdapter, ElevenLabsAdapter,
     FireworksAdapter, GladiaAdapter, MistralAdapter, OpenAIAdapter, Provider, RealtimeSttAdapter,
     SonioxAdapter,
 };
@@ -47,6 +47,7 @@ fn build_upstream_url_with_adapter(
         Provider::ElevenLabs => ElevenLabsAdapter.build_ws_url(api_base, params, channels),
         Provider::DashScope => DashScopeAdapter.build_ws_url(api_base, params, channels),
         Provider::Mistral => MistralAdapter::default().build_ws_url(api_base, params, channels),
+        Provider::Bedrock => BedrockAdapter.build_ws_url(api_base, params, channels),
     }
 }
 
@@ -66,6 +67,7 @@ fn build_initial_message_with_adapter(
         Provider::ElevenLabs => ElevenLabsAdapter.initial_message(api_key, params, channels),
         Provider::DashScope => DashScopeAdapter.initial_message(api_key, params, channels),
         Provider::Mistral => MistralAdapter::default().initial_message(api_key, params, channels),
+        Provider::Bedrock => BedrockAdapter.initial_message(api_key, params, channels),
     };
 
     msg.and_then(|m| match m {
@@ -89,6 +91,7 @@ fn build_response_transformer(
             Provider::ElevenLabs => ElevenLabsAdapter.parse_response(raw),
             Provider::DashScope => DashScopeAdapter.parse_response(raw),
             Provider::Mistral => mistral_adapter.parse_response(raw),
+            Provider::Bedrock => BedrockAdapter.parse_response(raw),
         };
 
         if responses.is_empty() {
