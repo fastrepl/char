@@ -48,6 +48,23 @@ export function useStartListening(sessionId: string) {
       speaker_hints: "[]",
     });
 
+    const existingPreMeetingMemo = store.getCell(
+      "sessions",
+      sessionId,
+      "pre_meeting_memo",
+    );
+    if (!existingPreMeetingMemo) {
+      const currentRawMd = store.getCell("sessions", sessionId, "raw_md");
+      if (typeof currentRawMd === "string" && currentRawMd) {
+        store.setCell(
+          "sessions",
+          sessionId,
+          "pre_meeting_memo",
+          currentRawMd,
+        );
+      }
+    }
+
     void analyticsCommands.event({
       event: "session_started",
       has_calendar_event: !!getSessionEventById(store, sessionId),

@@ -30,6 +30,7 @@ export const tableSchemaForTinybase = {
     event_json: { type: "string" },
     title: { type: "string" },
     raw_md: { type: "string" },
+    pre_meeting_memo: { type: "string" },
   } as const satisfies InferTinyBaseSchema<typeof sessionSchema>,
   transcripts: {
     user_id: { type: "string" },

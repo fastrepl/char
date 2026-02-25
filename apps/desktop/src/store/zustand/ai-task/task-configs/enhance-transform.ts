@@ -76,6 +76,7 @@ async function transformArgs(
     template,
     transcripts: formatTranscripts(
       sessionContext.rawMd,
+      sessionContext.preMeetingMemo,
       sessionContext.segments,
       sessionContext.transcriptsMeta,
     ),
@@ -84,6 +85,7 @@ async function transformArgs(
 
 function formatTranscripts(
   rawMd: string,
+  preMeetingMemo: string | undefined,
   segments: SegmentPayload[],
   transcriptsMeta: TranscriptMeta[],
 ): Transcript[] {
@@ -112,16 +114,131 @@ function formatTranscripts(
   }
 
   if (rawMd) {
-    return [
-      {
-        segments: [{ speaker: "", text: rawMd }],
-        startedAt: null,
-        endedAt: null,
-      },
-    ];
+    const inMeetingMemo = extractInMeetingMemo(rawMd, preMeetingMemo);
+    if (inMeetingMemo) {
+      return [
+        {
+          segments: [{ speaker: "", text: inMeetingMemo }],
+          startedAt: null,
+          endedAt: null,
+        },
+      ];
+    }
   }
 
   return [];
+}
+
+/**
+ * Extracts only the in-meeting portion of the user's memo by comparing
+ * the current document against a snapshot taken when listening started.
+ *
+ * Uses TipTap document node-level comparison rather than fragile string
+ * matching. Top-level content nodes are compared structurally: any leading
+ * nodes that match the pre-meeting snapshot are stripped, and only nodes
+ * added during or after the meeting are returned.
+ *
+ * Edge cases:
+ *  - No pre-meeting memo → returns all content
+ *  - Pre-meeting content was edited → conservatively includes changed nodes
+ *  - All content is pre-meeting → returns empty string
+ *  - Parse failure → falls back to returning all content
+ */
+function extractInMeetingMemo(
+  rawMd: string,
+  preMeetingMemo: string | undefined,
+): string {
+  if (!preMeetingMemo) {
+    return rawMd;
+  }
+
+  const currentNodes = parseTiptapNodes(rawMd);
+  const preNodes = parseTiptapNodes(preMeetingMemo);
+
+  if (!currentNodes || !preNodes) {
+    return rawMd;
+  }
+
+  if (preNodes.length === 0) {
+    return rawMd;
+  }
+
+  // Find how many leading nodes in the current document match the
+  // pre-meeting snapshot. We compare structurally (deep equality on each
+  // top-level node) so minor edits to pre-meeting content cause those
+  // nodes to be included rather than silently dropped.
+  let matchCount = 0;
+  for (let i = 0; i < preNodes.length && i < currentNodes.length; i++) {
+    if (nodesEqual(currentNodes[i], preNodes[i])) {
+      matchCount++;
+    } else {
+      break;
+    }
+  }
+
+  const inMeetingNodes = currentNodes.slice(matchCount);
+
+  if (inMeetingNodes.length === 0) {
+    return "";
+  }
+
+  // Reconstruct a valid TipTap document with only in-meeting nodes
+  const inMeetingDoc = JSON.stringify({
+    type: "doc",
+    content: inMeetingNodes,
+  });
+
+  return inMeetingDoc;
+}
+
+/**
+ * Parse a raw_md string (TipTap JSON) into its top-level content nodes.
+ * Returns null if the string is not valid TipTap JSON.
+ */
+function parseTiptapNodes(
+  raw: string,
+): Record<string, unknown>[] | null {
+  try {
+    const parsed = JSON.parse(raw);
+    if (
+      parsed &&
+      typeof parsed === "object" &&
+      parsed.type === "doc" &&
+      Array.isArray(parsed.content)
+    ) {
+      return parsed.content as Record<string, unknown>[];
+    }
+  } catch {
+    // Not valid JSON; raw_md might be plain text
+  }
+  return null;
+}
+
+/**
+ * Deep-equality check for two TipTap JSON nodes.
+ * Handles nested content arrays, marks, attrs, etc.
+ */
+function nodesEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (a === null || b === null) return false;
+  if (typeof a !== typeof b) return false;
+
+  if (Array.isArray(a)) {
+    if (!Array.isArray(b)) return false;
+    if (a.length !== b.length) return false;
+    return a.every((item, i) => nodesEqual(item, b[i]));
+  }
+
+  if (typeof a === "object" && typeof b === "object") {
+    const aObj = a as Record<string, unknown>;
+    const bObj = b as Record<string, unknown>;
+    const aKeys = Object.keys(aObj);
+    const bKeys = Object.keys(bObj);
+    if (aKeys.length !== bKeys.length) return false;
+    return aKeys.every((key) => nodesEqual(aObj[key], bObj[key]));
+  }
+
+  return false;
 }
 
 function getLanguage(settingsStore: SettingsStore): string | null {
@@ -133,6 +250,12 @@ function getSessionContext(sessionId: string, store: MainStore) {
   const transcriptsMeta = collectTranscripts(sessionId, store);
   return {
     rawMd: getStringCell(store, "sessions", sessionId, "raw_md"),
+    preMeetingMemo: getOptionalStringCell(
+      store,
+      "sessions",
+      sessionId,
+      "pre_meeting_memo",
+    ),
     session: getSessionData(sessionId, store),
     participants: getParticipants(sessionId, store),
     segments: getTranscriptSegmentsFromMeta(transcriptsMeta, store),

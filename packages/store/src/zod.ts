@@ -114,6 +114,10 @@ export const sessionSchema = z.object({
   event_json: z.preprocess((val) => val ?? undefined, z.string().optional()),
   title: z.string(),
   raw_md: z.string(),
+  pre_meeting_memo: z.preprocess(
+    (val) => val ?? undefined,
+    z.string().optional(),
+  ),
 });
 
 export const transcriptSchema = z.object({
