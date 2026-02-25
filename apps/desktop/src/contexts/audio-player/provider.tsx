@@ -24,6 +24,8 @@ interface AudioPlayerContextValue {
   stop: () => void;
   seek: (sec: number) => void;
   audioExists: boolean;
+  playbackRate: number;
+  setPlaybackRate: (rate: number) => void;
 }
 
 const AudioPlayerContext = createContext<AudioPlayerContextValue | null>(null);
@@ -50,6 +52,7 @@ export function AudioPlayerProvider({
   const [state, setState] = useState<AudioPlayerState>("stopped");
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [playbackRate, setPlaybackRateState] = useState(1);
 
   const audioExists = useQuery({
     queryKey: ["audio", sessionId, "exist"],
@@ -200,6 +203,16 @@ export function AudioPlayerProvider({
     [wavesurfer],
   );
 
+  const setPlaybackRate = useCallback(
+    (rate: number) => {
+      if (wavesurfer) {
+        wavesurfer.setPlaybackRate(rate);
+      }
+      setPlaybackRateState(rate);
+    },
+    [wavesurfer],
+  );
+
   return (
     <AudioPlayerContext.Provider
       value={{
@@ -213,6 +226,8 @@ export function AudioPlayerProvider({
         stop,
         seek,
         audioExists: audioExists.data ?? false,
+        playbackRate,
+        setPlaybackRate,
       }}
     >
       {children}
