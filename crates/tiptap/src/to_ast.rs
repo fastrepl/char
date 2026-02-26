@@ -33,8 +33,22 @@ fn convert_node(node: &serde_json::Value) -> Option<mdast::Node> {
         "hardBreak" => Some(convert_hard_break()),
         "image" => Some(convert_image(node)),
         "text" => convert_text(node),
+        t if t.starts_with("mention") => Some(convert_mention(node)),
         _ => None,
     }
+}
+
+fn convert_mention(node: &serde_json::Value) -> mdast::Node {
+    let label = node
+        .get("attrs")
+        .and_then(|a| a.get("label"))
+        .and_then(|l| l.as_str())
+        .unwrap_or("");
+
+    mdast::Node::Text(mdast::Text {
+        value: format!("[[{}]]", label),
+        position: None,
+    })
 }
 
 fn convert_paragraph(node: &serde_json::Value) -> mdast::Node {
@@ -243,6 +257,7 @@ fn convert_inline_node(node: &serde_json::Value) -> Option<mdast::Node> {
         "text" => convert_text_with_marks(node),
         "hardBreak" => Some(convert_hard_break()),
         "image" => Some(convert_image(node)),
+        t if t.starts_with("mention") => Some(convert_mention(node)),
         _ => None,
     }
 }

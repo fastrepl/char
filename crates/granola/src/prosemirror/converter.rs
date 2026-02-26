@@ -109,6 +109,15 @@ fn process_node(node: &ProseMirrorNode, indent_level: usize, is_top_level: bool)
             format!("{}{}", items.join("\n"), suffix)
         }
         "text" => node.text.clone(),
+        t if t.starts_with("mention") => {
+            let label = node
+                .attrs
+                .as_ref()
+                .and_then(|attrs| attrs.get("label"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
+            format!("[[{}]]", label)
+        }
         _ => text_content,
     }
 }

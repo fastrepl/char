@@ -452,6 +452,42 @@ function MentionNodeView({ node }: NodeViewProps) {
 export const mention = (config: MentionConfig) => {
   return Mention.extend({
     name: `mention-${config.trigger}`,
+
+    renderMarkdown: (node: {
+      attrs?: { id?: string; type?: string; label?: string };
+    }) => {
+      const label = node.attrs?.label || "";
+      return `[[${label}]]`;
+    },
+
+    parseMarkdown: (token: { text?: string; label?: string }) => {
+      const label = token.text || token.label || "";
+      return {
+        type: `mention-${config.trigger}`,
+        attrs: {
+          id: null,
+          type: null,
+          label,
+        },
+      };
+    },
+
+    markdownTokenizer: {
+      name: `mention-${config.trigger}`,
+      level: "inline" as const,
+      start: "[[",
+      tokenize: (src: string) => {
+        const match = src.match(/^\[\[([^\]]+)\]\]/);
+        if (!match) return undefined;
+        return {
+          type: `mention-${config.trigger}`,
+          raw: match[0],
+          text: match[1],
+          tokens: [],
+        };
+      },
+    },
+
     addAttributes() {
       return {
         id: {
