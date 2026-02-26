@@ -27,7 +27,7 @@ I won't tell you "X is the best CMS." Instead, I'll show you what each category 
 6. [How We Built Char's Publishing Stack](/blog/hyprnote-publishing-stack)
 7. [Building an Editorial Workflow with GitHub and Slack](/blog/building-editorial-workflow-github-slack)
 
-## Step 0: Decide What Problem You're Actually Solving
+## Step 0: decide what problem you're actually solving
 
 Start by answering these questions instead:
 
@@ -54,14 +54,14 @@ Start by answering these questions instead:
 
 Once you answer these, the CMS choice mostly falls out.
 
-## The Four Big Buckets of CMS Options
+## The four big buckets of CMS options
 
 1. **No CMS, just Git + MDX**
 2. **Git-based CMS (visual UI on top of your repo)**
 3. **Headless CMS (API-first like Sanity, Payload)**
 4. **Hosted doc/knowledge platforms (GitBook, Notion, etc.)**
 
-## 1. No CMS: Just Git + MDX (What We Use)
+## 1. No CMS: just Git + MDX (what we use)
 
 At Char, content lives as `.mdx` files in the repo. We write in Zed / Cursor / VS Code. GitHub is the CMS. PRs are drafts, merges are publish. CI handles link checking, OG generation, and so on.
 
@@ -81,7 +81,7 @@ Cons:
 
 If your team is very technical and you're early-stage, this is almost always the correct default. You can always add a Git-based or headless CMS later without throwing anything away.
 
-## 2. Git-Based CMS: "UI for Your Repo" (Keystatic & Friends)
+## 2. Git-based CMS: "UI for your repo" (Keystatic & friends)
 
 Git-based CMS tools give you a **visual editor that talks directly to your Git repo**. Content stays as Markdown/MDX/JSON/YAML in the repository, but non-technical people get a web UI.
 
@@ -108,7 +108,7 @@ Use this when you like the Git + MDX approach but want PMs, designers, or market
 
 ---
 
-## 3. Headless CMS: Sanity, Payload, and the Heavy Hitters
+## 3. Headless CMS: Sanity, Payload, and the heavy hitters
 
 Headless CMS = content backend with APIs. You define schemas, models, relationships, and the CMS exposes content via REST/GraphQL to web, mobile, native apps, signage, whatever.
 
@@ -141,7 +141,7 @@ Use this when you're running a **content platform** with multiple surfaces, loca
 
 ---
 
-## 4. Docs / Knowledge Platforms: GitBook, Notion & Co.
+## 4. Docs / knowledge platforms: GitBook, Notion & Co.
 
 Sometimes you don't need a CMS. You need a **docs product**.
 
@@ -170,7 +170,7 @@ Use this when you want a **docs site ready tomorrow**, UX matters more than cont
 
 ---
 
-## Summary: The Four Buckets at a Glance
+## Summary: the four buckets at a glance
 
 | Bucket                 | Best For                                                   | Pros                                                                                 | Cons                                                                     | Examples                    |
 | ---------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ | --------------------------- |
@@ -181,7 +181,7 @@ Use this when you want a **docs site ready tomorrow**, UX matters more than cont
 
 ---
 
-## 5. Special Case: Nextra & Friends (Frameworks, Not CMSs)
+## 5. Special case: Nextra & friends (frameworks, not CMSs)
 
 Tools like **Nextra** are not CMS platforms but content-focused frameworks built on Next.js that make it easy to build docs and blog sites with Markdown/MDX and opinionated themes. [Nextra](https://nextra.site/docs)
 
@@ -193,7 +193,7 @@ This is the category Char's stack resembles: modern React/MDX frontend with cont
 
 ---
 
-## A Simple Decision Matrix
+## A simple decision matrix
 
 | Situation                                                          | Likely Best Choice                              |
 | ------------------------------------------------------------------ | ----------------------------------------------- |
@@ -209,7 +209,7 @@ Most teams overestimate how much CMS infrastructure they need in the first 2–3
 
 ---
 
-## Things People Don't Talk About Enough
+## Things people don't talk about enough
 
 ### 1. Lock-in doesn't hurt until you're tired and busy
 
@@ -235,7 +235,7 @@ Git + MDX is a good foundation for that.
 
 ---
 
-## So… What Would I Use If I Were Starting Today?
+## So... what would I use if I were starting today?
 
 For a technical founder starting a new product:
 

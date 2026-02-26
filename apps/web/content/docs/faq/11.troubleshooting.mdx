@@ -4,11 +4,11 @@ section: "FAQ"
 description: "Common issues and how to resolve them."
 ---
 
-## Keychain Password Prompts (macOS)
+## Keychain password prompts (macOS)
 
 If you see repeated password prompts asking for access to keychain items like `com.hyprnote.Argmax.licenseToken` or similar entries, this is typically caused by outdated or corrupted keychain entries from a previous version of Char.
 
-### How to Fix
+### How to fix
 
 1. Open **Keychain Access** directly by searching "Keychain Access" in Spotlight and selecting the app (not the Passwords app that macOS may suggest). You can also find it at `/System/Library/CoreServices/Applications/Keychain Access.app`.
 2. In the search bar, type `hyprnote` or `argmax`
@@ -17,7 +17,7 @@ If you see repeated password prompts asking for access to keychain items like `c
 
 The app will create fresh keychain entries on the next launch, and the password prompts should stop appearing.
 
-### If Deletion Doesn't Work
+### If deletion doesn't work
 
 Keychain Access may sometimes ignore delete attempts for application password entries due to access control settings. If clicking Delete does nothing or no confirmation dialog appears:
 
@@ -27,6 +27,6 @@ Keychain Access may sometimes ignore delete attempts for application password en
 
 If issues persist, you may need to restart your Mac to refresh the keychain state.
 
-### Why This Happens
+### Why this happens
 
 When Char updates, sometimes the code signing identity changes, which can cause macOS to treat the new version as a different application. This triggers keychain access prompts because macOS is protecting your stored credentials from unauthorized access.

@@ -6,13 +6,13 @@ description: "Exactly how Char handles your data: what stays local, what gets se
 
 This page documents every way Char stores and processes your data. Nothing is hidden. Where possible, we include code snippets from the actual codebase so you can verify each claim yourself.
 
-## How Data Is Stored
+## How data is stored
 
 All core data is stored locally on your device as plain Markdown and JSON files — not in a database. This is a deliberate choice. Files are portable, inspectable, and yours. You can open them in any text editor, back them up however you want, or drop them into an existing vault alongside tools like Obsidian. There is no proprietary format or opaque data layer between you and your data. For more on why we believe in this approach, see [The Filesystem Is the Cortex](/blog/filesystem-is-coretex).
 
 Nothing leaves your machine unless you explicitly enable a cloud feature.
 
-### Directory Layout
+### Directory layout
 
 Char uses two base directories. See [Data](/docs/guides/data) for the full directory layout.
 
@@ -38,7 +38,7 @@ The `store.json` keys are defined by this enum — nothing else is persisted thr
 
 **Application logs** are stored in the system app log directory as rotating files (`app.log`, `app.log.1`, etc.).
 
-### Session Files
+### Session files
 
 Each session gets its own subdirectory. Here is how Char loads session content from disk — this shows exactly what files exist per session:
 
@@ -48,7 +48,7 @@ Transcript data uses this structure — word-level timestamps, speaker channels,
 
 <GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/fs-sync/src/types.rs#L83-L119" />
 
-### Audio Recording
+### Audio recording
 
 When you start a recording session, Char spawns three actors in parallel:
 
@@ -72,7 +72,7 @@ Char stores data as plain Markdown and JSON files on disk — formats you can re
 
 We are actively investigating end-to-end encryption (E2EE) to add an additional layer of protection. This would encrypt your data at rest so that only you can decrypt it, independent of OS-level encryption. We do not have a timeline yet, but it is a priority for us.
 
-### Cloud Sync (Optional)
+### Cloud sync (optional)
 
 Char supports optional cloud database sync.
 
@@ -80,11 +80,11 @@ Char supports optional cloud database sync.
 
 **When not configured:** All data stays in local Markdown and JSON files on disk.
 
-## How Data Is Processed
+## How data is processed
 
 The following sections document every case where Char sends data to an external server. If a feature is not listed here, it does not send data externally.
 
-### Speech-to-Text
+### Speech-to-text
 
 Char supports both local and cloud transcription.
 
@@ -126,7 +126,7 @@ The `ListenerArgs` passed to the STT adapter contain the following — this is a
 | Mistral | [Privacy Policy](https://mistral.ai/terms/#privacy-policy) |
 | Fireworks AI | [Privacy Policy](https://fireworks.ai/privacy-policy) |
 
-### Large Language Models
+### Large language models
 
 Char uses LLMs for summaries, enhanced notes, and chat. You can use cloud providers, bring your own key, or run models locally.
 
@@ -160,7 +160,7 @@ An analytics event is also fired when auto-enhance runs — it includes only the
 - **BYOK providers:** Requests are sent directly to the provider you selected (OpenAI, Anthropic, Google, or Mistral).
 - **Local LLMs:** Everything stays on your device. See [Local LLM Setup](/docs/faq/local-llm-setup).
 
-### MCP Tools (Pro Only)
+### MCP tools (Pro only)
 
 Pro users have access to MCP tools for web search and URL reading during AI-assisted note generation.
 
@@ -173,7 +173,7 @@ Pro users have access to MCP tools for web search and URL reading during AI-assi
 - [Exa](https://exa.ai) — web search
 - [Jina AI](https://jina.ai) — URL content reading
 
-### Analytics (Opt-Out Available)
+### Analytics (opt-out available)
 
 Char collects anonymous usage analytics by default to help improve the product. **You can disable this entirely in Settings.**
 
@@ -201,7 +201,7 @@ The analytics client sends events to both services:
 
 **How to disable:** Go to Settings and turn off analytics. When disabled, no analytics events are sent — the `is_disabled()` check short-circuits the entire flow.
 
-### Error Reporting (Sentry)
+### Error reporting (Sentry)
 
 Char uses Sentry for crash reporting and error tracking in release builds. Here is the complete initialization:
 
@@ -217,7 +217,7 @@ Char uses Sentry for crash reporting and error tracking in release builds. Here 
 **Where it goes:**
 - [Sentry](https://sentry.io) — error monitoring. [Privacy Policy](https://sentry.io/privacy/)
 
-### Network Connectivity Check
+### Network connectivity check
 
 Char periodically checks if your device is online. Here is the complete implementation:
 
@@ -230,7 +230,7 @@ Char periodically checks if your device is online. Here is the complete implemen
 - No user data, cookies, or identifiers are included — it is a bare HEAD request
 - The response is only used to determine if the device is online (boolean)
 
-### Model Downloads
+### Model downloads
 
 When you download a local STT model, Char fetches the model file from a hosting server.
 
@@ -243,7 +243,7 @@ These are the supported local models:
 - No user data is sent
 - Downloaded models are verified with checksums before use
 
-### App Updates
+### App updates
 
 Char checks for updates using the Tauri updater system.
 
@@ -253,7 +253,7 @@ Char checks for updates using the Tauri updater system.
 **Where it goes:**
 - [CrabNebula](https://crabnebula.dev) — release hosting and update distribution
 
-### Authentication (When Signed In)
+### Authentication (when signed in)
 
 When you sign in for Pro or cloud features, Char authenticates via Supabase.
 
@@ -283,7 +283,7 @@ When you sign in for Pro or cloud features, Char authenticates via Supabase.
 4. Do not sign in or enable any cloud features
 5. Enable full-disk encryption on your OS (FileVault, LUKS, BitLocker)
 
-## Open Source
+## Open source
 
 Char is open source. You can verify everything documented here by reading the code:
 
