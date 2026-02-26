@@ -62,6 +62,8 @@ function PromptDetails({ selectedTask }: { selectedTask: TaskType }) {
               participants: [],
               template: null,
               transcripts: [],
+              preMeetingMemo: "",
+              postMeetingMemo: "",
             },
           }
         : { titleUser: { enhancedNote: "" } };

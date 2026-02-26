@@ -48,6 +48,7 @@ function groupTranscriptsBySession(
       created_at: transcript.created_at ?? "",
       session_id: transcript.session_id,
       started_at: transcript.started_at ?? 0,
+      memo_md: transcript.memo_md ?? "",
       ended_at: transcript.ended_at,
       words: transcript.words ? JSON.parse(transcript.words) : [],
       speaker_hints: transcript.speaker_hints

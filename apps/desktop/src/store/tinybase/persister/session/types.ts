@@ -21,7 +21,7 @@ export type SessionMetaJson = Pick<
 
 export type TranscriptWithData = Pick<
   TranscriptStorage,
-  "user_id" | "created_at" | "session_id" | "started_at"
+  "user_id" | "created_at" | "session_id" | "started_at" | "memo_md"
 > & {
   id: string;
   ended_at?: number;

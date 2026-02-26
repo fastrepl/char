@@ -13,6 +13,7 @@ import {
 } from "~/stt/utils";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
+import type { TranscriptStorage } from "@hypr/store";
 
 import { useListener } from "./contexts";
 import { useKeywords } from "./useKeywords";
@@ -38,15 +39,18 @@ export function useStartListening(sessionId: string) {
 
     const transcriptId = id();
     const startedAt = Date.now();
-
-    store.setRow("transcripts", transcriptId, {
+    const memoMd = store.getCell("sessions", sessionId, "raw_md");
+    const transcriptRow = {
       session_id: sessionId,
       user_id: user_id ?? "",
       created_at: new Date().toISOString(),
       started_at: startedAt,
       words: "[]",
       speaker_hints: "[]",
-    });
+      memo_md: typeof memoMd === "string" ? memoMd : "",
+    } satisfies TranscriptStorage;
+
+    store.setRow("transcripts", transcriptId, transcriptRow);
 
     void analyticsCommands.event({
       event: "session_started",
