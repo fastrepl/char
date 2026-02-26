@@ -98,6 +98,7 @@ jobs:
             --exclude cactus \
             --exclude transcribe-cactus \
             --exclude llm-cactus \
+            --exclude local-llm-core \
             --exclude tauri-plugin-analytics\
             --exclude tauri-plugin-apple-calendar \
             --exclude tauri-plugin-apple-contact \

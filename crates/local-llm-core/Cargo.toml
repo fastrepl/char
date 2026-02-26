@@ -9,7 +9,6 @@ specta = ["dep:specta"]
 [dependencies]
 hypr-file = { workspace = true }
 hypr-gguf = { workspace = true }
-hypr-llm-cactus = { workspace = true }
 hypr-lmstudio = { workspace = true }
 
 axum = { workspace = true }
@@ -22,3 +21,6 @@ tower-http = { workspace = true, features = ["cors"] }
 tracing = { workspace = true }
 
 specta = { workspace = true, optional = true }
+
+[target.'cfg(target_arch = "aarch64")'.dependencies]
+hypr-llm-cactus = { workspace = true }

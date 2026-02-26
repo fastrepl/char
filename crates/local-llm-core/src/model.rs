@@ -1,8 +1,12 @@
+#[cfg(target_arch = "aarch64")]
 pub static SUPPORTED_MODELS: &[SupportedModel] = &[
     SupportedModel::Llama3p2_3bQ4,
     SupportedModel::HyprLLM,
     SupportedModel::Gemma3_4bQ4,
 ];
+
+#[cfg(not(target_arch = "aarch64"))]
+pub static SUPPORTED_MODELS: &[SupportedModel] = &[];
 
 #[derive(serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "specta", derive(specta::Type))]
