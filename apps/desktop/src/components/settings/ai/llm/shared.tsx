@@ -1,6 +1,8 @@
 import { Icon } from "@iconify-icon/react";
 import {
   Anthropic,
+  Azure,
+  AzureAI,
   LmStudio,
   Mistral,
   Ollama,
@@ -34,7 +36,7 @@ type Provider = {
 const _PROVIDERS = [
   {
     id: "hyprnote",
-    displayName: "Hyprnote",
+    displayName: "Char",
     badge: "Recommended",
     icon: <img src="/assets/icon.png" alt="Char" className="size-5" />,
     baseUrl: new URL("/llm", env.VITE_API_URL).toString(),
@@ -55,7 +57,7 @@ const _PROVIDERS = [
       models: { label: "Available models", url: "https://lmstudio.ai/models" },
       setup: {
         label: "Setup guide",
-        url: "https://hyprnote.com/docs/faq/local-llm-setup/#lm-studio-setup",
+        url: "https://char.com/docs/faq/local-llm-setup/#lm-studio-setup",
       },
     },
   },
@@ -74,7 +76,7 @@ const _PROVIDERS = [
       models: { label: "Available models", url: "https://ollama.com/library" },
       setup: {
         label: "Setup guide",
-        url: "https://hyprnote.com/docs/faq/local-llm-setup/#ollama-setup",
+        url: "https://char.com/docs/faq/local-llm-setup/#ollama-setup",
       },
     },
   },
@@ -109,6 +111,26 @@ const _PROVIDERS = [
     icon: <Mistral size={16} />,
     baseUrl: "https://api.mistral.ai/v1",
     requirements: [{ kind: "requires_config", fields: ["api_key"] }],
+  },
+  {
+    id: "azure_openai",
+    displayName: "Azure OpenAI",
+    badge: "Beta",
+    icon: <Azure size={16} />,
+    baseUrl: undefined,
+    requirements: [
+      { kind: "requires_config", fields: ["base_url", "api_key"] },
+    ],
+  },
+  {
+    id: "azure_ai",
+    displayName: "Azure AI Foundry",
+    badge: "Beta",
+    icon: <AzureAI size={16} />,
+    baseUrl: undefined,
+    requirements: [
+      { kind: "requires_config", fields: ["base_url", "api_key"] },
+    ],
   },
   {
     id: "google_generative_ai",

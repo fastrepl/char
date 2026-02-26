@@ -134,7 +134,7 @@ Extension UIs have access to the following globals provided by Char:
 - `@hypr/ui` - Char UI component library (Button, ButtonGroup, Card, Checkbox, Popover)
 - `@hypr/utils` - Char utility functions (cn, date-fns helpers, etc.)
 
-## State Management
+## State management
 
 - `tinybase/ui-react` - TinyBase React hooks for synchronized state (useRow, useStore, useSetRowCallback, etc.)
 
@@ -156,7 +156,7 @@ import { useTabs } from "@hypr/tabs";
 
 Extensions can read state from the main Char application using TinyBase. The synchronization happens automatically via postMessage between the iframe and parent window.
 
-## Reading State
+## Reading state
 
 Use TinyBase hooks to read from the synchronized store:
 
@@ -222,7 +222,7 @@ node build.mjs clean              # Remove all dist folders
 node build.mjs install            # Install to app data directory
 ```
 
-## Build Output
+## Build output
 
 The build process generates:
 
@@ -233,22 +233,22 @@ The build process generates:
 
 Follow these steps to develop and test an extension:
 
-## 1. Create Extension Directory
+## 1. Create extension directory
 
 ```bash
 mkdir extensions/my-extension
 cd extensions/my-extension
 ```
 
-## 2. Create Manifest
+## 2. Create manifest
 
 Create `extension.json` with your extension configuration.
 
-## 3. Create Runtime Script
+## 3. Create runtime script
 
 Create `main.js` with lifecycle handlers.
 
-## 4. Create Panel UI
+## 4. Create panel UI
 
 Create `ui.tsx` with your React component.
 
@@ -258,7 +258,7 @@ Create `ui.tsx` with your React component.
 pnpm -F @hypr/extensions build my-extension
 ```
 
-## 6. Install for Development
+## 6. Install for development
 
 Copy the extension to the app data directory:
 
@@ -284,25 +284,25 @@ Launch Char in development mode and navigate to your extension panel.
 
 Extension UIs run in sandboxed iframes with restricted capabilities. The security model relies on several trust boundaries and validation checks.
 
-## Iframe Sandbox
+## Iframe sandbox
 
 Extension iframes use the `sandbox="allow-scripts"` attribute, which restricts the iframe from accessing the parent window's DOM, making top-level navigations, or accessing same-origin storage. Extensions communicate with the parent exclusively through the TinyBase postMessage synchronizer.
 
-## Tauri API Isolation
+## Tauri API isolation
 
 In iframe contexts, Tauri's `__TAURI_INTERNALS__` is polyfilled with a minimal stub that rejects all invoke calls. This prevents extensions from directly calling Tauri commands. The polyfill runs before any module imports to ensure consistent behavior.
 
-## Script Loading
+## Script loading
 
 When an extension panel is loaded, the parent window constructs the script URL using Tauri's `convertFileSrc` API. This converts the local file path from the extension registry into a URL that the iframe can fetch. The `entry_path` originates from the trusted backend extension registry, which only includes extensions that have been explicitly installed by the user.
 
 The iframe host route validates incoming search parameters to ensure `extensionId` and `scriptUrl` are well-formed strings and that `scriptUrl` is a valid URL (rejecting potentially dangerous protocols like `javascript:`). Before executing the fetched script, the host also validates that the response content-type includes `javascript` to avoid executing non-JS payloads.
 
-## State Synchronization Security
+## State synchronization security
 
 The TinyBase synchronizer uses postMessage with origin validation. Messages are only accepted from the expected origin (same as the parent window), and the message format is validated before processing. This prevents malicious iframes from injecting state into the main application.
 
-## Export Validation
+## Export validation
 
 After script execution, the host checks that the extension exported a valid React component via `__hypr_panel_exports.default`. Extensions that fail to export a default component will display an error rather than rendering.
 

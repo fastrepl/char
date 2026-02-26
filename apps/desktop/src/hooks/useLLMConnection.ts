@@ -1,4 +1,5 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
+import { createAzure } from "@ai-sdk/azure";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
@@ -281,6 +282,26 @@ const createLanguageModel = (
         apiKey: conn.apiKey,
       });
       return wrapWithThinkingMiddleware(provider(conn.modelId));
+    }
+
+    case "azure_openai": {
+      const provider = createAzure({
+        fetch: tauriFetch,
+        baseURL: conn.baseUrl,
+        apiKey: conn.apiKey,
+      });
+      return wrapWithThinkingMiddleware(provider(conn.modelId));
+    }
+
+    case "azure_ai": {
+      const provider = createOpenAICompatible({
+        fetch: tauriFetch,
+        name: "azure_ai",
+        baseURL: conn.baseUrl,
+        apiKey: conn.apiKey,
+        headers: { "api-key": conn.apiKey },
+      });
+      return wrapWithThinkingMiddleware(provider.chatModel(conn.modelId));
     }
 
     case "ollama": {

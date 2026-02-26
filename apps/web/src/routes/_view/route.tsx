@@ -30,6 +30,7 @@ function Component() {
   const isDocsPage = router.location.pathname.startsWith("/docs");
   const isHandbookPage =
     router.location.pathname.startsWith("/company-handbook");
+  const isChoosePage = router.location.pathname.startsWith("/choose");
   const [onTrigger, setOnTrigger] = useState<(() => void) | null>(null);
   const [isDocsDrawerOpen, setIsDocsDrawerOpen] = useState(false);
   const [isHandbookDrawerOpen, setIsHandbookDrawerOpen] = useState(false);
@@ -75,11 +76,11 @@ function Component() {
               }}
             >
               <div className="min-h-screen flex flex-col">
-                <Header />
+                {!isChoosePage && <Header />}
                 <main className="flex-1">
                   <Outlet />
                 </main>
-                <Footer />
+                {!isChoosePage && <Footer />}
                 {isDocsPage && (
                   <MobileDocsDrawer
                     isOpen={isDocsDrawerOpen}

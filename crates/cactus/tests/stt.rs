@@ -1,8 +1,14 @@
+use std::io::Write;
+
 use cactus::{CloudConfig, Model, TranscribeOptions, Transcriber};
 
 fn stt_model() -> Model {
-    let path = std::env::var("CACTUS_STT_MODEL")
-        .unwrap_or_else(|_| "/tmp/cactus-model/moonshine-base-cactus".into());
+    let home = std::env::var("HOME").unwrap_or_default();
+    let default = format!(
+        "{}/Library/Application Support/com.hyprnote.dev/models/cactus/whisper-small-int8-apple",
+        home
+    );
+    let path = std::env::var("CACTUS_STT_MODEL").unwrap_or(default);
     Model::new(&path).unwrap()
 }
 
@@ -26,6 +32,30 @@ fn test_transcribe_file() {
 
     assert!(!r.text.is_empty());
     println!("transcription: {:?}", r.text);
+}
+
+// cargo test -p cactus --test stt test_transcribe_file_with_callback -- --ignored --nocapture
+#[ignore]
+#[test]
+fn test_transcribe_file_with_callback() {
+    let model = stt_model();
+    let options = en_options();
+
+    let mut tokens: Vec<String> = Vec::new();
+    let r = model
+        .transcribe_file_with_callback(hypr_data::english_1::AUDIO_PATH, &options, |token| {
+            tokens.push(token.to_string());
+            print!("{}", token);
+            std::io::stdout().flush().ok();
+            true
+        })
+        .unwrap();
+    println!();
+
+    assert!(!r.text.is_empty());
+    println!("transcription: {:?}", r.text);
+    println!("received {} tokens via callback", tokens.len());
+    assert!(!tokens.is_empty(), "expected at least one progress token");
 }
 
 // cargo test -p cactus --test stt test_transcribe_pcm -- --ignored --nocapture

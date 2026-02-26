@@ -40,6 +40,12 @@ pub struct RecorderActor<E: AudioCodec = Mp3Codec> {
     codec: E,
 }
 
+impl Default for RecorderActor {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl RecorderActor {
     pub fn new() -> Self {
         Self { codec: Mp3Codec }
@@ -251,10 +257,7 @@ fn prepare_existing_audio_state<E: AudioCodec>(
         codec
             .decode(encoded_path, wav_path)
             .map_err(|e| -> ActorProcessingErr {
-                Box::new(std::io::Error::new(
-                    std::io::ErrorKind::Other,
-                    e.to_string(),
-                ))
+                Box::new(std::io::Error::other(e.to_string()))
             })?;
         std::fs::remove_file(encoded_path)?;
     }

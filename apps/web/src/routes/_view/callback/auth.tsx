@@ -37,9 +37,12 @@ export const Route = createFileRoute("/_view/callback/auth")({
 
       if (result.success) {
         if (search.type === "recovery") {
-          throw redirect({ to: "/update-password/" });
+          throw redirect({ to: "/update-password/", search: {} });
         }
-        throw redirect({ to: search.redirect || "/app/account/" });
+        throw redirect({
+          to: search.redirect || "/app/account/",
+          search: {},
+        });
       } else {
         console.error(result.error);
       }
@@ -76,7 +79,7 @@ export const Route = createFileRoute("/_view/callback/auth")({
         });
 
         if (result.success) {
-          throw redirect({ to: "/update-password/" });
+          throw redirect({ to: "/update-password/", search: {} });
         } else {
           console.error(result.error);
         }
@@ -91,7 +94,10 @@ export const Route = createFileRoute("/_view/callback/auth")({
 
         if (result.success) {
           if (search.flow === "web") {
-            throw redirect({ to: search.redirect || "/app/account/" });
+            throw redirect({
+              to: search.redirect || "/app/account/",
+              search: {},
+            });
           }
 
           if (search.flow === "desktop") {
@@ -176,7 +182,11 @@ function Component() {
 
   useEffect(() => {
     if (search.flow === "web" && !search.error) {
-      navigate({ to: search.redirect || "/app/account/" });
+      navigate({
+        to: search.redirect || "/app/account/",
+        search: {},
+        replace: true,
+      });
     }
   }, [search, navigate]);
 

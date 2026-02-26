@@ -13,7 +13,6 @@ import { Route as YoutubeRouteImport } from './routes/youtube'
 import { Route as XRouteImport } from './routes/x'
 import { Route as UpdatePasswordRouteImport } from './routes/update-password'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as RedditRouteImport } from './routes/reddit'
 import { Route as LinkedinRouteImport } from './routes/linkedin'
 import { Route as GithubRouteImport } from './routes/github'
 import { Route as FoundersRouteImport } from './routes/founders'
@@ -31,7 +30,7 @@ import { Route as ApiTemplatesRouteImport } from './routes/api/templates'
 import { Route as ApiShortcutsRouteImport } from './routes/api/shortcuts'
 import { Route as ApiMediaUploadRouteImport } from './routes/api/media-upload'
 import { Route as ApiK6ReportsRouteImport } from './routes/api/k6-reports'
-import { Route as ViewWhyHyprnoteRouteImport } from './routes/_view/why-hyprnote'
+import { Route as ViewWhyCharRouteImport } from './routes/_view/why-char'
 import { Route as ViewSecurityRouteImport } from './routes/_view/security'
 import { Route as ViewPrivacyRouteImport } from './routes/_view/privacy'
 import { Route as ViewPricingRouteImport } from './routes/_view/pricing'
@@ -40,6 +39,7 @@ import { Route as ViewOpensourceRouteImport } from './routes/_view/opensource'
 import { Route as ViewFreeRouteImport } from './routes/_view/free'
 import { Route as ViewFileTranscriptionRouteImport } from './routes/_view/file-transcription'
 import { Route as ViewEnterpriseRouteImport } from './routes/_view/enterprise'
+import { Route as ViewChooseRouteImport } from './routes/_view/choose'
 import { Route as ViewBrandRouteImport } from './routes/_view/brand'
 import { Route as ViewAboutRouteImport } from './routes/_view/about'
 import { Route as ViewDocsRouteRouteImport } from './routes/_view/docs/route'
@@ -175,11 +175,6 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RedditRoute = RedditRouteImport.update({
-  id: '/reddit',
-  path: '/reddit',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LinkedinRoute = LinkedinRouteImport.update({
   id: '/linkedin',
   path: '/linkedin',
@@ -264,9 +259,9 @@ const ApiK6ReportsRoute = ApiK6ReportsRouteImport.update({
   path: '/api/k6-reports',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ViewWhyHyprnoteRoute = ViewWhyHyprnoteRouteImport.update({
-  id: '/why-hyprnote',
-  path: '/why-hyprnote',
+const ViewWhyCharRoute = ViewWhyCharRouteImport.update({
+  id: '/why-char',
+  path: '/why-char',
   getParentRoute: () => ViewRouteRoute,
 } as any)
 const ViewSecurityRoute = ViewSecurityRouteImport.update({
@@ -307,6 +302,11 @@ const ViewFileTranscriptionRoute = ViewFileTranscriptionRouteImport.update({
 const ViewEnterpriseRoute = ViewEnterpriseRouteImport.update({
   id: '/enterprise',
   path: '/enterprise',
+  getParentRoute: () => ViewRouteRoute,
+} as any)
+const ViewChooseRoute = ViewChooseRouteImport.update({
+  id: '/choose',
+  path: '/choose',
   getParentRoute: () => ViewRouteRoute,
 } as any)
 const ViewBrandRoute = ViewBrandRouteImport.update({
@@ -916,7 +916,6 @@ export interface FileRoutesByFullPath {
   '/founders': typeof FoundersRoute
   '/github': typeof GithubRoute
   '/linkedin': typeof LinkedinRoute
-  '/reddit': typeof RedditRoute
   '/reset-password': typeof ResetPasswordRoute
   '/update-password': typeof UpdatePasswordRoute
   '/x': typeof XRoute
@@ -926,6 +925,7 @@ export interface FileRoutesByFullPath {
   '/docs': typeof ViewDocsRouteRouteWithChildren
   '/about': typeof ViewAboutRoute
   '/brand': typeof ViewBrandRoute
+  '/choose': typeof ViewChooseRoute
   '/enterprise': typeof ViewEnterpriseRoute
   '/file-transcription': typeof ViewFileTranscriptionRoute
   '/free': typeof ViewFreeRoute
@@ -934,7 +934,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof ViewPricingRoute
   '/privacy': typeof ViewPrivacyRoute
   '/security': typeof ViewSecurityRoute
-  '/why-hyprnote': typeof ViewWhyHyprnoteRoute
+  '/why-char': typeof ViewWhyCharRoute
   '/api/k6-reports': typeof ApiK6ReportsRoute
   '/api/media-upload': typeof ApiMediaUploadRoute
   '/api/shortcuts': typeof ApiShortcutsRoute
@@ -1060,13 +1060,13 @@ export interface FileRoutesByTo {
   '/founders': typeof FoundersRoute
   '/github': typeof GithubRoute
   '/linkedin': typeof LinkedinRoute
-  '/reddit': typeof RedditRoute
   '/reset-password': typeof ResetPasswordRoute
   '/update-password': typeof UpdatePasswordRoute
   '/x': typeof XRoute
   '/youtube': typeof YoutubeRoute
   '/about': typeof ViewAboutRoute
   '/brand': typeof ViewBrandRoute
+  '/choose': typeof ViewChooseRoute
   '/enterprise': typeof ViewEnterpriseRoute
   '/file-transcription': typeof ViewFileTranscriptionRoute
   '/free': typeof ViewFreeRoute
@@ -1075,7 +1075,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof ViewPricingRoute
   '/privacy': typeof ViewPrivacyRoute
   '/security': typeof ViewSecurityRoute
-  '/why-hyprnote': typeof ViewWhyHyprnoteRoute
+  '/why-char': typeof ViewWhyCharRoute
   '/api/k6-reports': typeof ApiK6ReportsRoute
   '/api/media-upload': typeof ApiMediaUploadRoute
   '/api/shortcuts': typeof ApiShortcutsRoute
@@ -1205,7 +1205,6 @@ export interface FileRoutesById {
   '/founders': typeof FoundersRoute
   '/github': typeof GithubRoute
   '/linkedin': typeof LinkedinRoute
-  '/reddit': typeof RedditRoute
   '/reset-password': typeof ResetPasswordRoute
   '/update-password': typeof UpdatePasswordRoute
   '/x': typeof XRoute
@@ -1215,6 +1214,7 @@ export interface FileRoutesById {
   '/_view/docs': typeof ViewDocsRouteRouteWithChildren
   '/_view/about': typeof ViewAboutRoute
   '/_view/brand': typeof ViewBrandRoute
+  '/_view/choose': typeof ViewChooseRoute
   '/_view/enterprise': typeof ViewEnterpriseRoute
   '/_view/file-transcription': typeof ViewFileTranscriptionRoute
   '/_view/free': typeof ViewFreeRoute
@@ -1223,7 +1223,7 @@ export interface FileRoutesById {
   '/_view/pricing': typeof ViewPricingRoute
   '/_view/privacy': typeof ViewPrivacyRoute
   '/_view/security': typeof ViewSecurityRoute
-  '/_view/why-hyprnote': typeof ViewWhyHyprnoteRoute
+  '/_view/why-char': typeof ViewWhyCharRoute
   '/api/k6-reports': typeof ApiK6ReportsRoute
   '/api/media-upload': typeof ApiMediaUploadRoute
   '/api/shortcuts': typeof ApiShortcutsRoute
@@ -1354,7 +1354,6 @@ export interface FileRouteTypes {
     | '/founders'
     | '/github'
     | '/linkedin'
-    | '/reddit'
     | '/reset-password'
     | '/update-password'
     | '/x'
@@ -1364,6 +1363,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/about'
     | '/brand'
+    | '/choose'
     | '/enterprise'
     | '/file-transcription'
     | '/free'
@@ -1372,7 +1372,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/security'
-    | '/why-hyprnote'
+    | '/why-char'
     | '/api/k6-reports'
     | '/api/media-upload'
     | '/api/shortcuts'
@@ -1498,13 +1498,13 @@ export interface FileRouteTypes {
     | '/founders'
     | '/github'
     | '/linkedin'
-    | '/reddit'
     | '/reset-password'
     | '/update-password'
     | '/x'
     | '/youtube'
     | '/about'
     | '/brand'
+    | '/choose'
     | '/enterprise'
     | '/file-transcription'
     | '/free'
@@ -1513,7 +1513,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/security'
-    | '/why-hyprnote'
+    | '/why-char'
     | '/api/k6-reports'
     | '/api/media-upload'
     | '/api/shortcuts'
@@ -1642,7 +1642,6 @@ export interface FileRouteTypes {
     | '/founders'
     | '/github'
     | '/linkedin'
-    | '/reddit'
     | '/reset-password'
     | '/update-password'
     | '/x'
@@ -1652,6 +1651,7 @@ export interface FileRouteTypes {
     | '/_view/docs'
     | '/_view/about'
     | '/_view/brand'
+    | '/_view/choose'
     | '/_view/enterprise'
     | '/_view/file-transcription'
     | '/_view/free'
@@ -1660,7 +1660,7 @@ export interface FileRouteTypes {
     | '/_view/pricing'
     | '/_view/privacy'
     | '/_view/security'
-    | '/_view/why-hyprnote'
+    | '/_view/why-char'
     | '/api/k6-reports'
     | '/api/media-upload'
     | '/api/shortcuts'
@@ -1790,7 +1790,6 @@ export interface RootRouteChildren {
   FoundersRoute: typeof FoundersRoute
   GithubRoute: typeof GithubRoute
   LinkedinRoute: typeof LinkedinRoute
-  RedditRoute: typeof RedditRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   UpdatePasswordRoute: typeof UpdatePasswordRoute
   XRoute: typeof XRoute
@@ -1859,13 +1858,6 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reddit': {
-      id: '/reddit'
-      path: '/reddit'
-      fullPath: '/reddit'
-      preLoaderRoute: typeof RedditRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/linkedin': {
@@ -1987,11 +1979,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiK6ReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_view/why-hyprnote': {
-      id: '/_view/why-hyprnote'
-      path: '/why-hyprnote'
-      fullPath: '/why-hyprnote'
-      preLoaderRoute: typeof ViewWhyHyprnoteRouteImport
+    '/_view/why-char': {
+      id: '/_view/why-char'
+      path: '/why-char'
+      fullPath: '/why-char'
+      preLoaderRoute: typeof ViewWhyCharRouteImport
       parentRoute: typeof ViewRouteRoute
     }
     '/_view/security': {
@@ -2048,6 +2040,13 @@ declare module '@tanstack/react-router' {
       path: '/enterprise'
       fullPath: '/enterprise'
       preLoaderRoute: typeof ViewEnterpriseRouteImport
+      parentRoute: typeof ViewRouteRoute
+    }
+    '/_view/choose': {
+      id: '/_view/choose'
+      path: '/choose'
+      fullPath: '/choose'
+      preLoaderRoute: typeof ViewChooseRouteImport
       parentRoute: typeof ViewRouteRoute
     }
     '/_view/brand': {
@@ -2907,6 +2906,7 @@ interface ViewRouteRouteChildren {
   ViewDocsRouteRoute: typeof ViewDocsRouteRouteWithChildren
   ViewAboutRoute: typeof ViewAboutRoute
   ViewBrandRoute: typeof ViewBrandRoute
+  ViewChooseRoute: typeof ViewChooseRoute
   ViewEnterpriseRoute: typeof ViewEnterpriseRoute
   ViewFileTranscriptionRoute: typeof ViewFileTranscriptionRoute
   ViewFreeRoute: typeof ViewFreeRoute
@@ -2915,7 +2915,7 @@ interface ViewRouteRouteChildren {
   ViewPricingRoute: typeof ViewPricingRoute
   ViewPrivacyRoute: typeof ViewPrivacyRoute
   ViewSecurityRoute: typeof ViewSecurityRoute
-  ViewWhyHyprnoteRoute: typeof ViewWhyHyprnoteRoute
+  ViewWhyCharRoute: typeof ViewWhyCharRoute
   ViewIndexRoute: typeof ViewIndexRoute
   ViewBlogSlugRoute: typeof ViewBlogSlugRoute
   ViewCallbackAuthRoute: typeof ViewCallbackAuthRoute
@@ -2990,6 +2990,7 @@ const ViewRouteRouteChildren: ViewRouteRouteChildren = {
   ViewDocsRouteRoute: ViewDocsRouteRouteWithChildren,
   ViewAboutRoute: ViewAboutRoute,
   ViewBrandRoute: ViewBrandRoute,
+  ViewChooseRoute: ViewChooseRoute,
   ViewEnterpriseRoute: ViewEnterpriseRoute,
   ViewFileTranscriptionRoute: ViewFileTranscriptionRoute,
   ViewFreeRoute: ViewFreeRoute,
@@ -2998,7 +2999,7 @@ const ViewRouteRouteChildren: ViewRouteRouteChildren = {
   ViewPricingRoute: ViewPricingRoute,
   ViewPrivacyRoute: ViewPrivacyRoute,
   ViewSecurityRoute: ViewSecurityRoute,
-  ViewWhyHyprnoteRoute: ViewWhyHyprnoteRoute,
+  ViewWhyCharRoute: ViewWhyCharRoute,
   ViewIndexRoute: ViewIndexRoute,
   ViewBlogSlugRoute: ViewBlogSlugRoute,
   ViewCallbackAuthRoute: ViewCallbackAuthRoute,
@@ -3108,7 +3109,6 @@ const rootRouteChildren: RootRouteChildren = {
   FoundersRoute: FoundersRoute,
   GithubRoute: GithubRoute,
   LinkedinRoute: LinkedinRoute,
-  RedditRoute: RedditRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   UpdatePasswordRoute: UpdatePasswordRoute,
   XRoute: XRoute,

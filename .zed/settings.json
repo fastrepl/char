@@ -10,6 +10,9 @@
     },
     "TSX": {
       "formatter": "prettier"
+    },
+    "Swift": {
+      "tab_size": 2
     }
   },
   "lsp": {

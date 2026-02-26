@@ -44,7 +44,7 @@ pip install aiohttp toml
 pip install toml
 ```
 
-## Generating Vendored Dependencies
+## Generating vendored dependencies
 
 Before building the Flatpak, you need to generate JSON files containing all vendored dependencies. These files allow the build to proceed offline, which is required by Flathub.
 
@@ -70,7 +70,7 @@ python3 flatpak-builder-tools/cargo/flatpak-cargo-generator.py \
   -o apps/desktop/flatpak/cargo-sources.json
 ```
 
-## Building Locally
+## Building locally
 
 Once the vendored dependency files are generated, you can build the Flatpak locally:
 
@@ -102,9 +102,9 @@ ls /app/bin/
 /app/bin/hyprnote
 ```
 
-## Flathub Submission
+## Flathub submission
 
-### Preparation Checklist
+### Preparation checklist
 
 Before submitting to Flathub, ensure:
 
@@ -114,7 +114,7 @@ Before submitting to Flathub, ensure:
 - [ ] The metainfo.xml file has valid screenshots and descriptions
 - [ ] The desktop file has correct categories and keywords
 
-### Submission Process
+### Submission process
 
 1. Fork the `flathub/flathub` repository on GitHub
 
@@ -164,7 +164,7 @@ Before submitting to Flathub, ensure:
 
 8. Respond to review comments from Flathub maintainers
 
-### After Approval
+### After approval
 
 Once approved:
 
@@ -181,7 +181,7 @@ When releasing a new version:
 3. Update the git source tag/commit in the Flathub manifest
 4. Push changes to the Flathub app repository
 
-## File Structure
+## File structure
 
 ```
 apps/desktop/

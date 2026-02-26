@@ -8,7 +8,7 @@ description: "Managed cloud services for Pro users"
   If you've [subscribed to the Pro plan](/pricing) or started a free trial, you automatically get access to these services.
 </Tip>
 
-## Included Services
+## Included services
 
 Pro users get access to managed cloud services that work out of the box:
 
@@ -19,7 +19,7 @@ Pro users get access to managed cloud services that work out of the box:
 
 Pro includes curated AI models that work out of the box. Your requests are proxied through our servers with automatic API key management. If you want to use a specific LLM provider, you can bring your own API key (BYOK) in Settings > Intelligence.
 
-### Which LLM Models Are Used
+### Which LLM models are used
 
 When you use Pro's curated intelligence, Char's server selects from these models automatically. You don't choose a specific model — the server decides which pool of models to use based on the type of request, then OpenRouter picks the fastest available model from that pool.
 
@@ -60,12 +60,9 @@ And here are the two model pools defined in the server config:
 
 <GithubCode url="https://github.com/fastrepl/char/blob/main/crates/llm-proxy/src/config.rs#L43-L52" />
 
-### How the Request Flows
+### How the request flows
 
-```
-Your Device ──HTTPS──▶ Char API Server ──HTTPS──▶ OpenRouter ──▶ Model Provider
-                       (pro.hyprnote.com)          (openrouter.ai)   (OpenAI/Anthropic/Moonshot)
-```
+![Request Flow](https://agents.craft.do/mermaid?code=flowchart%20LR%0A%20%20%20%20A%5BYour%20Device%5D%20--%3E%7CHTTPS%7C%20B%5BChar%20API%20Server%3Cbr%3Epro.hyprnote.com%5D%0A%20%20%20%20B%20--%3E%7CHTTPS%7C%20C%5BOpenRouter%3Cbr%3Eopenrouter.ai%5D%0A%20%20%20%20C%20--%3E%20D%5BModel%20Provider%3Cbr%3EOpenAI%2FAnthropic%2FMoonshot%5D)
 
 1. **Your device** sends a chat completion request to the Char API server, authenticated with your Supabase JWT token.
 2. **Char API server** validates your Pro subscription, then forwards the request to [OpenRouter](https://openrouter.ai).
@@ -76,7 +73,7 @@ The server sends your request to OpenRouter with `provider.sort = "latency"` to 
 
 <GithubCode url="https://github.com/fastrepl/char/blob/main/crates/llm-proxy/src/provider/openrouter.rs#L47-L65" />
 
-### What Data Is Sent
+### What data is sent
 
 **Sent to OpenRouter / model provider:**
 - Your conversation messages (system prompt, user messages, assistant responses)
@@ -88,7 +85,7 @@ The server sends your request to OpenRouter with `provider.sort = "latency"` to 
 - Your device fingerprint
 - Your JWT token (used only for Char API authentication — not forwarded)
 
-### What Char Logs (Analytics)
+### What Char logs (analytics)
 
 Char logs metadata about each LLM request to PostHog for usage tracking and billing. **No message content is ever logged.**
 
@@ -97,7 +94,7 @@ Char logs metadata about each LLM request to PostHog for usage tracking and bill
 **Logged:** provider name, model name, token counts, latency, cost, HTTP status.
 **Not logged:** message content, conversation history, user prompts.
 
-## MCP Tools
+## MCP tools
 
 The MCP server provides two built-in tools:
 
@@ -105,14 +102,14 @@ The MCP server provides two built-in tools:
 
 **read-url** - Visit any URL and return the content as markdown. Great for pulling in context from links shared during meetings.
 
-## Why Use Cloud Services?
+## Why use cloud services?
 
 While Char aims to be fully transparent and controllable, cloud services help in two ways:
 
 1. **Faster time-to-value** - Start using AI features immediately without configuring API keys or running local models.
 2. **Managed complexity** - Get the benefits of multiple AI providers without managing each one yourself.
 
-## Privacy & Security
+## Privacy & security
 
 The cloud server (`pro.hyprnote.com`) is [open-source](https://github.com/fastrepl/hyprnote/tree/main/apps/pro) and deployed in our Kubernetes cluster on AWS via GitHub Actions.
 
@@ -124,7 +121,7 @@ The cloud server (`pro.hyprnote.com`) is [open-source](https://github.com/fastre
 
 All requests are rate-limited and authenticated using your Pro subscription.
 
-### OpenRouter Privacy Policy
+### OpenRouter privacy policy
 
 All Pro LLM requests go through [OpenRouter](https://openrouter.ai), which routes to the actual model provider (OpenAI, Anthropic, Moonshot AI).
 

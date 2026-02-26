@@ -22,7 +22,7 @@ const _PROVIDERS = [
     badge: "Beta",
     icon: <Icon icon="logos:apple" width={20} height={20} />,
     platform: "macos",
-    docsPath: "https://hyprnote.com/docs/calendar/apple",
+    docsPath: "https://char.com/docs/calendar/apple",
     nangoIntegrationId: undefined,
   },
   {
@@ -32,7 +32,7 @@ const _PROVIDERS = [
     badge: "Beta",
     icon: <Icon icon="logos:google-calendar" width={20} height={20} />,
     platform: "all",
-    docsPath: "https://hyprnote.com/docs/calendar/gcal",
+    docsPath: "https://char.com/docs/calendar/gcal",
     nangoIntegrationId: "google-calendar",
   },
   {
@@ -42,7 +42,7 @@ const _PROVIDERS = [
     badge: "Coming soon",
     icon: <OutlookIcon size={20} />,
     platform: "all",
-    docsPath: "https://hyprnote.com/docs/calendar/outlook",
+    docsPath: "https://char.com/docs/calendar/outlook",
     nangoIntegrationId: undefined,
   },
 ] as const satisfies readonly CalendarProvider[];

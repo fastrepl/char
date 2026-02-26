@@ -36,7 +36,7 @@ export const Route = createFileRoute("/_view/opensource")({
       { property: "og:type", content: "website" },
       {
         property: "og:url",
-        content: "https://hyprnote.com/opensource",
+        content: "https://char.com/opensource",
       },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Open Source - Char" },
@@ -820,14 +820,14 @@ const contributions = [
     title: "Spread the Word",
     description: "Share Char with your network and community",
     icon: "mdi:share-variant",
-    link: "https://twitter.com/intent/tweet?text=Check%20out%20Hyprnote%20-%20open%20source%20AI%20meeting%20notes%20that%20run%20locally!%20https://hyprnote.com",
+    link: "https://twitter.com/intent/tweet?text=Check%20out%Char%20-%20open%20source%20AI%20meeting%20notes%20that%20run%20locally!%20https://char.com",
     linkText: "Share on X",
   },
   {
     title: "Join Community",
     description: "Connect with other users and contributors",
     icon: "mdi:forum",
-    link: "https://discord.gg/Hyprnote",
+    link: "/discord",
     linkText: "Join Discord",
   },
 ];

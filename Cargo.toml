@@ -17,7 +17,7 @@ members = [
   "crates/*",
   "plugins/*",
 ]
-exclude = ["plugins/cli2", "plugins/db", "plugins/export"]
+exclude = ["plugins/cli2", "plugins/db", "plugins/export", "crates/vad-ext"]
 
 [workspace.dependencies]
 hypr-aec = { path = "crates/aec", package = "aec" }
@@ -29,6 +29,7 @@ hypr-api-auth = { path = "crates/api-auth", package = "api-auth" }
 hypr-api-bot = { path = "crates/api-bot", package = "api-bot" }
 hypr-api-calendar = { path = "crates/api-calendar", package = "api-calendar" }
 hypr-api-env = { path = "crates/api-env", package = "api-env" }
+hypr-api-error = { path = "crates/api-error", package = "api-error" }
 hypr-api-messenger = { path = "crates/api-messenger", package = "api-messenger" }
 hypr-api-nango = { path = "crates/api-nango", package = "api-nango" }
 hypr-api-research = { path = "crates/api-research", package = "api-research" }
@@ -42,6 +43,7 @@ hypr-audio = { path = "crates/audio", package = "audio" }
 hypr-audio-device = { path = "crates/audio-device", package = "audio-device" }
 hypr-audio-interface = { path = "crates/audio-interface", package = "audio-interface" }
 hypr-audio-mime = { path = "crates/audio-mime", package = "audio-mime" }
+hypr-audio-snapshot = { path = "crates/audio-snapshot", package = "audio-snapshot" }
 hypr-audio-utils = { path = "crates/audio-utils", package = "audio-utils" }
 hypr-buffer = { path = "crates/buffer", package = "buffer" }
 hypr-bundle = { path = "crates/bundle", package = "bundle" }
@@ -52,6 +54,7 @@ hypr-data = { path = "crates/data", package = "data" }
 hypr-db-core = { path = "crates/db-core", package = "db-core" }
 hypr-db-parser = { path = "crates/db-parser", package = "db-parser" }
 hypr-db-user = { path = "crates/db-user", package = "db-user" }
+hypr-denoise = { path = "crates/denoise", package = "denoise" }
 hypr-detect = { path = "crates/detect", package = "detect" }
 hypr-device-monitor = { path = "crates/device-monitor", package = "device-monitor" }
 hypr-docs = { path = "crates/docs", package = "docs" }
@@ -82,6 +85,7 @@ hypr-llm-types = { path = "crates/llm-types", package = "llm-types" }
 hypr-loops = { path = "crates/loops", package = "loops" }
 hypr-mac = { path = "crates/mac", package = "mac" }
 hypr-mcp = { path = "crates/mcp", package = "mcp" }
+hypr-mobile-bridge = { path = "crates/mobile-bridge", package = "mobile-bridge" }
 hypr-mp3 = { path = "crates/mp3", package = "mp3" }
 hypr-nango = { path = "crates/nango", package = "nango" }
 hypr-notification = { path = "crates/notification", package = "notification" }
@@ -112,7 +116,8 @@ hypr-transcribe-proxy = { path = "crates/transcribe-proxy", package = "transcrib
 hypr-transcribe-whisper-local = { path = "crates/transcribe-whisper-local", package = "transcribe-whisper-local" }
 hypr-transcript = { path = "crates/transcript", package = "transcript" }
 hypr-vad = { path = "crates/vad", package = "vad" }
-hypr-vad-ext = { path = "crates/vad-ext", package = "vad-ext" }
+hypr-vad-chunking = { path = "crates/vad-chunking", package = "vad-chunking" }
+hypr-vad-masking = { path = "crates/vad-masking", package = "vad-masking" }
 hypr-version = { path = "crates/version", package = "version" }
 hypr-whisper = { path = "crates/whisper", package = "whisper" }
 hypr-whisper-local = { path = "crates/whisper-local", package = "whisper-local" }
@@ -313,7 +318,6 @@ ratatui = "0.30"
 realfft = "3.5.0"
 ringbuf = "0.4.8"
 rodio = "0.21"
-silero-rs = { git = "https://github.com/emotechlab/silero-rs", rev = "193542c", package = "silero" }
 vorbis_rs = "0.5.5"
 
 deepgram = { version = "0.7", default-features = false }

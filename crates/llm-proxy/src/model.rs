@@ -100,10 +100,10 @@ impl StaticModelResolver {
 
 impl ModelResolver for StaticModelResolver {
     fn resolve(&self, ctx: &ModelContext) -> Vec<String> {
-        if ctx.has_audio {
-            if let Some(models) = self.models.get(MODEL_KEY_AUDIO) {
-                return models.clone();
-            }
+        if ctx.has_audio
+            && let Some(models) = self.models.get(MODEL_KEY_AUDIO)
+        {
+            return models.clone();
         }
 
         if let Some(models) = ctx.task.and_then(|t| self.models.get(&t.to_string())) {

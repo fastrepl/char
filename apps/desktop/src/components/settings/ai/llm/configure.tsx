@@ -35,7 +35,7 @@ export function ConfigureProviders() {
       >
         <HyprProviderCard
           providerId="hyprnote"
-          providerName="Hyprnote"
+          providerName="Char"
           icon={<img src="/assets/icon.png" alt="Char" className="size-5" />}
           badge={PROVIDERS.find((p) => p.id === "hyprnote")?.badge}
         />
@@ -129,9 +129,9 @@ function HyprProviderAutoRow({ highlight }: { highlight?: boolean }) {
   return (
     <HyprProviderRow>
       <div className="flex-1">
-        <span className="text-sm font-medium">Hyprnote Cloud</span>
+        <span className="text-sm font-medium">Char Cloud</span>
         <p className="text-xs text-neutral-500">
-          Use the Hyprnote Cloud API for AI assistance.
+          Use the Char Cloud API for AI assistance.
         </p>
       </div>
       <HyprCloudCTAButton
@@ -156,9 +156,13 @@ function ProviderContext({ providerId }: { providerId: ProviderId }) {
             ? "We only support **OpenAI-compatible** endpoints for now."
             : providerId === "openrouter"
               ? "We filter out models from the combobox based on heuristics like **input modalities** and **tool support**."
-              : providerId === "google_generative_ai"
-                ? "Visit [AI Studio](https://aistudio.google.com/api-keys) to create an API key."
-                : "";
+              : providerId === "azure_openai"
+                ? "Enter your **Azure OpenAI endpoint** (e.g. `https://your-resource.openai.azure.com`) as the Base URL and your **API key**. [Report issues](https://github.com/fastrepl/char/issues/3928)"
+                : providerId === "azure_ai"
+                  ? "Enter your **Azure AI Foundry endpoint** as the Base URL and your **API key**. Supports Claude and other models deployed via Azure AI Foundry. [Report issues](https://github.com/fastrepl/char/issues/3928)"
+                  : providerId === "google_generative_ai"
+                    ? "Visit [AI Studio](https://aistudio.google.com/api-keys) to create an API key."
+                    : "";
 
   if (!content) {
     return null;

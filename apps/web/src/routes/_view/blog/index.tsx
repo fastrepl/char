@@ -41,7 +41,7 @@ export const Route = createFileRoute("/_view/blog/")({
         content: "Insights, updates, and stories from the Char team",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://hyprnote.com/blog" },
+      { property: "og:url", content: "https://char.com/blog" },
     ],
   }),
 });

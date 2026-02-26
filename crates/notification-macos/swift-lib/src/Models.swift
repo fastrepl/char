@@ -21,9 +21,15 @@ struct NotificationPayload: Codable {
   let participants: [Participant]?
   let eventDetails: EventDetails?
   let actionLabel: String?
+  let options: [String]?
 
   var isPersistent: Bool {
     return timeoutSeconds <= 0
+  }
+
+  var hasOptions: Bool {
+    guard let options = options else { return false }
+    return !options.isEmpty
   }
 }
 

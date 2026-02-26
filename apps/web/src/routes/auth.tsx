@@ -237,14 +237,14 @@ function LegalText() {
     <p className="text-xs text-neutral-500 mt-4 text-center">
       By signing up, you agree to our{" "}
       <a
-        href="https://hyprnote.com/legal/terms"
+        href="https://char.com/legal/terms"
         className="underline hover:text-neutral-700"
       >
         Terms of Service
       </a>{" "}
       and{" "}
       <a
-        href="https://hyprnote.com/legal/privacy"
+        href="https://char.com/legal/privacy"
         className="underline hover:text-neutral-700"
       >
         Privacy Policy

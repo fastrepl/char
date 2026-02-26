@@ -288,7 +288,7 @@ export function TimelineView() {
             "rounded-full bg-white hover:bg-neutral-50",
             "text-neutral-700 border border-neutral-200",
             "z-20 flex items-center gap-1",
-            "shadow-[inset_0_-4px_6px_-1px_rgba(255,0,0,0.1),inset_0_-2px_4px_-2px_rgba(255,0,0,0.1)]",
+            "shadow-xs",
             isScrolledPastToday ? "top-2" : "bottom-2",
           ])}
           variant="outline"
