@@ -5,7 +5,7 @@ pub(crate) mod language;
 mod live;
 
 #[cfg(feature = "argmax")]
-pub use batch::{StreamingBatchConfig, StreamingBatchEvent, StreamingBatchStream};
+pub use batch::StreamingBatchConfig;
 
 pub use language::PARAKEET_V3_LANGS;
 

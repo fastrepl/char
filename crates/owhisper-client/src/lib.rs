@@ -15,6 +15,8 @@ pub use providers::{Auth, Provider, is_meta_model};
 
 use std::marker::PhantomData;
 
+#[cfg(feature = "argmax")]
+pub use adapter::StreamingBatchConfig;
 pub use adapter::deepgram::DeepgramModel;
 pub use adapter::{
     AdapterKind, ArgmaxAdapter, AssemblyAIAdapter, BatchSttAdapter, CactusAdapter, CallbackResult,
@@ -24,8 +26,7 @@ pub use adapter::{
     documented_language_codes_batch, documented_language_codes_live, is_hyprnote_proxy,
     is_local_host, normalize_languages,
 };
-#[cfg(feature = "argmax")]
-pub use adapter::{StreamingBatchConfig, StreamingBatchEvent, StreamingBatchStream};
+pub use adapter::{StreamingBatchEvent, StreamingBatchStream};
 
 pub use batch::{BatchClient, BatchClientBuilder};
 pub use error::Error;

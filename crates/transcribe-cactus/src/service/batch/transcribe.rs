@@ -3,7 +3,8 @@ use std::path::Path;
 
 use owhisper_interface::ListenParams;
 use owhisper_interface::batch;
-use owhisper_interface::stream::{Extra, Metadata, ModelInfo};
+use owhisper_interface::progress::{InferencePhase, InferenceProgress};
+use tokio::sync::mpsc;
 
 use super::audio::{audio_duration_secs, content_type_to_extension};
 use super::response::build_batch_words;
@@ -13,6 +14,7 @@ pub(super) fn transcribe_batch(
     content_type: &str,
     params: &ListenParams,
     model_path: &Path,
+    progress_tx: Option<mpsc::UnboundedSender<InferenceProgress>>,
 ) -> Result<batch::Response, crate::Error> {
     let extension = content_type_to_extension(content_type);
     let mut temp_file = tempfile::Builder::new()
@@ -39,25 +41,44 @@ pub(super) fn transcribe_batch(
 
     let total_duration = audio_duration_secs(temp_file.path());
 
-    let cactus_response = model.transcribe_file(temp_file.path(), &options)?;
+    let cactus_response = if let Some(tx) = progress_tx {
+        let mut partial_text = String::new();
+        let mut last_timestamp: f64 = 0.0;
+
+        model.transcribe_file_with_callback(temp_file.path(), &options, |token| {
+            if token.starts_with("<|") && token.ends_with("|>") {
+                if let Some(ts_str) = token.strip_prefix("<|").and_then(|s| s.strip_suffix("|>")) {
+                    if let Ok(ts) = ts_str.parse::<f64>() {
+                        last_timestamp = ts;
+                    }
+                }
+            } else {
+                partial_text.push_str(token);
+            }
+
+            let percentage = if total_duration > 0.0 {
+                (last_timestamp / total_duration).clamp(0.0, 1.0)
+            } else {
+                0.0
+            };
+
+            let _ = tx.send(InferenceProgress {
+                percentage,
+                partial_text: Some(partial_text.clone()),
+                phase: InferencePhase::Decoding,
+            });
+
+            true
+        })?
+    } else {
+        model.transcribe_file(temp_file.path(), &options)?
+    };
+
     let transcript = cactus_response.text.trim().to_string();
     let confidence = cactus_response.confidence as f64;
     let words = build_batch_words(&transcript, total_duration, confidence);
 
-    let model_name = model_path
-        .file_stem()
-        .and_then(|s| s.to_str())
-        .unwrap_or("cactus");
-
-    let meta = Metadata {
-        model_info: ModelInfo {
-            name: model_name.to_string(),
-            version: "1.0".to_string(),
-            arch: "cactus".to_string(),
-        },
-        extra: Some(Extra::default().into()),
-        ..Default::default()
-    };
+    let meta = crate::service::build_metadata(model_path);
 
     let mut metadata = serde_json::to_value(&meta).unwrap_or_default();
     if let Some(obj) = metadata.as_object_mut() {
@@ -108,7 +129,7 @@ mod tests {
             ..Default::default()
         };
 
-        let response = transcribe_batch(&wav_bytes, "audio/wav", &params, model_path)
+        let response = transcribe_batch(&wav_bytes, "audio/wav", &params, model_path, None)
             .unwrap_or_else(|e| panic!("real-model batch transcription failed: {e}"));
 
         let Some(channel) = response.results.channels.first() else {
