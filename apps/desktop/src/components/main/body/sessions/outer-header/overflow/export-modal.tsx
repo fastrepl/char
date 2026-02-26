@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
+import { commands as fs2Commands } from "@hypr/plugin-fs2";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 import {
   commands as pdfCommands,
@@ -391,7 +392,7 @@ export function ExportModal({
       } else {
         const textContent =
           format === "md" ? buildMdContent() : buildTxtContent();
-        const result = await pdfCommands.exportText(path, textContent);
+        const result = await fs2Commands.writeTextFile(path, textContent);
         if (result.status === "error") {
           throw new Error(result.error);
         }
