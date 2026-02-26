@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import type { ComponentRef } from "react";
-import { ChatView } from "~/chat/components/view";
+import { PersistentChatPanel } from "~/chat/components/persistent-chat";
 import { useShell } from "~/contexts/shell";
 import { useSearch } from "~/search/contexts/ui";
 import { Body } from "~/shared/main";
@@ -29,6 +29,7 @@ function Component() {
   const previousModeRef = useRef(chat.mode);
   const previousQueryRef = useRef(query);
   const bodyPanelRef = useRef<ComponentRef<typeof ResizablePanel>>(null);
+  const chatPanelContainerRef = useRef<HTMLDivElement>(null);
 
   const isChatOpen = chat.mode === "RightPanelOpen";
 
@@ -93,11 +94,13 @@ function Component() {
               className="pl-1"
               style={{ minWidth: CHAT_MIN_WIDTH_PX }}
             >
-              <ChatView />
+              <div ref={chatPanelContainerRef} className="h-full" />
             </ResizablePanel>
           </>
         )}
       </ResizablePanelGroup>
+
+      <PersistentChatPanel panelContainerRef={chatPanelContainerRef} />
     </div>
   );
 }
