@@ -193,7 +193,7 @@ export function ChatSession({
     });
 
   return (
-    <div className="flex-1 h-full flex flex-col">
+    <div className="flex-1 min-h-0 flex flex-col">
       {children({
         sessionId,
         messages,
