@@ -51,7 +51,9 @@
 
 /* Inline mention chip */
 .mention {
-  display: inline;
+  display: inline-flex;
+  align-items: center;
+  max-width: 200px;
   font-weight: 500;
   text-decoration: none;
   border-radius: 0.25rem;
@@ -59,6 +61,9 @@
   font-size: inherit;
   line-height: inherit;
   color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .mention .mention-avatar {
@@ -89,6 +94,13 @@
   height: 1em;
   position: relative;
   top: -2px;
+}
+
+.mention .mention-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 /* NodeView wrapper for inline mention rendering */
