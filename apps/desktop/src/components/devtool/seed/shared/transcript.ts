@@ -202,6 +202,7 @@ export function generateTranscript(options?: {
       ended_at: startedAt + currentTimeMs,
       words: JSON.stringify(wordsWithIds),
       speaker_hints: "[]",
+      memo_md: "",
     };
 
     return {

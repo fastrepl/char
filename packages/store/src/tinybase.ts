@@ -39,6 +39,7 @@ export const tableSchemaForTinybase = {
     ended_at: { type: "number" },
     words: { type: "string" },
     speaker_hints: { type: "string" },
+    memo_md: { type: "string" },
   } as const satisfies InferTinyBaseSchema<typeof transcriptSchema>,
   humans: {
     user_id: { type: "string" },

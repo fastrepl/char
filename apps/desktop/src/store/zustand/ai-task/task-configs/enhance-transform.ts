@@ -27,6 +27,7 @@ type TranscriptMeta = {
   id: string;
   startedAt: number;
   endedAt: number | null;
+  memoMd: string;
 };
 
 type WordRow = Record<string, unknown> & {
@@ -74,6 +75,8 @@ async function transformArgs(
     session: sessionContext.session,
     participants: sessionContext.participants,
     template,
+    preMeetingMd: sessionContext.preMeetingMemo,
+    rawMd: sessionContext.inMeetingMemo,
     transcripts: formatTranscripts(
       sessionContext.rawMd,
       sessionContext.segments,
@@ -131,13 +134,32 @@ function getLanguage(settingsStore: SettingsStore): string | null {
 
 function getSessionContext(sessionId: string, store: MainStore) {
   const transcriptsMeta = collectTranscripts(sessionId, store);
+  const rawMd = getStringCell(store, "sessions", sessionId, "raw_md");
+
+  const earliest =
+    transcriptsMeta.length > 0
+      ? transcriptsMeta.reduce((a, b) => (a.startedAt <= b.startedAt ? a : b))
+      : null;
+  const preMeetingMemo = earliest?.memoMd ?? "";
+  const inMeetingMemo = extractInMeetingMemo(rawMd, preMeetingMemo);
+
   return {
-    rawMd: getStringCell(store, "sessions", sessionId, "raw_md"),
+    rawMd,
+    preMeetingMemo,
+    inMeetingMemo,
     session: getSessionData(sessionId, store),
     participants: getParticipants(sessionId, store),
     segments: getTranscriptSegmentsFromMeta(transcriptsMeta, store),
     transcriptsMeta,
   };
+}
+
+function extractInMeetingMemo(rawMd: string, preMeetingMemo: string): string {
+  if (!preMeetingMemo) return rawMd;
+  if (rawMd === preMeetingMemo) return "";
+  if (rawMd.startsWith(preMeetingMemo))
+    return rawMd.slice(preMeetingMemo.length).trimStart();
+  return rawMd;
 }
 
 function getSessionData(sessionId: string, store: MainStore): Session {
@@ -325,7 +347,8 @@ function collectTranscripts(
       getNumberCell(store, "transcripts", transcriptId, "started_at") ?? 0;
     const endedAt =
       getNumberCell(store, "transcripts", transcriptId, "ended_at") ?? null;
-    transcripts.push({ id: transcriptId, startedAt, endedAt });
+    const memoMd = getStringCell(store, "transcripts", transcriptId, "memo_md");
+    transcripts.push({ id: transcriptId, startedAt, endedAt, memoMd });
   });
 
   return transcripts;

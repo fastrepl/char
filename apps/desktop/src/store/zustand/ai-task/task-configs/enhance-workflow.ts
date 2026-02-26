@@ -83,7 +83,8 @@ async function getUserPrompt(
   args: TaskArgsMapTransformed["enhance"],
   store: Store,
 ) {
-  const { session, participants, template, transcripts } = args;
+  const { session, participants, template, transcripts, preMeetingMd, rawMd } =
+    args;
 
   const ctx = {
     content: transcripts,
@@ -107,6 +108,8 @@ async function getUserPrompt(
       participants,
       template,
       transcripts,
+      preMeetingMd,
+      rawMd,
     },
   });
 

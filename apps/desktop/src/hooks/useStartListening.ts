@@ -38,6 +38,7 @@ export function useStartListening(sessionId: string) {
 
     const transcriptId = id();
     const startedAt = Date.now();
+    const memoMd = store.getCell("sessions", sessionId, "raw_md");
 
     store.setRow("transcripts", transcriptId, {
       session_id: sessionId,
@@ -46,6 +47,7 @@ export function useStartListening(sessionId: string) {
       started_at: startedAt,
       words: "[]",
       speaker_hints: "[]",
+      memo_md: typeof memoMd === "string" ? memoMd : "",
     });
 
     void analyticsCommands.event({
