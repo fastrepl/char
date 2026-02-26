@@ -21,9 +21,11 @@ pub(super) fn sanitise_key(key: &str) -> Cow<'_, str> {
 
 pub(super) fn sanitise_type_name(ident: &str) -> Result<(), Error> {
     if let Some(first_char) = ident.chars().next()
-        && !first_char.is_alphabetic() && first_char != '_' {
-            return Err(Error::InvalidTypeName(ident.to_string()));
-        }
+        && !first_char.is_alphabetic()
+        && first_char != '_'
+    {
+        return Err(Error::InvalidTypeName(ident.to_string()));
+    }
 
     if ident.contains(|c: char| !c.is_alphanumeric() && c != '_') {
         return Err(Error::InvalidTypeName(ident.to_string()));

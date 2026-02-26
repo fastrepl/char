@@ -75,9 +75,10 @@ impl Zod {
     pub fn export_to(&self, path: impl AsRef<Path>, types: &TypeCollection) -> Result<(), Error> {
         let path = path.as_ref();
         if let Some(parent) = path.parent()
-            && !parent.as_os_str().is_empty() {
-                std::fs::create_dir_all(parent)?;
-            }
+            && !parent.as_os_str().is_empty()
+        {
+            std::fs::create_dir_all(parent)?;
+        }
         std::fs::write(path, self.export(types)?)?;
         Ok(())
     }

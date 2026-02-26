@@ -257,9 +257,7 @@ fn prepare_existing_audio_state<E: AudioCodec>(
         codec
             .decode(encoded_path, wav_path)
             .map_err(|e| -> ActorProcessingErr {
-                Box::new(std::io::Error::other(
-                    e.to_string(),
-                ))
+                Box::new(std::io::Error::other(e.to_string()))
             })?;
         std::fs::remove_file(encoded_path)?;
     }

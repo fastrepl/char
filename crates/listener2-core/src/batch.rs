@@ -498,10 +498,9 @@ async fn spawn_argmax_streaming_batch_task(
             }
         }
 
-        if ended_cleanly
-            && let Err(e) = myself.send_message(BatchMsg::StreamEnded) {
-                tracing::error!("failed to send stream ended message: {:?}", e);
-            }
+        if ended_cleanly && let Err(e) = myself.send_message(BatchMsg::StreamEnded) {
+            tracing::error!("failed to send stream ended message: {:?}", e);
+        }
         tracing::info!("argmax streaming batch task exited");
     });
 
@@ -730,10 +729,9 @@ async fn process_batch_stream<S, E>(
         }
     }
 
-    if ended_cleanly
-        && let Err(e) = myself.send_message(BatchMsg::StreamEnded) {
-            tracing::error!("failed to send stream ended message: {:?}", e);
-        }
+    if ended_cleanly && let Err(e) = myself.send_message(BatchMsg::StreamEnded) {
+        tracing::error!("failed to send stream ended message: {:?}", e);
+    }
     tracing::info!("batch stream processing loop exited");
 }
 
