@@ -130,17 +130,10 @@ function getSessionContext(sessionId: string, store: MainStore) {
       ? transcriptsMeta.reduce((a, b) => (a.startedAt <= b.startedAt ? a : b))
       : null;
   const preMeetingMemo = earliest?.memoMd ?? "";
-  const postMeetingMemo = !preMeetingMemo
-    ? rawMd
-    : rawMd === preMeetingMemo
-      ? ""
-      : rawMd.startsWith(preMeetingMemo)
-        ? rawMd.slice(preMeetingMemo.length).trimStart()
-        : rawMd;
 
   return {
     preMeetingMemo,
-    postMeetingMemo,
+    postMeetingMemo: rawMd,
     session: getSessionData(sessionId, store),
     participants: getParticipants(sessionId, store),
     segments: getTranscriptSegmentsFromMeta(transcriptsMeta, store),
