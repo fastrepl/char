@@ -119,7 +119,7 @@ function HeroSection() {
             <Icon icon="mdi:newspaper" className="text-lg" />
             <span>For Journalists</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
+          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
             Report with confidence using
             <br />
             AI-powered meeting notes
@@ -160,7 +160,7 @@ function FeaturesSection() {
   return (
     <section className="px-6 py-16 border-t border-neutral-100">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-600 text-center mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
           Built for journalism excellence
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
@@ -191,7 +191,7 @@ function UseCasesSection() {
   return (
     <section className="px-6 py-16 bg-stone-50/50 border-t border-neutral-100">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-600 text-center mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
           For every beat and story
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
@@ -222,7 +222,7 @@ function CTASection() {
   return (
     <section className="px-6 py-16 border-t border-neutral-100">
       <div className="max-w-2xl mx-auto text-center">
-        <h2 className="text-3xl font-serif text-stone-600 mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 mb-4">
           Ready to report with confidence?
         </h2>
         <p className="text-neutral-600 mb-8">

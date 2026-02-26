@@ -145,7 +145,7 @@ function HeroSection() {
   return (
     <div className="px-6 py-16 lg:py-24">
       <div className="text-center max-w-3xl mx-auto">
-        <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
+        <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
           App Screenshots
         </h1>
         <p className="text-lg sm:text-xl text-neutral-600">
@@ -260,7 +260,7 @@ function ScreenshotsGrid({
                 className="w-16 h-16 rounded-lg border border-neutral-200 object-cover group-hover:scale-110 transition-transform"
               />
             </div>
-            <div className="font-medium text-stone-600 text-sm truncate w-full">
+            <div className="font-medium text-stone-700 text-sm truncate w-full">
               {screenshot.name}
             </div>
           </button>
@@ -345,7 +345,7 @@ function MobileSidebarDrawer({
             }}
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200 bg-stone-50">
-              <span className="text-sm font-medium text-stone-600">
+              <span className="text-sm font-medium text-stone-700">
                 Navigation
               </span>
               <button
@@ -452,7 +452,7 @@ function ScreenshotsSidebar({
               />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-stone-600 truncate">
+              <p className="text-sm font-medium text-stone-700 truncate">
                 {screenshot.name}
               </p>
             </div>
@@ -502,7 +502,7 @@ function ScreenshotDetail({
   return (
     <>
       <div className="py-2 px-4 flex items-center justify-between border-b border-neutral-200">
-        <h2 className="font-medium text-stone-600">{screenshot.name}</h2>
+        <h2 className="font-medium text-stone-700">{screenshot.name}</h2>
         <div className="flex items-center gap-2">
           <a
             href={screenshot.url}

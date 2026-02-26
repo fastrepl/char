@@ -27,7 +27,7 @@ function Component() {
       <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white h-full">
         <div className="bg-[linear-gradient(to_bottom,rgba(245,245,244,0.2),white_50%,rgba(245,245,244,0.3))] px-6 py-12 h-full overflow-auto flex items-center justify-center">
           <header className="text-center max-w-4xl mx-auto mb-12">
-            <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
+            <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
               Char API
             </h1>
             <p className="text-lg sm:text-xl text-neutral-600 mb-8">

@@ -8,7 +8,6 @@ pub use integration_callback::*;
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use std::collections::HashMap;
 use std::str::FromStr;
 
 #[derive(Debug, Clone, serde::Serialize, specta::Type, tauri_specta::Event)]
@@ -49,18 +48,12 @@ impl FromStr for DeepLink {
             format!("{}/{}", host, path)
         };
 
-        let query_params: HashMap<String, String> = parsed.query_pairs().into_owned().collect();
+        let query = parsed.query().unwrap_or("");
 
         match full_path.as_str() {
-            "auth/callback" => Ok(DeepLink::AuthCallback(
-                AuthCallbackSearch::from_query_params(&query_params)?,
-            )),
-            "billing/refresh" => Ok(DeepLink::BillingRefresh(
-                BillingRefreshSearch::from_query_params(&query_params)?,
-            )),
-            "integration/callback" => Ok(DeepLink::IntegrationCallback(
-                IntegrationCallbackSearch::from_query_params(&query_params)?,
-            )),
+            "auth/callback" => Ok(DeepLink::AuthCallback(serde_qs::from_str(query)?)),
+            "billing/refresh" => Ok(DeepLink::BillingRefresh(serde_qs::from_str(query)?)),
+            "integration/callback" => Ok(DeepLink::IntegrationCallback(serde_qs::from_str(query)?)),
             _ => Err(crate::Error::UnknownPath(full_path)),
         }
     }

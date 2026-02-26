@@ -12,6 +12,12 @@ pub struct CreateConnectSessionRequest {
     pub allowed_integrations: Option<Vec<String>>,
 }
 
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct CreateReconnectSessionRequest {
+    pub connection_id: String,
+    pub integration_id: String,
+}
+
 #[derive(Debug, Serialize, ToSchema)]
 pub struct ConnectSessionResponse {
     pub token: String,
@@ -56,6 +62,35 @@ pub async fn create_connect_session(
     };
 
     let session = state.nango.create_connect_session(req).await?;
+
+    Ok(Json(ConnectSessionResponse {
+        token: session.token,
+        expires_at: session.expires_at,
+    }))
+}
+
+#[utoipa::path(
+    post,
+    path = "/reconnect-session",
+    request_body(content = CreateReconnectSessionRequest, content_type = "application/json"),
+    responses(
+        (status = 200, description = "Reconnect session created", body = ConnectSessionResponse),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal server error"),
+    ),
+    tag = "nango",
+)]
+pub async fn create_reconnect_session(
+    State(state): State<AppState>,
+    Extension(_auth): Extension<AuthContext>,
+    Json(body): Json<CreateReconnectSessionRequest>,
+) -> Result<Json<ConnectSessionResponse>> {
+    let req = hypr_nango::ReconnectSessionRequest {
+        connection_id: body.connection_id,
+        integration_id: body.integration_id,
+    };
+
+    let session = state.nango.reconnect_session(req).await?;
 
     Ok(Json(ConnectSessionResponse {
         token: session.token,

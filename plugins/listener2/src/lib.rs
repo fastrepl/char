@@ -9,7 +9,7 @@ mod ext;
 pub use events::*;
 pub use ext::*;
 
-pub use hypr_listener2_core::{BatchParams, BatchProvider, Subtitle, VttWord};
+pub use hypr_listener2_core::{BatchParams, BatchProvider, DenoiseParams, Subtitle, VttWord};
 
 const PLUGIN_NAME: &str = "listener2";
 
@@ -24,13 +24,14 @@ fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
         .plugin_name(PLUGIN_NAME)
         .commands(tauri_specta::collect_commands![
             commands::run_batch::<tauri::Wry>,
+            commands::run_denoise::<tauri::Wry>,
             commands::parse_subtitle::<tauri::Wry>,
             commands::export_to_vtt::<tauri::Wry>,
             commands::is_supported_languages_batch::<tauri::Wry>,
             commands::suggest_providers_for_languages_batch::<tauri::Wry>,
             commands::list_documented_language_codes_batch::<tauri::Wry>,
         ])
-        .events(tauri_specta::collect_events![BatchEvent])
+        .events(tauri_specta::collect_events![BatchEvent, DenoiseEvent])
         .error_handling(tauri_specta::ErrorHandlingMode::Result)
 }
 

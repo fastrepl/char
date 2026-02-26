@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 
-import { createConnectSession } from "@hypr/api-client";
+import { createConnectSession, createReconnectSession } from "@hypr/api-client";
 import { createClient } from "@hypr/api-client/client";
 import { cn } from "@hypr/utils";
 
@@ -12,6 +12,10 @@ import { getAccessToken } from "@/functions/access-token";
 
 const validateSearch = z.object({
   integration_id: z.string().default("google-calendar"),
+  connection_id: z.string().optional(),
+  flow: z.enum(["desktop", "web"]).default("web"),
+  scheme: z.string().default("hyprnote"),
+  return_to: z.string().optional(),
 });
 
 const INTEGRATION_DISPLAY: Record<
@@ -48,9 +52,11 @@ function Component() {
   const navigate = useNavigate();
   const [nango] = useState(() => new Nango());
   const [status, setStatus] = useState<
-    "idle" | "connecting" | "success" | "error"
+    "idle" | "loading" | "connecting" | "success" | "error"
   >("idle");
   const statusRef = useRef(status);
+  const inFlightRef = useRef(false);
+
   useEffect(() => {
     statusRef.current = status;
   }, [status]);
@@ -58,6 +64,51 @@ function Component() {
   const display = getIntegrationDisplay(search.integration_id);
 
   const handleConnect = async () => {
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
+    setStatus("loading");
+
+    let sessionToken: string;
+
+    try {
+      const token = await getAccessToken();
+      const apiClient = createClient({
+        baseUrl: env.VITE_API_URL,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (search.connection_id) {
+        const { data, error } = await createReconnectSession({
+          client: apiClient,
+          body: {
+            connection_id: search.connection_id,
+            integration_id: search.integration_id,
+          },
+        });
+        if (error || !data) {
+          inFlightRef.current = false;
+          setStatus("error");
+          return;
+        }
+        sessionToken = data.token;
+      } else {
+        const { data, error } = await createConnectSession({
+          client: apiClient,
+          body: { allowed_integrations: [search.integration_id] },
+        });
+        if (error || !data) {
+          inFlightRef.current = false;
+          setStatus("error");
+          return;
+        }
+        sessionToken = data.token;
+      }
+    } catch {
+      inFlightRef.current = false;
+      setStatus("error");
+      return;
+    }
+
     setStatus("connecting");
 
     const connect = nango.openConnectUI({
@@ -67,6 +118,7 @@ function Component() {
             statusRef.current !== "success" &&
             statusRef.current !== "error"
           ) {
+            inFlightRef.current = false;
             setStatus("idle");
           }
         } else if (event.type === "connect") {
@@ -76,56 +128,75 @@ function Component() {
             search: {
               integration_id: search.integration_id,
               status: "success",
-              flow: "web",
+              flow: search.flow,
+              scheme: search.scheme,
+              return_to: search.return_to,
             },
           });
         }
       },
     });
 
-    try {
-      const token = await getAccessToken();
-      const client = createClient({
-        baseUrl: env.VITE_API_URL,
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const { data, error } = await createConnectSession({
-        client,
-        body: { allowed_integrations: [search.integration_id] },
-      });
-      if (error || !data) {
-        setStatus("error");
-        return;
-      }
-      connect.setSessionToken(data.token);
-    } catch {
-      setStatus("error");
-    }
+    connect.setSessionToken(sessionToken);
   };
+
+  useEffect(() => {
+    if (search.flow === "desktop") {
+      void handleConnect();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const isLoading = status === "loading";
+  const isConnecting = status === "connecting";
 
   return (
     <div className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white flex items-center justify-center p-6">
       <div className="max-w-md w-full text-center flex flex-col gap-8">
         <div className="flex flex-col gap-3">
-          <h1 className="text-3xl font-serif tracking-tight text-stone-600">
+          <h1 className="text-3xl font-serif tracking-tight text-stone-700">
             Connect {display.name}
           </h1>
           <p className="text-neutral-600">
-            {status === "connecting"
-              ? display.connectingHint
-              : display.description}
+            {isConnecting ? display.connectingHint : display.description}
           </p>
         </div>
 
-        {status === "idle" && (
+        {(status === "idle" || isLoading) && (
           <button
             onClick={handleConnect}
+            disabled={isLoading}
             className={cn([
-              "w-full h-12 flex items-center justify-center text-base font-medium transition-all cursor-pointer",
-              "bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
+              "w-full h-12 flex items-center justify-center gap-2 text-base font-medium transition-all rounded-full shadow-md",
+              "bg-linear-to-t from-stone-600 to-stone-500 text-white",
+              isLoading
+                ? "opacity-70 cursor-not-allowed"
+                : "cursor-pointer hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
             ])}
           >
-            Connect {display.name}
+            {isLoading && (
+              <svg
+                className="animate-spin h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
+              </svg>
+            )}
+            {isLoading ? "Connecting…" : `Connect ${display.name}`}
           </button>
         )}
 
@@ -135,7 +206,7 @@ function Component() {
               Something went wrong. Please try again.
             </p>
             <button
-              onClick={() => setStatus("idle")}
+              onClick={handleConnect}
               className={cn([
                 "w-full h-12 flex items-center justify-center text-base font-medium transition-all cursor-pointer",
                 "bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",

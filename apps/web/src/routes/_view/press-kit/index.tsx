@@ -47,7 +47,7 @@ function Component() {
       <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
         <div className="px-6 py-16 lg:py-24">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
+            <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
               Press Kit
             </h1>
             <p className="text-lg sm:text-xl text-neutral-600">

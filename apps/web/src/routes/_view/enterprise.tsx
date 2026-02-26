@@ -165,7 +165,7 @@ function HeroSection() {
             <Icon icon="mdi:office-building" className="text-lg" />
             <span>For Enterprise</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
+          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
             Meeting AI Configured
             <br />
             For Your Organization
@@ -294,7 +294,7 @@ function VerifiableSection() {
   return (
     <section className="px-6 py-16 bg-stone-50/50 border-t border-neutral-100">
       <div className="max-w-3xl mx-auto text-center">
-        <h2 className="text-3xl font-serif text-stone-600 mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 mb-4">
           Vendor Promises vs. Verifiable Architecture
         </h2>
         <p className="text-xl text-neutral-600 mb-8">What Do You Choose?</p>
@@ -318,7 +318,7 @@ function FAQSection() {
   return (
     <section className="px-6 py-16 border-t border-neutral-100">
       <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-600 mb-8 text-center">
+        <h2 className="text-3xl font-serif text-stone-700 mb-8 text-center">
           Frequently Asked Questions
         </h2>
         <div className="flex flex-col gap-6">
@@ -346,7 +346,7 @@ function CTASection() {
   return (
     <section className="px-6 py-16 bg-amber-50/50 border-t border-neutral-100">
       <div className="max-w-2xl mx-auto text-center">
-        <h2 className="text-3xl font-serif text-stone-600 mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 mb-4">
           Deploy meeting AI on your terms
         </h2>
         <p className="text-neutral-600 mb-8">

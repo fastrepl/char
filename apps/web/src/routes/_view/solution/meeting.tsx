@@ -158,7 +158,7 @@ function HeroSection() {
             <Icon icon="mdi:calendar-clock" className="text-lg" />
             <span>For Meetings</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
+          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
             All Your Meeting Notes
             <br />
             in One Place
@@ -228,7 +228,7 @@ function DetailedFeaturesSection() {
   return (
     <section className="border-t border-neutral-100">
       <div className="px-6 py-16 max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-600 text-center mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
           Everything you need for meeting notes
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
@@ -267,7 +267,7 @@ function DetailedFeaturesSection() {
         <div className="px-6 py-12 max-w-4xl mx-auto">
           <div className="grid md:grid-cols-2 gap-8 items-start">
             <div>
-              <h3 className="text-2xl font-serif text-stone-600 mb-4">
+              <h3 className="text-2xl font-serif text-stone-700 mb-4">
                 {activeFeatureData.heading}
               </h3>
               <p className="text-neutral-600 mb-4 leading-relaxed">
@@ -299,7 +299,7 @@ function DataControlSection() {
             <Icon icon="mdi:shield-lock" className="text-2xl text-stone-600" />
           </div>
           <div>
-            <h3 className="text-2xl font-serif text-stone-600 mb-3">
+            <h3 className="text-2xl font-serif text-stone-700 mb-3">
               Control Where Your Data Lives
             </h3>
             <p className="text-neutral-600 leading-relaxed mb-3">
@@ -323,7 +323,7 @@ function FAQSection() {
   return (
     <section className="px-6 py-16 border-t border-neutral-100">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-600 text-center mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
           Frequently Asked Questions
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">

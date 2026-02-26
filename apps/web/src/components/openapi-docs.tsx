@@ -143,7 +143,7 @@ export function OpenAPIDocs({ apiUrl }: { apiUrl: string }) {
 
       {spec.tags && spec.tags.length > 0 && (
         <div className="flex flex-col gap-4">
-          <h3 className="text-lg font-serif text-stone-600">API Categories</h3>
+          <h3 className="text-lg font-serif text-stone-700">API Categories</h3>
           <div className="grid gap-3">
             {spec.tags.map((tag) => (
               <div
@@ -165,7 +165,7 @@ export function OpenAPIDocs({ apiUrl }: { apiUrl: string }) {
 
       {Object.entries(groupedPaths).map(([tag, endpoints]) => (
         <div key={tag} className="flex flex-col gap-4">
-          <h3 className="text-lg font-serif text-stone-600 capitalize">
+          <h3 className="text-lg font-serif text-stone-700 capitalize">
             {tag} Endpoints
           </h3>
           <div className="flex flex-col gap-3">

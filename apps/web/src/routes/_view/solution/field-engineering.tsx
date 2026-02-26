@@ -115,11 +115,11 @@ function HeroSection() {
     <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
       <div className="px-6 py-12 lg:py-20">
         <header className="mb-8 text-center max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-stone-100 text-stone-600 text-sm mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-stone-100 text-stone-700 text-sm mb-6">
             <Icon icon="mdi:tools" className="text-lg" />
             <span>For Field Engineering</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
+          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
             Capture technical details
             <br />
             anywhere you work
@@ -143,7 +143,7 @@ function HeroSection() {
               to="/product/local-ai/"
               className={cn([
                 "inline-block px-8 py-3 text-base font-medium rounded-full",
-                "border border-stone-300 text-stone-600",
+                "border border-stone-300 text-stone-700",
                 "hover:bg-stone-50 transition-colors",
               ])}
             >
@@ -160,7 +160,7 @@ function FeaturesSection() {
   return (
     <section className="px-6 py-16 border-t border-neutral-100">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-600 text-center mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
           Built for field engineers
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
@@ -170,7 +170,7 @@ function FeaturesSection() {
           {features.map((feature) => (
             <div key={feature.title} className="flex flex-col gap-3">
               <div className="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center">
-                <Icon icon={feature.icon} className="text-2xl text-stone-600" />
+                <Icon icon={feature.icon} className="text-2xl text-stone-700" />
               </div>
               <h3 className="text-lg font-medium text-stone-700">
                 {feature.title}
@@ -190,7 +190,7 @@ function UseCasesSection() {
   return (
     <section className="px-6 py-16 bg-stone-50/50 border-t border-neutral-100">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-600 text-center mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
           For every field engagement
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
@@ -220,7 +220,7 @@ function CTASection() {
   return (
     <section className="px-6 py-16 border-t border-neutral-100">
       <div className="max-w-2xl mx-auto text-center">
-        <h2 className="text-3xl font-serif text-stone-600 mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 mb-4">
           Ready to improve field documentation?
         </h2>
         <p className="text-neutral-600 mb-8">

@@ -65,7 +65,7 @@ function HeroSection() {
     <section className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
       <div className="flex flex-col items-center text-center gap-6 py-24 px-4">
         <div className="flex flex-col gap-6 max-w-4xl">
-          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600">
+          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700">
             AI that runs
             <br />
             on your device
@@ -92,7 +92,7 @@ function HeroSection() {
             to="/product/self-hosting/"
             className={cn([
               "px-6 py-3 text-base font-medium rounded-full",
-              "border border-neutral-300 text-stone-600",
+              "border border-neutral-300 text-stone-700",
               "hover:bg-stone-50 transition-colors",
             ])}
           >
@@ -116,9 +116,9 @@ function WhyLocalAISection() {
         <div className="p-8 border-r border-b border-neutral-100 md:border-b-0">
           <Icon
             icon="mdi:shield-lock"
-            className="text-3xl text-stone-600 mb-4"
+            className="text-3xl text-stone-700 mb-4"
           />
-          <h3 className="text-xl font-serif text-stone-600 mb-2">
+          <h3 className="text-xl font-serif text-stone-700 mb-2">
             Complete privacy
           </h3>
           <p className="text-neutral-600">
@@ -130,9 +130,9 @@ function WhyLocalAISection() {
         <div className="p-8 border-b border-neutral-100 md:border-b-0">
           <Icon
             icon="mdi:lightning-bolt"
-            className="text-3xl text-stone-600 mb-4"
+            className="text-3xl text-stone-700 mb-4"
           />
-          <h3 className="text-xl font-serif text-stone-600 mb-2">
+          <h3 className="text-xl font-serif text-stone-700 mb-2">
             Lightning fast
           </h3>
           <p className="text-neutral-600">
@@ -141,8 +141,8 @@ function WhyLocalAISection() {
           </p>
         </div>
         <div className="p-8 border-r border-neutral-100">
-          <Icon icon="mdi:wifi-off" className="text-3xl text-stone-600 mb-4" />
-          <h3 className="text-xl font-serif text-stone-600 mb-2">
+          <Icon icon="mdi:wifi-off" className="text-3xl text-stone-700 mb-4" />
+          <h3 className="text-xl font-serif text-stone-700 mb-2">
             Works offline
           </h3>
           <p className="text-neutral-600">
@@ -153,9 +153,9 @@ function WhyLocalAISection() {
         <div className="p-8">
           <Icon
             icon="mdi:credit-card-off"
-            className="text-3xl text-stone-600 mb-4"
+            className="text-3xl text-stone-700 mb-4"
           />
-          <h3 className="text-xl font-serif text-stone-600 mb-2">
+          <h3 className="text-xl font-serif text-stone-700 mb-2">
             No usage limits
           </h3>
           <p className="text-neutral-600">
@@ -297,8 +297,8 @@ function CapabilitiesSection() {
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3">
         <div className="p-6 border-r border-b border-neutral-100">
-          <Icon icon="mdi:text" className="text-2xl text-stone-600 mb-3" />
-          <h3 className="font-medium text-stone-600 mb-2">Transcription</h3>
+          <Icon icon="mdi:text" className="text-2xl text-stone-700 mb-3" />
+          <h3 className="font-medium text-stone-700 mb-2">Transcription</h3>
           <p className="text-sm text-neutral-600">
             High-quality speech-to-text powered by local Whisper models. Support
             for 100+ languages.
@@ -307,9 +307,9 @@ function CapabilitiesSection() {
         <div className="p-6 border-r border-b border-neutral-100 lg:border-r">
           <Icon
             icon="mdi:file-document"
-            className="text-2xl text-stone-600 mb-3"
+            className="text-2xl text-stone-700 mb-3"
           />
-          <h3 className="font-medium text-stone-600 mb-2">Summarization</h3>
+          <h3 className="font-medium text-stone-700 mb-2">Summarization</h3>
           <p className="text-sm text-neutral-600">
             AI-generated summaries with key points, decisions, and action items
             using local LLMs.
@@ -318,25 +318,25 @@ function CapabilitiesSection() {
         <div className="p-6 border-b border-neutral-100 sm:border-r lg:border-r-0">
           <Icon
             icon="mdi:tag-multiple"
-            className="text-2xl text-stone-600 mb-3"
+            className="text-2xl text-stone-700 mb-3"
           />
-          <h3 className="font-medium text-stone-600 mb-2">Classification</h3>
+          <h3 className="font-medium text-stone-700 mb-2">Classification</h3>
           <p className="text-sm text-neutral-600">
             Automatic categorization and tagging of conversations by topic and
             meeting type.
           </p>
         </div>
         <div className="p-6 border-r border-neutral-100 sm:border-b-0 border-b lg:border-b-0">
-          <Icon icon="mdi:magnify" className="text-2xl text-stone-600 mb-3" />
-          <h3 className="font-medium text-stone-600 mb-2">Semantic search</h3>
+          <Icon icon="mdi:magnify" className="text-2xl text-stone-700 mb-3" />
+          <h3 className="font-medium text-stone-700 mb-2">Semantic search</h3>
           <p className="text-sm text-neutral-600">
             Find information across all meetings using natural language with
             local embedding models.
           </p>
         </div>
         <div className="p-6 border-r border-neutral-100">
-          <Icon icon="mdi:lightbulb" className="text-2xl text-stone-600 mb-3" />
-          <h3 className="font-medium text-stone-600 mb-2">Key insights</h3>
+          <Icon icon="mdi:lightbulb" className="text-2xl text-stone-700 mb-3" />
+          <h3 className="font-medium text-stone-700 mb-2">Key insights</h3>
           <p className="text-sm text-neutral-600">
             Extract decisions, questions, and important moments automatically
             from transcripts.
@@ -345,9 +345,9 @@ function CapabilitiesSection() {
         <div className="p-6">
           <Icon
             icon="mdi:account-voice"
-            className="text-2xl text-stone-600 mb-3"
+            className="text-2xl text-stone-700 mb-3"
           />
-          <h3 className="font-medium text-stone-600 mb-2">Speaker detection</h3>
+          <h3 className="font-medium text-stone-700 mb-2">Speaker detection</h3>
           <p className="text-sm text-neutral-600">
             Identify different speakers and attribute quotes accurately with
             diarization.
@@ -370,10 +370,10 @@ function ModelsSection() {
         <div className="p-8 flex items-start gap-4">
           <Icon
             icon="mdi:microphone"
-            className="text-3xl text-stone-600 shrink-0"
+            className="text-3xl text-stone-700 shrink-0"
           />
           <div>
-            <h3 className="text-xl font-serif text-stone-600 mb-2">
+            <h3 className="text-xl font-serif text-stone-700 mb-2">
               Whisper for transcription
             </h3>
             <p className="text-neutral-600">
@@ -385,9 +385,9 @@ function ModelsSection() {
           </div>
         </div>
         <div className="p-8 flex items-start gap-4">
-          <Icon icon="mdi:brain" className="text-3xl text-stone-600 shrink-0" />
+          <Icon icon="mdi:brain" className="text-3xl text-stone-700 shrink-0" />
           <div>
-            <h3 className="text-xl font-serif text-stone-600 mb-2">
+            <h3 className="text-xl font-serif text-stone-700 mb-2">
               Local LLMs for understanding
             </h3>
             <p className="text-neutral-600">
@@ -417,7 +417,7 @@ function ComplianceSection() {
             className="text-3xl text-green-600 shrink-0"
           />
           <div>
-            <h3 className="text-lg font-serif text-stone-600 mb-2">
+            <h3 className="text-lg font-serif text-stone-700 mb-2">
               GDPR & HIPAA ready
             </h3>
             <p className="text-neutral-600">
@@ -432,7 +432,7 @@ function ComplianceSection() {
             className="text-3xl text-blue-600 shrink-0"
           />
           <div>
-            <h3 className="text-lg font-serif text-stone-600 mb-2">
+            <h3 className="text-lg font-serif text-stone-700 mb-2">
               Zero data leaks
             </h3>
             <p className="text-neutral-600">
@@ -447,7 +447,7 @@ function ComplianceSection() {
             className="text-3xl text-purple-600 shrink-0"
           />
           <div>
-            <h3 className="text-lg font-serif text-stone-600 mb-2">
+            <h3 className="text-lg font-serif text-stone-700 mb-2">
               Full data ownership
             </h3>
             <p className="text-neutral-600">
@@ -462,7 +462,7 @@ function ComplianceSection() {
             className="text-3xl text-orange-600 shrink-0"
           />
           <div>
-            <h3 className="text-lg font-serif text-stone-600 mb-2">
+            <h3 className="text-lg font-serif text-stone-700 mb-2">
               No vendor lock-in
             </h3>
             <p className="text-neutral-600">

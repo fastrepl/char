@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { computeCurrentNoteTab } from "./shared";
+import { computeCurrentNoteTab } from "./compute-note-tab";
 
 describe("computeCurrentNoteTab", () => {
   describe("when listening is active", () => {

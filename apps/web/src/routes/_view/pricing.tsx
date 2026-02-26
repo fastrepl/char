@@ -123,7 +123,7 @@ function HeroSection() {
   return (
     <section className="flex flex-col items-center text-center gap-6 py-24 px-4 laptop:px-0 border-b border-neutral-100">
       <div className="flex flex-col gap-4 max-w-3xl">
-        <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600">
+        <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700">
           Char Pricing
         </h1>
         <p className="text-lg sm:text-xl text-neutral-600">
@@ -165,7 +165,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
 
       <div className="p-8 flex-1 flex flex-col">
         <div className="mb-6">
-          <h2 className="text-2xl font-serif text-stone-600 mb-2">
+          <h2 className="text-2xl font-serif text-stone-700 mb-2">
             {plan.name}
           </h2>
           <p className="text-sm text-neutral-600 mb-4">{plan.description}</p>
@@ -173,7 +173,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
           {plan.price ? (
             <div className="flex flex-col gap-2">
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-serif text-stone-600">
+                <span className="text-4xl font-serif text-stone-700">
                   ${plan.price.monthly}
                 </span>
                 {plan.originalPrice && (
@@ -194,7 +194,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
               </div>
             </div>
           ) : (
-            <div className="text-4xl font-serif text-stone-600">Free</div>
+            <div className="text-4xl font-serif text-stone-700">Free</div>
           )}
         </div>
 
@@ -308,7 +308,7 @@ function FAQSection() {
   return (
     <section className="py-16 px-4 laptop:px-0 border-t border-neutral-100">
       <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-600 mb-16 text-center">
+        <h2 className="text-3xl font-serif text-stone-700 mb-16 text-center">
           Frequently Asked Questions
         </h2>
         <div className="flex flex-col gap-6">

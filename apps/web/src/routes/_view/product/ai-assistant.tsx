@@ -46,7 +46,7 @@ function HeroSection() {
   return (
     <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30 px-6 py-12 lg:py-20">
       <header className="text-center max-w-4xl mx-auto">
-        <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6 flex items-center justify-center flex-wrap">
+        <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6 flex items-center justify-center flex-wrap">
           <span>AI Chat</span>
           <img
             src="/api/images/hyprnote/ai-assistant.gif"
@@ -85,8 +85,8 @@ function BeforeMeetingSection() {
       <div className="border-t border-neutral-100">
         <div className="grid md:grid-cols-2">
           <div className="p-8 border-b md:border-b-0 md:border-r border-neutral-100">
-            <Icon icon="mdi:magnify" className="text-3xl text-stone-600 mb-4" />
-            <h3 className="text-xl font-serif text-stone-600 mb-3">
+            <Icon icon="mdi:magnify" className="text-3xl text-stone-700 mb-4" />
+            <h3 className="text-xl font-serif text-stone-700 mb-3">
               Deep research with chat
             </h3>
             <p className="text-neutral-600 mb-4 leading-relaxed">
@@ -98,7 +98,7 @@ function BeforeMeetingSection() {
               <li className="flex items-start gap-2">
                 <Icon
                   icon="mdi:check"
-                  className="text-stone-600 shrink-0 mt-0.5"
+                  className="text-stone-700 shrink-0 mt-0.5"
                 />
                 <span className="text-sm text-neutral-600">
                   "What did we discuss last time with Sarah?"
@@ -107,7 +107,7 @@ function BeforeMeetingSection() {
               <li className="flex items-start gap-2">
                 <Icon
                   icon="mdi:check"
-                  className="text-stone-600 shrink-0 mt-0.5"
+                  className="text-stone-700 shrink-0 mt-0.5"
                 />
                 <span className="text-sm text-neutral-600">
                   "What are the client's main concerns?"
@@ -116,7 +116,7 @@ function BeforeMeetingSection() {
               <li className="flex items-start gap-2">
                 <Icon
                   icon="mdi:check"
-                  className="text-stone-600 shrink-0 mt-0.5"
+                  className="text-stone-700 shrink-0 mt-0.5"
                 />
                 <span className="text-sm text-neutral-600">
                   "Show me all action items from previous meetings"
@@ -128,9 +128,9 @@ function BeforeMeetingSection() {
           <div className="p-8 border-b md:border-b-0 border-neutral-100">
             <Icon
               icon="mdi:file-document-edit"
-              className="text-3xl text-stone-600 mb-4"
+              className="text-3xl text-stone-700 mb-4"
             />
-            <h3 className="text-xl font-serif text-stone-600 mb-3">
+            <h3 className="text-xl font-serif text-stone-700 mb-3">
               Generate custom templates
             </h3>
             <p className="text-neutral-600 mb-4 leading-relaxed">
@@ -142,7 +142,7 @@ function BeforeMeetingSection() {
               <li className="flex items-start gap-2">
                 <Icon
                   icon="mdi:check"
-                  className="text-stone-600 shrink-0 mt-0.5"
+                  className="text-stone-700 shrink-0 mt-0.5"
                 />
                 <span className="text-sm text-neutral-600">
                   "Create a customer discovery template"
@@ -151,7 +151,7 @@ function BeforeMeetingSection() {
               <li className="flex items-start gap-2">
                 <Icon
                   icon="mdi:check"
-                  className="text-stone-600 shrink-0 mt-0.5"
+                  className="text-stone-700 shrink-0 mt-0.5"
                 />
                 <span className="text-sm text-neutral-600">
                   "Generate questions for a technical interview"
@@ -160,7 +160,7 @@ function BeforeMeetingSection() {
               <li className="flex items-start gap-2">
                 <Icon
                   icon="mdi:check"
-                  className="text-stone-600 shrink-0 mt-0.5"
+                  className="text-stone-700 shrink-0 mt-0.5"
                 />
                 <span className="text-sm text-neutral-600">
                   "Build an agenda for our quarterly review"
@@ -173,9 +173,9 @@ function BeforeMeetingSection() {
         <div className="p-8 border-t border-neutral-100">
           <Icon
             icon="mdi:message-question"
-            className="text-3xl text-stone-600 mb-4"
+            className="text-3xl text-stone-700 mb-4"
           />
-          <h3 className="text-xl font-serif text-stone-600 mb-3">
+          <h3 className="text-xl font-serif text-stone-700 mb-3">
             Ask about past conversations
           </h3>
           <p className="text-neutral-600 leading-relaxed max-w-3xl">
@@ -199,8 +199,8 @@ function DuringMeetingSection() {
       <div className="border-t border-neutral-100">
         <div className="grid md:grid-cols-2">
           <div className="p-8 border-b md:border-b-0 md:border-r border-neutral-100">
-            <Icon icon="mdi:chat" className="text-3xl text-stone-600 mb-4" />
-            <h3 className="text-xl font-serif text-stone-600 mb-3">
+            <Icon icon="mdi:chat" className="text-3xl text-stone-700 mb-4" />
+            <h3 className="text-xl font-serif text-stone-700 mb-3">
               Ask questions in realtime
             </h3>
             <p className="text-neutral-600 leading-relaxed">
@@ -213,13 +213,13 @@ function DuringMeetingSection() {
           <div className="p-8 border-b md:border-b-0 border-neutral-100">
             <Icon
               icon="mdi:lightbulb-on"
-              className="text-3xl text-stone-600 mb-4"
+              className="text-3xl text-stone-700 mb-4"
             />
-            <h3 className="text-xl font-serif text-stone-600 mb-3">
+            <h3 className="text-xl font-serif text-stone-700 mb-3">
               Realtime insights via{" "}
               <Link
                 to="/product/extensions/"
-                className="text-stone-600 hover:text-stone-800 underline decoration-dotted underline-offset-2"
+                className="text-stone-700 hover:text-stone-800 underline decoration-dotted underline-offset-2"
               >
                 extensions
               </Link>
@@ -234,14 +234,14 @@ function DuringMeetingSection() {
 
         <div className="border-t border-neutral-100">
           <div className="py-8 px-6 lg:px-8">
-            <h4 className="text-lg font-serif text-stone-600 mb-6 text-center">
+            <h4 className="text-lg font-serif text-stone-700 mb-6 text-center">
               Available realtime extensions
             </h4>
             <div className="grid md:grid-cols-3 gap-6">
               <div className="p-6 bg-stone-50 border border-neutral-200 rounded-lg">
                 <Icon
                   icon="mdi:comment-check"
-                  className="text-2xl text-stone-600 mb-3"
+                  className="text-2xl text-stone-700 mb-3"
                 />
                 <h5 className="font-medium text-stone-700 mb-2">Suggestions</h5>
                 <p className="text-sm text-neutral-600">
@@ -253,7 +253,7 @@ function DuringMeetingSection() {
               <div className="p-6 bg-stone-50 border border-neutral-200 rounded-lg">
                 <Icon
                   icon="mdi:account-voice"
-                  className="text-2xl text-stone-600 mb-3"
+                  className="text-2xl text-stone-700 mb-3"
                 />
                 <h5 className="font-medium text-stone-700 mb-2">
                   Talk time tracking
@@ -267,7 +267,7 @@ function DuringMeetingSection() {
               <div className="p-6 bg-stone-50 border border-neutral-200 rounded-lg">
                 <Icon
                   icon="mdi:school"
-                  className="text-2xl text-stone-600 mb-3"
+                  className="text-2xl text-stone-700 mb-3"
                 />
                 <h5 className="font-medium text-stone-700 mb-2">
                   ELI5 explanations
@@ -282,7 +282,7 @@ function DuringMeetingSection() {
             <div className="mt-6 text-center">
               <Link
                 to="/product/extensions/"
-                className="inline-flex items-center gap-2 text-stone-600 hover:text-stone-800 font-medium"
+                className="inline-flex items-center gap-2 text-stone-700 hover:text-stone-800 font-medium"
               >
                 Learn more about extensions
                 <Icon icon="mdi:arrow-right" className="text-lg" />
@@ -308,7 +308,7 @@ function AfterMeetingSection() {
           <div className="flex flex-row items-center gap-2 text-xs text-neutral-500">
             <Icon icon="logos:jira" className="text-base" />
             <span>ENG-247</span>
-            <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[11px] text-stone-600">
+            <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[11px] text-stone-700">
               Todo
             </span>
           </div>
@@ -377,7 +377,7 @@ function AfterMeetingSection() {
               2 guests · 1 yes, 1 awaiting
             </p>
             <div className="mt-2 flex items-center gap-2 text-xs text-neutral-500">
-              <div className="size-5 rounded-full bg-stone-200 flex items-center justify-center text-[10px] text-stone-600">
+              <div className="size-5 rounded-full bg-stone-200 flex items-center justify-center text-[10px] text-stone-700">
                 A
               </div>
               <span>John Smith</span>
@@ -427,9 +427,9 @@ function AfterMeetingSection() {
           <div className="p-8 border-b md:border-b-0 md:border-r border-neutral-100">
             <Icon
               icon="mdi:workflow"
-              className="text-3xl text-stone-600 mb-4"
+              className="text-3xl text-stone-700 mb-4"
             />
-            <h3 className="text-xl font-serif text-stone-600 mb-3">
+            <h3 className="text-xl font-serif text-stone-700 mb-3">
               Execute workflows with natural language
             </h3>
             <p className="text-neutral-600 mb-4 leading-relaxed">
@@ -485,8 +485,8 @@ function AfterMeetingSection() {
           </div>
 
           <div className="p-8 border-b md:border-b-0 border-neutral-100">
-            <Icon icon="mdi:brain" className="text-3xl text-stone-600 mb-4" />
-            <h3 className="text-xl font-serif text-stone-600 mb-3">
+            <Icon icon="mdi:brain" className="text-3xl text-stone-700 mb-4" />
+            <h3 className="text-xl font-serif text-stone-700 mb-3">
               Learns and adapts with memory
             </h3>
             <p className="text-neutral-600 leading-relaxed">
@@ -498,7 +498,7 @@ function AfterMeetingSection() {
               <li className="flex items-start gap-3">
                 <Icon
                   icon="mdi:check-circle"
-                  className="text-stone-600 shrink-0 mt-0.5"
+                  className="text-stone-700 shrink-0 mt-0.5"
                 />
                 <span className="text-sm text-neutral-600">
                   Remembers your meeting preferences and formats
@@ -507,7 +507,7 @@ function AfterMeetingSection() {
               <li className="flex items-start gap-3">
                 <Icon
                   icon="mdi:check-circle"
-                  className="text-stone-600 shrink-0 mt-0.5"
+                  className="text-stone-700 shrink-0 mt-0.5"
                 />
                 <span className="text-sm text-neutral-600">
                   Learns from your edits to improve future summaries
@@ -516,7 +516,7 @@ function AfterMeetingSection() {
               <li className="flex items-start gap-3">
                 <Icon
                   icon="mdi:check-circle"
-                  className="text-stone-600 shrink-0 mt-0.5"
+                  className="text-stone-700 shrink-0 mt-0.5"
                 />
                 <span className="text-sm text-neutral-600">
                   Adapts to your workflow and tool preferences
@@ -525,7 +525,7 @@ function AfterMeetingSection() {
               <li className="flex items-start gap-3">
                 <Icon
                   icon="mdi:check-circle"
-                  className="text-stone-600 shrink-0 mt-0.5"
+                  className="text-stone-700 shrink-0 mt-0.5"
                 />
                 <span className="text-sm text-neutral-600">
                   Builds context about your team and projects over time
@@ -588,7 +588,7 @@ function CTASection() {
             to="/product/ai-notetaking/"
             className={cn([
               "px-6 h-12 flex items-center justify-center text-base sm:text-lg",
-              "border border-neutral-300 text-stone-600 rounded-full",
+              "border border-neutral-300 text-stone-700 rounded-full",
               "hover:bg-white transition-colors",
             ])}
           >

@@ -65,7 +65,7 @@ function HeroSection() {
     <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
       <div className="px-6 py-16 lg:py-24">
         <div className="text-center max-w-3xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif tracking-tight text-stone-600 mb-8">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif tracking-tight text-stone-700 mb-8">
             Why Char exists
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 leading-relaxed mb-6">
@@ -116,7 +116,7 @@ function WhyWereDifferentSection() {
   return (
     <section className="px-6 py-16 lg:py-24 bg-stone-50/30">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl sm:text-4xl font-serif text-stone-600 mb-12 text-center">
+        <h2 className="text-3xl sm:text-4xl font-serif text-stone-700 mb-12 text-center">
           So we built Char to give you back control.
         </h2>
 
@@ -124,7 +124,7 @@ function WhyWereDifferentSection() {
           {differentiators.slice(0, 3).map((item) => (
             <div
               key={item.title}
-              className="p-6 bg-white rounded-lg border border-neutral-100 shadow-sm"
+              className="p-6 bg-white rounded-lg border border-neutral-100"
             >
               <div className="flex items-start gap-4">
                 <div className="p-2 bg-stone-100 rounded-lg shrink-0">
@@ -145,7 +145,7 @@ function WhyWereDifferentSection() {
           {differentiators.slice(3).map((item) => (
             <div
               key={item.title}
-              className="p-6 bg-white rounded-lg border border-neutral-100 shadow-sm lg:w-[calc(33.333%-1rem)]"
+              className="p-6 bg-white rounded-lg border border-neutral-100 lg:w-[calc(33.333%-1rem)]"
             >
               <div className="flex items-start gap-4">
                 <div className="p-2 bg-stone-100 rounded-lg shrink-0">
@@ -203,7 +203,7 @@ function WhoThisIsForSection() {
   return (
     <section className="px-6 py-16 lg:py-24">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl sm:text-4xl font-serif text-stone-600 mb-4 text-center">
+        <h2 className="text-3xl sm:text-4xl font-serif text-stone-700 mb-4 text-center">
           Char's for you, if
         </h2>
 
@@ -213,7 +213,7 @@ function WhoThisIsForSection() {
               key={item.title}
               className="flex gap-4 p-6 bg-stone-50/50 rounded-lg border border-neutral-100"
             >
-              <div className="p-2 bg-white rounded-lg shrink-0 h-fit border border-neutral-100">
+              <div className="p-2 size-10 flex items-center justify-center bg-white rounded-lg shrink-0 h-fit border border-neutral-100">
                 <Icon icon={item.icon} className="text-2xl text-stone-600" />
               </div>
               <div>
@@ -248,7 +248,7 @@ function WhatWereBuildingTowardSection() {
               backgroundImage: "url(/api/images/texture/paper.png)",
             }}
           >
-            <h2 className="text-2xl sm:text-3xl font-serif text-stone-600 mb-4">
+            <h2 className="text-2xl sm:text-3xl font-serif text-stone-700 mb-4">
               What we're building toward
             </h2>
 
@@ -332,7 +332,7 @@ function HereForTheLongHaulSection() {
   return (
     <section className="px-6 py-16 lg:py-24">
       <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl sm:text-4xl font-serif text-stone-600 mb-8 text-center">
+        <h2 className="text-3xl sm:text-4xl font-serif text-stone-700 mb-8 text-center">
           Here for the long haul
         </h2>
 
@@ -354,7 +354,7 @@ function HereForTheLongHaulSection() {
           <ul className="flex flex-col gap-3">
             {commitments.map((commitment) => (
               <li key={commitment} className="flex items-center gap-3">
-                <div className="p-1 bg-stone-100 rounded-full shrink-0">
+                <div className="p-1 size-6 flex items-center justify-center bg-stone-100 rounded-full shrink-0">
                   <Icon icon="mdi:check" className="text-lg text-stone-600" />
                 </div>
                 <span>{commitment}</span>

@@ -145,7 +145,7 @@ function HeroSection() {
           <Icon icon="mdi:gift" className="text-lg" />
           <span>100% Free Forever</span>
         </div>
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif tracking-tight text-stone-600 mb-6">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif tracking-tight text-stone-700 mb-6">
           AI meeting notes
           <br />
           <span className="text-stone-400">without the price tag</span>
@@ -190,7 +190,7 @@ function FeaturesSection() {
     <section className="px-6 py-16 lg:py-20 border-t border-neutral-100">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-serif text-stone-600 mb-4">
+          <h2 className="text-3xl sm:text-4xl font-serif text-stone-700 mb-4">
             Everything you need, free
           </h2>
           <p className="text-lg text-neutral-600">
@@ -205,7 +205,7 @@ function FeaturesSection() {
             >
               <Icon
                 icon={feature.icon}
-                className="text-3xl text-stone-600 mb-4"
+                className="text-3xl text-stone-700 mb-4"
               />
               <h3 className="text-lg font-medium text-stone-700 mb-2">
                 {feature.title}
@@ -226,7 +226,7 @@ function ComparisonSection() {
     <section className="px-6 py-16 lg:py-20 bg-stone-50/50 border-t border-neutral-100">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-serif text-stone-600 mb-4">
+          <h2 className="text-3xl sm:text-4xl font-serif text-stone-700 mb-4">
             More value than paid alternatives
           </h2>
           <p className="text-lg text-neutral-600">
@@ -237,7 +237,7 @@ function ComparisonSection() {
           <div className="grid grid-cols-3 bg-stone-100 border-b border-neutral-200">
             <div className="p-4 font-medium text-stone-700">Feature</div>
             <div className="p-4 font-medium text-stone-700 text-center border-x border-neutral-200">
-              <span className="text-stone-600">Char</span>
+              <span className="text-stone-700">Char</span>
               <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
                 Free
               </span>
@@ -296,7 +296,7 @@ function UseCasesSection() {
     <section className="px-6 py-16 lg:py-20 border-t border-neutral-100">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-serif text-stone-600 mb-4">
+          <h2 className="text-3xl sm:text-4xl font-serif text-stone-700 mb-4">
             Built for every conversation
           </h2>
           <p className="text-lg text-neutral-600">
@@ -333,11 +333,11 @@ function OpenSourceSection() {
       <div className="max-w-4xl mx-auto">
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-stone-100 rounded-full text-stone-600 text-sm font-medium mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-stone-100 rounded-full text-stone-700 text-sm font-medium mb-4">
               <Icon icon="mdi:github" className="text-lg" />
               <span>Open Source</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-serif text-stone-600 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-serif text-stone-700 mb-4">
               Transparent by design
             </h2>
             <p className="text-neutral-600 mb-6 leading-relaxed">
@@ -373,23 +373,23 @@ function OpenSourceSection() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="p-6 bg-white border border-neutral-200 rounded-lg text-center">
-              <div className="text-3xl font-serif text-stone-600 mb-1">
+              <div className="text-3xl font-serif text-stone-700 mb-1">
                 100%
               </div>
               <div className="text-sm text-neutral-600">Open Source</div>
             </div>
             <div className="p-6 bg-white border border-neutral-200 rounded-lg text-center">
-              <div className="text-3xl font-serif text-stone-600 mb-1">0</div>
+              <div className="text-3xl font-serif text-stone-700 mb-1">0</div>
               <div className="text-sm text-neutral-600">Data Collection</div>
             </div>
             <div className="p-6 bg-white border border-neutral-200 rounded-lg text-center">
-              <div className="text-3xl font-serif text-stone-600 mb-1">
+              <div className="text-3xl font-serif text-stone-700 mb-1">
                 Local
               </div>
               <div className="text-sm text-neutral-600">AI Processing</div>
             </div>
             <div className="p-6 bg-white border border-neutral-200 rounded-lg text-center">
-              <div className="text-3xl font-serif text-stone-600 mb-1">
+              <div className="text-3xl font-serif text-stone-700 mb-1">
                 Free
               </div>
               <div className="text-sm text-neutral-600">Forever</div>
@@ -405,7 +405,7 @@ function CTASection() {
   return (
     <section className="px-6 py-16 lg:py-24 border-t border-neutral-100">
       <div className="max-w-2xl mx-auto text-center">
-        <h2 className="text-3xl sm:text-4xl font-serif text-stone-600 mb-4">
+        <h2 className="text-3xl sm:text-4xl font-serif text-stone-700 mb-4">
           Ready to try Char?
         </h2>
         <p className="text-lg text-neutral-600 mb-8">

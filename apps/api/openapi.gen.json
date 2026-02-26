@@ -256,6 +256,47 @@
         ]
       }
     },
+    "/nango/reconnect-session": {
+      "post": {
+        "tags": [
+          "nango"
+        ],
+        "operationId": "create_reconnect_session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReconnectSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Reconnect session created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectSessionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/nango/connections": {
       "get": {
         "tags": [
@@ -1038,6 +1079,21 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "CreateReconnectSessionRequest": {
+        "type": "object",
+        "required": [
+          "connection_id",
+          "integration_id"
+        ],
+        "properties": {
+          "connection_id": {
+            "type": "string"
+          },
+          "integration_id": {
+            "type": "string"
           }
         }
       },
