@@ -1,5 +1,6 @@
 mod ext;
 mod menu_items;
+mod tray_icon;
 
 pub use ext::*;
 pub use menu_items::{HyprMenuItem, UpdateMenuState};
