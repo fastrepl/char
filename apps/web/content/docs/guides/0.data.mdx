@@ -8,7 +8,7 @@ Char has no database. Every piece of data — sessions, transcripts, notes, cont
 
 This means you can browse your data in Finder, back it up with any tool, sync it with git, or open your notes in Obsidian. Nothing is locked inside a proprietary format or opaque database.
 
-## How It Works
+## How it works
 
 The architecture has three layers:
 
@@ -18,7 +18,7 @@ The architecture has three layers:
 
 When you edit a note in the UI, the change flows: UI → TinyBase store → Persister → fs-sync → disk. When a file changes on disk (e.g. you edited it externally), the flow reverses: disk → file watcher → Persister → TinyBase → UI.
 
-## Base Directories
+## Base directories
 
 There are two types of base directories: `global` and `vault`.
 
@@ -53,9 +53,9 @@ Contents:
 - `prompts/` — custom prompt templates
 - `settings.json` — app settings
 
-## File Formats
+## File formats
 
-### Markdown with Frontmatter
+### Markdown with frontmatter
 
 Humans, organizations, and notes are stored as Markdown files with YAML frontmatter. For example, a contact file in `humans/` looks like:
 
@@ -90,7 +90,7 @@ title: "Summary"
 - Discussed Q1 roadmap priorities...
 ```
 
-### JSON Files
+### JSON files
 
 Session metadata (`_meta.json`), transcripts (`transcript.json`), and settings (`settings.json`) use JSON. For example, a session's `_meta.json`:
 
@@ -117,7 +117,7 @@ Transcript files store word-level timestamps and speaker information:
 
 <GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/fs-sync/src/types.rs#L83-L119" />
 
-## Session Directory Structure
+## Session directory structure
 
 Each session gets its own directory under `sessions/`, named by its UUID. Sessions can also be organized into user-created folders:
 
@@ -147,25 +147,25 @@ Here is how Char loads session content from disk — this shows exactly what fil
 
 <GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/fs-sync/src/session_content.rs#L10-L110" />
 
-## The Persister Layer
+## The persister layer
 
 Persisters are the bridges between TinyBase (the in-memory store) and the filesystem. There are three persister factories, each designed for a different data shape:
 
-### JSON File Persister
+### JSON file persister
 
 Used for data stored as a single JSON file (e.g. `settings.json`). Reads the file into a TinyBase table on load, writes the full table back on save. Supports both polling and filesystem notification-based change detection.
 
-### Markdown Directory Persister
+### Markdown directory persister
 
 Used for entities stored as individual Markdown files in a directory (e.g. `humans/`, `organizations/`, `prompts/`). Each entity is one `.md` file. The frontmatter maps to TinyBase row fields; the body maps to a content field (like `memo`).
 
-### Multi-Table Directory Persister
+### Multi-table directory persister
 
 Used for complex entities that span multiple TinyBase tables (e.g. sessions). A single session directory produces rows in the `sessions`, `transcripts`, `enhanced_notes`, `mapping_session_participant`, `tags`, and `mapping_tag_session` tables. This persister coordinates loading and saving across all these tables atomically.
 
 All three factories share a common `collector` layer that handles batching write operations, file-change listening, and orphan cleanup.
 
-## File Watching
+## File watching
 
 Char watches the vault directory for external changes. When files are modified outside the app (e.g. you edit a Markdown file in another editor), the persister detects the change and reloads the affected data into TinyBase, which updates the UI reactively.
 
@@ -175,11 +175,11 @@ The file watcher uses two strategies:
 
 To avoid reacting to its own writes, the app marks paths it has just written and ignores notifications for those paths.
 
-## Orphan Cleanup
+## Orphan cleanup
 
 When data is deleted in the UI, the persister removes the corresponding files from disk. A safeguard prevents accidental mass deletion: if the number of items to keep drops below 50% of what's on disk (with a minimum threshold of 5 items), cleanup is skipped and a warning is logged. This protects against data loss from load failures being misinterpreted as deletions.
 
-## The fs-sync Plugin
+## The fs-sync plugin
 
 The actual file I/O runs in Rust via the `fs-sync` Tauri plugin. It provides commands for:
 
@@ -193,7 +193,7 @@ The actual file I/O runs in Rust via the `fs-sync` Tauri plugin. It provides com
 
 <GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/fs-sync/src/lib.rs#L27-L56" />
 
-## App State
+## App state
 
 The app state persisted in `store.json` is defined by this enum — nothing else is stored there:
 
@@ -205,7 +205,7 @@ Application logs are stored in the system app log directory as rotating files (`
 
 For details on what data leaves your device, see [AI Models & Data Privacy](/docs/faq/ai-models-and-privacy).
 
-## Further Reading
+## Further reading
 
 - [The Filesystem Is the Cortex](/blog/filesystem-is-coretex) — our philosophy on why files matter
 - [Why Local-First?](/docs/about/why-local-first) — the case for local-first architecture

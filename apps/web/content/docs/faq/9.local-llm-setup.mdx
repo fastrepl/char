@@ -6,7 +6,7 @@ description: "How to set up LM Studio or Ollama for local AI in Char."
 
 This guide covers setting up local LLMs for AI features like summaries and notes. If you're looking for local speech-to-text models, see [Local Models](/docs/developers/local-models#speech-to-text-stt).
 
-## LM Studio Setup
+## LM Studio setup
 
 [LM Studio](https://lmstudio.ai) is a desktop application that lets you run large language models locally on your computer.
 
@@ -25,7 +25,7 @@ This guide covers setting up local LLMs for AI features like summaries and notes
 3. The default base URL `http://127.0.0.1:1234/v1` should work if you haven't changed the port
 4. Select LM Studio as your provider and choose a model from the dropdown
 
-### Tool Calling Fallback
+### Tool calling fallback
 
 Some local models (e.g., Gemma) do not support tool calling, which Char uses for structured output during summarization. Char automatically detects this and falls back to plain text generation with JSON extraction, so summarization still works with these models. No configuration is needed.
 
@@ -38,7 +38,7 @@ If Char cannot connect to LM Studio:
 - Check that the port matches (default is 1234)
 - Make sure no firewall is blocking the connection
 
-#### Context Length Error
+#### Context length error
 
 If you see an error like "Cannot truncate prompt with n_keep >= n_ctx" or "request exceeds the available context size", this means the model's context length is too small for your conversation or transcript.
 
@@ -50,7 +50,7 @@ To fix this:
 
 ![Increase Context Length in LM Studio](/api/images/docs/faq/lmstudio-context-length.png)
 
-## Ollama Setup
+## Ollama setup
 
 [Ollama](https://ollama.ai) is a command-line tool for running large language models locally.
 

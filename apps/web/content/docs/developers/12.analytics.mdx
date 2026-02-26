@@ -8,9 +8,9 @@ description: "Learn about analytics in Char"
 
 We use PostHog for analytics in both the web and desktop applications. The web application also uses Outlit for pageview tracking. You can opt-out from the settings menu in the desktop app.
 
-## User Journey Events
+## User journey events
 
-### 1. Visiting the Website
+### 1. Visiting the website
 
 Events tracked on the web app (`apps/web`):
 
@@ -23,7 +23,7 @@ Events tracked on the web app (`apps/web`):
 
 The web app also has PostHog autocapture and pageview tracking enabled.
 
-### 2. Getting Started
+### 2. Getting started
 
 Events tracked when users first launch the desktop app:
 
@@ -37,7 +37,7 @@ Events tracked when users first launch the desktop app:
 | `ai_provider_configured` | User configures an AI provider | `provider` | `components/settings/ai/shared/index.tsx` |
 | `data_imported` | User imports data from another app | `source` | `components/settings/data/index.tsx` |
 
-### 3. Before Meetings
+### 3. Before meetings
 
 Events tracked when preparing for meetings:
 
@@ -46,7 +46,7 @@ Events tracked when preparing for meetings:
 | `note_created` | User creates a new note | `has_event_id` (whether linked to calendar) | `store/tinybase/store/sessions.ts`, `components/main/shared.ts` |
 | `file_uploaded` | User uploads a file | `file_type` (`audio` or `transcript`), `token_count` (transcript only) | `components/main/body/sessions/floating/options-menu.tsx` |
 
-### 4. During Meetings
+### 4. During meetings
 
 Events tracked during active sessions:
 
@@ -56,7 +56,7 @@ Events tracked during active sessions:
 | `tab_opened` | User opens a tab | `view` (tab type) | `store/zustand/tabs/basic.ts` |
 | `search_performed` | User performs a search | - | `contexts/search/ui.tsx` |
 
-### 5. After Meetings
+### 5. After meetings
 
 Events tracked when working with completed sessions:
 
@@ -69,7 +69,7 @@ Events tracked when working with completed sessions:
 | `session_deleted` | User deletes a session/note | `includes_recording` | `components/main/body/sessions/outer-header/overflow/delete.tsx` |
 | `recording_deleted` | User deletes a recording | - | `components/main/body/sessions/outer-header/overflow/delete.tsx` |
 
-### 6. Settings & Account Management
+### 6. Settings & account management
 
 Events tracked when managing settings and account:
 
@@ -79,7 +79,7 @@ Events tracked when managing settings and account:
 | `upgrade_clicked` | User clicks upgrade button | `plan` | `components/settings/general/account.tsx` |
 | `user_signed_out` | User signs out | - | `components/settings/general/account.tsx` |
 
-### 7. Notification Interactions
+### 7. Notification interactions
 
 Events tracked when users interact with system notifications (`plugins/notification/src/handler.rs`):
 
@@ -90,7 +90,7 @@ Events tracked when users interact with system notifications (`plugins/notificat
 | `dismiss` | User dismisses notification | - |
 | `collapsed_timeout` | Collapsed notification times out | - |
 
-### 8. Server-Side Proxy Events
+### 8. Server-side proxy events
 
 Events tracked by the API proxy layer. These use the `$` prefix following PostHog conventions for built-in event types.
 
@@ -99,7 +99,7 @@ Events tracked by the API proxy layer. These use the `$` prefix following PostHo
 | `$stt_request` | Speech-to-text request processed | `$stt_provider`, `$stt_duration`, `user_id` | `crates/transcribe-proxy/src/analytics.rs` |
 | `$ai_generation` | LLM generation request processed | `$ai_provider`, `$ai_model`, `$ai_input_tokens`, `$ai_output_tokens`, `$ai_latency`, `$ai_trace_id`, `$ai_http_status`, `$ai_base_url`, `$ai_total_cost_usd`, `user_id` | `crates/llm-proxy/src/analytics.rs` |
 
-## User Properties
+## User properties
 
 Properties set to track user context and configuration:
 
@@ -120,7 +120,7 @@ Properties set to track user context and configuration:
 | `current_llm_provider` | Currently selected LLM provider | set | `store/tinybase/persister/settings/persister.ts` |
 | `current_llm_model` | Currently selected LLM model | set | `store/tinybase/persister/settings/persister.ts` |
 
-## Analytics Commands
+## Analytics commands
 
 Available methods for tracking events and properties:
 
@@ -130,7 +130,7 @@ Available methods for tracking events and properties:
 - `setDisabled(disabled)` - Enable or disable analytics tracking
 - `isDisabled()` - Check if analytics is currently disabled
 
-## User Identification
+## User identification
 
 When a user signs in, the `identify` command is called to link their anonymous device ID (machine fingerprint) to their authenticated user ID. This uses PostHog's `$identify` event with the `$anon_distinct_id` property, enabling:
 
@@ -140,7 +140,7 @@ When a user signs in, the `identify` command is called to link their anonymous d
 
 The identification flow works as follows: before sign-in, events are tracked using the device fingerprint as the distinct ID. Upon successful authentication, `identify(userId, payload)` is called, which sends a `$identify` event to PostHog with both the new user ID and the anonymous device ID, merging the two identities.
 
-## Conversion Funnel Tracking
+## Conversion funnel tracking
 
 To track the user journey from website visit to active usage, use PostHog's funnel analysis with these key events:
 
@@ -154,7 +154,7 @@ To track the user journey from website visit to active usage, use PostHog's funn
 
 PostHog's `$identify` event links anonymous device IDs to authenticated user IDs, enabling accurate conversion analysis across the entire user journey.
 
-## Feature Flags
+## Feature flags
 
 Char uses PostHog feature flags to control feature rollouts. The system is built on two layers:
 

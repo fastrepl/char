@@ -24,7 +24,7 @@ This will:
 
 See [Environment Variables](/docs/developers/env) for the full list of generated variables.
 
-## GitHub Login (OAuth)
+## GitHub login (OAuth)
 
 To enable the GitHub login flow locally, use [Infisical](https://infisical.com/docs/cli/commands/login) to inject the dev-only OAuth credentials:
 
@@ -38,7 +38,7 @@ Without these credentials, `task supabase-start` still works — you just won't 
 
 See the [Login docs](/docs/developers/login) for more details on authentication setup.
 
-## Running the App
+## Running the app
 
 ```bash
 pnpm -F ui build && pnpm -F desktop tauri dev
@@ -46,7 +46,7 @@ pnpm -F ui build && pnpm -F desktop tauri dev
 
 See [Run](/docs/developers/run) for all available dev commands (desktop, web, API, etc.).
 
-## Common Issues
+## Common issues
 
 **"I can't log in / I don't have the Supabase keys"** — You don't need production keys. Run `task supabase-start` to spin up a local Supabase instance that generates all the keys automatically.
 
@@ -54,7 +54,7 @@ See [Run](/docs/developers/run) for all available dev commands (desktop, web, AP
 
 **"Cursor can't connect to the network when indexing"** — Ensure you have a stable internet connection and restart Cursor. If the issue persists, you can still work by browsing the code directly.
 
-## Further Reading
+## Further reading
 
 - [Developer Setup](/docs/developers/setup) — Full installation guide
 - [Environment Variables](/docs/developers/env) — All env var details
