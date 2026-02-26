@@ -29,6 +29,14 @@ export function BeforeLogin() {
         )}
       </div>
       {showCallbackUrlInput && <CallbackUrlInput />}
+      <a
+        href="https://char.com/docs/faq/general#why-do-i-need-to-create-an-account"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-xs text-neutral-500 hover:text-neutral-600 underline mt-1"
+      >
+        Why do I need to login?
+      </a>
     </div>
   );
 }

@@ -123,6 +123,7 @@ function Component() {
               </button>
             )}
           </div>
+          <WhyLoginLink />
           <LegalText />
         </>
       )}
@@ -229,6 +230,21 @@ function DesktopReauthView({
         </>
       )}
     </div>
+  );
+}
+
+function WhyLoginLink() {
+  return (
+    <p className="text-xs text-neutral-500 mt-3 text-center">
+      <a
+        href="https://char.com/docs/faq/general#why-do-i-need-to-create-an-account"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="underline hover:text-neutral-700"
+      >
+        Why do I need to login?
+      </a>
+    </p>
   );
 }
 
