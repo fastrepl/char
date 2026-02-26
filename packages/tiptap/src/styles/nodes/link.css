@@ -3,6 +3,10 @@
     color: #3b82f6;
     cursor: text;
     text-decoration: underline;
+
+    &.mention {
+      text-decoration: none;
+    }
     position: relative;
 
     &:hover {
