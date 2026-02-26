@@ -13,12 +13,12 @@ import { cn, format, getYear, safeParseDate, TZDate } from "@hypr/utils";
 import { useListener } from "../../../../contexts/listener";
 import { useIgnoredEvents } from "../../../../hooks/tinybase";
 import { useIsSessionEnhancing } from "../../../../hooks/useEnhancedNotes";
+import type { MenuItemDef } from "../../../../hooks/useNativeContextMenu";
 import {
   captureSessionData,
   deleteSessionCascade,
 } from "../../../../store/tinybase/store/deleteSession";
 import * as main from "../../../../store/tinybase/store/main";
-import { save } from "../../../../store/tinybase/store/save";
 import { getOrCreateSessionForEventId } from "../../../../store/tinybase/store/sessions";
 import { useSessionTitle } from "../../../../store/zustand/live-title";
 import { type TabInput, useTabs } from "../../../../store/zustand/tabs";
@@ -98,7 +98,7 @@ function ItemBase({
   onClick: () => void;
   onCmdClick: () => void;
   onShiftClick: () => void;
-  contextMenu: Array<{ id: string; text: string; action: () => void }>;
+  contextMenu: MenuItemDef[];
 }) {
   const hasSelection = useTimelineSelection((s) => s.selectedIds.length > 0);
 
@@ -396,11 +396,10 @@ const SessionItem = memo(
       }
     }, [store, indexes, sessionId, invalidateResource, addDeletion]);
 
-    const handleRevealInFinder = useCallback(async () => {
-      await save();
+    const handleShowInFinder = useCallback(async () => {
       const result = await fsSyncCommands.sessionDir(sessionId);
       if (result.status === "ok") {
-        await openerCommands.revealItemInDir(result.data);
+        await openerCommands.openPath(result.data, null);
       }
     }, [sessionId]);
 
@@ -412,17 +411,18 @@ const SessionItem = memo(
           action: handleOpenNewTab,
         },
         {
-          id: "reveal",
-          text: "Reveal in Finder",
-          action: handleRevealInFinder,
+          id: "show",
+          text: "Show in Finder",
+          action: handleShowInFinder,
         },
+        { separator: true as const },
         {
           id: "delete",
           text: hasEvent ? "Delete Attached Note" : "Delete Note",
           action: handleDelete,
         },
       ],
-      [handleOpenNewTab, handleRevealInFinder, handleDelete, hasEvent],
+      [handleOpenNewTab, handleShowInFinder, handleDelete, hasEvent],
     );
 
     return (
