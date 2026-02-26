@@ -1,8 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
 import { FileTextIcon, MoreHorizontalIcon } from "lucide-react";
 import { useState } from "react";
 
-import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 import { Button } from "@hypr/ui/components/ui/button";
 import {
   DropdownMenu,
@@ -14,10 +12,10 @@ import {
 
 import type { EditorView } from "../../../../../../store/zustand/tabs/schema";
 import { useHasTranscript } from "../../shared";
-import { DeleteNote, DeleteRecording } from "./delete";
+import { DeleteNote } from "./delete";
 import { ExportModal } from "./export-modal";
 import { Listening } from "./listening";
-import { Copy, Folder, RevealInFinder, ShowInFinder } from "./misc";
+import { Copy, Folder, ShowInFinder } from "./misc";
 
 export function OverflowButton({
   sessionId,
@@ -28,16 +26,6 @@ export function OverflowButton({
 }) {
   const [open, setOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  const audioExists = useQuery({
-    queryKey: ["audio", sessionId, "exist"],
-    queryFn: () => fsSyncCommands.audioExist(sessionId),
-    select: (result) => {
-      if (result.status === "error") {
-        throw new Error(result.error);
-      }
-      return result.data;
-    },
-  });
   const hasTranscript = useHasTranscript(sessionId);
   const openExportModal = () => {
     setOpen(false);
@@ -69,10 +57,9 @@ export function OverflowButton({
           <DropdownMenuSeparator />
           <Listening sessionId={sessionId} hasTranscript={hasTranscript} />
           <DropdownMenuSeparator />
-          <RevealInFinder sessionId={sessionId} />
-          {audioExists.data && <ShowInFinder sessionId={sessionId} />}
+          <ShowInFinder sessionId={sessionId} />
+          <DropdownMenuSeparator />
           <DeleteNote sessionId={sessionId} />
-          {audioExists.data && <DeleteRecording sessionId={sessionId} />}
         </DropdownMenuContent>
       </DropdownMenu>
       <ExportModal

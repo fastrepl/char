@@ -98,15 +98,16 @@ export function ExportTranscript({ sessionId }: { sessionId: string }) {
 
     const vttWords: VttWord[] = [];
     for (const segment of segments) {
+      if (segment.words.length === 0) continue;
       const speakerLabel = SegmentKey.renderLabel(segment.key, ctx, manager);
-      for (const word of segment.words) {
-        vttWords.push({
-          text: word.text,
-          start_ms: word.start_ms,
-          end_ms: word.end_ms,
-          speaker: speakerLabel,
-        });
-      }
+      const firstWord = segment.words[0];
+      const lastWord = segment.words[segment.words.length - 1];
+      vttWords.push({
+        text: segment.words.map((w) => w.text).join(" "),
+        start_ms: firstWord.start_ms,
+        end_ms: lastWord.end_ms,
+        speaker: speakerLabel,
+      });
     }
 
     return vttWords;
