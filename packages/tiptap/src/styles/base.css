@@ -31,6 +31,7 @@
   p {
     margin-bottom: 0.25rem;
     text-wrap: wrap;
+    line-height: 20px;
   }
 
   .node-image {
