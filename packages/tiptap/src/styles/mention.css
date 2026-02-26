@@ -69,6 +69,9 @@
     border-radius: 50%;
     overflow: hidden;
     vertical-align: middle;
+    position: relative;
+    top: -2px;
+    margin-right: 0.15em;
 }
 
 .mention .mention-avatar-icon {
@@ -86,8 +89,7 @@
     height: 1em;
 }
 
-.mention .mention-text {
-}
+.mention .mention-text {}
 
 /* NodeView wrapper for inline mention rendering */
 span[data-node-view-wrapper] {
