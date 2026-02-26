@@ -71,8 +71,10 @@ mod test {
     fn test_config() {
         let app_data_dir = dirs::data_dir().unwrap();
         let config_path = app_data_dir.join("LM Studio").join("settings.json");
-        let config = std::fs::read_to_string(config_path).unwrap();
-        println!("config: {:#?}", config);
+        match std::fs::read_to_string(config_path) {
+            Ok(config) => println!("config: {:#?}", config),
+            Err(_) => println!("LM Studio config not found, skipping"),
+        }
     }
 
     #[test]
