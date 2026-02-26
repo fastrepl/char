@@ -9,6 +9,7 @@ import type {
 import { EMPTY_TIPTAP_DOC } from "@hypr/tiptap/shared";
 
 import * as main from "../../../store/tinybase/store/main";
+import { useSearchEngine } from "../../../contexts/search/engine";
 
 const draftsByKey = new Map<string, JSONContent>();
 
@@ -108,10 +109,7 @@ export function useSlashCommandConfig(): SlashCommandConfig {
     main.QUERIES.visibleChatShortcuts,
     main.STORE_ID,
   );
-  const sessions = main.UI.useResultTable(
-    main.QUERIES.timelineSessions,
-    main.STORE_ID,
-  );
+  const { search } = useSearchEngine();
 
   return useMemo(
     () => ({
@@ -137,21 +135,19 @@ export function useSlashCommandConfig(): SlashCommandConfig {
           }
         });
 
-        Object.entries(sessions).forEach(([rowId, row]) => {
-          const title = row.title as string | undefined;
-          if (title && title.toLowerCase().includes(lowerQuery)) {
-            results.push({
-              id: rowId,
-              type: "session",
-              label: title,
-            });
-          }
-        });
+        const searchResults = await search(query);
+        for (const hit of searchResults) {
+          results.push({
+            id: hit.document.id,
+            type: hit.document.type,
+            label: hit.document.title,
+          });
+        }
 
         return results.slice(0, 5);
       },
     }),
-    [chatShortcuts, sessions],
+    [chatShortcuts, search],
   );
 }
 
