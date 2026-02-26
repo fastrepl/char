@@ -7,7 +7,7 @@
     "beforeDevCommand": "pnpm -F desktop dev",
     "devUrl": "http://localhost:1422",
     "beforeBuildCommand": "pnpm -F desktop build",
-    "beforeBundleCommand": "cargo xtask prepare-binaries && ./scripts/fix-dylib.sh",
+    "beforeBundleCommand": "./scripts/fix-dylib.sh",
     "frontendDist": "../dist"
   },
   "app": {
@@ -31,9 +31,6 @@
       "icons/stable/128x128@2x.png",
       "icons/stable/icon.icns",
       "icons/stable/icon.ico"
-    ],
-    "externalBin": [
-      "binaries/char-chrome-native-host"
     ],
     "resources": {
       "icons/stable/icon.icns": "icons/stable.icns",
