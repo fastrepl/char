@@ -1,16 +1,14 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
+import { createAzure } from "@ai-sdk/azure";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
-import {
-  extractReasoningMiddleware,
-  type LanguageModel,
-  wrapLanguageModel,
-} from "ai";
+import { extractReasoningMiddleware, wrapLanguageModel } from "ai";
 import { useMemo } from "react";
 
+import type { CharTask } from "@hypr/api-client";
 import type { AIProviderStorage } from "@hypr/store";
 
 import { useAuth } from "../auth";
@@ -19,13 +17,16 @@ import {
   type ProviderId,
   PROVIDERS,
 } from "../components/settings/ai/llm/shared";
+import { providerRowId } from "../components/settings/ai/shared";
 import {
   getProviderSelectionBlockers,
   type ProviderEligibilityContext,
 } from "../components/settings/ai/shared/eligibility";
 import { env } from "../env";
 import * as settings from "../store/tinybase/store/settings";
-import { tracedFetch } from "../utils/traced-fetch";
+import { createTracedFetch, tracedFetch } from "../utils/traced-fetch";
+
+type LanguageModelV3 = Parameters<typeof wrapLanguageModel>[0]["model"];
 
 type LLMConnectionInfo = {
   providerId: ProviderId;
@@ -53,9 +54,12 @@ type LLMConnectionResult = {
   status: LLMConnectionStatus;
 };
 
-export const useLanguageModel = (): Exclude<LanguageModel, string> | null => {
+export const useLanguageModel = (task?: CharTask): LanguageModelV3 | null => {
   const { conn } = useLLMConnection();
-  return useMemo(() => (conn ? createLanguageModel(conn) : null), [conn]);
+  return useMemo(
+    () => (conn ? createLanguageModel(conn, task) : null),
+    [conn, task],
+  );
 };
 
 export const useLLMConnection = (): LLMConnectionResult => {
@@ -67,7 +71,7 @@ export const useLLMConnection = (): LLMConnectionResult => {
   );
   const providerConfig = settings.UI.useRow(
     "ai_providers",
-    current_llm_provider ?? "",
+    current_llm_provider ? providerRowId("llm", current_llm_provider) : "",
     settings.STORE_ID,
   ) as AIProviderStorage | undefined;
 
@@ -188,7 +192,7 @@ const resolveLLMConnection = (params: {
       conn: {
         providerId,
         modelId,
-        baseUrl: baseUrl ?? new URL("/llm", env.VITE_AI_URL).toString(),
+        baseUrl: baseUrl ?? new URL("/llm", env.VITE_API_URL).toString(),
         apiKey: session.access_token,
       },
       status: { status: "success", providerId, isHosted: true },
@@ -201,35 +205,45 @@ const resolveLLMConnection = (params: {
   };
 };
 
+export const useFeedbackLanguageModel = (): LanguageModelV3 => {
+  const { session } = useAuth();
+  const apiKey = session?.access_token ?? "CANT_BE_EMPTY";
+
+  return useMemo(() => {
+    const baseUrl = new URL("/support/llm", env.VITE_API_URL).toString();
+    const provider = createOpenRouter({
+      fetch: tauriFetch,
+      baseURL: baseUrl,
+      apiKey,
+    });
+    return wrapWithThinkingMiddleware(provider.chat("unused"));
+  }, [apiKey]);
+};
+
 const wrapWithThinkingMiddleware = (
-  model: Exclude<LanguageModel, string>,
-): Exclude<LanguageModel, string> => {
-  // Type cast needed because wrapLanguageModel expects LanguageModelV3 in AI SDK v6
-  // but providers may return LanguageModelV2 | LanguageModelV3
+  model: LanguageModelV3,
+): LanguageModelV3 => {
   return wrapLanguageModel({
-    model: model as Parameters<typeof wrapLanguageModel>[0]["model"],
+    model,
     middleware: [
       extractReasoningMiddleware({ tagName: "think" }),
       extractReasoningMiddleware({ tagName: "thinking" }),
     ],
-  }) as Exclude<LanguageModel, string>;
+  });
 };
 
 const createLanguageModel = (
   conn: LLMConnectionInfo,
-): Exclude<LanguageModel, string> => {
+  task?: CharTask,
+): LanguageModelV3 => {
   switch (conn.providerId) {
     case "hyprnote": {
-      const provider = createOpenAICompatible({
-        fetch: tracedFetch,
-        name: "hyprnote",
+      const provider = createOpenRouter({
+        fetch: task ? createTracedFetch(task) : tracedFetch,
         baseURL: conn.baseUrl,
         apiKey: conn.apiKey,
-        headers: {
-          Authorization: `Bearer ${conn.apiKey}`,
-        },
       });
-      return wrapWithThinkingMiddleware(provider.chatModel(conn.modelId));
+      return wrapWithThinkingMiddleware(provider.chat(conn.modelId));
     }
 
     case "anthropic": {
@@ -258,10 +272,7 @@ const createLanguageModel = (
         fetch: tauriFetch,
         apiKey: conn.apiKey,
       });
-      // Type cast needed due to @ai-sdk/mistral using @ai-sdk/provider@3.x while @openrouter uses @2.x
-      return wrapWithThinkingMiddleware(
-        provider(conn.modelId) as Exclude<LanguageModel, string>,
-      );
+      return wrapWithThinkingMiddleware(provider.chat(conn.modelId));
     }
 
     case "openai": {
@@ -271,6 +282,26 @@ const createLanguageModel = (
         apiKey: conn.apiKey,
       });
       return wrapWithThinkingMiddleware(provider(conn.modelId));
+    }
+
+    case "azure_openai": {
+      const provider = createAzure({
+        fetch: tauriFetch,
+        baseURL: conn.baseUrl,
+        apiKey: conn.apiKey,
+      });
+      return wrapWithThinkingMiddleware(provider(conn.modelId));
+    }
+
+    case "azure_ai": {
+      const provider = createOpenAICompatible({
+        fetch: tauriFetch,
+        name: "azure_ai",
+        baseURL: conn.baseUrl,
+        apiKey: conn.apiKey,
+        headers: { "api-key": conn.apiKey },
+      });
+      return wrapWithThinkingMiddleware(provider.chatModel(conn.modelId));
     }
 
     case "ollama": {

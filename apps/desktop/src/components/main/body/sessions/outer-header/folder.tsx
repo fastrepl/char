@@ -11,6 +11,7 @@ import {
 import { Button } from "@hypr/ui/components/ui/button";
 
 import * as main from "../../../../../store/tinybase/store/main";
+import { useSessionTitle } from "../../../../../store/zustand/live-title";
 import { useTabs } from "../../../../../store/zustand/tabs";
 import { FolderBreadcrumb } from "../../shared/folder-breadcrumb";
 import { SearchableFolderDropdown } from "./shared/folder";
@@ -22,9 +23,13 @@ export function FolderChain({ sessionId }: { sessionId: string }) {
     "folder_id",
     main.STORE_ID,
   );
-  const title =
-    main.UI.useCell("sessions", sessionId, "title", main.STORE_ID) ??
-    "Untitled";
+  const storeTitle = main.UI.useCell(
+    "sessions",
+    sessionId,
+    "title",
+    main.STORE_ID,
+  ) as string | undefined;
+  const title = useSessionTitle(sessionId, storeTitle);
 
   const handleChangeTitle = main.UI.useSetPartialRowCallback(
     "sessions",

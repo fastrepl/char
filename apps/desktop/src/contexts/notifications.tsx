@@ -63,9 +63,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const sttModel = current_stt_model as string | undefined;
   const isLocalSttModel =
-    current_stt_provider === "hyprnote" &&
-    !!sttModel &&
-    (sttModel.startsWith("am-") || sttModel.startsWith("Quantized"));
+    current_stt_provider === "hyprnote" && !!sttModel && sttModel !== "cloud";
 
   const localSttQuery = useQuery({
     enabled: isLocalSttModel,
@@ -74,15 +72,12 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     queryFn: async () => {
       if (!sttModel) return null;
 
-      const servers = await localSttCommands.getServers();
-      if (servers.status !== "ok") return null;
+      const serverResult = await localSttCommands.getServerForModel(
+        sttModel as SupportedSttModel,
+      );
+      if (serverResult.status !== "ok") return null;
 
-      const isInternalModel = sttModel.startsWith("Quantized");
-      const server = isInternalModel
-        ? servers.data.internal
-        : servers.data.external;
-
-      return server?.status ?? null;
+      return serverResult.data?.status ?? null;
     },
   });
 

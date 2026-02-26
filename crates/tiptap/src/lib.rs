@@ -812,4 +812,39 @@ mod tests {
         let result = to_md(json);
         assert_eq!(result.trim(), md);
     }
+
+    #[test]
+    fn test_multibyte_chars_no_panic() {
+        let json = serde_json::json!({
+            "type": "doc",
+            "content": [{
+                "type": "bulletList",
+                "content": [
+                    {
+                        "type": "listItem",
+                        "content": [{
+                            "type": "paragraph",
+                            "content": [{
+                                "type": "text",
+                                "text": "Sad music track began playing on one side, noted aloud as \u{201C}"
+                            }]
+                        }]
+                    },
+                    {
+                        "type": "listItem",
+                        "content": [{
+                            "type": "paragraph",
+                            "content": [{
+                                "type": "text",
+                                "text": "\"Projet 'A à Z' sans supervision\"\u{00A0}"
+                            }]
+                        }]
+                    }
+                ]
+            }]
+        });
+
+        let result = tiptap_json_to_md(&json);
+        assert!(result.is_ok(), "should not panic on multi-byte chars");
+    }
 }

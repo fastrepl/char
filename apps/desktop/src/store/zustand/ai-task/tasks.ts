@@ -66,7 +66,7 @@ const initialState: TasksState = {
   tasks: {},
 };
 
-export const createTasksSlice = <T extends TasksState>(
+export const createTasksSlice = <T extends TasksState & TasksActions>(
   set: StoreApi<T>["setState"],
   get: StoreApi<T>["getState"],
   deps: { persistedStore: MainStore; settingsStore: SettingsStore },
@@ -125,16 +125,15 @@ export const createTasksSlice = <T extends TasksState>(
       onComplete?: (text: string) => void;
     },
   ) => {
+    const existingTask = get().tasks[taskId];
+    if (existingTask?.status === "generating") {
+      return;
+    }
+
     const abortController = new AbortController();
     const taskConfig = TASK_CONFIGS[config.taskType];
 
     try {
-      const enrichedArgs = await taskConfig.transformArgs(
-        config.args,
-        deps.persistedStore,
-        deps.settingsStore,
-      );
-
       set((state) =>
         mutate(state, (draft) => {
           draft.tasks[taskId] = {
@@ -146,6 +145,12 @@ export const createTasksSlice = <T extends TasksState>(
             currentStep: undefined,
           };
         }),
+      );
+
+      const enrichedArgs = await taskConfig.transformArgs(
+        config.args,
+        deps.persistedStore,
+        deps.settingsStore,
       );
       let fullText = "";
 
@@ -213,7 +218,28 @@ export const createTasksSlice = <T extends TasksState>(
         }),
       );
 
-      config.onComplete?.(fullText);
+      try {
+        await taskConfig.onSuccess?.({
+          taskId,
+          text: fullText,
+          model: config.model,
+          args: config.args,
+          transformedArgs: enrichedArgs,
+          store: deps.persistedStore,
+          settingsStore: deps.settingsStore,
+          startTask: (nextTaskId, nextConfig) =>
+            get().generate(nextTaskId, nextConfig),
+          getTaskState: (nextTaskId) => getTaskState(get().tasks, nextTaskId),
+        });
+      } catch (error) {
+        console.error("Task post-success hook failed:", error);
+      }
+
+      try {
+        config.onComplete?.(fullText);
+      } catch (error) {
+        console.error("Task onComplete callback failed:", error);
+      }
     } catch (err) {
       if (
         err instanceof Error &&

@@ -2,6 +2,7 @@ import type { AppleEvent, Participant } from "@hypr/plugin-apple-calendar";
 import { commands as appleCalendarCommands } from "@hypr/plugin-apple-calendar";
 import { commands as miscCommands } from "@hypr/plugin-misc";
 
+import { eventMatchingKey } from "../../../utils/session-event";
 import type { Ctx } from "../ctx";
 import type {
   EventParticipant,
@@ -21,7 +22,10 @@ export class CalendarFetchError extends Error {
   }
 }
 
-export async function fetchIncomingEvents(ctx: Ctx): Promise<{
+export async function fetchIncomingEvents(
+  ctx: Ctx,
+  timezone?: string,
+): Promise<{
   events: IncomingEvent[];
   participants: IncomingParticipants;
 }> {
@@ -51,7 +55,8 @@ export async function fetchIncomingEvents(ctx: Ctx): Promise<{
     const { event, eventParticipants } = await normalizeAppleEvent(appleEvent);
     events.push(event);
     if (eventParticipants.length > 0) {
-      participants.set(event.tracking_id_event, eventParticipants);
+      const key = eventMatchingKey(event, timezone);
+      participants.set(key, eventParticipants);
     }
   }
 
@@ -67,13 +72,19 @@ async function normalizeAppleEvent(appleEvent: AppleEvent): Promise<{
     (await extractMeetingLink(appleEvent.notes, appleEvent.location));
 
   const eventParticipants: EventParticipant[] = [];
+  let normalizedOrganizer: EventParticipant | undefined;
 
   if (appleEvent.organizer) {
-    eventParticipants.push(normalizeParticipant(appleEvent.organizer, true));
+    normalizedOrganizer = normalizeParticipant(appleEvent.organizer, true);
+    eventParticipants.push(normalizedOrganizer);
   }
 
   for (const attendee of appleEvent.attendees) {
-    eventParticipants.push(normalizeParticipant(attendee, false));
+    const normalizedAttendee = normalizeParticipant(attendee, false);
+    if (normalizedAttendee.email === normalizedOrganizer?.email) {
+      continue;
+    }
+    eventParticipants.push(normalizedAttendee);
   }
 
   return {
@@ -88,6 +99,8 @@ async function normalizeAppleEvent(appleEvent: AppleEvent): Promise<{
       description: appleEvent.notes ?? undefined,
       recurrence_series_id:
         appleEvent.recurrence?.series_identifier ?? undefined,
+      has_recurrence_rules: appleEvent.has_recurrence_rules,
+      is_all_day: appleEvent.is_all_day,
     },
     eventParticipants,
   };
@@ -110,8 +123,39 @@ function normalizeParticipant(
 ): EventParticipant {
   return {
     name: participant.name ?? undefined,
-    email: participant.email ?? undefined,
+    email: resolveParticipantEmail(participant),
     is_organizer: isOrganizer,
     is_current_user: participant.is_current_user,
   };
+}
+
+function resolveParticipantEmail(participant: Participant): string | undefined {
+  if (participant.email) {
+    return participant.email;
+  }
+
+  if (participant.contact?.email_addresses?.length) {
+    return participant.contact.email_addresses[0];
+  }
+
+  if (participant.url) {
+    const lower = participant.url.toLowerCase();
+    if (lower.startsWith("mailto:")) {
+      const email = participant.url.slice(7);
+      if (email) {
+        return email;
+      }
+    }
+  }
+
+  if (
+    participant.name &&
+    participant.name.includes("@") &&
+    participant.name.includes(".") &&
+    !participant.name.includes(" ")
+  ) {
+    return participant.name;
+  }
+
+  return undefined;
 }

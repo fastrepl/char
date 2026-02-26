@@ -7,16 +7,16 @@ export const Route = createFileRoute("/_view/solution/consulting")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "AI Meeting Notes for Consultants - Hyprnote" },
+      { title: "AI Meeting Notes for Consultants - Char" },
       {
         name: "description",
         content:
-          "Capture client conversations, project details, and strategic insights with AI-powered meeting notes. Deliver better recommendations with Hyprnote.",
+          "Capture client conversations, project details, and strategic insights with AI-powered meeting notes. Deliver better recommendations with Char.",
       },
       { name: "robots", content: "noindex, nofollow" },
       {
         property: "og:title",
-        content: "AI Meeting Notes for Consultants - Hyprnote",
+        content: "AI Meeting Notes for Consultants - Char",
       },
       {
         property: "og:description",
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_view/solution/consulting")({
       { property: "og:type", content: "website" },
       {
         property: "og:url",
-        content: "https://hyprnote.com/solution/consulting",
+        content: "https://char.com/solution/consulting",
       },
     ],
   }),
@@ -125,7 +125,7 @@ function HeroSection() {
             AI-powered meeting notes
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto">
-            Focus on advising your clients while Hyprnote captures every detail,
+            Focus on advising your clients while Char captures every detail,
             extracts insights, and helps you create compelling deliverables.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
@@ -195,8 +195,8 @@ function UseCasesSection() {
           For every client engagement
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
-          From discovery to delivery, Hyprnote helps you capture and leverage
-          every client interaction.
+          From discovery to delivery, Char helps you capture and leverage every
+          client interaction.
         </p>
         <div className="grid md:grid-cols-2 gap-6">
           {useCases.map((useCase) => (

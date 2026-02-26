@@ -20,10 +20,13 @@ import {
   TooltipTrigger,
 } from "@hypr/ui/components/ui/tooltip";
 
+import { useListener } from "../../../../../contexts/listener";
 import { fromResult } from "../../../../../effect";
 import { useRunBatch } from "../../../../../hooks/useRunBatch";
+import { getEnhancerService } from "../../../../../services/enhancer";
 import * as main from "../../../../../store/tinybase/store/main";
-import { type Tab, useTabs } from "../../../../../store/zustand/tabs";
+import { useTabs } from "../../../../../store/zustand/tabs";
+import type { Tab } from "../../../../../store/zustand/tabs/schema";
 import { ChannelProfile } from "../../../../../utils/segment";
 import { ActionableTooltipContent } from "./shared";
 
@@ -45,8 +48,11 @@ export function OptionsMenu({
   const [open, setOpen] = useState(false);
   const runBatch = useRunBatch(sessionId);
   const queryClient = useQueryClient();
+  const handleBatchStarted = useListener((state) => state.handleBatchStarted);
+  const handleBatchFailed = useListener((state) => state.handleBatchFailed);
+  const clearBatchSession = useListener((state) => state.clearBatchSession);
 
-  const store = main.UI.useStore(main.STORE_ID);
+  const store = main.UI.useStore(main.STORE_ID) as main.Store | undefined;
   const { user_id } = main.UI.useValues(main.STORE_ID);
   const updateSessionTabState = useTabs((state) => state.updateSessionTabState);
   const sessionTab = useTabs((state) => {
@@ -56,6 +62,22 @@ export function OptionsMenu({
     );
     return found ?? null;
   });
+
+  const triggerEnhance = useCallback(() => {
+    const result = getEnhancerService()?.enhance(sessionId);
+    if (
+      (result?.type === "started" || result?.type === "already_active") &&
+      sessionTab
+    ) {
+      updateSessionTabState(sessionTab, {
+        ...sessionTab.state,
+        view: { type: "enhanced", id: result.noteId },
+      });
+    }
+    if (result?.type === "no_model") {
+      console.warn("[enhance] skipped: no model configured");
+    }
+  }, [sessionId, sessionTab, updateSessionTabState]);
 
   const handleFilePath = useCallback(
     (selection: FileSelection, kind: "audio" | "transcript") => {
@@ -122,6 +144,8 @@ export function OptionsMenu({
                 file_type: "transcript",
                 token_count: subtitle.tokens.length,
               });
+
+              triggerEnhance();
             }),
           ),
         );
@@ -139,7 +163,18 @@ export function OptionsMenu({
       }
 
       return pipe(
-        fromResult(fsSyncCommands.audioImport(sessionId, path)),
+        Effect.sync(() => {
+          if (sessionTab) {
+            updateSessionTabState(sessionTab, {
+              ...sessionTab.state,
+              view: { type: "transcript" },
+            });
+          }
+          handleBatchStarted(sessionId);
+        }),
+        Effect.flatMap(() =>
+          fromResult(fsSyncCommands.audioImport(sessionId, path)),
+        ),
         Effect.tap(() =>
           Effect.sync(() => {
             void analyticsCommands.event({
@@ -154,15 +189,32 @@ export function OptionsMenu({
             });
           }),
         ),
-        Effect.flatMap(() => Effect.promise(() => runBatch(path))),
+        Effect.tap(() => Effect.sync(() => clearBatchSession(sessionId))),
+        Effect.flatMap((importedPath) =>
+          Effect.tryPromise({
+            try: () => runBatch(importedPath),
+            catch: (error) => error,
+          }),
+        ),
+        Effect.tap(() => Effect.sync(() => triggerEnhance())),
+        Effect.catchAll((error: unknown) =>
+          Effect.sync(() => {
+            const msg = error instanceof Error ? error.message : String(error);
+            handleBatchFailed(sessionId, msg);
+          }),
+        ),
       );
     },
     [
+      clearBatchSession,
+      handleBatchFailed,
+      handleBatchStarted,
       queryClient,
       runBatch,
       sessionId,
       sessionTab,
       store,
+      triggerEnhance,
       updateSessionTabState,
       user_id,
     ],

@@ -51,6 +51,24 @@
   }
 }
 
+.tiptap > :first-child a:hover::after {
+  bottom: auto;
+  top: 100%;
+  margin-bottom: 0;
+  margin-top: 8px;
+  animation: fadeInBelow 0.15s ease-in;
+}
+
+.tiptap > :first-child a:hover::before {
+  bottom: auto;
+  top: 100%;
+  margin-bottom: 0;
+  margin-top: 2px;
+  border-top-color: transparent;
+  border-bottom-color: rgba(0, 0, 0, 0.85);
+  animation: fadeInBelow 0.15s ease-in;
+}
+
 .platform-windows .tiptap a:hover::after,
 .platform-linux .tiptap a:hover::after {
   content: "Ctrl+click to open link";
@@ -60,6 +78,17 @@
   from {
     opacity: 0;
     transform: translateX(-50%) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes fadeInBelow {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
   }
   to {
     opacity: 1;

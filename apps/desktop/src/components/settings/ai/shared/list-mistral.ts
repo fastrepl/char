@@ -5,6 +5,7 @@ import {
   extractMetadataMap,
   fetchJson,
   type InputModality,
+  isDateSnapshot,
   type ListModelsResult,
   type ModelIgnoreReason,
   partition,
@@ -50,6 +51,9 @@ export async function listMistralModels(
     }
     if (!supportsChatCompletion(model)) {
       reasons.push("no_completion");
+    }
+    if (isDateSnapshot(model.id)) {
+      reasons.push("date_snapshot");
     }
     return reasons.length > 0 ? reasons : null;
   };

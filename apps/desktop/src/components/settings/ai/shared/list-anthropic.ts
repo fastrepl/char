@@ -5,6 +5,8 @@ import {
   extractMetadataMap,
   fetchJson,
   type InputModality,
+  isDateSnapshot,
+  isOldModel,
   type ListModelsResult,
   type ModelIgnoreReason,
   partition,
@@ -48,6 +50,12 @@ export async function listAnthropicModels(
           const reasons: ModelIgnoreReason[] = [];
           if (shouldIgnoreCommonKeywords(model.id)) {
             reasons.push("common_keyword");
+          }
+          if (isOldModel(model.id)) {
+            reasons.push("old_model");
+          }
+          if (isDateSnapshot(model.id)) {
+            reasons.push("date_snapshot");
           }
           return reasons.length > 0 ? reasons : null;
         },

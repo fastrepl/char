@@ -7,16 +7,16 @@ export const Route = createFileRoute("/_view/solution/project-management")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "AI Meeting Notes for Project Management - Hyprnote" },
+      { title: "AI Meeting Notes for Project Management - Char" },
       {
         name: "description",
         content:
-          "Capture every project meeting with AI-powered notes. Track decisions, action items, and stakeholder discussions. Keep projects on track with Hyprnote.",
+          "Capture every project meeting with AI-powered notes. Track decisions, action items, and stakeholder discussions. Keep projects on track with Char.",
       },
       { name: "robots", content: "noindex, nofollow" },
       {
         property: "og:title",
-        content: "AI Meeting Notes for Project Management - Hyprnote",
+        content: "AI Meeting Notes for Project Management - Char",
       },
       {
         property: "og:description",
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_view/solution/project-management")({
       { property: "og:type", content: "website" },
       {
         property: "og:url",
-        content: "https://hyprnote.com/solution/project-management",
+        content: "https://char.com/solution/project-management",
       },
     ],
   }),
@@ -125,7 +125,7 @@ function HeroSection() {
             with AI-powered notes
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto">
-            Focus on leading your projects, not taking notes. Hyprnote captures
+            Focus on leading your projects, not taking notes. Char captures
             every meeting detail so nothing falls through the cracks.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">

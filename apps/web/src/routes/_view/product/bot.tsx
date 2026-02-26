@@ -7,10 +7,10 @@ export const Route = createFileRoute("/_view/product/bot")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "Bot - Hyprnote" },
+      { title: "Bot - Char" },
       {
         name: "description",
-        content: "Hyprnote Bot for meeting platforms. Coming soon.",
+        content: "Char Bot for meeting platforms. Coming soon.",
       },
       { name: "robots", content: "noindex, nofollow" },
     ],
@@ -46,7 +46,7 @@ function Component() {
         <div className="bg-[linear-gradient(to_bottom,rgba(245,245,244,0.2),white_50%,rgba(245,245,244,0.3))] px-6 h-full flex items-center justify-center relative z-10 pointer-events-none">
           <div className="text-center max-w-4xl mx-auto pointer-events-auto">
             <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
-              Hyprnote Bot
+              Char Bot
             </h1>
             <p className="text-lg sm:text-xl text-neutral-600">
               An optional bot solution for teams that need centralized meeting
@@ -177,7 +177,7 @@ function DraggableIcon({
       <div className="w-full h-full shadow-2xl border border-neutral-100 flex justify-center items-center rounded-3xl bg-transparent">
         <img
           src="/api/images/hyprnote/icon.png"
-          alt="Hyprnote"
+          alt="Char"
           className="w-[85%] h-[85%] rounded-[20px] border border-neutral-100"
           draggable={false}
         />

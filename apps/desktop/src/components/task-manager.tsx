@@ -34,8 +34,9 @@ export function TaskManager() {
     await syncCalendarEvents(
       store as main.Store,
       queries as Queries<main.Schemas>,
+      settingsStore as settings.Store,
     );
-  }, [store, queries]);
+  }, [store, queries, settingsStore]);
 
   useScheduleTaskRun(CALENDAR_SYNC_TASK_ID, undefined, 0, {
     repeatDelay: CALENDAR_SYNC_INTERVAL,

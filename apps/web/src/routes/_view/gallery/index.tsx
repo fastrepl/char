@@ -1,15 +1,8 @@
 import { Icon } from "@iconify-icon/react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { allShortcuts, allTemplates } from "content-collections";
-import { CircleHelp } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@hypr/ui/components/ui/tooltip";
 import { cn } from "@hypr/utils";
 
 import { DownloadButton } from "@/components/download-button";
@@ -36,15 +29,15 @@ export const Route = createFileRoute("/_view/gallery/")({
   },
   head: () => ({
     meta: [
-      { title: "Templates & Shortcuts Gallery - Hyprnote" },
+      { title: "Templates & Shortcuts Gallery - Char" },
       {
         name: "description",
         content:
-          "Discover our library of AI meeting templates and shortcuts. Get structured summaries, extract action items, and more with Hyprnote's AI-powered tools.",
+          "Discover our library of AI meeting templates and shortcuts. Get structured summaries, extract action items, and more with Char's AI-powered tools.",
       },
       {
         property: "og:title",
-        content: "Templates & Shortcuts Gallery - Hyprnote",
+        content: "Templates & Shortcuts Gallery - Char",
       },
       {
         property: "og:description",
@@ -52,7 +45,7 @@ export const Route = createFileRoute("/_view/gallery/")({
           "Browse our collection of AI meeting templates and shortcuts. From engineering standups to sales discovery calls, find the perfect tool for your workflow.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://hyprnote.com/gallery" },
+      { property: "og:url", content: "https://char.com/gallery" },
     ],
   }),
 });
@@ -198,7 +191,7 @@ function Component() {
 function ContributeBanner() {
   return (
     <a
-      href="https://github.com/fastrepl/hyprnote/issues/new?title=Suggest%20New%20Template%2FShortcut&body=Type:%20template%0ATitle:%20Sprint%20Planning%0ACategory:%20Engineering%0ADescription:%20A%20template%20for%20capturing%20sprint%20planning%20discussions%0A%0AStructure%20(list%20of%20sections%2C%20each%20with%20a%20title%20and%20what%20to%20include):%0A-%20Sprint%20Goals:%20Key%20objectives%20for%20the%20sprint%0A-%20User%20Stories:%20Stories%20discussed%20and%20committed%0A-%20Action%20Items:%20Tasks%20assigned%20to%20team%20members"
+      href="https://github.com/fastrepl/char/issues/new?title=Suggest%20New%20Template%2FShortcut&body=Type:%20template%0ATitle:%20Sprint%20Planning%0ACategory:%20Engineering%0ADescription:%20A%20template%20for%20capturing%20sprint%20planning%20discussions%0A%0AStructure%20(list%20of%20sections%2C%20each%20with%20a%20title%20and%20what%20to%20include):%0A-%20Sprint%20Goals:%20Key%20objectives%20for%20the%20sprint%0A-%20User%20Stories:%20Stories%20discussed%20and%20committed%0A-%20Action%20Items:%20Tasks%20assigned%20to%20team%20members"
       target="_blank"
       rel="noopener noreferrer"
       className={cn([
@@ -240,41 +233,7 @@ function HeroSection({
             Gallery
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600">
-            Browse and discover{" "}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    to="/templates/"
-                    className="underline decoration-dotted underline-offset-2 cursor-pointer inline-flex items-center gap-0.5 hover:text-stone-800 transition-colors"
-                  >
-                    templates
-                    <CircleHelp className="size-3.5" />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent className="bg-black text-white rounded-md">
-                  AI instructions for summarizing meetings
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>{" "}
-            and{" "}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    to="/shortcuts/"
-                    className="underline decoration-dotted underline-offset-2 cursor-pointer inline-flex items-center gap-0.5 hover:text-stone-800 transition-colors"
-                  >
-                    shortcuts
-                    <CircleHelp className="size-3.5" />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent className="bg-black text-white rounded-md">
-                  Quick commands for the AI chat assistant
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>{" "}
-            for your workflow
+            Browse and discover templates and shortcuts for your workflow
           </p>
         </div>
 
@@ -334,7 +293,7 @@ function QuoteSection() {
   return (
     <div className="py-4 px-4 text-center border-y border-neutral-100 bg-white bg-[linear-gradient(to_right,#f5f5f5_1px,transparent_1px),linear-gradient(to_bottom,#f5f5f5_1px,transparent_1px)] bg-size-[24px_24px] bg-position-[12px_12px,12px_12px]">
       <p className="text-base text-stone-600 font-serif italic">
-        "Curated by Hyprnote and the community"
+        "Curated by Char and the community"
       </p>
     </div>
   );
@@ -544,7 +503,7 @@ function ContributeCard() {
         Have an idea? Submit a PR and help the community.
       </p>
       <a
-        href="https://github.com/fastrepl/hyprnote/issues/new?title=Suggest%20New%20Template%2FShortcut&body=Type:%20template%0ATitle:%20Sprint%20Planning%0ACategory:%20Engineering%0ADescription:%20A%20template%20for%20capturing%20sprint%20planning%20discussions%0A%0AStructure%20(list%20of%20sections%2C%20each%20with%20a%20title%20and%20what%20to%20include):%0A-%20Sprint%20Goals:%20Key%20objectives%20for%20the%20sprint%0A-%20User%20Stories:%20Stories%20discussed%20and%20committed%0A-%20Action%20Items:%20Tasks%20assigned%20to%20team%20members"
+        href="https://github.com/fastrepl/char/issues/new?title=Suggest%20New%20Template%2FShortcut&body=Type:%20template%0ATitle:%20Sprint%20Planning%0ACategory:%20Engineering%0ADescription:%20A%20template%20for%20capturing%20sprint%20planning%20discussions%0A%0AStructure%20(list%20of%20sections%2C%20each%20with%20a%20title%20and%20what%20to%20include):%0A-%20Sprint%20Goals:%20Key%20objectives%20for%20the%20sprint%0A-%20User%20Stories:%20Stories%20discussed%20and%20committed%0A-%20Action%20Items:%20Tasks%20assigned%20to%20team%20members"
         target="_blank"
         rel="noopener noreferrer"
         className={cn([
@@ -569,8 +528,8 @@ function CTASection() {
           Ready to transform your meetings?
         </h2>
         <p className="text-lg text-neutral-600">
-          Download Hyprnote and start using these templates and shortcuts to
-          capture perfect meeting notes with AI.
+          Download Char and start using these templates and shortcuts to capture
+          perfect meeting notes with AI.
         </p>
         <div className="flex flex-col items-center gap-4 pt-4">
           <DownloadButton />

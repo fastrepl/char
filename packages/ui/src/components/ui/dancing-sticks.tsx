@@ -25,31 +25,37 @@ const EqualizerStick = memo(function EqualizerStick({
   height,
   stickWidth,
 }: EqualizerStickProps) {
-  const animationHeights = useMemo(
-    () => getRandomValues(height, 6, baseLength),
-    [height, baseLength],
-  );
+  const animationScales = useMemo(() => {
+    const heights = getRandomValues(height, 6, baseLength);
+    return heights.map((h) => Math.max(0.2, Math.min(1, h / height)));
+  }, [height, baseLength]);
 
-  const scaleY = useTransform(amplitudeMotionValue, [0, 1], [0.2, 1]);
+  const amplitudeScaleY = useTransform(amplitudeMotionValue, [0, 1], [0.2, 1]);
 
   return (
     <motion.div
-      className="rounded-full origin-center"
+      className="rounded-full origin-center flex items-center justify-center"
       style={{
         width: stickWidth,
-        backgroundColor: color,
-        scaleY,
+        height,
+        scaleY: amplitudeScaleY,
       }}
-      animate={{
-        height: animationHeights,
-      }}
-      transition={{
-        duration: 1.1,
-        ease: "easeInOut",
-        times: [0.2, 0.3, 0.5, 0.7, 1.1, 1.3, 1.7],
-        repeat: Infinity,
-      }}
-    />
+    >
+      <motion.div
+        className="w-full rounded-full origin-center"
+        style={{
+          height,
+          backgroundColor: color,
+        }}
+        animate={{ scaleY: animationScales }}
+        transition={{
+          duration: 1.1,
+          ease: "easeInOut",
+          times: [0.2, 0.3, 0.5, 0.7, 1.1, 1.3, 1.7],
+          repeat: Infinity,
+        }}
+      />
+    </motion.div>
   );
 });
 

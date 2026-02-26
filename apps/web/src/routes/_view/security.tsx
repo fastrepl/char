@@ -9,26 +9,26 @@ export const Route = createFileRoute("/_view/security")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "Security - Hyprnote" },
+      { title: "Security - Char" },
       {
         name: "description",
         content:
-          "Hyprnote is built with security at its core. Local-first architecture, end-to-end encryption, and open source transparency ensure your meeting data stays protected.",
+          "Char is built with security at its core. Local-first architecture, end-to-end encryption, and open source transparency ensure your meeting data stays protected.",
       },
-      { property: "og:title", content: "Security - Hyprnote" },
+      { property: "og:title", content: "Security - Char" },
       {
         property: "og:description",
         content:
-          "Your meeting data deserves the highest level of protection. Learn how Hyprnote's security-first architecture keeps your conversations safe.",
+          "Your meeting data deserves the highest level of protection. Learn how Char's security-first architecture keeps your conversations safe.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://hyprnote.com/security" },
+      { property: "og:url", content: "https://char.com/security" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Security - Hyprnote" },
+      { name: "twitter:title", content: "Security - Char" },
       {
         name: "twitter:description",
         content:
-          "Your meeting data deserves the highest level of protection. Learn how Hyprnote's security-first architecture keeps your conversations safe.",
+          "Your meeting data deserves the highest level of protection. Learn how Char's security-first architecture keeps your conversations safe.",
       },
     ],
   }),
@@ -74,10 +74,10 @@ function HeroSection() {
             is our priority
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 leading-relaxed max-w-3xl mx-auto">
-            At Hyprnote, we believe your meeting conversations are among your
-            most sensitive data. That's why we've built security into every
-            layer of our architecture, not as an afterthought, but as a
-            foundational principle.
+            At Char, we believe your meeting conversations are among your most
+            sensitive data. That's why we've built security into every layer of
+            our architecture, not as an afterthought, but as a foundational
+            principle.
           </p>
         </header>
       </div>
@@ -120,7 +120,7 @@ function SecurityPrinciplesSection() {
       </h2>
       <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
         These aren't just marketing claims. They're architectural decisions
-        baked into every aspect of Hyprnote.
+        baked into every aspect of Char.
       </p>
       <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
         {principles.map((principle, index) => (
@@ -157,7 +157,7 @@ function LocalFirstSection() {
           </h2>
           <p className="text-neutral-600 max-w-2xl mx-auto">
             Unlike cloud-based alternatives that upload your audio to remote
-            servers, Hyprnote processes everything on your machine.
+            servers, Char processes everything on your machine.
           </p>
         </div>
 
@@ -210,11 +210,11 @@ function LocalFirstSection() {
                 Works completely offline
               </h3>
               <p className="text-neutral-600">
-                Because everything runs locally, Hyprnote works without an
-                internet connection. Record meetings, transcribe audio, and
-                generate summaries even when you're offline. Your productivity
-                isn't dependent on network availability, and your data isn't
-                exposed to network-based attacks.
+                Because everything runs locally, Char works without an internet
+                connection. Record meetings, transcribe audio, and generate
+                summaries even when you're offline. Your productivity isn't
+                dependent on network availability, and your data isn't exposed
+                to network-based attacks.
               </p>
             </div>
           </div>
@@ -346,7 +346,7 @@ function OpenSourceSecuritySection() {
             <p className="text-neutral-600">
               Thousands of developers have reviewed our codebase. Bugs and
               security issues are caught faster when many eyes are watching.
-              This collective vigilance makes Hyprnote more secure than any
+              This collective vigilance makes Char more secure than any
               closed-source alternative.
             </p>
           </div>
@@ -354,7 +354,7 @@ function OpenSourceSecuritySection() {
 
         <div className="mt-8 text-center">
           <a
-            href="https://github.com/fastrepl/hyprnote"
+            href="https://github.com/fastrepl/char"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-stone-600 hover:text-stone-800 font-medium"
@@ -375,7 +375,7 @@ function EnterpriseSecuritySection() {
       icon: "mdi:office-building",
       title: "Self-hosted deployment",
       description:
-        "Deploy Hyprnote on your own infrastructure for complete control over your data and security policies.",
+        "Deploy Char on your own infrastructure for complete control over your data and security policies.",
     },
     {
       icon: "mdi:shield-account",
@@ -405,8 +405,8 @@ function EnterpriseSecuritySection() {
             Enterprise-ready security
           </h2>
           <p className="text-neutral-600 max-w-2xl mx-auto">
-            For organizations with advanced security requirements, Hyprnote
-            offers enterprise features that meet the most demanding standards.
+            For organizations with advanced security requirements, Char offers
+            enterprise features that meet the most demanding standards.
           </p>
         </div>
 
@@ -454,7 +454,7 @@ function CTASection() {
           Ready to take control of your meeting data?
         </h2>
         <p className="text-neutral-600 mb-8">
-          Join thousands of professionals who trust Hyprnote to keep their
+          Join thousands of professionals who trust Char to keep their
           conversations secure and private.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -467,7 +467,7 @@ function CTASection() {
             ])}
           >
             <Icon icon="mdi:download" className="text-lg" />
-            Download Hyprnote
+            Download Char
           </Link>
           <Link
             to="/privacy/"

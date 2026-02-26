@@ -1,5 +1,5 @@
 import { CalendarIcon, ExternalLinkIcon, SparklesIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 import NoteEditor from "@hypr/tiptap/editor";
@@ -69,23 +69,6 @@ function fixImageUrls(content: string): string {
   );
 }
 
-function addEmptyParagraphsBeforeHeaders(
-  json: ReturnType<typeof md2json>,
-): ReturnType<typeof md2json> {
-  if (!json.content) return json;
-
-  const newContent: typeof json.content = [];
-  for (let i = 0; i < json.content.length; i++) {
-    const node = json.content[i];
-    if (node.type === "heading" && i > 0) {
-      newContent.push({ type: "paragraph" });
-    }
-    newContent.push(node);
-  }
-
-  return { ...json, content: newContent };
-}
-
 export const TabItemChangelog: TabItem<Extract<Tab, { type: "changelog" }>> = ({
   tab,
   tabIndex,
@@ -122,6 +105,15 @@ export function TabContentChangelog({
   const scrollRef = useRef<HTMLDivElement>(null);
   const { atStart, atEnd } = useScrollFade(scrollRef);
 
+  const changelogExtensionOptions = useMemo(
+    () => ({
+      onLinkOpen: (url: string) => {
+        void openerCommands.openUrl(url, null);
+      },
+    }),
+    [],
+  );
+
   return (
     <StandardTabWrapper>
       <div className="flex flex-col h-full">
@@ -142,7 +134,11 @@ export function TabContentChangelog({
             {loading ? (
               <p className="text-neutral-500">Loading...</p>
             ) : content ? (
-              <NoteEditor initialContent={content} editable={false} />
+              <NoteEditor
+                initialContent={content}
+                editable={false}
+                extensionOptions={changelogExtensionOptions}
+              />
             ) : (
               <p className="text-neutral-500">
                 No changelog available for this version.
@@ -188,7 +184,7 @@ function ChangelogHeader({
               variant="ghost"
               className="pointer-events-none text-neutral-600"
             >
-              <CalendarIcon size={14} className="shrink-0 -mt-0.5" />
+              <CalendarIcon size={14} className="shrink-0" />
               <span>{formattedDate}</span>
             </Button>
           )}
@@ -197,11 +193,14 @@ function ChangelogHeader({
             variant="ghost"
             className="gap-1.5 text-neutral-600 hover:text-black"
             onClick={() =>
-              openerCommands.openUrl("https://hyprnote.com/changelog", null)
+              openerCommands.openUrl(
+                `https://char.com/changelog/${version}`,
+                null,
+              )
             }
           >
-            <ExternalLinkIcon size={14} className="-mt-0.5" />
-            <span>See all</span>
+            <ExternalLinkIcon size={14} />
+            <span>Open in web</span>
           </Button>
         </div>
       </div>
@@ -212,7 +211,7 @@ function ChangelogHeader({
 async function fetchChangelogFromGitHub(
   version: string,
 ): Promise<string | null> {
-  const url = `https://raw.githubusercontent.com/fastrepl/hyprnote/main/apps/web/content/changelog/${version}.mdx`;
+  const url = `https://raw.githubusercontent.com/fastrepl/char/main/apps/web/content/changelog/${version}.mdx`;
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -232,7 +231,7 @@ function processChangelogContent(raw: string): {
   const markdown = fixImageUrls(body);
   const json = md2json(markdown);
   return {
-    content: addEmptyParagraphsBeforeHeaders(json),
+    content: json,
     date,
   };
 }

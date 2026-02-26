@@ -1,5 +1,6 @@
 import { disable, enable } from "@tauri-apps/plugin-autostart";
 
+import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as detectCommands } from "@hypr/plugin-detect";
 import {
   commands as localSttCommands,
@@ -12,6 +13,7 @@ export type ConfigKey =
   | "notification_event"
   | "respect_dnd"
   | "ignored_platforms"
+  | "mic_active_threshold"
   | "current_stt_provider"
   | "current_stt_model"
   | "ai_language"
@@ -19,7 +21,9 @@ export type ConfigKey =
   | "save_recordings"
   | "telemetry_consent"
   | "current_llm_provider"
-  | "current_llm_model";
+  | "current_llm_model"
+  | "timezone"
+  | "week_start";
 
 type ConfigValueType<K extends ConfigKey> =
   (typeof CONFIG_REGISTRY)[K]["default"];
@@ -72,6 +76,14 @@ export const CONFIG_REGISTRY = {
     },
   },
 
+  mic_active_threshold: {
+    key: "mic_active_threshold",
+    default: 15,
+    sideEffect: async (value: number, _) => {
+      await detectCommands.setMicActiveThreshold(value);
+    },
+  },
+
   current_stt_provider: {
     key: "current_stt_provider",
     default: undefined,
@@ -79,14 +91,14 @@ export const CONFIG_REGISTRY = {
       const provider = getConfig("current_stt_provider") as string | undefined;
       const model = getConfig("current_stt_model") as string | undefined;
 
-      if (
-        provider === "hyprnote" &&
-        model &&
-        model !== "cloud" &&
-        (model.startsWith("am-") || model.startsWith("Quantized"))
-      ) {
-        await localSttCommands.startServer(model as SupportedSttModel);
+      const isHyprnoteLocal =
+        provider === "hyprnote" && model && model !== "cloud";
+
+      if (!isHyprnoteLocal) {
+        return;
       }
+
+      await localSttCommands.startServer(model as SupportedSttModel);
     },
   },
 
@@ -97,16 +109,15 @@ export const CONFIG_REGISTRY = {
       const provider = getConfig("current_stt_provider") as string | undefined;
       const model = getConfig("current_stt_model") as string | undefined;
 
-      if (
-        provider === "hyprnote" &&
-        model &&
-        model !== "cloud" &&
-        (model.startsWith("am-") || model.startsWith("Quantized"))
-      ) {
-        await localSttCommands.startServer(model as SupportedSttModel);
-      } else {
+      const isHyprnoteLocal =
+        provider === "hyprnote" && model && model !== "cloud";
+
+      if (!isHyprnoteLocal) {
         await localSttCommands.stopServer(null);
+        return;
       }
+
+      await localSttCommands.startServer(model as SupportedSttModel);
     },
   },
 
@@ -128,6 +139,9 @@ export const CONFIG_REGISTRY = {
   telemetry_consent: {
     key: "telemetry_consent",
     default: true,
+    sideEffect: async (value: boolean, _) => {
+      await analyticsCommands.setDisabled(!value);
+    },
   },
 
   current_llm_provider: {
@@ -138,5 +152,15 @@ export const CONFIG_REGISTRY = {
   current_llm_model: {
     key: "current_llm_model",
     default: undefined,
+  },
+
+  timezone: {
+    key: "timezone",
+    default: undefined as string | undefined,
+  },
+
+  week_start: {
+    key: "week_start",
+    default: undefined as "sunday" | "monday" | undefined,
   },
 } satisfies Record<ConfigKey, ConfigDefinition>;

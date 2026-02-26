@@ -9,9 +9,9 @@ import { SlashSeparator } from "@/components/slash-separator";
 import {
   CoolStuffSection,
   CTASection,
-  DetailsSection,
   HowItWorksSection,
   MainFeaturesSection,
+  TemplatesSection,
 } from "@/routes/_view/index";
 
 export const Route = createFileRoute("/_view/vs/$slug")({
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_view/vs/$slug")({
     }
 
     const { doc } = loaderData;
-    const metaTitle = `Hyprnote vs ${doc.name} - Privacy-First AI Notetaking`;
+    const metaTitle = `Char vs ${doc.name} - Privacy-First AI Notetaking`;
 
     return {
       meta: [
@@ -42,7 +42,7 @@ export const Route = createFileRoute("/_view/vs/$slug")({
         { property: "og:type", content: "website" },
         {
           property: "og:url",
-          content: `https://hyprnote.com/vs/${doc.slug}`,
+          content: `https://char.com/vs/${doc.slug}`,
         },
         { name: "twitter:card", content: "summary" },
         { name: "twitter:title", content: metaTitle },
@@ -54,20 +54,9 @@ export const Route = createFileRoute("/_view/vs/$slug")({
 
 function Component() {
   const { doc } = Route.useLoaderData();
-  const [selectedDetail, setSelectedDetail] = useState(0);
   const [selectedFeature, setSelectedFeature] = useState(0);
-  const detailsScrollRef = useRef<HTMLDivElement>(null);
   const featuresScrollRef = useRef<HTMLDivElement>(null);
   const heroInputRef = useRef<HTMLInputElement>(null);
-
-  const scrollToDetail = (index: number) => {
-    setSelectedDetail(index);
-    if (detailsScrollRef.current) {
-      const container = detailsScrollRef.current;
-      const scrollLeft = container.offsetWidth * index;
-      container.scrollTo({ left: scrollLeft, behavior: "smooth" });
-    }
-  };
 
   const scrollToFeature = (index: number) => {
     setSelectedFeature(index);
@@ -102,12 +91,7 @@ function Component() {
           scrollToFeature={scrollToFeature}
         />
         <SlashSeparator />
-        <DetailsSection
-          detailsScrollRef={detailsScrollRef}
-          selectedDetail={selectedDetail}
-          setSelectedDetail={setSelectedDetail}
-          scrollToDetail={scrollToDetail}
-        />
+        <TemplatesSection />
         <SlashSeparator />
         <GitHubOpenSource />
         <SlashSeparator />
@@ -143,7 +127,7 @@ function HeroSection({
             <div className="absolute bottom-0 right-0 size-28 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-4xl bg-white z-10">
               <img
                 src="/api/images/hyprnote/icon.png"
-                alt="Hyprnote"
+                alt="Char"
                 className="size-24 rounded-[28px] border border-neutral-100"
               />
             </div>
@@ -162,7 +146,7 @@ function HeroSection({
             <div className="size-32 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[40px] bg-transparent scale-110">
               <img
                 src="/api/images/hyprnote/icon.png"
-                alt="Hyprnote"
+                alt="Char"
                 className="size-28 rounded-4xl border border-neutral-100"
               />
             </div>
@@ -185,7 +169,7 @@ function HeroSection({
               "hover:scale-105 active:scale-95 transition-transform",
             ])}
           >
-            Download Hyprnote for free
+            Download Char for free
           </Link>
         </div>
       </header>

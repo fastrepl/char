@@ -1,11 +1,12 @@
 import { describe, expect, test } from "vitest";
 
 import type { Ctx } from "../../ctx";
-import { syncParticipants } from "./sync";
+import { syncSessionParticipants } from "./sync";
 
 type MockStoreData = {
   humans: Record<string, { email?: string; name?: string }>;
-  sessions: Record<string, { event_id?: string }>;
+  sessions: Record<string, { event_json?: string }>;
+  events: Record<string, { tracking_id_event?: string }>;
   mapping_session_participant: Record<
     string,
     { session_id: string; human_id: string; source?: string }
@@ -15,6 +16,7 @@ type MockStoreData = {
 function createMockStore(data: MockStoreData) {
   return {
     getRow: (table: keyof MockStoreData, id: string) => data[table]?.[id] ?? {},
+    hasRow: (table: keyof MockStoreData, id: string) => !!data[table]?.[id],
     forEachRow: (
       table: keyof MockStoreData,
       callback: (id: string, forEachCell: unknown) => void,
@@ -43,13 +45,13 @@ describe("syncParticipants", () => {
     const store = createMockStore({
       humans: {},
       sessions: {},
+      events: {},
       mapping_session_participant: {},
     });
     const ctx = createMockCtx(store);
 
-    const result = syncParticipants(ctx, {
+    const result = syncSessionParticipants(ctx, {
       incomingParticipants: new Map(),
-      trackingIdToEventId: new Map(),
     });
 
     expect(result.toAdd).toHaveLength(0);
@@ -61,15 +63,15 @@ describe("syncParticipants", () => {
     const store = createMockStore({
       humans: {},
       sessions: {},
+      events: {},
       mapping_session_participant: {},
     });
     const ctx = createMockCtx(store);
 
-    const result = syncParticipants(ctx, {
+    const result = syncSessionParticipants(ctx, {
       incomingParticipants: new Map([
         ["tracking-1", [{ email: "test@example.com", name: "Test" }]],
       ]),
-      trackingIdToEventId: new Map([["tracking-1", "event-1"]]),
     });
 
     expect(result.toAdd).toHaveLength(0);
@@ -79,16 +81,20 @@ describe("syncParticipants", () => {
   test("creates new human when participant email not found", () => {
     const store = createMockStore({
       humans: {},
-      sessions: { "session-1": { event_id: "event-1" } },
+      sessions: {
+        "session-1": {
+          event_json: JSON.stringify({ tracking_id: "tracking-1" }),
+        },
+      },
+      events: { "event-1": { tracking_id_event: "tracking-1" } },
       mapping_session_participant: {},
     });
     const ctx = createMockCtx(store);
 
-    const result = syncParticipants(ctx, {
+    const result = syncSessionParticipants(ctx, {
       incomingParticipants: new Map([
         ["tracking-1", [{ email: "new@example.com", name: "New Person" }]],
       ]),
-      trackingIdToEventId: new Map([["tracking-1", "event-1"]]),
     });
 
     expect(result.humansToCreate).toHaveLength(1);
@@ -99,16 +105,20 @@ describe("syncParticipants", () => {
   test("uses existing human when email matches", () => {
     const store = createMockStore({
       humans: { "human-1": { email: "existing@example.com" } },
-      sessions: { "session-1": { event_id: "event-1" } },
+      sessions: {
+        "session-1": {
+          event_json: JSON.stringify({ tracking_id: "tracking-1" }),
+        },
+      },
+      events: { "event-1": { tracking_id_event: "tracking-1" } },
       mapping_session_participant: {},
     });
     const ctx = createMockCtx(store);
 
-    const result = syncParticipants(ctx, {
+    const result = syncSessionParticipants(ctx, {
       incomingParticipants: new Map([
         ["tracking-1", [{ email: "existing@example.com", name: "Existing" }]],
       ]),
-      trackingIdToEventId: new Map([["tracking-1", "event-1"]]),
     });
 
     expect(result.humansToCreate).toHaveLength(0);
@@ -119,7 +129,12 @@ describe("syncParticipants", () => {
   test("deletes auto-source mappings when participant removed from event", () => {
     const store = createMockStore({
       humans: { "human-1": { email: "removed@example.com" } },
-      sessions: { "session-1": { event_id: "event-1" } },
+      sessions: {
+        "session-1": {
+          event_json: JSON.stringify({ tracking_id: "tracking-1" }),
+        },
+      },
+      events: { "event-1": { tracking_id_event: "tracking-1" } },
       mapping_session_participant: {
         "mapping-1": {
           session_id: "session-1",
@@ -130,9 +145,8 @@ describe("syncParticipants", () => {
     });
     const ctx = createMockCtx(store);
 
-    const result = syncParticipants(ctx, {
+    const result = syncSessionParticipants(ctx, {
       incomingParticipants: new Map([["tracking-1", []]]),
-      trackingIdToEventId: new Map([["tracking-1", "event-1"]]),
     });
 
     expect(result.toDelete).toContain("mapping-1");
@@ -141,7 +155,12 @@ describe("syncParticipants", () => {
   test("does not delete excluded mappings", () => {
     const store = createMockStore({
       humans: { "human-1": { email: "excluded@example.com" } },
-      sessions: { "session-1": { event_id: "event-1" } },
+      sessions: {
+        "session-1": {
+          event_json: JSON.stringify({ tracking_id: "tracking-1" }),
+        },
+      },
+      events: {},
       mapping_session_participant: {
         "mapping-1": {
           session_id: "session-1",
@@ -152,9 +171,8 @@ describe("syncParticipants", () => {
     });
     const ctx = createMockCtx(store);
 
-    const result = syncParticipants(ctx, {
+    const result = syncSessionParticipants(ctx, {
       incomingParticipants: new Map([["tracking-1", []]]),
-      trackingIdToEventId: new Map([["tracking-1", "event-1"]]),
     });
 
     expect(result.toDelete).not.toContain("mapping-1");

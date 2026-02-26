@@ -1,31 +1,23 @@
+import type { SearchFilters as TantivySearchFilters } from "@hypr/plugin-tantivy";
+
 import type { SearchFilters } from "./types";
 
-export function buildOramaFilters(
+export function buildTantivyFilters(
   filters: SearchFilters | null,
-): Record<string, any> | undefined {
+): TantivySearchFilters | undefined {
   if (!filters || !filters.created_at) {
     return undefined;
   }
 
-  const createdAtConditions: Record<string, number> = {};
-
-  if (filters.created_at.gte !== undefined) {
-    createdAtConditions.gte = filters.created_at.gte;
-  }
-  if (filters.created_at.lte !== undefined) {
-    createdAtConditions.lte = filters.created_at.lte;
-  }
-  if (filters.created_at.gt !== undefined) {
-    createdAtConditions.gt = filters.created_at.gt;
-  }
-  if (filters.created_at.lt !== undefined) {
-    createdAtConditions.lt = filters.created_at.lt;
-  }
-  if (filters.created_at.eq !== undefined) {
-    createdAtConditions.eq = filters.created_at.eq;
-  }
-
-  return Object.keys(createdAtConditions).length > 0
-    ? { created_at: createdAtConditions }
-    : undefined;
+  return {
+    created_at: {
+      gte: filters.created_at.gte ?? null,
+      lte: filters.created_at.lte ?? null,
+      gt: filters.created_at.gt ?? null,
+      lt: filters.created_at.lt ?? null,
+      eq: filters.created_at.eq ?? null,
+    },
+    doc_type: null,
+    facet: null,
+  };
 }

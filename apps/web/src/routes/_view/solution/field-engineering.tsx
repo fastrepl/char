@@ -7,16 +7,16 @@ export const Route = createFileRoute("/_view/solution/field-engineering")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "AI Meeting Notes for Field Engineering - Hyprnote" },
+      { title: "AI Meeting Notes for Field Engineering - Char" },
       {
         name: "description",
         content:
-          "Capture technical discussions and customer meetings on the go with AI-powered meeting notes. Document implementations, troubleshooting, and field visits with Hyprnote.",
+          "Capture technical discussions and customer meetings on the go with AI-powered meeting notes. Document implementations, troubleshooting, and field visits with Char.",
       },
       { name: "robots", content: "noindex, nofollow" },
       {
         property: "og:title",
-        content: "AI Meeting Notes for Field Engineering - Hyprnote",
+        content: "AI Meeting Notes for Field Engineering - Char",
       },
       {
         property: "og:description",
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_view/solution/field-engineering")({
       { property: "og:type", content: "website" },
       {
         property: "og:url",
-        content: "https://hyprnote.com/solution/field-engineering",
+        content: "https://char.com/solution/field-engineering",
       },
     ],
   }),
@@ -125,7 +125,7 @@ function HeroSection() {
             anywhere you work
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto">
-            From customer sites to remote locations, Hyprnote captures your
+            From customer sites to remote locations, Char captures your
             technical discussions with AI that works offline.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">

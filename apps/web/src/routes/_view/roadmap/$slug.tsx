@@ -23,11 +23,11 @@ export const Route = createFileRoute("/_view/roadmap/$slug")({
     }
 
     const { item } = loaderData;
-    const url = `https://hyprnote.com/roadmap/${item.slug}`;
+    const url = `https://char.com/roadmap/${item.slug}`;
 
     return {
       meta: [
-        { title: `${item.title} - Roadmap - Hyprnote` },
+        { title: `${item.title} - Roadmap - Char` },
         {
           name: "description",
           content: `Roadmap item: ${item.title}`,

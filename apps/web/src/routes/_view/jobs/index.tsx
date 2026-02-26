@@ -11,10 +11,10 @@ export const Route = createFileRoute("/_view/jobs/")({
   component: JobsPage,
   head: () => ({
     meta: [
-      { title: "Jobs - Hyprnote" },
+      { title: "Jobs - Char" },
       {
         name: "description",
-        content: "Join the Hyprnote team. View open positions and apply.",
+        content: "Join the Char team. View open positions and apply.",
       },
     ],
   }),
@@ -58,11 +58,19 @@ function JobsSection() {
 
   return (
     <section className="pb-16 lg:pb-24">
-      <div className="grid grid-cols-1 md:grid-cols-2">
-        {jobs.map((job, index) => (
-          <JobCard key={job.slug} job={job} hasBorder={index === 0} />
-        ))}
-      </div>
+      {jobs.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2">
+          {jobs.map((job, index) => (
+            <JobCard key={job.slug} job={job} hasBorder={index === 0} />
+          ))}
+        </div>
+      ) : (
+        <div className="px-6 py-16 text-center">
+          <p className="text-lg text-neutral-500">
+            There are no open positions at the moment.
+          </p>
+        </div>
+      )}
       <SlashSeparator />
       <CTASection />
     </section>
@@ -119,7 +127,7 @@ function CTASection() {
         <div className="mb-4 size-40 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[48px] bg-transparent">
           <Image
             src="/api/images/hyprnote/icon.png"
-            alt="Hyprnote"
+            alt="Char"
             width={144}
             height={144}
             className="size-36 mx-auto rounded-[40px] border border-neutral-100"
@@ -133,7 +141,7 @@ function CTASection() {
         </p>
         <div className="pt-6">
           <a
-            href="mailto:founders@hyprnote.com"
+            href="mailto:founders@char.com"
             className="px-6 h-12 flex items-center justify-center text-base sm:text-lg bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%] transition-all"
           >
             Contact us

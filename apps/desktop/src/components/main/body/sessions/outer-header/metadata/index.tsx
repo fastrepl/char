@@ -14,9 +14,11 @@ import {
   safeFormat,
   safeParseDate,
   startOfDay,
+  TZDate,
 } from "@hypr/utils";
 
-import { useEvent, useSession } from "../../../../../../hooks/tinybase";
+import { useConfigValue } from "../../../../../../config/use-config";
+import { useSessionEvent } from "../../../../../../hooks/tinybase";
 import * as main from "../../../../../../store/tinybase/store/main";
 import { DateDisplay } from "./date";
 import { ParticipantsDisplay } from "./participants";
@@ -49,13 +51,12 @@ const TriggerInner = forwardRef<
     "created_at",
     main.STORE_ID,
   );
-  const { eventId } = useSession(sessionId);
-  const event = useEvent(eventId);
+  const sessionEvent = useSessionEvent(sessionId);
 
-  const hasEvent = !!event;
+  const hasEvent = !!sessionEvent;
   const parsedDate = safeParseDate(createdAt);
   const displayText = hasEvent
-    ? event.title || "Untitled Event"
+    ? sessionEvent.title || "Untitled Event"
     : formatRelativeOrAbsolute(parsedDate ?? new Date());
 
   return (
@@ -70,10 +71,10 @@ const TriggerInner = forwardRef<
         hasEvent && "max-w-50",
       ])}
     >
-      {hasEvent && event?.meetingLink ? (
+      {hasEvent && sessionEvent?.meeting_link ? (
         <VideoIcon size={14} className="shrink-0" />
       ) : (
-        <CalendarIcon size={14} className="shrink-0 -mt-0.5" />
+        <CalendarIcon size={14} className="shrink-0" />
       )}
       <span className={cn([hasEvent && "truncate"])}>{displayText}</span>
     </Button>
@@ -81,20 +82,36 @@ const TriggerInner = forwardRef<
 });
 
 function ContentInner({ sessionId }: { sessionId: string }) {
-  const { eventId } = useSession(sessionId);
-  const event = useEvent(eventId);
+  const sessionEvent = useSessionEvent(sessionId);
+
+  const eventDisplayData = sessionEvent
+    ? {
+        title: sessionEvent.title,
+        startedAt: sessionEvent.started_at,
+        endedAt: sessionEvent.ended_at,
+        location: sessionEvent.location,
+        meetingLink: sessionEvent.meeting_link,
+        description: sessionEvent.description,
+        calendarId: sessionEvent.calendar_id,
+      }
+    : null;
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      {event && <EventDisplay event={event} />}
-      {!event && <DateDisplay sessionId={sessionId} />}
-      <ParticipantsDisplay sessionId={sessionId} />
+      {!eventDisplayData && <DateDisplay sessionId={sessionId} />}
+      {eventDisplayData && (
+        <EventDisplay event={eventDisplayData}>
+          <ParticipantsDisplay sessionId={sessionId} />
+        </EventDisplay>
+      )}
+      {!eventDisplayData && <ParticipantsDisplay sessionId={sessionId} />}
     </div>
   );
 }
 
-function EventDisplay({
+export function EventDisplay({
   event,
+  children,
 }: {
   event: {
     title: string | undefined;
@@ -105,24 +122,32 @@ function EventDisplay({
     description: string | undefined;
     calendarId: string | undefined;
   };
+  children?: React.ReactNode;
 }) {
+  const tz = useConfigValue("timezone") || undefined;
+
   const handleJoinMeeting = () => {
     if (event.meetingLink) {
       void openerCommands.openUrl(event.meetingLink, null);
     }
   };
 
+  const toTz = (date: Date): Date => (tz ? new TZDate(date, tz) : date);
+
   const formatEventDateTime = () => {
     if (!event.startedAt) {
       return "";
     }
 
-    const startDate = safeParseDate(event.startedAt);
-    const endDate = event.endedAt ? safeParseDate(event.endedAt) : null;
+    const rawStart = safeParseDate(event.startedAt);
+    const rawEnd = event.endedAt ? safeParseDate(event.endedAt) : null;
 
-    if (!startDate) {
+    if (!rawStart) {
       return "";
     }
+
+    const startDate = toTz(rawStart);
+    const endDate = rawEnd ? toTz(rawEnd) : null;
 
     const startStr = safeFormat(startDate, "MMM d, yyyy h:mm a");
     if (!endDate) {
@@ -168,9 +193,10 @@ function EventDisplay({
         {event.title || "Untitled Event"}
       </div>
 
+      <div className="h-px bg-neutral-200" />
+
       {shouldShowLocation && (
         <>
-          <div className="h-px bg-neutral-200" />
           <div className="flex items-center gap-2 text-sm text-neutral-700">
             <MapPinIcon size={16} className="shrink-0 text-neutral-500" />
             <span>{event.location}</span>
@@ -180,7 +206,6 @@ function EventDisplay({
 
       {event.meetingLink && (
         <>
-          <div className="h-px bg-neutral-200" />
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 text-sm text-neutral-700 min-w-0">
               <VideoIcon size={16} className="shrink-0 text-neutral-500" />
@@ -202,6 +227,17 @@ function EventDisplay({
 
       {event.startedAt && (
         <div className="text-sm text-neutral-700">{formatEventDateTime()}</div>
+      )}
+
+      {children}
+
+      {event.description && (
+        <>
+          <div className="h-px bg-neutral-200" />
+          <div className="text-sm text-neutral-700 whitespace-pre-wrap break-words overflow-y-auto max-h-40">
+            {event.description}
+          </div>
+        </>
       )}
     </div>
   );

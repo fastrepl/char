@@ -1,31 +1,28 @@
 import { Loader2Icon, SearchIcon, XIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@hypr/ui/components/ui/button";
 import { Kbd } from "@hypr/ui/components/ui/kbd";
+import { useCmdKeyPressed } from "@hypr/ui/hooks/use-cmd-key-pressed";
 import { cn } from "@hypr/utils";
 
 import { useSearch } from "../../../contexts/search/ui";
-import { useCmdKeyPressed } from "../../../hooks/useCmdKeyPressed";
+import { useTabs } from "../../../store/zustand/tabs";
 
 export function Search({
-  hasSpace,
   onManualExpandChange,
 }: {
-  hasSpace: boolean;
   onManualExpandChange?: (isManuallyExpanded: boolean) => void;
 }) {
   const { focus, setFocusImpl, inputRef } = useSearch();
   const [isManuallyExpanded, setIsManuallyExpanded] = useState(false);
-
-  const shouldShowExpanded = hasSpace || isManuallyExpanded;
 
   useEffect(() => {
     onManualExpandChange?.(isManuallyExpanded);
   }, [isManuallyExpanded, onManualExpandChange]);
 
   useEffect(() => {
-    if (!shouldShowExpanded) {
+    if (!isManuallyExpanded) {
       setFocusImpl(() => {
         setIsManuallyExpanded(true);
         setTimeout(() => inputRef.current?.focus(), 100);
@@ -35,32 +32,18 @@ export function Search({
         inputRef.current?.focus();
       });
     }
-  }, [shouldShowExpanded, setFocusImpl, inputRef]);
+  }, [isManuallyExpanded, setFocusImpl, inputRef]);
 
   const handleCollapsedClick = () => {
     focus();
   };
 
-  const handleExpandedFocus = () => {
-    if (!hasSpace) {
-      setIsManuallyExpanded(true);
-    }
-  };
-
   const handleExpandedBlur = () => {
-    if (!hasSpace) {
-      setIsManuallyExpanded(false);
-    }
+    setIsManuallyExpanded(false);
   };
 
-  if (shouldShowExpanded) {
-    return (
-      <ExpandedSearch
-        hasSpace={hasSpace}
-        onFocus={handleExpandedFocus}
-        onBlur={handleExpandedBlur}
-      />
-    );
+  if (isManuallyExpanded) {
+    return <ExpandedSearch onBlur={handleExpandedBlur} />;
   }
 
   return <CollapsedSearch onClick={handleCollapsedClick} />;
@@ -86,30 +69,32 @@ function CollapsedSearch({ onClick }: { onClick: () => void }) {
   );
 }
 
-function ExpandedSearch({
-  hasSpace,
-  onFocus,
-  onBlur,
-}: {
-  hasSpace: boolean;
-  onFocus?: () => void;
-  onBlur?: () => void;
-}) {
-  const { query, setQuery, isSearching, isIndexing, inputRef, results } =
-    useSearch();
+function ExpandedSearch({ onBlur }: { onBlur?: () => void }) {
+  const {
+    query,
+    setQuery,
+    isSearching,
+    isIndexing,
+    inputRef,
+    results,
+    selectedIndex,
+    setSelectedIndex,
+  } = useSearch();
   const [isFocused, setIsFocused] = useState(false);
   const isCmdPressed = useCmdKeyPressed();
+  const openNew = useTabs((state) => state.openNew);
+
+  const flatResults = useMemo(() => {
+    if (!results) return [];
+    return results.groups.flatMap((g) => g.results);
+  }, [results]);
 
   const showLoading = isSearching || isIndexing;
   const showShortcut = isCmdPressed && !query;
   const hasResults = results && results.totalResults > 0;
   const resultCount = results?.totalResults ?? 0;
 
-  const width = hasSpace
-    ? isFocused
-      ? "w-[250px]"
-      : "w-[180px]"
-    : "w-[180px]";
+  const width = isFocused ? "w-[250px]" : "w-[180px]";
 
   return (
     <div
@@ -139,12 +124,66 @@ function ExpandedSearch({
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Escape") {
+              if (query.trim()) {
+                setQuery("");
+                setSelectedIndex(-1);
+              } else {
+                e.currentTarget.blur();
+              }
+            }
+            if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && query.trim()) {
+              e.preventDefault();
+              openNew({
+                type: "search",
+                state: {
+                  selectedTypes: null,
+                  initialQuery: query.trim(),
+                },
+              });
+              setQuery("");
+              e.currentTarget.blur();
+            }
+            if (e.key === "ArrowDown" && flatResults.length > 0) {
+              e.preventDefault();
+              setSelectedIndex(
+                Math.min(selectedIndex + 1, flatResults.length - 1),
+              );
+            }
+            if (e.key === "ArrowUp" && flatResults.length > 0) {
+              e.preventDefault();
+              setSelectedIndex(Math.max(selectedIndex - 1, -1));
+            }
+            if (
+              e.key === "Enter" &&
+              !e.metaKey &&
+              !e.ctrlKey &&
+              selectedIndex >= 0 &&
+              selectedIndex < flatResults.length
+            ) {
+              e.preventDefault();
+              const item = flatResults[selectedIndex];
+              if (item.type === "session") {
+                openNew({ type: "sessions", id: item.id });
+              } else if (item.type === "human") {
+                openNew({
+                  type: "contacts",
+                  state: {
+                    selected: { type: "person", id: item.id },
+                  },
+                });
+              } else if (item.type === "organization") {
+                openNew({
+                  type: "contacts",
+                  state: {
+                    selected: { type: "organization", id: item.id },
+                  },
+                });
+              }
               e.currentTarget.blur();
             }
           }}
           onFocus={() => {
             setIsFocused(true);
-            onFocus?.();
           }}
           onBlur={() => {
             setIsFocused(false);

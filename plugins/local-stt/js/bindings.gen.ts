@@ -14,6 +14,14 @@ async modelsDir() : Promise<Result<string, string>> {
     else return { status: "error", error: e  as any };
 }
 },
+async cactusModelsDir() : Promise<Result<string, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:local-stt|cactus_models_dir") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async isModelDownloaded(model: SupportedSttModel) : Promise<Result<boolean, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-stt|is_model_downloaded", { model }) };
@@ -44,6 +52,14 @@ async cancelDownload(model: SupportedSttModel) : Promise<boolean> {
 async deleteModel(model: SupportedSttModel) : Promise<Result<null, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-stt|delete_model", { model }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getServerForModel(model: SupportedSttModel) : Promise<Result<ServerInfo | null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:local-stt|get_server_for_model", { model }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -80,9 +96,6 @@ async listSupportedModels() : Promise<Result<SttModelInfo[], string>> {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
-},
-async listSupportedLanguages(model: SupportedSttModel) : Promise<string[]> {
-    return await TAURI_INVOKE("plugin:local-stt|list_supported_languages", { model });
 }
 }
 
@@ -102,12 +115,14 @@ downloadProgressPayload: "plugin:local-stt:download-progress-payload"
 /** user-defined types **/
 
 export type AmModel = "am-parakeet-v2" | "am-parakeet-v3" | "am-whisper-large-v3"
+export type CactusSttModel = "cactus-whisper-small-int4" | "cactus-whisper-small-int8" | "cactus-whisper-small-int8-apple" | "cactus-whisper-medium-int4" | "cactus-whisper-medium-int4-apple" | "cactus-whisper-medium-int8" | "cactus-whisper-medium-int8-apple"
 export type DownloadProgressPayload = { model: SupportedSttModel; progress: number }
 export type ServerInfo = { url: string | null; status: ServerStatus; model: SupportedSttModel | null }
 export type ServerStatus = "unreachable" | "loading" | "ready"
 export type ServerType = "internal" | "external"
-export type SttModelInfo = { key: SupportedSttModel; display_name: string; size_bytes: number }
-export type SupportedSttModel = WhisperModel | AmModel
+export type SttModelInfo = { key: SupportedSttModel; display_name: string; description: string; size_bytes: number; model_type: SttModelType }
+export type SttModelType = "cactus" | "whispercpp" | "argmax"
+export type SupportedSttModel = CactusSttModel | WhisperModel | AmModel
 export type WhisperModel = "QuantizedTiny" | "QuantizedTinyEn" | "QuantizedBase" | "QuantizedBaseEn" | "QuantizedSmall" | "QuantizedSmallEn" | "QuantizedLargeTurbo"
 
 /** tauri-specta globals **/

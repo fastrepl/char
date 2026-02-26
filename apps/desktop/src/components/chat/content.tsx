@@ -1,0 +1,77 @@
+import type { ChatStatus } from "ai";
+
+import type { ContextEntity } from "../../chat/context-item";
+import type { HyprUIMessage } from "../../chat/types";
+import type { useLanguageModel } from "../../hooks/useLLMConnection";
+import { ChatBody } from "./body";
+import { ContextBar } from "./context-bar";
+import { ChatMessageInput, type McpIndicator } from "./input";
+
+export function ChatContent({
+  sessionId,
+  messages,
+  sendMessage,
+  regenerate,
+  stop,
+  status,
+  error,
+  model,
+  handleSendMessage,
+  contextEntities,
+  onRemoveContextEntity,
+  isSystemPromptReady,
+  mcpIndicator,
+  children,
+}: {
+  sessionId: string;
+  messages: HyprUIMessage[];
+  sendMessage: (message: HyprUIMessage) => void;
+  regenerate: () => void;
+  stop: () => void;
+  status: ChatStatus;
+  error?: Error;
+  model: ReturnType<typeof useLanguageModel>;
+  handleSendMessage: (
+    content: string,
+    parts: HyprUIMessage["parts"],
+    sendMessage: (message: HyprUIMessage) => void,
+  ) => void;
+  contextEntities: ContextEntity[];
+  onRemoveContextEntity?: (key: string) => void;
+  isSystemPromptReady: boolean;
+  mcpIndicator?: McpIndicator;
+  children?: React.ReactNode;
+}) {
+  const disabled =
+    !model ||
+    status !== "ready" ||
+    (status === "ready" && !isSystemPromptReady);
+
+  return (
+    <>
+      {children ?? (
+        <ChatBody
+          messages={messages}
+          status={status}
+          error={error}
+          onReload={regenerate}
+          isModelConfigured={!!model}
+        />
+      )}
+      <ContextBar
+        entities={contextEntities}
+        onRemoveEntity={onRemoveContextEntity}
+      />
+      <ChatMessageInput
+        draftKey={sessionId}
+        disabled={disabled}
+        onSendMessage={(content, parts) =>
+          handleSendMessage(content, parts, sendMessage)
+        }
+        isStreaming={status === "streaming" || status === "submitted"}
+        onStop={stop}
+        mcpIndicator={mcpIndicator}
+      />
+    </>
+  );
+}

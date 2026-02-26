@@ -7,16 +7,16 @@ export const Route = createFileRoute("/_view/solution/recruiting")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "AI Meeting Notes for Recruiting - Hyprnote" },
+      { title: "AI Meeting Notes for Recruiting - Char" },
       {
         name: "description",
         content:
-          "Capture every candidate interview with AI-powered meeting notes. Get structured feedback, compare candidates objectively, and make better hiring decisions with Hyprnote.",
+          "Capture every candidate interview with AI-powered meeting notes. Get structured feedback, compare candidates objectively, and make better hiring decisions with Char.",
       },
       { name: "robots", content: "noindex, nofollow" },
       {
         property: "og:title",
-        content: "AI Meeting Notes for Recruiting - Hyprnote",
+        content: "AI Meeting Notes for Recruiting - Char",
       },
       {
         property: "og:description",
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_view/solution/recruiting")({
       { property: "og:type", content: "website" },
       {
         property: "og:url",
-        content: "https://hyprnote.com/solution/recruiting",
+        content: "https://char.com/solution/recruiting",
       },
     ],
   }),
@@ -125,7 +125,7 @@ function HeroSection() {
             AI-powered interview notes
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto">
-            Focus on the candidate, not your notepad. Hyprnote captures every
+            Focus on the candidate, not your notepad. Char captures every
             interview detail so you can make better hiring decisions.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">

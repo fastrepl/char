@@ -1,0 +1,24 @@
+[package]
+name = "denoise"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = []
+onnx = ["dep:hypr-onnx", "dep:realfft"]
+coreml = ["onnx", "hypr-onnx/coreml"]
+
+[dependencies]
+hypr-onnx = { workspace = true, optional = true }
+realfft = { workspace = true, optional = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+criterion = { workspace = true }
+hypr-data = { workspace = true }
+
+[[bench]]
+name = "denoise_bench"
+harness = false
+required-features = ["onnx"]

@@ -1,7 +1,7 @@
 ---
 title: "Analytics"
 section: "Developers"
-description: "Learn about analytics in Hyprnote"
+description: "Learn about analytics in Char"
 ---
 
 ## What are we tracking?
@@ -14,11 +14,12 @@ We use PostHog for analytics in both the web and desktop applications. The web a
 
 Events tracked on the web app (`apps/web`):
 
-| Event | Description | Properties |
-|-------|-------------|------------|
-| `download_clicked` | User clicks a download button | `platform`, `spec`, `source`, `timestamp` |
-| `reminder_requested` | User requests a mobile reminder | `platform`, `timestamp`, `email` |
-| `os_waitlist_joined` | User joins waitlist for Linux/Windows | `platform`, `timestamp`, `email` |
+| Event | Description | Properties | Source |
+|-------|-------------|------------|--------|
+| `hero_section_viewed` | User views the landing page hero section | `timestamp` | `routes/_view/index.tsx` |
+| `download_clicked` | User clicks a download button | `platform`, `spec`, `source`, `timestamp` | `components/download-button.tsx`, `routes/_view/download/index.tsx` |
+| `reminder_requested` | User requests a mobile reminder | `platform`, `timestamp`, `email` | `routes/_view/index.tsx` |
+| `os_waitlist_joined` | User joins waitlist for unsupported OS | `platform`, `timestamp`, `email` | `routes/_view/index.tsx` |
 
 The web app also has PostHog autocapture and pageview tracking enabled.
 
@@ -26,60 +27,61 @@ The web app also has PostHog autocapture and pageview tracking enabled.
 
 Events tracked when users first launch the desktop app:
 
-| Event | Description | Properties |
-|-------|-------------|------------|
-| `show_main_window` | Main window is shown (fires on every app launch) | - |
-| `account_skipped` | User proceeds without account (local mode) | - |
-| `user_signed_in` | User signs in | - |
-| `ai_provider_configured` | User configures an AI provider | `provider` |
-| `data_imported` | User imports data from another app | `source` |
-| `trial_started` | User starts a trial | `plan` |
+| Event | Description | Properties | Source |
+|-------|-------------|------------|--------|
+| `show_main_window` | Main window is shown (fires on every app launch) | - | `plugins/windows/src/ext.rs` |
+| `onboarding_step_viewed` | User views an onboarding step | `step`, `platform` | `components/main/body/onboarding/index.tsx` |
+| `onboarding_completed` | User finishes the onboarding flow | - | `components/onboarding/final.tsx` |
+| `user_signed_in` | User signs in (triggers `$identify` to link anonymous ID) | - | `auth/context.tsx` |
+| `trial_started` | User starts a free trial | `plan` | `components/onboarding/login.tsx`, `components/settings/general/account.tsx` |
+| `ai_provider_configured` | User configures an AI provider | `provider` | `components/settings/ai/shared/index.tsx` |
+| `data_imported` | User imports data from another app | `source` | `components/settings/data/index.tsx` |
 
 ### 3. Before Meetings
 
 Events tracked when preparing for meetings:
 
-| Event | Description | Properties |
-|-------|-------------|------------|
-| `note_created` | User creates a new note | `has_event_id` (whether linked to calendar) |
-| `file_uploaded` | User uploads a file | `file_type` (audio/transcript), `token_count` |
+| Event | Description | Properties | Source |
+|-------|-------------|------------|--------|
+| `note_created` | User creates a new note | `has_event_id` (whether linked to calendar) | `store/tinybase/store/sessions.ts`, `components/main/shared.ts` |
+| `file_uploaded` | User uploads a file | `file_type` (`audio` or `transcript`), `token_count` (transcript only) | `components/main/body/sessions/floating/options-menu.tsx` |
 
 ### 4. During Meetings
 
 Events tracked during active sessions:
 
-| Event | Description | Properties |
-|-------|-------------|------------|
-| `session_started` | Listening session starts | `has_calendar_event` |
-| `tab_opened` | User opens a tab | `view` (tab type) |
-| `search_performed` | User performs a search | - |
+| Event | Description | Properties | Source |
+|-------|-------------|------------|--------|
+| `session_started` | Listening session starts | `has_calendar_event`, `stt_provider`, `stt_model` | `hooks/useStartListening.ts` |
+| `tab_opened` | User opens a tab | `view` (tab type) | `store/zustand/tabs/basic.ts` |
+| `search_performed` | User performs a search | - | `contexts/search/ui.tsx` |
 
 ### 5. After Meetings
 
 Events tracked when working with completed sessions:
 
-| Event | Description | Properties |
-|-------|-------------|------------|
-| `note_edited` | User edits a note | `has_content` |
-| `note_enhanced` | AI enhancement is triggered | `is_auto`, `template_id` |
-| `message_sent` | User sends a chat message | - |
-| `session_exported` | User exports a session | `format` (pdf/vtt), `view_type`, `has_transcript`, `has_enhanced`, `has_memo`, `word_count` |
-| `session_deleted` | User deletes a session/note | `includes_recording` |
-| `recording_deleted` | User deletes a recording | - |
+| Event | Description | Properties | Source |
+|-------|-------------|------------|--------|
+| `note_edited` | User edits a note | `has_content` | `components/main/body/sessions/note-input/raw.tsx` |
+| `note_enhanced` | AI enhancement is triggered | `is_auto`, `template_id` (manual), `llm_provider` (auto), `llm_model` (auto) | `hooks/autoEnhance/runner.ts`, `components/main/body/sessions/note-input/header.tsx` |
+| `message_sent` | User sends a chat message | - | `components/chat/input/hooks.ts` |
+| `session_exported` | User exports a session | `format` (`pdf` or `vtt`), `word_count` (vtt), `view_type` (pdf), `has_transcript` (pdf), `has_enhanced` (pdf), `has_memo` (pdf) | `components/main/body/sessions/outer-header/overflow/export-transcript.tsx`, `export-pdf.tsx` |
+| `session_deleted` | User deletes a session/note | `includes_recording` | `components/main/body/sessions/outer-header/overflow/delete.tsx` |
+| `recording_deleted` | User deletes a recording | - | `components/main/body/sessions/outer-header/overflow/delete.tsx` |
 
 ### 6. Settings & Account Management
 
 Events tracked when managing settings and account:
 
-| Event | Description | Properties |
-|-------|-------------|------------|
-| `settings_changed` | User changes settings | `autostart`, `notification_detect`, `save_recordings`, `telemetry_consent` |
-| `upgrade_clicked` | User clicks upgrade button | `plan` |
-| `user_signed_out` | User signs out | - |
+| Event | Description | Properties | Source |
+|-------|-------------|------------|--------|
+| `settings_changed` | User changes settings | `autostart`, `notification_detect`, `save_recordings`, `telemetry_consent` | `components/settings/general/index.tsx` |
+| `upgrade_clicked` | User clicks upgrade button | `plan` | `components/settings/general/account.tsx` |
+| `user_signed_out` | User signs out | - | `components/settings/general/account.tsx` |
 
 ### 7. Notification Interactions
 
-Events tracked when users interact with system notifications:
+Events tracked when users interact with system notifications (`plugins/notification/src/handler.rs`):
 
 | Event | Description | Properties |
 |-------|-------------|------------|
@@ -88,31 +90,55 @@ Events tracked when users interact with system notifications:
 | `dismiss` | User dismisses notification | - |
 | `collapsed_timeout` | Collapsed notification times out | - |
 
+### 8. Server-Side Proxy Events
+
+Events tracked by the API proxy layer. These use the `$` prefix following PostHog conventions for built-in event types.
+
+| Event | Description | Properties | Source |
+|-------|-------------|------------|--------|
+| `$stt_request` | Speech-to-text request processed | `$stt_provider`, `$stt_duration`, `user_id` | `crates/transcribe-proxy/src/analytics.rs` |
+| `$ai_generation` | LLM generation request processed | `$ai_provider`, `$ai_model`, `$ai_input_tokens`, `$ai_output_tokens`, `$ai_latency`, `$ai_trace_id`, `$ai_http_status`, `$ai_base_url`, `$ai_total_cost_usd`, `user_id` | `crates/llm-proxy/src/analytics.rs` |
+
 ## User Properties
 
 Properties set to track user context and configuration:
 
-| Property | Description | Type |
-|----------|-------------|------|
-| `is_local_mode` | Whether user is in local-only mode | set |
-| `is_signed_up` | Whether user has signed up | set |
-| `platform` | Operating system (macos, linux, windows) | set |
-| `os_version` | Operating system version | set |
-| `app_version` | Application version | set |
-| `account_created_date` | When account was created | set_once |
-| `telemetry_opt_out` | Whether user opted out of telemetry | set |
-| `has_configured_ai` | Whether user has configured an AI provider | set |
-| `plan` | Current subscription plan | set |
-| `trial_end_date` | When trial ends | set |
+| Property | Description | Type | Source |
+|----------|-------------|------|--------|
+| `is_signed_up` | Whether user has signed up | set | `auth/context.tsx`, `components/settings/general/account.tsx` |
+| `platform` | Operating system (macos, linux, windows) | set | `auth/context.tsx` |
+| `os_version` | Operating system version | set | `auth/context.tsx` |
+| `app_version` | Application version | set | `auth/context.tsx` |
+| `account_created_date` | When account was created | set_once | `auth/context.tsx` |
+| `telemetry_opt_out` | Whether user opted out of telemetry | set | `components/settings/general/index.tsx` |
+| `has_configured_ai` | Whether user has configured an AI provider | set | `components/settings/ai/shared/index.tsx` |
+| `plan` | Current subscription plan | set | `components/onboarding/login.tsx`, `components/settings/general/account.tsx` |
+| `trial_end_date` | When trial ends | set | `components/onboarding/login.tsx`, `components/settings/general/account.tsx` |
+| `spoken_languages` | Configured spoken languages for transcription | set | `store/tinybase/persister/settings/persister.ts` |
+| `current_stt_provider` | Currently selected speech-to-text provider | set | `store/tinybase/persister/settings/persister.ts` |
+| `current_stt_model` | Currently selected speech-to-text model | set | `store/tinybase/persister/settings/persister.ts` |
+| `current_llm_provider` | Currently selected LLM provider | set | `store/tinybase/persister/settings/persister.ts` |
+| `current_llm_model` | Currently selected LLM model | set | `store/tinybase/persister/settings/persister.ts` |
 
 ## Analytics Commands
 
 Available methods for tracking events and properties:
 
-- `event(name, properties?)` - Track a custom event with optional properties
-- `setProperties(properties)` - Set user properties (supports `set` and `set_once` types)
+- `event(payload)` - Track a custom event with optional properties
+- `setProperties(payload)` - Set user properties (supports `set` and `set_once` types)
+- `identify(userId, payload)` - Link anonymous device ID to authenticated user ID using PostHog's `$identify` event
 - `setDisabled(disabled)` - Enable or disable analytics tracking
 - `isDisabled()` - Check if analytics is currently disabled
+
+## User Identification
+
+When a user signs in, the `identify` command is called to link their anonymous device ID (machine fingerprint) to their authenticated user ID. This uses PostHog's `$identify` event with the `$anon_distinct_id` property, enabling:
+
+- Attribution of pre-login activity to the authenticated user
+- Unified user profiles across anonymous and authenticated sessions
+- Accurate conversion funnel analysis from first visit to active usage
+
+The identification flow works as follows: before sign-in, events are tracked using the device fingerprint as the distinct ID. Upon successful authentication, `identify(userId, payload)` is called, which sends a `$identify` event to PostHog with both the new user ID and the anonymous device ID, merging the two identities.
 
 ## Conversion Funnel Tracking
 
@@ -120,10 +146,30 @@ To track the user journey from website visit to active usage, use PostHog's funn
 
 1. `download_clicked` (web) - User downloads the app
 2. `show_main_window` (desktop) - User launches the app
-3. `note_created` (desktop) - User creates their first note
-4. `note_enhanced` (desktop) - User uses AI enhancement
+3. `onboarding_completed` (desktop) - User finishes onboarding
+4. `user_signed_in` (desktop) - User signs in (triggers identity merge)
+5. `note_created` (desktop) - User creates their first note
+6. `session_started` (desktop) - User starts a listening session
+7. `note_enhanced` (desktop) - User uses AI enhancement
 
-PostHog's anonymous ID tracking links web and desktop events for the same user, enabling conversion analysis without additional implementation.
+PostHog's `$identify` event links anonymous device IDs to authenticated user IDs, enabling accurate conversion analysis across the entire user journey.
+
+## Feature Flags
+
+Char uses PostHog feature flags to control feature rollouts. The system is built on two layers:
+
+- **`crates/analytics`** - Uses the official `posthog-rs` 0.4 client with lazy initialization. Supports optional local flag evaluation via `PostHog LocalEvaluator` when a personal API key is configured.
+- **`plugins/flag`** - A Tauri plugin that delegates to the shared `AnalyticsClient` from `crates/analytics` and provides the `FlagPluginExt` trait for checking flags from application code via `app.flag().is_enabled(feature)`.
+
+Each feature defines a `FlagStrategy`:
+
+| Strategy | Behavior |
+|----------|----------|
+| `Debug` | Enabled only in debug builds |
+| `Posthog(key)` | Resolved via PostHog `is_feature_enabled` (through `posthog-rs`) |
+| `Hardcoded(bool)` | Always enabled or disabled |
+
+Features can also be overridden at build time using environment variables (e.g., `CHAT=1` forces the Chat feature on).
 
 ## How to make changes?
 

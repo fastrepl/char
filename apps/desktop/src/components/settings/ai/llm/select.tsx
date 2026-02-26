@@ -14,11 +14,14 @@ import { useAuth } from "../../../../auth";
 import { useBillingAccess } from "../../../../billing";
 import { useConfigValues } from "../../../../config/use-config";
 import * as settings from "../../../../store/tinybase/store/settings";
+import { providerRowId } from "../shared";
 import {
   getProviderSelectionBlockers,
   requiresEntitlement,
 } from "../shared/eligibility";
 import { listAnthropicModels } from "../shared/list-anthropic";
+import { listAzureAIModels } from "../shared/list-azure-ai";
+import { listAzureOpenAIModels } from "../shared/list-azure-openai";
 import {
   type InputModality,
   type ListModelsResult,
@@ -35,6 +38,7 @@ import { PROVIDERS } from "./shared";
 
 export function SelectProviderAndModel() {
   const configuredProviders = useConfiguredMapping();
+  const billing = useBillingAccess();
 
   const { current_llm_model, current_llm_provider } = useConfigValues([
     "current_llm_model",
@@ -108,7 +112,13 @@ export function SelectProviderAndModel() {
               <div className="flex-2 min-w-0" data-llm-provider-selector>
                 <Select
                   value={field.state.value}
-                  onValueChange={(value) => field.handleChange(value)}
+                  onValueChange={(value) => {
+                    if (value === "hyprnote" && !billing.isPro) {
+                      billing.upgradeToPro();
+                      return;
+                    }
+                    field.handleChange(value);
+                  }}
                 >
                   <SelectTrigger className="bg-white shadow-none focus:ring-0">
                     <SelectValue placeholder="Select a provider" />
@@ -116,18 +126,33 @@ export function SelectProviderAndModel() {
                   <SelectContent>
                     {PROVIDERS.map((provider) => {
                       const status = configuredProviders[provider.id];
+                      const requiresPro = requiresEntitlement(
+                        provider.requirements,
+                        "pro",
+                      );
+                      const locked = requiresPro && !billing.isPro;
 
                       return (
                         <SelectItem
                           key={provider.id}
                           value={provider.id}
-                          disabled={!status?.listModels}
+                          disabled={!status?.listModels || locked}
                         >
                           <div className="flex flex-col gap-0.5">
                             <div className="flex items-center gap-2">
                               {provider.icon}
                               <span>{provider.displayName}</span>
+                              {requiresPro ? (
+                                <span className="text-[10px] uppercase tracking-wide text-neutral-500 border border-neutral-200 rounded-full px-2 py-0.5">
+                                  Pro
+                                </span>
+                              ) : null}
                             </div>
+                            {locked ? (
+                              <span className="text-[11px] text-neutral-500">
+                                Upgrade to Pro to use this provider.
+                              </span>
+                            ) : null}
                           </div>
                         </SelectItem>
                       );
@@ -168,7 +193,7 @@ export function SelectProviderAndModel() {
           <div className="flex items-center gap-2 pt-2 border-t border-red-200">
             <span className="text-sm text-red-600">
               <strong className="font-medium">Language model</strong> is needed
-              to make Hyprnote summarize and chat about your conversations.
+              to make Char summarize and chat about your conversations.
             </span>
           </div>
         )}
@@ -185,7 +210,6 @@ export function SelectProviderAndModel() {
 
 type ProviderStatus = {
   listModels?: () => Promise<ListModelsResult>;
-  proLocked: boolean;
 };
 
 function useConfiguredMapping(): Record<string, ProviderStatus> {
@@ -199,14 +223,11 @@ function useConfiguredMapping(): Record<string, ProviderStatus> {
   const mapping = useMemo(() => {
     return Object.fromEntries(
       PROVIDERS.map((provider) => {
-        const config = configuredProviders[provider.id];
+        const config = configuredProviders[providerRowId("llm", provider.id)];
         const baseUrl = String(
           config?.base_url || provider.baseUrl || "",
         ).trim();
         const apiKey = String(config?.api_key || "").trim();
-
-        const proLocked =
-          requiresEntitlement(provider.requirements, "pro") && !billing.isPro;
 
         const eligible =
           getProviderSelectionBlockers(provider.requirements, {
@@ -216,7 +237,7 @@ function useConfiguredMapping(): Record<string, ProviderStatus> {
           }).length === 0;
 
         if (!eligible) {
-          return [provider.id, { listModels: undefined, proLocked }];
+          return [provider.id, { listModels: undefined }];
         }
 
         if (provider.id === "hyprnote") {
@@ -229,7 +250,7 @@ function useConfiguredMapping(): Record<string, ProviderStatus> {
               },
             },
           };
-          return [provider.id, { listModels: async () => result, proLocked }];
+          return [provider.id, { listModels: async () => result }];
         }
 
         let listModelsFunc: () => Promise<ListModelsResult>;
@@ -250,6 +271,12 @@ function useConfiguredMapping(): Record<string, ProviderStatus> {
           case "mistral":
             listModelsFunc = () => listMistralModels(baseUrl, apiKey);
             break;
+          case "azure_openai":
+            listModelsFunc = () => listAzureOpenAIModels(baseUrl, apiKey);
+            break;
+          case "azure_ai":
+            listModelsFunc = () => listAzureAIModels(baseUrl, apiKey);
+            break;
           case "ollama":
             listModelsFunc = () => listOllamaModels(baseUrl, apiKey);
             break;
@@ -263,7 +290,7 @@ function useConfiguredMapping(): Record<string, ProviderStatus> {
             listModelsFunc = () => listGenericModels(baseUrl, apiKey);
         }
 
-        return [provider.id, { listModels: listModelsFunc, proLocked }];
+        return [provider.id, { listModels: listModelsFunc }];
       }),
     ) as Record<string, ProviderStatus>;
   }, [configuredProviders, auth, billing]);

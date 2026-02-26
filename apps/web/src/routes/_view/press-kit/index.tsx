@@ -4,9 +4,9 @@ import { cn } from "@hypr/utils";
 
 import { MockWindow } from "@/components/mock-window";
 
-const TITLE = "Press Kit - Hyprnote";
+const TITLE = "Press Kit - Char";
 const DESCRIPTION =
-  "Download Hyprnote press materials, logos, screenshots, and brand assets.";
+  "Download Char press materials, logos, screenshots, and brand assets.";
 
 export const Route = createFileRoute("/_view/press-kit/")({
   component: Component,
@@ -52,12 +52,12 @@ function Component() {
             </h1>
             <p className="text-lg sm:text-xl text-neutral-600">
               Download press materials, logos, screenshots, and learn more about
-              Hyprnote. For press inquiries, contact us at{" "}
+              Char. For press inquiries, contact us at{" "}
               <a
-                href="mailto:founders@hyprnote.com"
+                href="mailto:founders@char.com"
                 className="text-stone-600 underline hover:text-stone-700"
               >
-                founders@hyprnote.com
+                founders@char.com
               </a>
             </p>
           </div>
@@ -108,12 +108,12 @@ function Component() {
                       appIcon
                     />
                     <FinderAction
-                      href="mailto:founders@hyprnote.com"
+                      href="mailto:founders@char.com"
                       iconImage="/api/images/icons/macos-mail.png"
                       label="Contact"
                     />
                     <FinderAction
-                      href="https://github.com/fastrepl/hyprnote"
+                      href="https://github.com/fastrepl/char"
                       iconImage="/api/images/icons/github.webp"
                       label="GitHub"
                       external
@@ -195,7 +195,7 @@ function FinderAction({
         {appIcon ? (
           <img
             src="/api/images/hyprnote/icon.png"
-            alt="Hyprnote"
+            alt="Char"
             className="w-16 h-16 mx-auto rounded-[20px] border border-neutral-100 group-hover:scale-110 transition-transform shadow-md"
           />
         ) : iconImage ? (

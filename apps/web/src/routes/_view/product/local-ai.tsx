@@ -11,14 +11,14 @@ export const Route = createFileRoute("/_view/product/local-ai")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "Local AI - Hyprnote" },
+      { title: "Local AI - Char" },
       {
         name: "description",
         content:
           "Powerful AI processing that runs entirely on your device. Private, fast, and offline-capable meeting transcription and summarization with local Whisper and LLM models.",
       },
       { name: "robots", content: "noindex, nofollow" },
-      { property: "og:title", content: "Local AI - Hyprnote" },
+      { property: "og:title", content: "Local AI - Char" },
       {
         property: "og:description",
         content:
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_view/product/local-ai")({
       { property: "og:type", content: "website" },
       {
         property: "og:url",
-        content: "https://hyprnote.com/product/local-ai",
+        content: "https://char.com/product/local-ai",
       },
     ],
   }),
@@ -71,9 +71,9 @@ function HeroSection() {
             on your device
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 max-w-3xl mx-auto">
-            Hyprnote uses powerful local AI models to process your meetings
-            entirely on your device. No cloud uploads, complete privacy, and
-            works offline.
+            Char uses powerful local AI models to process your meetings entirely
+            on your device. No cloud uploads, complete privacy, and works
+            offline.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 pt-6">
@@ -235,9 +235,7 @@ function ComparisonSection() {
         <div className="p-8 bg-green-50/50">
           <div className="flex items-center gap-2 mb-6">
             <Icon icon="mdi:laptop" className="text-2xl text-green-600" />
-            <h3 className="font-serif text-lg text-green-900">
-              Hyprnote Local AI
-            </h3>
+            <h3 className="font-serif text-lg text-green-900">Char Local AI</h3>
           </div>
           <ul className="flex flex-col gap-4 text-green-900">
             <li className="flex items-start gap-3">

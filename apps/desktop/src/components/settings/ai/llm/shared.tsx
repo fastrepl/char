@@ -1,6 +1,8 @@
 import { Icon } from "@iconify-icon/react";
 import {
   Anthropic,
+  Azure,
+  AzureAI,
   LmStudio,
   Mistral,
   Ollama,
@@ -24,19 +26,21 @@ type Provider = {
   icon: ReactNode;
   baseUrl?: string;
   requirements: ProviderRequirement[];
+  links?: {
+    download?: { label: string; url: string };
+    models?: { label: string; url: string };
+    setup?: { label: string; url: string };
+  };
 };
 
 const _PROVIDERS = [
   {
     id: "hyprnote",
-    displayName: "Hyprnote",
+    displayName: "Char",
     badge: "Recommended",
-    icon: <img src="/assets/icon.png" alt="Hyprnote" className="size-5" />,
-    baseUrl: new URL("/llm", env.VITE_AI_URL).toString(),
-    requirements: [
-      { kind: "requires_auth" },
-      { kind: "requires_entitlement", entitlement: "pro" },
-    ],
+    icon: <img src="/assets/icon.png" alt="Char" className="size-5" />,
+    baseUrl: new URL("/llm", env.VITE_API_URL).toString(),
+    requirements: [{ kind: "requires_auth" }],
   },
   {
     id: "lmstudio",
@@ -45,6 +49,17 @@ const _PROVIDERS = [
     icon: <LmStudio size={16} />,
     baseUrl: "http://127.0.0.1:1234/v1",
     requirements: [],
+    links: {
+      download: {
+        label: "Download LM Studio",
+        url: "https://lmstudio.ai/download",
+      },
+      models: { label: "Available models", url: "https://lmstudio.ai/models" },
+      setup: {
+        label: "Setup guide",
+        url: "https://char.com/docs/faq/local-llm-setup/#lm-studio-setup",
+      },
+    },
   },
   {
     id: "ollama",
@@ -53,6 +68,17 @@ const _PROVIDERS = [
     icon: <Ollama size={16} />,
     baseUrl: "http://127.0.0.1:11434/v1",
     requirements: [],
+    links: {
+      download: {
+        label: "Download Ollama",
+        url: "https://ollama.com/download",
+      },
+      models: { label: "Available models", url: "https://ollama.com/library" },
+      setup: {
+        label: "Setup guide",
+        url: "https://char.com/docs/faq/local-llm-setup/#ollama-setup",
+      },
+    },
   },
   {
     id: "openrouter",
@@ -85,6 +111,26 @@ const _PROVIDERS = [
     icon: <Mistral size={16} />,
     baseUrl: "https://api.mistral.ai/v1",
     requirements: [{ kind: "requires_config", fields: ["api_key"] }],
+  },
+  {
+    id: "azure_openai",
+    displayName: "Azure OpenAI",
+    badge: "Beta",
+    icon: <Azure size={16} />,
+    baseUrl: undefined,
+    requirements: [
+      { kind: "requires_config", fields: ["base_url", "api_key"] },
+    ],
+  },
+  {
+    id: "azure_ai",
+    displayName: "Azure AI Foundry",
+    badge: "Beta",
+    icon: <AzureAI size={16} />,
+    baseUrl: undefined,
+    requirements: [
+      { kind: "requires_config", fields: ["base_url", "api_key"] },
+    ],
   },
   {
     id: "google_generative_ai",

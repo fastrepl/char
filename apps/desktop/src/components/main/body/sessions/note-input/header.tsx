@@ -7,7 +7,7 @@ import {
   type AttachmentInfo,
   commands as fsSyncCommands,
 } from "@hypr/plugin-fs-sync";
-import { md2json } from "@hypr/tiptap/shared";
+import { NoteTab } from "@hypr/ui/components/ui/note-tab";
 import {
   Popover,
   PopoverContent,
@@ -23,15 +23,13 @@ import { cn } from "@hypr/utils";
 import { useAudioPlayer } from "../../../../../contexts/audio-player/provider";
 import { useListener } from "../../../../../contexts/listener";
 import { useAITaskTask } from "../../../../../hooks/useAITaskTask";
-import {
-  useCreateEnhancedNote,
-  useEnsureDefaultSummary,
-} from "../../../../../hooks/useEnhancedNotes";
+import { useEnsureDefaultSummary } from "../../../../../hooks/useEnhancedNotes";
 import {
   useLanguageModel,
   useLLMConnectionStatus,
 } from "../../../../../hooks/useLLMConnection";
 import { useRunBatch } from "../../../../../hooks/useRunBatch";
+import { getEnhancerService } from "../../../../../services/enhancer";
 import * as main from "../../../../../store/tinybase/store/main";
 import { createTaskId } from "../../../../../store/zustand/ai-task/task-configs";
 import { type TaskStepInfo } from "../../../../../store/zustand/ai-task/tasks";
@@ -40,34 +38,6 @@ import { type EditorView } from "../../../../../store/zustand/tabs/schema";
 import { useHasTranscript } from "../shared";
 import { EditingControls } from "./transcript/editing-controls";
 import { TranscriptionProgress } from "./transcript/progress";
-
-function HeaderTab({
-  isActive,
-  onClick = () => {},
-  children,
-}: {
-  isActive: boolean;
-  onClick?: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn([
-        "relative my-2 border-b-2 px-1 py-0.5 text-xs font-medium transition-all duration-200 shrink-0",
-        isActive
-          ? ["border-neutral-900", "text-neutral-900"]
-          : [
-              "border-transparent",
-              "text-neutral-600",
-              "hover:text-neutral-800",
-            ],
-      ])}
-    >
-      <span className="flex items-center h-5">{children}</span>
-    </button>
-  );
-}
 
 function TruncatedTitle({
   title,
@@ -95,9 +65,12 @@ function HeaderTabTranscript({
   sessionId: string;
 }) {
   const { audioExists } = useAudioPlayer();
-  const isBatchProcessing = useListener(
-    (state) => state.getSessionMode(sessionId) === "running_batch",
-  );
+  const sessionMode = useListener((state) => state.getSessionMode(sessionId));
+  const isBatchProcessing = sessionMode === "running_batch";
+  const isSessionInactive =
+    sessionMode !== "active" &&
+    sessionMode !== "finalizing" &&
+    sessionMode !== "running_batch";
   const store = main.UI.useStore(main.STORE_ID);
   const runBatch = useRunBatch(sessionId);
   const [isRedoing, setIsRedoing] = useState(false);
@@ -158,42 +131,28 @@ function HeaderTabTranscript({
     [audioExists, isBatchProcessing, runBatch, sessionId, store],
   );
 
-  const showRefreshButton = audioExists && isActive;
+  const showRefreshButton = audioExists && isActive && isSessionInactive;
 
   return (
-    <button
-      onClick={onClick}
-      className={cn([
-        "relative my-2 border-b-2 px-1 py-0.5 text-xs font-medium transition-all duration-200 shrink-0",
-        isActive
-          ? ["border-neutral-900", "text-neutral-900"]
-          : [
-              "border-transparent",
-              "text-neutral-600",
-              "hover:text-neutral-800",
-            ],
-      ])}
-    >
-      <span className="flex items-center gap-1 h-5">
-        Transcript
-        {showRefreshButton && (
-          <span
-            onClick={handleRefreshClick}
-            className={cn([
-              "inline-flex h-5 w-5 items-center justify-center rounded-xs transition-colors cursor-pointer",
-              "hover:bg-neutral-200 focus-visible:bg-neutral-200",
-              (isBatchProcessing || isRedoing) && "pointer-events-none",
-            ])}
-          >
-            {isBatchProcessing || isRedoing ? (
-              <Spinner size={12} />
-            ) : (
-              <RefreshCwIcon size={12} />
-            )}
-          </span>
-        )}
-      </span>
-    </button>
+    <NoteTab isActive={isActive} onClick={onClick}>
+      Transcript
+      {showRefreshButton && (
+        <span
+          onClick={handleRefreshClick}
+          className={cn([
+            "inline-flex h-5 w-5 items-center justify-center rounded-xs transition-colors cursor-pointer",
+            "hover:bg-neutral-200 focus-visible:bg-neutral-200",
+            (isBatchProcessing || isRedoing) && "pointer-events-none",
+          ])}
+        >
+          {isBatchProcessing || isRedoing ? (
+            <Spinner size={12} />
+          ) : (
+            <RefreshCwIcon size={12} />
+          )}
+        </span>
+      )}
+    </NoteTab>
   );
 }
 
@@ -314,24 +273,10 @@ function HeaderTabEnhanced({
   );
 
   return (
-    <button
-      onClick={onClick}
-      className={cn([
-        "relative my-2 py-0.5 px-1 text-xs font-medium transition-all duration-200 border-b-2 shrink-0",
-        isActive
-          ? ["text-neutral-900", "border-neutral-900"]
-          : [
-              "text-neutral-600",
-              "border-transparent",
-              "hover:text-neutral-800",
-            ],
-      ])}
-    >
-      <span className="flex items-center gap-1 h-5">
-        <TruncatedTitle title={title} isActive={isActive} />
-        {isActive && regenerateIcon}
-      </span>
-    </button>
+    <NoteTab isActive={isActive} onClick={onClick}>
+      <TruncatedTitle title={title} isActive={isActive} />
+      {isActive && regenerateIcon}
+    </NoteTab>
   );
 }
 
@@ -343,75 +288,25 @@ function CreateOtherFormatButton({
   handleTabChange: (view: EditorView) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [pendingNote, setPendingNote] = useState<{
-    id: string;
-    templateId: string;
-  } | null>(null);
-  const startedTasksRef = useRef(new Set<string>());
   const templates = main.UI.useResultTable(
     main.QUERIES.visibleTemplates,
     main.STORE_ID,
   );
-  const createEnhancedNote = useCreateEnhancedNote();
-  const model = useLanguageModel();
   const openNew = useTabs((state) => state.openNew);
-
-  const store = main.UI.useStore(main.STORE_ID);
-  const taskId = createTaskId(pendingNote?.id || "placeholder", "enhance");
-  const enhanceTask = useAITaskTask(taskId, "enhance", {
-    onSuccess: ({ text }) => {
-      if (text && pendingNote && store) {
-        try {
-          const jsonContent = md2json(text);
-          store.setPartialRow("enhanced_notes", pendingNote.id, {
-            content: JSON.stringify(jsonContent),
-          });
-        } catch (error) {
-          console.error("Failed to convert markdown to JSON:", error);
-        }
-      }
-    },
-  });
-
-  useEffect(() => {
-    if (pendingNote && model && !startedTasksRef.current.has(pendingNote.id)) {
-      startedTasksRef.current.add(pendingNote.id);
-      void enhanceTask.start({
-        model,
-        args: {
-          sessionId,
-          enhancedNoteId: pendingNote.id,
-          templateId: pendingNote.templateId,
-        },
-      });
-    }
-  }, [pendingNote, model, sessionId, enhanceTask.start]);
 
   const handleTemplateClick = useCallback(
     (templateId: string) => {
       setOpen(false);
 
-      if (!model) {
-        console.error("No language model available");
-        return;
+      const service = getEnhancerService();
+      if (!service) return;
+
+      const result = service.enhance(sessionId, { templateId });
+      if (result.type === "started" || result.type === "already_active") {
+        handleTabChange({ type: "enhanced", id: result.noteId });
       }
-
-      const enhancedNoteId = createEnhancedNote(sessionId, templateId);
-      if (!enhancedNoteId) {
-        console.error("Failed to create enhanced note");
-        return;
-      }
-
-      void analyticsCommands.event({
-        event: "note_enhanced",
-        template_id: templateId,
-        is_auto: false,
-      });
-
-      handleTabChange({ type: "enhanced", id: enhancedNoteId });
-      setPendingNote({ id: enhancedNoteId, templateId });
     },
-    [sessionId, createEnhancedNote, model, handleTabChange],
+    [sessionId, handleTabChange],
   );
 
   return (
@@ -445,7 +340,7 @@ function CreateOtherFormatButton({
                 className="italic text-neutral-500 hover:text-neutral-700 hover:bg-neutral-50"
                 onClick={() => {
                   setOpen(false);
-                  openNew({ type: "templates" });
+                  openNew({ type: "ai", state: { tab: "templates" } });
                 }}
               >
                 Manage templates
@@ -459,7 +354,7 @@ function CreateOtherFormatButton({
               <button
                 onClick={() => {
                   setOpen(false);
-                  openNew({ type: "templates" });
+                  openNew({ type: "ai", state: { tab: "templates" } });
                 }}
                 className="px-6 py-2 rounded-full bg-linear-to-t from-stone-600 to-stone-500 text-white text-sm font-medium transition-opacity duration-150 hover:opacity-90"
               >
@@ -543,13 +438,13 @@ export function Header({
               }
 
               return (
-                <HeaderTab
+                <NoteTab
                   key={view.type}
                   isActive={currentTab.type === view.type}
                   onClick={() => handleTabChange(view)}
                 >
                   {labelForEditorView(view)}
-                </HeaderTab>
+                </NoteTab>
               );
             })}
             {isMeetingOver && (
@@ -663,29 +558,22 @@ function labelForEditorView(view: EditorView): string {
 }
 
 function useEnhanceLogic(sessionId: string, enhancedNoteId: string) {
-  const model = useLanguageModel();
+  const model = useLanguageModel("enhance");
   const llmStatus = useLLMConnectionStatus();
   const taskId = createTaskId(enhancedNoteId, "enhance");
   const [missingModelError, setMissingModelError] = useState<Error | null>(
     null,
   );
 
-  const store = main.UI.useStore(main.STORE_ID);
+  const noteTemplateId =
+    (main.UI.useCell(
+      "enhanced_notes",
+      enhancedNoteId,
+      "template_id",
+      main.STORE_ID,
+    ) as string | undefined) || undefined;
 
-  const enhanceTask = useAITaskTask(taskId, "enhance", {
-    onSuccess: ({ text }) => {
-      if (text && store) {
-        try {
-          const jsonContent = md2json(text);
-          store.setPartialRow("enhanced_notes", enhancedNoteId, {
-            content: JSON.stringify(jsonContent),
-          });
-        } catch (error) {
-          console.error("Failed to convert markdown to JSON:", error);
-        }
-      }
-    },
-  });
+  const enhanceTask = useAITaskTask(taskId, "enhance");
 
   const onRegenerate = useCallback(
     async (templateId: string | null) => {
@@ -708,11 +596,11 @@ function useEnhanceLogic(sessionId: string, enhancedNoteId: string) {
         args: {
           sessionId,
           enhancedNoteId,
-          templateId: templateId ?? undefined,
+          templateId: templateId ?? noteTemplateId,
         },
       });
     },
-    [model, enhanceTask.start, sessionId, enhancedNoteId],
+    [model, enhanceTask.start, sessionId, enhancedNoteId, noteTemplateId],
   );
 
   useEffect(() => {

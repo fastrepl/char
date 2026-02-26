@@ -1,8 +1,6 @@
 import { LogIn } from "lucide-react";
 import { useCallback } from "react";
 
-import { Button } from "@hypr/ui/components/ui/button";
-
 import { useTabs } from "../../../../store/zustand/tabs";
 
 export function AuthSection({
@@ -24,11 +22,14 @@ export function AuthSection({
   }
 
   return (
-    <div className="p-1 pt-2">
-      <Button onClick={handleOpenSettings} variant="default" className="w-full">
+    <div className="px-3 pt-2 pb-1">
+      <button
+        onClick={handleOpenSettings}
+        className="flex w-full items-center justify-center gap-2 h-10 rounded-full bg-stone-800 hover:bg-stone-700 text-white text-sm font-medium border-2 border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)] transition-all duration-200"
+      >
         <LogIn size={16} />
         Sign in
-      </Button>
+      </button>
     </div>
   );
 }

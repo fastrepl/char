@@ -1,11 +1,6 @@
 import { Icon } from "@iconify-icon/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  ArrowRightIcon,
-  CheckIcon,
-  ChevronDownIcon,
-  SearchIcon,
-} from "lucide-react";
+import { CheckIcon, ChevronDownIcon, SearchIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 
@@ -20,14 +15,14 @@ export const Route = createFileRoute("/_view/product/ai-notetaking")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "AI Notetaking - Hyprnote" },
+      { title: "AI Notetaking - Char" },
       {
         name: "description",
         content:
           "Complete AI-powered notetaking solution. Record meetings, transcribe audio, and get intelligent summaries with customizable templates. Works with any video conferencing tool.",
       },
       { name: "robots", content: "noindex, nofollow" },
-      { property: "og:title", content: "AI Notetaking - Hyprnote" },
+      { property: "og:title", content: "AI Notetaking - Char" },
       {
         property: "og:description",
         content:
@@ -36,7 +31,7 @@ export const Route = createFileRoute("/_view/product/ai-notetaking")({
       { property: "og:type", content: "website" },
       {
         property: "og:url",
-        content: "https://hyprnote.com/product/ai-notetaking",
+        content: "https://char.com/product/ai-notetaking",
       },
     ],
   }),
@@ -108,56 +103,11 @@ function HeroSection() {
       <div className="px-6 py-12 lg:py-20">
         <header className="mb-12 text-center max-w-4xl mx-auto">
           <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
-            <span className="inline-block mx-auto min-[680px]:hidden">
-              AI notetaking for
-              <br />
-              <span
-                className="inline-block whitespace-nowrap"
-                style={{ width: "240px", maxWidth: "100%" }}
-              >
-                your{" "}
-                <span
-                  className="inline-block relative"
-                  style={{ minWidth: "12ch" }}
-                >
-                  <span className="invisible">meetings</span>
-                  <Typewriter
-                    text={["meetings", "lectures", "thoughts"]}
-                    speed={100}
-                    deleteSpeed={50}
-                    waitTime={2000}
-                    loop={true}
-                    className="absolute left-0 top-0"
-                  />
-                </span>
-              </span>
-            </span>
-
-            <span
-              className="hidden min-[680px]:inline-block mx-auto whitespace-nowrap"
-              style={{ width: "680px", maxWidth: "100%" }}
-            >
-              AI notetaking for your{" "}
-              <span
-                className="inline-block relative"
-                style={{ minWidth: "12ch" }}
-              >
-                <span className="invisible">meetings</span>
-                <Typewriter
-                  text={["meetings", "lectures", "thoughts"]}
-                  speed={100}
-                  deleteSpeed={50}
-                  waitTime={2000}
-                  loop={true}
-                  className="absolute left-0 top-0"
-                />
-              </span>
-            </span>
+            AI Notepad for Smarter Meeting Notes
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600">
-            Record meetings or upload audio files to get instant
-            <br className="hidden sm:inline" /> AI transcriptions and
-            customizable summaries
+            You focus on the conversation. AI transcribes, summarizes,
+            <br className="hidden sm:inline" /> and fills in what you missed.
           </p>
           <div className="mt-8">
             <Link
@@ -191,11 +141,11 @@ function EditorSection() {
         <div className="flex items-center p-8">
           <div className="flex flex-col gap-4">
             <h2 className="text-3xl font-serif text-stone-600">
-              Simple notetaking
+              Simple, Familiar Notepad
             </h2>
             <p className="text-base text-neutral-600 leading-relaxed">
-              Hyprnote comes with a easy-to-use text editor where you can jot
-              down stuff in markdown.
+              Char comes with a easy-to-use text editor where you can jot down
+              stuff in markdown.
             </p>
             <ul className="flex flex-col gap-3">
               <li className="flex items-start gap-3">
@@ -231,10 +181,10 @@ function EditorSection() {
       <div className="sm:hidden">
         <div className="p-6 border-b border-neutral-100">
           <h2 className="text-2xl font-serif text-stone-600 mb-3">
-            Simple notetaking
+            Simple, Familiar Notepad
           </h2>
           <p className="text-sm text-neutral-600 leading-relaxed mb-4">
-            Hyprnote comes with a easy-to-use text editor where you can jot down
+            Char comes with a easy-to-use text editor where you can jot down
             stuff in markdown.
           </p>
           <ul className="flex flex-col gap-3">
@@ -649,31 +599,26 @@ function TranscriptionSection() {
     <section id="transcription" className="border-y border-neutral-100">
       <div className="text-center py-12 px-4 lg:px-0">
         <h2 className="text-3xl font-serif text-stone-600 mb-4">
-          Transcription
+          Live meetings to recorded audio, Char transcribes it all
         </h2>
-        <p className="text-base text-neutral-600 max-w-2xl mx-auto">
-          From live meetings to recorded audio, Hyprnote can transcribe it all
-        </p>
       </div>
 
       <div className="border-t border-neutral-100">
         <div className="hidden sm:grid sm:grid-cols-2">
           <div className="border-r border-neutral-100 flex flex-col">
             <div className="p-8 flex flex-col gap-4">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <Icon icon="mdi:chip" className="text-3xl text-stone-600" />
-                  <h3 className="text-2xl font-serif text-stone-600">
-                    Fully on-device
-                  </h3>
-                </div>
-                <div className="px-4 py-1.5 bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900 rounded-full shadow-xs text-xs font-medium whitespace-nowrap">
-                  Apple Silicon only
-                </div>
+              <div className="flex items-center gap-3">
+                <Icon
+                  icon="mdi:microphone"
+                  className="text-3xl text-stone-600"
+                />
+                <h3 className="text-2xl font-serif text-stone-600">
+                  Real-time transcription
+                </h3>
               </div>
               <p className="text-base text-neutral-600 leading-relaxed">
-                For Apple Silicon Macs, transcription happens entirely on your
-                device. Fast, private, and no internet required.
+                Every word captured as it's spoken. See the transcript build in
+                real-time with speaker identification and timestamps.
               </p>
             </div>
             <div className="flex-1 flex items-center justify-center overflow-hidden">
@@ -706,26 +651,19 @@ function TranscriptionSection() {
         <div className="sm:hidden">
           <div className="border-b border-neutral-100">
             <div className="p-6">
-              <div className="inline-block px-4 py-1.5 bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900 rounded-full shadow-xs text-xs font-medium mb-3">
-                Apple Silicon only
-              </div>
               <div className="flex items-center gap-3 mb-3">
-                <Icon icon="mdi:chip" className="text-2xl text-stone-600" />
+                <Icon
+                  icon="mdi:microphone"
+                  className="text-2xl text-stone-600"
+                />
                 <h3 className="text-xl font-serif text-stone-600">
-                  Fully on-device
+                  Real-time transcription
                 </h3>
               </div>
               <p className="text-sm text-neutral-600 leading-relaxed mb-4">
-                For Apple Silicon Macs, transcription happens entirely on your
-                device. Fast, private, and no internet required.
+                Every word captured as it's spoken. See the transcript build in
+                real-time with speaker identification and timestamps.
               </p>
-            </div>
-            <div className="overflow-hidden bg-neutral-100">
-              <img
-                src="/api/images/hyprnote/no-wifi.png"
-                alt="On-device transcription"
-                className="w-full h-auto object-contain"
-              />
             </div>
           </div>
           <div>
@@ -818,12 +756,8 @@ function SummariesSection() {
     <section id="summaries">
       <div className="text-center py-12 px-4 lg:px-0">
         <h2 className="text-3xl font-serif text-stone-600 mb-4">
-          AI summaries
+          Your Notes+AI = Perfect Summary
         </h2>
-        <p className="text-base text-neutral-600">
-          Hyprnote combines your notes with transcripts to create intelligent
-          summaries after your meeting ends
-        </p>
       </div>
       <div className="border-t border-neutral-100">
         <div className="hidden sm:grid sm:grid-cols-2">
@@ -831,8 +765,8 @@ function SummariesSection() {
             <div className="p-8 flex flex-col gap-4">
               <p className="text-lg font-serif text-neutral-600 leading-relaxed">
                 <span className="font-semibold">While you take notes,</span>{" "}
-                Hyprnote listens and keeps track of everything that happens
-                during the meeting.
+                Char listens and keeps track of everything that happens during
+                the meeting.
               </p>
             </div>
             <div className="flex-1 flex items-end justify-center px-8 pb-0 bg-stone-50/30">
@@ -865,8 +799,7 @@ function SummariesSection() {
                 <span className="font-semibold">
                   After the meeting is over,
                 </span>{" "}
-                Hyprnote combines your notes with transcripts to create a
-                perfect summary.
+                Char combines your notes with transcripts to create a summary.
               </p>
             </div>
             <div className="flex-1 flex items-end justify-center px-8 pb-0 bg-stone-50/30">
@@ -955,8 +888,8 @@ function SummariesSection() {
             <div className="p-6 pb-2">
               <p className="text-base font-serif text-neutral-600 leading-relaxed mb-4">
                 <span className="font-semibold">While you take notes,</span>{" "}
-                Hyprnote listens and keeps track of everything that happens
-                during the meeting.
+                Char listens and keeps track of everything that happens during
+                the meeting.
               </p>
             </div>
             <div className="px-6 pb-0 bg-stone-50/30 overflow-clip">
@@ -989,8 +922,7 @@ function SummariesSection() {
                 <span className="font-semibold">
                   After the meeting is over,
                 </span>{" "}
-                Hyprnote combines your notes with transcripts to create a
-                perfect summary.
+                Char combines your notes with transcripts to create a summary.
               </p>
             </div>
             <div className="px-6 pb-0 bg-stone-50/30 overflow-clip">
@@ -1110,23 +1042,7 @@ function SearchSection() {
                   cursorClassName="ml-1"
                 />
               </div>
-              <Link
-                to="/product/mini-apps/"
-                hash="advanced-search"
-                className="hidden sm:inline-flex px-5 h-10 items-center justify-center gap-2 text-sm bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900 rounded-full shadow-xs hover:shadow-md hover:scale-[102%] active:scale-[98%] transition-all shrink-0"
-              >
-                Go to Advanced Search
-                <ArrowRightIcon className="size-4" />
-              </Link>
             </div>
-            <Link
-              to="/product/mini-apps/"
-              hash="advanced-search"
-              className="sm:hidden w-full px-4 h-10 inline-flex items-center justify-center gap-2 text-sm bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900 rounded-full shadow-xs hover:shadow-md active:scale-[98%] transition-all"
-            >
-              Go to Advanced Search
-              <ArrowRightIcon className="size-4" />
-            </Link>
           </div>
         </div>
       </div>
@@ -2512,7 +2428,7 @@ function CTASection() {
         <div className="mb-4 size-40 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[48px] bg-transparent">
           <img
             src="/api/images/hyprnote/icon.png"
-            alt="Hyprnote"
+            alt="Char"
             width={144}
             height={144}
             className="size-36 mx-auto rounded-[40px] border border-neutral-100"

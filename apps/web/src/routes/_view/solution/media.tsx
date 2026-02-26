@@ -7,16 +7,16 @@ export const Route = createFileRoute("/_view/solution/media")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "AI Meeting Notes for Media & Entertainment - Hyprnote" },
+      { title: "AI Meeting Notes for Media & Entertainment - Char" },
       {
         name: "description",
         content:
-          "Capture creative meetings, production calls, and editorial discussions with AI-powered meeting notes. Streamline content production workflows with Hyprnote.",
+          "Capture creative meetings, production calls, and editorial discussions with AI-powered meeting notes. Streamline content production workflows with Char.",
       },
       { name: "robots", content: "noindex, nofollow" },
       {
         property: "og:title",
-        content: "AI Meeting Notes for Media & Entertainment - Hyprnote",
+        content: "AI Meeting Notes for Media & Entertainment - Char",
       },
       {
         property: "og:description",
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_view/solution/media")({
       { property: "og:type", content: "website" },
       {
         property: "og:url",
-        content: "https://hyprnote.com/solution/media",
+        content: "https://char.com/solution/media",
       },
     ],
   }),
@@ -125,8 +125,8 @@ function HeroSection() {
             with AI-powered notes
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto">
-            From brainstorms to production calls, Hyprnote captures your
-            creative discussions so no brilliant idea gets lost.
+            From brainstorms to production calls, Char captures your creative
+            discussions so no brilliant idea gets lost.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <Link

@@ -40,14 +40,14 @@ export const Route = createFileRoute("/_view/jobs/$slug")({
 
     return {
       meta: [
-        { title: `${job.title} - Hyprnote` },
+        { title: `${job.title} - Char` },
         { name: "description", content: job.description },
-        { property: "og:title", content: `${job.title} - Hyprnote` },
+        { property: "og:title", content: `${job.title} - Char` },
         { property: "og:description", content: job.description },
         { property: "og:image", content: ogImageUrl },
         { property: "og:type", content: "website" },
         { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: `${job.title} - Hyprnote` },
+        { name: "twitter:title", content: `${job.title} - Char` },
         { name: "twitter:description", content: job.description },
         { name: "twitter:image", content: ogImageUrl },
       ],
@@ -76,7 +76,7 @@ function JobPage() {
 function getApplyUrl(job: (typeof allJobs)[0]) {
   return (
     job.applyUrl ||
-    `mailto:founders@hyprnote.com?subject=Application for ${job.title}`
+    `mailto:founders@char.com?subject=Application for ${job.title}`
   );
 }
 
@@ -182,7 +182,7 @@ function CTASection({ job }: { job: (typeof allJobs)[0] }) {
         <div className="mb-4 size-40 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[48px] bg-transparent">
           <Image
             src="/api/images/hyprnote/icon.png"
-            alt="Hyprnote"
+            alt="Char"
             width={144}
             height={144}
             className="size-36 mx-auto rounded-[40px] border border-neutral-100"

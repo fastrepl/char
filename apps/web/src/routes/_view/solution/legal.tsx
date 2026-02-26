@@ -7,7 +7,7 @@ export const Route = createFileRoute("/_view/solution/legal")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "AI Meeting Notes for Legal Teams - Hyprnote" },
+      { title: "AI Meeting Notes for Legal Teams - Char" },
       {
         name: "description",
         content:
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_view/solution/legal")({
       { name: "robots", content: "noindex, nofollow" },
       {
         property: "og:title",
-        content: "AI Meeting Notes for Legal Teams - Hyprnote",
+        content: "AI Meeting Notes for Legal Teams - Char",
       },
       {
         property: "og:description",
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_view/solution/legal")({
       { property: "og:type", content: "website" },
       {
         property: "og:url",
-        content: "https://hyprnote.com/solution/legal",
+        content: "https://char.com/solution/legal",
       },
     ],
   }),

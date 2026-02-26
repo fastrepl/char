@@ -113,7 +113,7 @@ function SettingsView({ tab }: { tab: Extract<Tab, { type: "settings" }> }) {
 
   return (
     <div className="flex flex-col flex-1 w-full overflow-hidden">
-      <div className="flex gap-1 px-6 pt-6 pb-2">
+      <div className="flex flex-wrap gap-1 px-6 pt-6 pb-2">
         {SECTIONS.map(({ id, label, icon: Icon }) => (
           <Button
             key={id}
