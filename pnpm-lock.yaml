@@ -1405,6 +1405,9 @@ importers:
       codemirror-readonly-ranges:
         specifier: 0.1.0-alpha.2
         version: 0.1.0-alpha.2(@codemirror/state@6.5.4)(@codemirror/view@6.39.13)
+      facehash:
+        specifier: ^0.0.7
+        version: 0.0.7(@types/react@19.2.13)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       lucide-react:
         specifier: ^0.544.0
         version: 0.544.0(react@19.2.4)

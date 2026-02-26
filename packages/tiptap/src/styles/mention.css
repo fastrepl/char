@@ -51,11 +51,13 @@
 
 /* Inline mention chip */
 .mention {
+  display: inline;
   font-weight: 500;
   text-decoration: none;
   border-radius: 0.25rem;
-  padding: 0.1rem 0.25rem;
+  padding: 0 0.25rem;
   font-size: inherit;
+  line-height: inherit;
   color: inherit;
 }
 
@@ -63,17 +65,33 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.1em;
-  height: 1.1em;
+  width: 1em;
+  height: 1em;
   border-radius: 50%;
-  background-color: #e5e7eb;
-  color: #6b7280;
-  font-size: 0.6em;
-  font-weight: 600;
-  vertical-align: middle;
-  line-height: 1;
+  overflow: hidden;
+  vertical-align: text-bottom;
+  flex-shrink: 0;
+  margin-right: 0.15em;
 }
 
-.mention .mention-avatar::before {
-  content: attr(data-initial);
+.mention .mention-avatar-icon {
+  width: 1em;
+  height: 1em;
+  border-radius: 0;
+  overflow: visible;
+  background: none;
+  color: #737373;
+}
+
+.mention .mention-inline-icon {
+  display: block;
+  width: 1em;
+  height: 1em;
+  position: relative;
+  top: -2px;
+}
+
+/* NodeView wrapper for inline mention rendering */
+span[data-node-view-wrapper] .mention {
+  display: inline;
 }
