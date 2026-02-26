@@ -416,6 +416,10 @@ function MentionNodeView({ node }: NodeViewProps) {
   const mentionId = String(id ?? "");
   const mentionType = String(type ?? "");
   const mentionLabel = String(label ?? "");
+  const MAX_MENTION_LENGTH = 20;
+  const displayLabel = mentionLabel.length > MAX_MENTION_LENGTH
+    ? mentionLabel.slice(0, MAX_MENTION_LENGTH) + "…"
+    : mentionLabel;
   const path = `/app/${mentionType}/${mentionId}`;
 
   const handleClick = useCallback(
@@ -439,7 +443,7 @@ function MentionNodeView({ node }: NodeViewProps) {
       onClick={handleClick}
     >
       <MentionAvatar id={mentionId} type={mentionType} label={mentionLabel} />
-      <span className="mention-text">{mentionLabel}</span>
+      <span className="mention-text">{displayLabel}</span>
     </NodeViewWrapper>
   );
 }
