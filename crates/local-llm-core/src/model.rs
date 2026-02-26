@@ -4,7 +4,8 @@ pub static SUPPORTED_MODELS: &[SupportedModel] = &[
     SupportedModel::Gemma3_4bQ4,
 ];
 
-#[derive(serde::Serialize, serde::Deserialize, specta::Type)]
+#[derive(serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 pub struct ModelInfo {
     pub key: SupportedModel,
     pub name: String,
@@ -12,13 +13,15 @@ pub struct ModelInfo {
     pub size_bytes: u64,
 }
 
-#[derive(serde::Serialize, serde::Deserialize, specta::Type)]
+#[derive(serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 pub struct CustomModelInfo {
     pub path: String,
     pub name: String,
 }
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[serde(tag = "type", content = "content")]
 pub enum ModelSelection {
     Predefined { key: SupportedModel },
@@ -49,7 +52,8 @@ impl ModelSelection {
     }
 }
 
-#[derive(Debug, Eq, Hash, PartialEq, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
+#[derive(Debug, Eq, Hash, PartialEq, Clone, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 pub enum SupportedModel {
     Llama3p2_3bQ4,
     Gemma3_4bQ4,
@@ -96,7 +100,8 @@ impl SupportedModel {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, specta::Type)]
+#[derive(serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 pub enum ModelIdentifier {
     #[serde(rename = "local")]
     Local,

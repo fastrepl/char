@@ -80,9 +80,10 @@ hypr-language = { path = "crates/language", package = "language" }
 hypr-listener-core = { path = "crates/listener-core", package = "listener-core" }
 hypr-listener2-core = { path = "crates/listener2-core", package = "listener2-core" }
 hypr-llm-cactus = { path = "crates/llm-cactus", package = "llm-cactus" }
-hypr-lmstudio = { path = "crates/lmstudio", package = "lmstudio" }
 hypr-llm-proxy = { path = "crates/llm-proxy", package = "llm-proxy" }
 hypr-llm-types = { path = "crates/llm-types", package = "llm-types" }
+hypr-lmstudio = { path = "crates/lmstudio", package = "lmstudio" }
+hypr-local-llm-core = { path = "crates/local-llm-core", package = "local-llm-core" }
 hypr-loops = { path = "crates/loops", package = "loops" }
 hypr-mac = { path = "crates/mac", package = "mac" }
 hypr-mcp = { path = "crates/mcp", package = "mcp" }

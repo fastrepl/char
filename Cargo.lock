@@ -2771,12 +2771,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cargo-husky"
-version = "1.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b02b629252fe8ef6460461409564e2c21d0c8e77e0944f3d189ff06c4e932ad"
-
-[[package]]
 name = "cargo-platform"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10227,6 +10221,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "local-llm-core"
+version = "0.1.0"
+dependencies = [
+ "dirs 6.0.0",
+ "file",
+ "gguf",
+ "lmstudio",
+ "serde",
+ "serde_json",
+ "specta",
+ "thiserror 2.0.18",
+ "tracing",
+]
+
+[[package]]
 name = "local-waker"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -14085,22 +14094,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "reqwest-streams"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d2484a49257a16e13f0c5f760c6e65a231eb32fbe6f899f6caa6f9bc78e2799"
-dependencies = [
- "async-trait",
- "bytes",
- "cargo-husky",
- "futures",
- "reqwest 0.13.2",
- "serde",
- "serde_json",
- "tokio-util",
-]
-
-[[package]]
 name = "reqwest-tracing"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -17933,36 +17926,24 @@ dependencies = [
 name = "tauri-plugin-local-llm"
 version = "0.1.0"
 dependencies = [
- "async-openai",
- "async-stream",
- "axum 0.8.8",
  "dirs 6.0.0",
  "download-interface",
  "file",
- "futures-util",
- "gbnf",
- "gguf",
- "lmstudio",
+ "local-llm-core",
  "reqwest 0.13.2",
- "reqwest-streams",
  "serde",
  "serde_json",
  "specta",
  "specta-typescript",
- "strum 0.27.2",
  "tauri",
  "tauri-plugin",
  "tauri-plugin-settings",
  "tauri-plugin-store",
  "tauri-plugin-store2",
- "tauri-plugin-windows",
  "tauri-specta",
  "thiserror 2.0.18",
  "tokio",
- "tokio-util",
- "tower-http 0.6.8",
  "tracing",
- "uuid",
 ]
 
 [[package]]

@@ -7,12 +7,13 @@ use tokio::sync::Mutex;
 mod commands;
 mod error;
 mod ext;
-mod model;
 mod store;
 
 pub use error::*;
 pub use ext::*;
-pub use model::*;
+pub use hypr_local_llm_core::{
+    CustomModelInfo, ModelIdentifier, ModelInfo, ModelSelection, SUPPORTED_MODELS, SupportedModel,
+};
 pub use store::*;
 
 const PLUGIN_NAME: &str = "local-llm";
@@ -20,7 +21,6 @@ const PLUGIN_NAME: &str = "local-llm";
 pub type SharedState = std::sync::Arc<tokio::sync::Mutex<State>>;
 
 pub struct State {
-    pub api_base: Option<String>,
     pub download_task: HashMap<SupportedModel, tokio::task::JoinHandle<()>>,
 }
 
@@ -82,7 +82,6 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
                 };
 
                 let state = State {
-                    api_base: None,
                     download_task: HashMap::new(),
                 };
                 app.manage(Arc::new(Mutex::new(state)));
