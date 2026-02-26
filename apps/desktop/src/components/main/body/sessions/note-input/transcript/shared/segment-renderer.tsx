@@ -1,13 +1,24 @@
-import { memo, useCallback, useMemo } from "react";
+import { memo, useMemo } from "react";
 
 import type { Operations, Segment, SegmentWord } from "@hypr/transcript";
 import { SpeakerLabelManager } from "@hypr/transcript";
 import { groupWordsIntoLines } from "@hypr/transcript/ui";
 import { cn } from "@hypr/utils";
 
-import { useAudioPlayer } from "../../../../../../../contexts/audio-player/provider";
 import { SegmentHeader } from "./segment-header";
 import { WordSpan } from "./word-span";
+
+function getSegmentTimeRange(
+  segment: Segment,
+  offsetMs: number,
+): { start: number; end: number } | null {
+  const words = segment.words;
+  if (words.length === 0) return null;
+  return {
+    start: offsetMs + (words[0].start_ms ?? 0),
+    end: offsetMs + (words[words.length - 1].end_ms ?? 0),
+  };
+}
 
 export const SegmentRenderer = memo(
   ({
@@ -17,6 +28,9 @@ export const SegmentRenderer = memo(
     operations,
     sessionId,
     speakerLabelManager,
+    currentMs,
+    seekAndPlay,
+    audioExists,
   }: {
     editable: boolean;
     segment: Segment;
@@ -24,20 +38,10 @@ export const SegmentRenderer = memo(
     operations?: Operations;
     sessionId?: string;
     speakerLabelManager?: SpeakerLabelManager;
+    currentMs: number;
+    seekAndPlay: (word: SegmentWord) => void;
+    audioExists: boolean;
   }) => {
-    const { time, seek, start, audioExists } = useAudioPlayer();
-    const currentMs = time.current * 1000;
-
-    const seekAndPlay = useCallback(
-      (word: SegmentWord) => {
-        if (audioExists) {
-          seek((offsetMs + word.start_ms) / 1000);
-          start();
-        }
-      },
-      [audioExists, offsetMs, seek, start],
-    );
-
     const lines = useMemo(
       () => groupWordsIntoLines(segment.words),
       [segment.words],
@@ -93,13 +97,39 @@ export const SegmentRenderer = memo(
     );
   },
   (prev, next) => {
-    return (
-      prev.editable === next.editable &&
-      prev.segment === next.segment &&
-      prev.offsetMs === next.offsetMs &&
-      prev.operations === next.operations &&
-      prev.sessionId === next.sessionId &&
-      prev.speakerLabelManager === next.speakerLabelManager
-    );
+    if (
+      prev.editable !== next.editable ||
+      prev.segment !== next.segment ||
+      prev.offsetMs !== next.offsetMs ||
+      prev.operations !== next.operations ||
+      prev.sessionId !== next.sessionId ||
+      prev.speakerLabelManager !== next.speakerLabelManager ||
+      prev.audioExists !== next.audioExists ||
+      prev.seekAndPlay !== next.seekAndPlay
+    ) {
+      return false;
+    }
+
+    // Smart time comparison: only re-render if time change affects which line is active
+    if (prev.currentMs === next.currentMs) return true;
+
+    const range = getSegmentTimeRange(prev.segment, prev.offsetMs);
+    if (!range) return true;
+
+    const prevInRange =
+      prev.currentMs > 0 &&
+      prev.currentMs >= range.start &&
+      prev.currentMs <= range.end;
+    const nextInRange =
+      next.currentMs > 0 &&
+      next.currentMs >= range.start &&
+      next.currentMs <= range.end;
+
+    // If neither time is in this segment's range, no visual change
+    if (!prevInRange && !nextInRange) return true;
+
+    // If both are in range, the active line might have changed — need to re-render
+    // If one is in range and the other isn't, definitely need to re-render
+    return false;
   },
 );

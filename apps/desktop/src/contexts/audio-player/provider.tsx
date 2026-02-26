@@ -5,7 +5,10 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
+  useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import WaveSurfer from "wavesurfer.js";
 
@@ -13,17 +16,63 @@ import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 
 type AudioPlayerState = "playing" | "paused" | "stopped";
 
+interface TimeSnapshot {
+  current: number;
+  total: number;
+}
+
+class TimeStore {
+  private snapshot: TimeSnapshot = { current: 0, total: 0 };
+  private listeners = new Set<() => void>();
+
+  getSnapshot = (): TimeSnapshot => {
+    return this.snapshot;
+  };
+
+  subscribe = (cb: () => void): (() => void) => {
+    this.listeners.add(cb);
+    return () => {
+      this.listeners.delete(cb);
+    };
+  };
+
+  setCurrent(value: number) {
+    if (value === this.snapshot.current) return;
+    this.snapshot = { ...this.snapshot, current: value };
+    this.notify();
+  }
+
+  setTotal(value: number) {
+    if (value === this.snapshot.total) return;
+    this.snapshot = { ...this.snapshot, total: value };
+    this.notify();
+  }
+
+  reset() {
+    this.snapshot = { current: 0, total: 0 };
+    this.notify();
+  }
+
+  private notify() {
+    for (const cb of this.listeners) {
+      cb();
+    }
+  }
+}
+
 interface AudioPlayerContextValue {
   registerContainer: (el: HTMLDivElement | null) => void;
   wavesurfer: WaveSurfer | null;
   state: AudioPlayerState;
-  time: { current: number; total: number };
+  timeStore: TimeStore;
   start: () => void;
   pause: () => void;
   resume: () => void;
   stop: () => void;
   seek: (sec: number) => void;
   audioExists: boolean;
+  playbackRate: number;
+  setPlaybackRate: (rate: number) => void;
 }
 
 const AudioPlayerContext = createContext<AudioPlayerContextValue | null>(null);
@@ -34,6 +83,11 @@ export function useAudioPlayer() {
     throw new Error("useAudioPlayer must be used within AudioPlayerProvider");
   }
   return context;
+}
+
+export function useAudioTime(): TimeSnapshot {
+  const { timeStore } = useAudioPlayer();
+  return useSyncExternalStore(timeStore.subscribe, timeStore.getSnapshot);
 }
 
 export function AudioPlayerProvider({
@@ -48,8 +102,8 @@ export function AudioPlayerProvider({
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [wavesurfer, setWavesurfer] = useState<WaveSurfer | null>(null);
   const [state, setState] = useState<AudioPlayerState>("stopped");
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [playbackRate, setPlaybackRateState] = useState(1);
+  const timeStoreRef = useRef(new TimeStore());
 
   const audioExists = useQuery({
     queryKey: ["audio", sessionId, "exist"],
@@ -70,6 +124,9 @@ export function AudioPlayerProvider({
     if (!container || !url) {
       return;
     }
+
+    const store = timeStoreRef.current;
+    store.reset();
 
     const audio = new Audio(url);
 
@@ -98,7 +155,7 @@ export function AudioPlayerProvider({
     const handleReady = async () => {
       const dur = ws.getDuration();
       if (dur && isFinite(dur)) {
-        setDuration(dur);
+        store.setTotal(dur);
       }
 
       const media = ws.getMediaElement();
@@ -123,17 +180,13 @@ export function AudioPlayerProvider({
       merger.connect(audioContext.destination);
     };
 
-    const handleAudioprocess = () => {
-      setCurrentTime(ws.getCurrentTime());
-    };
-
     const handleTimeupdate = () => {
-      setCurrentTime(ws.getCurrentTime());
+      store.setCurrent(ws.getCurrentTime());
     };
 
     const handleDecode = (dur: number) => {
       if (dur && isFinite(dur)) {
-        setDuration(dur);
+        store.setTotal(dur);
       }
     };
 
@@ -143,7 +196,6 @@ export function AudioPlayerProvider({
 
     ws.on("decode", handleDecode);
     ws.on("ready", handleReady);
-    ws.on("audioprocess", handleAudioprocess);
     ws.on("timeupdate", handleTimeupdate);
 
     // Listening to the "pause" event is problematic. Not sure why, but it is even called when I stop the player.
@@ -200,21 +252,50 @@ export function AudioPlayerProvider({
     [wavesurfer],
   );
 
+  const setPlaybackRate = useCallback(
+    (rate: number) => {
+      if (wavesurfer) {
+        wavesurfer.setPlaybackRate(rate);
+      }
+      setPlaybackRateState(rate);
+    },
+    [wavesurfer],
+  );
+
+  const audioExistsValue = audioExists.data ?? false;
+
+  const value = useMemo<AudioPlayerContextValue>(
+    () => ({
+      registerContainer,
+      wavesurfer,
+      state,
+      timeStore: timeStoreRef.current,
+      start,
+      pause,
+      resume,
+      stop,
+      seek,
+      audioExists: audioExistsValue,
+      playbackRate,
+      setPlaybackRate,
+    }),
+    [
+      registerContainer,
+      wavesurfer,
+      state,
+      start,
+      pause,
+      resume,
+      stop,
+      seek,
+      audioExistsValue,
+      playbackRate,
+      setPlaybackRate,
+    ],
+  );
+
   return (
-    <AudioPlayerContext.Provider
-      value={{
-        registerContainer,
-        wavesurfer,
-        state,
-        time: { current: currentTime, total: duration },
-        start,
-        pause,
-        resume,
-        stop,
-        seek,
-        audioExists: audioExists.data ?? false,
-      }}
-    >
+    <AudioPlayerContext.Provider value={value}>
       {children}
     </AudioPlayerContext.Provider>
   );

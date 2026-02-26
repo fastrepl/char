@@ -462,6 +462,11 @@ export function usePlaybackAutoScroll(
       return;
     }
 
+    const now = Date.now();
+    if (now - lastScrollTimeRef.current < 200) {
+      return;
+    }
+
     const element = containerRef.current;
     if (!element) {
       return;
@@ -481,7 +486,7 @@ export function usePlaybackAutoScroll(
     }
 
     lastScrolledWordIdRef.current = lineKey;
-    lastScrollTimeRef.current = Date.now();
+    lastScrollTimeRef.current = now;
 
     currentLineEl.scrollIntoView({
       behavior: "smooth",

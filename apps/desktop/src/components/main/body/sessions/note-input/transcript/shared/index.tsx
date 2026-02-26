@@ -6,7 +6,10 @@ import type { RuntimeSpeakerHint } from "@hypr/transcript";
 import { DancingSticks } from "@hypr/ui/components/ui/dancing-sticks";
 import { cn } from "@hypr/utils";
 
-import { useAudioPlayer } from "../../../../../../../contexts/audio-player/provider";
+import {
+  useAudioPlayer,
+  useAudioTime,
+} from "../../../../../../../contexts/audio-player/provider";
 import { useListener } from "../../../../../../../contexts/listener";
 import * as main from "../../../../../../../store/tinybase/store/main";
 import { TranscriptEmptyState } from "../empty-state";
@@ -98,7 +101,15 @@ export function TranscriptContainer({
   const { isAtBottom, autoScrollEnabled, scrollToBottom } =
     useScrollDetection(containerRef);
 
-  const { time, state: playerState, pause, resume, start } = useAudioPlayer();
+  const {
+    state: playerState,
+    pause,
+    resume,
+    start,
+    seek,
+    audioExists,
+  } = useAudioPlayer();
+  const time = useAudioTime();
   const currentMs = time.current * 1000;
   const isPlaying = playerState === "playing";
 
@@ -175,6 +186,10 @@ export function TranscriptContainer({
                     : []
                 }
                 operations={operations}
+                currentMs={currentMs}
+                seek={seek}
+                startPlayback={start}
+                audioExists={audioExists}
               />
               {index < transcriptIds.length - 1 && <TranscriptSeparator />}
             </div>

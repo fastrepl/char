@@ -1,9 +1,10 @@
-import { memo, useEffect, useMemo } from "react";
+import { memo, useCallback, useEffect, useMemo } from "react";
 
 import type {
   PartialWord,
   RuntimeSpeakerHint,
   Segment,
+  SegmentWord,
 } from "@hypr/transcript";
 import { cn } from "@hypr/utils";
 
@@ -33,6 +34,10 @@ export function RenderTranscript({
   partialWords,
   partialHints,
   operations,
+  currentMs,
+  seek,
+  startPlayback,
+  audioExists,
 }: {
   scrollElement: HTMLDivElement | null;
   isLastTranscript: boolean;
@@ -42,6 +47,10 @@ export function RenderTranscript({
   partialWords: PartialWord[];
   partialHints: RuntimeSpeakerHint[];
   operations?: Operations;
+  currentMs: number;
+  seek: (sec: number) => void;
+  startPlayback: () => void;
+  audioExists: boolean;
 }) {
   const finalWords = useFinalWords(transcriptId);
   const finalSpeakerHints = useFinalSpeakerHints(transcriptId);
@@ -88,6 +97,10 @@ export function RenderTranscript({
       operations={operations}
       sessionId={sessionId}
       shouldScrollToEnd={isLastTranscript && isAtBottom}
+      currentMs={currentMs}
+      seek={seek}
+      startPlayback={startPlayback}
+      audioExists={audioExists}
     />
   );
 }
@@ -102,6 +115,10 @@ const SegmentsList = memo(
     operations,
     sessionId,
     shouldScrollToEnd,
+    currentMs,
+    seek,
+    startPlayback,
+    audioExists,
   }: {
     segments: Segment[];
     scrollElement: HTMLDivElement | null;
@@ -111,6 +128,10 @@ const SegmentsList = memo(
     operations?: Operations;
     sessionId?: string;
     shouldScrollToEnd: boolean;
+    currentMs: number;
+    seek: (sec: number) => void;
+    startPlayback: () => void;
+    audioExists: boolean;
   }) => {
     const store = main.UI.useStore(main.STORE_ID);
     const speakerLabelManager = useMemo(() => {
@@ -120,6 +141,16 @@ const SegmentsList = memo(
       const ctx = defaultRenderLabelContext(store);
       return SpeakerLabelManager.fromSegments(segments, ctx);
     }, [segments, store]);
+
+    const seekAndPlay = useCallback(
+      (word: SegmentWord) => {
+        if (audioExists) {
+          seek((offsetMs + word.start_ms) / 1000);
+          startPlayback();
+        }
+      },
+      [audioExists, offsetMs, seek, startPlayback],
+    );
 
     useEffect(() => {
       if (!scrollElement || !shouldScrollToEnd) {
@@ -148,6 +179,9 @@ const SegmentsList = memo(
               operations={operations}
               sessionId={sessionId}
               speakerLabelManager={speakerLabelManager}
+              currentMs={currentMs}
+              seekAndPlay={seekAndPlay}
+              audioExists={audioExists}
             />
           </div>
         ))}
@@ -161,6 +195,10 @@ const SegmentsList = memo(
       prevProps.offsetMs === nextProps.offsetMs &&
       prevProps.sessionId === nextProps.sessionId &&
       prevProps.shouldScrollToEnd === nextProps.shouldScrollToEnd &&
+      prevProps.currentMs === nextProps.currentMs &&
+      prevProps.audioExists === nextProps.audioExists &&
+      prevProps.seek === nextProps.seek &&
+      prevProps.startPlayback === nextProps.startPlayback &&
       segmentsShallowEqual(prevProps.segments, nextProps.segments)
     );
   },
