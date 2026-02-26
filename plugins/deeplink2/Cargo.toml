@@ -23,6 +23,7 @@ tauri-plugin-deep-link = { workspace = true }
 tauri-specta = { workspace = true, features = ["derive", "typescript"] }
 
 serde = { workspace = true }
+serde_qs = { workspace = true }
 specta = { workspace = true }
 strum = { workspace = true, features = ["derive"] }
 

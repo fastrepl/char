@@ -17568,6 +17568,7 @@ version = "0.1.0"
 dependencies = [
  "docs",
  "serde",
+ "serde_qs",
  "serde_yaml",
  "specta",
  "specta-typescript",
