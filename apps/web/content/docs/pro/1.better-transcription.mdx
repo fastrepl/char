@@ -78,13 +78,13 @@ When using cloud transcription, your recorded audio is sent to the selected prov
 
 Here is how Char selects the correct adapter for your configured provider — each provider has its own adapter that handles the audio stream:
 
-<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/listener/src/actors/listener/adapters.rs#L22-L102" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/listener-core/src/actors/listener/adapters.rs#L22-L102" />
 
 ### What data is sent to the provider
 
 **Sent alongside your audio stream:**
 
-<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/listener/src/actors/session/supervisor.rs#L122-L134" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/listener-core/src/actors/session/supervisor.rs#L122-L134" />
 
 - Raw audio (Linear PCM, 16kHz sample rate, mono or stereo)
 - Configuration: model name, language codes, optional keyword boost list, sample rate, channel count

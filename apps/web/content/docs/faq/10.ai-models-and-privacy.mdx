@@ -58,11 +58,11 @@ When you start a recording session, Char spawns three actors in parallel:
 
 Here is the session supervisor that orchestrates these actors:
 
-<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/listener/src/actors/session/supervisor.rs#L56-L106" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/listener-core/src/actors/session/supervisor.rs#L56-L106" />
 
 Audio is written to WAV files on your local disk. Here is the recorder handling incoming audio samples:
 
-<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/listener/src/actors/recorder.rs#L130-L168" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/listener-core/src/actors/recorder/mod.rs#L130-L168" />
 
 Audio files are stored at `{vault}/sessions/{session_id}/audio.wav` — they never leave your device unless you explicitly use cloud transcription.
 
@@ -96,11 +96,11 @@ For local model details and download instructions, see [Local Models](/docs/deve
 
 **Cloud models** send your audio to the selected provider for processing. Here is how the listener actor connects to your configured STT provider:
 
-<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/listener/src/actors/listener/adapters.rs#L22-L102" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/listener-core/src/actors/listener/adapters.rs#L22-L102" />
 
 The `ListenerArgs` passed to the STT adapter contain the following — this is all the data sent to the provider along with your audio stream:
 
-<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/listener/src/actors/session/supervisor.rs#L122-L134" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/listener-core/src/actors/session/supervisor.rs#L122-L134" />
 
 **What is sent:**
 - Your recorded audio (streamed in real-time or sent as a file for batch transcription)
@@ -140,15 +140,15 @@ When using cloud-based AI features, your session content is sent to the selected
 
 Here is how the language model client is created — each provider connects directly to its own API:
 
-<GithubCode url="https://github.com/fastrepl/char/blob/main/apps/desktop/src/hooks/useLLMConnection.ts#L230-L310" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/apps/desktop/src/ai/hooks/useLLMConnection.ts#L230-L310" />
 
 When auto-enhance runs after a session ends, the enhanced result is stored locally:
 
-<GithubCode url="https://github.com/fastrepl/char/blob/main/apps/desktop/src/hooks/autoEnhance/runner.ts#L82-L105" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/apps/desktop/src/store/tinybase/persister/session/save/note.ts#L39-L69" />
 
 An analytics event is also fired when auto-enhance runs — it includes only the provider and model name, not the content:
 
-<GithubCode url="https://github.com/fastrepl/char/blob/main/apps/desktop/src/hooks/autoEnhance/runner.ts#L161-L166" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/apps/desktop/src/services/enhancer/index.ts#L191-L197" />
 
 **What is sent:**
 - Transcript text, raw notes, and prompt templates
