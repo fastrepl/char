@@ -16,6 +16,7 @@ import { useRunBatch } from "~/stt/useRunBatch";
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 import { commands as listener2Commands } from "@hypr/plugin-listener2";
+import type { TranscriptStorage } from "@hypr/store";
 import { Button } from "@hypr/ui/components/ui/button";
 import {
   Popover,
@@ -118,6 +119,7 @@ export function OptionsMenu({
 
               const transcriptId = crypto.randomUUID();
               const createdAt = new Date().toISOString();
+              const memoMd = store.getCell("sessions", sessionId, "raw_md");
 
               const words = subtitle.tokens.map((token) => ({
                 id: crypto.randomUUID(),
@@ -130,14 +132,17 @@ export function OptionsMenu({
                 created_at: new Date().toISOString(),
               }));
 
-              store.setRow("transcripts", transcriptId, {
+              const transcriptRow = {
                 session_id: sessionId,
                 user_id: user_id ?? "",
                 created_at: createdAt,
                 started_at: Date.now(),
                 words: JSON.stringify(words),
                 speaker_hints: "[]",
-              });
+                memo_md: typeof memoMd === "string" ? memoMd : "",
+              } satisfies TranscriptStorage;
+
+              store.setRow("transcripts", transcriptId, transcriptRow);
 
               void analyticsCommands.event({
                 event: "file_uploaded",

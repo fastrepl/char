@@ -28,6 +28,7 @@ type TranscriptMeta = {
   id: string;
   startedAt: number;
   endedAt: number | null;
+  memoMd: string;
 };
 
 type WordRow = Record<string, unknown> & {
@@ -75,8 +76,9 @@ async function transformArgs(
     session: sessionContext.session,
     participants: sessionContext.participants,
     template,
+    preMeetingMemo: sessionContext.preMeetingMemo,
+    postMeetingMemo: sessionContext.postMeetingMemo,
     transcripts: formatTranscripts(
-      sessionContext.rawMd,
       sessionContext.segments,
       sessionContext.transcriptsMeta,
     ),
@@ -84,7 +86,6 @@ async function transformArgs(
 }
 
 function formatTranscripts(
-  rawMd: string,
   segments: SegmentPayload[],
   transcriptsMeta: TranscriptMeta[],
 ): Transcript[] {
@@ -112,16 +113,6 @@ function formatTranscripts(
     ];
   }
 
-  if (rawMd) {
-    return [
-      {
-        segments: [{ speaker: "", text: rawMd }],
-        startedAt: null,
-        endedAt: null,
-      },
-    ];
-  }
-
   return [];
 }
 
@@ -132,8 +123,24 @@ function getLanguage(settingsStore: SettingsStore): string | null {
 
 function getSessionContext(sessionId: string, store: MainStore) {
   const transcriptsMeta = collectTranscripts(sessionId, store);
+  const rawMd = getStringCell(store, "sessions", sessionId, "raw_md");
+
+  const earliest =
+    transcriptsMeta.length > 0
+      ? transcriptsMeta.reduce((a, b) => (a.startedAt <= b.startedAt ? a : b))
+      : null;
+  const preMeetingMemo = earliest?.memoMd ?? "";
+  const postMeetingMemo = !preMeetingMemo
+    ? rawMd
+    : rawMd === preMeetingMemo
+      ? ""
+      : rawMd.startsWith(preMeetingMemo)
+        ? rawMd.slice(preMeetingMemo.length).trimStart()
+        : rawMd;
+
   return {
-    rawMd: getStringCell(store, "sessions", sessionId, "raw_md"),
+    preMeetingMemo,
+    postMeetingMemo,
     session: getSessionData(sessionId, store),
     participants: getParticipants(sessionId, store),
     segments: getTranscriptSegmentsFromMeta(transcriptsMeta, store),
@@ -326,7 +333,8 @@ function collectTranscripts(
       getNumberCell(store, "transcripts", transcriptId, "started_at") ?? 0;
     const endedAt =
       getNumberCell(store, "transcripts", transcriptId, "ended_at") ?? null;
-    transcripts.push({ id: transcriptId, startedAt, endedAt });
+    const memoMd = getStringCell(store, "transcripts", transcriptId, "memo_md");
+    transcripts.push({ id: transcriptId, startedAt, endedAt, memoMd });
   });
 
   return transcripts;

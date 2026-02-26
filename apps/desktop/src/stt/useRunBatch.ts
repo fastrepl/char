@@ -13,6 +13,7 @@ import {
 } from "~/stt/utils";
 
 import type { BatchParams } from "@hypr/plugin-listener2";
+import type { TranscriptStorage } from "@hypr/store";
 
 import { useListener } from "./contexts";
 import { useKeywords } from "./useKeywords";
@@ -89,15 +90,19 @@ export const useRunBatch = (sessionId: string) => {
 
       const transcriptId = id();
       const createdAt = new Date().toISOString();
+      const memoMd = store.getCell("sessions", sessionId, "raw_md");
 
-      store.setRow("transcripts", transcriptId, {
+      const transcriptRow = {
         session_id: sessionId,
         user_id: user_id ?? "",
         created_at: createdAt,
         started_at: Date.now(),
         words: "[]",
         speaker_hints: "[]",
-      });
+        memo_md: typeof memoMd === "string" ? memoMd : "",
+      } satisfies TranscriptStorage;
+
+      store.setRow("transcripts", transcriptId, transcriptRow);
 
       const handlePersist: HandlePersistCallback | undefined =
         options?.handlePersist;

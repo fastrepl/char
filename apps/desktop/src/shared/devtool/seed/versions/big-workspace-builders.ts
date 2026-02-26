@@ -208,6 +208,7 @@ export const buildLongTranscriptsForSessions = (
       ended_at: startedAt + currentTimeMs,
       words: JSON.stringify(wordsList),
       speaker_hints: "[]",
+      memo_md: "",
     };
   });
 

@@ -200,6 +200,7 @@ export const loadCuratedData = (data: CuratedData): Tables<Schemas[0]> => {
         ended_at: maxEndMs > 0 ? baseTimestamp + maxEndMs : undefined,
         words: JSON.stringify(wordsList),
         speaker_hints: "[]",
+        memo_md: "",
       };
     }
   });

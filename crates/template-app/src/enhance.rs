@@ -17,6 +17,8 @@ common_derives! {
         pub participants: Vec<Participant>,
         pub template: Option<EnhanceTemplate>,
         pub transcripts: Vec<Transcript>,
+        pub pre_meeting_memo: String,
+        pub post_meeting_memo: String,
     }
 }
 
@@ -60,20 +62,20 @@ mod tests {
     - Do not include any explanations, commentary, or meta-discussion.
     - Do not say things like "Here's the summary" or "I've analyzed".
 
-    # About Raw Notes
+    # About Notes
 
-    - The beginning of a raw note may include agenda items, discussion topics, and preliminary questions.
-    - Primarily consist of key phrases or sentences the user wants to remember, though they may also contain random or extraneous words.
-    - May sometimes be empty.
+    - Pre-Meeting Notes contain agenda items, discussion topics, and preliminary questions the user prepared before the meeting.
+    - Meeting Notes contain key phrases or sentences the user captured as important during the meeting, though they may also contain random or extraneous words.
+    - Either section may sometimes be empty.
 
     # Guidelines
 
-    - Raw notes and transcript may contain errors made by human and STT, respectively. Make the best out of every material.
+    - Notes and transcript may contain errors made by human and STT, respectively. Make the best out of every material.
     - Do not include meeting note title, attendee lists nor explanatory notes about the output structure.
-    - Acknowledge what the user found important. Raw notes show a glimpse of important information and moments during the meeting. Naturally integrate raw note entries into relevant sections instead of forcefully converting them into headers.
+    - Use Pre-Meeting Notes to understand intent and context; use Meeting Notes to surface what the user found important. Naturally integrate entries into relevant sections instead of forcefully converting them into headers.
     - Preserve essential details; avoid excessive abstraction. Ensure content remains concrete and specific.
-    - Pay close attention to emphasized text in raw notes. Users highlight information using four styles: bold(**text**), italic(_text_), underline(<u>text</u>), strikethrough(~~text~~).
-    - Recognize H3 headers (### Header) in raw notes—these indicate highly important topics that the user wants to retain no matter what.
+    - Pay close attention to emphasized text in notes. Users highlight information using four styles: bold(**text**), italic(_text_), underline(<u>text</u>), strikethrough(~~text~~).
+    - Recognize H3 headers (### Header) in notes—these indicate highly important topics that the user wants to retain no matter what.
     "#);
 
     tpl_snapshot!(
@@ -117,6 +119,8 @@ mod tests {
                 started_at: Some(1719859200),
                 ended_at: Some(1719862800),
             }],
+            pre_meeting_memo: String::new(),
+            post_meeting_memo: String::new(),
         }, @"
     # Context
 
@@ -126,6 +130,8 @@ mod tests {
     - John Doe (CEO)
       - Jane Smith (CTO)
       
+
+
 
     # Transcript
 
@@ -143,4 +149,59 @@ mod tests {
     1. Section 1 - Section 1 description
     2. Section 2 - Section 2 description
     ");
+
+    tpl_snapshot!(
+        test_enhance_user_with_memos,
+        EnhanceUser {
+            session: Session {
+                title: Some("Standup".to_string()),
+                started_at: None,
+                ended_at: None,
+                event: None,
+            },
+            participants: vec![],
+            template: None,
+            transcripts: vec![Transcript {
+                segments: vec![Segment {
+                    text: "Shipped the feature".to_string(),
+                    speaker: "Alice".to_string(),
+                }],
+                started_at: None,
+                ended_at: None,
+            }],
+            pre_meeting_memo: "- follow up on PR review\n- align on priorities".to_string(),
+            post_meeting_memo: "- check CI\n- ship before EOD".to_string(),
+        }, @"
+    # Context
+
+
+    Session: Standup
+
+
+    # Pre-Meeting Notes
+
+    - follow up on PR review
+    - align on priorities
+
+
+
+    # Meeting Notes
+
+    - check CI
+    - ship before EOD
+
+
+    # Transcript
+
+
+    Alice: Shipped the feature
+
+    # Output Template
+
+    # Instructions
+
+    1. Analyze the content and decide the sections to use.
+    2. Generate a well-formatted markdown summary.
+    "
+    );
 }
