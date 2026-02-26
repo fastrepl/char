@@ -417,9 +417,10 @@ function MentionNodeView({ node }: NodeViewProps) {
   const mentionType = String(type ?? "");
   const mentionLabel = String(label ?? "");
   const MAX_MENTION_LENGTH = 20;
-  const displayLabel = mentionLabel.length > MAX_MENTION_LENGTH
-    ? mentionLabel.slice(0, MAX_MENTION_LENGTH) + "…"
-    : mentionLabel;
+  const displayLabel =
+    mentionLabel.length > MAX_MENTION_LENGTH
+      ? mentionLabel.slice(0, MAX_MENTION_LENGTH) + "…"
+      : mentionLabel;
   const path = `/app/${mentionType}/${mentionId}`;
 
   const handleClick = useCallback(
