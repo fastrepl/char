@@ -215,12 +215,20 @@ function TabContentNoteInner({
 
     if (justStartedListening) {
       setShowConsentBanner(true);
-      const timer = setTimeout(() => {
-        setShowConsentBanner(false);
-      }, 5000);
-      return () => clearTimeout(timer);
     }
   }, [sessionMode]);
+
+  useEffect(() => {
+    if (!showConsentBanner) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setShowConsentBanner(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [showConsentBanner]);
 
   const focusTitle = React.useCallback(() => {
     titleInputRef.current?.focus();
