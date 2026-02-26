@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/shallow";
-import { useConfigValue } from "~/shared/config";
 import * as main from "~/store/tinybase/store/main";
 import {
   createListenerStore,
@@ -79,18 +78,12 @@ function getNearbyEvents(
 const useHandleDetectEvents = (store: ListenerStore) => {
   const stop = useStore(store, (state) => state.stop);
   const setMuted = useStore(store, (state) => state.setMuted);
-  const notificationDetectEnabled = useConfigValue("notification_detect");
   const tinybaseStore = main.UI.useStore(main.STORE_ID);
 
   const tinybaseStoreRef = useRef(tinybaseStore);
   useEffect(() => {
     tinybaseStoreRef.current = tinybaseStore;
   }, [tinybaseStore]);
-
-  const notificationDetectEnabledRef = useRef(notificationDetectEnabled);
-  useEffect(() => {
-    notificationDetectEnabledRef.current = notificationDetectEnabled;
-  }, [notificationDetectEnabled]);
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;
@@ -99,10 +92,6 @@ const useHandleDetectEvents = (store: ListenerStore) => {
     detectEvents.detectEvent
       .listen(({ payload }) => {
         if (payload.type === "micDetected") {
-          if (!notificationDetectEnabledRef.current) {
-            return;
-          }
-
           if (store.getState().live.status === "active") {
             return;
           }
