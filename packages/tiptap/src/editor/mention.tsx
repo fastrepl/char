@@ -8,7 +8,13 @@ import {
   type VirtualElement,
 } from "@floating-ui/dom";
 import Mention from "@tiptap/extension-mention";
-import { type EditorState, PluginKey } from "@tiptap/pm/state";
+import {
+  type EditorState,
+  NodeSelection,
+  Plugin,
+  PluginKey,
+  TextSelection,
+} from "@tiptap/pm/state";
 import {
   NodeViewWrapper,
   ReactNodeViewRenderer,
@@ -410,6 +416,11 @@ function MentionNodeView({ node }: NodeViewProps) {
   const mentionId = String(id ?? "");
   const mentionType = String(type ?? "");
   const mentionLabel = String(label ?? "");
+  const MAX_MENTION_LENGTH = 20;
+  const displayLabel =
+    mentionLabel.length > MAX_MENTION_LENGTH
+      ? mentionLabel.slice(0, MAX_MENTION_LENGTH) + "…"
+      : mentionLabel;
   const path = `/app/${mentionType}/${mentionId}`;
 
   const handleClick = useCallback(
@@ -433,7 +444,7 @@ function MentionNodeView({ node }: NodeViewProps) {
       onClick={handleClick}
     >
       <MentionAvatar id={mentionId} type={mentionType} label={mentionLabel} />
-      <span className="mention-text">{mentionLabel}</span>
+      <span className="mention-text">{displayLabel}</span>
     </NodeViewWrapper>
   );
 }
@@ -473,6 +484,149 @@ export const mention = (config: MentionConfig) => {
         },
       ];
     },
+    addKeyboardShortcuts() {
+      const skipMention = (direction: "left" | "right") => () => {
+        const { state, view } = this.editor;
+        const { selection } = state;
+
+        if (
+          selection instanceof NodeSelection &&
+          selection.node.type.name === this.name
+        ) {
+          const pos = direction === "left" ? selection.from : selection.to;
+          view.dispatch(
+            state.tr.setSelection(TextSelection.create(state.doc, pos)),
+          );
+          return true;
+        }
+
+        if (!selection.empty) return false;
+
+        const $pos = selection.$head;
+        const node = direction === "left" ? $pos.nodeBefore : $pos.nodeAfter;
+        if (node && node.type.name === this.name) {
+          const newPos =
+            direction === "left"
+              ? $pos.pos - node.nodeSize
+              : $pos.pos + node.nodeSize;
+          view.dispatch(
+            state.tr.setSelection(TextSelection.create(state.doc, newPos)),
+          );
+          return true;
+        }
+
+        return false;
+      };
+
+      return {
+        ArrowLeft: skipMention("left"),
+        ArrowRight: skipMention("right"),
+      };
+    },
+    addProseMirrorPlugins() {
+      const parentPlugins = this.parent?.() ?? [];
+      const mentionName = this.name;
+      return [
+        ...parentPlugins,
+        new Plugin({
+          key: new PluginKey(`${mentionName}-focus-guard`),
+          props: {
+            handleKeyDown(view, event) {
+              if (event.key !== "ArrowDown" && event.key !== "ArrowUp") {
+                return false;
+              }
+              if (
+                event.shiftKey ||
+                event.metaKey ||
+                event.ctrlKey ||
+                event.altKey
+              ) {
+                return false;
+              }
+
+              const { state } = view;
+              const { selection } = state;
+              if (!selection.empty) return false;
+
+              const savedPos = selection.$head.pos;
+              const forward = event.key === "ArrowDown";
+
+              setTimeout(() => {
+                const { state: currentState } = view;
+                const currentSelection = currentState.selection;
+
+                if (
+                  currentSelection instanceof NodeSelection &&
+                  currentSelection.node.type.name === mentionName
+                ) {
+                  const pos = forward
+                    ? currentSelection.to
+                    : currentSelection.from;
+                  try {
+                    view.dispatch(
+                      currentState.tr.setSelection(
+                        TextSelection.create(currentState.doc, pos),
+                      ),
+                    );
+                  } catch {
+                    // best-effort
+                  }
+                  return;
+                }
+
+                if (
+                  currentSelection instanceof TextSelection &&
+                  currentSelection.empty
+                ) {
+                  const $head = currentSelection.$head;
+                  const nodeAfter = $head.nodeAfter;
+                  if (
+                    nodeAfter &&
+                    nodeAfter.type.name === mentionName &&
+                    $head.parentOffset === 0
+                  ) {
+                    const pos = $head.pos + nodeAfter.nodeSize;
+                    try {
+                      view.dispatch(
+                        currentState.tr.setSelection(
+                          TextSelection.create(currentState.doc, pos),
+                        ),
+                      );
+                    } catch {
+                      // best-effort
+                    }
+                    return;
+                  }
+                }
+
+                if (!view.hasFocus()) {
+                  view.focus();
+                  const doc = currentState.doc;
+                  const $saved = doc.resolve(
+                    Math.min(savedPos, doc.content.size),
+                  );
+                  const depth = $saved.depth;
+
+                  const targetPos = forward
+                    ? Math.min($saved.end(depth) + 1, doc.content.size)
+                    : Math.max($saved.start(depth) - 1, 0);
+
+                  try {
+                    const $target = doc.resolve(targetPos);
+                    const sel = TextSelection.near($target, forward ? 1 : -1);
+                    view.dispatch(currentState.tr.setSelection(sel));
+                  } catch {
+                    // recovery failed, at least focus is restored
+                  }
+                }
+              }, 0);
+
+              return false;
+            },
+          },
+        }),
+      ];
+    },
     addNodeView() {
       return ReactNodeViewRenderer(MentionNodeView, { as: "span" });
     },
@@ -499,7 +653,7 @@ export const mention = (config: MentionConfig) => {
           onclick: `event.preventDefault(); if (window.${GLOBAL_NAVIGATE_FUNCTION}) window.${GLOBAL_NAVIGATE_FUNCTION}('${path}');`,
         },
         ["span", { class: "mention-avatar", "data-initial": initial }],
-        ["span", { class: "mention-text" }, ` ${label}`],
+        ["span", { class: "mention-text" }, label],
       ];
     },
     HTMLAttributes: {
