@@ -377,6 +377,7 @@ export const mention = (config: MentionConfig) => {
         attrs: { id, type, label },
       } = node;
       const path = `/app/${type}/${id}`;
+      const initial = label ? label[0].toUpperCase() : "?";
 
       return [
         "a",
@@ -386,10 +387,12 @@ export const mention = (config: MentionConfig) => {
           "data-id": id,
           "data-type": type,
           "data-label": label,
+          "data-initial": initial,
           href: "javascript:void(0)",
           onclick: `event.preventDefault(); if (window.${GLOBAL_NAVIGATE_FUNCTION}) window.${GLOBAL_NAVIGATE_FUNCTION}('${path}');`,
         },
-        `${config.trigger}${label}`,
+        ["span", { class: "mention-avatar", "data-initial": initial }],
+        ` ${config.trigger}${label}`,
       ];
     },
     HTMLAttributes: {
