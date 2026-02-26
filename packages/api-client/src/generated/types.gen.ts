@@ -94,6 +94,11 @@ export type CreateEventResponse = {
     event: unknown;
 };
 
+export type DeleteAccountResponse = {
+    deleted: boolean;
+    error?: string | null;
+};
+
 export type DeviceInfo = {
     appVersion: string;
     arch: string;
@@ -182,7 +187,7 @@ export type SendMessageRequest = {
     sourceId?: string | null;
 };
 
-export type StartTrialReason = 'started' | 'not_eligible' | 'error';
+export type StartTrialReason = 'started' | 'not_eligible';
 
 export type StartTrialResponse = {
     reason?: null | StartTrialReason;
@@ -661,6 +666,33 @@ export type CanStartTrialResponses = {
 };
 
 export type CanStartTrialResponse2 = CanStartTrialResponses[keyof CanStartTrialResponses];
+
+export type DeleteAccountData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/subscription/delete-account';
+};
+
+export type DeleteAccountErrors = {
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Internal server error
+     */
+    500: unknown;
+};
+
+export type DeleteAccountResponses = {
+    /**
+     * Account deleted successfully
+     */
+    200: DeleteAccountResponse;
+};
+
+export type DeleteAccountResponse2 = DeleteAccountResponses[keyof DeleteAccountResponses];
 
 export type StartTrialData = {
     body?: never;

@@ -33,6 +33,9 @@ pub struct Env {
     pub jina_api_key: String,
 
     #[serde(flatten)]
+    pub loops: hypr_api_env::LoopsEnv,
+
+    #[serde(flatten)]
     pub llm: hypr_llm_proxy::Env,
     #[serde(flatten)]
     pub stt: hypr_transcribe_proxy::Env,

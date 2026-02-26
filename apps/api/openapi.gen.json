@@ -554,6 +554,37 @@
         ]
       }
     },
+    "/subscription/delete-account": {
+      "delete": {
+        "tags": [
+          "subscription"
+        ],
+        "operationId": "delete_account",
+        "responses": {
+          "200": {
+            "description": "Account deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteAccountResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
     "/subscription/start-trial": {
       "post": {
         "tags": [
@@ -1102,6 +1133,23 @@
           "event": {}
         }
       },
+      "DeleteAccountResponse": {
+        "type": "object",
+        "required": [
+          "deleted"
+        ],
+        "properties": {
+          "deleted": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
       "DeviceInfo": {
         "type": "object",
         "required": [
@@ -1431,8 +1479,7 @@
         "type": "string",
         "enum": [
           "started",
-          "not_eligible",
-          "error"
+          "not_eligible"
         ]
       },
       "StartTrialResponse": {

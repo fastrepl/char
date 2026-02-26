@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import {
   canStartTrial as canStartTrialApi,
+  deleteAccount as deleteAccountApi,
   startTrial as startTrialApi,
 } from "@hypr/api-client";
 import { createClient } from "@hypr/api-client/client";
@@ -274,5 +275,31 @@ export const startTrial = createServerFn({ method: "POST" }).handler(
     }
 
     return { started: data?.started ?? false };
+  },
+);
+
+export const deleteAccount = createServerFn({ method: "POST" }).handler(
+  async () => {
+    const supabase = getSupabaseServerClient();
+    const { data: sessionData } = await supabase.auth.getSession();
+
+    if (!sessionData.session) {
+      throw new Error("Not authenticated");
+    }
+
+    const client = createClient({
+      baseUrl: env.VITE_API_URL,
+      headers: {
+        Authorization: `Bearer ${sessionData.session.access_token}`,
+      },
+    });
+
+    const { error } = await deleteAccountApi({ client });
+    if (error) {
+      throw new Error("Failed to delete account");
+    }
+
+    await supabase.auth.signOut({ scope: "local" });
+    return { success: true };
   },
 );
