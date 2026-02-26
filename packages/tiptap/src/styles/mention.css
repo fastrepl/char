@@ -89,8 +89,6 @@
   height: 1em;
 }
 
-.mention .mention-text {}
-
 /* NodeView wrapper for inline mention rendering */
 span[data-node-view-wrapper] {
   display: inline !important;
