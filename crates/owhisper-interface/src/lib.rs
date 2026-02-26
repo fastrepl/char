@@ -1,10 +1,13 @@
 pub mod batch;
 #[cfg(feature = "openapi")]
 pub mod openapi;
+pub mod progress;
 pub mod stream;
 
 #[cfg(feature = "openapi")]
 pub use openapi::openapi;
+
+pub use progress::{InferencePhase, InferenceProgress};
 
 #[macro_export]
 macro_rules! common_derives {

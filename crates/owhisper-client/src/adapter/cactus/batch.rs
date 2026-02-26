@@ -1,12 +1,13 @@
 use std::path::Path;
 
 use futures_util::StreamExt;
-use owhisper_interface::{ListenParams, batch, stream};
+use owhisper_interface::{InferencePhase, InferenceProgress, ListenParams, batch, stream};
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
 use super::CactusAdapter;
 use crate::adapter::deepgram_compat::listen_endpoint_url;
 use crate::adapter::{StreamingBatchEvent, StreamingBatchStream, is_local_host};
+use serde_json::Value;
 use crate::error::Error;
 
 impl CactusAdapter {
@@ -74,9 +75,11 @@ impl CactusAdapter {
 
                                 match event_type.as_str() {
                                     "progress" => {
-                                        let (token, percentage) = parse_progress(&data);
-                                        accumulated.push_str(&token);
-                                        let event = in_progress_event(&accumulated, percentage);
+                                        let progress = parse_progress(&data);
+                                        if let Some(fragment) = progress.partial_text {
+                                            accumulated.push_str(&fragment);
+                                        }
+                                        let event = in_progress_event(&accumulated, progress.percentage);
                                         let _ = tx.send(Ok(event));
                                     }
                                     "result" => {
@@ -135,13 +138,29 @@ fn build_http_url(api_base: &str, params: &ListenParams) -> url::Url {
     url
 }
 
-fn parse_progress(data: &str) -> (String, f64) {
-    if let Ok(v) = serde_json::from_str::<serde_json::Value>(data) {
-        let token = v["token"].as_str().unwrap_or(data).to_string();
+fn parse_progress(data: &str) -> InferenceProgress {
+    if let Ok(p) = serde_json::from_str::<InferenceProgress>(data) {
+        return p;
+    }
+
+    // Backward-compat / best-effort parsing
+    if let Ok(v) = serde_json::from_str::<Value>(data) {
         let percentage = v["percentage"].as_f64().unwrap_or(0.0);
-        (token, percentage)
-    } else {
-        (data.to_string(), 0.0)
+        let partial_text = v["partial_text"]
+            .as_str()
+            .or_else(|| v["token"].as_str())
+            .map(|s| s.to_string());
+        return InferenceProgress {
+            percentage,
+            partial_text,
+            phase: InferencePhase::Transcribing,
+        };
+    }
+
+    InferenceProgress {
+        percentage: 0.0,
+        partial_text: Some(data.to_string()),
+        phase: InferencePhase::Transcribing,
     }
 }
 

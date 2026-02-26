@@ -15,7 +15,9 @@ use futures_util::stream;
 use owhisper_interface::ListenParams;
 use tokio::sync::mpsc;
 
-use transcribe::{ProgressEvent, transcribe_batch};
+use owhisper_interface::InferenceProgress;
+
+use transcribe::transcribe_batch;
 
 pub async fn handle_batch(
     body: Bytes,
@@ -76,7 +78,7 @@ async fn handle_batch_sse(
     let content_type = content_type.to_string();
     let params = params.clone();
 
-    let (progress_tx, progress_rx) = mpsc::unbounded_channel::<ProgressEvent>();
+    let (progress_tx, progress_rx) = mpsc::unbounded_channel::<InferenceProgress>();
     let (result_tx, result_rx) = mpsc::unbounded_channel::<Result<String, String>>();
 
     tokio::task::spawn_blocking(move || {
@@ -124,13 +126,8 @@ async fn handle_batch_sse(
                     progress = prx.recv() => {
                         match progress {
                             Some(p) => {
-                                let data = serde_json::json!({
-                                    "token": p.token,
-                                    "percentage": p.percentage,
-                                });
-                                let event = Event::default()
-                                    .event("progress")
-                                    .data(data.to_string());
+                                let json = serde_json::to_string(&p).unwrap_or_else(|_| "{}".to_string());
+                                let event = Event::default().event("progress").data(json);
                                 Some((Ok(event), (progress_rx, result_rx)))
                             }
                             None => {

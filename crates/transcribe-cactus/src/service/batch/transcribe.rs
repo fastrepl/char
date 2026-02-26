@@ -3,24 +3,23 @@ use std::path::Path;
 
 use owhisper_interface::ListenParams;
 use owhisper_interface::batch;
+use owhisper_interface::progress::{InferencePhase, InferenceProgress};
 use tokio::sync::mpsc::UnboundedSender;
 
 use super::audio::{audio_duration_secs, content_type_to_extension};
 use super::response::build_batch_words;
 
-pub(super) struct ProgressEvent {
-    pub token: String,
-    pub percentage: f64,
+fn parse_timestamp_token(token: &str) -> Option<f64> {
+    let inner = token.strip_prefix("<|")?.strip_suffix("|>")?;
+    inner.parse::<f64>().ok()
 }
-
-const ESTIMATED_TOKENS_PER_SECOND: f64 = 3.0;
 
 pub(super) fn transcribe_batch(
     audio_data: &[u8],
     content_type: &str,
     params: &ListenParams,
     model_path: &Path,
-    progress_tx: Option<UnboundedSender<ProgressEvent>>,
+    progress_tx: Option<UnboundedSender<InferenceProgress>>,
 ) -> Result<batch::Response, crate::Error> {
     let extension = content_type_to_extension(content_type);
     let mut temp_file = tempfile::Builder::new()
@@ -49,14 +48,35 @@ pub(super) fn transcribe_batch(
 
     let cactus_response = match progress_tx {
         Some(tx) => {
-            let estimated_total = (total_duration * ESTIMATED_TOKENS_PER_SECOND).max(10.0);
-            let mut token_count = 0u32;
+            let mut last_audio_pos = 0.0f64;
+            let mut last_percentage = 0.0f64;
+            let total_duration = total_duration.max(0.0);
+
             model.transcribe_file_with_callback(temp_file.path(), &options, move |token| {
-                token_count += 1;
-                let percentage = (token_count as f64 / estimated_total).min(0.95);
-                let _ = tx.send(ProgressEvent {
-                    token: token.to_string(),
-                    percentage,
+                if let Some(ts) = parse_timestamp_token(token) {
+                    last_audio_pos = last_audio_pos.max(ts);
+                    if total_duration > 0.0 {
+                        let pct = (last_audio_pos / total_duration).clamp(0.0, 0.95);
+                        last_percentage = last_percentage.max(pct);
+                    }
+
+                    let _ = tx.send(InferenceProgress {
+                        percentage: last_percentage,
+                        partial_text: None,
+                        phase: InferencePhase::Transcribing,
+                    });
+                    return true;
+                }
+
+                // Ignore other special tokens (language tags, control markers, etc.)
+                if token.starts_with("<|") && token.ends_with("|>") {
+                    return true;
+                }
+
+                let _ = tx.send(InferenceProgress {
+                    percentage: last_percentage,
+                    partial_text: Some(token.to_string()),
+                    phase: InferencePhase::Transcribing,
                 });
                 true
             })?

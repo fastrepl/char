@@ -35,9 +35,6 @@ unsafe extern "C" fn token_trampoline<F: FnMut(&str) -> bool>(
 
     let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         let chunk = unsafe { CStr::from_ptr(token) }.to_string_lossy();
-        if chunk.starts_with("<|") && chunk.ends_with("|>") {
-            return;
-        }
         let on_token = unsafe { &mut *state.on_token.get() };
         if !on_token(&chunk) {
             state.stopped.set(true);
