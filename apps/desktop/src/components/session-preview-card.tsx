@@ -1,0 +1,236 @@
+import { useMotionValue, useSpring, useTransform } from "motion/react";
+import { useCallback, useMemo, useRef, useState } from "react";
+
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@hypr/ui/components/ui/hover-card";
+import { cn, format, safeParseDate } from "@hypr/utils";
+
+import { extractPlainText } from "../contexts/search/engine/utils";
+import * as main from "../store/tinybase/store/main";
+
+const MAX_PREVIEW_LENGTH = 200;
+const FOLLOW_RANGE = 16;
+const SPRING_CONFIG = { stiffness: 300, damping: 30, mass: 0.5 };
+
+const OPEN_DELAY_COLD = 400;
+const OPEN_DELAY_WARM = 0;
+const WARMUP_COOLDOWN_MS = 600;
+
+let lastPreviewClosedAt = 0;
+
+function isWarmedUp() {
+  return Date.now() - lastPreviewClosedAt < WARMUP_COOLDOWN_MS;
+}
+
+function markPreviewClosed() {
+  lastPreviewClosedAt = Date.now();
+}
+
+function useSessionPreviewData(sessionId: string) {
+  const title =
+    (main.UI.useCell("sessions", sessionId, "title", main.STORE_ID) as
+      | string
+      | undefined) || "";
+  const rawMd = main.UI.useCell(
+    "sessions",
+    sessionId,
+    "raw_md",
+    main.STORE_ID,
+  ) as string | undefined;
+  const createdAt = main.UI.useCell(
+    "sessions",
+    sessionId,
+    "created_at",
+    main.STORE_ID,
+  ) as string | undefined;
+  const eventJson = main.UI.useCell(
+    "sessions",
+    sessionId,
+    "event_json",
+    main.STORE_ID,
+  ) as string | undefined;
+
+  const participantMappingIds = main.UI.useSliceRowIds(
+    main.INDEXES.sessionParticipantsBySession,
+    sessionId,
+    main.STORE_ID,
+  );
+
+  const previewText = useMemo(() => {
+    const text = extractPlainText(rawMd);
+    if (!text) return "";
+    return text.length > MAX_PREVIEW_LENGTH
+      ? text.slice(0, MAX_PREVIEW_LENGTH) + "…"
+      : text;
+  }, [rawMd]);
+
+  const dateDisplay = useMemo(() => {
+    let timestamp = createdAt;
+    if (eventJson) {
+      try {
+        const event = JSON.parse(eventJson);
+        if (event?.started_at) timestamp = event.started_at;
+      } catch {}
+    }
+    const parsed = safeParseDate(timestamp);
+    if (!parsed) return "";
+    return format(parsed, "MMM d, yyyy · h:mm a");
+  }, [createdAt, eventJson]);
+
+  return { title, previewText, dateDisplay, participantMappingIds };
+}
+
+function useCursorFollow(axis: "x" | "y") {
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const normalized = useMotionValue(0.5);
+
+  const offset = useSpring(
+    useTransform(normalized, [0, 1], [-FOLLOW_RANGE, FOLLOW_RANGE]),
+    SPRING_CONFIG,
+  );
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      const el = triggerRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const ratio =
+        axis === "y"
+          ? (e.clientY - rect.top) / rect.height
+          : (e.clientX - rect.left) / rect.width;
+      normalized.set(Math.max(0, Math.min(1, ratio)));
+    },
+    [axis, normalized],
+  );
+
+  const handleMouseLeave = useCallback(() => {
+    normalized.set(0.5);
+  }, [normalized]);
+
+  const style = axis === "y" ? { translateY: offset } : { translateX: offset };
+
+  return { triggerRef, handleMouseMove, handleMouseLeave, style };
+}
+
+function useParticipantNames(mappingIds: string[]) {
+  const allResults = main.UI.useResultTable(
+    main.QUERIES.sessionParticipantsWithDetails,
+    main.STORE_ID,
+  );
+
+  return useMemo(() => {
+    const names: string[] = [];
+    for (const id of mappingIds) {
+      const row = allResults[id];
+      if (!row) continue;
+      const name = (row.human_name as string) || "Unknown";
+      names.push(name);
+    }
+    return names;
+  }, [mappingIds, allResults]);
+}
+
+const MAX_VISIBLE_PARTICIPANTS = 3;
+
+function ParticipantsList({ mappingIds }: { mappingIds: string[] }) {
+  const names = useParticipantNames(mappingIds);
+
+  if (names.length === 0) return null;
+
+  const visible = names.slice(0, MAX_VISIBLE_PARTICIPANTS);
+  const remaining = names.length - visible.length;
+
+  return (
+    <div className="text-xs text-neutral-500 line-clamp-2">
+      {visible.join(", ")}
+      {remaining > 0 && (
+        <span className="text-neutral-500"> and {remaining} more</span>
+      )}
+    </div>
+  );
+}
+
+export function SessionPreviewCard({
+  sessionId,
+  side,
+  children,
+  enabled = true,
+}: {
+  sessionId: string;
+  side: "right" | "bottom";
+  children: React.ReactNode;
+  enabled?: boolean;
+}) {
+  const { title, previewText, dateDisplay, participantMappingIds } =
+    useSessionPreviewData(sessionId);
+
+  const followAxis = side === "right" ? "y" : "x";
+  const { triggerRef, handleMouseMove, handleMouseLeave, style } =
+    useCursorFollow(followAxis);
+
+  const [openDelay, setOpenDelay] = useState(
+    isWarmedUp() ? OPEN_DELAY_WARM : OPEN_DELAY_COLD,
+  );
+
+  const handleOpenChange = useCallback((open: boolean) => {
+    if (open) {
+      markPreviewClosed();
+    } else {
+      markPreviewClosed();
+      setOpenDelay(OPEN_DELAY_WARM);
+    }
+  }, []);
+
+  const handleMouseEnter = useCallback(() => {
+    setOpenDelay(isWarmedUp() ? OPEN_DELAY_WARM : OPEN_DELAY_COLD);
+  }, []);
+
+  if (!enabled) {
+    return <>{children}</>;
+  }
+
+  return (
+    <HoverCard
+      openDelay={openDelay}
+      closeDelay={0}
+      onOpenChange={handleOpenChange}
+    >
+      <HoverCardTrigger asChild>
+        <div
+          ref={triggerRef}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          onMouseEnter={handleMouseEnter}
+          className={side === "bottom" ? "h-full" : ""}
+        >
+          {children}
+        </div>
+      </HoverCardTrigger>
+      <HoverCardContent
+        side={side}
+        align="start"
+        sideOffset={8}
+        followStyle={style}
+        className={cn(["w-72 p-4", "pointer-events-none"])}
+      >
+        <div className="flex flex-col gap-1">
+          {dateDisplay && (
+            <div className="text-xs text-neutral-500">{dateDisplay}</div>
+          )}
+
+          <div className="font-medium text-sm">{title || "Untitled"}</div>
+          <ParticipantsList mappingIds={participantMappingIds} />
+
+          {previewText && (
+            <div className="text-xs leading-relaxed line-clamp-4 text-gradient-to-b from-neutral-700 to-transparent">
+              {previewText}
+            </div>
+          )}
+        </div>
+      </HoverCardContent>
+    </HoverCard>
+  );
+}
