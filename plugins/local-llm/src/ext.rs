@@ -226,7 +226,7 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
         #[cfg(target_os = "macos")]
         {
             let app_data_dir = dirs::data_dir().unwrap();
-            let gguf_files = crate::lmstudio::list_models(app_data_dir)?;
+            let gguf_files = hypr_lmstudio::list_models(app_data_dir)?;
 
             let mut custom_models = Vec::new();
             for path_str in gguf_files {

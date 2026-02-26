@@ -10218,6 +10218,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "lmstudio"
+version = "0.1.0"
+dependencies = [
+ "dirs 6.0.0",
+ "serde_json",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "local-waker"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -17933,6 +17942,7 @@ dependencies = [
  "futures-util",
  "gbnf",
  "gguf",
+ "lmstudio",
  "reqwest 0.13.2",
  "reqwest-streams",
  "serde",

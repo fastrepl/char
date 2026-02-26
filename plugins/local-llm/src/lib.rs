@@ -10,9 +10,6 @@ mod ext;
 mod model;
 mod store;
 
-#[cfg(target_os = "macos")]
-mod lmstudio;
-
 pub use error::*;
 pub use ext::*;
 pub use model::*;

@@ -1,7 +1,13 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-pub fn list_models(app_data_dir: PathBuf) -> Result<Vec<String>, crate::Error> {
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error(transparent)]
+    IoError(#[from] std::io::Error),
+}
+
+pub fn list_models(app_data_dir: PathBuf) -> Result<Vec<String>, Error> {
     let config_path = app_data_dir.join("LM Studio").join("settings.json");
 
     let config = match std::fs::read_to_string(config_path) {
@@ -36,7 +42,7 @@ pub fn list_models(app_data_dir: PathBuf) -> Result<Vec<String>, crate::Error> {
     Ok(files)
 }
 
-fn walk_directory_for_gguf(path: impl AsRef<Path>) -> Result<Vec<PathBuf>, crate::Error> {
+fn walk_directory_for_gguf(path: impl AsRef<Path>) -> Result<Vec<PathBuf>, Error> {
     let dir = path.as_ref();
     let mut gguf_files = Vec::new();
 
