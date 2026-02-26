@@ -210,17 +210,29 @@ function TabContentNoteInner({
   useEffect(() => {
     const justStartedListening =
       prevSessionMode.current !== "active" && sessionMode === "active";
+    const justStoppedListening =
+      prevSessionMode.current === "active" && sessionMode !== "active";
 
     prevSessionMode.current = sessionMode;
 
     if (justStartedListening) {
       setShowConsentBanner(true);
-      const timer = setTimeout(() => {
-        setShowConsentBanner(false);
-      }, 5000);
-      return () => clearTimeout(timer);
+    } else if (justStoppedListening) {
+      setShowConsentBanner(false);
     }
   }, [sessionMode]);
+
+  useEffect(() => {
+    if (!showConsentBanner) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setShowConsentBanner(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [showConsentBanner]);
 
   const focusTitle = React.useCallback(() => {
     titleInputRef.current?.focus();
