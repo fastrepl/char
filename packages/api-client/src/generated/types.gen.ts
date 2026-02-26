@@ -59,6 +59,10 @@ export type ConversationSummary = {
     inboxId?: string | null;
 };
 
+export type CreateConnectSessionRequest = {
+    allowed_integrations?: Array<string> | null;
+};
+
 export type CreateContactRequest = {
     customAttributes?: unknown;
     email?: string | null;
@@ -424,7 +428,7 @@ export type LlmChatCompletionsResponses = {
 };
 
 export type CreateConnectSessionData = {
-    body?: never;
+    body: CreateConnectSessionRequest;
     path?: never;
     query?: never;
     url: '/nango/connect-session';

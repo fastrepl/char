@@ -221,6 +221,16 @@
           "nango"
         ],
         "operationId": "create_connect_session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConnectSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Connect session created",
@@ -1014,6 +1024,20 @@
               "string",
               "null"
             ]
+          }
+        }
+      },
+      "CreateConnectSessionRequest": {
+        "type": "object",
+        "properties": {
+          "allowed_integrations": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
           }
         }
       },

@@ -10,7 +10,7 @@ use axum::{
 use crate::config::NangoConfig;
 use crate::state::AppState;
 
-pub use connect::ConnectSessionResponse;
+pub use connect::{ConnectSessionResponse, CreateConnectSessionRequest};
 pub use status::{ConnectionItem, ListConnectionsResponse};
 pub use webhook::WebhookResponse;
 

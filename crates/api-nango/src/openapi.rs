@@ -1,7 +1,8 @@
 use utoipa::OpenApi;
 
 use crate::routes::{
-    ConnectSessionResponse, ConnectionItem, ListConnectionsResponse, WebhookResponse,
+    ConnectSessionResponse, ConnectionItem, CreateConnectSessionRequest, ListConnectionsResponse,
+    WebhookResponse,
 };
 
 #[derive(OpenApi)]
@@ -13,6 +14,7 @@ use crate::routes::{
     ),
     components(
         schemas(
+            CreateConnectSessionRequest,
             ConnectSessionResponse,
             ConnectionItem,
             ListConnectionsResponse,
