@@ -17,7 +17,7 @@ export type TrialPhase =
   | "starting"
   | "already-pro"
   | "already-trialing"
-  | { done: StartTrialReason };
+  | { done: StartTrialReason | "error" };
 
 export function useTrialFlow(onContinue: () => void) {
   const auth = useAuth();
@@ -82,12 +82,15 @@ export function useTrialFlow(onContinue: () => void) {
   if (mutation.isPending) return "starting" as const;
 
   if (mutation.isSuccess) {
-    const reason: StartTrialReason = mutation.data?.reason ?? "error";
-    return { done: reason };
+    const reason = mutation.data?.reason;
+    if (reason === "started" || reason === "not_eligible") {
+      return { done: reason };
+    }
+    return { done: "error" as const };
   }
 
   if (mutation.isError) {
-    return { done: "error" as StartTrialReason };
+    return { done: "error" as const };
   }
 
   return "checking" as const;
