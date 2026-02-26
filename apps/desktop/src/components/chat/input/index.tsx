@@ -93,10 +93,10 @@ export function ChatMessageInput({
                 disabled
                   ? "text-neutral-300 border-neutral-200 cursor-default"
                   : [
-                    "text-white bg-stone-800 border-stone-600",
-                    "hover:bg-stone-700",
-                    "active:scale-[0.97] active:bg-stone-600",
-                  ],
+                      "text-white bg-stone-800 border-stone-600",
+                      "hover:bg-stone-700",
+                      "active:scale-[0.97] active:bg-stone-600",
+                    ],
                 !hasContent && !disabled && "opacity-50",
               ])}
             >
