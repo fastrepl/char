@@ -33,13 +33,18 @@ export function useChatActions({
       content: string,
       parts: HyprUIMessage["parts"],
       sendMessage: (message: HyprUIMessage) => void,
+      contextBlock?: string,
     ) => {
       const messageId = id();
+      const metadata = {
+        createdAt: Date.now(),
+        ...(contextBlock ? { contextBlock } : {}),
+      };
       const uiMessage: HyprUIMessage = {
         id: messageId,
         role: "user",
         parts,
-        metadata: { createdAt: Date.now() },
+        metadata,
       };
 
       let currentGroupId = groupId;
@@ -56,7 +61,7 @@ export function useChatActions({
         content,
         role: "user",
         parts,
-        metadata: { createdAt: Date.now() },
+        metadata,
       });
 
       sendMessage(uiMessage);

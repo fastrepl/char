@@ -14,6 +14,7 @@ interface ChatContextState {
 interface ChatContextActions {
   setGroupId: (groupId: string | undefined) => void;
   persistContext: (groupId: string, entities: ContextEntity[]) => void;
+  addEntity: (groupId: string, entity: ContextEntity) => void;
 }
 
 export const useChatContext = create<ChatContextState & ChatContextActions>(
@@ -26,6 +27,18 @@ export const useChatContext = create<ChatContextState & ChatContextActions>(
         contexts: {
           ...get().contexts,
           [groupId]: { contextEntities: entities },
+        },
+      });
+    },
+    addEntity: (groupId, entity) => {
+      const current = get().contexts[groupId]?.contextEntities ?? [];
+      if (current.some((e) => e.key === entity.key)) {
+        return;
+      }
+      set({
+        contexts: {
+          ...get().contexts,
+          [groupId]: { contextEntities: [...current, entity] },
         },
       });
     },

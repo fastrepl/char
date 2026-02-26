@@ -1,14 +1,17 @@
 import { useChat } from "@ai-sdk/react";
 import type { ChatStatus } from "ai";
 import type { LanguageModel, ToolSet } from "ai";
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
-import type { SessionContext } from "@hypr/plugin-template";
 import { commands as templateCommands } from "@hypr/plugin-template";
 
 import type { ContextEntity } from "../../chat/context-item";
-import { composeContextEntities } from "../../chat/context/composer";
-import { buildChatSystemContext } from "../../chat/context/prompt-context";
 import { CustomChatTransport } from "../../chat/transport";
 import type { HyprUIMessage } from "../../chat/types";
 import { useToolRegistry } from "../../contexts/tool";
@@ -42,6 +45,7 @@ interface ChatSessionProps {
     error?: Error;
     contextEntities: ContextEntity[];
     onRemoveContextEntity: (key: string) => void;
+    onAddContextEntity: (entity: ContextEntity) => void;
     isSystemPromptReady: boolean;
   }) => ReactNode;
 }
@@ -58,24 +62,22 @@ export function ChatSession({
   const sessionEntity = useSessionContextEntity(currentSessionId);
 
   const persistContext = useChatContext((s) => s.persistContext);
+  const addEntity = useChatContext((s) => s.addEntity);
   const persistedCtx = useChatContext((s) =>
     chatGroupId ? s.contexts[chatGroupId] : undefined,
   );
   const persistedEntities =
     persistedCtx?.contextEntities ?? EMPTY_CONTEXT_ENTITIES;
 
-  const transportContextEntities = useMemo(() => {
-    const sessionEntities: ContextEntity[] = sessionEntity
-      ? [sessionEntity]
-      : [];
-    return composeContextEntities([sessionEntities, persistedEntities]);
-  }, [sessionEntity, persistedEntities]);
-  const sessionContext = useMemo(
-    () => buildChatSystemContext(transportContextEntities).context,
-    [transportContextEntities],
+  const onAddContextEntity = useCallback(
+    (entity: ContextEntity) => {
+      if (!chatGroupId) return;
+      addEntity(chatGroupId, entity);
+    },
+    [chatGroupId, addEntity],
   );
+
   const { transport, isSystemPromptReady } = useTransport(
-    sessionContext,
     modelOverride,
     extraTools,
     systemPromptOverride,
@@ -200,6 +202,7 @@ export function ChatSession({
         error,
         contextEntities,
         onRemoveContextEntity,
+        onAddContextEntity,
         isSystemPromptReady,
       })}
     </div>
@@ -207,7 +210,6 @@ export function ChatSession({
 }
 
 function useTransport(
-  sessionContext: SessionContext | null,
   modelOverride?: LanguageModel,
   extraTools?: ToolSet,
   systemPromptOverride?: string,
@@ -230,7 +232,7 @@ function useTransport(
       .render({
         chatSystem: {
           language,
-          context: sessionContext,
+          context: null,
         },
       })
       .then((result) => {
@@ -254,7 +256,7 @@ function useTransport(
     return () => {
       stale = true;
     };
-  }, [language, sessionContext, systemPromptOverride]);
+  }, [language, systemPromptOverride]);
 
   const effectiveSystemPrompt = systemPromptOverride ?? systemPrompt;
   const isSystemPromptReady =

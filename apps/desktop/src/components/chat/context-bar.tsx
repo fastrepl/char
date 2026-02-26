@@ -1,6 +1,11 @@
-import { ChevronUpIcon, XIcon } from "lucide-react";
+import { ChevronUpIcon, PlusIcon, XIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@hypr/ui/components/ui/popover";
 import {
   Tooltip,
   TooltipContent,
@@ -10,6 +15,9 @@ import { cn } from "@hypr/utils";
 
 import type { ContextEntity } from "../../chat/context-item";
 import { type ContextChipProps, renderChip } from "../../chat/context/registry";
+import { hydrateSessionContextFromFs } from "../../chat/session-context-hydrator";
+import { useSearchEngine } from "../../contexts/search/engine";
+import * as main from "../../store/tinybase/store/main";
 
 function ContextChip({
   chip,
@@ -52,12 +60,81 @@ function ContextChip({
   );
 }
 
+function SessionPicker({
+  onSelect,
+  onClose,
+}: {
+  onSelect: (sessionId: string, title: string) => void;
+  onClose: () => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<
+    Array<{ id: string; title: string; created_at: number }>
+  >([]);
+  const { search } = useSearchEngine();
+
+  useEffect(() => {
+    search(query, { created_at: undefined }).then((hits) => {
+      setResults(
+        hits
+          .filter((h) => h.document.type === "session")
+          .slice(0, 8)
+          .map((h) => ({
+            id: h.document.id,
+            title: h.document.title,
+            created_at: h.document.created_at,
+          })),
+      );
+    });
+  }, [query, search]);
+
+  return (
+    <div className="flex flex-col gap-2">
+      <input
+        autoFocus
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search sessions..."
+        className="w-full rounded-md border border-neutral-200 bg-white px-2.5 py-1.5 text-xs outline-none focus:border-neutral-400"
+      />
+      <div className="flex flex-col gap-0.5 max-h-48 overflow-y-auto">
+        {results.map((result) => (
+          <button
+            key={result.id}
+            type="button"
+            onClick={() => {
+              onSelect(result.id, result.title);
+              onClose();
+            }}
+            className="flex flex-col items-start rounded-md px-2 py-1.5 text-left hover:bg-neutral-100 transition-colors"
+          >
+            <span className="text-xs font-medium text-neutral-700 truncate w-full">
+              {result.title || "Untitled"}
+            </span>
+            <span className="text-[10px] text-neutral-400">
+              {new Date(result.created_at).toLocaleDateString()}
+            </span>
+          </button>
+        ))}
+        {results.length === 0 && (
+          <span className="text-xs text-neutral-400 px-2 py-1.5">
+            No sessions found
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function ContextBar({
   entities,
   onRemoveEntity,
+  onAddEntity,
 }: {
   entities: ContextEntity[];
   onRemoveEntity?: (key: string) => void;
+  onAddEntity?: (entity: ContextEntity) => void;
 }) {
   const chips = useMemo(
     () =>
@@ -68,6 +145,8 @@ export function ContextBar({
   const innerRef = useRef<HTMLDivElement>(null);
   const [visibleCount, setVisibleCount] = useState(chips.length);
   const [expanded, setExpanded] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const store = main.UI.useStore(main.STORE_ID);
 
   useEffect(() => {
     setVisibleCount(chips.length);
@@ -124,10 +203,22 @@ export function ContextBar({
     setExpanded(false);
   }, [chips.length]);
 
-  if (chips.length === 0) return null;
+  if (chips.length === 0 && !onAddEntity) return null;
 
   const hasOverflow = visibleCount < chips.length;
   const displayChips = chips.slice(0, visibleCount);
+
+  const handleSelectSession = async (sessionId: string) => {
+    if (!onAddEntity) return;
+    const sessionContext = await hydrateSessionContextFromFs(store, sessionId);
+    if (!sessionContext) return;
+    onAddEntity({
+      kind: "session",
+      key: `session:manual:${sessionId}`,
+      sessionContext,
+      removable: true,
+    });
+  };
 
   return (
     <div className="relative mx-2 rounded-t-xl border-t border-l border-r border-neutral-200 bg-neutral-100">
@@ -168,6 +259,26 @@ export function ContextBar({
               </span>
             )}
           </button>
+        )}
+        {onAddEntity && (
+          <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className={cn([
+                  "shrink-0 inline-flex items-center justify-center rounded-md bg-neutral-500/10 p-0.5 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-500/20 transition-colors",
+                ])}
+              >
+                <PlusIcon className="size-3.5" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent side="top" align="start" className="w-64 p-3">
+              <SessionPicker
+                onSelect={handleSelectSession}
+                onClose={() => setPickerOpen(false)}
+              />
+            </PopoverContent>
+          </Popover>
         )}
       </div>
     </div>

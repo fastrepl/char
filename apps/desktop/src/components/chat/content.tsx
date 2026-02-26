@@ -1,6 +1,7 @@
 import type { ChatStatus } from "ai";
 
 import type { ContextEntity } from "../../chat/context-item";
+import { buildContextBlock } from "../../chat/context/prompt-context";
 import type { HyprUIMessage } from "../../chat/types";
 import type { useLanguageModel } from "../../hooks/useLLMConnection";
 import { ChatBody } from "./body";
@@ -19,6 +20,7 @@ export function ChatContent({
   handleSendMessage,
   contextEntities,
   onRemoveContextEntity,
+  onAddContextEntity,
   isSystemPromptReady,
   mcpIndicator,
   children,
@@ -35,9 +37,11 @@ export function ChatContent({
     content: string,
     parts: HyprUIMessage["parts"],
     sendMessage: (message: HyprUIMessage) => void,
+    contextBlock?: string,
   ) => void;
   contextEntities: ContextEntity[];
   onRemoveContextEntity?: (key: string) => void;
+  onAddContextEntity?: (entity: ContextEntity) => void;
   isSystemPromptReady: boolean;
   mcpIndicator?: McpIndicator;
   children?: React.ReactNode;
@@ -61,14 +65,16 @@ export function ChatContent({
       <ContextBar
         entities={contextEntities}
         onRemoveEntity={onRemoveContextEntity}
+        onAddEntity={onAddContextEntity}
       />
       <ChatMessageInput
         draftKey={sessionId}
         disabled={disabled}
         hasContextBar={contextEntities.length > 0}
-        onSendMessage={(content, parts) =>
-          handleSendMessage(content, parts, sendMessage)
-        }
+        onSendMessage={(content, parts) => {
+          const block = buildContextBlock(contextEntities) ?? undefined;
+          handleSendMessage(content, parts, sendMessage, block);
+        }}
         isStreaming={status === "streaming" || status === "submitted"}
         onStop={stop}
         mcpIndicator={mcpIndicator}

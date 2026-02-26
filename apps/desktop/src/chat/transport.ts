@@ -38,8 +38,26 @@ export class CustomChatTransport implements ChatTransport<HyprUIMessage> {
       },
     });
 
+    const messagesWithContext = options.messages.map((msg) => {
+      const contextBlock = (msg.metadata as { contextBlock?: string })
+        ?.contextBlock;
+      if (msg.role !== "user" || !contextBlock) {
+        return msg;
+      }
+      return {
+        ...msg,
+        parts: [
+          {
+            type: "text" as const,
+            text: `<context>\n${contextBlock}\n</context>\n\n`,
+          },
+          ...msg.parts,
+        ],
+      };
+    });
+
     const result = await agent.stream({
-      messages: await convertToModelMessages(options.messages),
+      messages: await convertToModelMessages(messagesWithContext),
     });
 
     return result.toUIMessageStream({

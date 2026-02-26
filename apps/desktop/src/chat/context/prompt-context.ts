@@ -1,13 +1,6 @@
 import type { SessionContext } from "@hypr/plugin-template";
 
-import {
-  type ContextEntity,
-  CURRENT_SESSION_CONTEXT_KEY,
-} from "../context-item";
-
-export type ChatSystemContext = {
-  context: SessionContext | null;
-};
+import type { ContextEntity } from "../context-item";
 
 export function getPersistableContextEntities(
   entities: ContextEntity[],
@@ -15,21 +8,54 @@ export function getPersistableContextEntities(
   return entities.filter((entity) => entity.source !== "tool");
 }
 
-export function buildChatSystemContext(
-  entities: ContextEntity[],
-): ChatSystemContext {
+function formatSessionContext(ctx: SessionContext): string {
+  const lines: string[] = [];
+
+  lines.push(`## ${ctx.title ?? "Untitled"}`);
+
+  if (ctx.date) {
+    lines.push(`Date: ${ctx.date}`);
+  }
+
+  if (ctx.participants && ctx.participants.length > 0) {
+    const names = ctx.participants
+      .map((p) => (p.jobTitle ? `${p.name} (${p.jobTitle})` : p.name))
+      .join(", ");
+    lines.push(`Participants: ${names}`);
+  }
+
+  if (ctx.event?.name) {
+    lines.push(`Meeting: ${ctx.event.name}`);
+  }
+
+  const content = ctx.enhancedContent ?? ctx.rawContent;
+  if (content) {
+    lines.push("", "### Summary", content);
+  }
+
+  if (ctx.transcript && ctx.transcript.segments.length > 0) {
+    lines.push("", "### Transcript");
+    for (const segment of ctx.transcript.segments) {
+      lines.push(`${segment.speaker}: ${segment.text}`);
+    }
+  }
+
+  return lines.join("\n");
+}
+
+export function buildContextBlock(entities: ContextEntity[]): string | null {
   const sessionEntities = entities.filter(
     (entity): entity is Extract<ContextEntity, { kind: "session" }> =>
-      entity.kind === "session",
+      entity.kind === "session" && entity.source !== "tool",
   );
-  const primary =
-    sessionEntities.find(
-      (entity) => entity.key === CURRENT_SESSION_CONTEXT_KEY,
-    ) ?? sessionEntities[0];
 
-  return {
-    context: primary?.sessionContext ?? null,
-  };
+  if (sessionEntities.length === 0) {
+    return null;
+  }
+
+  return sessionEntities
+    .map((entity) => formatSessionContext(entity.sessionContext))
+    .join("\n\n---\n\n");
 }
 
 export function stableContextFingerprint(entities: ContextEntity[]): string {
