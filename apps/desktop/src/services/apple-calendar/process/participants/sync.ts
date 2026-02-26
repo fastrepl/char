@@ -1,8 +1,8 @@
 import type { Ctx } from "~/services/apple-calendar/ctx";
 import type { EventParticipant } from "~/services/apple-calendar/fetch/types";
-import type { Store } from "~/store/tinybase/store/main";
-import { id } from "~/shared/utils";
 import { findSessionByKey } from "~/session/utils";
+import { id } from "~/shared/utils";
+import type { Store } from "~/store/tinybase/store/main";
 
 import type {
   HumanToCreate,

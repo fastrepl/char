@@ -1,15 +1,15 @@
 import { HeadsetIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useShell } from "~/contexts/shell";
-import { useSessionEvent } from "~/store/tinybase/hooks";
-import { useListener } from "~/stt/contexts";
-import { useStartListening } from "~/stt/useStartListening";
 import {
   RecordingIcon,
   useListenButtonState,
 } from "~/session/components/shared";
 import { useEventCountdown } from "~/sidebar/useEventCountdown";
+import { useSessionEvent } from "~/store/tinybase/hooks";
 import { type Tab, useTabs } from "~/store/zustand/tabs";
+import { useListener } from "~/stt/contexts";
+import { useStartListening } from "~/stt/useStartListening";
 
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 import { Spinner } from "@hypr/ui/components/ui/spinner";

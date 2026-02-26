@@ -1,8 +1,8 @@
 import { Globe, MessageSquare, Plus, Search, X } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { StandardTabWrapper } from "~/shared/main";
-import { ResourceListLayout, useWebResources } from "~/shared/ui/resource-list";
 import { type TabItem, TabItemBase } from "~/shared/tabs";
+import { ResourceListLayout, useWebResources } from "~/shared/ui/resource-list";
 import * as main from "~/store/tinybase/store/main";
 import { type Tab, useTabs } from "~/store/zustand/tabs";
 

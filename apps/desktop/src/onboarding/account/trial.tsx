@@ -4,8 +4,8 @@ import { useEffect, useRef } from "react";
 import { useAuth } from "~/auth";
 import { useBillingAccess } from "~/auth/billing";
 import { env } from "~/env";
-import * as settings from "~/store/tinybase/store/settings";
 import { configureProSettings } from "~/shared/config/configure-pro-settings";
+import * as settings from "~/store/tinybase/store/settings";
 
 import { startTrial } from "@hypr/api-client";
 import type { StartTrialReason } from "@hypr/api-client";

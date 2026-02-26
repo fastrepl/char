@@ -1,8 +1,8 @@
 import { useForm } from "@tanstack/react-form";
 import { useQuery } from "@tanstack/react-query";
 import { disable, enable } from "@tauri-apps/plugin-autostart";
-import { useConfigValues } from "~/shared/config";
 import { Data } from "~/settings/data";
+import { useConfigValues } from "~/shared/config";
 import * as settings from "~/store/tinybase/store/settings";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";

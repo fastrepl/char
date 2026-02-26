@@ -4,14 +4,14 @@ import { open as selectFile } from "@tauri-apps/plugin-dialog";
 import { Effect, pipe } from "effect";
 import { EllipsisVerticalIcon } from "lucide-react";
 import { useCallback, useState } from "react";
-import { useListener } from "~/stt/contexts";
-import { ChannelProfile } from "~/stt/segment";
-import { useRunBatch } from "~/stt/useRunBatch";
 import { getEnhancerService } from "~/services/enhancer";
 import * as main from "~/store/tinybase/store/main";
 import { useTabs } from "~/store/zustand/tabs";
 import type { Tab } from "~/store/zustand/tabs/schema";
+import { useListener } from "~/stt/contexts";
 import { fromResult } from "~/stt/fromResult";
+import { ChannelProfile } from "~/stt/segment";
+import { useRunBatch } from "~/stt/useRunBatch";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";

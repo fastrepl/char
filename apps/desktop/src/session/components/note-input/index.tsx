@@ -9,14 +9,14 @@ import {
   useState,
 } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { useScrollPreservation } from "~/shared/hooks/useScrollPreservation";
-import { useListener } from "~/stt/contexts";
-import { parseTranscriptWords, updateTranscriptWords } from "~/stt/utils";
 import { useCaretNearBottom } from "~/session/components/caret-position-context";
 import { useCurrentNoteTab } from "~/session/components/shared";
+import { useScrollPreservation } from "~/shared/hooks/useScrollPreservation";
 import * as main from "~/store/tinybase/store/main";
 import { type Tab, useTabs } from "~/store/zustand/tabs";
 import { type EditorView } from "~/store/zustand/tabs/schema";
+import { useListener } from "~/stt/contexts";
+import { parseTranscriptWords, updateTranscriptWords } from "~/stt/utils";
 
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 import type { TiptapEditor } from "@hypr/tiptap/editor";

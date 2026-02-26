@@ -1,10 +1,10 @@
+import type * as main from "~/store/tinybase/store/main";
 import { buildSegments, SegmentKey, type WordLike } from "~/stt/segment";
 import {
   defaultRenderLabelContext,
   SpeakerLabelManager,
 } from "~/stt/segment/shared";
 import { convertStorageHintsToRuntime } from "~/stt/speaker-hints";
-import type * as main from "~/store/tinybase/store/main";
 
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 import type { SessionContentData } from "@hypr/plugin-fs-sync";

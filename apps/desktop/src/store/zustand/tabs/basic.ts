@@ -1,6 +1,6 @@
 import type { StoreApi } from "zustand";
-import { listenerStore } from "~/store/zustand/listener/instance";
 import { id } from "~/shared/utils";
+import { listenerStore } from "~/store/zustand/listener/instance";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 

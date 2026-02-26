@@ -10,8 +10,6 @@ import {
 } from "lucide-react";
 import { useCallback } from "react";
 import { useBillingAccess } from "~/auth/billing";
-import { useListener } from "~/stt/contexts";
-import { localSttQueries, useLocalModelDownload } from "~/stt/useLocalSttModel";
 import {
   HyprCloudCTAButton,
   HyprProviderRow,
@@ -19,6 +17,8 @@ import {
   StyledStreamdown,
 } from "~/settings/ai/shared";
 import * as settings from "~/store/tinybase/store/settings";
+import { useListener } from "~/stt/contexts";
+import { localSttQueries, useLocalModelDownload } from "~/stt/useLocalSttModel";
 
 import {
   commands as localSttCommands,

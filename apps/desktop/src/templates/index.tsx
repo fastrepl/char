@@ -16,8 +16,8 @@ import {
   useState,
 } from "react";
 import { StandardTabWrapper } from "~/shared/main";
-import { useWebResources } from "~/shared/ui/resource-list";
 import { type TabItem, TabItemBase } from "~/shared/tabs";
+import { useWebResources } from "~/shared/ui/resource-list";
 import * as main from "~/store/tinybase/store/main";
 import { type Tab, useTabs } from "~/store/zustand/tabs";
 

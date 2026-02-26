@@ -1,9 +1,9 @@
 import { memo, useCallback, useEffect, useMemo } from "react";
+import * as main from "~/store/tinybase/store/main";
 import {
   defaultRenderLabelContext,
   SpeakerLabelManager,
 } from "~/stt/segment/shared";
-import * as main from "~/store/tinybase/store/main";
 
 import type {
   PartialWord,

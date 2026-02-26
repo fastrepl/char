@@ -3,13 +3,13 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import { arch } from "@tauri-apps/plugin-os";
 import { Check, Loader2 } from "lucide-react";
 import { useBillingAccess } from "~/auth/billing";
-import { useConfigValues } from "~/shared/config";
 import { useNotifications } from "~/contexts/notifications";
 import { providerRowId } from "~/settings/ai/shared";
 import {
   getProviderSelectionBlockers,
   requiresEntitlement,
 } from "~/settings/ai/shared/eligibility";
+import { useConfigValues } from "~/shared/config";
 import * as settings from "~/store/tinybase/store/settings";
 
 import { commands as listenerCommands } from "@hypr/plugin-listener";

@@ -1,8 +1,6 @@
 import { useHover } from "@uidotdev/usehooks";
 import { MicOff } from "lucide-react";
 import { useCallback } from "react";
-import { useListener } from "~/stt/contexts";
-import { useStartListening } from "~/stt/useStartListening";
 import {
   ActionableTooltipContent,
   RecordingIcon,
@@ -10,6 +8,8 @@ import {
   useListenButtonState,
 } from "~/session/components/shared";
 import { useTabs } from "~/store/zustand/tabs";
+import { useListener } from "~/stt/contexts";
+import { useStartListening } from "~/stt/useStartListening";
 
 import { DancingSticks } from "@hypr/ui/components/ui/dancing-sticks";
 import {

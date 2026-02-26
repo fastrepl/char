@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "~/auth";
+
 import { OnboardingButton } from "../shared";
 
 export function BeforeLogin() {

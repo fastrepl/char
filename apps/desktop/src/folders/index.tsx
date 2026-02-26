@@ -1,12 +1,12 @@
 import { FolderIcon, FoldersIcon, StickyNoteIcon } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
-import { useSession } from "~/store/tinybase/hooks";
 import { StandardTabWrapper } from "~/shared/main";
 import { type TabItem, TabItemBase } from "~/shared/tabs";
 import {
   FolderBreadcrumb,
   useFolderChain,
 } from "~/shared/ui/folder-breadcrumb";
+import { useSession } from "~/store/tinybase/hooks";
 import { sessionOps } from "~/store/tinybase/persister/session/ops";
 import * as main from "~/store/tinybase/store/main";
 import { type Tab, useTabs } from "~/store/zustand/tabs";

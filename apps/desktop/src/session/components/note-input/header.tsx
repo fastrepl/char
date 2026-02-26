@@ -4,8 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAITaskTask } from "~/ai/hooks";
 import { useLanguageModel, useLLMConnectionStatus } from "~/ai/hooks";
 import { useAudioPlayer } from "~/audio-player";
-import { useListener } from "~/stt/contexts";
-import { useRunBatch } from "~/stt/useRunBatch";
 import { getEnhancerService } from "~/services/enhancer";
 import { useHasTranscript } from "~/session/components/shared";
 import { useEnsureDefaultSummary } from "~/session/hooks/useEnhancedNotes";
@@ -14,6 +12,8 @@ import { createTaskId } from "~/store/zustand/ai-task/task-configs";
 import { type TaskStepInfo } from "~/store/zustand/ai-task/tasks";
 import { useTabs } from "~/store/zustand/tabs";
 import { type EditorView } from "~/store/zustand/tabs/schema";
+import { useListener } from "~/stt/contexts";
+import { useRunBatch } from "~/stt/useRunBatch";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import {

@@ -1,6 +1,6 @@
+import { findSessionByEventId } from "~/session/utils";
 import type * as main from "~/store/tinybase/store/main";
 import type * as settings from "~/store/tinybase/store/settings";
-import { findSessionByEventId } from "~/session/utils";
 
 import {
   type EventDetails,

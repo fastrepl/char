@@ -4,12 +4,12 @@ import {
   CURRENT_SESSION_CONTEXT_KEY,
 } from "~/chat/context-item";
 import { useSession } from "~/store/tinybase/hooks";
+import * as main from "~/store/tinybase/store/main";
 import { buildSegments, SegmentKey, type WordLike } from "~/stt/segment";
 import {
   defaultRenderLabelContext,
   SpeakerLabelManager,
 } from "~/stt/segment/shared";
-import * as main from "~/store/tinybase/store/main";
 
 import {
   type Participant,

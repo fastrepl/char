@@ -1,10 +1,10 @@
 import { useMemo } from "react";
+import * as main from "~/store/tinybase/store/main";
 import { SegmentKey } from "~/stt/segment";
 import {
   defaultRenderLabelContext,
   SpeakerLabelManager,
 } from "~/stt/segment/shared";
-import * as main from "~/store/tinybase/store/main";
 
 import type { Segment } from "@hypr/transcript";
 import {

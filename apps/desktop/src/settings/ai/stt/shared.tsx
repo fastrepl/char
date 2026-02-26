@@ -8,12 +8,12 @@ import {
 } from "@lobehub/icons";
 import type { ReactNode } from "react";
 import { env } from "~/env";
-import { localSttQueries } from "~/stt/useLocalSttModel";
 import {
   type ProviderRequirement,
   requiresEntitlement,
 } from "~/settings/ai/shared/eligibility";
 import { sortProviders } from "~/settings/ai/shared/sort-providers";
+import { localSttQueries } from "~/stt/useLocalSttModel";
 
 import type { AmModel, SupportedSttModel } from "@hypr/plugin-local-stt";
 

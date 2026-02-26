@@ -1,11 +1,11 @@
 import type { Ctx } from "~/services/apple-calendar/ctx";
 import type { IncomingEvent } from "~/services/apple-calendar/fetch/types";
-import { id } from "~/shared/utils";
 import {
   eventMatchingKey,
   getSessionEventById,
   sessionEventMatchingKey,
 } from "~/session/utils";
+import { id } from "~/shared/utils";
 
 import type { EventStorage, SessionEvent } from "@hypr/store";
 

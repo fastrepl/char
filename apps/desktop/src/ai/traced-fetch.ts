@@ -1,10 +1,9 @@
 import * as Sentry from "@sentry/react";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
+import { CHAR_TASK_HEADER, DEVICE_FINGERPRINT_HEADER } from "~/shared/utils";
 
 import type { CharTask } from "@hypr/api-client";
 import { commands as miscCommands } from "@hypr/plugin-misc";
-
-import { CHAR_TASK_HEADER, DEVICE_FINGERPRINT_HEADER } from "~/shared/utils";
 
 let cachedFingerprint: string | null = null;
 

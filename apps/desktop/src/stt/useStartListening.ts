@@ -1,22 +1,22 @@
 import { useCallback } from "react";
+import { getSessionEventById } from "~/session/utils";
 import { useConfigValue } from "~/shared/config";
+import { id } from "~/shared/utils";
 import * as main from "~/store/tinybase/store/main";
 import type { HandlePersistCallback } from "~/store/zustand/listener/transcript";
-import { id } from "~/shared/utils";
-import { getSessionEventById } from "~/session/utils";
-
-import { commands as analyticsCommands } from "@hypr/plugin-analytics";
-
-import { useListener } from "./contexts";
 import type { SpeakerHintWithId, WordWithId } from "~/stt/types";
-import { useKeywords } from "./useKeywords";
-import { useSTTConnection } from "./useSTTConnection";
 import {
   parseTranscriptHints,
   parseTranscriptWords,
   updateTranscriptHints,
   updateTranscriptWords,
 } from "~/stt/utils";
+
+import { commands as analyticsCommands } from "@hypr/plugin-analytics";
+
+import { useListener } from "./contexts";
+import { useKeywords } from "./useKeywords";
+import { useSTTConnection } from "./useSTTConnection";
 
 export function useStartListening(sessionId: string) {
   const { user_id } = main.UI.useValues(main.STORE_ID);

@@ -7,8 +7,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { convertStorageHintsToRuntime } from "~/stt/speaker-hints";
 import * as main from "~/store/tinybase/store/main";
+import { convertStorageHintsToRuntime } from "~/stt/speaker-hints";
 
 import type { SpeakerHintStorage, Word } from "@hypr/store";
 import {

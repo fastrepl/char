@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker/locale/en";
-import type { WordWithId } from "~/stt/types";
 import { DEFAULT_USER_ID, id } from "~/shared/utils";
+import type { WordWithId } from "~/stt/types";
 
 import type { TranscriptStorage, WordStorage } from "@hypr/store";
 
@@ -13,7 +13,7 @@ type TranscriptWordsOnly = {
   words: Array<WordStorage>;
 };
 
-const selectWeighted = <T>(choices: Array<{ weight: number; value: T }>): T =>
+const selectWeighted = <T,>(choices: Array<{ weight: number; value: T }>): T =>
   faker.helpers.weightedArrayElement(choices);
 
 const appendPhrase = (target: string[], phrase: string) => {

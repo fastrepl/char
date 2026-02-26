@@ -1,6 +1,6 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef } from "react";
-import { useImageUpload } from "~/shared/hooks/useImageUpload";
 import { useSearchEngine } from "~/search/contexts/engine";
+import { useImageUpload } from "~/shared/hooks/useImageUpload";
 import * as main from "~/store/tinybase/store/main";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";

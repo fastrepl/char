@@ -1,7 +1,6 @@
 import type { LanguageModel } from "ai";
 import { useCallback, useEffect, useRef } from "react";
 import { shallow } from "zustand/shallow";
-import { useAITask } from "../contexts";
 import { useLatestRef } from "~/shared/hooks/useLatestRef";
 import type {
   TaskArgsMap,
@@ -13,6 +12,8 @@ import {
   type TaskState,
   type TaskStatus,
 } from "~/store/zustand/ai-task/tasks";
+
+import { useAITask } from "../contexts";
 
 type SuccessPayload<T extends TaskType> = {
   text: string;

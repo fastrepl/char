@@ -1,3 +1,6 @@
+import { getSessionEventById } from "~/session/utils";
+import type { Store as MainStore } from "~/store/tinybase/store/main";
+import type { Store as SettingsStore } from "~/store/tinybase/store/settings";
 import {
   buildSegments,
   type RuntimeSpeakerHint,
@@ -9,9 +12,6 @@ import {
   SpeakerLabelManager,
 } from "~/stt/segment/shared";
 import { convertStorageHintsToRuntime } from "~/stt/speaker-hints";
-import type { Store as MainStore } from "~/store/tinybase/store/main";
-import type { Store as SettingsStore } from "~/store/tinybase/store/settings";
-import { getSessionEventById } from "~/session/utils";
 
 import type {
   EnhanceTemplate,

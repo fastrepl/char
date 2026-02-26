@@ -1,8 +1,8 @@
 import { useCallback, useRef } from "react";
 import { useCreateChatMessage } from "~/chat/hooks/useCreateChatMessage";
 import type { HyprUIMessage } from "~/chat/types";
-import * as main from "~/store/tinybase/store/main";
 import { id } from "~/shared/utils";
+import * as main from "~/store/tinybase/store/main";
 
 export function useChatActions({
   groupId,

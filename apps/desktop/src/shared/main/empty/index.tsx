@@ -3,12 +3,12 @@ import { useCallback, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { StandardTabWrapper } from "~/shared/main";
 import { type TabItem, TabItemBase } from "~/shared/tabs";
-import { useNewNote } from "../useNewNote";
 import { type Tab, useTabs } from "~/store/zustand/tabs";
 
 import { Kbd } from "@hypr/ui/components/ui/kbd";
 import { cn } from "@hypr/utils";
 
+import { useNewNote } from "../useNewNote";
 import { OpenNoteDialog } from "./open-note-dialog";
 
 export const TabItemEmpty: TabItem<Extract<Tab, { type: "empty" }>> = ({

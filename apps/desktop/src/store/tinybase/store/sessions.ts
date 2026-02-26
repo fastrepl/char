@@ -1,6 +1,6 @@
+import { findSessionByEventId } from "~/session/utils";
 import { DEFAULT_USER_ID } from "~/shared/utils";
 import { id } from "~/shared/utils";
-import { findSessionByEventId } from "~/session/utils";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import type {

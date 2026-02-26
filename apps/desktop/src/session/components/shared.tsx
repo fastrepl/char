@@ -1,12 +1,12 @@
 import { useMemo } from "react";
 import { useAITaskTask } from "~/ai/hooks";
 import { useNetwork } from "~/contexts/network";
-import { useListener } from "~/stt/contexts";
-import { useSTTConnection } from "~/stt/useSTTConnection";
 import * as main from "~/store/tinybase/store/main";
 import { createTaskId } from "~/store/zustand/ai-task/task-configs";
 import type { Tab } from "~/store/zustand/tabs/schema";
 import { type EditorView } from "~/store/zustand/tabs/schema";
+import { useListener } from "~/stt/contexts";
+import { useSTTConnection } from "~/stt/useSTTConnection";
 
 import { Button } from "@hypr/ui/components/ui/button";
 

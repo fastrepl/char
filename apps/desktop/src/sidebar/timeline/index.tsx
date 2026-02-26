@@ -1,8 +1,8 @@
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { useConfigValue } from "~/shared/config";
-import { useIgnoredEvents } from "~/store/tinybase/hooks";
 import { useNativeContextMenu } from "~/shared/hooks/useNativeContextMenu";
+import { useIgnoredEvents } from "~/store/tinybase/hooks";
 import {
   captureSessionData,
   deleteSessionCascade,

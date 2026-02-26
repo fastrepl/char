@@ -16,9 +16,9 @@ import {
 } from "@hypr/plugin-auth";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 
-import { useAuth } from "./context";
 import { env } from "../env";
 import { getScheme } from "../shared/utils";
+import { useAuth } from "./context";
 
 type TokenInfo = Omit<Claims, "sub"> & {
   trialEnd: Date | null;

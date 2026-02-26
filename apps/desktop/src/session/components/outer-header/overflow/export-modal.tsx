@@ -2,6 +2,16 @@ import { useMutation } from "@tanstack/react-query";
 import { downloadDir, join } from "@tauri-apps/api/path";
 import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import { useSessionEvent } from "~/store/tinybase/hooks";
+import * as main from "~/store/tinybase/store/main";
+import type { EditorView } from "~/store/zustand/tabs/schema";
+import { buildSegments, SegmentKey } from "~/stt/segment";
+import {
+  defaultRenderLabelContext,
+  SpeakerLabelManager,
+} from "~/stt/segment/shared";
+import { convertStorageHintsToRuntime } from "~/stt/speaker-hints";
+import { parseTranscriptHints, parseTranscriptWords } from "~/stt/utils";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as fs2Commands } from "@hypr/plugin-fs2";
@@ -13,20 +23,6 @@ import {
 } from "@hypr/plugin-pdf";
 import { json2md } from "@hypr/tiptap/shared";
 import { cn } from "@hypr/utils";
-
-import { useSessionEvent } from "~/store/tinybase/hooks";
-import * as main from "~/store/tinybase/store/main";
-import {
-  parseTranscriptHints,
-  parseTranscriptWords,
-} from "~/stt/utils";
-import type { EditorView } from "~/store/zustand/tabs/schema";
-import { buildSegments, SegmentKey } from "~/stt/segment";
-import {
-  defaultRenderLabelContext,
-  SpeakerLabelManager,
-} from "~/stt/segment/shared";
-import { convertStorageHintsToRuntime } from "~/stt/speaker-hints";
 
 type FileFormat = "pdf" | "txt" | "md";
 

@@ -1,8 +1,8 @@
 import { format } from "date-fns";
 import { useCallback } from "react";
 import { toTz, useTimezone } from "~/calendar/hooks";
-import { useEvent } from "~/store/tinybase/hooks";
 import { EventDisplay } from "~/session/components/outer-header/metadata";
+import { useEvent } from "~/store/tinybase/hooks";
 import * as main from "~/store/tinybase/store/main";
 import { getOrCreateSessionForEventId } from "~/store/tinybase/store/sessions";
 import { useTabs } from "~/store/zustand/tabs";

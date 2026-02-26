@@ -1,6 +1,6 @@
 import { forwardRef, useMemo } from "react";
-import { useImageUpload } from "~/shared/hooks/useImageUpload";
 import { useSearchEngine } from "~/search/contexts/engine";
+import { useImageUpload } from "~/shared/hooks/useImageUpload";
 import * as main from "~/store/tinybase/store/main";
 
 import { commands as openerCommands } from "@hypr/plugin-opener2";

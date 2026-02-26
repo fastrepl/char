@@ -1,22 +1,22 @@
 import { useCallback, useRef } from "react";
 import { useConfigValue } from "~/shared/config";
+import { id } from "~/shared/utils";
 import * as main from "~/store/tinybase/store/main";
 import type { HandlePersistCallback } from "~/store/zustand/listener/transcript";
 import { type Tab, useTabs } from "~/store/zustand/tabs";
-import { id } from "~/shared/utils";
-
-import type { BatchParams } from "@hypr/plugin-listener2";
-
-import { useListener } from "./contexts";
 import type { SpeakerHintWithId, WordWithId } from "~/stt/types";
-import { useKeywords } from "./useKeywords";
-import { useSTTConnection } from "./useSTTConnection";
 import {
   parseTranscriptHints,
   parseTranscriptWords,
   updateTranscriptHints,
   updateTranscriptWords,
 } from "~/stt/utils";
+
+import type { BatchParams } from "@hypr/plugin-listener2";
+
+import { useListener } from "./contexts";
+import { useKeywords } from "./useKeywords";
+import { useSTTConnection } from "./useSTTConnection";
 
 type RunOptions = {
   handlePersist?: HandlePersistCallback;

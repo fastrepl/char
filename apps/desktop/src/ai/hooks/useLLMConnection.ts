@@ -17,10 +17,11 @@ import {
   type ProviderEligibilityContext,
 } from "~/settings/ai/shared/eligibility";
 import * as settings from "~/store/tinybase/store/settings";
-import { createTracedFetch, tracedFetch } from "../traced-fetch";
 
 import type { CharTask } from "@hypr/api-client";
 import type { AIProviderStorage } from "@hypr/store";
+
+import { createTracedFetch, tracedFetch } from "../traced-fetch";
 
 type LanguageModelV3 = Parameters<typeof wrapLanguageModel>[0]["model"];
 

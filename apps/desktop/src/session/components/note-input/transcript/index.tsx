@@ -1,4 +1,6 @@
 import { type RefObject, useCallback } from "react";
+import { id } from "~/shared/utils";
+import * as main from "~/store/tinybase/store/main";
 import type { SpeakerHintWithId } from "~/stt/types";
 import {
   parseTranscriptHints,
@@ -6,8 +8,6 @@ import {
   updateTranscriptHints,
   updateTranscriptWords,
 } from "~/stt/utils";
-import * as main from "~/store/tinybase/store/main";
-import { id } from "~/shared/utils";
 
 import { TranscriptContainer } from "./shared";
 

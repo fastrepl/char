@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { FileTextIcon, Loader2Icon } from "lucide-react";
 import { useMemo } from "react";
+import * as main from "~/store/tinybase/store/main";
 import { buildSegments, SegmentKey } from "~/stt/segment";
 import {
   defaultRenderLabelContext,
@@ -8,7 +9,6 @@ import {
 } from "~/stt/segment/shared";
 import { convertStorageHintsToRuntime } from "~/stt/speaker-hints";
 import { parseTranscriptHints, parseTranscriptWords } from "~/stt/utils";
-import * as main from "~/store/tinybase/store/main";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import {

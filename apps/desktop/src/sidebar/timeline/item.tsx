@@ -1,10 +1,10 @@
 import { memo, useCallback, useMemo } from "react";
-import { useIgnoredEvents } from "~/store/tinybase/hooks";
-import { useListener } from "~/stt/contexts";
 import { SessionPreviewCard } from "~/session/components/session-preview-card";
 import { useIsSessionEnhancing } from "~/session/hooks/useEnhancedNotes";
-import { InteractiveButton } from "~/shared/ui/interactive-button";
+import { getSessionEvent } from "~/session/utils";
 import type { MenuItemDef } from "~/shared/hooks/useNativeContextMenu";
+import { InteractiveButton } from "~/shared/ui/interactive-button";
+import { useIgnoredEvents } from "~/store/tinybase/hooks";
 import {
   captureSessionData,
   deleteSessionCascade,
@@ -15,7 +15,7 @@ import { useSessionTitle } from "~/store/zustand/live-title";
 import { type TabInput, useTabs } from "~/store/zustand/tabs";
 import { useTimelineSelection } from "~/store/zustand/timeline-selection";
 import { useUndoDelete } from "~/store/zustand/undo-delete";
-import { getSessionEvent } from "~/session/utils";
+import { useListener } from "~/stt/contexts";
 
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 import { commands as openerCommands } from "@hypr/plugin-opener2";

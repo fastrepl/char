@@ -10,9 +10,9 @@ import { useCreateChatMessage } from "~/chat/hooks/useCreateChatMessage";
 import { CustomChatTransport } from "~/chat/transport";
 import type { HyprUIMessage } from "~/chat/types";
 import { useToolRegistry } from "~/contexts/tool";
+import { id } from "~/shared/utils";
 import * as main from "~/store/tinybase/store/main";
 import { useChatContext } from "~/store/zustand/chat-context";
-import { id } from "~/shared/utils";
 
 import type { SessionContext } from "@hypr/plugin-template";
 import { commands as templateCommands } from "@hypr/plugin-template";

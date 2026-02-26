@@ -1,6 +1,6 @@
 import { CheckCircle2Icon } from "lucide-react";
-import { StepRow } from "../shared";
 
+import { StepRow } from "../shared";
 import { type TrialPhase, useTrialFlow } from "./trial";
 
 function TrialStatusDisplay({ trialPhase }: { trialPhase: TrialPhase }) {

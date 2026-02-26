@@ -1,6 +1,6 @@
 import { type ReactNode, useCallback, useMemo } from "react";
-import * as main from "~/store/tinybase/store/main";
 import { getSessionEvent } from "~/session/utils";
+import * as main from "~/store/tinybase/store/main";
 
 import type {
   EnhancedNoteStorage,

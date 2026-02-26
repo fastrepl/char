@@ -1,8 +1,8 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "~/auth";
-import { useConfigValues } from "~/shared/config";
 import { useNotifications } from "~/contexts/notifications";
+import { useConfigValues } from "~/shared/config";
 import { useTabs } from "~/store/zustand/tabs";
 import { useToastAction } from "~/store/zustand/toast-action";
 

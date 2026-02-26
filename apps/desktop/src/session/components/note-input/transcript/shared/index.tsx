@@ -2,14 +2,15 @@ import { type RefObject, useCallback, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useAudioPlayer } from "~/audio-player";
 import { useAudioTime } from "~/audio-player/provider";
-import { useListener } from "~/stt/contexts";
 import { TranscriptEmptyState } from "~/session/components/note-input/transcript/empty-state";
 import * as main from "~/store/tinybase/store/main";
+import { useListener } from "~/stt/contexts";
 
 import type { DegradedError } from "@hypr/plugin-listener";
 import type { RuntimeSpeakerHint } from "@hypr/transcript";
 import { DancingSticks } from "@hypr/ui/components/ui/dancing-sticks";
 import { cn } from "@hypr/utils";
+
 import {
   useAutoScroll,
   usePlaybackAutoScroll,

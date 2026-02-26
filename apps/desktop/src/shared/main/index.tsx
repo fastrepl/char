@@ -13,9 +13,9 @@ import { useResizeObserver } from "usehooks-ts";
 import { useShallow } from "zustand/shallow";
 import { TabContentAI, TabItemAI } from "~/ai";
 import { TabContentCalendar, TabItemCalendar } from "~/calendar";
+import { TabContentChat, TabItemChat } from "~/chat";
 import { ChatFloatingButton } from "~/chat/components";
 import { TabContentChatShortcut, TabItemChatShortcut } from "~/chat/shortcuts";
-import { TabContentChat, TabItemChat } from "~/chat";
 import { TabContentContact, TabItemContact } from "~/contacts";
 import { TabContentHuman, TabItemHuman } from "~/contacts/humans";
 import { useNotifications } from "~/contexts/notifications";
@@ -28,20 +28,19 @@ import {
 } from "~/extensions";
 import { loadExtensionPanels } from "~/extensions/registry";
 import { TabContentFolder, TabItemFolder } from "~/folders";
-import { useNativeContextMenu } from "~/shared/hooks/useNativeContextMenu";
 import { TabContentOnboarding, TabItemOnboarding } from "~/onboarding";
-import { useListener } from "~/stt/contexts";
 import { TabContentSearch, TabItemSearch } from "~/search/advanced";
 import { Search } from "~/search/components/search";
 import { TabContentNote, TabItemNote } from "~/session";
 import { useCaretPosition } from "~/session/components/caret-position-context";
 import { TabContentSettings, TabItemSettings } from "~/settings";
-import { useNewNote, useNewNoteAndListen } from "./useNewNote";
+import { useNativeContextMenu } from "~/shared/hooks/useNativeContextMenu";
 import { NotificationBadge } from "~/shared/ui/notification-badge";
 import { TrafficLights } from "~/shared/ui/traffic-lights";
 import { TabContentChangelog, TabItemChangelog } from "~/sidebar/changelog";
 import { Update } from "~/sidebar/update";
 import { type Tab, uniqueIdfromTab, useTabs } from "~/store/zustand/tabs";
+import { useListener } from "~/stt/contexts";
 import { TabContentTemplate, TabItemTemplate } from "~/templates";
 
 import { commands as flagCommands } from "@hypr/plugin-flag";
@@ -55,6 +54,7 @@ import {
 import { cn } from "@hypr/utils";
 
 import { TabContentEmpty, TabItemEmpty } from "./empty";
+import { useNewNote, useNewNoteAndListen } from "./useNewNote";
 
 export function Body() {
   const { tabs, currentTab } = useTabs(

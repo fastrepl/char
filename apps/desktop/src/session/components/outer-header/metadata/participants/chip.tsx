@@ -1,8 +1,8 @@
 import { X } from "lucide-react";
 import { useCallback } from "react";
-import { parseTranscriptHints, updateTranscriptHints } from "~/stt/utils";
 import * as main from "~/store/tinybase/store/main";
 import { useTabs } from "~/store/zustand/tabs/index";
+import { parseTranscriptHints, updateTranscriptHints } from "~/stt/utils";
 
 import { Badge } from "@hypr/ui/components/ui/badge";
 import { Button } from "@hypr/ui/components/ui/button";

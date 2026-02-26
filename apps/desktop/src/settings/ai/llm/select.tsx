@@ -2,7 +2,6 @@ import { useForm } from "@tanstack/react-form";
 import { useMemo } from "react";
 import { useAuth } from "~/auth";
 import { useBillingAccess } from "~/auth/billing";
-import { useConfigValues } from "~/shared/config";
 import { providerRowId } from "~/settings/ai/shared";
 import {
   getProviderSelectionBlockers,
@@ -25,6 +24,7 @@ import {
 } from "~/settings/ai/shared/list-openai";
 import { listOpenRouterModels } from "~/settings/ai/shared/list-openrouter";
 import { ModelCombobox } from "~/settings/ai/shared/model-combobox";
+import { useConfigValues } from "~/shared/config";
 import * as settings from "~/store/tinybase/store/settings";
 
 import {

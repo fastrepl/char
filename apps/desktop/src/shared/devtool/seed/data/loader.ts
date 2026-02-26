@@ -1,6 +1,6 @@
 import type { Tables } from "tinybase/with-schemas";
-import type { Schemas } from "~/store/tinybase/store/main";
 import { DEFAULT_USER_ID, id } from "~/shared/utils";
+import type { Schemas } from "~/store/tinybase/store/main";
 
 import { md2json } from "@hypr/tiptap/shared";
 
