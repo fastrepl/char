@@ -32,7 +32,8 @@ export function OAuthProviderContent({ config }: { config: CalendarProvider }) {
   const disabled = validationMessage !== null;
 
   const handleConnect = useCallback(
-    () => openIntegrationUrl(config.nangoIntegrationId, connection?.connection_id),
+    () =>
+      openIntegrationUrl(config.nangoIntegrationId, connection?.connection_id),
     [config.nangoIntegrationId, connection?.connection_id],
   );
 
