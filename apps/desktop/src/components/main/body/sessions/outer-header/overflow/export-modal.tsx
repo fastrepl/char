@@ -53,6 +53,21 @@ function formatDuration(startMs: number, endMs: number): string {
   return `${minutes}m`;
 }
 
+function markdownToText(content: string): string {
+  return content
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1 ($2)")
+    .replace(/^\s*[-*+]\s+/gm, "• ")
+    .replace(/^\s*\d+\.\s+/gm, "")
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/\*(.*?)\*/g, "$1")
+    .replace(/__(.*?)__/g, "$1")
+    .replace(/_(.*?)_/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 export function ExportModal({
   sessionId,
   currentView,
@@ -248,17 +263,49 @@ export function ExportModal({
       .join("\n\n");
   };
 
-  const buildTextContent = (): string => {
+  const buildMdContent = (): string => {
     const sections: string[] = [];
     const title = sessionTitle || "Untitled";
-    const isMd = format === "md";
+    sections.push(`# ${title}`);
 
-    if (isMd) {
-      sections.push(`# ${title}`);
-    } else {
-      sections.push(title);
-      sections.push("=".repeat(title.length));
+    if (sessionCreatedAt) {
+      sections.push(`- Created: ${formatDate(sessionCreatedAt)}`);
     }
+
+    if (participantNames.length > 0) {
+      sections.push(`- Participants: ${participantNames.join(", ")}`);
+    }
+
+    if (transcriptDuration) {
+      sections.push(`- Duration: ${transcriptDuration}`);
+    }
+
+    if (includeSummary) {
+      const summary = getSummaryMd();
+      if (summary) {
+        sections.push("");
+        sections.push("## Summary");
+        sections.push(summary);
+      }
+    }
+
+    if (includeTranscript) {
+      const transcript = getTranscriptText();
+      if (transcript) {
+        sections.push("");
+        sections.push("## Transcript");
+        sections.push(transcript);
+      }
+    }
+
+    return sections.join("\n");
+  };
+
+  const buildTxtContent = (): string => {
+    const sections: string[] = [];
+    const title = sessionTitle || "Untitled";
+    sections.push(title);
+    sections.push("=".repeat(title.length));
 
     if (sessionCreatedAt) {
       sections.push(formatDate(sessionCreatedAt));
@@ -276,13 +323,9 @@ export function ExportModal({
       const summary = getSummaryMd();
       if (summary) {
         sections.push("");
-        if (isMd) {
-          sections.push("## Summary");
-        } else {
-          sections.push("Summary");
-          sections.push("-".repeat(7));
-        }
-        sections.push(isMd ? summary : summary.replace(/^#{1,6}\s/gm, ""));
+        sections.push("Summary");
+        sections.push("-".repeat(7));
+        sections.push(markdownToText(summary));
       }
     }
 
@@ -290,12 +333,8 @@ export function ExportModal({
       const transcript = getTranscriptText();
       if (transcript) {
         sections.push("");
-        if (isMd) {
-          sections.push("## Transcript");
-        } else {
-          sections.push("Transcript");
-          sections.push("-".repeat(10));
-        }
+        sections.push("Transcript");
+        sections.push("-".repeat(10));
         sections.push(transcript);
       }
     }
@@ -350,7 +389,8 @@ export function ExportModal({
           throw new Error(result.error);
         }
       } else {
-        const textContent = buildTextContent();
+        const textContent =
+          format === "md" ? buildMdContent() : buildTxtContent();
         const result = await pdfCommands.exportText(path, textContent);
         if (result.status === "error") {
           throw new Error(result.error);
