@@ -34,14 +34,25 @@ fn prepare_binaries() {
     // cross-compilation (e.g. x86_64-apple-darwin built on an ARM runner).
     // Fall back to rustc host triple only when invoking the task directly.
     let triple = env::var("TAURI_ENV_TARGET_TRIPLE").unwrap_or_else(|_| rustc_host_triple());
-    let ext = if triple.contains("windows") { ".exe" } else { "" };
+    let ext = if triple.contains("windows") {
+        ".exe"
+    } else {
+        ""
+    };
 
     let cargo = env::var("CARGO").unwrap_or_else(|_| "cargo".into());
 
     // Run from src-tauri/ so its .cargo/config.toml (target-dir = "target")
     // is in effect. Binary lands at src-tauri/target/{triple}/release/.
     let status = Command::new(&cargo)
-        .args(["build", "--release", "--target", &triple, "-p", "chrome-native-host"])
+        .args([
+            "build",
+            "--release",
+            "--target",
+            &triple,
+            "-p",
+            "chrome-native-host",
+        ])
         .current_dir(&src_tauri)
         .status()
         .expect("failed to spawn cargo");

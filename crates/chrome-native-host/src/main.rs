@@ -170,7 +170,10 @@ mod tests {
             url: Some("https://meet.google.com/abc".into()),
             is_active: Some(true),
             muted: Some(true),
-            participants: Some(vec![Participant { name: "Alice".into(), is_self: true }]),
+            participants: Some(vec![Participant {
+                name: "Alice".into(),
+                is_self: true,
+            }]),
         };
         let result = process_message(msg).unwrap();
         assert!(result.is_active);
@@ -247,7 +250,11 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("nested").join("dirs").join("state.json");
 
-        let state = ChromeState { version: 1, timestamp_ms: 0, meeting: None };
+        let state = ChromeState {
+            version: 1,
+            timestamp_ms: 0,
+            meeting: None,
+        };
         write_state(&state, &path).unwrap();
 
         assert!(path.exists());
