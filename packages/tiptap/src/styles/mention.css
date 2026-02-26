@@ -1,3 +1,4 @@
+/* Mention dropdown */
 .mention-container {
   background: white;
   border-radius: 0.5rem;
@@ -45,48 +46,34 @@
   width: 0.9rem;
   height: 0.9rem;
   flex-shrink: 0;
+  color: #a3a3a3;
 }
 
-.mention-type-session {
-  color: #3b82f6;
-}
-
-.mention-type-human {
-  color: #8b5cf6;
-}
-
-.mention-type-organization {
-  color: #10b981;
-}
-
+/* Inline mention chip */
 .mention {
   font-weight: 500;
   text-decoration: none;
   border-radius: 0.25rem;
   padding: 0.1rem 0.25rem;
-  font-size: 0.9rem;
+  font-size: inherit;
+  color: inherit;
 }
 
-.mention[data-type="session"] {
-  color: #3b82f6;
-  background-color: rgba(59, 130, 246, 0.08);
+.mention .mention-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1em;
+  height: 1.1em;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+  color: #6b7280;
+  font-size: 0.6em;
+  font-weight: 600;
+  vertical-align: middle;
+  line-height: 1;
 }
 
-.mention[data-type="human"] {
-  color: #8b5cf6;
-  background-color: rgba(139, 92, 246, 0.08);
-}
-
-.mention[data-type="organization"] {
-  color: #10b981;
-  background-color: rgba(16, 185, 129, 0.08);
-}
-
-.mention-type-chat-shortcut {
-  color: #f59e0b;
-}
-
-.mention[data-type="chat_shortcut"] {
-  color: #f59e0b;
-  background-color: rgba(245, 158, 11, 0.08);
+.mention .mention-avatar::before {
+  content: attr(data-initial);
 }
