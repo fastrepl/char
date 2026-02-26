@@ -10,6 +10,10 @@ import { useSTTConnection } from "~/stt/useSTTConnection";
 
 import { Button } from "@hypr/ui/components/ui/button";
 
+import { computeCurrentNoteTab } from "./compute-note-tab";
+
+export { computeCurrentNoteTab } from "./compute-note-tab";
+
 export function useHasTranscript(sessionId: string): boolean {
   const transcriptIds = main.UI.useSliceRowIds(
     main.INDEXES.transcriptBySession,
@@ -18,29 +22,6 @@ export function useHasTranscript(sessionId: string): boolean {
   );
 
   return !!transcriptIds && transcriptIds.length > 0;
-}
-
-export function computeCurrentNoteTab(
-  tabView: EditorView | null,
-  isListenerActive: boolean,
-  firstEnhancedNoteId: string | undefined,
-): EditorView {
-  if (isListenerActive) {
-    if (tabView?.type === "raw" || tabView?.type === "transcript") {
-      return tabView;
-    }
-    return { type: "raw" };
-  }
-
-  if (tabView) {
-    return tabView;
-  }
-
-  if (firstEnhancedNoteId) {
-    return { type: "enhanced", id: firstEnhancedNoteId };
-  }
-
-  return { type: "raw" };
 }
 
 export function useCurrentNoteTab(
