@@ -6,6 +6,8 @@ use crate::error::{Error, Result};
 use crate::ffi_utils::{RESPONSE_BUF_SIZE, parse_buf};
 use crate::model::Model;
 
+use crate::model::ModelKind;
+
 use super::whisper::build_whisper_prompt;
 use super::{TranscribeOptions, TranscriptionResult};
 
@@ -66,10 +68,9 @@ impl Model {
         user_data: *mut std::ffi::c_void,
     ) -> Result<TranscriptionResult> {
         let guard = self.lock_inference();
-        let prompt = if self.is_moonshine() {
-            String::new()
-        } else {
-            build_whisper_prompt(options)
+        let prompt = match self.kind() {
+            ModelKind::Moonshine | ModelKind::Parakeet => String::new(),
+            ModelKind::Whisper => build_whisper_prompt(options),
         };
         let prompt_c = CString::new(prompt)?;
         let options_c = CString::new(serde_json::to_string(options)?)?;

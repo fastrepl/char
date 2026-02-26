@@ -175,35 +175,6 @@ function useGroupCountdown(group: ToastGroup) {
   return Math.ceil(remaining / 1000);
 }
 
-function useTriggerPosition(hasToasts: boolean) {
-  const [pos, setPos] = useState<{ bottom: number; right: number } | null>(
-    null,
-  );
-
-  useEffect(() => {
-    const find = () => {
-      const el = document.querySelector(
-        "[data-chat-trigger]",
-      ) as HTMLElement | null;
-      if (el) {
-        const rect = el.getBoundingClientRect();
-        setPos({
-          bottom: window.innerHeight - rect.top + 8,
-          right: window.innerWidth - rect.right + rect.width / 2 - 8,
-        });
-      }
-    };
-
-    find();
-    if (hasToasts) {
-      const id = requestAnimationFrame(find);
-      return () => cancelAnimationFrame(id);
-    }
-  }, [hasToasts]);
-
-  return pos;
-}
-
 export function UndoDeleteKeyboardHandler() {
   const groups = useToastGroups();
   const restoreGroup = useRestoreGroup();
@@ -233,35 +204,32 @@ export function UndoDeleteKeyboardHandler() {
 
 export function UndoDeleteToast() {
   const groups = useToastGroups();
-  const pos = useTriggerPosition(groups.length > 0);
 
   return createPortal(
     <AnimatePresence mode="popLayout">
-      {pos &&
-        groups.map((group, index) => (
-          <ToastBubble
-            key={group.key}
-            group={group}
-            index={index}
-            total={groups.length}
-            pos={pos}
-          />
-        ))}
+      {groups.map((group, index) => (
+        <ToastPill
+          key={group.key}
+          group={group}
+          index={index}
+          total={groups.length}
+        />
+      ))}
     </AnimatePresence>,
     document.body,
   );
 }
 
-function ToastBubble({
+const SIDEBAR_SELECTOR = "[data-testid='main-app-shell']";
+
+function ToastPill({
   group,
   index,
   total,
-  pos,
 }: {
   group: ToastGroup;
   index: number;
   total: number;
-  pos: { bottom: number; right: number };
 }) {
   const restoreGroup = useRestoreGroup();
   const confirmGroup = useConfirmGroup();
@@ -269,6 +237,44 @@ function ToastBubble({
   const pendingDeletions = useUndoDelete((state) => state.pendingDeletions);
   const pauseGroup = useUndoDelete((state) => state.pauseGroup);
   const resumeGroup = useUndoDelete((state) => state.resumeGroup);
+
+  const [contentOffset, setContentOffset] = useState(0);
+
+  useEffect(() => {
+    const computeOffset = () => {
+      const shell = document.querySelector(SIDEBAR_SELECTOR);
+      if (!shell) {
+        setContentOffset(0);
+        return;
+      }
+
+      const panels = document.querySelectorAll("[data-panel-id]");
+      const bodyPanel = panels[0];
+      if (!bodyPanel) {
+        setContentOffset(0);
+        return;
+      }
+
+      const bodyRect = bodyPanel.getBoundingClientRect();
+      const bodyCenter = bodyRect.left + bodyRect.width / 2;
+      const windowCenter = window.innerWidth / 2;
+      setContentOffset(bodyCenter - windowCenter);
+    };
+
+    computeOffset();
+    window.addEventListener("resize", computeOffset);
+
+    const resizeObserver = new ResizeObserver(computeOffset);
+    const panels = document.querySelectorAll("[data-panel-id]");
+    for (const panel of panels) {
+      resizeObserver.observe(panel);
+    }
+
+    return () => {
+      window.removeEventListener("resize", computeOffset);
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   const handleMouseEnter = useCallback(() => {
     pauseGroup(group.sessionIds);
@@ -284,79 +290,66 @@ function ToastBubble({
     return p?.data.session.title || "Untitled";
   }, [group, pendingDeletions]);
 
-  const stackOffset = (total - 1 - index) * 8;
-  const stackScale = 1 - (total - 1 - index) * 0.03;
+  const stackOffset = (total - 1 - index) * 44;
   const isTop = index === total - 1;
 
   const count = group.sessionIds.length;
-  const undoLabel = group.isBatch ? "Restore all" : "Undo";
-  const deleteLabel = group.isBatch ? "Delete all" : "Delete";
+  const label = group.isBatch ? `Deleting ${count} notes` : `Deleting ${title}`;
 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{
-        opacity: isTop ? 1 : 0.6,
+        opacity: isTop ? 1 : 0.7,
         y: -stackOffset,
-        scale: stackScale,
+        scale: 1,
       }}
-      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+      exit={{ opacity: 0, y: 20, scale: 0.95 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
       style={{
-        bottom: pos.bottom,
-        right: pos.right,
         zIndex: 50 + index,
         pointerEvents: isTop ? "auto" : "none",
+        left: `calc(50% + ${contentOffset}px)`,
       }}
-      className="fixed"
+      className="fixed bottom-6 -translate-x-1/2"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       <div
         className={cn([
-          "bg-white rounded-2xl rounded-br-sm",
-          "shadow-xl px-5 py-4 w-[300px]",
-          "border border-neutral-200",
+          "flex items-center gap-3 pl-4 pr-1.5 py-1.5",
+          "bg-white rounded-full",
+          "shadow-lg border border-neutral-200",
         ])}
       >
-        <p className="text-sm text-neutral-700 leading-relaxed">
-          {group.isBatch ? (
-            `Delete ${count} notes?`
-          ) : (
-            <>
-              Delete{" "}
-              <span className="font-medium text-neutral-900 truncate inline-block max-w-[180px] align-bottom">
-                {title}
-              </span>
-              ?
-            </>
-          )}
-        </p>
-        <div className="flex items-stretch gap-2 mt-3">
-          <button
-            onClick={() => restoreGroup(group)}
-            className={cn([
-              "flex-1 text-sm font-medium py-2 rounded-xl",
-              "bg-primary text-primary-foreground",
-              "hover:bg-primary/90 active:bg-primary/80",
-              "transition-colors",
-            ])}
-          >
-            {undoLabel} · {seconds}s
-          </button>
-          <button
-            onClick={() => confirmGroup(group)}
-            className={cn([
-              "flex-1 text-sm font-medium py-2 rounded-xl",
-              "bg-neutral-100 text-neutral-600",
-              "hover:bg-red-100 hover:text-red-700",
-              "transition-colors",
-            ])}
-          >
-            {deleteLabel}
-          </button>
-        </div>
+        <span className="text-sm text-neutral-600 truncate max-w-[200px]">
+          {label}...
+        </span>
+
+        <button
+          onClick={() => confirmGroup(group)}
+          className={cn([
+            "text-xs font-medium px-3 py-1.5 rounded-full",
+            "bg-neutral-100 text-neutral-500",
+            "hover:bg-red-100 hover:text-red-600",
+            "transition-colors",
+          ])}
+        >
+          yes
+        </button>
+
+        <button
+          onClick={() => restoreGroup(group)}
+          className={cn([
+            "text-xs font-medium px-3 py-1.5 rounded-full",
+            "bg-neutral-900 text-white",
+            "hover:bg-neutral-800",
+            "transition-colors",
+          ])}
+        >
+          undo {seconds}s
+        </button>
       </div>
     </motion.div>
   );

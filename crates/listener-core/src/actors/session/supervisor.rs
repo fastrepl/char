@@ -224,7 +224,8 @@ impl Actor for SessionActor {
                     Some(ChildKind::Source) => {
                         tracing::info!(?reason, "source_terminated_attempting_restart");
                         state.source_cell = None;
-                        if !try_restart_source(myself.get_cell(), state).await {
+                        let is_device_change = reason.as_deref() == Some("device_change");
+                        if !try_restart_source(myself.get_cell(), state, !is_device_change).await {
                             tracing::error!("source_restart_limit_exceeded_meltdown");
                             meltdown(myself, state).await;
                         }
@@ -262,7 +263,7 @@ impl Actor for SessionActor {
                 Some(ChildKind::Source) => {
                     tracing::warn!(?error, "source_failed_attempting_restart");
                     state.source_cell = None;
-                    if !try_restart_source(myself.get_cell(), state).await {
+                    if !try_restart_source(myself.get_cell(), state, true).await {
                         tracing::error!("source_restart_limit_exceeded_meltdown");
                         meltdown(myself, state).await;
                     }
@@ -309,8 +310,12 @@ fn identify_child(state: &SessionState, cell: &ActorCell) -> Option<ChildKind> {
     None
 }
 
-async fn try_restart_source(supervisor_cell: ActorCell, state: &mut SessionState) -> bool {
-    if !state.source_restarts.record_restart(&RESTART_BUDGET) {
+async fn try_restart_source(
+    supervisor_cell: ActorCell,
+    state: &mut SessionState,
+    count_against_budget: bool,
+) -> bool {
+    if count_against_budget && !state.source_restarts.record_restart(&RESTART_BUDGET) {
         return false;
     }
 

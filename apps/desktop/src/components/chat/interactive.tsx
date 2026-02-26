@@ -19,7 +19,7 @@ export function InteractiveContainer({
     <div className="fixed z-100" style={{ right: 16, bottom: 16 }}>
       <Resizable
         defaultSize={{ width, height }}
-        minWidth={280}
+        minWidth={400}
         minHeight={400}
         bounds="window"
         enable={{

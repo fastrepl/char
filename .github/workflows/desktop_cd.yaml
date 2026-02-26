@@ -118,6 +118,9 @@ jobs:
         run: |
           chmod +x ./apps/desktop/src-tauri/binaries/char-sidecar-stt-${{ matrix.target }}
           ./scripts/sidecar.sh "./apps/desktop/${{ env.TAURI_CONF_PATH }}" "binaries/char-sidecar-stt"
+      - run: |
+          TAURI_ENV_TARGET_TRIPLE=${{ matrix.target }} cargo xtask prepare-binaries
+          ./scripts/sidecar.sh "./apps/desktop/${{ env.TAURI_CONF_PATH }}" "binaries/char-chrome-native-host"
       # - run: ./scripts/resource.sh "./apps/desktop/${{ env.TAURI_CONF_PATH }}" "resources/libonnxruntime.dylib"
       - uses: ./.github/actions/apple_cert
         id: apple-cert
@@ -232,6 +235,9 @@ jobs:
           platform: linux-${{ matrix.arch }}
       - uses: ./.github/actions/pnpm_install
       - run: pnpm -F ui build
+      - run: |
+          TAURI_ENV_TARGET_TRIPLE=${{ matrix.target }} cargo xtask prepare-binaries
+          ./scripts/sidecar.sh "./apps/desktop/${{ env.TAURI_CONF_PATH }}" "binaries/char-chrome-native-host"
       - run: |
           FEATURES_FLAG=""
           if [[ "${{ inputs.channel }}" == "staging" ]]; then

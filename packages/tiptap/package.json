@@ -47,7 +47,8 @@
     "prosemirror-state": "^1.4.4",
     "requestidlecallback-polyfill": "^1.0.2",
     "tlds": "^1.261.0",
-    "usehooks-ts": "^3.1.1"
+    "usehooks-ts": "^3.1.1",
+    "facehash": "^0.0.7"
   },
   "devDependencies": {
     "@types/node": "^22.19.11",

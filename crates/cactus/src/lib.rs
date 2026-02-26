@@ -8,7 +8,7 @@ mod vad;
 pub use error::Error;
 pub use hypr_language::Language;
 pub use llm::{CompleteOptions, CompletionResult, CompletionStream, Message, complete_stream};
-pub use model::{Model, ModelBuilder};
+pub use model::{Model, ModelBuilder, ModelKind};
 pub use stt::{
     CloudConfig, StreamResult, TranscribeEvent, TranscribeOptions, Transcriber,
     TranscriptionResult, TranscriptionSession, constrain_to, transcribe_stream,

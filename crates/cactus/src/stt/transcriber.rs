@@ -72,6 +72,14 @@ pub struct StreamResult {
     #[serde(default)]
     pub cloud_result: String,
     #[serde(default)]
+    pub cloud_result_used_cloud: bool,
+    #[serde(default)]
+    pub cloud_result_error: Option<String>,
+    #[serde(default)]
+    pub cloud_result_source: String,
+    #[serde(default)]
+    pub confirmed_local: String,
+    #[serde(default)]
     pub buffer_duration_ms: f64,
     #[serde(default)]
     pub confidence: f32,

@@ -1,3 +1,4 @@
+/* Mention dropdown */
 .mention-container {
   background: white;
   border-radius: 0.5rem;
@@ -45,48 +46,64 @@
   width: 0.9rem;
   height: 0.9rem;
   flex-shrink: 0;
+  color: #a3a3a3;
 }
 
-.mention-type-session {
-  color: #3b82f6;
-}
-
-.mention-type-human {
-  color: #8b5cf6;
-}
-
-.mention-type-organization {
-  color: #10b981;
-}
-
+/* Inline mention chip */
 .mention {
+  display: inline-flex;
+  align-items: center;
+  max-width: 200px;
   font-weight: 500;
   text-decoration: none;
   border-radius: 0.25rem;
-  padding: 0.1rem 0.25rem;
-  font-size: 0.9rem;
+  padding: 0 0.25rem;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.mention[data-type="session"] {
-  color: #3b82f6;
-  background-color: rgba(59, 130, 246, 0.08);
+.mention .mention-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  overflow: hidden;
+  vertical-align: text-bottom;
+  flex-shrink: 0;
+  margin-right: 0.15em;
 }
 
-.mention[data-type="human"] {
-  color: #8b5cf6;
-  background-color: rgba(139, 92, 246, 0.08);
+.mention .mention-avatar-icon {
+  width: 1em;
+  height: 1em;
+  border-radius: 0;
+  overflow: visible;
+  background: none;
+  color: #737373;
 }
 
-.mention[data-type="organization"] {
-  color: #10b981;
-  background-color: rgba(16, 185, 129, 0.08);
+.mention .mention-inline-icon {
+  display: block;
+  width: 1em;
+  height: 1em;
+  position: relative;
+  top: -2px;
 }
 
-.mention-type-chat-shortcut {
-  color: #f59e0b;
+.mention .mention-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
-.mention[data-type="chat_shortcut"] {
-  color: #f59e0b;
-  background-color: rgba(245, 158, 11, 0.08);
+/* NodeView wrapper for inline mention rendering */
+span[data-node-view-wrapper] .mention {
+  display: inline;
 }

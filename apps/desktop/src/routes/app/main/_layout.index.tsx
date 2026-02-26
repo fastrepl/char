@@ -47,7 +47,11 @@ function Component() {
     if (isOpeningRightPanel && bodyPanelRef.current) {
       const currentSize = bodyPanelRef.current.getSize();
       bodyPanelRef.current.resize(currentSize);
-      commands.resizeWindowForChat();
+
+      const wasFloating = previousModeRef.current === "FloatingOpen";
+      if (wasFloating || window.innerWidth < 1100) {
+        commands.resizeWindowForChat();
+      }
     }
 
     previousModeRef.current = chat.mode;

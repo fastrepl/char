@@ -8,6 +8,7 @@ import type {
 } from "@hypr/tiptap/chat";
 import { EMPTY_TIPTAP_DOC } from "@hypr/tiptap/shared";
 
+import { useSearchEngine } from "../../../contexts/search/engine";
 import * as main from "../../../store/tinybase/store/main";
 
 const draftsByKey = new Map<string, JSONContent>();
@@ -112,6 +113,15 @@ export function useSlashCommandConfig(): SlashCommandConfig {
     main.QUERIES.timelineSessions,
     main.STORE_ID,
   );
+  const humans = main.UI.useResultTable(
+    main.QUERIES.visibleHumans,
+    main.STORE_ID,
+  );
+  const organizations = main.UI.useResultTable(
+    main.QUERIES.visibleOrganizations,
+    main.STORE_ID,
+  );
+  const { search } = useSearchEngine();
 
   return useMemo(
     () => ({
@@ -137,21 +147,40 @@ export function useSlashCommandConfig(): SlashCommandConfig {
           }
         });
 
-        Object.entries(sessions).forEach(([rowId, row]) => {
-          const title = row.title as string | undefined;
-          if (title && title.toLowerCase().includes(lowerQuery)) {
+        if (query.trim()) {
+          const searchResults = await search(query);
+          for (const hit of searchResults) {
             results.push({
-              id: rowId,
-              type: "session",
-              label: title,
+              id: hit.document.id,
+              type: hit.document.type,
+              label: hit.document.title,
             });
           }
-        });
+        } else {
+          Object.entries(sessions).forEach(([rowId, row]) => {
+            const title = row.title as string | undefined;
+            if (title) {
+              results.push({ id: rowId, type: "session", label: title });
+            }
+          });
+          Object.entries(humans).forEach(([rowId, row]) => {
+            const name = row.name as string | undefined;
+            if (name) {
+              results.push({ id: rowId, type: "human", label: name });
+            }
+          });
+          Object.entries(organizations).forEach(([rowId, row]) => {
+            const name = row.name as string | undefined;
+            if (name) {
+              results.push({ id: rowId, type: "organization", label: name });
+            }
+          });
+        }
 
         return results.slice(0, 5);
       },
     }),
-    [chatShortcuts, sessions],
+    [chatShortcuts, sessions, humans, organizations, search],
   );
 }
 
