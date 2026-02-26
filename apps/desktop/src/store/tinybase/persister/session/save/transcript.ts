@@ -1,13 +1,15 @@
 import { sep } from "@tauri-apps/api/path";
-
+import type {
+  TranscriptJson,
+  TranscriptWithData,
+} from "~/store/tinybase/persister/session/types";
 import {
   buildSessionPath,
   iterateTableRows,
   SESSION_TRANSCRIPT_FILE,
   type TablesContent,
   type WriteOperation,
-} from "../../shared";
-import type { TranscriptJson, TranscriptWithData } from "../types";
+} from "~/store/tinybase/persister/shared";
 
 type BuildContext = {
   tables: TablesContent;

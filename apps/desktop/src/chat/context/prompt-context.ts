@@ -1,9 +1,9 @@
-import type { SessionContext } from "@hypr/plugin-template";
-
 import {
   type ContextEntity,
   CURRENT_SESSION_CONTEXT_KEY,
-} from "../context-item";
+} from "~/chat/context-item";
+
+import type { SessionContext } from "@hypr/plugin-template";
 
 export type ChatSystemContext = {
   context: SessionContext | null;

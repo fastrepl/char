@@ -1,4 +1,5 @@
-import type { Ctx } from "../ctx";
+import type { Ctx } from "~/services/apple-calendar/ctx";
+
 import type { ExistingEvent } from "./types";
 
 function isEventInRange(

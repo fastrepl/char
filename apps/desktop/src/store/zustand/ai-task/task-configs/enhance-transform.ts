@@ -1,3 +1,18 @@
+import {
+  buildSegments,
+  type RuntimeSpeakerHint,
+  SegmentKey,
+  type WordLike,
+} from "~/stt/segment";
+import {
+  defaultRenderLabelContext,
+  SpeakerLabelManager,
+} from "~/stt/segment/shared";
+import { convertStorageHintsToRuntime } from "~/stt/speaker-hints";
+import type { Store as MainStore } from "~/store/tinybase/store/main";
+import type { Store as SettingsStore } from "~/store/tinybase/store/settings";
+import { getSessionEventById } from "~/session/utils";
+
 import type {
   EnhanceTemplate,
   Participant,
@@ -8,20 +23,6 @@ import type {
 } from "@hypr/plugin-template";
 
 import type { TaskArgsMap, TaskArgsMapTransformed, TaskConfig } from ".";
-import {
-  buildSegments,
-  type RuntimeSpeakerHint,
-  SegmentKey,
-  type WordLike,
-} from "../../../../utils/segment";
-import {
-  defaultRenderLabelContext,
-  SpeakerLabelManager,
-} from "../../../../utils/segment/shared";
-import { getSessionEventById } from "../../../../utils/session-event";
-import { convertStorageHintsToRuntime } from "../../../../utils/speaker-hints";
-import type { Store as MainStore } from "../../../tinybase/store/main";
-import type { Store as SettingsStore } from "../../../tinybase/store/settings";
 
 type TranscriptMeta = {
   id: string;

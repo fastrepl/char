@@ -1,9 +1,10 @@
+import type { Ctx } from "~/services/apple-calendar/ctx";
+import { eventMatchingKey } from "~/session/utils";
+
 import type { AppleEvent, Participant } from "@hypr/plugin-apple-calendar";
 import { commands as appleCalendarCommands } from "@hypr/plugin-apple-calendar";
 import { commands as miscCommands } from "@hypr/plugin-misc";
 
-import { eventMatchingKey } from "../../../utils/session-event";
-import type { Ctx } from "../ctx";
 import type {
   EventParticipant,
   IncomingEvent,

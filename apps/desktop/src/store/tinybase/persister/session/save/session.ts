@@ -1,14 +1,16 @@
 import { sep } from "@tauri-apps/api/path";
-
-import type { Store } from "../../../store/main";
+import type {
+  ParticipantData,
+  SessionMetaJson,
+} from "~/store/tinybase/persister/session/types";
 import {
   buildSessionPath,
   iterateTableRows,
   SESSION_META_FILE,
   type TablesContent,
   type WriteOperation,
-} from "../../shared";
-import type { ParticipantData, SessionMetaJson } from "../types";
+} from "~/store/tinybase/persister/shared";
+import type { Store } from "~/store/tinybase/store/main";
 
 type SessionMetaWithFolder = {
   meta: SessionMetaJson;

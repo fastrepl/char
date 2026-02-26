@@ -1,4 +1,26 @@
 import type { MergeableStore, OptionalSchemas } from "tinybase/with-schemas";
+import {
+  createDeletionMarker,
+  type DeletionMarkerStore,
+} from "~/store/tinybase/persister/shared/deletion-marker";
+import {
+  isDirectoryNotFoundError,
+  isFileNotFoundError,
+} from "~/store/tinybase/persister/shared/fs";
+import {
+  err,
+  type LoadResult,
+  ok,
+} from "~/store/tinybase/persister/shared/load-result";
+import {
+  buildEntityFilePath,
+  buildEntityPath,
+  getDataDir,
+} from "~/store/tinybase/persister/shared/paths";
+import {
+  type ChangedTables,
+  type WriteOperation,
+} from "~/store/tinybase/persister/shared/types";
 
 import { commands as fs2Commands } from "@hypr/plugin-fs2";
 import {
@@ -8,18 +30,6 @@ import {
 } from "@hypr/plugin-fs-sync";
 import { toContent, toPersistedChanges } from "@hypr/tinybase-utils";
 
-import {
-  createDeletionMarker,
-  type DeletionMarkerStore,
-} from "../shared/deletion-marker";
-import { isDirectoryNotFoundError, isFileNotFoundError } from "../shared/fs";
-import { err, type LoadResult, ok } from "../shared/load-result";
-import {
-  buildEntityFilePath,
-  buildEntityPath,
-  getDataDir,
-} from "../shared/paths";
-import { type ChangedTables, type WriteOperation } from "../shared/types";
 import { createCollectorPersister } from "./collector";
 
 export interface MarkdownDirPersisterConfig<

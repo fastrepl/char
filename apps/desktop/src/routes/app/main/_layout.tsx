@@ -5,34 +5,30 @@ import {
 } from "@tanstack/react-router";
 import { isTauri } from "@tauri-apps/api/core";
 import { useCallback, useEffect, useRef } from "react";
-
-import { hydrateSessionContextFromFs } from "../../../chat/session-context-hydrator";
-import { buildChatTools } from "../../../chat/tools";
-import { AITaskProvider } from "../../../contexts/ai-task";
-import { NotificationProvider } from "../../../contexts/notifications";
-import { useSearchEngine } from "../../../contexts/search/engine";
-import { SearchEngineProvider } from "../../../contexts/search/engine";
-import { SearchUIProvider } from "../../../contexts/search/ui";
-import { ShellProvider } from "../../../contexts/shell";
-import { useRegisterTools } from "../../../contexts/tool";
-import { ToolRegistryProvider } from "../../../contexts/tool";
-import { useDeeplinkHandler } from "../../../hooks/useDeeplinkHandler";
-import {
-  useLanguageModel,
-  useLLMConnection,
-} from "../../../hooks/useLLMConnection";
-import { initEnhancerService } from "../../../services/enhancer";
-import { deleteSessionCascade } from "../../../store/tinybase/store/deleteSession";
-import * as main from "../../../store/tinybase/store/main";
-import { isSessionEmpty } from "../../../store/tinybase/store/sessions";
-import * as settings from "../../../store/tinybase/store/settings";
-import { listenerStore } from "../../../store/zustand/listener/instance";
+import { AITaskProvider } from "~/ai/contexts";
+import { useLanguageModel, useLLMConnection } from "~/ai/hooks";
+import { hydrateSessionContextFromFs } from "~/chat/session-context-hydrator";
+import { buildChatTools } from "~/chat/tools";
+import { NotificationProvider } from "~/contexts/notifications";
+import { ShellProvider } from "~/contexts/shell";
+import { useRegisterTools } from "~/contexts/tool";
+import { ToolRegistryProvider } from "~/contexts/tool";
+import { useDeeplinkHandler } from "~/shared/hooks/useDeeplinkHandler";
+import { useSearchEngine } from "~/search/contexts/engine";
+import { SearchEngineProvider } from "~/search/contexts/engine";
+import { SearchUIProvider } from "~/search/contexts/ui";
+import { initEnhancerService } from "~/services/enhancer";
+import { deleteSessionCascade } from "~/store/tinybase/store/deleteSession";
+import * as main from "~/store/tinybase/store/main";
+import { isSessionEmpty } from "~/store/tinybase/store/sessions";
+import * as settings from "~/store/tinybase/store/settings";
+import { listenerStore } from "~/store/zustand/listener/instance";
 import {
   restorePinnedTabsToStore,
   restoreRecentlyOpenedToStore,
   useTabs,
-} from "../../../store/zustand/tabs";
-import { commands } from "../../../types/tauri.gen";
+} from "~/store/zustand/tabs";
+import { commands } from "~/types/tauri.gen";
 
 export const Route = createFileRoute("/app/main/_layout")({
   component: Component,

@@ -1,7 +1,7 @@
 import type { Queries } from "tinybase/with-schemas";
+import type { Schemas, Store } from "~/store/tinybase/store/main";
+import type * as settings from "~/store/tinybase/store/settings";
 
-import type { Schemas, Store } from "../../store/tinybase/store/main";
-import type * as settings from "../../store/tinybase/store/settings";
 import { createCtx } from "./ctx";
 import {
   CalendarFetchError,

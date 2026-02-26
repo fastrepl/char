@@ -1,3 +1,7 @@
+import { DEFAULT_USER_ID } from "~/shared/utils";
+import { id } from "~/shared/utils";
+import { findSessionByEventId } from "~/session/utils";
+
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import type {
   Event,
@@ -8,9 +12,6 @@ import type {
 } from "@hypr/store";
 import { json2md } from "@hypr/tiptap/shared";
 
-import { DEFAULT_USER_ID } from "../../../utils";
-import { id } from "../../../utils";
-import { findSessionByEventId } from "../../../utils/session-event";
 import * as main from "./main";
 
 type Store = NonNullable<ReturnType<typeof main.UI.useStore>>;

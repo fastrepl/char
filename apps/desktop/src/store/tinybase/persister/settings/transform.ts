@@ -1,7 +1,6 @@
 import type { Content } from "tinybase/with-schemas";
-
-import type { Schemas, Store } from "../../store/settings";
-import { SETTINGS_MAPPING } from "../../store/settings";
+import type { Schemas, Store } from "~/store/tinybase/store/settings";
+import { SETTINGS_MAPPING } from "~/store/tinybase/store/settings";
 
 type ProviderData = { base_url: string; api_key: string };
 type ProviderRow = { type: "llm" | "stt"; base_url: string; api_key: string };

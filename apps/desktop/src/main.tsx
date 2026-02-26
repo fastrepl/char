@@ -13,13 +13,13 @@ import {
 import { init as initWindowsPlugin } from "@hypr/plugin-windows";
 import "@hypr/ui/globals.css";
 
-import { ErrorComponent, NotFoundComponent } from "./components/control";
-import { EventListeners } from "./components/event-listeners";
-import { TaskManager } from "./components/task-manager";
 import { createToolRegistry } from "./contexts/tool-registry/core";
 import { env } from "./env";
-import { initExtensionGlobals } from "./extension-globals";
+import { initExtensionGlobals } from "./extensions/globals";
 import { routeTree } from "./routeTree.gen";
+import { TaskManager } from "./services/task-manager";
+import { ErrorComponent, NotFoundComponent } from "./shared/control";
+import { EventListeners } from "./shared/event-listeners";
 import {
   type Store,
   STORE_ID,

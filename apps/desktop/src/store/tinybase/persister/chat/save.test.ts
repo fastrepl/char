@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vitest";
+import type { TablesContent } from "~/store/tinybase/persister/shared";
 
-import type { TablesContent } from "../shared";
 import { buildChatSaveOps } from "./save";
 import type { ChatJson } from "./types";
 

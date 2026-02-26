@@ -1,4 +1,4 @@
-import type { IncomingParticipants } from "../../fetch/types";
+import type { IncomingParticipants } from "~/services/apple-calendar/fetch/types";
 
 export type ParticipantMappingId = string;
 

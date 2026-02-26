@@ -1,4 +1,5 @@
-import type { TranscriptJson } from "../types";
+import type { TranscriptJson } from "~/store/tinybase/persister/session/types";
+
 import type { LoadedSessionData } from "./types";
 
 const LABEL = "SessionPersister";

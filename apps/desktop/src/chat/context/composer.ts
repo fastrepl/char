@@ -1,4 +1,4 @@
-import type { ContextEntity } from "../context-item";
+import type { ContextEntity } from "~/chat/context-item";
 
 export function composeContextEntities(
   groups: ContextEntity[][],

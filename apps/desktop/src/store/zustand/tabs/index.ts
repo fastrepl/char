@@ -1,6 +1,6 @@
 import { create } from "zustand";
+import { wrapSliceWithLogging } from "~/store/zustand/shared";
 
-import { wrapSliceWithLogging } from "../shared";
 import { type BasicActions, type BasicState, createBasicSlice } from "./basic";
 import {
   type ChatModeActions,

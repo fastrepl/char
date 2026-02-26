@@ -1,13 +1,13 @@
+import type * as main from "~/store/tinybase/store/main";
+import type * as settings from "~/store/tinybase/store/settings";
+import { findSessionByEventId } from "~/session/utils";
+
 import {
   type EventDetails,
   commands as notificationCommands,
   type Participant,
 } from "@hypr/plugin-notification";
 import { format, TZDate } from "@hypr/utils";
-
-import type * as main from "../../store/tinybase/store/main";
-import type * as settings from "../../store/tinybase/store/settings";
-import { findSessionByEventId } from "../../utils/session-event";
 
 export const EVENT_NOTIFICATION_TASK_ID = "eventNotification";
 export const EVENT_NOTIFICATION_INTERVAL = 30 * 1000; // 30 sec

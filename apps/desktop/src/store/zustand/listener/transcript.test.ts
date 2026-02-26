@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { createStore } from "zustand";
+import type { RuntimeSpeakerHint, WordLike } from "~/stt/segment";
 
 import type { StreamResponse, StreamWord } from "@hypr/plugin-listener";
 
-import type { RuntimeSpeakerHint, WordLike } from "../../../utils/segment";
 import {
   createTranscriptSlice,
   type TranscriptActions,

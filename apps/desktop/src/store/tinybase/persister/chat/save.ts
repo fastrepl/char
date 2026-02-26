@@ -1,12 +1,12 @@
 import { sep } from "@tauri-apps/api/path";
-
 import {
   buildChatPath,
   CHAT_MESSAGES_FILE,
   iterateTableRows,
   type TablesContent,
   type WriteOperation,
-} from "../shared";
+} from "~/store/tinybase/persister/shared";
+
 import type { ChatGroupData, ChatJson, ChatMessageWithId } from "./types";
 
 export function tablesToChatJsonList(tables: TablesContent): ChatJson[] {

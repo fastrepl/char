@@ -1,9 +1,8 @@
 import { createRootRouteWithContext } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
+import type { Context } from "~/types";
 
-import type { Context } from "../types";
-
-const MainAppLayout = lazy(() => import("../components/main-app-layout"));
+const MainAppLayout = lazy(() => import("~/shared/main-app-layout"));
 
 export const Route = createRootRouteWithContext<Partial<Context>>()({
   component: Component,

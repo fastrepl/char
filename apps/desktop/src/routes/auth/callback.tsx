@@ -1,9 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
+import { useAuth } from "~/auth";
 
 import type { AuthCallbackSearch } from "@hypr/plugin-deeplink2";
-
-import { useAuth } from "../../auth";
 
 export const Route = createFileRoute("/auth/callback")({
   validateSearch: (search): AuthCallbackSearch => {

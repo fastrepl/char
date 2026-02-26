@@ -1,18 +1,18 @@
 import { sep } from "@tauri-apps/api/path";
-
-import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
-
 import {
   SESSION_META_FILE,
   SESSION_NOTE_EXTENSION,
   SESSION_TRANSCRIPT_FILE,
-} from "../../shared";
+} from "~/store/tinybase/persister/shared";
 import {
   err,
   isDirectoryNotFoundError,
   type LoadResult,
   ok,
-} from "../../shared";
+} from "~/store/tinybase/persister/shared";
+
+import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
+
 import { processMetaFile } from "./meta";
 import { processMdFile } from "./note";
 import { processTranscriptFile } from "./transcript";

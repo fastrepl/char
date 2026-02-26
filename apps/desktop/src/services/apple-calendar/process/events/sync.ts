@@ -1,6 +1,7 @@
-import { eventMatchingKey } from "../../../../utils/session-event";
-import type { Ctx } from "../../ctx";
-import type { IncomingEvent } from "../../fetch/types";
+import type { Ctx } from "~/services/apple-calendar/ctx";
+import type { IncomingEvent } from "~/services/apple-calendar/fetch/types";
+import { eventMatchingKey } from "~/session/utils";
+
 import type { EventsSyncInput, EventsSyncOutput } from "./types";
 
 export function syncEvents(

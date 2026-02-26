@@ -1,7 +1,10 @@
 import { describe, expect, test } from "vitest";
+import type { Ctx } from "~/services/apple-calendar/ctx";
+import type {
+  ExistingEvent,
+  IncomingEvent,
+} from "~/services/apple-calendar/fetch/types";
 
-import type { Ctx } from "../../ctx";
-import type { ExistingEvent, IncomingEvent } from "../../fetch/types";
 import { syncEvents } from "./sync";
 import type { EventsSyncInput } from "./types";
 

@@ -1,9 +1,9 @@
 import type { StoreApi } from "zustand";
+import { listenerStore } from "~/store/zustand/listener/instance";
+import { id } from "~/shared/utils";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 
-import { id } from "../../../utils";
-import { listenerStore } from "../listener/instance";
 import type { ChatModeState } from "./chat-mode";
 import type { LifecycleState } from "./lifecycle";
 import type { NavigationState, TabHistory } from "./navigation";

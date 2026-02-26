@@ -1,9 +1,9 @@
 import type { LanguageModel } from "ai";
 import { create as mutate } from "mutative";
 import type { StoreApi } from "zustand";
+import type { Store as MainStore } from "~/store/tinybase/store/main";
+import type { Store as SettingsStore } from "~/store/tinybase/store/settings";
 
-import type { Store as MainStore } from "../../tinybase/store/main";
-import type { Store as SettingsStore } from "../../tinybase/store/settings";
 import { applyTransforms } from "./shared/transform_infra";
 import {
   TASK_CONFIGS,

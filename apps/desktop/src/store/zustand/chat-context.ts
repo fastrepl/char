@@ -1,6 +1,5 @@
 import { create } from "zustand";
-
-import type { ContextEntity } from "../../chat/context-item";
+import type { ContextEntity } from "~/chat/context-item";
 
 type PerGroupContext = {
   contextEntities: ContextEntity[];

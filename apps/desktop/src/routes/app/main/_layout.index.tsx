@@ -1,20 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import type { ComponentRef } from "react";
+import { ChatView } from "~/chat/components/view";
+import { useShell } from "~/contexts/shell";
+import { useSearch } from "~/search/contexts/ui";
+import { Body } from "~/shared/main";
+import { LeftSidebar } from "~/sidebar";
+import { useTabs } from "~/store/zustand/tabs";
+import { commands } from "~/types/tauri.gen";
 
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@hypr/ui/components/ui/resizable";
-
-import { ChatView } from "../../../components/chat/view";
-import { Body } from "../../../components/main/body";
-import { LeftSidebar } from "../../../components/main/sidebar";
-import { useSearch } from "../../../contexts/search/ui";
-import { useShell } from "../../../contexts/shell";
-import { useTabs } from "../../../store/zustand/tabs";
-import { commands } from "../../../types/tauri.gen";
 
 export const Route = createFileRoute("/app/main/_layout/")({
   component: Component,

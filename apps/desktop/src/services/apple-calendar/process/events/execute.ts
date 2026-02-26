@@ -1,13 +1,14 @@
-import type { EventStorage, SessionEvent } from "@hypr/store";
-
-import { id } from "../../../../utils";
+import type { Ctx } from "~/services/apple-calendar/ctx";
+import type { IncomingEvent } from "~/services/apple-calendar/fetch/types";
+import { id } from "~/shared/utils";
 import {
   eventMatchingKey,
   getSessionEventById,
   sessionEventMatchingKey,
-} from "../../../../utils/session-event";
-import type { Ctx } from "../../ctx";
-import type { IncomingEvent } from "../../fetch/types";
+} from "~/session/utils";
+
+import type { EventStorage, SessionEvent } from "@hypr/store";
+
 import type { EventsSyncOutput } from "./types";
 
 export function executeForEventsSync(ctx: Ctx, out: EventsSyncOutput): void {

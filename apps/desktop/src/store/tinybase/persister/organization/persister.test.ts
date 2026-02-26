@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
+import {
+  createTestMainStore,
+  MOCK_DATA_DIR,
+} from "~/store/tinybase/persister/testing/mocks";
 
-import { createTestMainStore, MOCK_DATA_DIR } from "../testing/mocks";
 import { createOrganizationPersister } from "./persister";
 
 const settingsMocks = vi.hoisted(() => ({
