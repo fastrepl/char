@@ -1,9 +1,12 @@
+use std::time::Duration;
+
 use axum::{
     Extension, Json,
     extract::State,
     http::StatusCode,
     response::{IntoResponse, Response},
 };
+use backon::{ExponentialBuilder, Retryable};
 use hypr_api_auth::AuthContext;
 use serde::Serialize;
 use stripe_core::customer::DeleteCustomer;
@@ -17,6 +20,12 @@ pub struct DeleteAccountResponse {
     pub deleted: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
+}
+
+fn retry_policy() -> ExponentialBuilder {
+    ExponentialBuilder::default()
+        .with_min_delay(Duration::from_millis(100))
+        .with_max_times(3)
 }
 
 #[utoipa::path(
@@ -35,67 +44,27 @@ pub async fn delete_account(
 ) -> Response {
     let user_id = &auth.claims.sub;
 
-    // 1. Delete Stripe customer (also cancels active subscriptions).
-    //    The webhook sync engine will update the `stripe` schema accordingly.
-    match state.supabase.admin_get_stripe_customer_id(user_id).await {
-        Ok(Some(customer_id)) => {
-            match DeleteCustomer::new(&*customer_id).send(&state.stripe).await {
-                Ok(_) => {
-                    tracing::info!(user_id = %user_id, customer_id = %customer_id, "stripe_customer_deleted");
-                }
-                Err(e) => {
-                    tracing::error!(user_id = %user_id, customer_id = %customer_id, error = %e, "stripe_customer_deletion_failed");
-                    sentry::capture_message(
-                        &format!("stripe customer deletion failed for {}: {}", user_id, e),
-                        sentry::Level::Error,
-                    );
-                    return (
-                        StatusCode::INTERNAL_SERVER_ERROR,
-                        Json(DeleteAccountResponse {
-                            deleted: false,
-                            error: Some("stripe_customer_deletion_failed".to_string()),
-                        }),
-                    )
-                        .into_response();
-                }
-            }
-        }
-        Ok(None) => {
-            tracing::info!(user_id = %user_id, "no_stripe_customer_to_delete");
-        }
-        Err(e) => {
-            tracing::warn!(user_id = %user_id, error = %e, "failed_to_lookup_stripe_customer");
-            // Continue — not having a stripe customer shouldn't block deletion
-        }
+    if let Err(response) = try_delete_stripe_customer(&state, user_id).await {
+        return response;
     }
 
-    // 2. Delete storage objects (audio files).
-    if let Err(e) = state
-        .supabase
-        .admin_delete_storage_objects("audio-files", user_id)
+    let _ = (|| {
+        state
+            .supabase
+            .admin_delete_storage_objects("audio-files", user_id)
+    })
+    .retry(retry_policy())
+    .sleep(tokio::time::sleep)
+    .await
+    .inspect_err(|e| tracing::warn!(user_id = %user_id, error = %e, "storage_cleanup_failed"));
+
+    try_delete_loops_contact(&state, &auth.token, user_id).await;
+
+    match (|| state.supabase.admin_delete_user(user_id))
+        .retry(retry_policy())
+        .sleep(tokio::time::sleep)
         .await
     {
-        tracing::warn!(user_id = %user_id, error = %e, "storage_cleanup_failed");
-    }
-
-    // 3. Delete Loops contact (best-effort, before auth user deletion).
-    match state.supabase.get_user_email(&auth.token).await {
-        Ok(Some(email)) => {
-            if let Err(e) = state.loops.delete_contact_by_email(&email).await {
-                tracing::warn!(user_id = %user_id, error = %e, "loops_contact_deletion_failed");
-            }
-        }
-        Ok(None) => {
-            tracing::warn!(user_id = %user_id, "no_email_for_loops_deletion");
-        }
-        Err(e) => {
-            tracing::warn!(user_id = %user_id, error = %e, "failed_to_get_email_for_loops");
-        }
-    }
-
-    // 4. Delete Supabase auth user.
-    //    This cascades: profiles, nango_connections, transcription_jobs.
-    match state.supabase.admin_delete_user(user_id).await {
         Ok(()) => {
             tracing::info!(user_id = %user_id, "account_deleted");
             (
@@ -120,4 +89,74 @@ pub async fn delete_account(
                 .into_response()
         }
     }
+}
+
+async fn try_delete_stripe_customer(state: &AppState, user_id: &str) -> Result<(), Response> {
+    let customer_id = match (|| state.supabase.admin_get_stripe_customer_id(user_id))
+        .retry(retry_policy())
+        .sleep(tokio::time::sleep)
+        .await
+    {
+        Ok(Some(id)) => id,
+        Ok(None) => {
+            tracing::info!(user_id = %user_id, "no_stripe_customer_to_delete");
+            return Ok(());
+        }
+        Err(e) => {
+            tracing::warn!(user_id = %user_id, error = %e, "failed_to_lookup_stripe_customer");
+            return Ok(());
+        }
+    };
+
+    match (|| async { DeleteCustomer::new(&*customer_id).send(&state.stripe).await })
+        .retry(retry_policy())
+        .sleep(tokio::time::sleep)
+        .await
+    {
+        Ok(_) => {
+            tracing::info!(user_id = %user_id, customer_id = %customer_id, "stripe_customer_deleted");
+            Ok(())
+        }
+        Err(e) => {
+            tracing::error!(user_id = %user_id, customer_id = %customer_id, error = %e, "stripe_customer_deletion_failed");
+            sentry::capture_message(
+                &format!("stripe customer deletion failed for {}: {}", user_id, e),
+                sentry::Level::Error,
+            );
+            Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(DeleteAccountResponse {
+                    deleted: false,
+                    error: Some("stripe_customer_deletion_failed".to_string()),
+                }),
+            )
+                .into_response())
+        }
+    }
+}
+
+async fn try_delete_loops_contact(state: &AppState, token: &str, user_id: &str) {
+    let email = match (|| state.supabase.get_user_email(token))
+        .retry(retry_policy())
+        .sleep(tokio::time::sleep)
+        .await
+    {
+        Ok(Some(email)) => email,
+        Ok(None) => {
+            tracing::warn!(user_id = %user_id, "no_email_for_loops_deletion");
+            return;
+        }
+        Err(e) => {
+            tracing::warn!(user_id = %user_id, error = %e, "failed_to_get_email_for_loops");
+            return;
+        }
+    };
+
+    let _ = (|| state.loops.delete_contact_by_email(&email))
+        .retry(retry_policy())
+        .sleep(tokio::time::sleep)
+        .await
+        .inspect_err(
+            |e| tracing::warn!(user_id = %user_id, error = %e, "loops_contact_deletion_failed"),
+        );
 }

@@ -1479,8 +1479,7 @@
         "type": "string",
         "enum": [
           "started",
-          "not_eligible",
-          "error"
+          "not_eligible"
         ]
       },
       "StartTrialResponse": {

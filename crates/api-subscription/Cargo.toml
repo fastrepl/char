@@ -14,6 +14,7 @@ utoipa = { workspace = true }
 
 axum = { workspace = true }
 reqwest = { workspace = true, features = ["json"] }
+sentry = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
 
@@ -22,6 +23,8 @@ serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
 urlencoding = { workspace = true }
+
+backon = { workspace = true }
 
 async-stripe = { workspace = true }
 async-stripe-billing = { workspace = true, features = ["subscription"] }

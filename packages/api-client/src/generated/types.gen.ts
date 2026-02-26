@@ -187,7 +187,7 @@ export type SendMessageRequest = {
     sourceId?: string | null;
 };
 
-export type StartTrialReason = 'started' | 'not_eligible' | 'error';
+export type StartTrialReason = 'started' | 'not_eligible';
 
 export type StartTrialResponse = {
     reason?: null | StartTrialReason;
