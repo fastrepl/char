@@ -37,7 +37,7 @@ jobs:
                  * New integrations or providers
 
             2. **Write the Blog Post**
-               Create a new MDX file at `apps/web/content/articles/char-weekly-YYYY-MM-DD.mdx` where YYYY-MM-DD is today's date.
+               Determine the ISO week number (W) and year (Y) for today's date, then create a new MDX file at `apps/web/content/articles/wW-Y.mdx` (e.g. `w9-2026.mdx` for ISO week 9 of 2026). You can compute this with: `date -u +"%V-%G"` on Linux.
 
                Use this frontmatter format:
                ```
