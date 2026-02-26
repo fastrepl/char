@@ -42,6 +42,6 @@ impl IntoResponse for MessengerError {
             ),
         };
 
-        hypr_api_error::error_response(status, &code, &message)
+        hypr_api_error::error_response(status, code, &message)
     }
 }

@@ -35,6 +35,6 @@ impl IntoResponse for CalendarError {
             Self::NangoConnection(err) => return err.into_response(),
         };
 
-        hypr_api_error::error_response(status, &code, &message)
+        hypr_api_error::error_response(status, code, &message)
     }
 }

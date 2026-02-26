@@ -64,7 +64,7 @@ impl TranscriptProcessor {
             return None;
         }
 
-        let ch = channel_index.first().copied().unwrap_or(0) as i32;
+        let ch = channel_index.first().copied().unwrap_or(0);
         let raw_words = assemble(&alt.words, &alt.transcript, ch);
         if raw_words.is_empty() {
             return None;

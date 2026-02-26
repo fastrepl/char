@@ -41,6 +41,6 @@ impl IntoResponse for NangoError {
             ),
         };
 
-        hypr_api_error::error_response(status, &code, &message)
+        hypr_api_error::error_response(status, code, &message)
     }
 }

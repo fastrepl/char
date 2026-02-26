@@ -36,6 +36,6 @@ impl IntoResponse for SyncError {
             ),
         };
 
-        hypr_api_error::error_response(status, &code, &message)
+        hypr_api_error::error_response(status, code, &message)
     }
 }
