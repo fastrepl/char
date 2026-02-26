@@ -51,16 +51,13 @@
 
 /* Inline mention chip */
 .mention {
-    display: inline-flex;
-    align-items: baseline;
+    display: inline;
     font-weight: 500;
     text-decoration: none;
-    border-radius: 0.25rem;
     padding: 0;
     font-size: inherit;
     line-height: inherit;
     color: inherit;
-    vertical-align: baseline;
 }
 
 .mention .mention-avatar {
@@ -72,9 +69,6 @@
     border-radius: 50%;
     overflow: hidden;
     vertical-align: middle;
-    flex-shrink: 0;
-    margin-right: 0.15em;
-    align-self: center;
 }
 
 .mention .mention-avatar-icon {
@@ -93,7 +87,6 @@
 }
 
 .mention .mention-text {
-    white-space: nowrap;
 }
 
 /* NodeView wrapper for inline mention rendering */
