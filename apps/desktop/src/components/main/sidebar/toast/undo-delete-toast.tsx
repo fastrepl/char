@@ -331,6 +331,7 @@ function ToastPill({
           onClick={() => confirmGroup(group)}
           className={cn([
             "text-xs font-medium px-3 py-1.5 rounded-full",
+            "whitespace-nowrap",
             "bg-neutral-100 text-neutral-500",
             "hover:bg-red-100 hover:text-red-600",
             "transition-colors",
@@ -343,6 +344,7 @@ function ToastPill({
           onClick={() => restoreGroup(group)}
           className={cn([
             "text-xs font-medium px-3 py-1.5 rounded-full",
+            "whitespace-nowrap",
             "bg-neutral-900 text-white",
             "hover:bg-neutral-800",
             "transition-colors",
