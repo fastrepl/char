@@ -210,11 +210,15 @@ function TabContentNoteInner({
   useEffect(() => {
     const justStartedListening =
       prevSessionMode.current !== "active" && sessionMode === "active";
+    const justStoppedListening =
+      prevSessionMode.current === "active" && sessionMode !== "active";
 
     prevSessionMode.current = sessionMode;
 
     if (justStartedListening) {
       setShowConsentBanner(true);
+    } else if (justStoppedListening) {
+      setShowConsentBanner(false);
     }
   }, [sessionMode]);
 
