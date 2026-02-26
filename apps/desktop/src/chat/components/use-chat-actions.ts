@@ -1,4 +1,5 @@
 import { useCallback, useRef } from "react";
+import type { ContextRef } from "~/chat/context-item";
 import { useCreateChatMessage } from "~/chat/hooks/useCreateChatMessage";
 import type { HyprUIMessage } from "~/chat/types";
 import { id } from "~/shared/utils";
@@ -32,13 +33,18 @@ export function useChatActions({
       content: string,
       parts: HyprUIMessage["parts"],
       sendMessage: (message: HyprUIMessage) => void,
+      contextRefs?: ContextRef[],
     ) => {
       const messageId = id();
+      const metadata = {
+        createdAt: Date.now(),
+        ...(contextRefs && contextRefs.length > 0 ? { contextRefs } : {}),
+      };
       const uiMessage: HyprUIMessage = {
         id: messageId,
         role: "user",
         parts,
-        metadata: { createdAt: Date.now() },
+        metadata,
       };
 
       let currentGroupId = groupId;
@@ -55,7 +61,7 @@ export function useChatActions({
         content,
         role: "user",
         parts,
-        metadata: { createdAt: Date.now() },
+        metadata,
       });
 
       sendMessage(uiMessage);

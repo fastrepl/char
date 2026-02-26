@@ -1,12 +1,17 @@
 import { useChat } from "@ai-sdk/react";
 import type { ChatStatus } from "ai";
 import type { LanguageModel, ToolSet } from "ai";
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useLanguageModel } from "~/ai/hooks";
-import type { ContextEntity } from "~/chat/context-item";
-import { composeContextEntities } from "~/chat/context/composer";
-import { buildChatSystemContext } from "~/chat/context/prompt-context";
+import type { ContextEntity, ContextRef } from "~/chat/context-item";
 import { useCreateChatMessage } from "~/chat/hooks/useCreateChatMessage";
+import { hydrateSessionContextFromFs } from "~/chat/session-context-hydrator";
 import { CustomChatTransport } from "~/chat/transport";
 import type { HyprUIMessage } from "~/chat/types";
 import { useToolRegistry } from "~/contexts/tool";
@@ -14,13 +19,12 @@ import { id } from "~/shared/utils";
 import * as main from "~/store/tinybase/store/main";
 import { useChatContext } from "~/store/zustand/chat-context";
 
-import type { SessionContext } from "@hypr/plugin-template";
 import { commands as templateCommands } from "@hypr/plugin-template";
 
 import { useChatContextPipeline } from "./use-chat-context-pipeline";
 import { useSessionContextEntity } from "./use-session-context-entity";
 
-const EMPTY_CONTEXT_ENTITIES: ContextEntity[] = [];
+const EMPTY_CONTEXT_REFS: ContextRef[] = [];
 
 interface ChatSessionProps {
   sessionId: string;
@@ -41,7 +45,9 @@ interface ChatSessionProps {
     status: ChatStatus;
     error?: Error;
     contextEntities: ContextEntity[];
+    contextRefs: ContextRef[];
     onRemoveContextEntity: (key: string) => void;
+    onAddContextEntity: (ref: ContextRef) => void;
     isSystemPromptReady: boolean;
   }) => ReactNode;
 }
@@ -56,32 +62,29 @@ export function ChatSession({
   children,
 }: ChatSessionProps) {
   const sessionEntity = useSessionContextEntity(currentSessionId);
+  const store = main.UI.useStore(main.STORE_ID);
 
   const persistContext = useChatContext((s) => s.persistContext);
+  const addRef = useChatContext((s) => s.addRef);
   const persistedCtx = useChatContext((s) =>
     chatGroupId ? s.contexts[chatGroupId] : undefined,
   );
-  const persistedEntities =
-    persistedCtx?.contextEntities ?? EMPTY_CONTEXT_ENTITIES;
+  const persistedRefs = persistedCtx?.contextRefs ?? EMPTY_CONTEXT_REFS;
 
-  const transportContextEntities = useMemo(() => {
-    const sessionEntities: ContextEntity[] = sessionEntity
-      ? [sessionEntity]
-      : [];
-    return composeContextEntities([sessionEntities, persistedEntities]);
-  }, [sessionEntity, persistedEntities]);
-  const sessionContext = useMemo(
-    () => buildChatSystemContext(transportContextEntities).context,
-    [transportContextEntities],
+  const onAddContextEntity = useCallback(
+    (ref: ContextRef) => {
+      if (!chatGroupId) return;
+      addRef(chatGroupId, ref);
+    },
+    [chatGroupId, addRef],
   );
+
   const { transport, isSystemPromptReady } = useTransport(
-    sessionContext,
     modelOverride,
     extraTools,
     systemPromptOverride,
+    store,
   );
-
-  const store = main.UI.useStore(main.STORE_ID);
   const createChatMessage = useCreateChatMessage();
 
   const messageIds = main.UI.useSliceRowIds(
@@ -178,14 +181,16 @@ export function ChatSession({
     }
   }, [chatGroupId, messages, status, store, createChatMessage, messageIds]);
 
-  const { contextEntities, onRemoveContextEntity } = useChatContextPipeline({
-    sessionId,
-    chatGroupId,
-    messages,
-    sessionEntity,
-    persistedEntities,
-    persistContext,
-  });
+  const { contextEntities, contextRefs, onRemoveContextEntity } =
+    useChatContextPipeline({
+      sessionId,
+      chatGroupId,
+      messages,
+      sessionEntity,
+      persistedRefs,
+      persistContext,
+      store,
+    });
 
   return (
     <div className="flex-1 h-full flex flex-col">
@@ -199,7 +204,9 @@ export function ChatSession({
         status,
         error,
         contextEntities,
+        contextRefs,
         onRemoveContextEntity,
+        onAddContextEntity,
         isSystemPromptReady,
       })}
     </div>
@@ -207,10 +214,10 @@ export function ChatSession({
 }
 
 function useTransport(
-  sessionContext: SessionContext | null,
   modelOverride?: LanguageModel,
   extraTools?: ToolSet,
   systemPromptOverride?: string,
+  store?: ReturnType<typeof main.UI.useStore>,
 ) {
   const registry = useToolRegistry();
   const configuredModel = useLanguageModel("chat");
@@ -230,7 +237,6 @@ function useTransport(
       .render({
         chatSystem: {
           language,
-          context: sessionContext,
         },
       })
       .then((result) => {
@@ -254,7 +260,7 @@ function useTransport(
     return () => {
       stale = true;
     };
-  }, [language, sessionContext, systemPromptOverride]);
+  }, [language, systemPromptOverride]);
 
   const effectiveSystemPrompt = systemPromptOverride ?? systemPrompt;
   const isSystemPromptReady =
@@ -284,8 +290,18 @@ function useTransport(
       return null;
     }
 
-    return new CustomChatTransport(model, tools, effectiveSystemPrompt);
-  }, [model, tools, effectiveSystemPrompt]);
+    return new CustomChatTransport(
+      model,
+      tools,
+      effectiveSystemPrompt,
+      async (ref) => {
+        if (ref.kind !== "session" || !store) {
+          return null;
+        }
+        return hydrateSessionContextFromFs(store, ref.sessionId);
+      },
+    );
+  }, [model, tools, effectiveSystemPrompt, store]);
 
   return {
     transport,

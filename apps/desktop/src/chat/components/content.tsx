@@ -1,6 +1,6 @@
 import type { ChatStatus } from "ai";
 import type { useLanguageModel } from "~/ai/hooks";
-import type { ContextEntity } from "~/chat/context-item";
+import type { ContextEntity, ContextRef } from "~/chat/context-item";
 import type { HyprUIMessage } from "~/chat/types";
 
 import { ChatBody } from "./body";
@@ -18,7 +18,9 @@ export function ChatContent({
   model,
   handleSendMessage,
   contextEntities,
+  contextRefs,
   onRemoveContextEntity,
+  onAddContextEntity,
   isSystemPromptReady,
   mcpIndicator,
   children,
@@ -35,9 +37,12 @@ export function ChatContent({
     content: string,
     parts: HyprUIMessage["parts"],
     sendMessage: (message: HyprUIMessage) => void,
+    contextRefs?: ContextRef[],
   ) => void;
   contextEntities: ContextEntity[];
+  contextRefs: ContextRef[];
   onRemoveContextEntity?: (key: string) => void;
+  onAddContextEntity?: (ref: ContextRef) => void;
   isSystemPromptReady: boolean;
   mcpIndicator?: McpIndicator;
   children?: React.ReactNode;
@@ -61,14 +66,15 @@ export function ChatContent({
       <ContextBar
         entities={contextEntities}
         onRemoveEntity={onRemoveContextEntity}
+        onAddEntity={onAddContextEntity}
       />
       <ChatMessageInput
         draftKey={sessionId}
         disabled={disabled}
         hasContextBar={contextEntities.length > 0}
-        onSendMessage={(content, parts) =>
-          handleSendMessage(content, parts, sendMessage)
-        }
+        onSendMessage={(content, parts) => {
+          handleSendMessage(content, parts, sendMessage, contextRefs);
+        }}
         isStreaming={status === "streaming" || status === "submitted"}
         onStop={stop}
         mcpIndicator={mcpIndicator}

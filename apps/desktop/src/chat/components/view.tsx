@@ -66,6 +66,7 @@ export function ChatView() {
             {...sessionProps}
             model={model}
             handleSendMessage={handleSendMessage}
+            onAddContextEntity={sessionProps.onAddContextEntity}
           >
             <ChatBody
               messages={sessionProps.messages}

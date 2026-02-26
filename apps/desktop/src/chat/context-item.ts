@@ -7,13 +7,21 @@ import { isRecord } from "./utils";
 
 export const CURRENT_SESSION_CONTEXT_KEY = "session:current";
 
-export type ContextEntitySource = "tool";
+export type ContextEntitySource = "tool" | "manual" | "auto-current";
+
+export type ContextRef = {
+  kind: "session";
+  key: string;
+  source?: ContextEntitySource;
+  sessionId: string;
+};
 
 export type ContextEntity =
   | {
       kind: "session";
       key: string;
       source?: ContextEntitySource;
+      sessionId: string;
       sessionContext: SessionContext;
       removable?: boolean;
     }
@@ -69,6 +77,7 @@ function parseSearchSessionsOutput(output: unknown): ContextEntity[] {
         kind: "session",
         key: `session:search:${item.id}`,
         source: "tool",
+        sessionId: String(item.id),
         sessionContext: parsedSessionContext ?? {
           title,
           date: null,
@@ -78,7 +87,6 @@ function parseSearchSessionsOutput(output: unknown): ContextEntity[] {
           participants: [],
           event: null,
         },
-        removable: true,
       },
     ];
   });
@@ -154,12 +162,77 @@ function parseSessionContext(value: unknown): SessionContext | null {
   };
 }
 
-const toolEntityExtractors: Record<
-  string,
-  (output: unknown) => ContextEntity[]
-> = {
+export type ToolContextExtractor = (output: unknown) => ContextEntity[];
+
+const toolEntityExtractors: Record<string, ToolContextExtractor> = {
   search_sessions: parseSearchSessionsOutput,
 };
+
+function getSessionIdFromKey(key: string): string | null {
+  const parts = key.split(":");
+  if (parts.length < 3 || parts[0] !== "session") {
+    return null;
+  }
+
+  return parts.slice(2).join(":") || null;
+}
+
+export function toContextRef(entity: ContextEntity): ContextRef | null {
+  if (entity.kind !== "session") {
+    return null;
+  }
+
+  if (entity.sessionId) {
+    return {
+      kind: "session",
+      key: entity.key,
+      source: entity.source,
+      sessionId: entity.sessionId,
+    };
+  }
+
+  const parsedSessionId = getSessionIdFromKey(entity.key);
+  if (!parsedSessionId) {
+    return null;
+  }
+
+  return {
+    kind: "session",
+    key: entity.key,
+    source: entity.source,
+    sessionId: parsedSessionId,
+  };
+}
+
+export function composeContextRefs(groups: ContextRef[][]): ContextRef[] {
+  const seen = new Set<string>();
+  const merged: ContextRef[] = [];
+
+  for (const group of groups) {
+    for (const ref of group) {
+      if (seen.has(ref.key)) {
+        continue;
+      }
+      seen.add(ref.key);
+      merged.push(ref);
+    }
+  }
+
+  return merged;
+}
+
+/**
+ * Register a context-entity extractor for a tool by its name (without the
+ * "tool-" prefix). Any tool whose output should be reflected in the Context
+ * Indicator must register here; tools without an extractor are silently
+ * ignored.
+ */
+export function registerToolContextExtractor(
+  toolName: string,
+  extractor: ToolContextExtractor,
+): void {
+  toolEntityExtractors[toolName] = extractor;
+}
 
 export function extractToolContextEntities(
   messages: Array<Pick<HyprUIMessage, "parts">>,

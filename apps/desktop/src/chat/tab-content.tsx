@@ -9,7 +9,7 @@ import {
   useChatActions,
   useStableSessionId,
 } from "~/chat/components/use-chat-actions";
-import type { ContextEntity } from "~/chat/context-item";
+import type { ContextEntity, ContextRef } from "~/chat/context-item";
 import { composeContextEntities } from "~/chat/context/composer";
 import { useSupportMCP } from "~/chat/hooks/useSupportMCP";
 import type { HyprUIMessage } from "~/chat/types";
@@ -134,6 +134,7 @@ function SupportChatTabInner({
     status: "submitted" | "streaming" | "ready" | "error";
     error?: Error;
     contextEntities: ContextEntity[];
+    contextRefs: ContextRef[];
     onRemoveContextEntity: (key: string) => void;
     isSystemPromptReady: boolean;
   };
@@ -213,6 +214,7 @@ function SupportChatTabInner({
       model={feedbackModel}
       handleSendMessage={handleSendMessage}
       contextEntities={mergedContextEntities}
+      contextRefs={sessionProps.contextRefs}
       onRemoveContextEntity={onRemoveContextEntity}
       isSystemPromptReady={isSystemPromptReady}
       mcpIndicator={{ type: "support" }}

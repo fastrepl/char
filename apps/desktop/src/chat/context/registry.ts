@@ -67,9 +67,7 @@ const renderers: RendererMap = {
       return {
         key: entity.key,
         icon: isFromTool ? SearchIcon : CalendarIcon,
-        label: isFromTool
-          ? `Search: ${sessionContext.title || "Session"}`
-          : sessionContext.title || "Session",
+        label: sessionContext.title || sessionContext.date || "Session",
         tooltip: lines.join("\n"),
         removable: entity.removable,
       };

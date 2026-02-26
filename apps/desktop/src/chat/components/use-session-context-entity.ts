@@ -231,6 +231,8 @@ export function useSessionContextEntity(
     return {
       kind: "session",
       key: CURRENT_SESSION_CONTEXT_KEY,
+      source: "auto-current",
+      sessionId: currentSessionId,
       sessionContext: sc,
     };
   }, [
