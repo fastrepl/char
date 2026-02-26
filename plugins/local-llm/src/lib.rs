@@ -22,6 +22,7 @@ pub type SharedState = std::sync::Arc<tokio::sync::Mutex<State>>;
 
 pub struct State {
     pub download_task: HashMap<SupportedModel, tokio::task::JoinHandle<()>>,
+    pub server: Option<hypr_local_llm_core::LlmServer>,
 }
 
 fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
@@ -39,6 +40,9 @@ fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
             commands::list_custom_models::<Wry>,
             commands::get_current_model_selection::<Wry>,
             commands::set_current_model_selection::<Wry>,
+            commands::start_server::<Wry>,
+            commands::stop_server::<Wry>,
+            commands::server_url::<Wry>,
         ])
         .error_handling(tauri_specta::ErrorHandlingMode::Result)
 }
@@ -83,6 +87,7 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
 
                 let state = State {
                     download_task: HashMap::new(),
+                    server: None,
                 };
                 app.manage(Arc::new(Mutex::new(state)));
             }

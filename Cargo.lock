@@ -10224,14 +10224,18 @@ dependencies = [
 name = "local-llm-core"
 version = "0.1.0"
 dependencies = [
+ "axum 0.8.8",
  "dirs 6.0.0",
  "file",
  "gguf",
+ "llm-cactus",
  "lmstudio",
  "serde",
  "serde_json",
  "specta",
  "thiserror 2.0.18",
+ "tokio",
+ "tower-http 0.6.8",
  "tracing",
 ]
 

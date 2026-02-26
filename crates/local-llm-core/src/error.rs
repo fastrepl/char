@@ -6,6 +6,8 @@ pub enum Error {
     IoError(#[from] std::io::Error),
     #[error(transparent)]
     LmStudioError(#[from] hypr_lmstudio::Error),
+    #[error(transparent)]
+    InferenceError(#[from] hypr_llm_cactus::Error),
     #[error("Model not downloaded")]
     ModelNotDownloaded,
     #[error("Store error: {0}")]

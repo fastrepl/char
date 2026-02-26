@@ -15,6 +15,9 @@ Default permissions for the plugin
 - `allow-list-custom-models`
 - `allow-get-current-model-selection`
 - `allow-set-current-model-selection`
+- `allow-start-server`
+- `allow-stop-server`
+- `allow-server-url`
 
 ## Permission Table
 
@@ -262,6 +265,32 @@ Denies the models_dir command without any pre-configured scope.
 <tr>
 <td>
 
+`local-llm:allow-server-url`
+
+</td>
+<td>
+
+Enables the server_url command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`local-llm:deny-server-url`
+
+</td>
+<td>
+
+Denies the server_url command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
 `local-llm:allow-set-current-model`
 
 </td>
@@ -307,6 +336,58 @@ Enables the set_current_model_selection command without any pre-configured scope
 <td>
 
 Denies the set_current_model_selection command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`local-llm:allow-start-server`
+
+</td>
+<td>
+
+Enables the start_server command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`local-llm:deny-start-server`
+
+</td>
+<td>
+
+Denies the start_server command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`local-llm:allow-stop-server`
+
+</td>
+<td>
+
+Enables the stop_server command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`local-llm:deny-stop-server`
+
+</td>
+<td>
+
+Denies the stop_server command without any pre-configured scope.
 
 </td>
 </tr>

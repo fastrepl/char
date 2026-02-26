@@ -12,4 +12,7 @@ permissions = [
     "allow-list-custom-models",
     "allow-get-current-model-selection",
     "allow-set-current-model-selection",
+    "allow-start-server",
+    "allow-stop-server",
+    "allow-server-url",
 ]

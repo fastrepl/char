@@ -36,6 +36,10 @@ pub trait LocalLlmPluginExt<R: Runtime> {
         &self,
         model: &crate::SupportedModel,
     ) -> impl Future<Output = Result<bool, crate::Error>>;
+
+    fn start_server(&self) -> impl Future<Output = Result<String, crate::Error>>;
+    fn stop_server(&self) -> impl Future<Output = Result<(), crate::Error>>;
+    fn server_url(&self) -> impl Future<Output = Result<Option<String>, crate::Error>>;
 }
 
 impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
@@ -186,5 +190,50 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
             &tauri_store,
             model,
         )?)
+    }
+
+    #[tracing::instrument(skip_all)]
+    async fn start_server(&self) -> Result<String, crate::Error> {
+        let state = self.state::<crate::SharedState>();
+
+        {
+            let mut guard = state.lock().await;
+            if let Some(server) = guard.server.take() {
+                server.stop().await;
+            }
+        }
+
+        let selection = self.get_current_model_selection()?;
+        let models_dir = self.models_dir();
+
+        let server = hypr_local_llm_core::LlmServer::start(&selection, &models_dir).await?;
+        let url = server.url().to_string();
+
+        {
+            let mut guard = state.lock().await;
+            guard.server = Some(server);
+        }
+
+        Ok(url)
+    }
+
+    #[tracing::instrument(skip_all)]
+    async fn stop_server(&self) -> Result<(), crate::Error> {
+        let state = self.state::<crate::SharedState>();
+        let mut guard = state.lock().await;
+
+        if let Some(server) = guard.server.take() {
+            server.stop().await;
+        }
+
+        Ok(())
+    }
+
+    #[tracing::instrument(skip_all)]
+    async fn server_url(&self) -> Result<Option<String>, crate::Error> {
+        let state = self.state::<crate::SharedState>();
+        let guard = state.lock().await;
+
+        Ok(guard.server.as_ref().map(|s| s.url().to_string()))
     }
 }

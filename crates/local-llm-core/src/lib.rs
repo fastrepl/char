@@ -1,9 +1,11 @@
 mod error;
 mod model;
+mod server;
 mod store;
 
 pub use error::*;
 pub use model::*;
+pub use server::*;
 pub use store::*;
 
 use std::path::Path;
