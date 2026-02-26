@@ -1,5 +1,4 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { useShell } from "~/contexts/shell";
 import { useCaretPosition } from "~/session/components/caret-position-context";
 import {
@@ -106,7 +105,7 @@ function FloatingButtonContainer({ children }: { children: ReactNode }) {
   const rightOffset = chatPanelWidth / 2;
   const totalOffset = leftOffset - rightOffset;
 
-  return createPortal(
+  return (
     <div
       ref={containerRef}
       style={{ left: `calc(50% + ${totalOffset}px)` }}
@@ -117,7 +116,6 @@ function FloatingButtonContainer({ children }: { children: ReactNode }) {
       ])}
     >
       {children}
-    </div>,
-    document.body,
+    </div>
   );
 }
