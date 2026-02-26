@@ -59,7 +59,7 @@ const ChatEditor = forwardRef<{ editor: TiptapEditor | null }, ChatEditorProps>(
 
       if (slashCommandConfigRef.current) {
         configs.push({
-          trigger: "/",
+          trigger: "@",
           handleSearch: (query) =>
             slashCommandConfigRef.current!.handleSearch(query),
         });
