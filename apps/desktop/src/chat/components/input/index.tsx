@@ -128,7 +128,7 @@ function Container({
     <div className={cn(["relative", "px-2 pb-2"])}>
       <div
         className={cn([
-          "flex flex-col border border-neutral-200 rounded-xl",
+          "flex flex-col border border-neutral-200 rounded-b-xl",
           hasContextBar && "rounded-t-none border-t-0",
         ])}
       >
