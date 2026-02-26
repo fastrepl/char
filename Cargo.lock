@@ -10122,8 +10122,10 @@ version = "0.1.0"
 dependencies = [
  "aspasia",
  "audio-utils",
+ "denoise",
  "futures-util",
  "host",
+ "hound",
  "language",
  "owhisper-client",
  "owhisper-interface",

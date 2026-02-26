@@ -19,6 +19,16 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Listener2<'a, R, M> {
         core::run_batch(runtime, params).await
     }
 
+    pub async fn run_denoise(&self, params: core::DenoiseParams) -> Result<(), core::Error> {
+        let state = self.manager.state::<crate::SharedState>();
+        let guard = state.lock().await;
+        let app = guard.app.clone();
+        drop(guard);
+
+        let runtime = Arc::new(TauriDenoiseRuntime { app });
+        core::run_denoise(runtime, params).await
+    }
+
     pub fn parse_subtitle(&self, path: String) -> Result<core::Subtitle, String> {
         core::parse_subtitle_from_path(path)
     }
@@ -71,6 +81,17 @@ struct TauriBatchRuntime {
 impl core::BatchRuntime for TauriBatchRuntime {
     fn emit(&self, event: core::BatchEvent) {
         let tauri_event: crate::BatchEvent = event.into();
+        let _ = tauri_event.emit(&self.app);
+    }
+}
+
+struct TauriDenoiseRuntime {
+    app: tauri::AppHandle,
+}
+
+impl core::DenoiseRuntime for TauriDenoiseRuntime {
+    fn emit(&self, event: core::DenoiseEvent) {
+        let tauri_event: crate::DenoiseEvent = event.into();
         let _ = tauri_event.emit(&self.app);
     }
 }

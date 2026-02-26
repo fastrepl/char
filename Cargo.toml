@@ -106,6 +106,7 @@ hypr-slack-web = { path = "crates/slack-web", package = "slack-web" }
 hypr-storage = { path = "crates/storage", package = "storage" }
 hypr-supabase-auth = { path = "crates/supabase-auth", package = "supabase-auth" }
 hypr-supabase-storage = { path = "crates/supabase-storage", package = "supabase-storage" }
+hypr-tantivy-core = { path = "crates/tantivy", package = "tantivy-core" }
 hypr-tcc = { path = "crates/tcc", package = "tcc" }
 hypr-teems = { path = "crates/teems", package = "teems" }
 hypr-template-app = { path = "crates/template-app", package = "template-app" }
