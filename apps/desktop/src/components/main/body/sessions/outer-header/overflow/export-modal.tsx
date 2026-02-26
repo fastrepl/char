@@ -1,6 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
 import { downloadDir, join } from "@tauri-apps/api/path";
-import { FileTextIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -12,7 +11,6 @@ import {
   type TranscriptItem,
 } from "@hypr/plugin-pdf";
 import { json2md } from "@hypr/tiptap/shared";
-import { DropdownMenuItem } from "@hypr/ui/components/ui/dropdown-menu";
 import { cn } from "@hypr/utils";
 
 import { useSessionEvent } from "../../../../../../hooks/tinybase";
@@ -58,11 +56,14 @@ function formatDuration(startMs: number, endMs: number): string {
 export function ExportModal({
   sessionId,
   currentView,
+  open,
+  onOpenChange,
 }: {
   sessionId: string;
   currentView: EditorView;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
   const [format, setFormat] = useState<FileFormat>("pdf");
   const [includeSummary, setIncludeSummary] = useState(true);
   const [includeTranscript, setIncludeTranscript] = useState(false);
@@ -368,113 +369,97 @@ export function ExportModal({
         });
         void openerCommands.revealItemInDir(path);
       }
-      setOpen(false);
+      onOpenChange(false);
     },
     onError: console.error,
   });
 
   const hasAnyContentSelected = includeSummary || includeTranscript;
+  if (!open) {
+    return null;
+  }
 
-  return (
-    <>
-      <DropdownMenuItem
-        onClick={(e) => {
-          e.preventDefault();
-          setOpen(true);
-        }}
-        className="cursor-pointer"
+  return createPortal(
+    <div
+      className="fixed inset-0 z-50 bg-black/20 backdrop-blur-xs"
+      onClick={() => onOpenChange(false)}
+    >
+      <div
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xs px-4"
+        onClick={(e) => e.stopPropagation()}
       >
-        <FileTextIcon />
-        <span>Export</span>
-      </DropdownMenuItem>
+        <div
+          className={cn([
+            "bg-[#faf8f5] rounded-xl border border-neutral-200/80",
+            "shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]",
+            "p-5 flex flex-col gap-4 text-center",
+          ])}
+        >
+          <div className="flex flex-col gap-1">
+            <h2 className="text-base font-semibold">Export</h2>
+            <p className="text-sm text-neutral-500">
+              Choose a file format and what to include.
+            </p>
+          </div>
 
-      {open &&
-        createPortal(
-          <div
-            className="fixed inset-0 z-50 bg-black/20 backdrop-blur-xs"
-            onMouseDown={(e) => {
-              if (e.target === e.currentTarget) setOpen(false);
-            }}
-          >
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xs px-4">
-              <div
-                className={cn([
-                  "bg-[#faf8f5] rounded-xl border border-neutral-200/80",
-                  "shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]",
-                  "p-5 flex flex-col gap-4 text-center",
-                ])}
-              >
-                <div className="flex flex-col gap-1">
-                  <h2 className="text-base font-semibold">Export</h2>
-                  <p className="text-sm text-neutral-500">
-                    Choose a file format and what to include.
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-4">
-                  <div className="flex flex-col gap-2">
-                    <span className="text-sm font-medium">File format</span>
-                    <div className="flex justify-center gap-4">
-                      {(["pdf", "txt", "md"] as const).map((f) => (
-                        <label
-                          key={f}
-                          className="flex items-center gap-1.5 cursor-pointer text-sm"
-                        >
-                          <input
-                            type="radio"
-                            name="export-format"
-                            checked={format === f}
-                            onChange={() => setFormat(f)}
-                            className="accent-stone-800"
-                          />
-                          {f === "md" ? "Markdown" : f.toUpperCase()}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <span className="text-sm font-medium">Include</span>
-                    <div className="flex justify-center gap-4">
-                      {(
-                        [
-                          ["Summary", includeSummary, setIncludeSummary],
-                          [
-                            "Transcript",
-                            includeTranscript,
-                            setIncludeTranscript,
-                          ],
-                        ] as const
-                      ).map(([label, checked, setter]) => (
-                        <label
-                          key={label}
-                          className="flex items-center gap-1.5 cursor-pointer text-sm"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={(e) => setter(e.target.checked)}
-                            className="accent-stone-800"
-                          />
-                          {label}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => mutate(null)}
-                  disabled={isPending || !hasAnyContentSelected}
-                  className="w-full h-10 rounded-full bg-stone-800 hover:bg-stone-700 text-white text-sm font-medium border-2 border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isPending ? "Exporting..." : "Export"}
-                </button>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-medium">File format</span>
+              <div className="flex justify-center gap-4">
+                {(["pdf", "txt", "md"] as const).map((f) => (
+                  <label
+                    key={f}
+                    className="flex items-center gap-1.5 cursor-pointer text-sm"
+                  >
+                    <input
+                      type="radio"
+                      name="export-format"
+                      checked={format === f}
+                      onChange={() => setFormat(f)}
+                      className="accent-stone-800"
+                    />
+                    {f === "md" ? "Markdown" : f.toUpperCase()}
+                  </label>
+                ))}
               </div>
             </div>
-          </div>,
-          document.body,
-        )}
-    </>
+
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-medium">Include</span>
+              <div className="flex justify-center gap-4">
+                {(
+                  [
+                    ["Summary", includeSummary, setIncludeSummary],
+                    ["Transcript", includeTranscript, setIncludeTranscript],
+                  ] as const
+                ).map(([label, checked, setter]) => (
+                  <label
+                    key={label}
+                    className="flex items-center gap-1.5 cursor-pointer text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={(e) => setter(e.target.checked)}
+                      className="accent-stone-800"
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => mutate(null)}
+            disabled={isPending || !hasAnyContentSelected}
+            className="w-full h-10 rounded-full bg-stone-800 hover:bg-stone-700 text-white text-sm font-medium border-2 border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isPending ? "Exporting..." : "Export"}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body,
   );
 }
