@@ -20,11 +20,10 @@ pub(super) fn sanitise_key(key: &str) -> Cow<'_, str> {
 }
 
 pub(super) fn sanitise_type_name(ident: &str) -> Result<(), Error> {
-    if let Some(first_char) = ident.chars().next() {
-        if !first_char.is_alphabetic() && first_char != '_' {
+    if let Some(first_char) = ident.chars().next()
+        && !first_char.is_alphabetic() && first_char != '_' {
             return Err(Error::InvalidTypeName(ident.to_string()));
         }
-    }
 
     if ident.contains(|c: char| !c.is_alphanumeric() && c != '_') {
         return Err(Error::InvalidTypeName(ident.to_string()));
@@ -34,7 +33,7 @@ pub(super) fn sanitise_type_name(ident: &str) -> Result<(), Error> {
 }
 
 pub(super) fn escape_string(s: &str) -> Cow<'_, str> {
-    if s.contains(|c: char| c == '\\' || c == '"' || c == '\n' || c == '\r' || c == '\t') {
+    if s.contains(['\\', '"', '\n', '\r', '\t']) {
         let mut result = String::with_capacity(s.len());
         for c in s.chars() {
             match c {

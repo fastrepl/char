@@ -31,6 +31,6 @@ impl IntoResponse for BotError {
             ),
         };
 
-        hypr_api_error::error_response(status, &code, &message)
+        hypr_api_error::error_response(status, code, &message)
     }
 }
