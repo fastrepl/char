@@ -212,34 +212,6 @@ export const getExtensions = (
             return tr;
           },
         }),
-        new Plugin({
-          key: new PluginKey("linkCmdClick"),
-          props: {
-            handleClick(view, pos, event) {
-              const { state } = view;
-              const $pos = state.doc.resolve(pos);
-              const marks = $pos.marks();
-              const linkMark = marks.find((mark) => mark.type.name === "link");
-              if (!linkMark || !linkMark.attrs.href) {
-                return false;
-              }
-              if (!(event.metaKey || event.ctrlKey)) {
-                return true;
-              }
-              event.preventDefault();
-              if (options?.onLinkOpen) {
-                options.onLinkOpen(linkMark.attrs.href);
-              } else {
-                window.open(
-                  linkMark.attrs.href,
-                  "_blank",
-                  "noopener,noreferrer",
-                );
-              }
-              return true;
-            },
-          },
-        }),
       ];
     },
   }).configure({

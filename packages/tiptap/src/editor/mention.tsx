@@ -433,7 +433,7 @@ function MentionNodeView({ node }: NodeViewProps) {
       onClick={handleClick}
     >
       <MentionAvatar id={mentionId} type={mentionType} label={mentionLabel} />
-      {mentionLabel}
+      <span className="mention-text">{mentionLabel}</span>
     </NodeViewWrapper>
   );
 }
@@ -499,7 +499,7 @@ export const mention = (config: MentionConfig) => {
           onclick: `event.preventDefault(); if (window.${GLOBAL_NAVIGATE_FUNCTION}) window.${GLOBAL_NAVIGATE_FUNCTION}('${path}');`,
         },
         ["span", { class: "mention-avatar", "data-initial": initial }],
-        ` ${label}`,
+        ["span", { class: "mention-text" }, ` ${label}`],
       ];
     },
     HTMLAttributes: {
