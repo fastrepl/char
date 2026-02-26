@@ -37,9 +37,15 @@ pub(crate) fn handle_detect_event<E: Env>(
 ) {
     match event {
         hypr_detect::DetectEvent::MicStarted(apps) => {
+            if !env.is_detect_enabled() {
+                return;
+            }
             handle_mic_started(env, state, apps);
         }
         hypr_detect::DetectEvent::MicStopped(apps) => {
+            if !env.is_detect_enabled() {
+                return;
+            }
             handle_mic_stopped(env, state, apps);
         }
         #[cfg(all(target_os = "macos", feature = "zoom"))]
