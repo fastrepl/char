@@ -3,6 +3,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 
+import { cn } from "@hypr/utils";
+
 import { signOutFn, updateUserEmail } from "@/functions/auth";
 import {
   canStartTrial,
@@ -11,6 +13,7 @@ import {
   startTrial,
   syncAfterSuccess,
 } from "@/functions/billing";
+import { useConnections } from "@/hooks/use-connections";
 
 const VALID_SCHEMES = [
   "hyprnote",
@@ -57,7 +60,7 @@ function Component() {
 
           <AccountSettingsCard />
 
-          {/* <IntegrationsSettingsCard /> */}
+          <IntegrationsSettingsCard />
 
           <DeleteAccountSection />
 
@@ -280,6 +283,69 @@ function AccountSettingsCard() {
         </div>
         {renderPlanButton()}
       </div>
+    </div>
+  );
+}
+
+const INTEGRATIONS = [
+  { id: "google-calendar", name: "Google Calendar" },
+] as const;
+
+function IntegrationsSettingsCard() {
+  const navigate = useNavigate();
+  const { data: connections, isLoading } = useConnections();
+
+  const getConnectionStatus = (integrationId: string) => {
+    return connections?.find((c) => c.integration_id === integrationId);
+  };
+
+  return (
+    <div className="border border-neutral-100 rounded-xs">
+      <div className="p-4">
+        <h3 className="font-serif text-lg font-semibold mb-2">Integrations</h3>
+        <p className="text-sm text-neutral-600">
+          Connect third-party services to enhance your experience
+        </p>
+      </div>
+
+      {INTEGRATIONS.map((integration) => {
+        const connection = getConnectionStatus(integration.id);
+        const isConnected = !!connection;
+
+        return (
+          <div
+            key={integration.id}
+            className="flex items-center justify-between border-t border-neutral-100 p-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="text-sm font-medium">{integration.name}</div>
+              {isLoading ? (
+                <span className="text-xs text-neutral-400">Checking...</span>
+              ) : isConnected ? (
+                <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                  Connected
+                </span>
+              ) : null}
+            </div>
+            <button
+              onClick={() =>
+                navigate({
+                  to: "/app/integration/",
+                  search: { integration_id: integration.id },
+                })
+              }
+              className={cn([
+                "px-4 h-8 flex items-center text-sm rounded-full transition-all cursor-pointer",
+                isConnected
+                  ? "bg-linear-to-b from-white to-stone-50 border border-neutral-300 text-neutral-700 shadow-xs hover:shadow-md hover:scale-[102%] active:scale-[98%]"
+                  : "bg-linear-to-t from-stone-600 to-stone-500 text-white shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
+              ])}
+            >
+              {isConnected ? "Reconnect" : "Connect"}
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }

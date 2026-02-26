@@ -1,17 +1,17 @@
 import Nango from "@nangohq/frontend";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 
+import { createConnectSession } from "@hypr/api-client";
+import { createClient } from "@hypr/api-client/client";
 import { cn } from "@hypr/utils";
 
-import { nangoCreateConnectSession } from "../../../functions/nango";
+import { env } from "@/env";
+import { getAccessToken } from "@/functions/access-token";
 
 const validateSearch = z.object({
   integration_id: z.string().default("google-calendar"),
-  flow: z.enum(["desktop", "web"]).default("web"),
-  scheme: z.string().default("hyprnote"),
 });
 
 const INTEGRATION_DISPLAY: Record<
@@ -45,9 +45,7 @@ export const Route = createFileRoute("/_view/app/integration")({
 
 function Component() {
   const search = Route.useSearch();
-  const { user } = Route.useRouteContext();
   const navigate = useNavigate();
-  const getSessionToken = useServerFn(nangoCreateConnectSession);
   const [nango] = useState(() => new Nango());
   const [status, setStatus] = useState<
     "idle" | "connecting" | "success" | "error"
@@ -60,7 +58,6 @@ function Component() {
   const display = getIntegrationDisplay(search.integration_id);
 
   const handleConnect = async () => {
-    if (!user) return;
     setStatus("connecting");
 
     const connect = nango.openConnectUI({
@@ -79,8 +76,7 @@ function Component() {
             search: {
               integration_id: search.integration_id,
               status: "success",
-              flow: search.flow,
-              scheme: search.scheme,
+              flow: "web",
             },
           });
         }
@@ -88,12 +84,20 @@ function Component() {
     });
 
     try {
-      const { sessionToken } = await getSessionToken({
-        data: {
-          allowedIntegrations: [search.integration_id],
-        },
+      const token = await getAccessToken();
+      const client = createClient({
+        baseUrl: env.VITE_API_URL,
+        headers: { Authorization: `Bearer ${token}` },
       });
-      connect.setSessionToken(sessionToken);
+      const { data, error } = await createConnectSession({
+        client,
+        body: { allowed_integrations: [search.integration_id] },
+      });
+      if (error || !data) {
+        setStatus("error");
+        return;
+      }
+      connect.setSessionToken(data.token);
     } catch {
       setStatus("error");
     }
