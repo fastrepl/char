@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -44,6 +45,7 @@ function buildDeeplinkUrl(
 function Component() {
   const search = Route.useSearch();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [copied, setCopied] = useState(false);
 
   const getDeeplink = () => {
@@ -72,9 +74,11 @@ function Component() {
 
   useEffect(() => {
     if (search.flow === "web") {
-      void navigate({ to: "/app/account/" });
+      void queryClient
+        .invalidateQueries({ queryKey: ["integration-status"] })
+        .then(() => navigate({ to: "/app/account/" }));
     }
-  }, [search.flow, navigate]);
+  }, [search.flow, navigate, queryClient]);
 
   useEffect(() => {
     if (search.flow === "desktop" && search.status === "success") {

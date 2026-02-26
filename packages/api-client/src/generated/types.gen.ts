@@ -59,6 +59,10 @@ export type ConversationSummary = {
     inboxId?: string | null;
 };
 
+export type CreateConnectSessionRequest = {
+    allowed_integrations?: Array<string> | null;
+};
+
 export type CreateContactRequest = {
     customAttributes?: unknown;
     email?: string | null;
@@ -267,10 +271,6 @@ export type SttStatusResponse = {
 
 export type WebhookResponse = {
     status: string;
-};
-
-export type CreateConnectSessionRequest = {
-    allowed_integrations?: Array<string>;
 };
 
 export type ListCalendarsData = {

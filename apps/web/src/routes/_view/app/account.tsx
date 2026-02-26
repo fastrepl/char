@@ -296,7 +296,7 @@ const NANGO_PROVIDERS = [
 
 function IntegrationsSettingsCard() {
   const navigate = useNavigate();
-  const { data: connections } = useConnections();
+  const { data: connections, isLoading } = useConnections();
 
   const handleConnect = (integrationId: string) => {
     void navigate({
@@ -319,9 +319,11 @@ function IntegrationsSettingsCard() {
       </div>
 
       {NANGO_PROVIDERS.map((provider) => {
-        const connection = connections?.find(
-          (c) => c.integration_id === provider.nangoIntegrationId,
-        );
+        const connection = isLoading
+          ? undefined
+          : connections?.find(
+              (c) => c.integration_id === provider.nangoIntegrationId,
+            );
         return (
           <div
             key={provider.nangoIntegrationId}
@@ -333,22 +335,27 @@ function IntegrationsSettingsCard() {
                 <span className="text-sm font-medium">
                   {provider.displayName}
                 </span>
-                {connection && (
+                {isLoading ? (
+                  <span className="text-xs text-neutral-400">Checking...</span>
+                ) : connection ? (
                   <span className="text-xs text-green-600">Connected</span>
-                )}
+                ) : null}
               </div>
             </div>
 
             <button
               onClick={() => handleConnect(provider.nangoIntegrationId)}
+              disabled={isLoading}
               className={cn([
                 "cursor-pointer px-4 h-8 flex items-center text-sm rounded-full shadow-xs transition-all",
-                connection
-                  ? "bg-linear-to-b from-white to-stone-50 border border-neutral-300 text-neutral-700 hover:shadow-md hover:scale-[102%] active:scale-[98%]"
-                  : "bg-linear-to-t from-stone-600 to-stone-500 text-white shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
+                isLoading
+                  ? "bg-neutral-100 text-neutral-400 cursor-not-allowed"
+                  : connection
+                    ? "bg-linear-to-b from-white to-stone-50 border border-neutral-300 text-neutral-700 hover:shadow-md hover:scale-[102%] active:scale-[98%]"
+                    : "bg-linear-to-t from-stone-600 to-stone-500 text-white shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
               ])}
             >
-              {connection ? "Reconnect" : "Connect"}
+              {isLoading ? "..." : connection ? "Reconnect" : "Connect"}
             </button>
           </div>
         );

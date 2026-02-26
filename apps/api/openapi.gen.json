@@ -221,6 +221,16 @@
           "nango"
         ],
         "operationId": "create_connect_session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConnectSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Connect session created",
@@ -243,17 +253,7 @@
           {
             "bearer_auth": []
           }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateConnectSessionRequest"
-              }
-            }
-          },
-          "required": true
-        }
+        ]
       }
     },
     "/nango/connections": {
@@ -993,6 +993,20 @@
               "string",
               "null"
             ]
+          }
+        }
+      },
+      "CreateConnectSessionRequest": {
+        "type": "object",
+        "properties": {
+          "allowed_integrations": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -1810,18 +1824,6 @@
         "properties": {
           "status": {
             "type": "string"
-          }
-        }
-      },
-      "CreateConnectSessionRequest": {
-        "type": "object",
-        "properties": {
-          "allowed_integrations": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true
           }
         }
       }
