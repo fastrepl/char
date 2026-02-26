@@ -5,7 +5,6 @@ import type { TiptapEditor } from "@hypr/tiptap/chat";
 import ChatEditor from "@hypr/tiptap/chat";
 import type { PlaceholderFunction } from "@hypr/tiptap/shared";
 import { Button } from "@hypr/ui/components/ui/button";
-import { Kbd } from "@hypr/ui/components/ui/kbd";
 import { cn } from "@hypr/utils";
 
 import {
@@ -42,7 +41,7 @@ export function ChatMessageInput({
   const disabled =
     typeof disabledProp === "object" ? disabledProp.disabled : disabledProp;
 
-  const { initialContent, handleEditorUpdate } = useDraftState({
+  const { hasContent, initialContent, handleEditorUpdate } = useDraftState({
     draftKey,
   });
   const handleSubmit = useSubmit({
@@ -89,22 +88,27 @@ export function ChatMessageInput({
               onClick={handleSubmit}
               disabled={disabled}
               className={cn([
-                "group inline-flex items-center gap-1.5 h-7 px-1.5 rounded-lg text-xs font-medium transition-colors",
+                "inline-flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-xs font-medium transition-all duration-100",
+                "border",
                 disabled
-                  ? "text-neutral-300 cursor-default"
-                  : "text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100",
+                  ? "text-neutral-300 border-neutral-200 cursor-default"
+                  : [
+                    "text-white bg-stone-800 border-stone-600",
+                    "hover:bg-stone-700",
+                    "active:scale-[0.97] active:bg-stone-600",
+                  ],
+                !hasContent && !disabled && "opacity-50",
               ])}
             >
               Send
-              <Kbd
+              <span
                 className={cn([
-                  "transition-all duration-100",
-                  "group-hover:-translate-y-0.5 group-hover:shadow-[0_2px_0_0_rgba(0,0,0,0.15),inset_0_1px_0_0_rgba(255,255,255,0.8)]",
-                  "group-active:translate-y-0.5 group-active:shadow-none",
+                  "text-xs font-mono",
+                  disabled ? "text-neutral-300" : "text-stone-400",
                 ])}
               >
                 ⌘ ↩
-              </Kbd>
+              </span>
             </button>
           )}
         </div>
