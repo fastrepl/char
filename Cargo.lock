@@ -553,7 +553,7 @@ name = "api-client"
 version = "0.1.0"
 dependencies = [
  "chrono",
- "progenitor-client",
+ "progenitor-client 0.13.0",
  "progenitor-utils",
  "reqwest 0.13.2",
  "serde",
@@ -2951,7 +2951,7 @@ name = "chatwoot"
 version = "0.1.0"
 dependencies = [
  "chrono",
- "progenitor-client",
+ "progenitor-client 0.13.0",
  "progenitor-utils",
  "reqwest 0.13.2",
  "serde",
@@ -13167,7 +13167,7 @@ version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bdc8cf6196a0139ab7b833b500f7f1acd005c91be0fe27a9e20112bf83dc9535"
 dependencies = [
- "progenitor-client",
+ "progenitor-client 0.12.0",
  "progenitor-impl",
  "progenitor-macro",
 ]
@@ -13177,6 +13177,21 @@ name = "progenitor-client"
 version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ffab7b358944dba033a7b324e7558e66e6bcb1fb4705cf57f26fd5092bcae630"
+dependencies = [
+ "bytes",
+ "futures-core",
+ "percent-encoding",
+ "reqwest 0.13.2",
+ "serde",
+ "serde_json",
+ "serde_urlencoded",
+]
+
+[[package]]
+name = "progenitor-client"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3999c302f5f2a42b7ca1cc39ad9e612c74cf2910ef6e58f869e45f3068b9659f"
 dependencies = [
  "bytes",
  "futures-core",
@@ -13366,7 +13381,7 @@ name = "pyannote-cloud"
 version = "0.1.0"
 dependencies = [
  "chrono",
- "progenitor-client",
+ "progenitor-client 0.13.0",
  "progenitor-utils",
  "regress",
  "reqwest 0.13.2",

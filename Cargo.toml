@@ -129,6 +129,7 @@ hypr-whisper-local-model = { path = "crates/whisper-local-model", package = "whi
 hypr-ws-client = { path = "crates/ws-client", package = "ws-client" }
 hypr-ws-utils = { path = "crates/ws-utils", package = "ws-utils" }
 posthog-rs = "0.4.1"
+progenitor-client = "0.13"
 
 owhisper-client = { path = "crates/owhisper-client", package = "owhisper-client" }
 owhisper-config = { path = "crates/owhisper-config", package = "owhisper-config" }
