@@ -2718,7 +2718,7 @@ dependencies = [
 [[package]]
 name = "cactus-sys"
 version = "0.1.0"
-source = "git+https://github.com/cactus-compute/cactus?rev=b1c378b#b1c378bb847439bc7cf6e06d3994ceb3f212e214"
+source = "git+https://github.com/cactus-compute/cactus?rev=7239830#723983012f62eed19bf6770f4f0f05c0ccd4ff0e"
 dependencies = [
  "bindgen 0.72.1",
  "cmake",
@@ -2966,6 +2966,16 @@ name = "chinese-variant"
 version = "1.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "58b52a9840ffff5d4d0058ae529fa066a75e794e3125546acfc61c23ad755e49"
+
+[[package]]
+name = "chrome-native-host"
+version = "0.1.0"
+dependencies = [
+ "dirs 6.0.0",
+ "serde",
+ "serde_json",
+ "tempfile",
+]
 
 [[package]]
 name = "chrono"
@@ -22735,6 +22745,10 @@ name = "xmp-writer"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ce9e2f4a404d9ebffc0a9832cf4f50907220ba3d7fffa9099261a5cab52f2dd7"
+
+[[package]]
+name = "xtask"
+version = "0.1.0"
 
 [[package]]
 name = "xz2"
