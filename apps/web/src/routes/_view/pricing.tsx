@@ -21,6 +21,7 @@ interface PricingPlan {
     included: boolean | "partial";
     tooltip?: string;
     comingSoon?: boolean;
+    partiallyImplemented?: boolean;
   }>;
 }
 
@@ -32,6 +33,8 @@ const pricingPlans: PricingPlan[] = [
       "Fully functional with your own API keys. Perfect for individuals who want complete control.",
     features: [
       { label: "On-device Transcription", included: true },
+      { label: "Save Audio Recordings", included: true },
+      { label: "Audio Player with Transcript Tracking", included: true },
       { label: "Bring Your Own Key (STT & LLM)", included: true },
       { label: "Export to PDF, TXT, Markdown", included: true },
       {
@@ -40,8 +43,15 @@ const pricingPlans: PricingPlan[] = [
         tooltip:
           "Filesystem-based by default: notes and transcripts are stored on your device first.",
       },
-      { label: "Templates & Chat", included: true },
-      { label: "Integrations", included: false, comingSoon: true },
+      {
+        label: "Custom Content Base Location",
+        included: true,
+        tooltip: "Move your default content folder to any location you prefer.",
+      },
+      { label: "Templates", included: true },
+      { label: "Shortcuts", included: true },
+      { label: "Chat", included: true },
+      { label: "Integrations", included: false },
       { label: "Cloud Services (STT & LLM)", included: false },
       { label: "Cloud Sync", included: false },
       { label: "Shareable Links", included: false },
@@ -62,11 +72,13 @@ const pricingPlans: PricingPlan[] = [
     popular: true,
     features: [
       { label: "Everything in Free", included: true },
+      { label: "Audio Player with Playback Rates", included: true },
       {
         label: "Speaker Identification",
-        included: true,
-        comingSoon: true,
+        included: "partial",
+        partiallyImplemented: true,
       },
+      { label: "Advanced Templates", included: true },
       { label: "Integrations", included: true, comingSoon: true },
       { label: "Cloud Services (STT & LLM)", included: true },
       {
@@ -237,9 +249,18 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
                     >
                       {feature.label}
                     </span>
-                    {feature.comingSoon && (
-                      <span className="text-xs font-medium text-neutral-500 bg-neutral-200 px-2 py-0.5 rounded-full">
-                        Coming Soon
+                    {(feature.comingSoon || feature.partiallyImplemented) && (
+                      <span
+                        className={cn([
+                          "text-xs font-medium px-2 py-0.5 rounded-full",
+                          feature.partiallyImplemented
+                            ? "text-yellow-800 bg-yellow-100"
+                            : "text-neutral-500 bg-neutral-200",
+                        ])}
+                      >
+                        {feature.partiallyImplemented
+                          ? "Partially Implemented"
+                          : "Coming Soon"}
                       </span>
                     )}
                   </div>
@@ -301,6 +322,21 @@ function FAQSection() {
       question: "What's included in shareable links?",
       answer:
         "Pro users get DocSend-like controls: track who views your notes, set expiration dates, and revoke access anytime.",
+    },
+    {
+      question: "What are templates?",
+      answer:
+        "Templates are our opinionated way to structure summaries. You can pick from a variety of templates we provide and create your own version as needed.",
+    },
+    {
+      question: "What are advanced templates?",
+      answer:
+        "Advanced templates let you override Char’s default system prompt by configuring template variables and the overall instructions given to the AI.",
+    },
+    {
+      question: "What are shortcuts?",
+      answer:
+        "Shortcuts are saved prompts you use repeatedly, like “Write a follow-up to blog blah” or “Create a one-pager of the important stuff that’s been discussed.” They’re available in chat via the / command.",
     },
     {
       question: "Do you offer student discounts?",
