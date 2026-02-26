@@ -6,11 +6,11 @@ description: "Pro users get access to higher-quality cloud transcription."
 
 Pro includes access to premium cloud transcription services that offer higher accuracy than local models, especially for accented speech, technical jargon, and noisy environments.
 
-## Pro Curated Models
+## Pro curated models
 
 Pro subscribers get access to curated cloud transcription models that work out of the box with no configuration required. These models are selected for quality and reliability, and API keys are managed automatically.
 
-### How Provider Selection Works
+### How provider selection works
 
 When you use Pro's curated transcription, you don't pick a specific provider — Char's server automatically selects the best one based on your configured languages. The routing logic evaluates each provider's language support quality and picks the highest-quality match.
 
@@ -32,7 +32,7 @@ For example, when transcribing Korean + English, Soniox is selected over Deepgra
 
 <GithubCode url="https://github.com/fastrepl/char/blob/main/crates/transcribe-proxy/src/hyprnote_routing.rs#L70-L111" />
 
-### How Audio Flows
+### How audio flows
 
 ![Audio Flow](https://agents.craft.do/mermaid?code=flowchart%20LR%0A%20%20%20%20A%5BYour%20Device%5D%20--%3E%7CWebSocket%7C%20B%5BChar%20API%20Server%3Cbr%2F%3Epro.hyprnote.com%5D%0A%20%20%20%20B%20--%3E%7CWebSocket%7C%20C%5BSTT%20Provider%3Cbr%2F%3Ee.g.%2C%20Deepgram%2C%20Soniox%5D)
 
@@ -42,7 +42,7 @@ For example, when transcribing Korean + English, Soniox is selected over Deepgra
 4. **The STT provider** returns real-time transcription results back through the same chain.
 5. If a provider fails, the server retries with the next provider in the chain (up to 2 retries with exponential backoff).
 
-## Bring Your Own Key (BYOK)
+## Bring your own key (BYOK)
 
 If you want to use a specific transcription provider, you can bring your own API key. Supported providers include:
 
@@ -59,17 +59,17 @@ If you want to use a specific transcription provider, you can bring your own API
 
 To use BYOK, go to Settings > Transcription and enter your API key for your preferred provider.
 
-## How to Enable
+## How to enable
 
 1. Subscribe to Pro or start a free trial
 2. Go to Settings > Transcription
 3. Use the curated Pro models (default) or enter your own API key for a specific provider
 
-## Language Support
+## Language support
 
 Char checks if your selected provider supports your configured languages. If there's a mismatch, you'll see a warning with suggestions for compatible providers. Configure your languages in Settings > Language & Vocabulary.
 
-## How Your Audio Data Is Handled
+## How your audio data is handled
 
 When using cloud transcription, your recorded audio is sent to the selected provider for processing:
 
@@ -80,7 +80,7 @@ Here is how Char selects the correct adapter for your configured provider — ea
 
 <GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/listener/src/actors/listener/adapters.rs#L22-L102" />
 
-### What Data Is Sent to the Provider
+### What data is sent to the provider
 
 **Sent alongside your audio stream:**
 
@@ -96,7 +96,7 @@ Here is how Char selects the correct adapter for your configured provider — ea
 
 Your audio files and transcripts are always stored locally on your device regardless of which transcription method you use. Cloud providers only receive the audio stream for processing and return the transcript.
 
-### What Char Logs
+### What Char logs
 
 Char logs metadata about each STT session to PostHog for usage tracking. **No audio or transcription text is ever logged.**
 
@@ -105,11 +105,11 @@ Char logs metadata about each STT session to PostHog for usage tracking. **No au
 **Logged:** provider name, session duration.
 **Not logged:** audio content, transcription text, meeting content.
 
-## Provider Privacy Policies
+## Provider privacy policies
 
 All STT providers used by Pro have zero data retention for real-time/streaming transcription and are SOC 2 compliant.
 
-### Deepgram (Primary)
+### Deepgram (primary)
 
 | Policy | Details |
 |--------|---------|
@@ -125,7 +125,7 @@ All STT providers used by Pro have zero data retention for real-time/streaming t
 
 Official docs: [Privacy Policy](https://deepgram.com/privacy) · [Data Security](https://deepgram.com/data-security) · [Information Security & Privacy](https://developers.deepgram.com/trust-security/information-security-privacy)
 
-### Soniox (Multilingual)
+### Soniox (multilingual)
 
 | Policy | Details |
 |--------|---------|
@@ -143,7 +143,7 @@ Official docs: [Privacy Policy](https://deepgram.com/privacy) · [Data Security]
 
 Official docs: [Privacy Policy](https://soniox.com/policies/privacy-policy) · [Security & Privacy](https://soniox.com/docs/stt/security-and-privacy) · [Data Residency](https://soniox.com/docs/stt/data-residency)
 
-### AssemblyAI (Fallback)
+### AssemblyAI (fallback)
 
 | Policy | Details |
 |--------|---------|
@@ -161,7 +161,7 @@ Official docs: [Privacy Policy](https://www.assemblyai.com/legal/privacy-policy)
 
 For the full details on every data flow, see [AI Models & Data Privacy](/docs/faq/ai-models-and-privacy).
 
-## When to Use Cloud vs Local
+## When to use cloud vs local
 
 Use cloud transcription when you need maximum accuracy and have internet access. Use local transcription (Whisper models) when privacy is paramount or you're offline. Local models support 50+ languages and run entirely on your device.
 

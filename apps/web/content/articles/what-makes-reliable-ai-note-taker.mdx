@@ -18,7 +18,7 @@ We haven't built a perfect platform yet. But we've learned what makes an AI note
 
 If you're evaluating note-taking tools, here's what matters.
 
-## Measuring Reliability in AI Notetakers
+## Measuring reliability in AI notetakers
 
 In system design, reliability scales with the number of dependencies your tool needs to function. The fewer external services required, the more reliable it is.
 
@@ -26,7 +26,7 @@ Most AI notetakers today depend on multiple layers. Understanding those dependen
 
 AI notetakers typically introduce dependencies in five places:
 
-### 1. Network Dependency
+### 1. Network dependency
 
 Most AI notetakers require internet to function. Not just to sync notes, but to process them in real time. Transcription happens in the cloud. AI runs on remote servers. No internet means no tool.
 
@@ -36,7 +36,7 @@ These aren't edge cases. They're where important conversations actually happen. 
 
 See [best AI notetakers for in-person meetings](/blog/best-ai-notetaker-for-in-person-meetings) or meetings without stable internet.
 
-### 2. Vendor Dependency
+### 2. Vendor dependency
 
 Cloud-based AI notetakers need specific services running. OpenAI's API. Azure's infrastructure. AWS endpoints. When those vendors go down, every tool built on them stops working.
 
@@ -46,7 +46,7 @@ Vendor dependencies also mean inheriting their business decisions. Pricing chang
 
 <CtaCard/>
 
-### 3. Platform Dependency
+### 3. Platform dependency
 
 Many AI notetakers work as bots that join your meetings. They need Zoom, Teams, or Google Meet to grant access to the audio. This creates platform dependency.
 
@@ -58,7 +58,7 @@ Bots also create user friction. They show up in participant lists. People ask wh
 
 Check out [bot-free AI notetakers](/blog/bot-free-ai-meeting-assistants) that solve this problem.
 
-### 4. Economic Dependency
+### 4. Economic dependency
 
 Usage-based pricing scales your costs with your usage. Per-minute charges work until they don't.
 
@@ -68,7 +68,7 @@ Usage caps create the same problem. You get 100 minutes per month, then you're b
 
 Cloud processing costs money. If a vendor's unit economics fail, they raise prices or shut down. You inherit this risk. You build workflows around a tool, then it becomes unaffordable or disappears.
 
-### 5. Compliance Dependency
+### 5. Compliance dependency
 
 For doctors, lawyers, therapists, and financial advisors, using an AI notetaker isn't just about features. It's about compliance. HIPAA for healthcare. Attorney-client privilege for legal. SOC 2 for enterprise. GDPR for European operations.
 
@@ -76,7 +76,7 @@ Cloud-based tools create compliance dependencies because data leaves your device
 
 Can you prove where the data was processed? Can you guarantee it wasn't used for training? Can you delete it completely? With cloud tools, you're trusting the vendor's compliance, not ensuring your own.
 
-## Choosing an AI Notetaker
+## Choosing an AI notetaker
 
 Start with architecture, not features.
 
@@ -84,7 +84,7 @@ Ask: What does this tool need to function? Does it need internet? Does it depend
 
 Each requirement is an architectural dependency. Each dependency is a trade-off. Decide which trade-offs matter for your use case.
 
-## How We're Building Char
+## How we're building Char
 
 We're designing Char around dependency thinking.
 
