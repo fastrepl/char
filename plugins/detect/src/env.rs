@@ -4,7 +4,7 @@ use tauri_specta::Event;
 
 use crate::DetectEvent;
 
-pub(crate) trait Env: Clone + Send + Sync + 'static {
+pub trait Env: Clone + Send + Sync + 'static {
     fn emit(&self, event: DetectEvent);
     fn is_do_not_disturb(&self) -> bool;
     fn is_detect_enabled(&self) -> bool;
@@ -54,21 +54,21 @@ fn read_detect_enabled_settings<R: Runtime>(app_handle: &AppHandle<R>) -> Option
         .and_then(|d| d.as_bool())
 }
 
-#[cfg(test)]
-pub(crate) mod test_support {
+#[cfg(any(test, feature = "test-support"))]
+pub mod test_support {
     use super::*;
     use std::sync::Arc;
     use std::sync::atomic::{AtomicBool, Ordering};
 
     #[derive(Clone)]
-    pub(crate) struct TestEnv {
-        pub(crate) events: Arc<std::sync::Mutex<Vec<DetectEvent>>>,
+    pub struct TestEnv {
+        pub events: Arc<std::sync::Mutex<Vec<DetectEvent>>>,
         dnd: Arc<AtomicBool>,
         detect_enabled: Arc<AtomicBool>,
     }
 
     impl TestEnv {
-        pub(crate) fn new() -> Self {
+        pub fn new() -> Self {
             Self {
                 events: Arc::new(std::sync::Mutex::new(Vec::new())),
                 dnd: Arc::new(AtomicBool::new(false)),
@@ -76,11 +76,11 @@ pub(crate) mod test_support {
             }
         }
 
-        pub(crate) fn set_dnd(&self, value: bool) {
+        pub fn set_dnd(&self, value: bool) {
             self.dnd.store(value, Ordering::Relaxed);
         }
 
-        pub(crate) fn set_detect_enabled(&self, value: bool) {
+        pub fn set_detect_enabled(&self, value: bool) {
             self.detect_enabled.store(value, Ordering::Relaxed);
         }
     }

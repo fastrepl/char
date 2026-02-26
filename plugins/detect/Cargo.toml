@@ -12,12 +12,15 @@ default = ["zoom", "sleep"]
 zoom = ["hypr-detect/zoom"]
 language = ["hypr-detect/language"]
 sleep = ["hypr-detect/sleep"]
+test-support = []
 
 [build-dependencies]
 tauri-plugin = { workspace = true, features = ["build"] }
 
 [dev-dependencies]
+hypr-detect = { workspace = true, features = ["mic"] }
 specta-typescript = { workspace = true }
+tauri-plugin-detect = { path = ".", features = ["test-support"] }
 tokio = { workspace = true, features = ["test-util"] }
 
 [dependencies]
