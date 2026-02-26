@@ -4,10 +4,11 @@ use futures_util::StreamExt;
 use owhisper_interface::{InferencePhase, InferenceProgress, ListenParams, batch, stream};
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
+use serde_json::Value;
+
 use super::CactusAdapter;
 use crate::adapter::deepgram_compat::listen_endpoint_url;
 use crate::adapter::{StreamingBatchEvent, StreamingBatchStream, is_local_host};
-use serde_json::Value;
 use crate::error::Error;
 
 impl CactusAdapter {
@@ -79,7 +80,8 @@ impl CactusAdapter {
                                         if let Some(fragment) = progress.partial_text {
                                             accumulated.push_str(&fragment);
                                         }
-                                        let event = in_progress_event(&accumulated, progress.percentage);
+                                        let event =
+                                            in_progress_event(&accumulated, progress.percentage);
                                         let _ = tx.send(Ok(event));
                                     }
                                     "result" => {
