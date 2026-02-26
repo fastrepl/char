@@ -2,7 +2,7 @@ import type { NoteFrontmatter } from "~/store/tinybase/persister/session/types";
 import { SESSION_MEMO_FILE } from "~/store/tinybase/persister/shared";
 
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
-import { md2json } from "@hypr/tiptap/shared";
+import { isValidTiptapContent, md2json } from "@hypr/tiptap/shared";
 
 import type { LoadedSessionData } from "./types";
 
@@ -31,8 +31,7 @@ export async function processMdFile(
       return;
     }
 
-    const tiptapJson = md2json(markdownBody);
-    const tiptapContent = JSON.stringify(tiptapJson);
+    const tiptapContent = parseTiptapContent(markdownBody);
 
     if (path.endsWith(SESSION_MEMO_FILE)) {
       if (result.sessions[fm.session_id]) {
@@ -51,4 +50,17 @@ export async function processMdFile(
   } catch (error) {
     console.error(`[${LABEL}] Failed to load note from ${path}:`, error);
   }
+}
+
+function parseTiptapContent(content: string): string {
+  try {
+    const parsed = JSON.parse(content);
+    if (isValidTiptapContent(parsed)) {
+      return JSON.stringify(parsed);
+    }
+  } catch {
+    // fall back to markdown parser
+  }
+
+  return JSON.stringify(md2json(content));
 }

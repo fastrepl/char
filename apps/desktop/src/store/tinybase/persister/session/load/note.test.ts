@@ -9,6 +9,14 @@ const fsSyncMocks = vi.hoisted(() => ({
 
 const tiptapMocks = vi.hoisted(() => ({
   md2json: vi.fn().mockReturnValue({ type: "doc", content: [] }),
+  isValidTiptapContent: vi.fn((value: unknown) => {
+    if (!value || typeof value !== "object") {
+      return false;
+    }
+
+    const content = value as { type?: unknown; content?: unknown };
+    return content.type === "doc" && Array.isArray(content.content);
+  }),
 }));
 
 vi.mock("@hypr/plugin-fs-sync", () => ({ commands: fsSyncMocks }));
@@ -48,6 +56,40 @@ describe("processMdFile", () => {
     expect(result.sessions["session-1"].raw_md).toBe(
       JSON.stringify({ type: "doc", content: [] }),
     );
+  });
+
+  test("preserves pre-serialized tiptap json content", async () => {
+    result.sessions["session-1"] = {
+      user_id: "user-1",
+      created_at: "2024-01-01T00:00:00Z",
+      title: "Test Session",
+      folder_id: "/sessions",
+      event_json: "",
+      raw_md: "",
+    };
+
+    const serialized = JSON.stringify({
+      type: "doc",
+      content: [
+        { type: "paragraph", content: [{ type: "text", text: "hello" }] },
+      ],
+    });
+
+    fsSyncMocks.deserialize.mockResolvedValue({
+      status: "ok",
+      data: {
+        frontmatter: {
+          id: "note-1",
+          session_id: "session-1",
+        },
+        content: serialized,
+      },
+    });
+
+    await processMdFile("/path/to/_memo.md", `---\n---\n${serialized}`, result);
+
+    expect(tiptapMocks.md2json).not.toHaveBeenCalled();
+    expect(result.sessions["session-1"].raw_md).toBe(serialized);
   });
 
   test("processes enhanced note file and creates entry", async () => {

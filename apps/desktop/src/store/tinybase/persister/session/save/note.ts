@@ -136,7 +136,32 @@ function tryParseAndConvertToMarkdown(content: string): string | undefined {
     return undefined;
   }
 
+  if (containsMentionNode(parsed)) {
+    return JSON.stringify(parsed);
+  }
+
   return json2md(parsed);
+}
+
+function containsMentionNode(node: unknown): boolean {
+  if (!node || typeof node !== "object") {
+    return false;
+  }
+
+  const contentNode = node as { type?: unknown; content?: unknown };
+
+  if (
+    typeof contentNode.type === "string" &&
+    contentNode.type.startsWith("mention-")
+  ) {
+    return true;
+  }
+
+  if (!Array.isArray(contentNode.content)) {
+    return false;
+  }
+
+  return contentNode.content.some((child) => containsMentionNode(child));
 }
 
 function getEnhancedNoteFilename(
