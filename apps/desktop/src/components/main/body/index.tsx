@@ -25,7 +25,6 @@ import { cn } from "@hypr/utils";
 import { useListener } from "../../../contexts/listener";
 import { useNotifications } from "../../../contexts/notifications";
 import { useShell } from "../../../contexts/shell";
-import { useNativeContextMenu } from "../../../hooks/useNativeContextMenu";
 import {
   type Tab,
   uniqueIdfromTab,
@@ -53,7 +52,6 @@ import { loadExtensionPanels } from "./extensions/registry";
 import { TabContentFolder, TabItemFolder } from "./folders";
 import { TabContentHuman, TabItemHuman } from "./humans";
 import { TabContentOnboarding, TabItemOnboarding } from "./onboarding";
-import { Search } from "./search";
 import { TabContentNote, TabItemNote } from "./sessions";
 import { useCaretPosition } from "./sessions/caret-position-context";
 import { TabContentSettings, TabItemSettings } from "./settings";
@@ -146,19 +144,7 @@ function Header({ tabs }: { tabs: Tab[] }) {
 
   const tabsScrollContainerRef = useRef<HTMLDivElement>(null);
   const handleNewEmptyTab = useNewEmptyTab();
-  const handleNewNote = useNewNote({ behavior: "new" });
   const handleNewNoteAndListen = useNewNoteAndListen();
-  const showNewTabMenu = useNativeContextMenu([
-    { id: "empty-tab", text: "Open Empty Tab", action: handleNewEmptyTab },
-    { id: "new-note", text: "Create New Note", action: handleNewNote },
-    {
-      id: "new-note-listen",
-      text: "Create and Start Listening",
-      action: handleNewNoteAndListen,
-    },
-  ]);
-  const [isSearchManuallyExpanded, setIsSearchManuallyExpanded] =
-    useState(false);
   const scrollState = useScrollState(
     tabsScrollContainerRef,
     regularTabs.length,
@@ -308,26 +294,31 @@ function Header({ tabs }: { tabs: Tab[] }) {
         data-tauri-drag-region
         className="flex-1 flex h-full items-center justify-between"
       >
-        {!isSearchManuallyExpanded && (
-          <Button
-            onClick={isOnboarding ? undefined : handleNewEmptyTab}
-            onContextMenu={isOnboarding ? undefined : showNewTabMenu}
-            disabled={isOnboarding}
-            variant="ghost"
-            size="icon"
-            className={cn([
-              "text-neutral-600",
-              isOnboarding && "opacity-40 cursor-not-allowed",
-            ])}
-          >
-            <PlusIcon size={16} />
-          </Button>
-        )}
+        <Button
+          onClick={isOnboarding ? undefined : handleNewEmptyTab}
+          disabled={isOnboarding}
+          variant="ghost"
+          size="icon"
+          className={cn([
+            "text-neutral-600",
+            isOnboarding && "opacity-40 cursor-not-allowed",
+          ])}
+        >
+          <PlusIcon size={16} />
+        </Button>
 
         <div className="flex items-center gap-1 h-full ml-auto">
           <Update />
           {!isOnboarding && (
-            <Search onManualExpandChange={setIsSearchManuallyExpanded} />
+            <Button
+              onClick={handleNewNoteAndListen}
+              variant="ghost"
+              size="sm"
+              className="gap-1 text-neutral-600 shrink-0"
+            >
+              <PlusIcon size={14} />
+              <span className="text-sm">New Note</span>
+            </Button>
           )}
         </div>
       </div>
