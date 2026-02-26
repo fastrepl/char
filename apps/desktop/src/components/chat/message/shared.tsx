@@ -34,7 +34,7 @@ export function MessageBubble({
   return (
     <div
       className={cn([
-        "text-sm",
+        "text-sm select-text-deep",
         variant === "user" &&
           "rounded-2xl px-3 py-1 bg-blue-100 text-neutral-800",
         variant === "assistant" && "text-neutral-800",

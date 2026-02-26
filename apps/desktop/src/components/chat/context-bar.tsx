@@ -130,7 +130,7 @@ export function ContextBar({
   const displayChips = chips.slice(0, visibleCount);
 
   return (
-    <div className="relative mx-3 rounded-t-lg bg-neutral-100">
+    <div className="relative mx-2 rounded-t-xl border-t border-l border-r border-neutral-200 bg-neutral-100">
       {expanded && (
         <div className="absolute bottom-full left-0 right-0 rounded-t-lg bg-neutral-100 border-b border-neutral-200/60 max-h-40 overflow-y-auto px-2.5 py-2">
           <div className="flex flex-wrap items-center gap-1.5">

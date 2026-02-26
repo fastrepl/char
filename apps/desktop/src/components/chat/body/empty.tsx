@@ -29,7 +29,7 @@ export function ChatBodyEmpty({
           <div className="flex items-center gap-2 mb-2">
             <img src="/assets/dynamic.gif" alt="Char" className="w-5 h-5" />
             <span className="text-sm font-medium text-neutral-800">
-              Hyprnote AI
+              Char AI
             </span>
           </div>
           <p className="text-sm text-neutral-700 mb-2">
@@ -53,9 +53,7 @@ export function ChatBodyEmpty({
       <div className="flex flex-col min-w-[240px] max-w-[80%]">
         <div className="flex items-center gap-1 mb-2">
           <img src="/assets/dynamic.gif" alt="Char" className="w-5 h-5" />
-          <span className="text-sm font-medium text-neutral-800">
-            Hyprnote AI
-          </span>
+          <span className="text-sm font-medium text-neutral-800">Char AI</span>
         </div>
         <p className="text-sm text-neutral-700 mb-2">
           Hey! I can help you with a lot of cool stuff :)

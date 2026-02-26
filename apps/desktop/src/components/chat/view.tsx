@@ -1,5 +1,7 @@
 import { useCallback } from "react";
 
+import { cn } from "@hypr/utils";
+
 import { useShell } from "../../contexts/shell";
 import { useLanguageModel } from "../../hooks/useLLMConnection";
 import { useTabs } from "../../store/zustand/tabs";
@@ -37,7 +39,13 @@ export function ChatView() {
   );
 
   return (
-    <div className="flex flex-col h-full">
+    <div
+      className={cn([
+        "flex flex-col h-full",
+        chat.mode === "RightPanelOpen" &&
+          "border border-neutral-200 rounded-xl overflow-hidden",
+      ])}
+    >
       <ChatHeader
         currentChatGroupId={groupId}
         onNewChat={handleNewChat}

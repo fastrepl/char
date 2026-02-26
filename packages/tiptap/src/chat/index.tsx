@@ -59,7 +59,7 @@ const ChatEditor = forwardRef<{ editor: TiptapEditor | null }, ChatEditorProps>(
 
       if (slashCommandConfigRef.current) {
         configs.push({
-          trigger: "/",
+          trigger: "@",
           handleSearch: (query) =>
             slashCommandConfigRef.current!.handleSearch(query),
         });
@@ -74,7 +74,7 @@ const ChatEditor = forwardRef<{ editor: TiptapEditor | null }, ChatEditorProps>(
           name: "submitOnEnter",
           addKeyboardShortcuts() {
             return {
-              Enter: ({ editor }) => {
+              "Mod-Enter": ({ editor }) => {
                 if (isMentionActive(editor.state)) {
                   return false;
                 }
