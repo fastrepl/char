@@ -88,7 +88,7 @@ export function ChatMessageInput({
               onClick={handleSubmit}
               disabled={disabled}
               className={cn([
-                "inline-flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-xs font-medium transition-all duration-100",
+                "inline-flex items-center gap-1.5 h-7 pl-2.5 pr-1.5 rounded-lg text-xs font-medium transition-all duration-100",
                 "border",
                 disabled
                   ? "text-neutral-300 border-neutral-200 cursor-default"
