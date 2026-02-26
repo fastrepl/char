@@ -35,20 +35,55 @@ export const EnhancedEditor = forwardRef<
   );
 
   const { search } = useSearchEngine();
+  const sessions = main.UI.useResultTable(
+    main.QUERIES.timelineSessions,
+    main.STORE_ID,
+  );
+  const humans = main.UI.useResultTable(
+    main.QUERIES.visibleHumans,
+    main.STORE_ID,
+  );
+  const organizations = main.UI.useResultTable(
+    main.QUERIES.visibleOrganizations,
+    main.STORE_ID,
+  );
 
   const mentionConfig = useMemo(
     () => ({
       trigger: "@",
       handleSearch: async (query: string) => {
-        const results = await search(query);
-        return results.slice(0, 5).map((hit) => ({
-          id: hit.document.id,
-          type: hit.document.type,
-          label: hit.document.title,
-        }));
+        if (query.trim()) {
+          const results = await search(query);
+          return results.slice(0, 5).map((hit) => ({
+            id: hit.document.id,
+            type: hit.document.type,
+            label: hit.document.title,
+          }));
+        }
+
+        const results: { id: string; type: string; label: string }[] = [];
+        Object.entries(sessions).forEach(([rowId, row]) => {
+          const title = row.title as string | undefined;
+          if (title) {
+            results.push({ id: rowId, type: "session", label: title });
+          }
+        });
+        Object.entries(humans).forEach(([rowId, row]) => {
+          const name = row.name as string | undefined;
+          if (name) {
+            results.push({ id: rowId, type: "human", label: name });
+          }
+        });
+        Object.entries(organizations).forEach(([rowId, row]) => {
+          const name = row.name as string | undefined;
+          if (name) {
+            results.push({ id: rowId, type: "organization", label: name });
+          }
+        });
+        return results.slice(0, 5);
       },
     }),
-    [search],
+    [search, sessions, humans, organizations],
   );
 
   const fileHandlerConfig = useMemo(() => ({ onImageUpload }), [onImageUpload]);
