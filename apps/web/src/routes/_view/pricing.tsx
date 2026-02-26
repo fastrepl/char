@@ -31,15 +31,15 @@ const pricingPlans: PricingPlan[] = [
     description:
       "Fully functional with your own API keys. Perfect for individuals who want complete control.",
     features: [
-      { label: "Local Transcription", included: true },
-      {
-        label: "Speaker Identification",
-        included: true,
-        comingSoon: true,
-      },
+      { label: "On-device Transcription", included: true },
       { label: "Bring Your Own Key (STT & LLM)", included: true },
-      { label: "Basic Sharing (Copy, PDF)", included: true },
-      { label: "All Data Local", included: true },
+      { label: "Export to PDF, TXT, Markdown", included: true },
+      {
+        label: "Local-first Data Architecture",
+        included: true,
+        tooltip:
+          "Filesystem-based by default: notes and transcripts are stored on your device first.",
+      },
       { label: "Templates & Chat", included: true },
       { label: "Integrations", included: false, comingSoon: true },
       { label: "Cloud Services (STT & LLM)", included: false },
@@ -62,6 +62,11 @@ const pricingPlans: PricingPlan[] = [
     popular: true,
     features: [
       { label: "Everything in Free", included: true },
+      {
+        label: "Speaker Identification",
+        included: true,
+        comingSoon: true,
+      },
       { label: "Integrations", included: true, comingSoon: true },
       { label: "Cloud Services (STT & LLM)", included: true },
       {
@@ -124,11 +129,10 @@ function HeroSection() {
     <section className="flex flex-col items-center text-center gap-6 py-24 px-4 laptop:px-0 border-b border-neutral-100">
       <div className="flex flex-col gap-4 max-w-3xl">
         <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700">
-          Char Pricing
+          Pricing
         </h1>
         <p className="text-lg sm:text-xl text-neutral-600">
-          Choose the plan that fits your needs. Start for free, upgrade when you
-          need cloud features.
+          Start for free, upgrade when you need cloud features.
         </p>
       </div>
     </section>
@@ -279,9 +283,14 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
 function FAQSection() {
   const faqs = [
     {
-      question: "What does 'Local only' transcription mean?",
+      question: "What does on-device transcription mean?",
       answer:
         "All transcription happens on your device. Your audio never leaves your computer, ensuring complete privacy.",
+    },
+    {
+      question: "What is local-first data architecture?",
+      answer:
+        "Your data is filesystem-based by default: notes and transcripts are saved on your device first, and you stay in control of where files live.",
     },
     {
       question: "What is BYOK (Bring Your Own Key)?",
@@ -294,14 +303,9 @@ function FAQSection() {
         "Pro users get DocSend-like controls: track who views your notes, set expiration dates, and revoke access anytime.",
     },
     {
-      question: "What is unified billing?",
+      question: "Do you offer student discounts?",
       answer:
-        "Unified billing allows organizations to manage all team member subscriptions under a single invoice. Instead of individual team members paying separately, you get one consolidated bill for your entire team. This includes centralized access management, so admins can add or remove users, and handle all payments from one account.",
-    },
-    {
-      question: "Is there a team discount?",
-      answer:
-        "Yes! We offer discounts based on both team size (volume) and contract commitment period. The more seats you need and the longer you commit (annual, multi-year), the better the discount. Contact us to discuss custom pricing for your team.",
+        "Yes, we provide student discounts. Contact us and we’ll help you get set up with student pricing.",
     },
   ];
 
