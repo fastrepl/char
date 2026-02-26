@@ -102,7 +102,7 @@ function HeroSection() {
     <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
       <div className="px-6 py-12 lg:py-20">
         <header className="mb-12 text-center max-w-4xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
+          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
             AI Notepad for Smarter Meeting Notes
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600">
@@ -140,7 +140,7 @@ function EditorSection() {
       <div className="hidden sm:grid sm:grid-cols-2">
         <div className="flex items-center p-8">
           <div className="flex flex-col gap-4">
-            <h2 className="text-3xl font-serif text-stone-600">
+            <h2 className="text-3xl font-serif text-stone-700">
               Simple, Familiar Notepad
             </h2>
             <p className="text-base text-neutral-600 leading-relaxed">
@@ -180,7 +180,7 @@ function EditorSection() {
 
       <div className="sm:hidden">
         <div className="p-6 border-b border-neutral-100">
-          <h2 className="text-2xl font-serif text-stone-600 mb-3">
+          <h2 className="text-2xl font-serif text-stone-700 mb-3">
             Simple, Familiar Notepad
           </h2>
           <p className="text-sm text-neutral-600 leading-relaxed mb-4">
@@ -598,7 +598,7 @@ function TranscriptionSection() {
   return (
     <section id="transcription" className="border-y border-neutral-100">
       <div className="text-center py-12 px-4 lg:px-0">
-        <h2 className="text-3xl font-serif text-stone-600 mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 mb-4">
           Live meetings to recorded audio, Char transcribes it all
         </h2>
       </div>
@@ -610,9 +610,9 @@ function TranscriptionSection() {
               <div className="flex items-center gap-3">
                 <Icon
                   icon="mdi:microphone"
-                  className="text-3xl text-stone-600"
+                  className="text-3xl text-stone-700"
                 />
-                <h3 className="text-2xl font-serif text-stone-600">
+                <h3 className="text-2xl font-serif text-stone-700">
                   Real-time transcription
                 </h3>
               </div>
@@ -632,8 +632,8 @@ function TranscriptionSection() {
           <div className="flex flex-col">
             <div className="p-8 flex flex-col gap-4">
               <div className="flex items-center gap-3">
-                <Icon icon="mdi:upload" className="text-3xl text-stone-600" />
-                <h3 className="text-2xl font-serif text-stone-600">
+                <Icon icon="mdi:upload" className="text-3xl text-stone-700" />
+                <h3 className="text-2xl font-serif text-stone-700">
                   Upload files
                 </h3>
               </div>
@@ -654,9 +654,9 @@ function TranscriptionSection() {
               <div className="flex items-center gap-3 mb-3">
                 <Icon
                   icon="mdi:microphone"
-                  className="text-2xl text-stone-600"
+                  className="text-2xl text-stone-700"
                 />
-                <h3 className="text-xl font-serif text-stone-600">
+                <h3 className="text-xl font-serif text-stone-700">
                   Real-time transcription
                 </h3>
               </div>
@@ -669,8 +669,8 @@ function TranscriptionSection() {
           <div>
             <div className="p-6">
               <div className="flex items-center gap-3 mb-3">
-                <Icon icon="mdi:upload" className="text-2xl text-stone-600" />
-                <h3 className="text-xl font-serif text-stone-600">
+                <Icon icon="mdi:upload" className="text-2xl text-stone-700" />
+                <h3 className="text-xl font-serif text-stone-700">
                   Upload files
                 </h3>
               </div>
@@ -755,7 +755,7 @@ function SummariesSection() {
   return (
     <section id="summaries">
       <div className="text-center py-12 px-4 lg:px-0">
-        <h2 className="text-3xl font-serif text-stone-600 mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 mb-4">
           Your Notes+AI = Perfect Summary
         </h2>
       </div>
@@ -1038,7 +1038,7 @@ function SearchSection() {
                   speed={100}
                   deleteSpeed={30}
                   waitTime={2000}
-                  className="text-base sm:text-lg text-stone-600 font-light truncate block"
+                  className="text-base sm:text-lg text-stone-700 font-light truncate block"
                   cursorClassName="ml-1"
                 />
               </div>
@@ -1355,7 +1355,7 @@ const ShareLinksCell = memo(() => {
             showLinkPopover && "z-10",
           ])}
         >
-          <Icon icon="hugeicons:note" className="w-8 text-stone-600" />
+          <Icon icon="hugeicons:note" className="w-8 text-stone-700" />
           <div className="flex-1 flex items-center justify-between gap-2 relative">
             <motion.div
               key={linkPermission}
@@ -1855,7 +1855,7 @@ function SharingSection() {
         <div className="inline-block px-4 py-1.5 bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900 rounded-full shadow-xs text-xs font-medium mb-4">
           Coming Soon
         </div>
-        <h2 className="text-3xl font-serif text-stone-600 mb-4">Share notes</h2>
+        <h2 className="text-3xl font-serif text-stone-700 mb-4">Share notes</h2>
         <p className="text-base text-neutral-600">
           Collaborate seamlessly by sharing meeting notes, transcripts, and
           summaries with your team.
@@ -1868,9 +1868,9 @@ function SharingSection() {
               <div className="flex items-center gap-3">
                 <Icon
                   icon="mdi:account-group"
-                  className="text-3xl text-stone-600"
+                  className="text-3xl text-stone-700"
                 />
-                <h3 className="text-2xl font-serif text-stone-600">
+                <h3 className="text-2xl font-serif text-stone-700">
                   Control who can access
                 </h3>
               </div>
@@ -1886,9 +1886,9 @@ function SharingSection() {
               <div className="flex items-center gap-3">
                 <Icon
                   icon="mdi:link-variant"
-                  className="text-3xl text-stone-600"
+                  className="text-3xl text-stone-700"
                 />
-                <h3 className="text-2xl font-serif text-stone-600">
+                <h3 className="text-2xl font-serif text-stone-700">
                   Share instantly
                 </h3>
               </div>
@@ -1904,9 +1904,9 @@ function SharingSection() {
               <div className="flex items-center gap-3">
                 <Icon
                   icon="mdi:shield-lock"
-                  className="text-3xl text-stone-600"
+                  className="text-3xl text-stone-700"
                 />
-                <h3 className="text-2xl font-serif text-stone-600">
+                <h3 className="text-2xl font-serif text-stone-700">
                   Track and protect
                 </h3>
               </div>
@@ -1926,9 +1926,9 @@ function SharingSection() {
                 <div className="flex items-center gap-3">
                   <Icon
                     icon="mdi:account-group"
-                    className="text-3xl text-stone-600"
+                    className="text-3xl text-stone-700"
                   />
-                  <h3 className="text-2xl font-serif text-stone-600">
+                  <h3 className="text-2xl font-serif text-stone-700">
                     Control who can access
                   </h3>
                 </div>
@@ -1944,9 +1944,9 @@ function SharingSection() {
                 <div className="flex items-center gap-3">
                   <Icon
                     icon="mdi:link-variant"
-                    className="text-3xl text-stone-600"
+                    className="text-3xl text-stone-700"
                   />
-                  <h3 className="text-2xl font-serif text-stone-600">
+                  <h3 className="text-2xl font-serif text-stone-700">
                     Share instantly
                   </h3>
                 </div>
@@ -1962,9 +1962,9 @@ function SharingSection() {
                 <div className="flex items-center gap-3">
                   <Icon
                     icon="mdi:shield-lock"
-                    className="text-3xl text-stone-600"
+                    className="text-3xl text-stone-700"
                   />
-                  <h3 className="text-2xl font-serif text-stone-600">
+                  <h3 className="text-2xl font-serif text-stone-700">
                     Track and protect
                   </h3>
                 </div>
@@ -1984,9 +1984,9 @@ function SharingSection() {
               <div className="flex items-center gap-3 mb-3">
                 <Icon
                   icon="mdi:account-group"
-                  className="text-2xl text-stone-600"
+                  className="text-2xl text-stone-700"
                 />
-                <h3 className="text-xl font-serif text-stone-600">
+                <h3 className="text-xl font-serif text-stone-700">
                   Control who can access
                 </h3>
               </div>
@@ -2002,9 +2002,9 @@ function SharingSection() {
               <div className="flex items-center gap-3 mb-3">
                 <Icon
                   icon="mdi:link-variant"
-                  className="text-2xl text-stone-600"
+                  className="text-2xl text-stone-700"
                 />
-                <h3 className="text-xl font-serif text-stone-600">
+                <h3 className="text-xl font-serif text-stone-700">
                   Share instantly
                 </h3>
               </div>
@@ -2020,9 +2020,9 @@ function SharingSection() {
               <div className="flex items-center gap-3 mb-3">
                 <Icon
                   icon="mdi:shield-lock"
-                  className="text-2xl text-stone-600"
+                  className="text-2xl text-stone-700"
                 />
-                <h3 className="text-xl font-serif text-stone-600">
+                <h3 className="text-xl font-serif text-stone-700">
                   Track and protect
                 </h3>
               </div>
@@ -2087,7 +2087,7 @@ function FloatingPanelHeader() {
       <div className="inline-block px-4 py-1.5 bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900 rounded-full shadow-xs text-xs font-medium mb-4">
         Coming Soon
       </div>
-      <h2 className="text-3xl font-serif text-stone-600 mb-4">
+      <h2 className="text-3xl font-serif text-stone-700 mb-4">
         Floating panel for meetings
       </h2>
       <p className="text-base text-neutral-600 max-w-3xl mx-auto">
@@ -2224,7 +2224,7 @@ function FloatingPanelTablet({
                   />
                 )}
                 <div className="relative">
-                  <h3 className="text-base font-serif font-medium text-stone-600 mb-1">
+                  <h3 className="text-base font-serif font-medium text-stone-700 mb-1">
                     {tab.title}
                   </h3>
                   <p className="text-sm text-neutral-600">{tab.description}</p>
@@ -2317,7 +2317,7 @@ function FloatingPanelDesktop() {
                 />
               )}
               <div className="relative">
-                <h3 className="text-base font-serif font-medium text-stone-600 mb-1">
+                <h3 className="text-base font-serif font-medium text-stone-700 mb-1">
                   {tab.title}
                 </h3>
                 <p className="text-sm text-neutral-600">{tab.description}</p>

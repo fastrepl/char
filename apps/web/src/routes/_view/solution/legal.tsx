@@ -119,7 +119,7 @@ function HeroSection() {
             <Icon icon="mdi:scale-balance" className="text-lg" />
             <span>For Legal Teams</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
+          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
             Confidential AI notes
             <br />
             for legal professionals
@@ -161,7 +161,7 @@ function FeaturesSection() {
   return (
     <section className="px-6 py-16 border-t border-neutral-100">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-600 text-center mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
           Built for legal confidentiality
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
@@ -192,7 +192,7 @@ function UseCasesSection() {
   return (
     <section className="px-6 py-16 bg-stone-50/50 border-t border-neutral-100">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-600 text-center mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
           For every legal conversation
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
@@ -222,7 +222,7 @@ function CTASection() {
   return (
     <section className="px-6 py-16 border-t border-neutral-100">
       <div className="max-w-2xl mx-auto text-center">
-        <h2 className="text-3xl font-serif text-stone-600 mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 mb-4">
           Ready to streamline legal documentation?
         </h2>
         <p className="text-neutral-600 mb-8">

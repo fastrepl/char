@@ -204,7 +204,7 @@ function Component() {
       style={{ backgroundImage: "url(/patterns/dots.svg)" }}
     >
       <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white min-h-screen">
-        <h1 className="text-4xl sm:text-5xl font-serif text-stone-600 text-center pt-12 pb-4">
+        <h1 className="text-4xl sm:text-5xl font-serif text-stone-700 text-center pt-12 pb-4">
           Build Your Pizza
         </h1>
         <div className="flex flex-col md:flex-row md:h-[calc(100vh-65px)]">
@@ -235,7 +235,7 @@ function Component() {
                           ? "Step 2 of 3"
                           : "Step 3 of 3"}
                     </p>
-                    <h2 className="text-2xl sm:text-3xl font-serif text-stone-600">
+                    <h2 className="text-2xl sm:text-3xl font-serif text-stone-700">
                       {step === "crust"
                         ? "Pick your crust"
                         : step === "sauce"
@@ -471,7 +471,7 @@ function RevealSection({
             <PizzaGraphic crust={crust} sauce={sauce} showPineapple={true} />
           </div>
           <div className="flex flex-col gap-5 text-center md:text-left">
-            <h2 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600">
+            <h2 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700">
               Felt annoying, didn't it?
             </h2>
             <p className="text-lg text-neutral-500 max-w-lg">
@@ -479,7 +479,7 @@ function RevealSection({
               touches it, where it lives, whether it ever leaves your device.
               You get no say.
             </p>
-            <p className="text-lg font-medium text-stone-600">
+            <p className="text-lg font-medium text-stone-700">
               Char gives you the choice back.
             </p>
             <div className="pt-2">
@@ -502,7 +502,7 @@ function RevealSection({
       <section>
         <div className="grid md:grid-cols-3">
           <div className="p-8 border-b md:border-b-0 md:border-r border-neutral-100">
-            <h3 className="text-xl font-serif text-stone-600 mb-2">
+            <h3 className="text-xl font-serif text-stone-700 mb-2">
               Choose your AI
             </h3>
             <p className="text-neutral-600">
@@ -512,7 +512,7 @@ function RevealSection({
             </p>
           </div>
           <div className="p-8 border-b md:border-b-0 md:border-r border-neutral-100">
-            <h3 className="text-xl font-serif text-stone-600 mb-2">
+            <h3 className="text-xl font-serif text-stone-700 mb-2">
               Your notes are files
             </h3>
             <p className="text-neutral-600">
@@ -521,7 +521,7 @@ function RevealSection({
             </p>
           </div>
           <div className="p-8">
-            <h3 className="text-xl font-serif text-stone-600 mb-2">
+            <h3 className="text-xl font-serif text-stone-700 mb-2">
               No bots. No lock-in.
             </h3>
             <p className="text-neutral-600">

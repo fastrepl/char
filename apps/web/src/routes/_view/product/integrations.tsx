@@ -97,7 +97,7 @@ function Component() {
           <div className="px-6 h-full flex items-center justify-center relative z-10">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_800px_400px_at_50%_50%,white_0%,rgba(255,255,255,0.8)_40%,transparent_70%)] pointer-events-none" />
             <div className="text-center max-w-4xl mx-auto relative">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif tracking-tight text-stone-600 mb-6">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif tracking-tight text-stone-700 mb-6">
                 Integrations & Workflows
               </h1>
               <p className="text-lg sm:text-xl text-neutral-600 leading-relaxed max-w-3xl mx-auto">

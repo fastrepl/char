@@ -116,7 +116,7 @@ function HeroSection() {
   return (
     <div className="px-6 py-16 lg:py-24">
       <div className="text-center max-w-3xl mx-auto">
-        <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
+        <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
           About
         </h1>
         <p className="text-lg sm:text-xl text-neutral-600">
@@ -226,7 +226,7 @@ function OurStoryGrid({
               className="w-16 h-16 group-hover:scale-110 transition-transform"
             />
           </div>
-          <div className="font-medium text-stone-600">Our Story.txt</div>
+          <div className="font-medium text-stone-700">Our Story.txt</div>
         </button>
       </div>
     </div>
@@ -264,7 +264,7 @@ function FoundersGrid({
                 className="w-16 h-16 rounded-full border-2 border-neutral-200 object-cover group-hover:scale-110 transition-transform"
               />
             </div>
-            <div className="font-medium text-stone-600">{founder.name}</div>
+            <div className="font-medium text-stone-700">{founder.name}</div>
           </button>
         ))}
       </div>
@@ -298,7 +298,7 @@ function TeamPhotosGrid({
                 className="w-16 h-16 rounded-lg border border-neutral-200 object-cover group-hover:scale-110 transition-transform"
               />
             </div>
-            <div className="font-medium text-stone-600 text-sm truncate w-full">
+            <div className="font-medium text-stone-700 text-sm truncate w-full">
               {photo.name}
             </div>
           </button>
@@ -365,7 +365,7 @@ function MobileSidebarDrawer({
             }}
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200 bg-stone-50">
-              <span className="text-sm font-medium text-stone-600">
+              <span className="text-sm font-medium text-stone-700">
                 Navigation
               </span>
               <button
@@ -492,7 +492,7 @@ function OurStorySidebar({
           />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-stone-600 truncate">
+          <p className="text-sm font-medium text-stone-700 truncate">
             Our Story.txt
           </p>
         </div>
@@ -541,7 +541,7 @@ function FoundersSidebar({
               />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-stone-600 truncate">
+              <p className="text-sm font-medium text-stone-700 truncate">
                 {founder.name}
               </p>
               <p className="text-xs text-neutral-500 truncate">
@@ -595,7 +595,7 @@ function TeamPhotosSidebar({
               />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-stone-600 truncate">
+              <p className="text-sm font-medium text-stone-700 truncate">
                 {photo.name}
               </p>
             </div>
@@ -648,7 +648,7 @@ function StoryDetail({ onClose }: { onClose: () => void }) {
   return (
     <>
       <div className="py-2 px-4 flex items-center justify-between border-b border-neutral-200">
-        <h2 className="font-medium text-stone-600">Our Story.txt</h2>
+        <h2 className="font-medium text-stone-700">Our Story.txt</h2>
         <button
           onClick={onClose}
           className="text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer"
@@ -659,7 +659,7 @@ function StoryDetail({ onClose }: { onClose: () => void }) {
 
       <div ref={scrollRef} className="p-4 overflow-y-auto">
         <div className="prose prose-stone max-w-none">
-          <h2 className="text-3xl font-serif text-stone-600 mb-4">
+          <h2 className="text-3xl font-serif text-stone-700 mb-4">
             How We Landed on Char
           </h2>
           <p className="text-base text-neutral-500 italic mb-8">
@@ -690,7 +690,7 @@ function StoryDetail({ onClose }: { onClose: () => void }) {
             focused point of view.
           </p>
 
-          <h3 className="text-2xl font-serif text-stone-600 mb-4 mt-8">
+          <h3 className="text-2xl font-serif text-stone-700 mb-4 mt-8">
             Our manifesto
           </h3>
           <p className="text-base text-neutral-600 leading-relaxed mb-4">
@@ -710,7 +710,7 @@ function StoryDetail({ onClose }: { onClose: () => void }) {
             We stand with those who value real connection and purposeful work.
           </p>
 
-          <h3 className="text-2xl font-serif text-stone-600 mb-4 mt-8">
+          <h3 className="text-2xl font-serif text-stone-700 mb-4 mt-8">
             Where we are now
           </h3>
           <p className="text-base text-neutral-600 leading-relaxed mb-8">
@@ -770,7 +770,7 @@ function FounderDetail({
   return (
     <>
       <div className="py-2 px-4 flex items-center justify-between border-b border-neutral-200">
-        <h2 className="font-medium text-stone-600">{founder.name}</h2>
+        <h2 className="font-medium text-stone-700">{founder.name}</h2>
         <div className="flex items-center gap-2">
           <a
             href={founder.avatar}
@@ -802,7 +802,7 @@ function FounderDetail({
         </div>
 
         <div>
-          <h3 className="text-2xl font-serif text-stone-600 mb-1">
+          <h3 className="text-2xl font-serif text-stone-700 mb-1">
             {founder.name}
           </h3>
           <p className="text-sm text-neutral-500 uppercase tracking-wider mb-4">
@@ -816,7 +816,7 @@ function FounderDetail({
             {founder.email && (
               <a
                 href={`mailto:${founder.email}`}
-                className="flex items-center gap-2 px-3 py-2 text-xs border border-neutral-300 text-stone-600 rounded-full hover:bg-stone-50 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 text-xs border border-neutral-300 text-stone-700 rounded-full hover:bg-stone-50 transition-colors"
                 aria-label="Email"
               >
                 <Mail className="w-3 h-3" />
@@ -828,7 +828,7 @@ function FounderDetail({
                 href={founder.links.twitter}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-3 py-2 text-xs border border-neutral-300 text-stone-600 rounded-full hover:bg-stone-50 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 text-xs border border-neutral-300 text-stone-700 rounded-full hover:bg-stone-50 transition-colors"
                 aria-label="Twitter"
               >
                 <Icon icon="mdi:twitter" className="text-sm" />
@@ -840,7 +840,7 @@ function FounderDetail({
                 href={founder.links.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-3 py-2 text-xs border border-neutral-300 text-stone-600 rounded-full hover:bg-stone-50 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 text-xs border border-neutral-300 text-stone-700 rounded-full hover:bg-stone-50 transition-colors"
                 aria-label="GitHub"
               >
                 <Icon icon="mdi:github" className="text-sm" />
@@ -852,7 +852,7 @@ function FounderDetail({
                 href={founder.links.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-3 py-2 text-xs border border-neutral-300 text-stone-600 rounded-full hover:bg-stone-50 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 text-xs border border-neutral-300 text-stone-700 rounded-full hover:bg-stone-50 transition-colors"
                 aria-label="LinkedIn"
               >
                 <Icon icon="mdi:linkedin" className="text-sm" />
@@ -884,7 +884,7 @@ function PhotoDetail({
   return (
     <>
       <div className="py-2 px-4 flex items-center justify-between border-b border-neutral-200">
-        <h2 className="font-medium text-stone-600">{photo.name}</h2>
+        <h2 className="font-medium text-stone-700">{photo.name}</h2>
         <div className="flex items-center gap-2">
           <a
             href={photo.url}

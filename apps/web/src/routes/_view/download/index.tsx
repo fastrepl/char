@@ -37,7 +37,7 @@ function Component() {
         <div className="py-12">
           <section className="py-16 px-4 sm:px-6">
             <div className="flex flex-col gap-6 max-w-2xl mx-auto text-center mb-16">
-              <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600">
+              <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700">
                 Download Char
               </h1>
               <p className="text-lg sm:text-xl text-neutral-600">
@@ -172,7 +172,7 @@ function FAQSection() {
   return (
     <section className="py-16 px-4 laptop:px-0">
       <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-600 mb-16 text-center">
+        <h2 className="text-3xl font-serif text-stone-700 mb-16 text-center">
           Frequently Asked Questions
         </h2>
         <div className="flex flex-col gap-6">

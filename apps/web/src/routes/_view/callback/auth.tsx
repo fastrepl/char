@@ -195,7 +195,7 @@ function Component() {
       <div className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white flex items-center justify-center p-6">
         <div className="max-w-md w-full text-center flex flex-col gap-8">
           <div className="flex flex-col gap-3">
-            <h1 className="text-3xl font-serif tracking-tight text-stone-600">
+            <h1 className="text-3xl font-serif tracking-tight text-stone-700">
               Sign-in failed
             </h1>
             <p className="text-neutral-600">
@@ -226,7 +226,7 @@ function Component() {
       <div className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white flex items-center justify-center p-6">
         <div className="max-w-md w-full text-center flex flex-col gap-8">
           <div className="flex flex-col gap-3">
-            <h1 className="text-3xl font-serif tracking-tight text-stone-600">
+            <h1 className="text-3xl font-serif tracking-tight text-stone-700">
               {hasTokens ? "Sign-in successful" : "Signing in..."}
             </h1>
             <p className="text-neutral-600">

@@ -49,7 +49,7 @@ function HeroSection() {
     <section className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
       <div className="flex flex-col items-center text-center gap-6 py-24 px-4">
         <div className="flex flex-col gap-6 max-w-4xl">
-          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600">
+          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700">
             Take Meeting Notes With
             <br />
             AI of Your Choice
@@ -99,9 +99,9 @@ function AISetupSection() {
         <div className="p-8 border-r border-b border-neutral-100 md:border-b-0">
           <Icon
             icon="mdi:key-variant"
-            className="text-3xl text-stone-600 mb-4"
+            className="text-3xl text-stone-700 mb-4"
           />
-          <h3 className="text-xl font-serif text-stone-600 mb-1">
+          <h3 className="text-xl font-serif text-stone-700 mb-1">
             Bring Your Own Key (Free)
           </h3>
           <p className="text-neutral-600">
@@ -110,8 +110,8 @@ function AISetupSection() {
           </p>
         </div>
         <div className="p-8 border-b border-neutral-100 md:border-b-0">
-          <Icon icon="mdi:laptop" className="text-3xl text-stone-600 mb-4" />
-          <h3 className="text-xl font-serif text-stone-600 mb-1">
+          <Icon icon="mdi:laptop" className="text-3xl text-stone-700 mb-4" />
+          <h3 className="text-xl font-serif text-stone-700 mb-1">
             Go fully local if you want to
           </h3>
           <p className="text-neutral-600">
@@ -130,10 +130,10 @@ function LocalFeaturesSection() {
         <div className="p-8 flex items-start gap-4">
           <Icon
             icon="mdi:microphone"
-            className="text-3xl text-stone-600 shrink-0"
+            className="text-3xl text-stone-700 shrink-0"
           />
           <div>
-            <h3 className="text-xl font-serif text-stone-600 mb-2">
+            <h3 className="text-xl font-serif text-stone-700 mb-2">
               Local transcription with Whisper
             </h3>
             <p className="text-neutral-600">
@@ -143,9 +143,9 @@ function LocalFeaturesSection() {
           </div>
         </div>
         <div className="p-8 flex items-start gap-4">
-          <Icon icon="mdi:brain" className="text-3xl text-stone-600 shrink-0" />
+          <Icon icon="mdi:brain" className="text-3xl text-stone-700 shrink-0" />
           <div>
-            <h3 className="text-xl font-serif text-stone-600 mb-2">
+            <h3 className="text-xl font-serif text-stone-700 mb-2">
               Local LLM inference
             </h3>
             <p className="text-neutral-600">
@@ -172,7 +172,7 @@ function SwitchSection() {
       </p>
       <div className="grid md:grid-cols-2">
         <div className="p-8 border-r border-b border-neutral-100 md:border-b-0">
-          <h3 className="text-lg font-serif text-stone-600 mb-2">
+          <h3 className="text-lg font-serif text-stone-700 mb-2">
             Start with Cloud
           </h3>
           <p className="text-neutral-600">
@@ -180,7 +180,7 @@ function SwitchSection() {
           </p>
         </div>
         <div className="p-8 border-b border-neutral-100 md:border-b-0">
-          <h3 className="text-lg font-serif text-stone-600 mb-2">
+          <h3 className="text-lg font-serif text-stone-700 mb-2">
             Change based on needs
           </h3>
           <p className="text-neutral-600">
@@ -189,7 +189,7 @@ function SwitchSection() {
           </p>
         </div>
         <div className="p-8 border-r border-neutral-100">
-          <h3 className="text-lg font-serif text-stone-600 mb-2">
+          <h3 className="text-lg font-serif text-stone-700 mb-2">
             Re-process meetings
           </h3>
           <p className="text-neutral-600">
@@ -197,7 +197,7 @@ function SwitchSection() {
           </p>
         </div>
         <div className="p-8">
-          <h3 className="text-lg font-serif text-stone-600 mb-2">
+          <h3 className="text-lg font-serif text-stone-700 mb-2">
             Data never moves
           </h3>
           <p className="text-neutral-600">
@@ -213,7 +213,7 @@ function BenchmarkSection() {
   return (
     <section className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
       <div className="flex flex-col items-center text-center gap-6 py-16 px-4">
-        <h2 className="text-2xl sm:text-3xl font-serif text-stone-600">
+        <h2 className="text-2xl sm:text-3xl font-serif text-stone-700">
           Confused which AI model to choose?
         </h2>
         <p className="text-neutral-600 max-w-2xl mx-auto">
@@ -225,7 +225,7 @@ function BenchmarkSection() {
           to="/eval/"
           className={cn([
             "px-8 py-3 text-base font-medium rounded-full",
-            "border border-neutral-300 text-stone-600",
+            "border border-neutral-300 text-stone-700",
             "hover:bg-stone-50 transition-colors",
           ])}
         >
@@ -241,7 +241,7 @@ function FAQSection() {
     <section className="py-16 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-serif text-stone-600">
+          <h2 className="text-3xl font-serif text-stone-700">
             Frequently asked questions
           </h2>
         </div>

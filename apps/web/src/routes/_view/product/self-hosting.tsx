@@ -68,7 +68,7 @@ function HeroSection() {
     <section className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
       <div className="flex flex-col items-center text-center gap-6 py-24 px-4">
         <div className="flex flex-col gap-6 max-w-4xl">
-          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600">
+          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700">
             Run Char on
             <br />
             your infrastructure
@@ -109,9 +109,9 @@ function WhySelfHostSection() {
         <div className="p-8 border-r border-b border-neutral-100 md:border-b-0">
           <Icon
             icon="mdi:server-security"
-            className="text-3xl text-stone-600 mb-4"
+            className="text-3xl text-stone-700 mb-4"
           />
-          <h3 className="text-xl font-serif text-stone-600 mb-2">
+          <h3 className="text-xl font-serif text-stone-700 mb-2">
             Complete data sovereignty
           </h3>
           <p className="text-neutral-600">
@@ -123,9 +123,9 @@ function WhySelfHostSection() {
         <div className="p-8 border-b border-neutral-100 md:border-b-0">
           <Icon
             icon="mdi:shield-check"
-            className="text-3xl text-stone-600 mb-4"
+            className="text-3xl text-stone-700 mb-4"
           />
-          <h3 className="text-xl font-serif text-stone-600 mb-2">
+          <h3 className="text-xl font-serif text-stone-700 mb-2">
             Compliance ready
           </h3>
           <p className="text-neutral-600">
@@ -135,8 +135,8 @@ function WhySelfHostSection() {
           </p>
         </div>
         <div className="p-8 border-r border-neutral-100">
-          <Icon icon="mdi:lan" className="text-3xl text-stone-600 mb-4" />
-          <h3 className="text-xl font-serif text-stone-600 mb-2">
+          <Icon icon="mdi:lan" className="text-3xl text-stone-700 mb-4" />
+          <h3 className="text-xl font-serif text-stone-700 mb-2">
             Air-gapped deployment
           </h3>
           <p className="text-neutral-600">
@@ -148,9 +148,9 @@ function WhySelfHostSection() {
         <div className="p-8">
           <Icon
             icon="mdi:tune-vertical"
-            className="text-3xl text-stone-600 mb-4"
+            className="text-3xl text-stone-700 mb-4"
           />
-          <h3 className="text-xl font-serif text-stone-600 mb-2">
+          <h3 className="text-xl font-serif text-stone-700 mb-2">
             Full customization
           </h3>
           <p className="text-neutral-600">
@@ -291,8 +291,8 @@ function DeploymentOptionsSection() {
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3">
         <div className="p-6 border-r border-b border-neutral-100">
-          <Icon icon="mdi:docker" className="text-2xl text-stone-600 mb-3" />
-          <h3 className="font-medium text-stone-600 mb-2">Docker containers</h3>
+          <Icon icon="mdi:docker" className="text-2xl text-stone-700 mb-3" />
+          <h3 className="font-medium text-stone-700 mb-2">Docker containers</h3>
           <p className="text-sm text-neutral-600">
             Deploy with Docker Compose for quick setup. Ideal for teams wanting
             containerized infrastructure.
@@ -301,17 +301,17 @@ function DeploymentOptionsSection() {
         <div className="p-6 border-r border-b border-neutral-100 lg:border-r">
           <Icon
             icon="mdi:kubernetes"
-            className="text-2xl text-stone-600 mb-3"
+            className="text-2xl text-stone-700 mb-3"
           />
-          <h3 className="font-medium text-stone-600 mb-2">Kubernetes</h3>
+          <h3 className="font-medium text-stone-700 mb-2">Kubernetes</h3>
           <p className="text-sm text-neutral-600">
             Scale across clusters with Helm charts. Built for enterprise
             orchestration and high availability.
           </p>
         </div>
         <div className="p-6 border-b border-neutral-100 sm:border-r lg:border-r-0">
-          <Icon icon="mdi:server" className="text-2xl text-stone-600 mb-3" />
-          <h3 className="font-medium text-stone-600 mb-2">Bare metal</h3>
+          <Icon icon="mdi:server" className="text-2xl text-stone-700 mb-3" />
+          <h3 className="font-medium text-stone-700 mb-2">Bare metal</h3>
           <p className="text-sm text-neutral-600">
             Install directly on your servers for maximum performance and
             complete hardware control.
@@ -320,9 +320,9 @@ function DeploymentOptionsSection() {
         <div className="p-6 border-r border-neutral-100 sm:border-b-0 border-b lg:border-b-0">
           <Icon
             icon="mdi:cloud-lock"
-            className="text-2xl text-stone-600 mb-3"
+            className="text-2xl text-stone-700 mb-3"
           />
-          <h3 className="font-medium text-stone-600 mb-2">Private cloud</h3>
+          <h3 className="font-medium text-stone-700 mb-2">Private cloud</h3>
           <p className="text-sm text-neutral-600">
             Deploy on AWS, GCP, or Azure within your VPC. Your cloud, your
             rules, your data.
@@ -331,9 +331,9 @@ function DeploymentOptionsSection() {
         <div className="p-6 border-r border-neutral-100">
           <Icon
             icon="mdi:lan-disconnect"
-            className="text-2xl text-stone-600 mb-3"
+            className="text-2xl text-stone-700 mb-3"
           />
-          <h3 className="font-medium text-stone-600 mb-2">Air-gapped</h3>
+          <h3 className="font-medium text-stone-700 mb-2">Air-gapped</h3>
           <p className="text-sm text-neutral-600">
             Fully isolated deployment with no network connectivity. All
             dependencies bundled offline.
@@ -342,9 +342,9 @@ function DeploymentOptionsSection() {
         <div className="p-6">
           <Icon
             icon="mdi:office-building"
-            className="text-2xl text-stone-600 mb-3"
+            className="text-2xl text-stone-700 mb-3"
           />
-          <h3 className="font-medium text-stone-600 mb-2">On-premises</h3>
+          <h3 className="font-medium text-stone-700 mb-2">On-premises</h3>
           <p className="text-sm text-neutral-600">
             Run in your own data center with dedicated hardware. Maximum
             security and performance.
@@ -367,10 +367,10 @@ function WhatYouCanHostSection() {
         <div className="p-8 flex items-start gap-4">
           <Icon
             icon="mdi:microphone"
-            className="text-3xl text-stone-600 shrink-0"
+            className="text-3xl text-stone-700 shrink-0"
           />
           <div>
-            <h3 className="text-xl font-serif text-stone-600 mb-2">
+            <h3 className="text-xl font-serif text-stone-700 mb-2">
               Transcription server
             </h3>
             <p className="text-neutral-600">
@@ -381,9 +381,9 @@ function WhatYouCanHostSection() {
           </div>
         </div>
         <div className="p-8 flex items-start gap-4">
-          <Icon icon="mdi:brain" className="text-3xl text-stone-600 shrink-0" />
+          <Icon icon="mdi:brain" className="text-3xl text-stone-700 shrink-0" />
           <div>
-            <h3 className="text-xl font-serif text-stone-600 mb-2">
+            <h3 className="text-xl font-serif text-stone-700 mb-2">
               LLM inference
             </h3>
             <p className="text-neutral-600">
@@ -396,10 +396,10 @@ function WhatYouCanHostSection() {
         <div className="p-8 flex items-start gap-4">
           <Icon
             icon="mdi:database"
-            className="text-3xl text-stone-600 shrink-0"
+            className="text-3xl text-stone-700 shrink-0"
           />
           <div>
-            <h3 className="text-xl font-serif text-stone-600 mb-2">
+            <h3 className="text-xl font-serif text-stone-700 mb-2">
               Data storage
             </h3>
             <p className="text-neutral-600">
@@ -429,7 +429,7 @@ function EnterpriseSection() {
             className="text-3xl text-green-600 shrink-0"
           />
           <div>
-            <h3 className="text-lg font-serif text-stone-600 mb-2">
+            <h3 className="text-lg font-serif text-stone-700 mb-2">
               HIPAA & SOC 2 ready
             </h3>
             <p className="text-neutral-600">
@@ -444,7 +444,7 @@ function EnterpriseSection() {
             className="text-3xl text-blue-600 shrink-0"
           />
           <div>
-            <h3 className="text-lg font-serif text-stone-600 mb-2">
+            <h3 className="text-lg font-serif text-stone-700 mb-2">
               SSO & LDAP integration
             </h3>
             <p className="text-neutral-600">
@@ -459,7 +459,7 @@ function EnterpriseSection() {
             className="text-3xl text-purple-600 shrink-0"
           />
           <div>
-            <h3 className="text-lg font-serif text-stone-600 mb-2">
+            <h3 className="text-lg font-serif text-stone-700 mb-2">
               Usage analytics
             </h3>
             <p className="text-neutral-600">
@@ -474,7 +474,7 @@ function EnterpriseSection() {
             className="text-3xl text-orange-600 shrink-0"
           />
           <div>
-            <h3 className="text-lg font-serif text-stone-600 mb-2">
+            <h3 className="text-lg font-serif text-stone-700 mb-2">
               Dedicated support
             </h3>
             <p className="text-neutral-600">
@@ -497,9 +497,9 @@ function OpenSourceSection() {
         </p>
       </div>
       <div className="p-8 flex items-start gap-4">
-        <Icon icon="mdi:github" className="text-4xl text-stone-600 shrink-0" />
+        <Icon icon="mdi:github" className="text-4xl text-stone-700 shrink-0" />
         <div>
-          <h3 className="text-xl font-serif text-stone-600 mb-3">
+          <h3 className="text-xl font-serif text-stone-700 mb-3">
             Fully auditable codebase
           </h3>
           <p className="text-neutral-600 mb-4">
@@ -511,7 +511,7 @@ function OpenSourceSection() {
             href="https://github.com/fastrepl/char"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-stone-600 hover:text-stone-800 font-medium"
+            className="inline-flex items-center gap-2 text-stone-700 hover:text-stone-800 font-medium"
           >
             <Icon icon="mdi:github" className="text-xl" />
             View on GitHub
