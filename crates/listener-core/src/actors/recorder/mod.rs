@@ -186,8 +186,6 @@ impl<E: AudioCodec> Actor for RecorderActor<E> {
                 Ok(()) => {
                     sync_file(&encoded_path);
                     sync_dir(&encoded_path);
-                    std::fs::remove_file(&st.wav_path)?;
-                    sync_dir(&st.wav_path);
                 }
                 Err(e) => {
                     tracing::error!(
@@ -248,15 +246,23 @@ fn prepare_existing_audio_state<E: AudioCodec>(
     wav_path: &Path,
 ) -> Result<bool, ActorProcessingErr> {
     if encoded_path.exists() && !wav_path.exists() {
-        codec
-            .decode(encoded_path, wav_path)
-            .map_err(|e| -> ActorProcessingErr {
-                Box::new(std::io::Error::new(
-                    std::io::ErrorKind::Other,
-                    e.to_string(),
-                ))
-            })?;
-        std::fs::remove_file(encoded_path)?;
+        match codec.decode(encoded_path, wav_path) {
+            Ok(()) => {
+                let _ = std::fs::remove_file(encoded_path);
+            }
+            Err(e) => {
+                tracing::error!(
+                    "Failed to decode {} to WAV, starting fresh: {}",
+                    codec.extension(),
+                    e
+                );
+            }
+        }
+    }
+
+    // Clean up encoded file if WAV already exists (both present from previous run)
+    if encoded_path.exists() && wav_path.exists() {
+        let _ = std::fs::remove_file(encoded_path);
     }
 
     if ogg_path.exists() {
