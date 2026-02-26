@@ -14,9 +14,9 @@ async runBatch(params: BatchParams) : Promise<Result<null, string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async runDenoise(params: DenoiseParams) : Promise<Result<null, string>> {
+async runDenoise(sessionId: string) : Promise<Result<null, string>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("plugin:listener2|run_denoise", { params }) };
+    return { status: "ok", data: await TAURI_INVOKE("plugin:listener2|run_denoise", { sessionId }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -90,7 +90,6 @@ export type BatchResponse = { metadata: JsonValue; results: BatchResults }
 export type BatchResults = { channels: BatchChannel[] }
 export type BatchWord = { word: string; start: number; end: number; confidence: number; speaker: number | null; punctuated_word: string | null }
 export type DenoiseEvent = { type: "denoiseStarted"; session_id: string } | { type: "denoiseProgress"; session_id: string; percentage: number } | { type: "denoiseCompleted"; session_id: string } | { type: "denoiseFailed"; session_id: string; error: string }
-export type DenoiseParams = { session_id: string; input_path: string; output_path: string }
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
 export type StreamAlternatives = { transcript: string; words: StreamWord[]; confidence: number; languages?: string[] }
 export type StreamChannel = { alternatives: StreamAlternatives[] }

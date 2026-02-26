@@ -69,6 +69,8 @@ fn run_denoise_blocking(
         });
     }
 
+    let tmp_wav_path = params.output_path.with_extension("wav.tmp");
+
     let spec = hound::WavSpec {
         channels: 1,
         sample_rate: DENOISE_SAMPLE_RATE,
@@ -76,7 +78,7 @@ fn run_denoise_blocking(
         sample_format: hound::SampleFormat::Float,
     };
 
-    let mut writer = hound::WavWriter::create(&params.output_path, spec)
+    let mut writer = hound::WavWriter::create(&tmp_wav_path, spec)
         .map_err(|e| crate::Error::DenoiseError(e.to_string()))?;
     for &sample in &output {
         writer
@@ -86,6 +88,11 @@ fn run_denoise_blocking(
     writer
         .finalize()
         .map_err(|e| crate::Error::DenoiseError(e.to_string()))?;
+
+    hypr_mp3::encode_wav(&tmp_wav_path, &params.output_path)
+        .map_err(|e| crate::Error::DenoiseError(e.to_string()))?;
+
+    let _ = std::fs::remove_file(&tmp_wav_path);
 
     runtime.emit(DenoiseEvent::DenoiseCompleted {
         session_id: params.session_id.clone(),

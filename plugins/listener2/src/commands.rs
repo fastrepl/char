@@ -39,10 +39,10 @@ pub async fn export_to_vtt<R: tauri::Runtime>(
 #[specta::specta]
 pub async fn run_denoise<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
-    params: core::DenoiseParams,
+    session_id: String,
 ) -> Result<(), String> {
     app.listener2()
-        .run_denoise(params)
+        .run_denoise(session_id)
         .await
         .map_err(|e| e.to_string())
 }

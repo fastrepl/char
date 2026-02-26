@@ -1,6 +1,11 @@
-import { Pause, Play } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader2Icon, Pause, Play, SparklesIcon } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+import {
+  commands as listener2Commands,
+  events as listener2Events,
+} from "@hypr/plugin-listener2";
 import { cn } from "@hypr/utils";
 
 import { useAudioPlayer, useAudioTime } from "./provider";
@@ -9,6 +14,7 @@ const PLAYBACK_RATES = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
 export function Timeline() {
   const {
+    sessionId,
     registerContainer,
     state,
     pause,
@@ -113,6 +119,8 @@ export function Timeline() {
           )}
         </div>
 
+        <DenoiseButton sessionId={sessionId} />
+
         <div
           ref={registerContainer}
           className="flex-1 min-w-0"
@@ -120,6 +128,91 @@ export function Timeline() {
         />
       </div>
     </div>
+  );
+}
+
+function DenoiseButton({ sessionId }: { sessionId: string }) {
+  const queryClient = useQueryClient();
+  const [progress, setProgress] = useState<number | null>(null);
+
+  const denoiseMutation = useMutation({
+    mutationFn: async () => {
+      const result = await listener2Commands.runDenoise(sessionId);
+      if (result.status === "error") {
+        throw new Error(result.error);
+      }
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ["audio", sessionId, "url"],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["audio", sessionId, "exist"],
+      });
+    },
+  });
+
+  useEffect(() => {
+    const unlisten = listener2Events.denoiseEvent.listen(({ payload }) => {
+      if (payload.session_id !== sessionId) {
+        return;
+      }
+
+      if (payload.type === "denoiseProgress") {
+        setProgress(payload.percentage);
+      } else if (payload.type === "denoiseCompleted") {
+        setProgress(null);
+      } else if (payload.type === "denoiseFailed") {
+        setProgress(null);
+      }
+    });
+
+    return () => {
+      void unlisten.then((fn) => fn());
+    };
+  }, [sessionId]);
+
+  const handleDenoise = useCallback(() => {
+    if (denoiseMutation.isPending) {
+      return;
+    }
+    denoiseMutation.mutate();
+  }, [denoiseMutation]);
+
+  const isPending = denoiseMutation.isPending;
+
+  return (
+    <button
+      onClick={handleDenoise}
+      disabled={isPending}
+      title={
+        isPending
+          ? `Denoising... ${Math.round(progress ?? 0)}%`
+          : "Denoise audio"
+      }
+      className={cn([
+        "flex items-center justify-center",
+        "h-6 rounded-md",
+        "border border-neutral-200",
+        "transition-colors",
+        "text-xs shrink-0",
+        "shadow-xs",
+        isPending
+          ? "bg-neutral-100 text-neutral-400 cursor-not-allowed px-2 gap-1"
+          : "bg-white hover:bg-neutral-100 text-neutral-700 w-6",
+      ])}
+    >
+      {isPending ? (
+        <>
+          <Loader2Icon className="w-3 h-3 animate-spin" />
+          <span className="font-mono tabular-nums">
+            {Math.round(progress ?? 0)}%
+          </span>
+        </>
+      ) : (
+        <SparklesIcon className="w-3 h-3" />
+      )}
+    </button>
   );
 }
 

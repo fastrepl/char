@@ -133,6 +133,9 @@ const useHandleDetectEvents = (store: ListenerStore) => {
             options,
           });
         } else if (payload.type === "micStopped") {
+          if (!notificationDetectEnabledRef.current) {
+            return;
+          }
           stop();
         } else if (payload.type === "sleepStateChanged") {
           if (payload.value) {

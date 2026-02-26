@@ -1,11 +1,22 @@
+use std::path::PathBuf;
 use std::sync::Arc;
 
 use hypr_listener2_core as core;
 use tauri_specta::Event;
 
+const RAW_AUDIO_FORMATS: [&str; 3] = ["audio.mp3", "audio.wav", "audio.ogg"];
+const POSTPROCESSED_AUDIO: &str = "audio-postprocessed.mp3";
+
 pub struct Listener2<'a, R: tauri::Runtime, M: tauri::Manager<R>> {
     manager: &'a M,
     _runtime: std::marker::PhantomData<fn() -> R>,
+}
+
+fn find_raw_audio(session_dir: &PathBuf) -> Option<PathBuf> {
+    RAW_AUDIO_FORMATS
+        .iter()
+        .map(|format| session_dir.join(format))
+        .find(|path| path.exists())
 }
 
 impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Listener2<'a, R, M> {
@@ -19,7 +30,27 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Listener2<'a, R, M> {
         core::run_batch(runtime, params).await
     }
 
-    pub async fn run_denoise(&self, params: core::DenoiseParams) -> Result<(), core::Error> {
+    pub async fn run_denoise(&self, session_id: String) -> Result<(), core::Error> {
+        use tauri_plugin_settings::SettingsPluginExt;
+
+        let base = self
+            .manager
+            .settings()
+            .cached_vault_base()
+            .map_err(|e| core::Error::DenoiseError(e.to_string()))?;
+        let session_dir: PathBuf = base.join("sessions").join(&session_id).into();
+
+        let input_path = find_raw_audio(&session_dir).ok_or_else(|| {
+            core::Error::DenoiseError("no audio file found in session".to_string())
+        })?;
+        let output_path = session_dir.join(POSTPROCESSED_AUDIO);
+
+        let params = core::DenoiseParams {
+            session_id,
+            input_path,
+            output_path,
+        };
+
         let state = self.manager.state::<crate::SharedState>();
         let guard = state.lock().await;
         let app = guard.app.clone();

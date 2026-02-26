@@ -9,7 +9,7 @@ mod ext;
 pub use events::*;
 pub use ext::*;
 
-pub use hypr_listener2_core::{BatchParams, BatchProvider, DenoiseParams, Subtitle, VttWord};
+pub use hypr_listener2_core::{BatchParams, BatchProvider, Subtitle, VttWord};
 
 const PLUGIN_NAME: &str = "listener2";
 

@@ -10,7 +10,12 @@ use hypr_audio_utils::{
 use crate::error::{AudioImportError, AudioProcessingError};
 
 const TARGET_SAMPLE_RATE_HZ: u32 = 16_000;
-const AUDIO_FORMATS: [&str; 3] = ["audio.mp3", "audio.wav", "audio.ogg"];
+const AUDIO_FORMATS: [&str; 4] = [
+    "audio-postprocessed.mp3",
+    "audio.mp3",
+    "audio.wav",
+    "audio.ogg",
+];
 
 pub fn exists(session_dir: &Path) -> std::io::Result<bool> {
     AUDIO_FORMATS
