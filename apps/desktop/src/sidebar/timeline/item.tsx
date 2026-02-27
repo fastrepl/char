@@ -166,7 +166,6 @@ const EventItem = memo(
     const title = item.data.title || "Untitled";
     const calendarId = item.data.calendar_id ?? null;
     const recurrenceSeriesId = item.data.recurrence_series_id;
-    const isRecurrent = item.data.has_recurrence_rules;
 
     const {
       isIgnored,
@@ -176,14 +175,7 @@ const EventItem = memo(
       unignoreSeries,
     } = useIgnoredEvents();
 
-    const day = useMemo(() => {
-      const parsed = safeParseDate(item.data.started_at);
-      return parsed
-        ? format(timezone ? new TZDate(parsed, timezone) : parsed, "yyyy-MM-dd")
-        : undefined;
-    }, [item.data.started_at, timezone]);
-
-    const ignored = isIgnored(trackingIdEvent, recurrenceSeriesId, day);
+    const ignored = isIgnored(trackingIdEvent, recurrenceSeriesId);
 
     const displayTime = useMemo(
       () => formatDisplayTime(item.data.started_at, precision, timezone),
@@ -196,16 +188,11 @@ const EventItem = memo(
           return;
         }
 
-        const sessionId = getOrCreateSessionForEventId(
-          store,
-          eventId,
-          title,
-          timezone,
-        );
+        const sessionId = getOrCreateSessionForEventId(store, eventId, title);
         const tab: TabInput = { id: sessionId, type: "sessions" };
         openInNewTab ? openNew(tab) : openCurrent(tab);
       },
-      [eventId, store, title, openCurrent, openNew, timezone],
+      [eventId, store, title, openCurrent, openNew],
     );
 
     const itemKey = `event-${item.id}`;
@@ -225,14 +212,13 @@ const EventItem = memo(
 
     const handleIgnore = useCallback(() => {
       if (!trackingIdEvent) return;
-      if (isRecurrent && !day) return;
-      ignoreEvent(trackingIdEvent, isRecurrent, day);
-    }, [trackingIdEvent, isRecurrent, day, ignoreEvent]);
+      ignoreEvent(trackingIdEvent);
+    }, [trackingIdEvent, ignoreEvent]);
 
     const handleUnignore = useCallback(() => {
       if (!trackingIdEvent) return;
-      unignoreEvent(trackingIdEvent, isRecurrent, day);
-    }, [trackingIdEvent, isRecurrent, day, unignoreEvent]);
+      unignoreEvent(trackingIdEvent);
+    }, [trackingIdEvent, unignoreEvent]);
 
     const handleUnignoreSeries = useCallback(() => {
       if (!recurrenceSeriesId) return;

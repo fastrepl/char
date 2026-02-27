@@ -1,12 +1,10 @@
 import type { Ctx } from "~/services/apple-calendar/ctx";
-import type { IncomingEvent } from "~/services/apple-calendar/fetch/types";
-import { eventMatchingKey } from "~/session/utils";
 
 import type { EventsSyncInput, EventsSyncOutput } from "./types";
 
 export function syncEvents(
   ctx: Ctx,
-  { incoming, existing, incomingParticipants, timezone }: EventsSyncInput,
+  { incoming, existing, incomingParticipants }: EventsSyncInput,
 ): EventsSyncOutput {
   const out: EventsSyncOutput = {
     toDelete: [],
@@ -14,10 +12,10 @@ export function syncEvents(
     toAdd: [],
   };
 
-  const incomingEventMap = new Map(
-    incoming.map((e) => [eventMatchingKey(e, timezone), e]),
+  const incomingByTrackingId = new Map(
+    incoming.map((e) => [e.tracking_id_event, e]),
   );
-  const handledEventKeys = new Set<string>();
+  const handledTrackingIds = new Set<string>();
 
   for (const storeEvent of existing) {
     if (!ctx.calendarIds.has(storeEvent.calendar_id!)) {
@@ -26,45 +24,11 @@ export function syncEvents(
     }
 
     const trackingId = storeEvent.tracking_id_event;
-    let eventKey: string | undefined;
-    let matchingIncomingEvent: IncomingEvent | undefined;
-    if (!trackingId) {
-      eventKey = undefined;
-      matchingIncomingEvent = undefined;
-    } else if (storeEvent.has_recurrence_rules === undefined) {
-      eventKey = eventMatchingKey(
-        {
-          tracking_id_event: trackingId,
-          started_at: storeEvent.started_at,
-          has_recurrence_rules: false,
-        },
-        timezone,
-      );
-      matchingIncomingEvent = incomingEventMap.get(eventKey);
-      if (!matchingIncomingEvent) {
-        eventKey = eventMatchingKey(
-          {
-            tracking_id_event: trackingId,
-            started_at: storeEvent.started_at,
-            has_recurrence_rules: true,
-          },
-          timezone,
-        );
-        matchingIncomingEvent = incomingEventMap.get(eventKey);
-      }
-    } else {
-      eventKey = eventMatchingKey(
-        {
-          tracking_id_event: trackingId,
-          started_at: storeEvent.started_at,
-          has_recurrence_rules: storeEvent.has_recurrence_rules,
-        },
-        timezone,
-      );
-      matchingIncomingEvent = incomingEventMap.get(eventKey);
-    }
+    const matchingIncomingEvent = trackingId
+      ? incomingByTrackingId.get(trackingId)
+      : undefined;
 
-    if (matchingIncomingEvent && trackingId && eventKey) {
+    if (matchingIncomingEvent && trackingId) {
       out.toUpdate.push({
         ...storeEvent,
         ...matchingIncomingEvent,
@@ -74,9 +38,9 @@ export function syncEvents(
         created_at: storeEvent.created_at,
         calendar_id: storeEvent.calendar_id,
         has_recurrence_rules: matchingIncomingEvent.has_recurrence_rules,
-        participants: incomingParticipants.get(eventKey) ?? [],
+        participants: incomingParticipants.get(trackingId) ?? [],
       });
-      handledEventKeys.add(eventKey);
+      handledTrackingIds.add(trackingId);
       continue;
     }
 
@@ -84,11 +48,11 @@ export function syncEvents(
   }
 
   for (const incomingEvent of incoming) {
-    const incomingEventKey = eventMatchingKey(incomingEvent, timezone);
-    if (!handledEventKeys.has(incomingEventKey)) {
+    if (!handledTrackingIds.has(incomingEvent.tracking_id_event)) {
       out.toAdd.push({
         ...incomingEvent,
-        participants: incomingParticipants.get(incomingEventKey) ?? [],
+        participants:
+          incomingParticipants.get(incomingEvent.tracking_id_event) ?? [],
       });
     }
   }

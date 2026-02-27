@@ -76,9 +76,9 @@ export function useCalendarData(): CalendarData {
         if (!row.title) continue;
         const raw = safeParseDate(row.started_at);
         if (!raw) continue;
-        const day = format(toTz(raw, tz), "yyyy-MM-dd");
-        if (isIgnored(row.tracking_id_event, row.recurrence_series_id, day))
+        if (isIgnored(row.tracking_id_event, row.recurrence_series_id))
           continue;
+        const day = format(toTz(raw, tz), "yyyy-MM-dd");
         (eventIdsByDate[day] ??= []).push(eventId);
       }
 

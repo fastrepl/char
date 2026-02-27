@@ -35,7 +35,6 @@ export function getOrCreateSessionForEventId(
   store: Store,
   eventId: string,
   title?: string,
-  timezone?: string,
 ): string {
   if (!store.hasRow("events", eventId)) {
     console.trace(
@@ -44,7 +43,7 @@ export function getOrCreateSessionForEventId(
     return createSession(store, title);
   }
 
-  const existingSessionId = findSessionByEventId(store, eventId, timezone);
+  const existingSessionId = findSessionByEventId(store, eventId);
   if (existingSessionId) {
     return existingSessionId;
   }

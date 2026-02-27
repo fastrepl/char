@@ -1,8 +1,4 @@
-import {
-  eventMatchingKey,
-  getSessionEvent,
-  sessionEventMatchingKey,
-} from "~/session/utils";
+import { getSessionEvent } from "~/session/utils";
 
 import {
   differenceInCalendarDays,
@@ -198,14 +194,14 @@ export function getItemTimestamp(item: TimelineItem): Date | null {
   );
 }
 
-function getEventKey(row: TimelineEventRow, timezone?: string): string {
-  return eventMatchingKey(row, timezone);
+function getEventTrackingId(row: TimelineEventRow): string {
+  return row.tracking_id_event ?? "";
 }
 
-function getSessionKey(row: TimelineSessionRow, timezone?: string): string {
+function getSessionTrackingId(row: TimelineSessionRow): string {
   const event = getSessionEvent(row);
   if (!event) return "";
-  return sessionEventMatchingKey(event, timezone);
+  return event.tracking_id;
 }
 
 export function buildTimelineBuckets({
@@ -236,17 +232,17 @@ export function buildTimelineBuckets({
         id: sessionId,
         data: row,
       });
-      const key = getSessionKey(row, timezone);
-      if (key) {
-        seenEventKeys.add(key);
+      const trackingId = getSessionTrackingId(row);
+      if (trackingId) {
+        seenEventKeys.add(trackingId);
       }
     });
   }
 
   if (timelineEventsTable) {
     Object.entries(timelineEventsTable).forEach(([eventId, row]) => {
-      const key = getEventKey(row, timezone);
-      if (key && seenEventKeys.has(key)) {
+      const trackingId = getEventTrackingId(row);
+      if (trackingId && seenEventKeys.has(trackingId)) {
         return;
       }
       const eventStartTime = safeParseDate(row.started_at);

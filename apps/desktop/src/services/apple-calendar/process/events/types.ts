@@ -12,7 +12,6 @@ export type EventsSyncInput = {
   incoming: IncomingEvent[];
   existing: ExistingEvent[];
   incomingParticipants: IncomingParticipants;
-  timezone?: string;
 };
 
 export type EventToAdd = IncomingEvent & {

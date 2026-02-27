@@ -1,6 +1,5 @@
 import { type UnlistenFn } from "@tauri-apps/api/event";
 import { useEffect, useRef } from "react";
-import { useConfigValue } from "~/shared/config";
 import * as main from "~/store/tinybase/store/main";
 import {
   createSession,
@@ -46,25 +45,21 @@ function useUpdaterEvents() {
 function useNotificationEvents() {
   const store = main.UI.useStore(main.STORE_ID);
   const openNew = useTabs((state) => state.openNew);
-  const timezone = useConfigValue("timezone") || undefined;
   const pendingAutoStart = useRef<{ eventId: string | null } | null>(null);
   const storeRef = useRef(store);
   const openNewRef = useRef(openNew);
-  const timezoneRef = useRef(timezone);
 
   useEffect(() => {
     storeRef.current = store;
     openNewRef.current = openNew;
-    timezoneRef.current = timezone;
-  }, [store, openNew, timezone]);
+  }, [store, openNew]);
 
   useEffect(() => {
     if (pendingAutoStart.current && store) {
       const { eventId } = pendingAutoStart.current;
-      const timezone = timezoneRef.current;
       pendingAutoStart.current = null;
       const sessionId = eventId
-        ? getOrCreateSessionForEventId(store, eventId, undefined, timezone)
+        ? getOrCreateSessionForEventId(store, eventId)
         : createSession(store);
       openNew({
         type: "sessions",
@@ -98,12 +93,7 @@ function useNotificationEvents() {
             return;
           }
           const sessionId = eventId
-            ? getOrCreateSessionForEventId(
-                currentStore,
-                eventId,
-                undefined,
-                timezoneRef.current,
-              )
+            ? getOrCreateSessionForEventId(currentStore, eventId)
             : createSession(currentStore);
           openNewRef.current({
             type: "sessions",
@@ -125,8 +115,6 @@ function useNotificationEvents() {
               ? getOrCreateSessionForEventId(
                   currentStore,
                   eventIds[selectedIndex],
-                  undefined,
-                  timezoneRef.current,
                 )
               : createSession(currentStore);
 

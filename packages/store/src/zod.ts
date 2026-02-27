@@ -32,19 +32,10 @@ export const sessionEventSchema = z.object({
   recurrence_series_id: z.string().optional(),
 });
 
-export const ignoredEventEntrySchema = z.discriminatedUnion("is_recurrent", [
-  z.object({
-    tracking_id: z.string(),
-    is_recurrent: z.literal(false),
-    last_seen: z.string(),
-  }),
-  z.object({
-    tracking_id: z.string(),
-    is_recurrent: z.literal(true),
-    day: z.string(),
-    last_seen: z.string(),
-  }),
-]);
+export const ignoredEventEntrySchema = z.object({
+  tracking_id: z.string(),
+  last_seen: z.string(),
+});
 
 export const ignoredRecurringSeriesEntrySchema = z.object({
   id: z.string(),

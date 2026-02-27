@@ -4,7 +4,6 @@ export type ParticipantMappingId = string;
 
 export type ParticipantsSyncInput = {
   incomingParticipants: IncomingParticipants;
-  timezone?: string;
 };
 
 export type ParticipantMappingToAdd = {

@@ -208,27 +208,9 @@ export function useIgnoredEvents() {
     main.STORE_ID,
   ) as string | undefined;
 
-  const ignoredNonRecurrentIds = useMemo(() => {
+  const ignoredIds = useMemo(() => {
     const list = parseIgnoredEvents(ignoredEventsRaw);
-    const set = new Set<string>();
-    for (const e of list) {
-      if (!e.is_recurrent) {
-        set.add(e.tracking_id);
-      }
-    }
-    return set;
-  }, [ignoredEventsRaw]);
-
-  const ignoredRecurrentMap = useMemo(() => {
-    const list = parseIgnoredEvents(ignoredEventsRaw);
-    const map = new Map<string, Set<string>>();
-    for (const e of list) {
-      if (!e.is_recurrent) continue;
-      const set = map.get(e.tracking_id) ?? new Set();
-      set.add(e.day);
-      map.set(e.tracking_id, set);
-    }
-    return map;
+    return new Set(list.map((e) => e.tracking_id));
   }, [ignoredEventsRaw]);
 
   const ignoredSeriesIds = useMemo(() => {
@@ -240,56 +222,39 @@ export function useIgnoredEvents() {
     (
       trackingId: string | null | undefined,
       recurrenceSeriesId: string | null | undefined,
-      day: string | null | undefined,
     ) => {
       if (!trackingId) return false;
-      if (!recurrenceSeriesId) {
-        return ignoredNonRecurrentIds.has(trackingId);
-      }
-      if (day && ignoredRecurrentMap.get(trackingId)?.has(day)) return true;
-      if (ignoredSeriesIds.has(recurrenceSeriesId)) return true;
+      if (ignoredIds.has(trackingId)) return true;
+      if (recurrenceSeriesId && ignoredSeriesIds.has(recurrenceSeriesId))
+        return true;
       return false;
     },
-    [ignoredNonRecurrentIds, ignoredRecurrentMap, ignoredSeriesIds],
+    [ignoredIds, ignoredSeriesIds],
   );
 
   const ignoreEvent = useCallback(
-    (trackingId: string, isRecurrent: boolean, day?: string) => {
+    (trackingId: string) => {
       if (!store) return;
       const list = parseIgnoredEvents(
         store.getValue("ignored_events") as string | undefined,
       );
       const now = new Date().toISOString();
-      if (isRecurrent && day) {
-        list.push({
-          tracking_id: trackingId,
-          is_recurrent: true,
-          day,
-          last_seen: now,
-        });
-      } else {
-        list.push({
-          tracking_id: trackingId,
-          is_recurrent: false,
-          last_seen: now,
-        });
-      }
+      list.push({
+        tracking_id: trackingId,
+        last_seen: now,
+      });
       store.setValue("ignored_events", JSON.stringify(list));
     },
     [store],
   );
 
   const unignoreEvent = useCallback(
-    (trackingId: string, isRecurrent: boolean, day?: string) => {
+    (trackingId: string) => {
       if (!store) return;
       const list = parseIgnoredEvents(
         store.getValue("ignored_events") as string | undefined,
       );
-      const filtered = list.filter((e) => {
-        if (e.tracking_id !== trackingId) return true;
-        if (!isRecurrent) return e.is_recurrent;
-        return !(e.is_recurrent && e.day === day);
-      });
+      const filtered = list.filter((e) => e.tracking_id !== trackingId);
       store.setValue("ignored_events", JSON.stringify(filtered));
     },
     [store],

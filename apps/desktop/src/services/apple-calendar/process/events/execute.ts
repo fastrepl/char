@@ -1,10 +1,6 @@
 import type { Ctx } from "~/services/apple-calendar/ctx";
 import type { IncomingEvent } from "~/services/apple-calendar/fetch/types";
-import {
-  eventMatchingKey,
-  getSessionEventById,
-  sessionEventMatchingKey,
-} from "~/session/utils";
+import { getSessionEventById } from "~/session/utils";
 import { id } from "~/shared/utils";
 
 import type { EventStorage, SessionEvent } from "@hypr/store";
@@ -80,20 +76,18 @@ export function executeForEventsSync(ctx: Ctx, out: EventsSyncOutput): void {
 export function syncSessionEmbeddedEvents(
   ctx: Ctx,
   incoming: IncomingEvent[],
-  timezone?: string,
 ): void {
-  const incomingByKey = new Map<string, IncomingEvent>();
+  const incomingByTrackingId = new Map<string, IncomingEvent>();
   for (const event of incoming) {
-    incomingByKey.set(eventMatchingKey(event, timezone), event);
+    incomingByTrackingId.set(event.tracking_id_event, event);
   }
 
   ctx.store.transaction(() => {
     ctx.store.forEachRow("sessions", (sessionId, _forEachCell) => {
       const sessionEvent = getSessionEventById(ctx.store, sessionId);
       if (!sessionEvent) return;
-      const key = sessionEventMatchingKey(sessionEvent, timezone);
 
-      const incomingEvent = incomingByKey.get(key);
+      const incomingEvent = incomingByTrackingId.get(sessionEvent.tracking_id);
       if (!incomingEvent) return;
 
       const calendarId =

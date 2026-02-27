@@ -1,5 +1,4 @@
 import type { Ctx } from "~/services/apple-calendar/ctx";
-import { eventMatchingKey } from "~/session/utils";
 
 import type { CalendarEvent } from "@hypr/plugin-apple-calendar";
 import { commands as appleCalendarCommands } from "@hypr/plugin-apple-calendar";
@@ -23,10 +22,7 @@ export class CalendarFetchError extends Error {
   }
 }
 
-export async function fetchIncomingEvents(
-  ctx: Ctx,
-  timezone?: string,
-): Promise<{
+export async function fetchIncomingEvents(ctx: Ctx): Promise<{
   events: IncomingEvent[];
   participants: IncomingParticipants;
 }> {
@@ -57,8 +53,7 @@ export async function fetchIncomingEvents(
       await normalizeCalendarEvent(calendarEvent);
     events.push(event);
     if (eventParticipants.length > 0) {
-      const key = eventMatchingKey(event, timezone);
-      participants.set(key, eventParticipants);
+      participants.set(event.tracking_id_event, eventParticipants);
     }
   }
 
@@ -98,11 +93,7 @@ async function normalizeCalendarEvent(calendarEvent: CalendarEvent): Promise<{
 
   return {
     event: {
-      // FIXME: this is a temporary workaround for not having to migrate everything at once
-      // apple calendar events have the id format of eventIdentifier:startDate if and only if they are recurrent
-      tracking_id_event: calendarEvent.has_recurrence_rules
-        ? calendarEvent.id.split(":").slice(0, -1).join(":")
-        : calendarEvent.id,
+      tracking_id_event: calendarEvent.id,
       tracking_id_calendar: calendarEvent.calendar_id,
       title: calendarEvent.title,
       started_at: calendarEvent.started_at,

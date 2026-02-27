@@ -31,7 +31,6 @@ export function TaskManager() {
     await syncCalendarEvents(
       store as main.Store,
       queries as Queries<main.Schemas>,
-      settingsStore as settings.Store,
     );
   }, [store, queries, settingsStore]);
 
