@@ -22,7 +22,7 @@ async listCalendars() : Promise<Result<AppleCalendar[], string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async listEvents(filter: EventFilter) : Promise<Result<AppleEvent[], string>> {
+async listEvents(filter: EventFilter) : Promise<Result<CalendarEvent[], string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:apple-calendar|list_events", { filter }) };
 } catch (e) {
@@ -55,37 +55,94 @@ calendarChangedEvent: "plugin:apple-calendar:calendar-changed-event"
 
 /** user-defined types **/
 
-export type Alarm = { absolute_date: string | null; relative_offset: number | null; proximity: AlarmProximity | null; alarm_type: AlarmType | null; email_address: string | null; sound_name: string | null; url: string | null; structured_location: StructuredLocation | null }
-export type AlarmProximity = "None" | "Enter" | "Leave"
-export type AlarmType = "Display" | "Audio" | "Procedure" | "Email"
 export type AppleCalendar = { id: string; title: string; calendar_type: CalendarType; color: CalendarColor | null; allows_content_modifications: boolean; is_immutable: boolean; is_subscribed: boolean; supported_event_availabilities: EventAvailability[]; allowed_entity_types: CalendarEntityType[]; source: CalendarSource }
-export type AppleEvent = { event_identifier: string; calendar_item_identifier: string; external_identifier: string; calendar: CalendarRef; title: string; location: string | null; url: string | null; notes: string | null; creation_date: string | null; last_modified_date: string | null; time_zone: string | null; start_date: string; end_date: string; is_all_day: boolean; availability: EventAvailability; status: EventStatus; has_alarms: boolean; has_attendees: boolean; has_notes: boolean; has_recurrence_rules: boolean; organizer: Participant | null; attendees: Participant[]; structured_location: StructuredLocation | null; recurrence: RecurrenceInfo | null; occurrence_date: string | null; is_detached: boolean; alarms: Alarm[]; birthday_contact_identifier: string | null; is_birthday: boolean }
+export type AttendeeRole = "chair" | "required" | "optional" | "nonparticipant"
+export type AttendeeStatus = "pending" | "accepted" | "tentative" | "declined"
 export type CalendarChangedEvent = null
 export type CalendarColor = { red: number; green: number; blue: number; alpha: number }
 export type CalendarEntityType = "Event" | "Reminder"
-export type CalendarRef = { id: string; title: string }
+export type CalendarEvent = { 
+/**
+ * Unique between events. Synthesized for Apple events (eventIdentifier:YYYY-MM-DD for recurring).
+ */
+id: string; 
+/**
+ * Calendar id.
+ */
+calendar_id: string; 
+/**
+ * iCal identifier used for deduplication.
+ * Apple: calendarItemExternalIdentifier, Google: iCalUID.
+ */
+external_id: string; title: string; description: string | null; location: string | null; url: string | null; 
+/**
+ * Parsed from notes for Apple, Google provides url directly.
+ */
+meeting_link: string | null; 
+/**
+ * ISO 8601. For Google, start of day for all day events (Apple already does that).
+ */
+started_at: string; 
+/**
+ * ISO 8601. For Google, end of day for all day events (Apple already does that).
+ */
+ended_at: string; timezone: string | null; is_all_day: boolean; 
+/**
+ * Apple: None | Confirmed | Tentative | Canceled -> map None to Confirmed.
+ * Google: confirmed | tentative | cancelled.
+ */
+status: EventStatus; organizer: EventPerson | null; attendees: EventAttendee[]; has_recurrence_rules: boolean; 
+/**
+ * Google's approach: for an instance of a recurring event, this is the id of the recurring
+ * event to which this instance belongs. For Apple, this is the recurrence's series_identifier
+ * (same across all occurrences of a recurring event).
+ */
+recurring_event_id: string | null; 
+/**
+ * Raw data. JSON for both Apple and Google.
+ */
+raw: string }
 export type CalendarSource = { identifier: string; title: string; source_type: CalendarSourceType }
 export type CalendarSourceType = "Local" | "Exchange" | "CalDav" | "MobileMe" | "Subscribed" | "Birthdays"
 export type CalendarType = "Local" | "CalDav" | "Exchange" | "Subscription" | "Birthday"
 export type CreateEventInput = { title: string; start_date: string; end_date: string; calendar_id: string; is_all_day: boolean | null; location: string | null; notes: string | null; url: string | null }
+export type EventAttendee = { name: string | null; 
+/**
+ * Apple calendar events only provide a contact entry, which can possibly not have an email.
+ */
+email: string | null; 
+/**
+ * Apple: participant.isCurrentUser, Google: attendee.self.
+ */
+is_current_user: boolean; 
+/**
+ * Apple: EKParticipantStatus (Unknown | Pending | Accepted | Declined | Tentative | Delegated | Completed | InProgress).
+ * Google: needsAction | declined | tentative | accepted.
+ * Normalize: unknown/needsAction -> Pending, delegated/completed/inProgress -> Accepted.
+ */
+status: AttendeeStatus; 
+/**
+ * Apple: EKParticipantRole (Unknown | Required | Optional | Chair | NonParticipant).
+ * Google: attendee.optional and attendee.organizer.
+ * For Apple, normalize unknown as required (see RFC 5545 3.2.16).
+ * For Google: organizer -> Chair, !organizer & !optional -> Required, !organizer & optional -> Optional.
+ */
+role: AttendeeRole }
 export type EventAvailability = "NotSupported" | "Busy" | "Free" | "Tentative" | "Unavailable"
 export type EventFilter = { from: string; to: string; calendar_tracking_id: string }
-export type EventStatus = "None" | "Confirmed" | "Tentative" | "Canceled"
-export type GeoLocation = { latitude: number; longitude: number }
-export type Participant = { name: string | null; email: string | null; is_current_user: boolean; role: ParticipantRole; status: ParticipantStatus; participant_type: ParticipantType; schedule_status: ParticipantScheduleStatus | null; url: string | null; contact: ParticipantContact | null }
-export type ParticipantContact = { identifier: string; given_name: string | null; family_name: string | null; middle_name: string | null; organization_name: string | null; job_title: string | null; email_addresses: string[]; phone_numbers: string[]; url_addresses: string[]; image_available: boolean }
-export type ParticipantRole = "Unknown" | "Required" | "Optional" | "Chair" | "NonParticipant"
-export type ParticipantScheduleStatus = "None" | "Pending" | "Sent" | "Delivered" | "RecipientNotRecognized" | "NoPrivileges" | "DeliveryFailed" | "CannotDeliver"
-export type ParticipantStatus = "Unknown" | "Pending" | "Accepted" | "Declined" | "Tentative" | "Delegated" | "Completed" | "InProgress"
-export type ParticipantType = "Unknown" | "Person" | "Room" | "Resource" | "Group"
-export type RecurrenceDayOfWeek = { weekday: Weekday; week_number: number | null }
-export type RecurrenceEnd = { Count: number } | { Until: string }
-export type RecurrenceFrequency = "Daily" | "Weekly" | "Monthly" | "Yearly"
-export type RecurrenceInfo = { series_identifier: string; has_recurrence_rules: boolean; occurrence: RecurrenceOccurrence | null; rules: RecurrenceRule[] }
-export type RecurrenceOccurrence = { original_start: string; is_detached: boolean }
-export type RecurrenceRule = { frequency: RecurrenceFrequency; interval: number; days_of_week: RecurrenceDayOfWeek[]; days_of_month: number[]; months_of_year: number[]; weeks_of_year: number[]; days_of_year: number[]; set_positions: number[]; first_day_of_week: Weekday | null; end: RecurrenceEnd | null }
-export type StructuredLocation = { title: string; geo: GeoLocation | null; radius: number | null }
-export type Weekday = "Sunday" | "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday"
+/**
+ * Apple: {name, email, isCurrentUser, ...}, Google: {id, email, displayName, self}.
+ */
+export type EventPerson = { name: string | null; 
+/**
+ * Apple calendar events only provide a contact entry, which can possibly not have an email.
+ */
+email: string | null; 
+/**
+ * Apple: participant.isCurrentUser, Google: organizer.self.
+ */
+is_current_user: boolean }
+export type EventStatus = "confirmed" | "tentative" | "cancelled"
 
 /** tauri-specta globals **/
 

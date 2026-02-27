@@ -2790,6 +2790,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "calendar-interface"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "specta",
+]
+
+[[package]]
 name = "camino"
 version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -17480,7 +17488,9 @@ name = "tauri-plugin-apple-calendar"
 version = "0.1.0"
 dependencies = [
  "apple-calendar",
+ "calendar-interface",
  "chrono",
+ "chrono-tz 0.10.4",
  "objc2-foundation",
  "schemars 1.2.1",
  "serde",

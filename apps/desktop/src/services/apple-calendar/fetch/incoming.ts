@@ -1,7 +1,7 @@
 import type { Ctx } from "~/services/apple-calendar/ctx";
 import { eventMatchingKey } from "~/session/utils";
 
-import type { AppleEvent, Participant } from "@hypr/plugin-apple-calendar";
+import type { CalendarEvent } from "@hypr/plugin-apple-calendar";
 import { commands as appleCalendarCommands } from "@hypr/plugin-apple-calendar";
 import { commands as miscCommands } from "@hypr/plugin-misc";
 
@@ -48,12 +48,13 @@ export async function fetchIncomingEvents(
     }),
   );
 
-  const appleEvents = results.flat();
+  const calendarEvents = results.flat();
   const events: IncomingEvent[] = [];
   const participants: IncomingParticipants = new Map();
 
-  for (const appleEvent of appleEvents) {
-    const { event, eventParticipants } = await normalizeAppleEvent(appleEvent);
+  for (const calendarEvent of calendarEvents) {
+    const { event, eventParticipants } =
+      await normalizeCalendarEvent(calendarEvent);
     events.push(event);
     if (eventParticipants.length > 0) {
       const key = eventMatchingKey(event, timezone);
@@ -64,44 +65,54 @@ export async function fetchIncomingEvents(
   return { events, participants };
 }
 
-async function normalizeAppleEvent(appleEvent: AppleEvent): Promise<{
+async function normalizeCalendarEvent(calendarEvent: CalendarEvent): Promise<{
   event: IncomingEvent;
   eventParticipants: EventParticipant[];
 }> {
   const meetingLink =
-    appleEvent.url ??
-    (await extractMeetingLink(appleEvent.notes, appleEvent.location));
+    calendarEvent.meeting_link ??
+    (await extractMeetingLink(
+      calendarEvent.description,
+      calendarEvent.location,
+    ));
 
   const eventParticipants: EventParticipant[] = [];
-  let normalizedOrganizer: EventParticipant | undefined;
 
-  if (appleEvent.organizer) {
-    normalizedOrganizer = normalizeParticipant(appleEvent.organizer, true);
-    eventParticipants.push(normalizedOrganizer);
+  if (calendarEvent.organizer) {
+    eventParticipants.push({
+      name: calendarEvent.organizer.name ?? undefined,
+      email: calendarEvent.organizer.email ?? undefined,
+      is_organizer: true,
+      is_current_user: calendarEvent.organizer.is_current_user,
+    });
   }
 
-  for (const attendee of appleEvent.attendees) {
-    const normalizedAttendee = normalizeParticipant(attendee, false);
-    if (normalizedAttendee.email === normalizedOrganizer?.email) {
-      continue;
-    }
-    eventParticipants.push(normalizedAttendee);
+  for (const attendee of calendarEvent.attendees) {
+    eventParticipants.push({
+      name: attendee.name ?? undefined,
+      email: attendee.email ?? undefined,
+      is_organizer: false,
+      is_current_user: attendee.is_current_user,
+    });
   }
 
   return {
     event: {
-      tracking_id_event: appleEvent.event_identifier,
-      tracking_id_calendar: appleEvent.calendar.id,
-      title: appleEvent.title,
-      started_at: appleEvent.start_date,
-      ended_at: appleEvent.end_date,
-      location: appleEvent.location ?? undefined,
+      // FIXME: this is a temporary workaround for not having to migrate everything at once
+      // apple calendar events have the id format of eventIdentifier:startDate if and only if they are recurrent
+      tracking_id_event: calendarEvent.has_recurrence_rules
+        ? calendarEvent.id.split(":").slice(0, -1).join(":")
+        : calendarEvent.id,
+      tracking_id_calendar: calendarEvent.calendar_id,
+      title: calendarEvent.title,
+      started_at: calendarEvent.started_at,
+      ended_at: calendarEvent.ended_at,
+      location: calendarEvent.location ?? undefined,
       meeting_link: meetingLink ?? undefined,
-      description: appleEvent.notes ?? undefined,
-      recurrence_series_id:
-        appleEvent.recurrence?.series_identifier ?? undefined,
-      has_recurrence_rules: appleEvent.has_recurrence_rules,
-      is_all_day: appleEvent.is_all_day,
+      description: calendarEvent.description ?? undefined,
+      recurrence_series_id: calendarEvent.recurring_event_id ?? undefined,
+      has_recurrence_rules: calendarEvent.has_recurrence_rules,
+      is_all_day: calendarEvent.is_all_day,
     },
     eventParticipants,
   };
@@ -115,48 +126,5 @@ async function extractMeetingLink(
     const result = await miscCommands.parseMeetingLink(text);
     if (result) return result;
   }
-  return undefined;
-}
-
-function normalizeParticipant(
-  participant: Participant,
-  isOrganizer: boolean,
-): EventParticipant {
-  return {
-    name: participant.name ?? undefined,
-    email: resolveParticipantEmail(participant),
-    is_organizer: isOrganizer,
-    is_current_user: participant.is_current_user,
-  };
-}
-
-function resolveParticipantEmail(participant: Participant): string | undefined {
-  if (participant.email) {
-    return participant.email;
-  }
-
-  if (participant.contact?.email_addresses?.length) {
-    return participant.contact.email_addresses[0];
-  }
-
-  if (participant.url) {
-    const lower = participant.url.toLowerCase();
-    if (lower.startsWith("mailto:")) {
-      const email = participant.url.slice(7);
-      if (email) {
-        return email;
-      }
-    }
-  }
-
-  if (
-    participant.name &&
-    participant.name.includes("@") &&
-    participant.name.includes(".") &&
-    !participant.name.includes(" ")
-  ) {
-    return participant.name;
-  }
-
   return undefined;
 }

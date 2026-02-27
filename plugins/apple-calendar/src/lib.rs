@@ -2,6 +2,7 @@
 pub use hypr_apple_calendar::fixture;
 
 mod commands;
+mod convert;
 mod error;
 mod events;
 mod ext;
