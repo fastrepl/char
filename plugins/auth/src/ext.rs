@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 
+use hypr_supabase_auth::client::{session::find_session, store::AuthStore};
 use hypr_template_support::AccountInfo;
-
-use crate::types::find_session;
 
 pub(crate) fn parse_account_info(
     data: &HashMap<String, String>,
@@ -31,28 +30,28 @@ pub trait AuthPluginExt<R: tauri::Runtime> {
 
 impl<R: tauri::Runtime, T: tauri::Manager<R>> AuthPluginExt<R> for T {
     fn get_item(&self, key: String) -> Result<Option<String>, crate::Error> {
-        Ok(self.state::<crate::store::AuthStore>().get(&key))
+        Ok(self.state::<AuthStore>().get(&key))
     }
 
     fn set_item(&self, key: String, value: String) -> Result<(), crate::Error> {
-        self.state::<crate::store::AuthStore>().set(key, value)
+        self.state::<AuthStore>().set(key, value)
     }
 
     fn remove_item(&self, key: String) -> Result<(), crate::Error> {
-        self.state::<crate::store::AuthStore>().remove(&key)
+        self.state::<AuthStore>().remove(&key)
     }
 
     fn clear_auth(&self) -> Result<(), crate::Error> {
-        self.state::<crate::store::AuthStore>().clear()
+        self.state::<AuthStore>().clear()
     }
 
     fn get_account_info(&self) -> Result<Option<AccountInfo>, crate::Error> {
-        let data = self.state::<crate::store::AuthStore>().snapshot();
+        let data = self.state::<AuthStore>().snapshot();
         parse_account_info(&data)
     }
 
     fn access_token(&self) -> Result<Option<String>, crate::Error> {
-        let Some(store) = self.try_state::<crate::store::AuthStore>() else {
+        let Some(store) = self.try_state::<AuthStore>() else {
             return Ok(None);
         };
         Ok(find_session(&store.snapshot())?.map(|s| s.access_token))

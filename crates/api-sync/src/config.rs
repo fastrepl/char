@@ -4,7 +4,7 @@ use std::sync::Arc;
 pub struct SyncConfig {
     pub supabase_url: String,
     pub supabase_anon_key: String,
-    pub auth: Option<Arc<hypr_supabase_auth::SupabaseAuth>>,
+    pub auth: Option<Arc<hypr_supabase_auth::server::SupabaseAuth>>,
 }
 
 impl SyncConfig {
@@ -16,7 +16,7 @@ impl SyncConfig {
         }
     }
 
-    pub fn with_auth(mut self, auth: Arc<hypr_supabase_auth::SupabaseAuth>) -> Self {
+    pub fn with_auth(mut self, auth: Arc<hypr_supabase_auth::server::SupabaseAuth>) -> Self {
         self.auth = Some(auth);
         self
     }

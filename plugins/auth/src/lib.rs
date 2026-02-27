@@ -1,11 +1,8 @@
 mod commands;
-mod error;
 mod ext;
-pub(crate) mod store;
-mod types;
 
-pub use error::{Error, Result};
 pub use ext::*;
+pub use hypr_supabase_auth::client::{Error, Result};
 
 const PLUGIN_NAME: &str = "auth";
 
@@ -44,7 +41,9 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
                 .ok();
             }
 
-            app.manage(store::AuthStore::load(auth_path));
+            app.manage(hypr_supabase_auth::client::store::AuthStore::load(
+                auth_path,
+            ));
             Ok(())
         })
         .build()
@@ -73,8 +72,8 @@ fn migrate_from_store_json(
     let _: std::collections::HashMap<String, String> =
         serde_json::from_str(&auth_str).map_err(invalid_data)?;
 
-    store::atomic_write(auth_path, &auth_str)?;
-    store::atomic_write(
+    hypr_storage::fs::atomic_write(auth_path, &auth_str)?;
+    hypr_storage::fs::atomic_write(
         store_json_path,
         &serde_json::to_string(&store).map_err(invalid_data)?,
     )?;

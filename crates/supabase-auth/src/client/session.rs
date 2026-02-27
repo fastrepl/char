@@ -1,28 +1,26 @@
 use std::collections::HashMap;
 
 #[derive(serde::Deserialize)]
-pub(crate) struct Session {
+pub struct Session {
     pub access_token: String,
     pub user: SessionUser,
 }
 
 #[derive(serde::Deserialize)]
-pub(crate) struct SessionUser {
+pub struct SessionUser {
     pub id: String,
     pub email: Option<String>,
     pub user_metadata: Option<UserMetadata>,
 }
 
 #[derive(serde::Deserialize)]
-pub(crate) struct UserMetadata {
+pub struct UserMetadata {
     pub full_name: Option<String>,
     pub avatar_url: Option<String>,
     pub stripe_customer_id: Option<String>,
 }
 
-pub(crate) fn find_session(
-    data: &HashMap<String, String>,
-) -> Result<Option<Session>, crate::Error> {
+pub fn find_session(data: &HashMap<String, String>) -> Result<Option<Session>, super::Error> {
     let Some(session_str) = data
         .iter()
         .find_map(|(k, v)| k.ends_with("-auth-token").then_some(v.as_str()))

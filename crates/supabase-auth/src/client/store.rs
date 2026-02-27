@@ -25,7 +25,7 @@ impl AuthStore {
         self.data.lock().unwrap().get(key).cloned()
     }
 
-    pub fn set(&self, key: String, value: String) -> crate::Result<()> {
+    pub fn set(&self, key: String, value: String) -> super::Result<()> {
         let mut data = self.data.lock().unwrap();
         data.insert(key, value);
         // Do NOT rollback memory on disk failure. If a token rotation succeeds
@@ -40,7 +40,7 @@ impl AuthStore {
         Ok(())
     }
 
-    pub fn remove(&self, key: &str) -> crate::Result<()> {
+    pub fn remove(&self, key: &str) -> super::Result<()> {
         let mut data = self.data.lock().unwrap();
         let old = data.remove(key);
         if let Err(e) = atomic_save(&self.path, &data) {
@@ -52,7 +52,7 @@ impl AuthStore {
         Ok(())
     }
 
-    pub fn clear(&self) -> crate::Result<()> {
+    pub fn clear(&self) -> super::Result<()> {
         let mut data = self.data.lock().unwrap();
         data.clear();
         if self.path.exists() {
@@ -66,12 +66,8 @@ impl AuthStore {
     }
 }
 
-fn atomic_save(path: &Path, data: &HashMap<String, String>) -> crate::Result<()> {
+fn atomic_save(path: &Path, data: &HashMap<String, String>) -> super::Result<()> {
     let content = serde_json::to_string(data)?;
     hypr_storage::fs::atomic_write(path, &content)?;
     Ok(())
-}
-
-pub(crate) fn atomic_write(target: &Path, content: &str) -> std::io::Result<()> {
-    hypr_storage::fs::atomic_write(target, content)
 }

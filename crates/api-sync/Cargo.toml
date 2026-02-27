@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 hypr-api-error = { workspace = true }
-hypr-supabase-auth = { workspace = true }
+hypr-supabase-auth = { workspace = true, features = ["server"] }
 
 utoipa = { workspace = true }
 
