@@ -45,7 +45,7 @@ fn is_block_type(t: &str) -> bool {
 }
 
 fn is_inline_type(t: &str) -> bool {
-    matches!(t, "text" | "hardBreak" | "image")
+    matches!(t, "text" | "hardBreak" | "image") || t.starts_with("mention-")
 }
 
 fn validate_node(node: &Value, path: &str, errors: &mut Vec<ValidationError>) {

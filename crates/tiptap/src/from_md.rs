@@ -36,6 +36,7 @@ fn convert_block_node(node: &mdast::Node) -> Option<Value> {
         mdast::Node::Blockquote(b) => Some(convert_blockquote(b)),
         mdast::Node::ThematicBreak(_) => Some(json!({ "type": "horizontalRule" })),
         mdast::Node::Image(img) => Some(convert_image(img)),
+        mdast::Node::Html(h) => convert_html_mention(&h.value),
         _ => None,
     }
 }
@@ -230,6 +231,7 @@ fn convert_inline_node(node: &mdast::Node) -> Option<Value> {
         mdast::Node::Delete(d) => Some(convert_marked_text(&d.children, "strike")),
         mdast::Node::Break(_) => Some(json!({ "type": "hardBreak" })),
         mdast::Node::Image(img) => Some(convert_image(img)),
+        mdast::Node::Html(h) => convert_html_mention(&h.value),
         _ => None,
     }
 }
@@ -298,4 +300,31 @@ fn extract_marks(nodes: &[mdast::Node]) -> Vec<Value> {
         }
     }
     marks
+}
+
+fn convert_html_mention(html: &str) -> Option<Value> {
+    let trimmed = html.trim();
+    if !trimmed.starts_with("<mention ") {
+        return None;
+    }
+
+    let id = extract_attr(trimmed, "data-id");
+    let typ = extract_attr(trimmed, "data-type");
+    let label = extract_attr(trimmed, "data-label");
+
+    Some(json!({
+        "type": "mention-@",
+        "attrs": { "id": id, "type": typ, "label": label }
+    }))
+}
+
+fn extract_attr(html: &str, attr_name: &str) -> String {
+    let pattern = format!("{}=\"", attr_name);
+    let Some(start) = html.find(&pattern) else {
+        return String::new();
+    };
+    let value_start = start + pattern.len();
+    let rest = &html[value_start..];
+    let end = rest.find('"').unwrap_or(rest.len());
+    rest[..end].to_string()
 }

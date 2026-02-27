@@ -1006,4 +1006,130 @@ mod tests {
         let result = tiptap_json_to_md(&json);
         assert!(result.is_ok(), "should not panic on multi-byte chars");
     }
+
+    #[test]
+    fn test_mention_to_markdown() {
+        let json = serde_json::json!({
+            "type": "doc",
+            "content": [{
+                "type": "paragraph",
+                "content": [
+                    { "type": "text", "text": "Talk to " },
+                    {
+                        "type": "mention-@",
+                        "attrs": { "id": "human-1", "type": "human", "label": "Alice" }
+                    },
+                    { "type": "text", "text": " about the project" }
+                ]
+            }]
+        });
+
+        let md = to_md(json);
+        assert!(md.contains(
+            r#"<mention data-id="human-1" data-type="human" data-label="Alice"></mention>"#
+        ));
+        assert!(md.contains("Talk to "));
+        assert!(md.contains(" about the project"));
+    }
+
+    #[test]
+    fn test_mention_from_markdown() {
+        let md = r#"Talk to <mention data-id="human-1" data-type="human" data-label="Alice"></mention> about the project"#;
+        let json = md_to_tiptap_json(md).unwrap();
+
+        let paragraph = &json["content"][0];
+        assert_eq!(paragraph["type"], "paragraph");
+
+        let content = paragraph["content"].as_array().unwrap();
+        let mention = content.iter().find(|n| n["type"] == "mention-@").unwrap();
+        assert_eq!(mention["attrs"]["id"], "human-1");
+        assert_eq!(mention["attrs"]["type"], "human");
+        assert_eq!(mention["attrs"]["label"], "Alice");
+    }
+
+    #[test]
+    fn test_mention_roundtrip() {
+        let original = serde_json::json!({
+            "type": "doc",
+            "content": [{
+                "type": "paragraph",
+                "content": [
+                    { "type": "text", "text": "Talk to " },
+                    {
+                        "type": "mention-@",
+                        "attrs": { "id": "human-1", "type": "human", "label": "Alice" }
+                    },
+                    { "type": "text", "text": " about the project" }
+                ]
+            }]
+        });
+
+        let md = to_md(original);
+        let restored = md_to_tiptap_json(&md).unwrap();
+
+        let content = restored["content"][0]["content"].as_array().unwrap();
+        let mention = content.iter().find(|n| n["type"] == "mention-@").unwrap();
+        assert_eq!(mention["attrs"]["id"], "human-1");
+        assert_eq!(mention["attrs"]["type"], "human");
+        assert_eq!(mention["attrs"]["label"], "Alice");
+    }
+
+    #[test]
+    fn test_multiple_mentions_in_paragraph() {
+        let json = serde_json::json!({
+            "type": "doc",
+            "content": [{
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "mention-@",
+                        "attrs": { "id": "human-1", "type": "human", "label": "Alice" }
+                    },
+                    { "type": "text", "text": " and " },
+                    {
+                        "type": "mention-@",
+                        "attrs": { "id": "session-1", "type": "session", "label": "Meeting" }
+                    }
+                ]
+            }]
+        });
+
+        let md = to_md(json);
+        assert!(md.contains(r#"data-label="Alice"#));
+        assert!(md.contains(r#"data-label="Meeting"#));
+
+        let restored = md_to_tiptap_json(&md).unwrap();
+        let content = restored["content"][0]["content"].as_array().unwrap();
+        let mentions: Vec<_> = content
+            .iter()
+            .filter(|n| n["type"] == "mention-@")
+            .collect();
+        assert_eq!(mentions.len(), 2);
+        assert_eq!(mentions[0]["attrs"]["label"], "Alice");
+        assert_eq!(mentions[1]["attrs"]["label"], "Meeting");
+    }
+
+    #[test]
+    fn test_mention_schema_validation() {
+        let json = serde_json::json!({
+            "type": "doc",
+            "content": [{
+                "type": "paragraph",
+                "content": [
+                    { "type": "text", "text": "Hello " },
+                    {
+                        "type": "mention-@",
+                        "attrs": { "id": "human-1", "type": "human", "label": "Alice" }
+                    }
+                ]
+            }]
+        });
+
+        let errors = validate_tiptap_json(&json);
+        assert!(
+            errors.is_empty(),
+            "mention nodes should be valid inline content: {:?}",
+            errors
+        );
+    }
 }

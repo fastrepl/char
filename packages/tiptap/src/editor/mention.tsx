@@ -452,6 +452,16 @@ function MentionNodeView({ node }: NodeViewProps) {
 export const mention = (config: MentionConfig) => {
   return Mention.extend({
     name: `mention-${config.trigger}`,
+
+    renderMarkdown: (node: {
+      attrs?: { id?: string; type?: string; label?: string };
+    }) => {
+      const id = node.attrs?.id ?? "";
+      const type = node.attrs?.type ?? "";
+      const label = node.attrs?.label ?? "";
+      return `<mention data-id="${id}" data-type="${type}" data-label="${label}"></mention>`;
+    },
+
     addAttributes() {
       return {
         id: {
@@ -481,6 +491,9 @@ export const mention = (config: MentionConfig) => {
       return [
         {
           tag: `a.mention[data-mention="true"]`,
+        },
+        {
+          tag: "mention",
         },
       ];
     },
