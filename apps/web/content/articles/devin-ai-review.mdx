@@ -27,13 +27,9 @@ Slack is where discussions already happen. We're already getting alerts from Zen
 
 **Real example:** John, my co-founder, identified an issue with our AI prompts and tagged Devin to fix it. Devin fixed it, but the approach was non-optimal. Since AI prompting is something I work on, I jumped into the same thread with more context. Devin figured it out based on my additional input, finished the PR, and it got merged. We stayed in the same Slack thread the whole time, with no copy-pasting between tools.
 
-<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=52" />
-
 **Another example:** I tagged Devin about our 404 page not rendering properly. John, who works on our webpage primarily, pointed out reference files to look at in the same thread. Based on his input, we got a PR and merged it.
 
 The agent participates in the same Slack threads where we discuss the problem.
-
-<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=74" />
 
 ## AI Agents Enable Non-Technical Teams to Ship Code
 
@@ -41,11 +37,7 @@ Having an agent accessible from Slack opened up tasks that don't necessarily req
 
 John attached some PostHog docs and asked questions about what we're tracking and what we should be tracking long-term. Devin made the changes. Now both John and I know we have analytics updates—super helpful for staying aligned.
 
-<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=108" />
-
 Since we use GitHub as a CMS for Char, we can even update landing pages or blog content directly from Slack. John attached a PDF from an internal discussion, and Devin updated our docs based on the actual conversation we had.
-
-<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=132" />
 
 ## Three Types of Tasks to Delegate to Devin AI
 
@@ -59,8 +51,6 @@ This is work that isn't planned for the immediate future. We're not going to shi
 
 Then we cloned the repository of a popular Chrome extension framework. Based on the docs and actual code examples, we implemented it to see how it would look. We didn't merge it, but it's useful to see how it'll look in the future.
 
-<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=177" />
-
 ### Degree 2: Preparation (Relevant, But Not Right Now)
 
 This is work we'll likely merge, but we're not pulling it into the IDE yet.
@@ -68,8 +58,6 @@ This is work we'll likely merge, but we're not pulling it into the IDE yet.
 **Example:** Someone asked whether Char could import data from Apple Notes. That feels like a feature we could support in the future, but it's not a core focus at the moment.
 
 We did research to see if there was any existing work on that. There was, so we cloned it, ported the test cases, and let Devin implement it. Tests passed, so we safely merged it for a future feature.
-
-<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=227" />
 
 ### Degree 3: Production (Very Relevant Right Now)
 
@@ -81,8 +69,6 @@ One trick: we asked Devin to use the Claude CLI that we already installed on Dev
 
 **Pro tip:** We encoded this knowledge as an "offload agent" on how to use Claude CLI. Mentioning "consult smart friend" (something Devin uses as a prompt internally) helps Claude CLI get called at the right timing.
 
-<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=263" />
-
 ## Good Documentation Enables AI Agents to Ship Code Faster
 
 In Char, we focus on supporting multiple providers for language and speech model inference as part of our open-source effort. Early on, we spent time designing and documenting flexible, clean interfaces. This worked well for future contributions and community involvement, and the same benefits apply when working with coding agents.
@@ -93,21 +79,15 @@ We support both WebSocket-based real-time transcription and file upload-based ba
 
 Since we have end-to-end testing support in place, we sent the ElevenLabs API key as credentials (this can be passed in the prompt or through Infisical CLI). With all the documentation, test cases, and API key in place, Devin implemented it in almost one shot, and we safely merged it.
 
-<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=349" />
-
 **Example: Mistral Support**
 
 Same story for language models—even easier because there's no WebSocket involved. Since we have infrastructure to support any language provider, Mistral was supported in less than 10 minutes.
-
-<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=392" />
 
 **Example: OpenAI Support**
 
 This one was a little harder. We had errors in the client, so we passed the error message and credentials. After a few minutes—since we had API keys and test cases in place—Devin figured out that OpenAI only supports 24kHz sample rate. That's why it was failing. We fixed it without any engineering resources invested.
 
 The pattern: good docs, clean interfaces, and test infrastructure make it possible for agents to ship working code.
-
-<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=406" />
 
 ## Automating Code Maintenance with AI Agents
 
@@ -120,8 +100,6 @@ One common example is doing migrations that have clear documentation. In Char, w
 - **AI SDK version 6 migration** in a single prompt
 - **Tailwind v3 to v4 migration** in a single prompt
 
-<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=447" />
-
 ### Concurrent Multi-PR Migrations
 
 Things can get more complicated and may require multiple PRs or concurrent work.
@@ -130,8 +108,6 @@ A good example is applying Vercel's recent React best practices agent skills. We
 
 One way to do this is to ask Devin to make actual API calls. But there's a better way: use the analyze-session task. This lets you spawn concurrent Devin sessions to run work concurrently and generate separate PRs per task.
 
-<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=463" />
-
 ### Daily Automated Linting
 
 Migrations and new guidelines don't happen every day, but pairing an agent with an automated linting tool can be applied daily.
@@ -139,8 +115,6 @@ Migrations and new guidelines don't happen every day, but pairing an agent with 
 In Char, we have a large Rust codebase, and since Cargo Clippy is pretty good, we set up a GitHub Action to run Cargo Clippy daily and spawn Devin to apply any fixes based on the output.
 
 This saves a lot of time applying these guidelines or Clippy warnings in an async manner, since running Clippy and Cargo check takes a long time.
-
-<Clip src="https://www.youtube.com/watch?v=UojsNSbhm6o&t=528" />
 
 ## When Devin Works and When It Doesn't
 
