@@ -82,45 +82,57 @@ function HeaderTabTranscript({
 
       setIsRedoing(true);
 
-      try {
-        const transcriptIds: string[] = [];
-        store.forEachRow("transcripts", (transcriptId, _forEachCell) => {
-          const session = store.getCell(
-            "transcripts",
-            transcriptId,
-            "session_id",
-          );
-          if (session === sessionId) {
-            transcriptIds.push(transcriptId);
-          }
-        });
-
-        if (transcriptIds.length > 0) {
-          store.transaction(() => {
-            transcriptIds.forEach((transcriptId) => {
-              store.delRow("transcripts", transcriptId);
-            });
+      const savedTranscripts: Array<{
+        id: string;
+        row: Record<string, unknown>;
+      }> = [];
+      store.forEachRow("transcripts", (transcriptId, _forEachCell) => {
+        const session = store.getCell(
+          "transcripts",
+          transcriptId,
+          "session_id",
+        );
+        if (session === sessionId) {
+          savedTranscripts.push({
+            id: transcriptId,
+            row: store.getRow("transcripts", transcriptId) as Record<
+              string,
+              unknown
+            >,
           });
         }
+      });
 
+      if (savedTranscripts.length > 0) {
+        store.transaction(() => {
+          savedTranscripts.forEach(({ id }) => {
+            store.delRow("transcripts", id);
+          });
+        });
+      }
+
+      try {
         const result = await fsSyncCommands.audioPath(sessionId);
         if (result.status === "error") {
-          console.error(
-            "[redo_transcript] failed to retrieve audio path",
-            result.error,
-          );
-          return;
+          throw new Error(result.error);
         }
 
         const audioPath = result.data;
         if (!audioPath) {
-          console.error("[redo_transcript] audio path not available");
-          return;
+          throw new Error("audio path not available");
         }
 
         await runBatch(audioPath);
       } catch (error) {
         console.error("[redo_transcript] failed", error);
+
+        if (savedTranscripts.length > 0) {
+          store.transaction(() => {
+            savedTranscripts.forEach(({ id, row }) => {
+              store.setRow("transcripts", id, row);
+            });
+          });
+        }
       } finally {
         setIsRedoing(false);
       }
