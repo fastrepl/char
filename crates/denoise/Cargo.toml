@@ -15,8 +15,13 @@ serde = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]
+approx = { workspace = true }
 criterion = { workspace = true }
+dasp = { workspace = true }
+hound = { workspace = true }
+hypr-audio-snapshot = { workspace = true }
 hypr-data = { workspace = true }
+rodio = { workspace = true }
 
 [[bench]]
 name = "denoise_bench"
