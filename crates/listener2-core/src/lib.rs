@@ -6,7 +6,7 @@ mod runtime;
 mod subtitle;
 
 pub use batch::{BatchParams, BatchProvider, run_batch};
-pub use denoise::{DenoiseParams, run_denoise};
+pub use denoise::*;
 pub use error::*;
 pub use events::*;
 pub use runtime::*;

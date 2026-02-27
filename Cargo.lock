@@ -4507,10 +4507,15 @@ dependencies = [
 name = "denoise"
 version = "0.1.0"
 dependencies = [
+ "approx",
+ "audio-snapshot",
  "criterion",
+ "dasp",
  "data",
+ "hound",
  "onnx",
  "realfft",
+ "rodio",
  "serde",
  "thiserror 2.0.18",
 ]
@@ -10193,15 +10198,18 @@ dependencies = [
  "host",
  "hound",
  "language",
+ "mp3",
  "owhisper-client",
  "owhisper-interface",
  "ractor",
  "serde",
  "specta",
+ "storage",
  "thiserror 2.0.18",
  "tokio",
  "tokio-stream",
  "tracing",
+ "uuid",
 ]
 
 [[package]]
@@ -10859,6 +10867,7 @@ dependencies = [
  "hound",
  "mp3lame-encoder",
  "tempfile",
+ "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -17825,6 +17834,7 @@ dependencies = [
  "data",
  "frontmatter",
  "glob",
+ "mp3",
  "predicates",
  "rayon",
  "rodio",
@@ -17833,6 +17843,7 @@ dependencies = [
  "serde_yaml",
  "specta",
  "specta-typescript",
+ "storage",
  "tauri",
  "tauri-plugin",
  "tauri-plugin-notify",
@@ -18040,6 +18051,7 @@ dependencies = [
  "serde",
  "specta",
  "specta-typescript",
+ "storage",
  "tauri",
  "tauri-plugin",
  "tauri-plugin-settings",

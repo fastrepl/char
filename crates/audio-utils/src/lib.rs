@@ -99,6 +99,31 @@ pub fn deinterleave_stereo_bytes(data: &[u8]) -> (Vec<f32>, Vec<f32>) {
     (ch0, ch1)
 }
 
+pub fn deinterleave(samples: &[f32], channels: usize) -> Vec<Vec<f32>> {
+    if channels <= 1 {
+        return vec![samples.to_vec()];
+    }
+    let mut output = vec![Vec::with_capacity(samples.len() / channels + 1); channels];
+    for (index, sample) in samples.iter().enumerate() {
+        output[index % channels].push(*sample);
+    }
+    output
+}
+
+pub fn interleave(channels: &[Vec<f32>]) -> Vec<f32> {
+    if channels.is_empty() {
+        return Vec::new();
+    }
+    let frames = channels.iter().map(|c| c.len()).max().unwrap_or(0);
+    let mut output = Vec::with_capacity(frames * channels.len());
+    for frame in 0..frames {
+        for ch in channels {
+            output.push(ch.get(frame).copied().unwrap_or(0.0));
+        }
+    }
+    output
+}
+
 pub fn mix_sample_f32(mic: f32, speaker: f32) -> f32 {
     (mic + speaker).clamp(-1.0, 1.0)
 }

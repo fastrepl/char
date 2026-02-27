@@ -10,23 +10,49 @@ pub struct Listener2<'a, R: tauri::Runtime, M: tauri::Manager<R>> {
 
 impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Listener2<'a, R, M> {
     pub async fn run_batch(&self, params: core::BatchParams) -> Result<(), core::Error> {
-        let state = self.manager.state::<crate::SharedState>();
-        let guard = state.lock().await;
-        let app = guard.app.clone();
-        drop(guard);
+        let app = self.manager.state::<crate::SharedState>().inner().clone();
 
-        let runtime = Arc::new(TauriBatchRuntime { app });
+        let runtime = Arc::new(Listener2Runtime {
+            storage: tauri_plugin_settings::TauriStorageRuntime { app },
+        });
         core::run_batch(runtime, params).await
     }
 
     pub async fn run_denoise(&self, params: core::DenoiseParams) -> Result<(), core::Error> {
-        let state = self.manager.state::<crate::SharedState>();
-        let guard = state.lock().await;
-        let app = guard.app.clone();
-        drop(guard);
+        let app = self.manager.state::<crate::SharedState>().inner().clone();
 
-        let runtime = Arc::new(TauriDenoiseRuntime { app });
+        let runtime = Arc::new(Listener2Runtime {
+            storage: tauri_plugin_settings::TauriStorageRuntime { app },
+        });
         core::run_denoise(runtime, params).await
+    }
+
+    pub async fn confirm_denoise(&self, session_id: &str) -> Result<(), core::Error> {
+        let app = self.manager.state::<crate::SharedState>().inner().clone();
+
+        let runtime = Listener2Runtime {
+            storage: tauri_plugin_settings::TauriStorageRuntime { app },
+        };
+        let session_id = session_id.to_string();
+
+        tokio::task::spawn_blocking(move || {
+            core::confirm_denoise(&runtime, &session_id).map(|_| ())
+        })
+        .await
+        .map_err(|e| core::Error::DenoiseError(e.to_string()))?
+    }
+
+    pub async fn revert_denoise(&self, session_id: &str) -> Result<(), core::Error> {
+        let app = self.manager.state::<crate::SharedState>().inner().clone();
+
+        let runtime = Listener2Runtime {
+            storage: tauri_plugin_settings::TauriStorageRuntime { app },
+        };
+        let session_id = session_id.to_string();
+
+        tokio::task::spawn_blocking(move || core::revert_denoise(&runtime, &session_id))
+            .await
+            .map_err(|e| core::Error::DenoiseError(e.to_string()))?
     }
 
     pub fn parse_subtitle(&self, path: String) -> Result<core::Subtitle, String> {
@@ -74,24 +100,30 @@ impl<R: tauri::Runtime, T: tauri::Manager<R>> Listener2PluginExt<R> for T {
     }
 }
 
-struct TauriBatchRuntime {
-    app: tauri::AppHandle,
+struct Listener2Runtime {
+    storage: tauri_plugin_settings::TauriStorageRuntime,
 }
 
-impl core::BatchRuntime for TauriBatchRuntime {
-    fn emit(&self, event: core::BatchEvent) {
-        let tauri_event: crate::BatchEvent = event.into();
-        let _ = tauri_event.emit(&self.app);
+impl hypr_storage::StorageRuntime for Listener2Runtime {
+    fn global_base(&self) -> Result<std::path::PathBuf, hypr_storage::Error> {
+        self.storage.global_base()
+    }
+
+    fn vault_base(&self) -> Result<std::path::PathBuf, hypr_storage::Error> {
+        self.storage.vault_base()
     }
 }
 
-struct TauriDenoiseRuntime {
-    app: tauri::AppHandle,
+impl core::BatchRuntime for Listener2Runtime {
+    fn emit(&self, event: core::BatchEvent) {
+        let tauri_event: crate::BatchEvent = event.into();
+        let _ = tauri_event.emit(&self.storage.app);
+    }
 }
 
-impl core::DenoiseRuntime for TauriDenoiseRuntime {
+impl core::DenoiseRuntime for Listener2Runtime {
     fn emit(&self, event: core::DenoiseEvent) {
         let tauri_event: crate::DenoiseEvent = event.into();
-        let _ = tauri_event.emit(&self.app);
+        let _ = tauri_event.emit(&self.storage.app);
     }
 }

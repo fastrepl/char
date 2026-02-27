@@ -61,6 +61,7 @@ class TimeStore {
 }
 
 interface AudioPlayerContextValue {
+  sessionId: string;
   registerContainer: (el: HTMLDivElement | null) => void;
   wavesurfer: WaveSurfer | null;
   state: AudioPlayerState;
@@ -266,6 +267,7 @@ export function AudioPlayerProvider({
 
   const value = useMemo<AudioPlayerContextValue>(
     () => ({
+      sessionId,
       registerContainer,
       wavesurfer,
       state,
@@ -280,6 +282,7 @@ export function AudioPlayerProvider({
       setPlaybackRate,
     }),
     [
+      sessionId,
       registerContainer,
       wavesurfer,
       state,
