@@ -70,6 +70,8 @@ mod tests {
             super::super::v1_0_4_nightly_2_repair_transcripts::Migrate.introduced_in();
         let event_sync_from_sqlite =
             super::super::v1_0_7_nightly_1_events_sync::Migrate.introduced_in();
+        let tracking_id_format =
+            super::super::v1_0_11_nightly_1_tracking_id_format::Migrate.introduced_in();
 
         struct Case {
             from: DetectedVersion,
@@ -162,6 +164,41 @@ mod tests {
                 from: DetectedVersion::FromFile(v("1.0.5")),
                 to: "1.0.6",
                 expected: vec![],
+            },
+            // tracking_id_format (1.0.11-nightly.1)
+            Case {
+                from: DetectedVersion::FromFile(v("1.0.10")),
+                to: "1.0.11",
+                expected: vec![tracking_id_format],
+            },
+            Case {
+                from: DetectedVersion::FromFile(v("1.0.10")),
+                to: "1.0.11-nightly.1",
+                expected: vec![tracking_id_format],
+            },
+            Case {
+                from: DetectedVersion::FromFile(v("1.0.7")),
+                to: "1.0.11",
+                expected: vec![tracking_id_format],
+            },
+            Case {
+                from: DetectedVersion::FromFile(v("1.0.11-nightly.1")),
+                to: "1.0.11",
+                expected: vec![],
+            },
+            Case {
+                from: DetectedVersion::FromFile(v("1.0.6")),
+                to: "1.0.11",
+                expected: vec![event_sync_from_sqlite, tracking_id_format],
+            },
+            Case {
+                from: DetectedVersion::FromFile(v("1.0.3")),
+                to: "1.0.11",
+                expected: vec![
+                    repair_transcripts,
+                    event_sync_from_sqlite,
+                    tracking_id_format,
+                ],
             },
         ];
 
