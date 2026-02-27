@@ -9,46 +9,36 @@ import {
 
 import { canStartTrial as canStartTrialApi } from "@hypr/api-client";
 import { createClient } from "@hypr/api-client/client";
-import {
-  commands as authCommands,
-  type Claims,
-  type SubscriptionStatus,
-} from "@hypr/plugin-auth";
+import { commands as authCommands } from "@hypr/plugin-auth";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
+import {
+  type BillingInfo,
+  deriveBillingInfo,
+  type SupabaseJwtPayload,
+} from "@hypr/supabase";
 
 import { env } from "../env";
 import { getScheme } from "../shared/utils";
 import { useAuth } from "./context";
 
-type TokenInfo = Omit<Claims, "sub"> & {
-  trialEnd: Date | null;
-};
-
-const DEFAULT_TOKEN_INFO: TokenInfo = {
-  entitlements: [],
-  subscription_status: null,
-  trialEnd: null,
-};
-
-async function getInfoFromToken(accessToken: string): Promise<TokenInfo> {
+async function getClaimsFromToken(
+  accessToken: string,
+): Promise<SupabaseJwtPayload | null> {
   const result = await authCommands.decodeClaims(accessToken);
   if (result.status === "error") {
-    return DEFAULT_TOKEN_INFO;
+    return null;
   }
-  const { sub, trial_end, ...rest } = result.data;
   return {
-    ...rest,
-    trialEnd: trial_end ? new Date(trial_end * 1000) : null,
+    sub: result.data.sub,
+    email: result.data.email ?? undefined,
+    entitlements: result.data.entitlements,
+    subscription_status: result.data.subscription_status,
+    trial_end: result.data.trial_end,
   };
 }
 
-type BillingContextValue = {
-  entitlements: string[];
-  subscriptionStatus: SubscriptionStatus | null;
+type BillingContextValue = BillingInfo & {
   isReady: boolean;
-  isPro: boolean;
-  isTrialing: boolean;
-  trialDaysRemaining: number | null;
   canStartTrial: { data: boolean; isPending: boolean };
   upgradeToPro: () => void;
 };
@@ -60,32 +50,17 @@ const BillingContext = createContext<BillingContextValue | null>(null);
 export function BillingProvider({ children }: { children: ReactNode }) {
   const auth = useAuth();
 
-  const tokenInfoQuery = useQuery({
+  const claimsQuery = useQuery({
     queryKey: ["tokenInfo", auth?.session?.access_token ?? ""],
-    queryFn: () => getInfoFromToken(auth!.session!.access_token),
+    queryFn: () => getClaimsFromToken(auth!.session!.access_token),
     enabled: !!auth?.session?.access_token,
   });
 
-  const tokenInfo = tokenInfoQuery.data ?? DEFAULT_TOKEN_INFO;
-  const entitlements = tokenInfo.entitlements ?? [];
-  const subscriptionStatus = tokenInfo.subscription_status ?? null;
-  const isReady = !tokenInfoQuery.isPending;
-  const isPro = entitlements.includes("hyprnote_pro");
-  const isTrialing = subscriptionStatus === "trialing";
-
-  const trialDaysRemaining = useMemo(() => {
-    if (!tokenInfo.trialEnd) {
-      return null;
-    }
-    const secondsRemaining = (tokenInfo.trialEnd.getTime() - Date.now()) / 1000;
-    if (secondsRemaining <= 0) {
-      return 0;
-    }
-    return Math.ceil(secondsRemaining / (24 * 60 * 60));
-  }, [tokenInfo.trialEnd]);
+  const billing = deriveBillingInfo(claimsQuery.data ?? null);
+  const isReady = !claimsQuery.isPending;
 
   const canTrialQuery = useQuery({
-    enabled: !!auth?.session && !isPro,
+    enabled: !!auth?.session && !billing.isPro,
     queryKey: [auth?.session?.user.id ?? "", "canStartTrial"],
     queryFn: async () => {
       const headers = auth?.getHeaders();
@@ -103,10 +78,10 @@ export function BillingProvider({ children }: { children: ReactNode }) {
 
   const canStartTrial = useMemo(
     () => ({
-      data: isPro ? false : (canTrialQuery.data ?? false),
+      data: billing.isPro ? false : (canTrialQuery.data ?? false),
       isPending: canTrialQuery.isPending,
     }),
-    [isPro, canTrialQuery.data, canTrialQuery.isPending],
+    [billing.isPro, canTrialQuery.data, canTrialQuery.isPending],
   );
 
   const upgradeToPro = useCallback(async () => {
@@ -119,25 +94,12 @@ export function BillingProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<BillingContextValue>(
     () => ({
-      entitlements,
-      subscriptionStatus,
+      ...billing,
       isReady,
-      isPro,
-      isTrialing,
-      trialDaysRemaining,
       canStartTrial,
       upgradeToPro,
     }),
-    [
-      entitlements,
-      subscriptionStatus,
-      isReady,
-      isPro,
-      isTrialing,
-      trialDaysRemaining,
-      canStartTrial,
-      upgradeToPro,
-    ],
+    [billing, isReady, canStartTrial, upgradeToPro],
   );
 
   return (

@@ -20,8 +20,8 @@ import {
 } from "@hypr/api-client";
 import { createClient } from "@hypr/api-client/client";
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
-import { type SubscriptionStatus } from "@hypr/plugin-auth";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
+import { type SubscriptionStatus } from "@hypr/supabase";
 import { Button } from "@hypr/ui/components/ui/button";
 import { Input } from "@hypr/ui/components/ui/input";
 import { Spinner } from "@hypr/ui/components/ui/spinner";
