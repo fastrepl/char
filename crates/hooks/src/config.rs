@@ -26,6 +26,7 @@ impl HooksConfig {
         Ok(config)
     }
 
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Result<Self> {
         let value: serde_json::Value =
             serde_json::from_str(s).map_err(|e| Error::ConfigParse(e.to_string()))?;
