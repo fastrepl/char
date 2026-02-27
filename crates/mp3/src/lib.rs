@@ -1,3 +1,7 @@
+mod error;
+
+pub use error::Error;
+
 use std::path::Path;
 
 use hound::SampleFormat;
@@ -5,41 +9,51 @@ use mp3lame_encoder::{Builder as LameBuilder, DualPcm, FlushNoGap, MonoPcm};
 
 const CHUNK_FRAMES: usize = 4096;
 
-pub fn encode_wav(wav_path: &Path, mp3_path: &Path) -> Result<(), Box<dyn std::error::Error>> {
+pub fn encode_wav(wav_path: &Path, mp3_path: &Path) -> Result<(), Error> {
     let mut reader = hound::WavReader::open(wav_path)?;
     let spec = reader.spec();
+
     let num_channels = match spec.channels {
         1 => 1u8,
         2 => 2u8,
-        count => {
-            return Err(format!("unsupported channel count: {count} (expected 1 or 2)").into());
-        }
+        count => return Err(Error::UnsupportedChannelCount(count)),
     };
+    let bitrate = if num_channels > 1 {
+        mp3lame_encoder::Bitrate::Kbps128
+    } else {
+        mp3lame_encoder::Bitrate::Kbps64
+    };
+
     let sample_rate = spec.sample_rate;
 
-    let mut mp3_builder = LameBuilder::new().ok_or("Failed to create LAME builder")?;
-    mp3_builder
-        .set_num_channels(num_channels)
-        .map_err(|e| format!("set channels error: {:?}", e))?;
-    mp3_builder
-        .set_sample_rate(sample_rate)
-        .map_err(|e| format!("set sample rate error: {:?}", e))?;
-    mp3_builder
-        .set_brate(mp3lame_encoder::Bitrate::Kbps128)
-        .map_err(|e| format!("set bitrate error: {:?}", e))?;
-    mp3_builder
-        .set_quality(mp3lame_encoder::Quality::Best)
-        .map_err(|e| format!("set quality error: {:?}", e))?;
-    let mut encoder = mp3_builder
-        .build()
-        .map_err(|e| format!("LAME build error: {:?}", e))?;
+    let mut encoder = {
+        let mut mp3_builder = LameBuilder::new().ok_or(Error::LameInit)?;
+        mp3_builder
+            .set_num_channels(num_channels)
+            .map_err(|e| Error::LameConfig(format!("{:?}", e)))?;
+        mp3_builder
+            .set_sample_rate(sample_rate)
+            .map_err(|e| Error::LameConfig(format!("{:?}", e)))?;
+
+        mp3_builder
+            .set_brate(bitrate)
+            .map_err(|e| Error::LameConfig(format!("{:?}", e)))?;
+        mp3_builder
+            .set_quality(mp3lame_encoder::Quality::NearBest)
+            .map_err(|e| Error::LameConfig(format!("{:?}", e)))?;
+
+        mp3_builder
+            .build()
+            .map_err(|e| Error::LameBuild(format!("{:?}", e)))?
+    };
+
     let mut mp3_out: Vec<u8> = Vec::new();
     let bits_per_sample = spec.bits_per_sample;
 
     match spec.sample_format {
         SampleFormat::Float => {
             if bits_per_sample != 32 {
-                return Err(format!("unsupported float bit depth: {bits_per_sample}").into());
+                return Err(Error::UnsupportedFloatBitDepth(bits_per_sample));
             }
 
             if num_channels == 1 {
@@ -48,7 +62,7 @@ pub fn encode_wav(wav_path: &Path, mp3_path: &Path) -> Result<(), Box<dyn std::e
                     let input = MonoPcm(chunk);
                     encoder
                         .encode_to_vec(input, &mut mp3_out)
-                        .map_err(|e| format!("encode error: {:?}", e).into())
+                        .map_err(|e| Error::LameEncode(format!("{:?}", e)))
                 })?;
             } else {
                 encode_stereo_samples(reader.samples::<f32>(), f32_to_i16, |left, right| {
@@ -56,7 +70,7 @@ pub fn encode_wav(wav_path: &Path, mp3_path: &Path) -> Result<(), Box<dyn std::e
                     let input = DualPcm { left, right };
                     encoder
                         .encode_to_vec(input, &mut mp3_out)
-                        .map_err(|e| format!("encode error: {:?}", e).into())
+                        .map_err(|e| Error::LameEncode(format!("{:?}", e)))
                 })?;
             }
         }
@@ -71,7 +85,7 @@ pub fn encode_wav(wav_path: &Path, mp3_path: &Path) -> Result<(), Box<dyn std::e
                             let input = MonoPcm(chunk);
                             encoder
                                 .encode_to_vec(input, &mut mp3_out)
-                                .map_err(|e| format!("encode error: {:?}", e).into())
+                                .map_err(|e| Error::LameEncode(format!("{:?}", e)))
                         },
                     )?;
                 } else {
@@ -83,7 +97,7 @@ pub fn encode_wav(wav_path: &Path, mp3_path: &Path) -> Result<(), Box<dyn std::e
                             let input = DualPcm { left, right };
                             encoder
                                 .encode_to_vec(input, &mut mp3_out)
-                                .map_err(|e| format!("encode error: {:?}", e).into())
+                                .map_err(|e| Error::LameEncode(format!("{:?}", e)))
                         },
                     )?;
                 }
@@ -98,7 +112,7 @@ pub fn encode_wav(wav_path: &Path, mp3_path: &Path) -> Result<(), Box<dyn std::e
                             let input = MonoPcm(chunk);
                             encoder
                                 .encode_to_vec(input, &mut mp3_out)
-                                .map_err(|e| format!("encode error: {:?}", e).into())
+                                .map_err(|e| Error::LameEncode(format!("{:?}", e)))
                         },
                     )?;
                 } else {
@@ -110,7 +124,7 @@ pub fn encode_wav(wav_path: &Path, mp3_path: &Path) -> Result<(), Box<dyn std::e
                             let input = DualPcm { left, right };
                             encoder
                                 .encode_to_vec(input, &mut mp3_out)
-                                .map_err(|e| format!("encode error: {:?}", e).into())
+                                .map_err(|e| Error::LameEncode(format!("{:?}", e)))
                         },
                     )?;
                 }
@@ -125,7 +139,7 @@ pub fn encode_wav(wav_path: &Path, mp3_path: &Path) -> Result<(), Box<dyn std::e
                             let input = MonoPcm(chunk);
                             encoder
                                 .encode_to_vec(input, &mut mp3_out)
-                                .map_err(|e| format!("encode error: {:?}", e).into())
+                                .map_err(|e| Error::LameEncode(format!("{:?}", e)))
                         },
                     )?;
                 } else {
@@ -137,24 +151,24 @@ pub fn encode_wav(wav_path: &Path, mp3_path: &Path) -> Result<(), Box<dyn std::e
                             let input = DualPcm { left, right };
                             encoder
                                 .encode_to_vec(input, &mut mp3_out)
-                                .map_err(|e| format!("encode error: {:?}", e).into())
+                                .map_err(|e| Error::LameEncode(format!("{:?}", e)))
                         },
                     )?;
                 }
             }
-            bits => return Err(format!("unsupported integer bit depth: {bits}").into()),
+            bits => return Err(Error::UnsupportedIntBitDepth(bits)),
         },
     }
 
     mp3_out.reserve(mp3lame_encoder::max_required_buffer_size(0));
     encoder
         .flush_to_vec::<FlushNoGap>(&mut mp3_out)
-        .map_err(|e| format!("flush error: {:?}", e))?;
+        .map_err(|e| Error::LameFlush(format!("{:?}", e)))?;
     std::fs::write(mp3_path, &mp3_out)?;
     Ok(())
 }
 
-pub fn decode_to_wav(mp3_path: &Path, wav_path: &Path) -> Result<(), Box<dyn std::error::Error>> {
+pub fn decode_to_wav(mp3_path: &Path, wav_path: &Path) -> Result<(), Error> {
     use hypr_audio_utils::Source;
 
     let source = hypr_audio_utils::source_from_path(mp3_path)?;
@@ -194,11 +208,11 @@ fn encode_mono_samples<S, I, F, E>(
     samples: I,
     mut sample_to_i16: F,
     mut encode_chunk: E,
-) -> Result<(), Box<dyn std::error::Error>>
+) -> Result<(), Error>
 where
     I: Iterator<Item = Result<S, hound::Error>>,
     F: FnMut(S) -> i16,
-    E: FnMut(&[i16]) -> Result<usize, Box<dyn std::error::Error>>,
+    E: FnMut(&[i16]) -> Result<usize, Error>,
 {
     let mut pcm_i16 = Vec::with_capacity(CHUNK_FRAMES);
     for sample in samples {
@@ -222,11 +236,11 @@ fn encode_stereo_samples<S, I, F, E>(
     mut samples: I,
     mut sample_to_i16: F,
     mut encode_chunk: E,
-) -> Result<(), Box<dyn std::error::Error>>
+) -> Result<(), Error>
 where
     I: Iterator<Item = Result<S, hound::Error>>,
     F: FnMut(S) -> i16,
-    E: FnMut(&[i16], &[i16]) -> Result<usize, Box<dyn std::error::Error>>,
+    E: FnMut(&[i16], &[i16]) -> Result<usize, Error>,
 {
     let mut left = Vec::with_capacity(CHUNK_FRAMES);
     let mut right = Vec::with_capacity(CHUNK_FRAMES);
@@ -280,7 +294,7 @@ mod tests {
     }
 
     #[test]
-    fn encode_mono_samples_flushes_partial_tail() -> Result<(), Box<dyn std::error::Error>> {
+    fn encode_mono_samples_flushes_partial_tail() -> Result<(), Error> {
         let samples = (0..(CHUNK_FRAMES + 1))
             .map(|n| Ok(n as i16))
             .collect::<Vec<_>>()
@@ -301,7 +315,7 @@ mod tests {
     }
 
     #[test]
-    fn encode_stereo_samples_pads_missing_right_sample() -> Result<(), Box<dyn std::error::Error>> {
+    fn encode_stereo_samples_pads_missing_right_sample() -> Result<(), Error> {
         let samples = vec![Ok(10i16), Ok(20i16), Ok(30i16)].into_iter();
         let mut encoded = Vec::new();
 

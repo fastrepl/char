@@ -10864,6 +10864,7 @@ dependencies = [
  "hound",
  "mp3lame-encoder",
  "tempfile",
+ "thiserror 2.0.18",
 ]
 
 [[package]]

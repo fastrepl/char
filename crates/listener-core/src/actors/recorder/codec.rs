@@ -8,11 +8,11 @@ impl AudioCodec for Mp3Codec {
     }
 
     fn encode(&self, input: &Path, output: &Path) -> Result<(), Box<dyn std::error::Error>> {
-        hypr_mp3::encode_wav(input, output)
+        Ok(hypr_mp3::encode_wav(input, output)?)
     }
 
     fn decode(&self, input: &Path, output: &Path) -> Result<(), Box<dyn std::error::Error>> {
-        hypr_mp3::decode_to_wav(input, output)
+        Ok(hypr_mp3::decode_to_wav(input, output)?)
     }
 }
 
