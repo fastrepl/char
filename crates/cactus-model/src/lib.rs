@@ -32,6 +32,12 @@ pub enum CactusSttModel {
     #[serde(rename = "cactus-whisper-medium-int8-apple")]
     #[strum(serialize = "cactus-whisper-medium-int8-apple")]
     WhisperMediumInt8Apple,
+    #[serde(rename = "cactus-parakeet-ctc-0.6b-int4")]
+    #[strum(serialize = "cactus-parakeet-ctc-0.6b-int4")]
+    ParakeetCtc0_6bInt4,
+    #[serde(rename = "cactus-parakeet-ctc-0.6b-int8")]
+    #[strum(serialize = "cactus-parakeet-ctc-0.6b-int8")]
+    ParakeetCtc0_6bInt8,
 }
 
 impl CactusSttModel {
@@ -44,6 +50,8 @@ impl CactusSttModel {
             CactusSttModel::WhisperMediumInt4Apple,
             CactusSttModel::WhisperMediumInt8,
             CactusSttModel::WhisperMediumInt8Apple,
+            CactusSttModel::ParakeetCtc0_6bInt4,
+            CactusSttModel::ParakeetCtc0_6bInt8,
         ]
     }
 
@@ -65,6 +73,8 @@ impl CactusSttModel {
             CactusSttModel::WhisperMediumInt4Apple => "cactus-whisper-medium-int4-apple",
             CactusSttModel::WhisperMediumInt8 => "cactus-whisper-medium-int8",
             CactusSttModel::WhisperMediumInt8Apple => "cactus-whisper-medium-int8-apple",
+            CactusSttModel::ParakeetCtc0_6bInt4 => "cactus-parakeet-ctc-0.6b-int4",
+            CactusSttModel::ParakeetCtc0_6bInt8 => "cactus-parakeet-ctc-0.6b-int8",
         }
     }
 
@@ -77,6 +87,8 @@ impl CactusSttModel {
             CactusSttModel::WhisperMediumInt4Apple => "whisper-medium-int4-apple",
             CactusSttModel::WhisperMediumInt8 => "whisper-medium-int8",
             CactusSttModel::WhisperMediumInt8Apple => "whisper-medium-int8-apple",
+            CactusSttModel::ParakeetCtc0_6bInt4 => "parakeet-ctc-0.6b-int4",
+            CactusSttModel::ParakeetCtc0_6bInt8 => "parakeet-ctc-0.6b-int8",
         }
     }
 
@@ -97,6 +109,12 @@ impl CactusSttModel {
             ),
             CactusSttModel::WhisperMediumInt8Apple => Some(
                 "https://hyprnote.s3.us-east-1.amazonaws.com/v0/Cactus-Compute/weights/whisper-medium-int8-apple.zip",
+            ),
+            CactusSttModel::ParakeetCtc0_6bInt4 => Some(
+                "https://hyprnote.s3.us-east-1.amazonaws.com/v0/Cactus-Compute/weights/parakeet-ctc-0.6b-int4.zip",
+            ),
+            CactusSttModel::ParakeetCtc0_6bInt8 => Some(
+                "https://hyprnote.s3.us-east-1.amazonaws.com/v0/Cactus-Compute/weights/parakeet-ctc-0.6b-int8.zip",
             ),
             _ => None,
         }
@@ -120,11 +138,18 @@ impl CactusSttModel {
             CactusSttModel::WhisperMediumInt4Apple => "Whisper Medium (INT4, Apple NPU)",
             CactusSttModel::WhisperMediumInt8 => "Whisper Medium (INT8)",
             CactusSttModel::WhisperMediumInt8Apple => "Whisper Medium (INT8, Apple NPU)",
+            CactusSttModel::ParakeetCtc0_6bInt4 => "Parakeet CTC 0.6B (INT4)",
+            CactusSttModel::ParakeetCtc0_6bInt8 => "Parakeet CTC 0.6B (INT8)",
         }
     }
 
     pub fn supported_languages(&self) -> Vec<hypr_language::Language> {
-        hypr_language::whisper_multilingual()
+        match self {
+            CactusSttModel::ParakeetCtc0_6bInt4 | CactusSttModel::ParakeetCtc0_6bInt8 => {
+                vec!["en".parse().unwrap()]
+            }
+            _ => hypr_language::whisper_multilingual(),
+        }
     }
 }
 
