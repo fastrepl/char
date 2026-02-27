@@ -50,6 +50,7 @@ import { Route as AdminLeadFinderIndexRouteImport } from './routes/admin/lead-fi
 import { Route as AdminKanbanIndexRouteImport } from './routes/admin/kanban/index'
 import { Route as AdminCrmIndexRouteImport } from './routes/admin/crm/index'
 import { Route as AdminCollectionsIndexRouteImport } from './routes/admin/collections/index'
+import { Route as ViewUpdatesIndexRouteImport } from './routes/_view/updates/index'
 import { Route as ViewRoadmapIndexRouteImport } from './routes/_view/roadmap/index'
 import { Route as ViewPressKitIndexRouteImport } from './routes/_view/press-kit/index'
 import { Route as ViewLegalIndexRouteImport } from './routes/_view/legal/index'
@@ -67,6 +68,7 @@ import { Route as ApiWebhooksSlackInteractiveRouteImport } from './routes/api/we
 import { Route as ApiTweetIdRouteImport } from './routes/api/tweet.$id'
 import { Route as ApiImagesSplatRouteImport } from './routes/api/images.$'
 import { Route as ViewVsSlugRouteImport } from './routes/_view/vs/$slug'
+import { Route as ViewUpdatesSlugRouteImport } from './routes/_view/updates/$slug'
 import { Route as ViewSolutionSalesRouteImport } from './routes/_view/solution/sales'
 import { Route as ViewSolutionResearchRouteImport } from './routes/_view/solution/research'
 import { Route as ViewSolutionRecruitingRouteImport } from './routes/_view/solution/recruiting'
@@ -359,6 +361,11 @@ const AdminCollectionsIndexRoute = AdminCollectionsIndexRouteImport.update({
   path: '/collections/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const ViewUpdatesIndexRoute = ViewUpdatesIndexRouteImport.update({
+  id: '/updates/',
+  path: '/updates/',
+  getParentRoute: () => ViewRouteRoute,
+} as any)
 const ViewRoadmapIndexRoute = ViewRoadmapIndexRouteImport.update({
   id: '/roadmap/',
   path: '/roadmap/',
@@ -444,6 +451,11 @@ const ApiImagesSplatRoute = ApiImagesSplatRouteImport.update({
 const ViewVsSlugRoute = ViewVsSlugRouteImport.update({
   id: '/vs/$slug',
   path: '/vs/$slug',
+  getParentRoute: () => ViewRouteRoute,
+} as any)
+const ViewUpdatesSlugRoute = ViewUpdatesSlugRouteImport.update({
+  id: '/updates/$slug',
+  path: '/updates/$slug',
   getParentRoute: () => ViewRouteRoute,
 } as any)
 const ViewSolutionSalesRoute = ViewSolutionSalesRouteImport.update({
@@ -985,6 +997,7 @@ export interface FileRoutesByFullPath {
   '/solution/recruiting': typeof ViewSolutionRecruitingRoute
   '/solution/research': typeof ViewSolutionResearchRoute
   '/solution/sales': typeof ViewSolutionSalesRoute
+  '/updates/$slug': typeof ViewUpdatesSlugRoute
   '/vs/$slug': typeof ViewVsSlugRoute
   '/api/images/$': typeof ApiImagesSplatRoute
   '/api/tweet/$id': typeof ApiTweetIdRoute
@@ -1002,6 +1015,7 @@ export interface FileRoutesByFullPath {
   '/legal/': typeof ViewLegalIndexRoute
   '/press-kit/': typeof ViewPressKitIndexRoute
   '/roadmap/': typeof ViewRoadmapIndexRoute
+  '/updates/': typeof ViewUpdatesIndexRoute
   '/admin/collections/': typeof AdminCollectionsIndexRoute
   '/admin/crm/': typeof AdminCrmIndexRoute
   '/admin/kanban/': typeof AdminKanbanIndexRoute
@@ -1126,6 +1140,7 @@ export interface FileRoutesByTo {
   '/solution/recruiting': typeof ViewSolutionRecruitingRoute
   '/solution/research': typeof ViewSolutionResearchRoute
   '/solution/sales': typeof ViewSolutionSalesRoute
+  '/updates/$slug': typeof ViewUpdatesSlugRoute
   '/vs/$slug': typeof ViewVsSlugRoute
   '/api/images/$': typeof ApiImagesSplatRoute
   '/api/tweet/$id': typeof ApiTweetIdRoute
@@ -1143,6 +1158,7 @@ export interface FileRoutesByTo {
   '/legal': typeof ViewLegalIndexRoute
   '/press-kit': typeof ViewPressKitIndexRoute
   '/roadmap': typeof ViewRoadmapIndexRoute
+  '/updates': typeof ViewUpdatesIndexRoute
   '/admin/collections': typeof AdminCollectionsIndexRoute
   '/admin/crm': typeof AdminCrmIndexRoute
   '/admin/kanban': typeof AdminKanbanIndexRoute
@@ -1273,6 +1289,7 @@ export interface FileRoutesById {
   '/_view/solution/recruiting': typeof ViewSolutionRecruitingRoute
   '/_view/solution/research': typeof ViewSolutionResearchRoute
   '/_view/solution/sales': typeof ViewSolutionSalesRoute
+  '/_view/updates/$slug': typeof ViewUpdatesSlugRoute
   '/_view/vs/$slug': typeof ViewVsSlugRoute
   '/api/images/$': typeof ApiImagesSplatRoute
   '/api/tweet/$id': typeof ApiTweetIdRoute
@@ -1290,6 +1307,7 @@ export interface FileRoutesById {
   '/_view/legal/': typeof ViewLegalIndexRoute
   '/_view/press-kit/': typeof ViewPressKitIndexRoute
   '/_view/roadmap/': typeof ViewRoadmapIndexRoute
+  '/_view/updates/': typeof ViewUpdatesIndexRoute
   '/admin/collections/': typeof AdminCollectionsIndexRoute
   '/admin/crm/': typeof AdminCrmIndexRoute
   '/admin/kanban/': typeof AdminKanbanIndexRoute
@@ -1420,6 +1438,7 @@ export interface FileRouteTypes {
     | '/solution/recruiting'
     | '/solution/research'
     | '/solution/sales'
+    | '/updates/$slug'
     | '/vs/$slug'
     | '/api/images/$'
     | '/api/tweet/$id'
@@ -1437,6 +1456,7 @@ export interface FileRouteTypes {
     | '/legal/'
     | '/press-kit/'
     | '/roadmap/'
+    | '/updates/'
     | '/admin/collections/'
     | '/admin/crm/'
     | '/admin/kanban/'
@@ -1561,6 +1581,7 @@ export interface FileRouteTypes {
     | '/solution/recruiting'
     | '/solution/research'
     | '/solution/sales'
+    | '/updates/$slug'
     | '/vs/$slug'
     | '/api/images/$'
     | '/api/tweet/$id'
@@ -1578,6 +1599,7 @@ export interface FileRouteTypes {
     | '/legal'
     | '/press-kit'
     | '/roadmap'
+    | '/updates'
     | '/admin/collections'
     | '/admin/crm'
     | '/admin/kanban'
@@ -1707,6 +1729,7 @@ export interface FileRouteTypes {
     | '/_view/solution/recruiting'
     | '/_view/solution/research'
     | '/_view/solution/sales'
+    | '/_view/updates/$slug'
     | '/_view/vs/$slug'
     | '/api/images/$'
     | '/api/tweet/$id'
@@ -1724,6 +1747,7 @@ export interface FileRouteTypes {
     | '/_view/legal/'
     | '/_view/press-kit/'
     | '/_view/roadmap/'
+    | '/_view/updates/'
     | '/admin/collections/'
     | '/admin/crm/'
     | '/admin/kanban/'
@@ -2106,6 +2130,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCollectionsIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/_view/updates/': {
+      id: '/_view/updates/'
+      path: '/updates'
+      fullPath: '/updates/'
+      preLoaderRoute: typeof ViewUpdatesIndexRouteImport
+      parentRoute: typeof ViewRouteRoute
+    }
     '/_view/roadmap/': {
       id: '/_view/roadmap/'
       path: '/roadmap'
@@ -2223,6 +2254,13 @@ declare module '@tanstack/react-router' {
       path: '/vs/$slug'
       fullPath: '/vs/$slug'
       preLoaderRoute: typeof ViewVsSlugRouteImport
+      parentRoute: typeof ViewRouteRoute
+    }
+    '/_view/updates/$slug': {
+      id: '/_view/updates/$slug'
+      path: '/updates/$slug'
+      fullPath: '/updates/$slug'
+      preLoaderRoute: typeof ViewUpdatesSlugRouteImport
       parentRoute: typeof ViewRouteRoute
     }
     '/_view/solution/sales': {
@@ -2942,6 +2980,7 @@ interface ViewRouteRouteChildren {
   ViewSolutionRecruitingRoute: typeof ViewSolutionRecruitingRoute
   ViewSolutionResearchRoute: typeof ViewSolutionResearchRoute
   ViewSolutionSalesRoute: typeof ViewSolutionSalesRoute
+  ViewUpdatesSlugRoute: typeof ViewUpdatesSlugRoute
   ViewVsSlugRoute: typeof ViewVsSlugRoute
   ViewBlogIndexRoute: typeof ViewBlogIndexRoute
   ViewChangelogIndexRoute: typeof ViewChangelogIndexRoute
@@ -2953,6 +2992,7 @@ interface ViewRouteRouteChildren {
   ViewLegalIndexRoute: typeof ViewLegalIndexRoute
   ViewPressKitIndexRoute: typeof ViewPressKitIndexRoute
   ViewRoadmapIndexRoute: typeof ViewRoadmapIndexRoute
+  ViewUpdatesIndexRoute: typeof ViewUpdatesIndexRoute
   ViewDownloadNightlyAppleIntelRoute: typeof ViewDownloadNightlyAppleIntelRoute
   ViewDownloadNightlyAppleSiliconRoute: typeof ViewDownloadNightlyAppleSiliconRoute
   ViewDownloadNightlyLinuxAppimageRoute: typeof ViewDownloadNightlyLinuxAppimageRoute
@@ -3026,6 +3066,7 @@ const ViewRouteRouteChildren: ViewRouteRouteChildren = {
   ViewSolutionRecruitingRoute: ViewSolutionRecruitingRoute,
   ViewSolutionResearchRoute: ViewSolutionResearchRoute,
   ViewSolutionSalesRoute: ViewSolutionSalesRoute,
+  ViewUpdatesSlugRoute: ViewUpdatesSlugRoute,
   ViewVsSlugRoute: ViewVsSlugRoute,
   ViewBlogIndexRoute: ViewBlogIndexRoute,
   ViewChangelogIndexRoute: ViewChangelogIndexRoute,
@@ -3037,6 +3078,7 @@ const ViewRouteRouteChildren: ViewRouteRouteChildren = {
   ViewLegalIndexRoute: ViewLegalIndexRoute,
   ViewPressKitIndexRoute: ViewPressKitIndexRoute,
   ViewRoadmapIndexRoute: ViewRoadmapIndexRoute,
+  ViewUpdatesIndexRoute: ViewUpdatesIndexRoute,
   ViewDownloadNightlyAppleIntelRoute: ViewDownloadNightlyAppleIntelRoute,
   ViewDownloadNightlyAppleSiliconRoute: ViewDownloadNightlyAppleSiliconRoute,
   ViewDownloadNightlyLinuxAppimageRoute: ViewDownloadNightlyLinuxAppimageRoute,

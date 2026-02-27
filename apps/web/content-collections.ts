@@ -727,6 +727,42 @@ const handbook = defineCollection({
   },
 });
 
+const updates = defineCollection({
+  name: "updates",
+  directory: "content/updates",
+  include: "*.mdx",
+  exclude: "AGENTS.md",
+  schema: z.object({
+    title: z.string(),
+    date: z.string(),
+  }),
+  transform: async (document, context) => {
+    const mdx = await compileMDX(context, document, {
+      remarkPlugins: [remarkGfm, mdxMermaid],
+      rehypePlugins: [
+        rehypeSlug,
+        [
+          rehypeAutolinkHeadings,
+          {
+            behavior: "wrap",
+            properties: {
+              className: ["anchor"],
+            },
+          },
+        ],
+      ],
+    });
+
+    const slug = document._meta.path.replace(/\.mdx$/, "");
+
+    return {
+      ...document,
+      mdx,
+      slug,
+    };
+  },
+});
+
 const jobs = defineCollection({
   name: "jobs",
   directory: "content/jobs",
@@ -783,5 +819,6 @@ export default defineConfig({
     roadmap,
     ossFriends,
     jobs,
+    updates,
   ],
 });
