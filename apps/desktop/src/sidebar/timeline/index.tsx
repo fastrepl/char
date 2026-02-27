@@ -14,7 +14,7 @@ import { useUndoDelete } from "~/store/zustand/undo-delete";
 
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 import { Button } from "@hypr/ui/components/ui/button";
-import { cn, format, safeParseDate, startOfDay, TZDate } from "@hypr/utils";
+import { cn, startOfDay } from "@hypr/utils";
 
 import { useAnchor, useAutoScrollToAnchor } from "./anchor";
 import { TimelineItemComponent } from "./item";
@@ -49,17 +49,9 @@ export function TimelineView() {
         ...bucket,
         items: bucket.items.filter((item) => {
           if (item.type !== "event") return true;
-          const parsed = safeParseDate(item.data.started_at);
-          const day = parsed
-            ? format(
-                timezone ? new TZDate(parsed, timezone) : parsed,
-                "yyyy-MM-dd",
-              )
-            : undefined;
           return !isIgnored(
             item.data.tracking_id_event,
             item.data.recurrence_series_id,
-            day,
           );
         }),
       }))

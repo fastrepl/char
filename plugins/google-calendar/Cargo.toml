@@ -15,6 +15,7 @@ specta-typescript = { workspace = true }
 
 [dependencies]
 hypr-api-client = { workspace = true }
+hypr-calendar-interface = { workspace = true }
 hypr-google-calendar = { workspace = true, features = ["specta"] }
 
 tauri = { workspace = true, features = ["test"] }

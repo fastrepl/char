@@ -1,6 +1,6 @@
 import type { Ctx } from "~/services/apple-calendar/ctx";
 import type { EventParticipant } from "~/services/apple-calendar/fetch/types";
-import { findSessionByKey } from "~/session/utils";
+import { findSessionByTrackingId } from "~/session/utils";
 import { id } from "~/shared/utils";
 import type { Store } from "~/store/tinybase/store/main";
 
@@ -24,8 +24,8 @@ export function syncSessionParticipants(
   const humansByEmail = buildHumansByEmailIndex(ctx.store);
   const humansToCreateMap = new Map<string, HumanToCreate>();
 
-  for (const [eventKey, participants] of input.incomingParticipants) {
-    const sessionId = findSessionByKey(ctx.store, eventKey, input.timezone);
+  for (const [trackingId, participants] of input.incomingParticipants) {
+    const sessionId = findSessionByTrackingId(ctx.store, trackingId);
     if (!sessionId) {
       continue;
     }

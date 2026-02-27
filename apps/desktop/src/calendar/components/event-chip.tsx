@@ -91,7 +91,6 @@ function EventPopoverContent({ eventId }: { eventId: string }) {
   const event = useEvent(eventId);
   const store = main.UI.useStore(main.STORE_ID);
   const openNew = useTabs((state) => state.openNew);
-  const tz = useTimezone();
 
   const eventRow = main.UI.useResultRow(
     main.QUERIES.timelineEvents,
@@ -102,9 +101,9 @@ function EventPopoverContent({ eventId }: { eventId: string }) {
   const handleOpen = useCallback(() => {
     if (!store) return;
     const title = (eventRow?.title as string) || "Untitled";
-    const sessionId = getOrCreateSessionForEventId(store, eventId, title, tz);
+    const sessionId = getOrCreateSessionForEventId(store, eventId, title);
     openNew({ type: "sessions", id: sessionId });
-  }, [store, eventId, eventRow?.title, openNew, tz]);
+  }, [store, eventId, eventRow?.title, openNew]);
 
   if (!event) {
     return null;

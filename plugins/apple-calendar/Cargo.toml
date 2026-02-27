@@ -19,6 +19,7 @@ specta-typescript = { workspace = true }
 
 [dependencies]
 hypr-apple-calendar = { workspace = true, features = ["specta"] }
+hypr-calendar-interface = { workspace = true }
 
 tauri = { workspace = true, features = ["test"] }
 tauri-specta = { workspace = true, features = ["derive", "typescript"] }
@@ -29,6 +30,7 @@ serde_json = { workspace = true }
 specta = { workspace = true, features = ["chrono"] }
 
 chrono = { workspace = true, features = ["serde"] }
+chrono-tz = { workspace = true }
 thiserror = { workspace = true }
 
 tracing = { workspace = true }

@@ -43,4 +43,5 @@ migrations! {
     v1_0_2_nightly_14_extract_from_sqlite,
     v1_0_4_nightly_2_repair_transcripts,
     v1_0_7_nightly_1_events_sync,
+    v1_0_11_nightly_1_tracking_id_format,
 }

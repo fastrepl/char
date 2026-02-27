@@ -1,5 +1,6 @@
 use crate::AppleCalendarPluginExt;
-use hypr_apple_calendar::types::{AppleCalendar, AppleEvent, CreateEventInput, EventFilter};
+use hypr_apple_calendar::types::{AppleCalendar, CreateEventInput, EventFilter};
+use hypr_calendar_interface::CalendarEvent;
 
 #[tauri::command]
 #[specta::specta]
@@ -20,8 +21,9 @@ pub fn list_calendars<R: tauri::Runtime>(
 pub fn list_events<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     filter: EventFilter,
-) -> Result<Vec<AppleEvent>, String> {
-    app.apple_calendar().list_events(filter)
+) -> Result<Vec<CalendarEvent>, String> {
+    let apple_events = app.apple_calendar().list_events(filter)?;
+    Ok(crate::convert::convert_events(apple_events))
 }
 
 #[tauri::command]

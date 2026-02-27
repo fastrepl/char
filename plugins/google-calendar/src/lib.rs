@@ -1,4 +1,5 @@
 mod commands;
+mod convert;
 mod ext;
 mod fetch;
 mod fixture;
