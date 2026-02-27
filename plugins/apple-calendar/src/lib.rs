@@ -116,13 +116,13 @@ mod test {
                         "Testing with calendar: {} ({})",
                         calendar.title, calendar.id
                     );
-                    let events = app.apple_calendar().list_events(
-                        hypr_apple_calendar::types::EventFilter {
-                            from: chrono::Utc::now(),
-                            to: chrono::Utc::now() + chrono::Duration::days(7),
-                            calendar_tracking_id: calendar.id.clone(),
-                        },
-                    );
+                    let events =
+                        app.apple_calendar()
+                            .list_events(hypr_apple_calendar::types::EventFilter {
+                                from: chrono::Utc::now(),
+                                to: chrono::Utc::now() + chrono::Duration::days(7),
+                                calendar_tracking_id: calendar.id.clone(),
+                            });
                     println!("events: {:?}", events);
                 } else {
                     println!("No calendars found");

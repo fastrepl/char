@@ -183,8 +183,7 @@ fn extract_event_participants(
     contact_fetcher: Option<&dyn ContactFetcher>,
 ) -> EventParticipants {
     EventParticipants {
-        organizer: unsafe { event.organizer() }
-            .map(|p| transform_participant(&p, contact_fetcher)),
+        organizer: unsafe { event.organizer() }.map(|p| transform_participant(&p, contact_fetcher)),
         attendees: unsafe { event.attendees() }
             .map(|arr| {
                 arr.iter()

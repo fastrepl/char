@@ -91,9 +91,9 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> AppleCalendarExt<'a, R, M> {
 
     #[tracing::instrument(skip_all)]
     pub fn list_events(&self, filter: EventFilter) -> Result<Vec<AppleEvent>, String> {
-        let handle = hypr_apple_calendar::Handle::with_contact_fetcher(
-            Box::new(contact_bridge::AppleContactFetcher),
-        );
+        let handle = hypr_apple_calendar::Handle::with_contact_fetcher(Box::new(
+            contact_bridge::AppleContactFetcher,
+        ));
         handle.list_events(filter).map_err(|e| e.to_string())
     }
 
