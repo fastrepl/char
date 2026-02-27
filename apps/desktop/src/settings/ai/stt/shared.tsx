@@ -91,7 +91,7 @@ const _PROVIDERS = [
   {
     disabled: false,
     id: "hyprnote",
-    displayName: "Hyprnote",
+    displayName: "Char",
     badge: "Recommended",
     icon: <img src="/assets/icon.png" alt="Char" className="size-5" />,
     baseUrl: new URL("/stt", env.VITE_API_URL).toString(),
