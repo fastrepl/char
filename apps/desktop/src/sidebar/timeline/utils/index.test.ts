@@ -189,14 +189,14 @@ describe("timeline utils", () => {
     expect(monthAgo.sortKey).toBeLessThan(weeksAgo4.sortKey);
   });
 
-  test("buildTimelineBuckets deduplicates recurring events by composite key (tracking_id + day)", () => {
+  test("buildTimelineBuckets deduplicates recurring events by tracking_id", () => {
     const timelineEventsTable: TimelineEventsTable = {
       "event-jan18": {
         title: "Weekly Standup",
         started_at: "2024-01-18T09:00:00.000Z",
         ended_at: "2024-01-18T09:30:00.000Z",
         calendar_id: "cal-1",
-        tracking_id_event: "recurring-1",
+        tracking_id_event: "recurring-1:2024-01-18",
         has_recurrence_rules: true,
         recurrence_series_id: "series-1",
       },
@@ -205,7 +205,7 @@ describe("timeline utils", () => {
         started_at: "2024-01-25T09:00:00.000Z",
         ended_at: "2024-01-25T09:30:00.000Z",
         calendar_id: "cal-1",
-        tracking_id_event: "recurring-1",
+        tracking_id_event: "recurring-1:2024-01-25",
         has_recurrence_rules: true,
         recurrence_series_id: "series-1",
       },
@@ -216,7 +216,7 @@ describe("timeline utils", () => {
         title: "Weekly Standup",
         created_at: "2024-01-18T09:00:00.000Z",
         event_json: JSON.stringify({
-          tracking_id: "recurring-1",
+          tracking_id: "recurring-1:2024-01-18",
           started_at: "2024-01-18T09:00:00.000Z",
           has_recurrence_rules: true,
         }),
@@ -246,14 +246,14 @@ describe("timeline utils", () => {
     expect(jan25Event).toBeDefined();
   });
 
-  test("buildTimelineBuckets does not deduplicate recurring events on different days", () => {
+  test("buildTimelineBuckets does not deduplicate recurring events with different tracking_ids", () => {
     const timelineEventsTable: TimelineEventsTable = {
       "event-jan18": {
         title: "Weekly Standup",
         started_at: "2024-01-18T09:00:00.000Z",
         ended_at: "2024-01-18T09:30:00.000Z",
         calendar_id: "cal-1",
-        tracking_id_event: "recurring-1",
+        tracking_id_event: "recurring-1:2024-01-18",
         has_recurrence_rules: true,
       },
       "event-jan25": {
@@ -261,7 +261,7 @@ describe("timeline utils", () => {
         started_at: "2024-01-25T09:00:00.000Z",
         ended_at: "2024-01-25T09:30:00.000Z",
         calendar_id: "cal-1",
-        tracking_id_event: "recurring-1",
+        tracking_id_event: "recurring-1:2024-01-25",
         has_recurrence_rules: true,
       },
     };
