@@ -396,6 +396,14 @@ function CompanyLinks() {
         </li>
         <li>
           <Link
+            to="/updates/"
+            className="text-sm text-neutral-600 hover:text-stone-600 transition-colors no-underline hover:underline hover:decoration-dotted"
+          >
+            Updates
+          </Link>
+        </li>
+        <li>
+          <Link
             to="/about/"
             className="text-sm text-neutral-600 hover:text-stone-600 transition-colors no-underline hover:underline hover:decoration-dotted"
           >
