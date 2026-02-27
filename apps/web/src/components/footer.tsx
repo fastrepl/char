@@ -1,11 +1,10 @@
-import { useMutation } from "@tanstack/react-query";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ArrowRightIcon, ExternalLinkIcon, MailIcon } from "lucide-react";
+import { ExternalLinkIcon, MailIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { cn } from "@hypr/utils";
 
-import { addContact } from "@/functions/loops";
+import { EmailSubscribeField } from "@/components/email-subscribe-field";
 
 const vsList = [
   { slug: "otter", name: "Otter.ai" },
@@ -51,23 +50,6 @@ export function Footer() {
 }
 
 function BrandSection({ currentYear }: { currentYear: number }) {
-  const [email, setEmail] = useState("");
-
-  const mutation = useMutation({
-    mutationFn: async () => {
-      await addContact({
-        data: {
-          email,
-          userGroup: "Lead",
-          source: "LANDING_PAGE",
-        },
-      });
-    },
-    onSuccess: () => {
-      setEmail("");
-    },
-  });
-
   return (
     <div className="lg:flex-1">
       <Link
@@ -77,52 +59,10 @@ function BrandSection({ currentYear }: { currentYear: number }) {
         Char
       </Link>
       <p className="text-sm text-neutral-500 mb-4">Fastrepl © {currentYear}</p>
-
-      <div className="mb-4">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (email) {
-              mutation.mutate();
-            }
-          }}
-          className="max-w-72 border border-neutral-100 bg-white transition-all laptop:border-l-0"
-        >
-          <div className="relative flex items-center">
-            <MailIcon className="absolute left-2.5 size-3.5 text-neutral-400" />
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Subscribe to updates"
-              className={cn([
-                "min-w-0 flex-1 pl-8 pr-2 py-1.5 text-sm",
-                "bg-transparent placeholder:text-neutral-400",
-                "focus:outline-none",
-              ])}
-            />
-            <button
-              type="submit"
-              disabled={!email || mutation.isPending}
-              className={cn([
-                "shrink-0 px-2 transition-colors focus:outline-none",
-                email ? "text-stone-600" : "text-neutral-300",
-                mutation.isPending && "opacity-50",
-              ])}
-            >
-              <ArrowRightIcon className="size-4" />
-            </button>
-          </div>
-        </form>
-        <p className="text-xs text-neutral-400 mt-1.5">
-          Only important stuff like release notes and interesting articles.
-        </p>
-        {mutation.isError && (
-          <p className="text-xs text-red-500 mt-1">
-            Something went wrong. Please try again.
-          </p>
-        )}
-      </div>
+      <EmailSubscribeField
+        className="mb-4 max-w-72"
+        formClassName="laptop:border-l-0"
+      />
 
       <p className="text-sm text-neutral-500">
         <Link
