@@ -5,12 +5,17 @@ use objc2_foundation::{NSInteger, NSPredicate};
 
 use crate::types::{ParticipantContact, ParticipantScheduleStatus};
 
+pub trait ContactFetcher: Send + Sync {
+    fn fetch_contact_with_predicate(&self, predicate: &NSPredicate) -> Option<ParticipantContact>;
+}
+
 pub fn resolve_participant_contact(
     participant: &objc2_event_kit::EKParticipant,
     url: Option<&str>,
     name: Option<&str>,
+    contact_fetcher: Option<&dyn ContactFetcher>,
 ) -> (Option<String>, Option<ParticipantContact>) {
-    if let Some(contact) = try_fetch_contact(participant) {
+    if let Some(contact) = contact_fetcher.and_then(|f| try_fetch_contact(participant, f)) {
         let email = contact.email_addresses.first().cloned();
         if email.is_some() {
             return (email, Some(contact));
@@ -23,7 +28,10 @@ pub fn resolve_participant_contact(
     (email, None)
 }
 
-fn try_fetch_contact(participant: &objc2_event_kit::EKParticipant) -> Option<ParticipantContact> {
+fn try_fetch_contact(
+    participant: &objc2_event_kit::EKParticipant,
+    fetcher: &dyn ContactFetcher,
+) -> Option<ParticipantContact> {
     let participant = AssertUnwindSafe(participant);
     let predicate: Retained<NSPredicate> =
         match unsafe { objc2::exception::catch(|| participant.contactPredicate()) } {
@@ -31,7 +39,7 @@ fn try_fetch_contact(participant: &objc2_event_kit::EKParticipant) -> Option<Par
             Err(_) => return None,
         };
 
-    tauri_plugin_apple_contact::fetch_contact_with_predicate(&predicate)
+    fetcher.fetch_contact_with_predicate(&predicate)
 }
 
 fn parse_email_from_url(url: Option<&str>) -> Option<String> {

@@ -725,6 +725,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "apple-calendar"
+version = "0.1.0"
+dependencies = [
+ "backon",
+ "block2",
+ "chrono",
+ "itertools 0.14.0",
+ "json-patch 4.1.0",
+ "jsonschema",
+ "objc2",
+ "objc2-contacts",
+ "objc2-core-graphics",
+ "objc2-event-kit",
+ "objc2-foundation",
+ "schemars 1.2.1",
+ "serde",
+ "serde_json",
+ "specta",
+ "strum 0.27.2",
+ "thiserror 2.0.18",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
 name = "apple-note"
 version = "0.1.0"
 dependencies = [
@@ -17451,30 +17476,20 @@ dependencies = [
 name = "tauri-plugin-apple-calendar"
 version = "0.1.0"
 dependencies = [
- "backon",
- "block2",
+ "apple-calendar",
  "chrono",
- "itertools 0.14.0",
- "json-patch 4.1.0",
- "jsonschema",
- "objc2",
- "objc2-core-graphics",
- "objc2-event-kit",
  "objc2-foundation",
  "schemars 1.2.1",
  "serde",
  "serde_json",
  "specta",
  "specta-typescript",
- "strum 0.27.2",
  "tauri",
  "tauri-plugin",
  "tauri-plugin-apple-contact",
  "tauri-specta",
  "thiserror 2.0.18",
- "tokio",
  "tracing",
- "uuid",
 ]
 
 [[package]]

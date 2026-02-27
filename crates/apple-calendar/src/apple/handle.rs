@@ -14,6 +14,7 @@ use crate::error::Error;
 use crate::types::{AppleCalendar, AppleEvent};
 use crate::types::{CreateEventInput, EventFilter};
 
+use super::contacts::ContactFetcher;
 use super::transforms::{transform_calendar, transform_event};
 
 fn retry_backoff() -> ConstantBuilder {
@@ -22,7 +23,23 @@ fn retry_backoff() -> ConstantBuilder {
         .with_max_times(3)
 }
 
-pub struct Handle;
+pub struct Handle {
+    contact_fetcher: Option<Box<dyn ContactFetcher>>,
+}
+
+impl Handle {
+    pub fn new() -> Self {
+        Self {
+            contact_fetcher: None,
+        }
+    }
+
+    pub fn with_contact_fetcher(contact_fetcher: Box<dyn ContactFetcher>) -> Self {
+        Self {
+            contact_fetcher: Some(contact_fetcher),
+        }
+    }
+}
 
 impl Handle {
     fn create_event_store() -> Retained<EKEventStore> {
@@ -116,6 +133,8 @@ impl Handle {
             return Err(Error::CalendarAccessDenied);
         }
 
+        let contact_fetcher = self.contact_fetcher.as_deref();
+
         let fetch = || {
             let event_store = Self::create_event_store();
             let events_array = Self::fetch_events(&event_store, &filter)?;
@@ -130,7 +149,7 @@ impl Handle {
                         return None;
                     }
 
-                    Some(transform_event(&event))
+                    Some(transform_event(&event, contact_fetcher))
                 })
                 .collect();
 
