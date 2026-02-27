@@ -65,6 +65,12 @@ export const createConnectSession = <ThrowOnError extends boolean = false>(optio
     }
 });
 
+export const listConnections = <ThrowOnError extends boolean = false>(options?: Options<ListConnectionsData, ThrowOnError>) => (options?.client ?? client).get<ListConnectionsResponses, ListConnectionsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/nango/connections',
+    ...options
+});
+
 export const createReconnectSession = <ThrowOnError extends boolean = false>(options: Options<CreateReconnectSessionData, ThrowOnError>) => (options.client ?? client).post<CreateReconnectSessionResponses, CreateReconnectSessionErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/nango/reconnect-session',
@@ -73,12 +79,6 @@ export const createReconnectSession = <ThrowOnError extends boolean = false>(opt
         'Content-Type': 'application/json',
         ...options.headers
     }
-});
-
-export const listConnections = <ThrowOnError extends boolean = false>(options?: Options<ListConnectionsData, ThrowOnError>) => (options?.client ?? client).get<ListConnectionsResponses, ListConnectionsErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/nango/connections',
-    ...options
 });
 
 export const nangoWebhook = <ThrowOnError extends boolean = false>(options?: Options<NangoWebhookData, ThrowOnError>) => (options?.client ?? client).post<NangoWebhookResponses, NangoWebhookErrors, ThrowOnError>({ url: '/nango/webhook', ...options });

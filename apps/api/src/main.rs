@@ -105,7 +105,8 @@ async fn app() -> Router {
             hypr_transcribe_proxy::callback_router(stt_config.clone()),
         );
 
-    let auth_state_integration = AuthState::new(&env.supabase.supabase_url);
+    let auth_state_integration =
+        AuthState::new(&env.supabase.supabase_url).with_required_entitlement("hyprnote_pro");
 
     let pro_routes = Router::new()
         .merge(hypr_api_research::router(research_config))

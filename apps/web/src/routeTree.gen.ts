@@ -18,7 +18,6 @@ import { Route as GithubRouteImport } from './routes/github'
 import { Route as FoundersRouteImport } from './routes/founders'
 import { Route as DiscordRouteImport } from './routes/discord'
 import { Route as ContactRouteImport } from './routes/contact'
-import { Route as BountiesRouteImport } from './routes/bounties'
 import { Route as BlueskyRouteImport } from './routes/bluesky'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
@@ -198,11 +197,6 @@ const DiscordRoute = DiscordRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BountiesRoute = BountiesRouteImport.update({
-  id: '/bounties',
-  path: '/bounties',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlueskyRoute = BlueskyRouteImport.update({
@@ -910,7 +904,6 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/bluesky': typeof BlueskyRoute
-  '/bounties': typeof BountiesRoute
   '/contact': typeof ContactRoute
   '/discord': typeof DiscordRoute
   '/founders': typeof FoundersRoute
@@ -1054,7 +1047,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/bluesky': typeof BlueskyRoute
-  '/bounties': typeof BountiesRoute
   '/contact': typeof ContactRoute
   '/discord': typeof DiscordRoute
   '/founders': typeof FoundersRoute
@@ -1199,7 +1191,6 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/bluesky': typeof BlueskyRoute
-  '/bounties': typeof BountiesRoute
   '/contact': typeof ContactRoute
   '/discord': typeof DiscordRoute
   '/founders': typeof FoundersRoute
@@ -1348,7 +1339,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/bluesky'
-    | '/bounties'
     | '/contact'
     | '/discord'
     | '/founders'
@@ -1492,7 +1482,6 @@ export interface FileRouteTypes {
   to:
     | '/auth'
     | '/bluesky'
-    | '/bounties'
     | '/contact'
     | '/discord'
     | '/founders'
@@ -1636,7 +1625,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/bluesky'
-    | '/bounties'
     | '/contact'
     | '/discord'
     | '/founders'
@@ -1784,7 +1772,6 @@ export interface RootRouteChildren {
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   BlueskyRoute: typeof BlueskyRoute
-  BountiesRoute: typeof BountiesRoute
   ContactRoute: typeof ContactRoute
   DiscordRoute: typeof DiscordRoute
   FoundersRoute: typeof FoundersRoute
@@ -1893,13 +1880,6 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/bounties': {
-      id: '/bounties'
-      path: '/bounties'
-      fullPath: '/bounties'
-      preLoaderRoute: typeof BountiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bluesky': {
@@ -3103,7 +3083,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRouteRoute: AdminRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   BlueskyRoute: BlueskyRoute,
-  BountiesRoute: BountiesRoute,
   ContactRoute: ContactRoute,
   DiscordRoute: DiscordRoute,
   FoundersRoute: FoundersRoute,

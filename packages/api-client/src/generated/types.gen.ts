@@ -63,11 +63,6 @@ export type CreateConnectSessionRequest = {
     allowed_integrations?: Array<string> | null;
 };
 
-export type CreateReconnectSessionRequest = {
-    connection_id: string;
-    integration_id: string;
-};
-
 export type CreateContactRequest = {
     customAttributes?: unknown;
     email?: string | null;
@@ -101,6 +96,11 @@ export type CreateEventRequest = {
 
 export type CreateEventResponse = {
     event: unknown;
+};
+
+export type CreateReconnectSessionRequest = {
+    connection_id: string;
+    integration_id: string;
 };
 
 export type DeleteAccountResponse = {
@@ -459,33 +459,6 @@ export type CreateConnectSessionResponses = {
 
 export type CreateConnectSessionResponse = CreateConnectSessionResponses[keyof CreateConnectSessionResponses];
 
-export type CreateReconnectSessionData = {
-    body: CreateReconnectSessionRequest;
-    path?: never;
-    query?: never;
-    url: '/nango/reconnect-session';
-};
-
-export type CreateReconnectSessionErrors = {
-    /**
-     * Unauthorized
-     */
-    401: unknown;
-    /**
-     * Internal server error
-     */
-    500: unknown;
-};
-
-export type CreateReconnectSessionResponses = {
-    /**
-     * Reconnect session created
-     */
-    200: ConnectSessionResponse;
-};
-
-export type CreateReconnectSessionResponse = CreateReconnectSessionResponses[keyof CreateReconnectSessionResponses];
-
 export type ListConnectionsData = {
     body?: never;
     path?: never;
@@ -512,6 +485,33 @@ export type ListConnectionsResponses = {
 };
 
 export type ListConnectionsResponse2 = ListConnectionsResponses[keyof ListConnectionsResponses];
+
+export type CreateReconnectSessionData = {
+    body: CreateReconnectSessionRequest;
+    path?: never;
+    query?: never;
+    url: '/nango/reconnect-session';
+};
+
+export type CreateReconnectSessionErrors = {
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Internal server error
+     */
+    500: unknown;
+};
+
+export type CreateReconnectSessionResponses = {
+    /**
+     * Reconnect session created
+     */
+    200: ConnectSessionResponse;
+};
+
+export type CreateReconnectSessionResponse = CreateReconnectSessionResponses[keyof CreateReconnectSessionResponses];
 
 export type NangoWebhookData = {
     body?: never;
