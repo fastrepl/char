@@ -14,7 +14,7 @@ async listCalendars() : Promise<Result<CalendarListEntry[], string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async listEvents(filter: EventFilter) : Promise<Result<Event[], string>> {
+async listEvents(filter: EventFilter) : Promise<Result<CalendarEvent[], string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:google-calendar|list_events", { filter }) };
 } catch (e) {
@@ -35,49 +35,94 @@ async listEvents(filter: EventFilter) : Promise<Result<Event[], string>> {
 /** user-defined types **/
 
 export type AccessRole = "freeBusyReader" | "reader" | "writer" | "owner" | "unknown"
-export type Attendee = { id?: string | null; email?: string | null; displayName?: string | null; organizer?: boolean | null; self?: boolean | null; resource?: boolean | null; optional?: boolean | null; responseStatus?: AttendeeResponseStatus | null; comment?: string | null; additionalGuests?: number | null }
-export type AttendeeResponseStatus = "needsAction" | "declined" | "tentative" | "accepted" | "unknown"
-export type AutoDeclineMode = "declineNone" | "declineAllConflictingInvitations" | "declineOnlyNewConflictingInvitations" | "unknown"
-export type BirthdayProperties = { contact?: string | null; type?: BirthdayPropertyType | null; customTypeName?: string | null }
-export type BirthdayPropertyType = "birthday" | "anniversary" | "self" | "other" | "custom" | "unknown"
+export type AttendeeRole = "chair" | "required" | "optional" | "nonparticipant"
+export type AttendeeStatus = "pending" | "accepted" | "tentative" | "declined"
+export type CalendarEvent = { 
+/**
+ * Unique between events. Synthesized for Apple events (eventIdentifier:YYYY-MM-DD for recurring).
+ */
+id: string; 
+/**
+ * Calendar id.
+ */
+calendar_id: string; 
+/**
+ * iCal identifier used for deduplication.
+ * Apple: calendarItemExternalIdentifier, Google: iCalUID.
+ */
+external_id: string; title: string; description: string | null; location: string | null; url: string | null; 
+/**
+ * Parsed from notes for Apple, Google provides url directly.
+ */
+meeting_link: string | null; 
+/**
+ * ISO 8601. For Google, start of day for all day events (Apple already does that).
+ */
+started_at: string; 
+/**
+ * ISO 8601. For Google, end of day for all day events (Apple already does that).
+ */
+ended_at: string; timezone: string | null; is_all_day: boolean; 
+/**
+ * Apple: None | Confirmed | Tentative | Canceled -> map None to Confirmed.
+ * Google: confirmed | tentative | cancelled.
+ */
+status: EventStatus; organizer: EventPerson | null; attendees: EventAttendee[]; has_recurrence_rules: boolean; 
+/**
+ * Google's approach: for an instance of a recurring event, this is the id of the recurring
+ * event to which this instance belongs. For Apple, this is the recurrence's series_identifier
+ * (same across all occurrences of a recurring event).
+ */
+recurring_event_id: string | null; 
+/**
+ * Raw data. JSON for both Apple and Google.
+ */
+raw: string }
 export type CalendarListEntry = { id: string; kind?: string | null; etag?: string | null; summary?: string | null; description?: string | null; location?: string | null; timeZone?: string | null; summaryOverride?: string | null; colorId?: string | null; backgroundColor?: string | null; foregroundColor?: string | null; hidden?: boolean | null; selected?: boolean | null; primary?: boolean | null; deleted?: boolean | null; accessRole?: AccessRole | null; dataOwner?: string | null; defaultReminders?: Reminder[] | null; notificationSettings?: NotificationSettings | null; conferenceProperties?: ConferenceProperties | null; autoAcceptInvitations?: boolean | null }
 export type CalendarNotification = { method: NotificationMethod; type: NotificationType }
-export type ChatStatus = "available" | "doNotDisturb" | "unknown"
-export type ConferenceCreateRequest = { requestId?: string | null; conferenceSolutionKey?: ConferenceSolutionKey | null; status?: ConferenceCreateRequestStatus | null }
-export type ConferenceCreateRequestStatus = { statusCode: ConferenceCreateStatusCode }
-export type ConferenceCreateStatusCode = "pending" | "success" | "failure" | "unknown"
-export type ConferenceData = { conferenceId?: string | null; conferenceSolution?: ConferenceSolution | null; entryPoints?: EntryPoint[] | null; createRequest?: ConferenceCreateRequest | null; notes?: string | null; signature?: string | null }
 export type ConferenceProperties = { allowedConferenceSolutionTypes?: ConferenceSolutionType[] | null }
-export type ConferenceSolution = { key?: ConferenceSolutionKey | null; name?: string | null; iconUri?: string | null }
-export type ConferenceSolutionKey = { type: ConferenceSolutionType }
 export type ConferenceSolutionType = "addOn" | "hangoutsMeet" | "eventNamedHangout" | "eventHangout" | "unknown"
-export type CustomLocation = { label?: string | null }
-export type EntryPoint = { entryPointType: EntryPointType; uri: string; label?: string | null; pin?: string | null; accessCode?: string | null; meetingCode?: string | null; passcode?: string | null; password?: string | null }
-export type EntryPointType = "video" | "phone" | "sip" | "more" | "unknown"
-export type Event = { id: string; kind?: string | null; etag?: string | null; status?: EventStatus | null; htmlLink?: string | null; created?: string | null; updated?: string | null; summary?: string | null; description?: string | null; location?: string | null; colorId?: string | null; creator?: EventPerson | null; organizer?: EventPerson | null; start?: EventDateTime | null; end?: EventDateTime | null; endTimeUnspecified?: boolean | null; recurrence?: string[] | null; recurringEventId?: string | null; originalStartTime?: EventDateTime | null; transparency?: Transparency | null; visibility?: Visibility | null; iCalUID?: string | null; sequence?: number | null; attendees?: Attendee[] | null; attendeesOmitted?: boolean | null; extendedProperties?: ExtendedProperties | null; hangoutLink?: string | null; conferenceData?: ConferenceData | null; gadget?: Gadget | null; anyoneCanAddSelf?: boolean | null; guestsCanInviteOthers?: boolean | null; guestsCanModify?: boolean | null; guestsCanSeeOtherGuests?: boolean | null; privateCopy?: boolean | null; locked?: boolean | null; reminders?: Reminders | null; source?: EventSource | null; workingLocationProperties?: WorkingLocationProperties | null; outOfOfficeProperties?: OutOfOfficeProperties | null; focusTimeProperties?: FocusTimeProperties | null; attachments?: EventAttachment[] | null; birthdayProperties?: BirthdayProperties | null; eventType?: EventType | null }
-export type EventAttachment = { fileUrl?: string | null; title?: string | null; mimeType?: string | null; iconLink?: string | null; fileId?: string | null }
-export type EventDateTime = { date?: string | null; dateTime?: string | null; timeZone?: string | null }
+export type EventAttendee = { name: string | null; 
+/**
+ * Apple calendar events only provide a contact entry, which can possibly not have an email.
+ */
+email: string | null; 
+/**
+ * Apple: participant.isCurrentUser, Google: attendee.self.
+ */
+is_current_user: boolean; 
+/**
+ * Apple: EKParticipantStatus (Unknown | Pending | Accepted | Declined | Tentative | Delegated | Completed | InProgress).
+ * Google: needsAction | declined | tentative | accepted.
+ * Normalize: unknown/needsAction -> Pending, delegated/completed/inProgress -> Accepted.
+ */
+status: AttendeeStatus; 
+/**
+ * Apple: EKParticipantRole (Unknown | Required | Optional | Chair | NonParticipant).
+ * Google: attendee.optional and attendee.organizer.
+ * For Apple, normalize unknown as required (see RFC 5545 3.2.16).
+ * For Google: organizer -> Chair, !organizer & !optional -> Required, !organizer & optional -> Optional.
+ */
+role: AttendeeRole }
 export type EventFilter = { from: string; to: string; calendar_tracking_id: string }
-export type EventPerson = { id?: string | null; email?: string | null; displayName?: string | null; self?: boolean | null }
-export type EventSource = { url: string; title: string }
-export type EventStatus = "confirmed" | "tentative" | "cancelled" | "unknown"
-export type EventType = "default" | "birthday" | "focusTime" | "fromGmail" | "outOfOffice" | "workingLocation" | "unknown"
-export type ExtendedProperties = { private?: Partial<{ [key in string]: string }> | null; shared?: Partial<{ [key in string]: string }> | null }
-export type FocusTimeProperties = { autoDeclineMode?: AutoDeclineMode | null; declineMessage?: string | null; chatStatus?: ChatStatus | null }
-export type Gadget = { type?: string | null; title?: string | null; link?: string | null; iconLink?: string | null; width?: number | null; height?: number | null; display?: GadgetDisplay | null; preferences?: Partial<{ [key in string]: string }> | null }
-export type GadgetDisplay = "chip" | "icon" | "unknown"
+/**
+ * Apple: {name, email, isCurrentUser, ...}, Google: {id, email, displayName, self}.
+ */
+export type EventPerson = { name: string | null; 
+/**
+ * Apple calendar events only provide a contact entry, which can possibly not have an email.
+ */
+email: string | null; 
+/**
+ * Apple: participant.isCurrentUser, Google: organizer.self.
+ */
+is_current_user: boolean }
+export type EventStatus = "confirmed" | "tentative" | "cancelled"
 export type NotificationMethod = "email" | "unknown"
 export type NotificationSettings = { notifications?: CalendarNotification[] | null }
 export type NotificationType = "eventCreation" | "eventChange" | "eventCancellation" | "eventResponse" | "agenda" | "unknown"
-export type OfficeLocation = { buildingId?: string | null; floorId?: string | null; floorSectionId?: string | null; deskId?: string | null; label?: string | null }
-export type OutOfOfficeProperties = { autoDeclineMode?: AutoDeclineMode | null; declineMessage?: string | null }
 export type Reminder = { method: ReminderMethod; minutes: number }
 export type ReminderMethod = "email" | "popup" | "unknown"
-export type Reminders = { useDefault?: boolean | null; overrides?: Reminder[] | null }
-export type Transparency = "opaque" | "transparent" | "unknown"
-export type Visibility = "default" | "public" | "private" | "confidential" | "unknown"
-export type WorkingLocationProperties = { type?: WorkingLocationType | null; customLocation?: CustomLocation | null; officeLocation?: OfficeLocation | null }
-export type WorkingLocationType = "homeOffice" | "officeLocation" | "customLocation" | "unknown"
 
 /** tauri-specta globals **/
 
