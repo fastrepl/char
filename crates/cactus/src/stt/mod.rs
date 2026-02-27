@@ -14,12 +14,13 @@ pub fn constrain_to(languages: &[Language]) -> Option<Language> {
     match languages {
         [] => None,
         [single] => Some(single.clone()),
-        _ => {
-            tracing::warn!(
+        [first, ..] => {
+            tracing::info!(
                 ?languages,
-                "multi-language constraint unsupported by cactus FFI; falling back to auto-detect"
+                selected = ?first,
+                "multi-language constraint unsupported by cactus FFI; using first language"
             );
-            None
+            Some(first.clone())
         }
     }
 }

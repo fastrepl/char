@@ -11,12 +11,13 @@ use crate::error::Error;
 use super::CactusAdapter;
 
 impl CactusAdapter {
-    pub async fn transcribe_file_streaming<P: AsRef<Path>>(
+    pub async fn transcribe_file_streaming(
         api_base: &str,
         params: &ListenParams,
-        file_path: P,
+        file_path: impl AsRef<Path>,
     ) -> Result<StreamingBatchStream, Error> {
         let path = file_path.as_ref().to_path_buf();
+        tracing::info!(file_path = %path.display(), api_base, "starting cactus batch stream");
 
         let (audio_data, content_type, audio_duration_secs) =
             tokio::task::spawn_blocking(move || load_audio_file(path))
@@ -37,6 +38,7 @@ impl CactusAdapter {
         let status = response.status();
         if !status.is_success() {
             let body = response.text().await.unwrap_or_default();
+            tracing::error!(status = %status, body = %body, "unexpected response status");
             return Err(Error::UnexpectedStatus { status, body });
         }
 
@@ -117,14 +119,14 @@ fn audio_duration_secs(path: &Path) -> f64 {
 fn build_cactus_batch_url(api_base: &str, params: &ListenParams) -> url::Url {
     let mut url: url::Url = api_base.parse().expect("invalid api_base URL");
 
-    if !params.languages.is_empty() {
-        let lang_strs: Vec<String> = params
-            .languages
-            .iter()
-            .map(|l| l.iso639().code().to_string())
-            .collect();
+    if !url.path().ends_with("/listen") {
+        let path = url.path().trim_end_matches('/').to_string();
+        url.set_path(&format!("{}/listen", path));
+    }
+
+    for lang in &params.languages {
         url.query_pairs_mut()
-            .append_pair("language", &lang_strs.join(","));
+            .append_pair("language", lang.iso639().code());
     }
     if !params.keywords.is_empty() {
         for kw in &params.keywords {
@@ -198,7 +200,7 @@ impl<S> SseParserState<S> {
                 let progress: InferenceProgress = match serde_json::from_str(&data) {
                     Ok(p) => p,
                     Err(e) => {
-                        tracing::warn!("failed to parse progress event: {e}");
+                        tracing::warn!(raw_data = %data, "failed to parse progress event: {e}");
                         return None;
                     }
                 };
@@ -232,6 +234,7 @@ impl<S> SseParserState<S> {
                     match serde_json::from_str(&data) {
                         Ok(r) => r,
                         Err(e) => {
+                            tracing::error!(raw_data = %data, "failed to parse result event: {e}");
                             return Some(Err(Error::WebSocket(format!(
                                 "failed to parse result: {e}"
                             ))));
@@ -310,6 +313,7 @@ impl<S> SseParserState<S> {
                     .get("detail")
                     .and_then(|v| v.as_str())
                     .unwrap_or("unknown error");
+                tracing::error!(detail = %detail, raw_data = %data, "server returned error event");
                 Some(Err(Error::WebSocket(format!("server error: {}", detail))))
             }
             _ => None,

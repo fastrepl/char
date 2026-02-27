@@ -124,7 +124,13 @@ function HeaderTabTranscript({
 
         await runBatch(audioPath);
       } catch (error) {
-        console.error("[redo_transcript] failed", error);
+        const message =
+          error instanceof Error
+            ? error.message
+            : typeof error === "string"
+              ? error
+              : JSON.stringify(error);
+        console.error("[redo_transcript] failed:", message);
 
         if (savedTranscripts.length > 0) {
           store.transaction(() => {

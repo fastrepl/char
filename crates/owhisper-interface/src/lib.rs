@@ -131,10 +131,13 @@ common_derives! {
 }
 
 common_derives! {
+    #[derive(Default)]
     pub struct ListenParams {
         #[serde(default)]
         pub model: Option<String>,
+        #[serde(default = "ListenParams::default_channels")]
         pub channels: u8,
+        #[serde(default = "ListenParams::default_sample_rate")]
         pub sample_rate: u32,
         // https://docs.rs/axum-extra/0.10.1/axum_extra/extract/struct.Query.html#example-1
         #[serde(default, alias = "language")]
@@ -148,15 +151,12 @@ common_derives! {
     }
 }
 
-impl Default for ListenParams {
-    fn default() -> Self {
-        ListenParams {
-            model: None,
-            channels: 1,
-            sample_rate: 16000,
-            languages: vec![],
-            keywords: vec![],
-            custom_query: None,
-        }
+impl ListenParams {
+    fn default_channels() -> u8 {
+        1
+    }
+
+    fn default_sample_rate() -> u32 {
+        16000
     }
 }

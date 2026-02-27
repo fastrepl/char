@@ -7,5 +7,8 @@ pub enum Error {
     Cactus(#[from] hypr_cactus::Error),
 
     #[error(transparent)]
-    QueryParse(#[from] serde_qs::Error),
+    Audio(#[from] hypr_audio_utils::Error),
+
+    #[error(transparent)]
+    Vad(#[from] hypr_vad_chunking::Error),
 }

@@ -84,8 +84,8 @@ impl Service<Request<Body>> for TranscribeService {
                 .map(|v| v.eq_ignore_ascii_case("websocket"))
                 .unwrap_or(false);
 
-            let query_string = req.uri().query().unwrap_or("").to_string();
-            let params: ListenParams = match serde_qs::from_str(&query_string) {
+            let query_string = req.uri().query().unwrap_or("");
+            let params = match parse_listen_params(query_string) {
                 Ok(p) => p,
                 Err(e) => {
                     return Ok((StatusCode::BAD_REQUEST, e.to_string()).into_response());
@@ -146,5 +146,50 @@ impl Service<Request<Body>> for TranscribeService {
                 }
             }
         })
+    }
+}
+
+fn parse_listen_params(query: &str) -> Result<ListenParams, serde_html_form::de::Error> {
+    serde_html_form::from_str(query)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use hypr_language::ISO639;
+
+    #[test]
+    fn parse_single_language() {
+        let params = parse_listen_params("language=en").unwrap();
+        assert_eq!(params.languages.len(), 1);
+        assert_eq!(params.languages[0].iso639(), ISO639::En);
+    }
+
+    #[test]
+    fn parse_multiple_languages() {
+        let params = parse_listen_params("language=en&language=ko").unwrap();
+        assert_eq!(params.languages.len(), 2);
+        assert_eq!(params.languages[0].iso639(), ISO639::En);
+        assert_eq!(params.languages[1].iso639(), ISO639::Ko);
+    }
+
+    #[test]
+    fn parse_no_languages() {
+        let params = parse_listen_params("").unwrap();
+        assert!(params.languages.is_empty());
+    }
+
+    #[test]
+    fn parse_with_keywords() {
+        let params = parse_listen_params("language=en&keywords=hello&keywords=world").unwrap();
+        assert_eq!(params.languages.len(), 1);
+        assert_eq!(params.keywords, vec!["hello", "world"]);
+    }
+
+    #[test]
+    fn defaults_channels_and_sample_rate_when_omitted() {
+        let params = parse_listen_params("language=en").unwrap();
+        assert_eq!(params.channels, 1);
+        assert_eq!(params.sample_rate, 16000);
     }
 }

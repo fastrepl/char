@@ -29,6 +29,7 @@ pub enum BatchProvider {
     Soniox,
     AssemblyAI,
     Am,
+    Cactus,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
@@ -70,7 +71,9 @@ pub async fn run_batch(runtime: Arc<dyn BatchRuntime>, params: BatchParams) -> c
     };
 
     match params.provider {
-        BatchProvider::Am => run_batch_am(runtime, params, listen_params).await,
+        BatchProvider::Am | BatchProvider::Cactus => {
+            run_batch_am(runtime, params, listen_params).await
+        }
         BatchProvider::Deepgram => {
             run_batch_simple::<DeepgramAdapter>(runtime, params, listen_params).await
         }
@@ -331,13 +334,13 @@ impl Actor for BatchActor {
             }
 
             BatchMsg::StreamStartFailed(error) => {
-                tracing::info!("batch_stream_start_failed: {}", error);
+                tracing::error!("batch_stream_start_failed: {}", error);
                 state.emit_failure(error.clone());
                 myself.stop(Some(format!("batch_stream_start_failed: {}", error)));
             }
 
             BatchMsg::StreamError(error) => {
-                tracing::info!("batch_stream_error: {}", error);
+                tracing::error!("batch_stream_error: {}", error);
                 state.emit_failure(error.clone());
                 myself.stop(None);
             }
@@ -519,98 +522,99 @@ async fn spawn_cactus_batch_task(
 > {
     let (shutdown_tx, mut shutdown_rx) = tokio::sync::oneshot::channel::<()>();
 
-    let rx_task = tokio::spawn(async move {
-        tracing::info!("cactus streaming batch task: starting");
-        let start_notifier = args.start_notifier.clone();
+    let span = tracing::info_span!(
+        "cactus_batch",
+        base_url = %args.base_url,
+        file_path = %args.file_path,
+    );
 
-        let stream_result = CactusAdapter::transcribe_file_streaming(
-            &args.base_url,
-            &args.listen_params,
-            &args.file_path,
-        )
-        .await;
+    let rx_task = tokio::spawn(
+        async move {
+            let start_notifier = args.start_notifier.clone();
 
-        let mut stream = match stream_result {
-            Ok(s) => {
-                notify_start_result(&start_notifier, Ok(()));
-                s
-            }
-            Err(e) => {
-                let raw_error = format!("{:?}", e);
-                let error = format_user_friendly_error(&raw_error);
-                tracing::error!("cactus streaming batch task: failed to start: {:?}", e);
-                notify_start_result(&start_notifier, Err(error.clone()));
-                let _ = myself.send_message(BatchMsg::StreamStartFailed(error));
-                return;
-            }
-        };
+            let stream_result = CactusAdapter::transcribe_file_streaming(
+                &args.base_url,
+                &args.listen_params,
+                &args.file_path,
+            )
+            .await;
 
-        let response_timeout = Duration::from_secs(BATCH_STREAM_TIMEOUT_SECS);
-        let mut response_count = 0;
-        let mut ended_cleanly = false;
-
-        loop {
-            tokio::select! {
-                _ = &mut shutdown_rx => {
-                    tracing::info!("cactus streaming batch task: shutdown");
-                    ended_cleanly = true;
-                    break;
+            let mut stream = match stream_result {
+                Ok(s) => {
+                    notify_start_result(&start_notifier, Ok(()));
+                    s
                 }
-                result = tokio::time::timeout(response_timeout, StreamExt::next(&mut stream)) => {
-                    match result {
-                        Ok(Some(Ok(event))) => {
-                            response_count += 1;
+                Err(e) => {
+                    let raw_error = format!("{:?}", e);
+                    let user_error = format_user_friendly_error(&raw_error);
+                    tracing::error!(raw_error = %raw_error, user_error = %user_error, "failed to start stream");
+                    notify_start_result(&start_notifier, Err(user_error.clone()));
+                    let _ = myself.send_message(BatchMsg::StreamStartFailed(user_error));
+                    return;
+                }
+            };
 
-                            let is_from_finalize = matches!(
-                                &event.response,
-                                StreamResponse::TranscriptResponse { from_finalize, .. } if *from_finalize
-                            );
+            let response_timeout = Duration::from_secs(BATCH_STREAM_TIMEOUT_SECS);
+            let mut response_count = 0;
+            let mut ended_cleanly = false;
 
-                            tracing::info!(
-                                "cactus streaming batch: response #{}{}",
-                                response_count,
-                                if is_from_finalize { " (from_finalize)" } else { "" }
-                            );
+            loop {
+                tokio::select! {
+                    _ = &mut shutdown_rx => {
+                        tracing::info!("shutdown requested");
+                        ended_cleanly = true;
+                        break;
+                    }
+                    result = tokio::time::timeout(response_timeout, StreamExt::next(&mut stream)) => {
+                        match result {
+                            Ok(Some(Ok(event))) => {
+                                response_count += 1;
 
-                            if let Err(e) = myself.send_message(BatchMsg::StreamResponse {
-                                response: Box::new(event.response),
-                                percentage: event.percentage,
-                            }) {
-                                tracing::error!("failed to send stream response message: {:?}", e);
+                                let is_from_finalize = matches!(
+                                    &event.response,
+                                    StreamResponse::TranscriptResponse { from_finalize, .. } if *from_finalize
+                                );
+
+                                if let Err(e) = myself.send_message(BatchMsg::StreamResponse {
+                                    response: Box::new(event.response),
+                                    percentage: event.percentage,
+                                }) {
+                                    tracing::error!("failed to send stream response: {:?}", e);
+                                }
+
+                                if is_from_finalize {
+                                    ended_cleanly = true;
+                                    break;
+                                }
                             }
-
-                            if is_from_finalize {
+                            Ok(Some(Err(e))) => {
+                                let raw_error = format!("{:?}", e);
+                                let user_error = format_user_friendly_error(&raw_error);
+                                tracing::error!(raw_error = %raw_error, user_error = %user_error, responses = response_count, "stream error");
+                                let _ = myself.send_message(BatchMsg::StreamError(user_error));
+                                break;
+                            }
+                            Ok(None) => {
+                                tracing::info!(responses = response_count, "stream completed");
                                 ended_cleanly = true;
                                 break;
                             }
-                        }
-                        Ok(Some(Err(e))) => {
-                            let raw_error = format!("{:?}", e);
-                            let error = format_user_friendly_error(&raw_error);
-                            tracing::error!("cactus streaming batch error: {:?}", e);
-                            let _ = myself.send_message(BatchMsg::StreamError(error));
-                            break;
-                        }
-                        Ok(None) => {
-                            tracing::info!("cactus streaming batch completed (total: {})", response_count);
-                            ended_cleanly = true;
-                            break;
-                        }
-                        Err(elapsed) => {
-                            tracing::warn!(timeout = ?elapsed, responses = response_count, "cactus streaming batch timeout");
-                            let _ = myself.send_message(BatchMsg::StreamError(format_user_friendly_error("timeout waiting for response")));
-                            break;
+                            Err(elapsed) => {
+                                tracing::warn!(timeout = ?elapsed, responses = response_count, "stream response timeout");
+                                let _ = myself.send_message(BatchMsg::StreamError(format_user_friendly_error("timeout waiting for response")));
+                                break;
+                            }
                         }
                     }
                 }
             }
-        }
 
-        if ended_cleanly && let Err(e) = myself.send_message(BatchMsg::StreamEnded) {
-            tracing::error!("failed to send stream ended message: {:?}", e);
+            if ended_cleanly && let Err(e) = myself.send_message(BatchMsg::StreamEnded) {
+                tracing::error!("failed to send stream ended: {:?}", e);
+            }
         }
-        tracing::info!("cactus streaming batch task exited");
-    });
+        .instrument(span),
+    );
 
     Ok((rx_task, shutdown_tx))
 }

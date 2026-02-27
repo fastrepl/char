@@ -3,7 +3,7 @@ use hypr_onnx::{
     ndarray::{Array3, Array4},
     ort::{session::Session, value::TensorRef},
 };
-use realfft::{ComplexToReal, RealFftPlanner, RealToComplex, num_complex::Complex};
+use realfft::{ComplexToReal, RealFftPlanner, RealToComplex};
 use std::sync::Arc;
 
 pub struct Denoiser {

@@ -38,8 +38,10 @@ function getBatchProvider(
   provider: string,
   model: string,
 ): BatchParams["provider"] | null {
-  if (provider === "hyprnote" && model.startsWith("am-")) {
-    return "am";
+  if (provider === "hyprnote") {
+    if (model.startsWith("am-")) return "am";
+    if (model.startsWith("cactus-")) return "cactus";
+    return null;
   }
   return BATCH_PROVIDER_MAP[provider] ?? null;
 }

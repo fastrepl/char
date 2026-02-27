@@ -1,4 +1,4 @@
-mod audio;
+mod chunk;
 mod response;
 mod transcribe;
 
@@ -119,20 +119,26 @@ pub async fn handle_batch_sse(
                             .event("result")
                             .json_data(&response)
                             .unwrap(),
-                        Ok(Err(e)) => Event::default()
-                            .event("error")
-                            .json_data(serde_json::json!({
-                                "error": "transcription_failed",
-                                "detail": e.to_string()
-                            }))
-                            .unwrap(),
-                        Err(_) => Event::default()
-                            .event("error")
-                            .json_data(serde_json::json!({
-                                "error": "transcription_failed",
-                                "detail": "task panicked"
-                            }))
-                            .unwrap(),
+                        Ok(Err(e)) => {
+                            tracing::error!(error = %e, "batch_sse transcription failed");
+                            Event::default()
+                                .event("error")
+                                .json_data(serde_json::json!({
+                                    "error": "transcription_failed",
+                                    "detail": e.to_string()
+                                }))
+                                .unwrap()
+                        }
+                        Err(_) => {
+                            tracing::error!("batch_sse transcription task panicked");
+                            Event::default()
+                                .event("error")
+                                .json_data(serde_json::json!({
+                                    "error": "transcription_failed",
+                                    "detail": "task panicked"
+                                }))
+                                .unwrap()
+                        }
                     };
                     Some((Ok(event), Phase::Done))
                 }
