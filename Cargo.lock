@@ -4507,10 +4507,15 @@ dependencies = [
 name = "denoise"
 version = "0.1.0"
 dependencies = [
+ "approx",
+ "audio-snapshot",
  "criterion",
+ "dasp",
  "data",
+ "hound",
  "onnx",
  "realfft",
+ "rodio",
  "serde",
  "thiserror 2.0.18",
 ]
@@ -17825,6 +17830,7 @@ dependencies = [
  "data",
  "frontmatter",
  "glob",
+ "mp3",
  "predicates",
  "rayon",
  "rodio",
