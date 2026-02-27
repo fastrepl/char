@@ -18,8 +18,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { env } from "~/env";
-import { DEVICE_FINGERPRINT_HEADER, getScheme } from "~/shared/utils";
+import { buildWebAppUrl, DEVICE_FINGERPRINT_HEADER } from "~/shared/utils";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as miscCommands } from "@hypr/plugin-misc";
@@ -266,12 +265,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = useCallback(async () => {
-    const base = env.VITE_APP_URL ?? "http://localhost:3000";
-    const scheme = await getScheme();
-    await openerCommands.openUrl(
-      `${base}/auth?flow=desktop&scheme=${scheme}`,
-      null,
-    );
+    const url = await buildWebAppUrl("/auth");
+    await openerCommands.openUrl(url, null);
   }, []);
 
   const signOut = useCallback(async () => {

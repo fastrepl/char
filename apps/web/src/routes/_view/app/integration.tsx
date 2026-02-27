@@ -1,6 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
+import {
+  desktopRedirectUriSchema,
+  desktopSchemeSchema,
+} from "@/functions/desktop-flow";
 import { useBilling } from "@/hooks/use-billing";
 
 import { ConnectFlow } from "./-integrations-connect-flow";
@@ -10,7 +14,8 @@ const validateSearch = z.object({
   integration_id: z.string().default("google-calendar"),
   connection_id: z.string().optional(),
   flow: z.enum(["desktop", "web"]).default("web"),
-  scheme: z.string().default("hyprnote"),
+  scheme: desktopSchemeSchema.default("hyprnote"),
+  redirect_uri: desktopRedirectUriSchema,
   return_to: z.string().optional(),
 });
 
@@ -45,6 +50,7 @@ export const Route = createFileRoute("/_view/app/integration")({
 
 function Component() {
   const search = Route.useSearch();
+  const redirectUri = search.redirect_uri;
   const billing = useBilling();
 
   if (!billing.isReady) {
@@ -63,6 +69,7 @@ function Component() {
         integrationId={search.integration_id}
         flow={search.flow}
         scheme={search.scheme}
+        redirectUri={redirectUri}
       />
     );
   }

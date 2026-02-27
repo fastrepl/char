@@ -1,8 +1,6 @@
 import { getIdentifier } from "@tauri-apps/api/app";
 
-// export * from "../shared/config/configure-pro-settings";
-// export * from "~/sidebar/timeline/utils";
-// export * from "~/stt/segment";
+import { commands as deeplink2Commands } from "@hypr/plugin-deeplink2";
 
 export const id = () => crypto.randomUUID() as string;
 
@@ -24,10 +22,18 @@ export const buildWebAppUrl = async (
   params?: Record<string, string>,
 ): Promise<string> => {
   const { env } = await import("~/env");
+
   const scheme = await getScheme();
+  const result = await deeplink2Commands.startCallbackServer(scheme);
+  if (result.status !== "ok") {
+    throw new Error(`Failed to start callback server: ${result.error}`);
+  }
+  const redirectUri = `http://127.0.0.1:${result.data}`;
+
   const url = new URL(path, env.VITE_APP_URL);
   url.searchParams.set("flow", "desktop");
   url.searchParams.set("scheme", scheme);
+  url.searchParams.set("redirect_uri", redirectUri);
   if (params) {
     for (const [key, value] of Object.entries(params)) {
       url.searchParams.set(key, value);

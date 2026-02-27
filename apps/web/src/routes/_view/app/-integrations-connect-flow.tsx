@@ -13,6 +13,8 @@ import { getIntegrationDisplay, Route } from "./integration";
 
 export function ConnectFlow() {
   const search = Route.useSearch();
+  const redirectUri = search.redirect_uri;
+
   const navigate = useNavigate();
   const [nango] = useState(() => new Nango());
   const [status, setStatus] = useState<
@@ -94,6 +96,7 @@ export function ConnectFlow() {
               status: "success",
               flow: search.flow,
               scheme: search.scheme,
+              redirect_uri: redirectUri,
               return_to: search.return_to,
             },
           });
