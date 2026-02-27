@@ -91,6 +91,7 @@
     "@content-collections/vite": "^0.2.8",
     "@dotenvx/dotenvx": "^1.52.0",
     "@hypr/plugin-auth": "workspace:*",
+    "@hypr/plugin-deeplink2": "workspace:*",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/typography": "^0.5.19",
     "@testing-library/dom": "^10.4.1",

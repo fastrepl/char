@@ -977,6 +977,9 @@ importers:
       '@hypr/plugin-auth':
         specifier: workspace:*
         version: link:../../plugins/auth
+      '@hypr/plugin-deeplink2':
+        specifier: workspace:*
+        version: link:../../plugins/deeplink2
       '@playwright/test':
         specifier: ^1.58.2
         version: 1.58.2
