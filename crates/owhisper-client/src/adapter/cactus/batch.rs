@@ -158,12 +158,7 @@ impl<S> SseParserState<S> {
     }
 
     fn parse_buffer(&mut self) {
-        loop {
-            let text = match std::str::from_utf8(&self.buffer) {
-                Ok(t) => t,
-                Err(_) => break,
-            };
-
+        while let Ok(text) = std::str::from_utf8(&self.buffer) {
             let Some(end) = text.find("\n\n") else {
                 break;
             };

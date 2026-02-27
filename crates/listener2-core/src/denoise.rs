@@ -53,7 +53,7 @@ fn run_denoise_blocking(
     let mut denoiser = hypr_denoise::onnx::Denoiser::new()
         .map_err(|e| crate::Error::DenoiseError(e.to_string()))?;
 
-    let total_chunks = (samples.len() + CHUNK_SIZE - 1) / CHUNK_SIZE;
+    let total_chunks = samples.len().div_ceil(CHUNK_SIZE);
     let mut output = Vec::with_capacity(samples.len());
 
     for (i, chunk) in samples.chunks(CHUNK_SIZE).enumerate() {

@@ -599,6 +599,7 @@ async fn external_health() -> Option<ServerInfo> {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn spawn_download_task<R: Runtime>(
     url: String,
     dest_path: PathBuf,
