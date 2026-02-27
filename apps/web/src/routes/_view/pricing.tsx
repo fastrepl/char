@@ -130,7 +130,7 @@ function TeamPricingBanner() {
       <span>
         <strong>Early Bird Discount:</strong> Get 68% off as we launch our new
         version and help with migration —{" "}
-        <strong>offer ends February 28th</strong>
+        <strong>offer extended while we finalize the new timeline</strong>
       </span>
     </div>
   );
