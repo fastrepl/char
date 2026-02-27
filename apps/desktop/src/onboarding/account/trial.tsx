@@ -10,6 +10,7 @@ import * as settings from "~/store/tinybase/store/settings";
 import { startTrial } from "@hypr/api-client";
 import type { StartTrialReason } from "@hypr/api-client";
 import { createClient } from "@hypr/api-client/client";
+import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 
 export type TrialPhase =
   | "checking"
@@ -46,6 +47,10 @@ export function useTrialFlow(onContinue: () => void) {
     },
     onError: async (e) => {
       Sentry.captureException(e);
+      void analyticsCommands.event({
+        event: "trial_flow_client_error",
+        properties: { error: String(e) },
+      });
       await new Promise((r) => setTimeout(r, 1500));
       onContinue();
     },
@@ -56,6 +61,10 @@ export function useTrialFlow(onContinue: () => void) {
 
     if (billing.isPro && !billing.isTrialing) {
       hasTriggeredRef.current = true;
+      void analyticsCommands.event({
+        event: "trial_flow_skipped",
+        properties: { reason: "already_pro" },
+      });
       if (store) configureProSettings(store);
       setTimeout(onContinue, 1500);
       return;
@@ -63,6 +72,10 @@ export function useTrialFlow(onContinue: () => void) {
 
     if (billing.isTrialing) {
       hasTriggeredRef.current = true;
+      void analyticsCommands.event({
+        event: "trial_flow_skipped",
+        properties: { reason: "already_trialing" },
+      });
       if (store) configureProSettings(store);
       setTimeout(onContinue, 1500);
       return;
