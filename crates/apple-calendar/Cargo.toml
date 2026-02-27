@@ -27,7 +27,7 @@ tracing = { workspace = true }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 block2 = { workspace = true }
-objc2 = { workspace = true }
+objc2 = { workspace = true, features = ["exception"] }
 objc2-contacts = { workspace = true, features = ["CNContactStore", "CNContact", "CNLabeledValue", "CNPhoneNumber"] }
 objc2-core-graphics = { workspace = true }
 objc2-event-kit = { workspace = true, features = ["EKEventStore", "EKCalendarItem", "EKCalendar", "EKParticipant", "EKObject", "EKEvent", "EKSource", "EKTypes", "EKRecurrenceRule", "EKRecurrenceEnd", "EKAlarm", "EKStructuredLocation", "EKRecurrenceDayOfWeek", "objc2-core-graphics"] }

@@ -16,7 +16,17 @@ pub fn resolve_participant_contact(
     contact_fetcher: Option<&dyn ContactFetcher>,
 ) -> (Option<String>, Option<ParticipantContact>) {
     if let Some(contact) = contact_fetcher.and_then(|f| try_fetch_contact(participant, f)) {
-        let email = contact.email_addresses.first().cloned();
+        // prefer the event url email if it exists
+        // in order to get the calendar-relevant email
+        // (e.g. work google account)
+        let email = parse_email_from_url(url)
+            .filter(|e| {
+                contact
+                    .email_addresses
+                    .iter()
+                    .any(|ce| ce.eq_ignore_ascii_case(e))
+            })
+            .or_else(|| contact.email_addresses.first().cloned());
         if email.is_some() {
             return (email, Some(contact));
         }
