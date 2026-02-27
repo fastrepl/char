@@ -4662,6 +4662,7 @@ dependencies = [
  "tauri-plugin-fs-sync",
  "tauri-plugin-fs2",
  "tauri-plugin-git",
+ "tauri-plugin-google-calendar",
  "tauri-plugin-hooks",
  "tauri-plugin-http",
  "tauri-plugin-icon",
@@ -7935,6 +7936,7 @@ dependencies = [
  "hypr-http-utils",
  "serde",
  "serde_json",
+ "specta",
  "thiserror 2.0.18",
  "tokio",
  "urlencoding",
@@ -17870,6 +17872,26 @@ dependencies = [
  "thiserror 2.0.18",
  "tokio",
  "walkdir",
+]
+
+[[package]]
+name = "tauri-plugin-google-calendar"
+version = "0.1.0"
+dependencies = [
+ "api-client",
+ "chrono",
+ "google-calendar",
+ "reqwest 0.13.2",
+ "serde",
+ "serde_json",
+ "specta",
+ "specta-typescript",
+ "tauri",
+ "tauri-plugin",
+ "tauri-plugin-auth",
+ "tauri-specta",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]

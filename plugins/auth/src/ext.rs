@@ -2,35 +2,14 @@ use std::collections::HashMap;
 
 use hypr_template_support::AccountInfo;
 
+use crate::types::find_session;
+
 pub(crate) fn parse_account_info(
     data: &HashMap<String, String>,
 ) -> Result<Option<AccountInfo>, crate::Error> {
-    let session_str = data
-        .iter()
-        .find_map(|(k, v)| k.ends_with("-auth-token").then_some(v.as_str()));
-
-    let Some(session_str) = session_str else {
+    let Some(session) = find_session(data)? else {
         return Ok(None);
     };
-
-    #[derive(serde::Deserialize)]
-    struct Session {
-        user: SessionUser,
-    }
-    #[derive(serde::Deserialize)]
-    struct SessionUser {
-        id: String,
-        email: Option<String>,
-        user_metadata: Option<UserMetadata>,
-    }
-    #[derive(serde::Deserialize)]
-    struct UserMetadata {
-        full_name: Option<String>,
-        avatar_url: Option<String>,
-        stripe_customer_id: Option<String>,
-    }
-
-    let session: Session = serde_json::from_str(session_str)?;
     let metadata = session.user.user_metadata;
     Ok(Some(AccountInfo {
         user_id: session.user.id,
@@ -47,6 +26,7 @@ pub trait AuthPluginExt<R: tauri::Runtime> {
     fn remove_item(&self, key: String) -> Result<(), crate::Error>;
     fn clear_auth(&self) -> Result<(), crate::Error>;
     fn get_account_info(&self) -> Result<Option<AccountInfo>, crate::Error>;
+    fn access_token(&self) -> Result<Option<String>, crate::Error>;
 }
 
 impl<R: tauri::Runtime, T: tauri::Manager<R>> AuthPluginExt<R> for T {
@@ -69,5 +49,12 @@ impl<R: tauri::Runtime, T: tauri::Manager<R>> AuthPluginExt<R> for T {
     fn get_account_info(&self) -> Result<Option<AccountInfo>, crate::Error> {
         let data = self.state::<crate::store::AuthStore>().snapshot();
         parse_account_info(&data)
+    }
+
+    fn access_token(&self) -> Result<Option<String>, crate::Error> {
+        let Some(store) = self.try_state::<crate::store::AuthStore>() else {
+            return Ok(None);
+        };
+        Ok(find_session(&store.snapshot())?.map(|s| s.access_token))
     }
 }

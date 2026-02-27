@@ -172,6 +172,7 @@ tauri-plugin-fs-db = { path = "plugins/fs-db" }
 tauri-plugin-fs-sync = { path = "plugins/fs-sync" }
 tauri-plugin-fs2 = { path = "plugins/fs2" }
 tauri-plugin-git = { path = "plugins/git" }
+tauri-plugin-google-calendar = { path = "plugins/google-calendar" }
 tauri-plugin-hooks = { path = "plugins/hooks" }
 tauri-plugin-icon = { path = "plugins/icon" }
 tauri-plugin-importer = { path = "plugins/importer" }

@@ -51,6 +51,7 @@
     "@hypr/plugin-fs-sync": "workspace:*",
     "@hypr/plugin-fs2": "workspace:*",
     "@hypr/plugin-git": "workspace:*",
+    "@hypr/plugin-google-calendar": "workspace:*",
     "@hypr/plugin-hooks": "workspace:*",
     "@hypr/plugin-icon": "workspace:*",
     "@hypr/plugin-importer": "workspace:*",

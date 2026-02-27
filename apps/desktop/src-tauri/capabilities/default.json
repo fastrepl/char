@@ -71,6 +71,7 @@
     "fs-sync:default",
     "fs2:default",
     "git:default",
+    "google-calendar:default",
     "os:default",
     "opener2:default",
     "mcp:default",

@@ -186,6 +186,9 @@ importers:
       '@hypr/plugin-git':
         specifier: workspace:*
         version: link:../../plugins/git
+      '@hypr/plugin-google-calendar':
+        specifier: workspace:*
+        version: link:../../plugins/google-calendar
       '@hypr/plugin-hooks':
         specifier: workspace:*
         version: link:../../plugins/hooks
@@ -1762,6 +1765,12 @@ importers:
         version: 2.10.1
 
   plugins/git:
+    dependencies:
+      '@tauri-apps/api':
+        specifier: ^2.10.1
+        version: 2.10.1
+
+  plugins/google-calendar:
     dependencies:
       '@tauri-apps/api':
         specifier: ^2.10.1

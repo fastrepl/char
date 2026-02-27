@@ -2,6 +2,7 @@ mod commands;
 mod error;
 mod ext;
 pub(crate) mod store;
+mod types;
 
 pub use error::{Error, Result};
 pub use ext::*;
