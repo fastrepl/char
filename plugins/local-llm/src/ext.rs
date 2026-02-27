@@ -6,11 +6,12 @@ use tauri_plugin_store2::Store2PluginExt;
 use hypr_download_interface::DownloadProgress;
 use hypr_file::download_file_parallel;
 
+use crate::store::TauriModelStore;
+
 pub trait LocalLlmPluginExt<R: Runtime> {
     fn local_llm_store(&self) -> tauri_plugin_store2::ScopedStore<R, crate::StoreKey>;
 
     fn models_dir(&self) -> PathBuf;
-    fn api_base(&self) -> impl Future<Output = Option<String>>;
 
     fn list_downloaded_model(
         &self,
@@ -35,6 +36,10 @@ pub trait LocalLlmPluginExt<R: Runtime> {
         &self,
         model: &crate::SupportedModel,
     ) -> impl Future<Output = Result<bool, crate::Error>>;
+
+    fn start_server(&self) -> impl Future<Output = Result<String, crate::Error>>;
+    fn stop_server(&self) -> impl Future<Output = Result<(), crate::Error>>;
+    fn server_url(&self) -> impl Future<Output = Result<Option<String>, crate::Error>>;
 }
 
 impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
@@ -48,13 +53,6 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
             .global_base()
             .map(|base| base.join("models").join("llm").into_std_path_buf())
             .unwrap_or_else(|_| dirs::data_dir().unwrap().join("models").join("llm"))
-    }
-
-    #[tracing::instrument(skip_all)]
-    async fn api_base(&self) -> Option<String> {
-        let state = self.state::<crate::SharedState>();
-        let s = state.lock().await;
-        s.api_base.clone()
     }
 
     #[tracing::instrument(skip_all)]
@@ -72,18 +70,10 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
         &self,
         model: &crate::SupportedModel,
     ) -> Result<bool, crate::Error> {
-        let path = self.models_dir().join(model.file_name());
-
-        if !path.exists() {
-            return Ok(false);
-        }
-
-        let actual = hypr_file::file_size(path)?;
-        if actual != model.model_size() {
-            return Ok(false);
-        }
-
-        Ok(true)
+        Ok(hypr_local_llm_core::is_model_downloaded(
+            model,
+            &self.models_dir(),
+        )?)
     }
 
     #[tracing::instrument(skip_all)]
@@ -152,123 +142,41 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
 
     #[tracing::instrument(skip_all)]
     async fn list_downloaded_model(&self) -> Result<Vec<crate::SupportedModel>, crate::Error> {
-        let models_dir = self.models_dir();
-
-        if !models_dir.exists() {
-            return Ok(vec![]);
-        }
-
-        let mut models = Vec::new();
-
-        for entry in models_dir.read_dir()? {
-            let entry = match entry {
-                Ok(e) => e,
-                Err(_) => {
-                    continue;
-                }
-            };
-
-            let file_name = entry.file_name();
-            let file_name_str = file_name.to_string_lossy();
-
-            if let Some(model) = crate::model::SUPPORTED_MODELS
-                .iter()
-                .find(|model| model.file_name() == file_name_str)
-                && entry.path().is_file()
-            {
-                models.push(model.clone());
-            }
-        }
-
-        Ok(models)
+        Ok(hypr_local_llm_core::list_downloaded_models(
+            &self.models_dir(),
+        )?)
     }
 
     #[tracing::instrument(skip_all)]
     fn get_current_model(&self) -> Result<crate::SupportedModel, crate::Error> {
         let store = self.local_llm_store();
-        let model = store.get(crate::StoreKey::Model)?;
-
-        match model {
-            Some(existing_model) => Ok(existing_model),
-            None => {
-                let is_migrated: Option<bool> = store.get(crate::StoreKey::DefaultModelMigrated)?;
-
-                if is_migrated.unwrap_or(false) {
-                    Ok(crate::SupportedModel::HyprLLM)
-                } else {
-                    let old_model_path = self
-                        .models_dir()
-                        .join(crate::SupportedModel::Llama3p2_3bQ4.file_name());
-
-                    if old_model_path.exists() {
-                        let _ =
-                            store.set(crate::StoreKey::Model, crate::SupportedModel::Llama3p2_3bQ4);
-                        let _ = store.set(crate::StoreKey::DefaultModelMigrated, true);
-                        Ok(crate::SupportedModel::Llama3p2_3bQ4)
-                    } else {
-                        let _ = store.set(crate::StoreKey::DefaultModelMigrated, true);
-                        Ok(crate::SupportedModel::HyprLLM)
-                    }
-                }
-            }
-        }
+        let tauri_store = TauriModelStore::new(&store);
+        Ok(hypr_local_llm_core::get_current_model(
+            &tauri_store,
+            &self.models_dir(),
+        )?)
     }
 
     #[tracing::instrument(skip_all)]
     fn set_current_model(&self, model: crate::SupportedModel) -> Result<(), crate::Error> {
         let store = self.local_llm_store();
-        store.set(crate::StoreKey::Model, model)?;
-        Ok(())
+        let tauri_store = TauriModelStore::new(&store);
+        Ok(hypr_local_llm_core::set_current_model(&tauri_store, model)?)
     }
 
     #[tracing::instrument(skip_all)]
     async fn list_custom_models(&self) -> Result<Vec<crate::CustomModelInfo>, crate::Error> {
-        #[cfg(target_os = "macos")]
-        {
-            let app_data_dir = dirs::data_dir().unwrap();
-            let gguf_files = crate::lmstudio::list_models(app_data_dir)?;
-
-            let mut custom_models = Vec::new();
-            for path_str in gguf_files {
-                let path = std::path::Path::new(&path_str);
-                if path.exists() {
-                    let name = {
-                        use hypr_gguf::GgufExt;
-                        path.model_name()
-                    };
-
-                    if let Ok(Some(name)) = name {
-                        custom_models.push(crate::CustomModelInfo {
-                            path: path_str,
-                            name,
-                        });
-                    }
-                }
-            }
-            Ok(custom_models)
-        }
-
-        #[cfg(not(target_os = "macos"))]
-        {
-            Ok(Vec::new())
-        }
+        Ok(hypr_local_llm_core::list_custom_models()?)
     }
 
     #[tracing::instrument(skip_all)]
     fn get_current_model_selection(&self) -> Result<crate::ModelSelection, crate::Error> {
         let store = self.local_llm_store();
-
-        if let Ok(Some(selection)) =
-            store.get::<crate::ModelSelection>(crate::StoreKey::ModelSelection)
-        {
-            return Ok(selection);
-        }
-
-        let current_model = self.get_current_model()?;
-        let selection = crate::ModelSelection::Predefined { key: current_model };
-
-        let _ = store.set(crate::StoreKey::ModelSelection, &selection);
-        Ok(selection)
+        let tauri_store = TauriModelStore::new(&store);
+        Ok(hypr_local_llm_core::get_current_model_selection(
+            &tauri_store,
+            &self.models_dir(),
+        )?)
     }
 
     #[tracing::instrument(skip_all)]
@@ -277,12 +185,55 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
         model: crate::ModelSelection,
     ) -> Result<(), crate::Error> {
         let store = self.local_llm_store();
+        let tauri_store = TauriModelStore::new(&store);
+        Ok(hypr_local_llm_core::set_current_model_selection(
+            &tauri_store,
+            model,
+        )?)
+    }
 
-        if let crate::ModelSelection::Predefined { key } = &model {
-            let _ = store.set(crate::StoreKey::Model, key.clone());
+    #[tracing::instrument(skip_all)]
+    async fn start_server(&self) -> Result<String, crate::Error> {
+        let state = self.state::<crate::SharedState>();
+
+        {
+            let mut guard = state.lock().await;
+            if let Some(server) = guard.server.take() {
+                server.stop().await;
+            }
         }
 
-        store.set(crate::StoreKey::ModelSelection, model)?;
+        let selection = self.get_current_model_selection()?;
+        let models_dir = self.models_dir();
+
+        let server = hypr_local_llm_core::LlmServer::start(&selection, &models_dir).await?;
+        let url = server.url().to_string();
+
+        {
+            let mut guard = state.lock().await;
+            guard.server = Some(server);
+        }
+
+        Ok(url)
+    }
+
+    #[tracing::instrument(skip_all)]
+    async fn stop_server(&self) -> Result<(), crate::Error> {
+        let state = self.state::<crate::SharedState>();
+        let mut guard = state.lock().await;
+
+        if let Some(server) = guard.server.take() {
+            server.stop().await;
+        }
+
         Ok(())
+    }
+
+    #[tracing::instrument(skip_all)]
+    async fn server_url(&self) -> Result<Option<String>, crate::Error> {
+        let state = self.state::<crate::SharedState>();
+        let guard = state.lock().await;
+
+        Ok(guard.server.as_ref().map(|s| s.url().to_string()))
     }
 }

@@ -57,3 +57,43 @@ impl From<core::BatchEvent> for BatchEvent {
         }
     }
 }
+
+common_event_derives! {
+    #[serde(tag = "type")]
+    pub enum DenoiseEvent {
+        #[serde(rename = "denoiseStarted")]
+        DenoiseStarted { session_id: String },
+        #[serde(rename = "denoiseProgress")]
+        DenoiseProgress {
+            session_id: String,
+            percentage: f64,
+        },
+        #[serde(rename = "denoiseCompleted")]
+        DenoiseCompleted { session_id: String },
+        #[serde(rename = "denoiseFailed")]
+        DenoiseFailed { session_id: String, error: String },
+    }
+}
+
+impl From<core::DenoiseEvent> for DenoiseEvent {
+    fn from(event: core::DenoiseEvent) -> Self {
+        match event {
+            core::DenoiseEvent::DenoiseStarted { session_id } => {
+                DenoiseEvent::DenoiseStarted { session_id }
+            }
+            core::DenoiseEvent::DenoiseProgress {
+                session_id,
+                percentage,
+            } => DenoiseEvent::DenoiseProgress {
+                session_id,
+                percentage,
+            },
+            core::DenoiseEvent::DenoiseCompleted { session_id } => {
+                DenoiseEvent::DenoiseCompleted { session_id }
+            }
+            core::DenoiseEvent::DenoiseFailed { session_id, error } => {
+                DenoiseEvent::DenoiseFailed { session_id, error }
+            }
+        }
+    }
+}

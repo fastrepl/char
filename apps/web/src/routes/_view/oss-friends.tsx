@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_view/oss-friends")({
       { property: "og:type", content: "website" },
       {
         property: "og:url",
-        content: "https://hyprnote.com/oss-friends",
+        content: "https://char.com/oss-friends",
       },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "OSS Friends - Char" },
@@ -98,7 +98,7 @@ function HeroSection({
     <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
       <div className="px-6 py-12 lg:py-20">
         <header className="mb-8 text-center max-w-4xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif text-stone-600 mb-6">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif text-stone-700 mb-6">
             OSS Friends
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 leading-relaxed max-w-3xl mx-auto mb-8">
@@ -168,7 +168,7 @@ function FriendsSection({
             </div>
             <div className="p-4 flex flex-col flex-1 border-t border-neutral-200">
               <div className="flex items-start justify-between gap-2 mb-2">
-                <h3 className="text-lg font-medium text-stone-600 group-hover:text-stone-800">
+                <h3 className="text-lg font-medium text-stone-700 group-hover:text-stone-800">
                   {friend.name}
                 </h3>
                 <Icon
@@ -216,7 +216,7 @@ function JoinSection() {
   return (
     <section className="px-6 py-12 lg:py-16 bg-stone-50/30">
       <div className="max-w-2xl mx-auto text-center">
-        <h2 className="text-2xl sm:text-3xl font-serif text-stone-600 mb-4">
+        <h2 className="text-2xl sm:text-3xl font-serif text-stone-700 mb-4">
           Want to be listed?
         </h2>
         <p className="text-neutral-600 mb-6">

@@ -41,3 +41,8 @@ pub struct StripeEnv {
     pub stripe_monthly_price_id: String,
     pub stripe_yearly_price_id: String,
 }
+
+#[derive(Clone, Deserialize)]
+pub struct LoopsEnv {
+    pub loops_key: String,
+}

@@ -1,7 +1,8 @@
 use utoipa::OpenApi;
 
 use crate::routes::{
-    CanStartTrialReason, CanStartTrialResponse, Interval, StartTrialReason, StartTrialResponse,
+    CanStartTrialReason, CanStartTrialResponse, DeleteAccountResponse, Interval, StartTrialReason,
+    StartTrialResponse,
 };
 
 #[derive(OpenApi)]
@@ -9,6 +10,7 @@ use crate::routes::{
     paths(
         crate::routes::rpc::can_start_trial,
         crate::routes::billing::start_trial,
+        crate::routes::account::delete_account,
     ),
     components(
         schemas(
@@ -17,6 +19,7 @@ use crate::routes::{
             StartTrialResponse,
             StartTrialReason,
             Interval,
+            DeleteAccountResponse,
         )
     ),
     tags(

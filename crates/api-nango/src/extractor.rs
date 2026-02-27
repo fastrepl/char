@@ -1,14 +1,12 @@
 use std::marker::PhantomData;
 
 use axum::{
-    Json,
     extract::FromRequestParts,
     http::{StatusCode, request::Parts},
     response::{IntoResponse, Response},
 };
 use hypr_api_auth::AuthContext;
 use hypr_nango::{NangoClient, OwnedNangoHttpClient, OwnedNangoProxy};
-use serde::Serialize;
 
 use crate::integrations::NangoIntegrationId;
 
@@ -107,17 +105,6 @@ pub enum NangoConnectionError {
     Database(String),
 }
 
-#[derive(Serialize)]
-struct ErrorDetails {
-    code: String,
-    message: String,
-}
-
-#[derive(Serialize)]
-struct ErrorResponse {
-    error: ErrorDetails,
-}
-
 impl IntoResponse for NangoConnectionError {
     fn into_response(self) -> Response {
         let (status, code, message) = match &self {
@@ -131,33 +118,19 @@ impl IntoResponse for NangoConnectionError {
                 "not_connected",
                 format!("no connection found for integration: {}", integration_id),
             ),
-            Self::MissingState => {
-                tracing::error!("NangoConnectionState not found in request extensions");
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "internal_server_error",
-                    "internal server error".to_string(),
-                )
-            }
-            Self::Database(msg) => {
-                tracing::error!(error = %msg, "nango_connection_db_error");
-                sentry::capture_message(msg, sentry::Level::Error);
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "internal_server_error",
-                    "internal server error".to_string(),
-                )
-            }
+            Self::MissingState => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "internal_server_error",
+                "NangoConnectionState not found in request extensions".to_string(),
+            ),
+            Self::Database(msg) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "internal_server_error",
+                msg.clone(),
+            ),
         };
 
-        let body = Json(ErrorResponse {
-            error: ErrorDetails {
-                code: code.to_string(),
-                message,
-            },
-        });
-
-        (status, body).into_response()
+        hypr_api_error::error_response(status, code, &message)
     }
 }
 

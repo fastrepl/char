@@ -1,8 +1,8 @@
 import type { StateCreator, StoreMutatorIdentifier } from "zustand";
+import { commands } from "~/types/tauri.gen";
 
 import { getCurrentWebviewWindowLabel } from "@hypr/plugin-windows";
 
-import { commands } from "../../../types/tauri.gen";
 import {
   getDefaultState,
   type Tab,

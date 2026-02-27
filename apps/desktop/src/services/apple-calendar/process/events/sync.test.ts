@@ -1,7 +1,10 @@
 import { describe, expect, test } from "vitest";
+import type { Ctx } from "~/services/apple-calendar/ctx";
+import type {
+  ExistingEvent,
+  IncomingEvent,
+} from "~/services/apple-calendar/fetch/types";
 
-import type { Ctx } from "../../ctx";
-import type { ExistingEvent, IncomingEvent } from "../../fetch/types";
 import { syncEvents } from "./sync";
 import type { EventsSyncInput } from "./types";
 
@@ -318,7 +321,7 @@ describe("syncEvents", () => {
       expect(result.toAdd[0].participants).toEqual([]);
     });
 
-    test("uses timezone for participant key matching on recurring events", () => {
+    test("matches participants by tracking_id_event for recurring events", () => {
       const ctx = createMockCtx();
       const participants = [{ email: "alice@example.com", name: "Alice" }];
       const result = syncEvents(
@@ -331,10 +334,7 @@ describe("syncEvents", () => {
               started_at: "2024-01-15T10:00:00Z",
             }),
           ],
-          incomingParticipants: new Map([
-            ["recurring-1:2024-01-15", participants],
-          ]),
-          timezone: "UTC",
+          incomingParticipants: new Map([["recurring-1", participants]]),
         }),
       );
 

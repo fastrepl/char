@@ -7,6 +7,7 @@ edition = "2024"
 hound = { workspace = true }
 hypr-audio-utils = { workspace = true }
 mp3lame-encoder = { workspace = true }
+thiserror = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }

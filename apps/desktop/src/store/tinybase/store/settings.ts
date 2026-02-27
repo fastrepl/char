@@ -8,10 +8,10 @@ import {
   type TablesSchema,
   type ValuesSchema,
 } from "tinybase/with-schemas";
+import { useSettingsPersister } from "~/store/tinybase/persister/settings";
 
 import { getCurrentWebviewWindowLabel } from "@hypr/plugin-windows";
 
-import { useSettingsPersister } from "../persister/settings";
 import { registerSaveHandler } from "./save";
 
 export const STORE_ID = "settings";

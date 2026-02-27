@@ -1,12 +1,12 @@
 import type { StoreApi } from "zustand";
-
-import type { BatchResponse, StreamResponse } from "@hypr/plugin-listener2";
-
 import {
   ChannelProfile,
   type RuntimeSpeakerHint,
   type WordLike,
-} from "../../../utils/segment";
+} from "~/stt/segment";
+
+import type { BatchResponse, StreamResponse } from "@hypr/plugin-listener2";
+
 import type { HandlePersistCallback } from "./transcript";
 import { transformWordEntries } from "./utils";
 

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
+import type { TablesContent } from "~/store/tinybase/persister/shared";
 
-import type { TablesContent } from "../shared";
 import {
   chatJsonToData,
   createEmptyLoadedChatData,

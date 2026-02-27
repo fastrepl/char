@@ -10,7 +10,9 @@ use axum::{
 use crate::config::NangoConfig;
 use crate::state::AppState;
 
-pub use connect::ConnectSessionResponse;
+pub use connect::{
+    ConnectSessionResponse, CreateConnectSessionRequest, CreateReconnectSessionRequest,
+};
 pub use status::{ConnectionItem, ListConnectionsResponse};
 pub use webhook::WebhookResponse;
 
@@ -19,6 +21,10 @@ pub fn router(config: NangoConfig) -> Router {
 
     Router::new()
         .route("/connect-session", post(connect::create_connect_session))
+        .route(
+            "/reconnect-session",
+            post(connect::create_reconnect_session),
+        )
         .route("/connections", get(status::list_connections))
         .with_state(state)
 }

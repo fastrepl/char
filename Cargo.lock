@@ -181,6 +181,8 @@ checksum = "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
 name = "aec"
 version = "0.1.0"
 dependencies = [
+ "approx",
+ "audio-snapshot",
  "criterion",
  "dasp",
  "hound",
@@ -515,6 +517,7 @@ dependencies = [
 name = "api-bot"
 version = "0.1.0"
 dependencies = [
+ "api-error",
  "axum 0.8.8",
  "recall",
  "sentry",
@@ -530,6 +533,7 @@ dependencies = [
 name = "api-calendar"
 version = "0.1.0"
 dependencies = [
+ "api-error",
  "api-nango",
  "axum 0.8.8",
  "chrono",
@@ -545,6 +549,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "api-client"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "progenitor-client 0.13.0",
+ "progenitor-utils",
+ "reqwest 0.13.2",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "api-env"
 version = "0.1.0"
 dependencies = [
@@ -552,9 +568,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "api-error"
+version = "0.1.0"
+dependencies = [
+ "axum 0.8.8",
+ "sentry",
+ "serde",
+ "tracing",
+ "utoipa",
+]
+
+[[package]]
 name = "api-messenger"
 version = "0.1.0"
 dependencies = [
+ "api-error",
  "axum 0.8.8",
  "hypr-http-utils",
  "serde",
@@ -570,6 +598,7 @@ version = "0.1.0"
 dependencies = [
  "api-auth",
  "api-env",
+ "api-error",
  "axum 0.8.8",
  "chrono",
  "nango",
@@ -588,7 +617,7 @@ dependencies = [
 name = "api-research"
 version = "0.1.0"
 dependencies = [
- "askama",
+ "askama 0.15.4",
  "axum 0.8.8",
  "exa",
  "jina",
@@ -605,6 +634,7 @@ dependencies = [
 name = "api-storage"
 version = "0.1.0"
 dependencies = [
+ "api-error",
  "api-nango",
  "axum 0.8.8",
  "google-drive",
@@ -624,11 +654,14 @@ dependencies = [
  "analytics",
  "api-auth",
  "api-env",
+ "api-error",
  "async-stripe",
  "async-stripe-billing",
  "async-stripe-core",
  "axum 0.8.8",
+ "backon",
  "chrono",
+ "loops",
  "reqwest 0.13.2",
  "sentry",
  "serde",
@@ -678,6 +711,7 @@ dependencies = [
 name = "api-sync"
 version = "0.1.0"
 dependencies = [
+ "api-error",
  "axum 0.8.8",
  "reqwest 0.13.2",
  "sentry",
@@ -688,6 +722,31 @@ dependencies = [
  "tokio",
  "tracing",
  "utoipa",
+]
+
+[[package]]
+name = "apple-calendar"
+version = "0.1.0"
+dependencies = [
+ "backon",
+ "block2",
+ "chrono",
+ "itertools 0.14.0",
+ "json-patch 4.1.0",
+ "jsonschema",
+ "objc2",
+ "objc2-contacts",
+ "objc2-core-graphics",
+ "objc2-event-kit",
+ "objc2-foundation",
+ "schemars 1.2.1",
+ "serde",
+ "serde_json",
+ "specta",
+ "strum 0.27.2",
+ "thiserror 2.0.18",
+ "tracing",
+ "uuid",
 ]
 
 [[package]]
@@ -778,6 +837,19 @@ checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 
 [[package]]
 name = "askama"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5d4744ed2eef2645831b441d8f5459689ade2ab27c854488fbab1fbe94fce1a7"
+dependencies = [
+ "askama_derive 0.13.1",
+ "itoa",
+ "percent-encoding",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "askama"
 version = "0.15.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "08e1676b346cadfec169374f949d7490fd80a24193d37d2afce0c047cf695e57"
@@ -793,11 +865,28 @@ dependencies = [
 name = "askama-utils"
 version = "0.1.0"
 dependencies = [
- "askama",
- "askama_parser",
+ "askama 0.15.4",
+ "askama_parser 0.15.4",
  "chrono",
  "insta",
  "isolang",
+]
+
+[[package]]
+name = "askama_derive"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d661e0f57be36a5c14c48f78d09011e67e0cb618f269cca9f2fd8d15b68c46ac"
+dependencies = [
+ "askama_parser 0.13.0",
+ "basic-toml",
+ "memchr",
+ "proc-macro2",
+ "quote",
+ "rustc-hash 2.1.1",
+ "serde",
+ "serde_derive",
+ "syn 2.0.117",
 ]
 
 [[package]]
@@ -806,7 +895,7 @@ version = "0.15.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7661ff56517787343f376f75db037426facd7c8d3049cef8911f1e75016f3a37"
 dependencies = [
- "askama_parser",
+ "askama_parser 0.15.4",
  "basic-toml",
  "memchr",
  "proc-macro2",
@@ -823,7 +912,19 @@ version = "0.15.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "713ee4dbfd1eb719c2dab859465b01fa1d21cb566684614a713a6b7a99a4e47b"
 dependencies = [
- "askama_derive",
+ "askama_derive 0.15.4",
+]
+
+[[package]]
+name = "askama_parser"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf315ce6524c857bb129ff794935cf6d42c82a6cff60526fe2a63593de4d0d4f"
+dependencies = [
+ "memchr",
+ "serde",
+ "serde_derive",
+ "winnow 0.7.14",
 ]
 
 [[package]]
@@ -1279,6 +1380,17 @@ dependencies = [
 [[package]]
 name = "audio-mime"
 version = "0.1.0"
+
+[[package]]
+name = "audio-snapshot"
+version = "0.1.0"
+dependencies = [
+ "approx",
+ "hound",
+ "realfft",
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "audio-utils"
@@ -2167,7 +2279,7 @@ dependencies = [
  "bitflags 2.11.0",
  "cexpr",
  "clang-sys",
- "itertools 0.13.0",
+ "itertools 0.12.1",
  "log",
  "prettyplease",
  "proc-macro2",
@@ -2187,7 +2299,7 @@ dependencies = [
  "bitflags 2.11.0",
  "cexpr",
  "clang-sys",
- "itertools 0.13.0",
+ "itertools 0.12.1",
  "log",
  "prettyplease",
  "proc-macro2",
@@ -2207,7 +2319,7 @@ dependencies = [
  "bitflags 2.11.0",
  "cexpr",
  "clang-sys",
- "itertools 0.13.0",
+ "itertools 0.12.1",
  "log",
  "prettyplease",
  "proc-macro2",
@@ -2646,7 +2758,7 @@ dependencies = [
 [[package]]
 name = "cactus-sys"
 version = "0.1.0"
-source = "git+https://github.com/cactus-compute/cactus?rev=b1c378b#b1c378bb847439bc7cf6e06d3994ceb3f212e214"
+source = "git+https://github.com/cactus-compute/cactus?rev=c6966ad#c6966adbd7cb166838326da204b95e5bf538f0f5"
 dependencies = [
  "bindgen 0.72.1",
  "cmake",
@@ -2678,6 +2790,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "calendar-interface"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "specta",
+]
+
+[[package]]
 name = "camino"
 version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2694,12 +2814,6 @@ checksum = "58ec49028cb308564429cd8fac4ef21290067a0afe8f5955330a8d487d0d790c"
 dependencies = [
  "itoa",
 ]
-
-[[package]]
-name = "cargo-husky"
-version = "1.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b02b629252fe8ef6460461409564e2c21d0c8e77e0944f3d189ff06c4e932ad"
 
 [[package]]
 name = "cargo-platform"
@@ -2870,7 +2984,7 @@ name = "chatwoot"
 version = "0.1.0"
 dependencies = [
  "chrono",
- "progenitor-client",
+ "progenitor-client 0.13.0",
  "progenitor-utils",
  "reqwest 0.13.2",
  "serde",
@@ -2894,6 +3008,16 @@ name = "chinese-variant"
 version = "1.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "58b52a9840ffff5d4d0058ae529fa066a75e794e3125546acfc61c23ad755e49"
+
+[[package]]
+name = "chrome-native-host"
+version = "0.1.0"
+dependencies = [
+ "dirs 6.0.0",
+ "serde",
+ "serde_json",
+ "tempfile",
+]
 
 [[package]]
 name = "chrono"
@@ -3158,6 +3282,33 @@ name = "codex"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9589e1effc5cacbea347899645c654158b03b2053d24bb426fd3128ced6e423c"
+
+[[package]]
+name = "color-eyre"
+version = "0.6.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e5920befb47832a6d61ee3a3a846565cfa39b331331e68a3b1d1116630f2f26d"
+dependencies = [
+ "backtrace",
+ "color-spantrace",
+ "eyre",
+ "indenter",
+ "once_cell",
+ "owo-colors",
+ "tracing-error",
+]
+
+[[package]]
+name = "color-spantrace"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b8b88ea9df13354b55bc7234ebcce36e6ef896aca2e42a15de9e10edce01b427"
+dependencies = [
+ "once_cell",
+ "owo-colors",
+ "tracing-core",
+ "tracing-error",
+]
 
 [[package]]
 name = "color_quant"
@@ -4361,6 +4512,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "denoise"
+version = "0.1.0"
+dependencies = [
+ "approx",
+ "audio-snapshot",
+ "criterion",
+ "dasp",
+ "data",
+ "hound",
+ "onnx",
+ "realfft",
+ "rodio",
+ "serde",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "der"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4507,6 +4675,7 @@ dependencies = [
  "tauri-plugin-fs-sync",
  "tauri-plugin-fs2",
  "tauri-plugin-git",
+ "tauri-plugin-google-calendar",
  "tauri-plugin-hooks",
  "tauri-plugin-http",
  "tauri-plugin-icon",
@@ -5687,6 +5856,15 @@ dependencies = [
  "serde_json",
  "serde_yaml",
  "thiserror 2.0.18",
+]
+
+[[package]]
+name = "fs-err"
+version = "2.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "88a41f105fe1d5b6b34b2055e3dc59bb79b46b48b2040b9e6c7b4b5de097aa41"
+dependencies = [
+ "autocfg",
 ]
 
 [[package]]
@@ -7771,6 +7949,7 @@ dependencies = [
  "hypr-http-utils",
  "serde",
  "serde_json",
+ "specta",
  "thiserror 2.0.18",
  "tokio",
  "urlencoding",
@@ -10022,8 +10201,10 @@ version = "0.1.0"
 dependencies = [
  "aspasia",
  "audio-utils",
+ "denoise",
  "futures-util",
  "host",
+ "hound",
  "language",
  "owhisper-client",
  "owhisper-interface",
@@ -10109,6 +10290,34 @@ dependencies = [
  "rand 0.9.2",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "lmstudio"
+version = "0.1.0"
+dependencies = [
+ "dirs 6.0.0",
+ "serde_json",
+ "thiserror 2.0.18",
+]
+
+[[package]]
+name = "local-llm-core"
+version = "0.1.0"
+dependencies = [
+ "axum 0.8.8",
+ "dirs 6.0.0",
+ "file",
+ "gguf",
+ "llm-cactus",
+ "lmstudio",
+ "serde",
+ "serde_json",
+ "specta",
+ "thiserror 2.0.18",
+ "tokio",
+ "tower-http 0.6.8",
+ "tracing",
 ]
 
 [[package]]
@@ -10392,7 +10601,7 @@ name = "mcp"
 version = "0.1.0"
 dependencies = [
  "api-auth",
- "askama",
+ "askama 0.15.4",
  "axum 0.8.8",
  "rmcp",
 ]
@@ -10636,6 +10845,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "mobile-bridge"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "thiserror 2.0.18",
+ "tiptap",
+ "uniffi",
+]
+
+[[package]]
 name = "moxcms"
 version = "0.7.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10653,6 +10872,7 @@ dependencies = [
  "hound",
  "mp3lame-encoder",
  "tempfile",
+ "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -11710,6 +11930,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "openapi31to30"
+version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a89ba9a74ae43f97c114a68bfded49346e06414730bb62400b71ec524fcca1f9"
+dependencies = [
+ "color-eyre",
+ "serde",
+ "serde_yaml",
+]
+
+[[package]]
 name = "openapiv3"
 version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -12003,6 +12234,12 @@ checksum = "2fbd56f7631767e61784dc43f8580f403f4475bd4aaa4da003e6295e1bab4a7e"
 dependencies = [
  "stable_deref_trait",
 ]
+
+[[package]]
+name = "owo-colors"
+version = "4.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d211803b9b6b570f68772237e415a029d5a50c65d382910b879fb19d3271f94d"
 
 [[package]]
 name = "p256"
@@ -12971,7 +13208,7 @@ version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bdc8cf6196a0139ab7b833b500f7f1acd005c91be0fe27a9e20112bf83dc9535"
 dependencies = [
- "progenitor-client",
+ "progenitor-client 0.12.0",
  "progenitor-impl",
  "progenitor-macro",
 ]
@@ -12981,6 +13218,21 @@ name = "progenitor-client"
 version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ffab7b358944dba033a7b324e7558e66e6bcb1fb4705cf57f26fd5092bcae630"
+dependencies = [
+ "bytes",
+ "futures-core",
+ "percent-encoding",
+ "reqwest 0.13.2",
+ "serde",
+ "serde_json",
+ "serde_urlencoded",
+]
+
+[[package]]
+name = "progenitor-client"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3999c302f5f2a42b7ca1cc39ad9e612c74cf2910ef6e58f869e45f3068b9659f"
 dependencies = [
  "bytes",
  "futures-core",
@@ -13035,10 +13287,12 @@ dependencies = [
 name = "progenitor-utils"
 version = "0.1.0"
 dependencies = [
+ "openapi31to30",
  "openapiv3",
  "prettyplease",
  "progenitor",
  "serde_json",
+ "serde_yaml",
  "syn 2.0.117",
 ]
 
@@ -13068,7 +13322,7 @@ version = "0.13.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be769465445e8c1474e9c5dac2018218498557af32d9ed057325ec9a41ae81bf"
 dependencies = [
- "heck 0.5.0",
+ "heck 0.4.1",
  "itertools 0.14.0",
  "log",
  "multimap",
@@ -13168,7 +13422,7 @@ name = "pyannote-cloud"
 version = "0.1.0"
 dependencies = [
  "chrono",
- "progenitor-client",
+ "progenitor-client 0.13.0",
  "progenitor-utils",
  "regress",
  "reqwest 0.13.2",
@@ -13957,22 +14211,6 @@ dependencies = [
  "serde",
  "thiserror 2.0.18",
  "tower-service",
-]
-
-[[package]]
-name = "reqwest-streams"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d2484a49257a16e13f0c5f760c6e65a231eb32fbe6f899f6caa6f9bc78e2799"
-dependencies = [
- "async-trait",
- "bytes",
- "cargo-husky",
- "futures",
- "reqwest 0.13.2",
- "serde",
- "serde_json",
- "tokio-util",
 ]
 
 [[package]]
@@ -15668,6 +15906,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "smawk"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b7c388c1b5e93756d0c740965c41e8822f866621d41acbdf6336a6a168f8840c"
+
+[[package]]
 name = "smol_str"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -15692,7 +15936,7 @@ version = "0.8.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c1c97747dbf44bb1ca44a561ece23508e99cb592e862f22222dcf42f51d1e451"
 dependencies = [
- "heck 0.5.0",
+ "heck 0.4.1",
  "proc-macro2",
  "quote",
  "syn 2.0.117",
@@ -16343,6 +16587,7 @@ dependencies = [
  "serde",
  "serde_json",
  "specta",
+ "storage",
  "thiserror 2.0.18",
  "tokio",
 ]
@@ -17248,30 +17493,22 @@ dependencies = [
 name = "tauri-plugin-apple-calendar"
 version = "0.1.0"
 dependencies = [
- "backon",
- "block2",
+ "apple-calendar",
+ "calendar-interface",
  "chrono",
- "itertools 0.14.0",
- "json-patch 4.1.0",
- "jsonschema",
- "objc2",
- "objc2-core-graphics",
- "objc2-event-kit",
+ "chrono-tz 0.10.4",
  "objc2-foundation",
  "schemars 1.2.1",
  "serde",
  "serde_json",
  "specta",
  "specta-typescript",
- "strum 0.27.2",
  "tauri",
  "tauri-plugin",
  "tauri-plugin-apple-contact",
  "tauri-specta",
  "thiserror 2.0.18",
- "tokio",
  "tracing",
- "uuid",
 ]
 
 [[package]]
@@ -17436,8 +17673,13 @@ dependencies = [
 name = "tauri-plugin-deeplink2"
 version = "0.1.0"
 dependencies = [
+ "askama 0.15.4",
+ "axum 0.8.8",
  "docs",
+ "open",
  "serde",
+ "serde_json",
+ "serde_qs",
  "serde_yaml",
  "specta",
  "specta-typescript",
@@ -17460,10 +17702,13 @@ dependencies = [
  "host",
  "notification-interface",
  "serde",
+ "serde_json",
  "specta",
  "specta-typescript",
  "tauri",
  "tauri-plugin",
+ "tauri-plugin-detect",
+ "tauri-plugin-settings",
  "tauri-plugin-windows",
  "tauri-specta",
  "thiserror 2.0.18",
@@ -17596,6 +17841,7 @@ dependencies = [
  "data",
  "frontmatter",
  "glob",
+ "mp3",
  "predicates",
  "rayon",
  "rodio",
@@ -17648,6 +17894,27 @@ dependencies = [
  "thiserror 2.0.18",
  "tokio",
  "walkdir",
+]
+
+[[package]]
+name = "tauri-plugin-google-calendar"
+version = "0.1.0"
+dependencies = [
+ "api-client",
+ "calendar-interface",
+ "chrono",
+ "google-calendar",
+ "reqwest 0.13.2",
+ "serde",
+ "serde_json",
+ "specta",
+ "specta-typescript",
+ "tauri",
+ "tauri-plugin",
+ "tauri-plugin-auth",
+ "tauri-specta",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]
@@ -17802,35 +18069,24 @@ dependencies = [
 name = "tauri-plugin-local-llm"
 version = "0.1.0"
 dependencies = [
- "async-openai",
- "async-stream",
- "axum 0.8.8",
  "dirs 6.0.0",
  "download-interface",
  "file",
- "futures-util",
- "gbnf",
- "gguf",
+ "local-llm-core",
  "reqwest 0.13.2",
- "reqwest-streams",
  "serde",
  "serde_json",
  "specta",
  "specta-typescript",
- "strum 0.27.2",
  "tauri",
  "tauri-plugin",
  "tauri-plugin-settings",
  "tauri-plugin-store",
  "tauri-plugin-store2",
- "tauri-plugin-windows",
  "tauri-specta",
  "thiserror 2.0.18",
  "tokio",
- "tokio-util",
- "tower-http 0.6.8",
  "tracing",
- "uuid",
 ]
 
 [[package]]
@@ -18656,7 +18912,7 @@ dependencies = [
 name = "template-app"
 version = "0.1.0"
 dependencies = [
- "askama",
+ "askama 0.15.4",
  "askama-utils",
  "insta",
  "serde",
@@ -18688,7 +18944,7 @@ dependencies = [
 name = "template-eval"
 version = "0.1.0"
 dependencies = [
- "askama",
+ "askama 0.15.4",
  "askama-utils",
  "insta",
  "serde",
@@ -18700,7 +18956,7 @@ dependencies = [
 name = "template-support"
 version = "0.1.0"
 dependencies = [
- "askama",
+ "askama 0.15.4",
  "serde",
  "specta",
  "utoipa",
@@ -18844,6 +19100,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "eac95cde96549fc19c6bf19ef34cc42bd56e264c1cb97e700e21555be0ecf9e2"
 dependencies = [
  "testcontainers",
+]
+
+[[package]]
+name = "textwrap"
+version = "0.16.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c13547615a44dc9c452a8a534638acdf07120d4b6847c8178705da06306a3057"
+dependencies = [
+ "smawk",
 ]
 
 [[package]]
@@ -19247,6 +19512,15 @@ dependencies = [
 
 [[package]]
 name = "toml"
+version = "0.5.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f4f7f0dd8d50a853a531c426359045b1998f04219d88799810762cd4ad314234"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "toml"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "185d8ab0dfbb35cf1399a6344d8484209c088f75f8f68230da55d48d95d43e3d"
@@ -19522,6 +19796,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "tracing-error"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b1581020d7a273442f5b45074a6a57d5757ad0a47dac0e9f0bd57b81936f3db"
+dependencies = [
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "tracing-futures"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -19569,13 +19853,15 @@ dependencies = [
  "bytes",
  "cactus",
  "data",
+ "dirs 6.0.0",
  "futures-util",
  "language",
  "owhisper-interface",
  "reqwest 0.13.2",
+ "rodio",
  "sequential-test",
+ "serde_html_form 0.4.0",
  "serde_json",
- "serde_qs",
  "tempfile",
  "thiserror 2.0.18",
  "tokio",
@@ -19583,6 +19869,7 @@ dependencies = [
  "tower 0.5.3",
  "tracing",
  "uuid",
+ "vad-chunking",
  "ws-utils",
 ]
 
@@ -20424,6 +20711,127 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ebc1c04c71510c7f702b52b7c350734c9ff1295c464a03335b00bb84fc54f853"
 
 [[package]]
+name = "uniffi"
+version = "0.29.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3291800a6b06569f7d3e15bdb6dc235e0f0c8bd3eb07177f430057feb076415f"
+dependencies = [
+ "anyhow",
+ "camino",
+ "cargo_metadata 0.19.2",
+ "clap",
+ "uniffi_bindgen",
+ "uniffi_core",
+ "uniffi_macros",
+ "uniffi_pipeline",
+]
+
+[[package]]
+name = "uniffi_bindgen"
+version = "0.29.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a04b99fa7796eaaa7b87976a0dbdd1178dc1ee702ea00aca2642003aef9b669e"
+dependencies = [
+ "anyhow",
+ "askama 0.13.1",
+ "camino",
+ "cargo_metadata 0.19.2",
+ "fs-err",
+ "glob",
+ "goblin",
+ "heck 0.5.0",
+ "indexmap 2.13.0",
+ "once_cell",
+ "serde",
+ "tempfile",
+ "textwrap",
+ "toml 0.5.11",
+ "uniffi_internal_macros",
+ "uniffi_meta",
+ "uniffi_pipeline",
+ "uniffi_udl",
+]
+
+[[package]]
+name = "uniffi_core"
+version = "0.29.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f38a9a27529ccff732f8efddb831b65b1e07f7dea3fd4cacd4a35a8c4b253b98"
+dependencies = [
+ "anyhow",
+ "bytes",
+ "once_cell",
+ "static_assertions",
+]
+
+[[package]]
+name = "uniffi_internal_macros"
+version = "0.29.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "09acd2ce09c777dd65ee97c251d33c8a972afc04873f1e3b21eb3492ade16933"
+dependencies = [
+ "anyhow",
+ "indexmap 2.13.0",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.117",
+]
+
+[[package]]
+name = "uniffi_macros"
+version = "0.29.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5596f178c4f7aafa1a501c4e0b96236a96bc2ef92bdb453d83e609dad0040152"
+dependencies = [
+ "camino",
+ "fs-err",
+ "once_cell",
+ "proc-macro2",
+ "quote",
+ "serde",
+ "syn 2.0.117",
+ "toml 0.5.11",
+ "uniffi_meta",
+]
+
+[[package]]
+name = "uniffi_meta"
+version = "0.29.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "beadc1f460eb2e209263c49c4f5b19e9a02e00a3b2b393f78ad10d766346ecff"
+dependencies = [
+ "anyhow",
+ "siphasher 0.3.11",
+ "uniffi_internal_macros",
+ "uniffi_pipeline",
+]
+
+[[package]]
+name = "uniffi_pipeline"
+version = "0.29.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dd76b3ac8a2d964ca9fce7df21c755afb4c77b054a85ad7a029ad179cc5abb8a"
+dependencies = [
+ "anyhow",
+ "heck 0.5.0",
+ "indexmap 2.13.0",
+ "tempfile",
+ "uniffi_internal_macros",
+]
+
+[[package]]
+name = "uniffi_udl"
+version = "0.29.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4319cf905911d70d5b97ce0f46f101619a22e9a189c8c46d797a9955e9233716"
+dependencies = [
+ "anyhow",
+ "textwrap",
+ "uniffi_meta",
+ "weedle2",
+]
+
+[[package]]
 name = "unit-prefix"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -20634,11 +21042,14 @@ dependencies = [
 name = "vad"
 version = "0.1.0"
 dependencies = [
+ "approx",
  "cactus",
  "criterion",
  "data",
  "earshot",
- "silero",
+ "onnx",
+ "serde",
+ "serde_json",
  "thiserror 2.0.18",
 ]
 
@@ -21285,6 +21696,15 @@ dependencies = [
  "thiserror 2.0.18",
  "windows 0.61.3",
  "windows-core 0.61.2",
+]
+
+[[package]]
+name = "weedle2"
+version = "5.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "998d2c24ec099a87daf9467808859f9d82b61f1d9c9701251aea037f514eae0e"
+dependencies = [
+ "nom 7.1.3",
 ]
 
 [[package]]
@@ -22475,6 +22895,10 @@ name = "xmp-writer"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ce9e2f4a404d9ebffc0a9832cf4f50907220ba3d7fffa9099261a5cab52f2dd7"
+
+[[package]]
+name = "xtask"
+version = "0.1.0"
 
 [[package]]
 name = "xz2"

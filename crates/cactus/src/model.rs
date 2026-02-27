@@ -5,10 +5,18 @@ use std::sync::{Mutex, MutexGuard};
 
 use crate::error::{Error, Result};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum ModelKind {
+    #[default]
+    Whisper,
+    Moonshine,
+    Parakeet,
+}
+
 pub struct Model {
     handle: NonNull<std::ffi::c_void>,
     inference_lock: Mutex<()>,
-    is_moonshine: bool,
+    kind: ModelKind,
 }
 
 unsafe impl Send for Model {}
@@ -29,25 +37,25 @@ impl InferenceGuard<'_> {
 
 pub struct ModelBuilder {
     model_path: PathBuf,
+    kind: ModelKind,
 }
 
 impl ModelBuilder {
+    pub fn kind(mut self, kind: ModelKind) -> Self {
+        self.kind = kind;
+        self
+    }
+
     pub fn build(self) -> Result<Model> {
         let path = CString::new(self.model_path.to_string_lossy().into_owned())?;
         let raw = unsafe { cactus_sys::cactus_init(path.as_ptr(), std::ptr::null(), false) };
         let handle =
             NonNull::new(raw).ok_or_else(|| Error::Init("cactus_init returned null".into()))?;
 
-        let is_moonshine = self
-            .model_path
-            .to_string_lossy()
-            .to_lowercase()
-            .contains("moonshine");
-
         Ok(Model {
             handle,
             inference_lock: Mutex::new(()),
-            is_moonshine,
+            kind: self.kind,
         })
     }
 }
@@ -56,6 +64,7 @@ impl Model {
     pub fn builder(model_path: impl AsRef<Path>) -> ModelBuilder {
         ModelBuilder {
             model_path: model_path.as_ref().to_path_buf(),
+            kind: ModelKind::default(),
         }
     }
 
@@ -63,8 +72,8 @@ impl Model {
         Self::builder(model_path).build()
     }
 
-    pub fn is_moonshine(&self) -> bool {
-        self.is_moonshine
+    pub fn kind(&self) -> ModelKind {
+        self.kind
     }
 
     pub fn stop(&self) {

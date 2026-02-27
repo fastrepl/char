@@ -1,20 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import type { ComponentRef } from "react";
+import { PersistentChatPanel } from "~/chat/components/persistent-chat";
+import { useShell } from "~/contexts/shell";
+import { useSearch } from "~/search/contexts/ui";
+import { Body } from "~/shared/main";
+import { LeftSidebar } from "~/sidebar";
+import { useTabs } from "~/store/zustand/tabs";
+import { commands } from "~/types/tauri.gen";
 
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@hypr/ui/components/ui/resizable";
-
-import { ChatView } from "../../../components/chat/view";
-import { Body } from "../../../components/main/body";
-import { LeftSidebar } from "../../../components/main/sidebar";
-import { useSearch } from "../../../contexts/search/ui";
-import { useShell } from "../../../contexts/shell";
-import { useTabs } from "../../../store/zustand/tabs";
-import { commands } from "../../../types/tauri.gen";
 
 export const Route = createFileRoute("/app/main/_layout/")({
   component: Component,
@@ -30,6 +29,7 @@ function Component() {
   const previousModeRef = useRef(chat.mode);
   const previousQueryRef = useRef(query);
   const bodyPanelRef = useRef<ComponentRef<typeof ResizablePanel>>(null);
+  const chatPanelContainerRef = useRef<HTMLDivElement>(null);
 
   const isChatOpen = chat.mode === "RightPanelOpen";
 
@@ -47,7 +47,11 @@ function Component() {
     if (isOpeningRightPanel && bodyPanelRef.current) {
       const currentSize = bodyPanelRef.current.getSize();
       bodyPanelRef.current.resize(currentSize);
-      commands.resizeWindowForChat();
+
+      const wasFloating = previousModeRef.current === "FloatingOpen";
+      if (wasFloating || window.innerWidth < 1100) {
+        commands.resizeWindowForChat();
+      }
     }
 
     previousModeRef.current = chat.mode;
@@ -90,11 +94,13 @@ function Component() {
               className="pl-1"
               style={{ minWidth: CHAT_MIN_WIDTH_PX }}
             >
-              <ChatView />
+              <div ref={chatPanelContainerRef} className="h-full" />
             </ResizablePanel>
           </>
         )}
       </ResizablePanelGroup>
+
+      <PersistentChatPanel panelContainerRef={chatPanelContainerRef} />
     </div>
   );
 }

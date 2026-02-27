@@ -49,7 +49,7 @@ function ArticleHeader({
           <span>{sectionTitle}</span>
         </div>
       )}
-      <h1 className="text-3xl sm:text-4xl font-serif text-stone-600 mb-4">
+      <h1 className="text-3xl sm:text-4xl font-serif text-stone-700 mb-4">
         {doc.title}
       </h1>
       {doc.summary && (

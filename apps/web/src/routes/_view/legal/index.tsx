@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_view/legal/")({
         content: "Terms, privacy policy, and other legal documents for Char",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://hyprnote.com/legal" },
+      { property: "og:url", content: "https://char.com/legal" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "Legal - Char" },
       {
@@ -36,7 +36,7 @@ function Component() {
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-x border-neutral-100 bg-white">
         <header className="mb-12">
-          <h1 className="text-4xl sm:text-5xl font-serif text-stone-600 mb-4">
+          <h1 className="text-4xl sm:text-5xl font-serif text-stone-700 mb-4">
             Legal
           </h1>
           <p className="text-lg text-neutral-600">
@@ -65,10 +65,10 @@ function LegalCard({ doc }: { doc: (typeof allLegals)[number] }) {
         <div className="flex items-start gap-3 mb-3">
           <Icon
             icon="mdi:file-document-outline"
-            className="text-xl text-stone-600 group-hover:text-stone-800 transition-colors shrink-0 mt-0.5"
+            className="text-xl text-stone-700 group-hover:text-stone-800 transition-colors shrink-0 mt-0.5"
           />
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-serif text-stone-600 group-hover:text-stone-800 transition-colors mb-2">
+            <h3 className="text-lg font-serif text-stone-700 group-hover:text-stone-800 transition-colors mb-2">
               {doc.title}
             </h3>
             <p className="text-sm text-neutral-500 line-clamp-2">

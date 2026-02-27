@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vitest";
+import type { Ctx } from "~/services/apple-calendar/ctx";
+import type { IncomingEvent } from "~/services/apple-calendar/fetch/types";
 
 import type { SessionEvent } from "@hypr/store";
 
-import type { Ctx } from "../../ctx";
-import type { IncomingEvent } from "../../fetch/types";
 import { syncSessionEmbeddedEvents } from "./execute";
 
 type MockStoreData = {
@@ -117,13 +117,13 @@ describe("syncSessionEmbeddedEvents", () => {
     expect(updated.tracking_id).toBe("track-1");
   });
 
-  test("matches recurring events by composite key (tracking_id + day)", () => {
+  test("matches recurring events by unique tracking_id per occurrence", () => {
     const storeData: MockStoreData = {
       sessions: {
         "session-jan15": {
           event_json: JSON.stringify(
             makeSessionEvent({
-              tracking_id: "recurring-1",
+              tracking_id: "recurring-1:2024-01-15",
               has_recurrence_rules: true,
               started_at: "2024-01-15T10:00:00Z",
             }),
@@ -132,7 +132,7 @@ describe("syncSessionEmbeddedEvents", () => {
         "session-jan22": {
           event_json: JSON.stringify(
             makeSessionEvent({
-              tracking_id: "recurring-1",
+              tracking_id: "recurring-1:2024-01-22",
               has_recurrence_rules: true,
               started_at: "2024-01-22T10:00:00Z",
             }),
@@ -146,7 +146,7 @@ describe("syncSessionEmbeddedEvents", () => {
 
     syncSessionEmbeddedEvents(ctx, [
       makeIncomingEvent({
-        tracking_id_event: "recurring-1",
+        tracking_id_event: "recurring-1:2024-01-15",
         has_recurrence_rules: true,
         started_at: "2024-01-15T10:00:00Z",
         title: "Updated Jan 15",
@@ -162,39 +162,6 @@ describe("syncSessionEmbeddedEvents", () => {
       storeData.sessions["session-jan22"].event_json as string,
     );
     expect(jan22.title).toBe("Old Title");
-  });
-
-  test("does not update session when tracking_id matches but day differs for recurring event", () => {
-    const storeData: MockStoreData = {
-      sessions: {
-        "session-1": {
-          event_json: JSON.stringify(
-            makeSessionEvent({
-              tracking_id: "recurring-1",
-              has_recurrence_rules: true,
-              started_at: "2024-01-15T10:00:00Z",
-            }),
-          ),
-        },
-      },
-      events: {},
-      values: {},
-    };
-    const ctx = createMockCtx(storeData);
-
-    syncSessionEmbeddedEvents(ctx, [
-      makeIncomingEvent({
-        tracking_id_event: "recurring-1",
-        has_recurrence_rules: true,
-        started_at: "2024-01-22T10:00:00Z",
-        title: "Different Day",
-      }),
-    ]);
-
-    const result = JSON.parse(
-      storeData.sessions["session-1"].event_json as string,
-    );
-    expect(result.title).toBe("Old Title");
   });
 
   test("skips sessions without embedded events", () => {

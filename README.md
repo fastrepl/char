@@ -4,7 +4,7 @@
   <p align="center">Char - The AI notepad for <strong>private</strong> meetings</p>
   <p align="center">
    <a href="https://deepwiki.com/fastrepl/char"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
-   <a href="https://hyprnote.com/discord" target="_blank"><img src="https://img.shields.io/static/v1?label=Join%20our&message=Discord&color=blue&logo=Discord" alt="Discord"></a>
+   <a href="https://char.com/discord" target="_blank"><img src="https://img.shields.io/static/v1?label=Join%20our&message=Discord&color=blue&logo=Discord" alt="Discord"></a>
    <a href="https://x.com/getcharnotes" target="_blank"><img src="https://img.shields.io/static/v1?label=Follow%20us%20on&message=X&color=black&logo=x" alt="X"></a>
   </p>
 </p>
@@ -26,9 +26,9 @@ You can also use it for taking notes for lectures or organizing your thoughts.
 brew install --cask fastrepl/fastrepl/char@nightly
 ```
 
-- [macOS](https://hyprnote.com/download) (public beta)
-- [Windows](https://github.com/fastrepl/char/issues/66) (q1 2026)
-- [Linux](https://github.com/fastrepl/char/issues/67) (q1 2026)
+- [macOS](https://char.com/download) (public beta)
+- [Windows](https://github.com/fastrepl/char/issues/66) (q2 2026)
+- [Linux](https://github.com/fastrepl/char/issues/67) (q2 2026)
 
 ## Highlights
 
@@ -56,6 +56,8 @@ If you noticed the GIF above, you can see that Char works without any internet c
 
 <img width="780" height="585" alt="no-wifi" src="https://github.com/user-attachments/assets/ecf08a9e-3b6c-4fb6-ab38-0bc572f54859" />
 
+> **Note on accounts:** During onboarding, Char creates an account so you can experience the full product — including cloud-powered transcription and summarization — at its best quality. All your notes, transcripts, and data are stored locally on your machine in a local SQLite database. If you prefer not to keep an account, you can request deletion anytime at [char.com/app/account](https://char.com/app/account). Char will continue to work fully offline with a local LLM.
+
 ### Bring Your Own LLM
 
 Prefer something custom? You can swap in your own language model:
@@ -72,7 +74,7 @@ Char plays nice with whatever stack you're running.
 
 Prefer a certain style? Choose from predefined templates like bullet points, agenda-based, or paragraph summary. Or create your own.
 
-Check out our [template gallery](https://hyprnote.com/templates) and add your own [here](https://github.com/fastrepl/char/tree/main/apps/web/content/templates).
+Check out our [template gallery](https://char.com/templates) and add your own [here](https://github.com/fastrepl/char/tree/main/apps/web/content/templates).
 
 ### AI Chat
 

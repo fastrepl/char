@@ -47,6 +47,15 @@ pub use reqwest_middleware::ClientWithMiddleware;
 
 pub type BatchFuture<'a> = Pin<Box<dyn Future<Output = Result<BatchResponse, Error>> + Send + 'a>>;
 
+#[derive(Debug, Clone)]
+pub struct StreamingBatchEvent {
+    pub response: StreamResponse,
+    pub percentage: f64,
+}
+
+pub type StreamingBatchStream =
+    Pin<Box<dyn futures_util::Stream<Item = Result<StreamingBatchEvent, Error>> + Send>>;
+
 pub fn documented_language_codes_live() -> Vec<String> {
     let mut set: BTreeSet<&'static str> = BTreeSet::new();
 

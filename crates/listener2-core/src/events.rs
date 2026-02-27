@@ -21,3 +21,17 @@ pub enum BatchEvent {
     #[serde(rename = "batchFailed")]
     BatchFailed { session_id: String, error: String },
 }
+
+#[derive(serde::Serialize, Clone)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
+#[serde(tag = "type")]
+pub enum DenoiseEvent {
+    #[serde(rename = "denoiseStarted")]
+    DenoiseStarted { session_id: String },
+    #[serde(rename = "denoiseProgress")]
+    DenoiseProgress { session_id: String, percentage: f64 },
+    #[serde(rename = "denoiseCompleted")]
+    DenoiseCompleted { session_id: String },
+    #[serde(rename = "denoiseFailed")]
+    DenoiseFailed { session_id: String, error: String },
+}

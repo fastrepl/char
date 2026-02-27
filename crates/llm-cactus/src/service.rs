@@ -143,8 +143,6 @@ fn build_streaming_response(
     let id_for_events = id.clone();
     let model_for_events = model_name.clone();
 
-    type SseResult = Result<sse::Event, std::convert::Infallible>;
-
     let data_events = completion_stream.filter_map(move |item| {
         let id = id_for_events.clone();
         let model_name = model_for_events.clone();

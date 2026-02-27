@@ -5,17 +5,13 @@ import { signOutFn } from "@/functions/auth";
 import {
   canStartTrial,
   createPortalSession,
-  createTrialCheckoutSession,
-  syncAfterSuccess,
+  startTrial,
 } from "@/functions/billing";
+import { useBilling } from "@/hooks/use-billing";
 
 export function SettingsPanel() {
   const navigate = useNavigate();
-
-  const billingQuery = useQuery({
-    queryKey: ["billing"],
-    queryFn: () => syncAfterSuccess(),
-  });
+  const billing = useBilling();
 
   const canTrialQuery = useQuery({
     queryKey: ["canStartTrial"],
@@ -32,11 +28,10 @@ export function SettingsPanel() {
   });
 
   const startTrialMutation = useMutation({
-    mutationFn: async () => {
-      const { url } = await createTrialCheckoutSession({ data: {} });
-      if (url) {
-        window.location.href = url;
-      }
+    mutationFn: () => startTrial(),
+    onSuccess: () => {
+      billing.refreshBilling();
+      canTrialQuery.refetch();
     },
   });
 
@@ -50,28 +45,20 @@ export function SettingsPanel() {
     onError: () => navigate({ to: "/" }),
   });
 
-  const currentPlan = (() => {
-    if (!billingQuery.data || billingQuery.data.status === "none")
-      return "free";
-    const status = billingQuery.data.status;
-    if (status === "trialing") return "trial";
-    if (status === "active") return "pro";
-    return "free";
-  })();
-
-  const getPlanDisplay = () => {
-    if (billingQuery.isLoading) return "...";
-    if (currentPlan === "trial") return "Trial";
-    if (currentPlan === "pro") return "Pro";
-    return "Free";
-  };
+  const planDisplay = !billing.isReady
+    ? "..."
+    : billing.plan === "trial"
+      ? "Trial"
+      : billing.plan === "pro"
+        ? "Pro"
+        : "Free";
 
   const renderPlanButton = () => {
-    if (billingQuery.isLoading || canTrialQuery.isLoading) {
+    if (!billing.isReady || canTrialQuery.isLoading) {
       return <span className="text-sm text-neutral-400">Loading...</span>;
     }
 
-    if (currentPlan === "free") {
+    if (billing.plan === "free") {
       if (canTrialQuery.data) {
         return (
           <button
@@ -123,8 +110,7 @@ export function SettingsPanel() {
 
           <div className="flex items-center justify-between border-t border-neutral-100 p-4">
             <div className="text-sm">
-              Current plan:{" "}
-              <span className="font-medium">{getPlanDisplay()}</span>
+              Current plan: <span className="font-medium">{planDisplay}</span>
             </div>
             {renderPlanButton()}
           </div>

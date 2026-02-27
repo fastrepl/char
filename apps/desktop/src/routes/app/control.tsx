@@ -3,13 +3,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { isTauri } from "@tauri-apps/api/core";
 import { ChevronDown, Mic, MicOff, Square, X } from "lucide-react";
 import { useRef } from "react";
+import { useWidgetState } from "~/shared/hooks/useWidgetState";
+import { useListener } from "~/stt/contexts";
 
 import { commands as iconCommands } from "@hypr/plugin-icon";
 import { Button } from "@hypr/ui/components/ui/button";
 import { cn } from "@hypr/utils";
-
-import { useListener } from "../../contexts/listener";
-import { useWidgetState } from "../../hooks/useWidgetState";
 
 export const Route = createFileRoute("/app/control")({
   component: Component,

@@ -59,6 +59,10 @@ export type ConversationSummary = {
     inboxId?: string | null;
 };
 
+export type CreateConnectSessionRequest = {
+    allowed_integrations?: Array<string> | null;
+};
+
 export type CreateContactRequest = {
     customAttributes?: unknown;
     email?: string | null;
@@ -92,6 +96,16 @@ export type CreateEventRequest = {
 
 export type CreateEventResponse = {
     event: unknown;
+};
+
+export type CreateReconnectSessionRequest = {
+    connection_id: string;
+    integration_id: string;
+};
+
+export type DeleteAccountResponse = {
+    deleted: boolean;
+    error?: string | null;
 };
 
 export type DeviceInfo = {
@@ -182,7 +196,7 @@ export type SendMessageRequest = {
     sourceId?: string | null;
 };
 
-export type StartTrialReason = 'started' | 'not_eligible' | 'error';
+export type StartTrialReason = 'started' | 'not_eligible';
 
 export type StartTrialResponse = {
     reason?: null | StartTrialReason;
@@ -419,7 +433,7 @@ export type LlmChatCompletionsResponses = {
 };
 
 export type CreateConnectSessionData = {
-    body?: never;
+    body: CreateConnectSessionRequest;
     path?: never;
     query?: never;
     url: '/nango/connect-session';
@@ -471,6 +485,33 @@ export type ListConnectionsResponses = {
 };
 
 export type ListConnectionsResponse2 = ListConnectionsResponses[keyof ListConnectionsResponses];
+
+export type CreateReconnectSessionData = {
+    body: CreateReconnectSessionRequest;
+    path?: never;
+    query?: never;
+    url: '/nango/reconnect-session';
+};
+
+export type CreateReconnectSessionErrors = {
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Internal server error
+     */
+    500: unknown;
+};
+
+export type CreateReconnectSessionResponses = {
+    /**
+     * Reconnect session created
+     */
+    200: ConnectSessionResponse;
+};
+
+export type CreateReconnectSessionResponse = CreateReconnectSessionResponses[keyof CreateReconnectSessionResponses];
 
 export type NangoWebhookData = {
     body?: never;
@@ -661,6 +702,33 @@ export type CanStartTrialResponses = {
 };
 
 export type CanStartTrialResponse2 = CanStartTrialResponses[keyof CanStartTrialResponses];
+
+export type DeleteAccountData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/subscription/delete-account';
+};
+
+export type DeleteAccountErrors = {
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Internal server error
+     */
+    500: unknown;
+};
+
+export type DeleteAccountResponses = {
+    /**
+     * Account deleted successfully
+     */
+    200: DeleteAccountResponse;
+};
+
+export type DeleteAccountResponse2 = DeleteAccountResponses[keyof DeleteAccountResponses];
 
 export type StartTrialData = {
     body?: never;

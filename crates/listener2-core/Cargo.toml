@@ -9,8 +9,11 @@ specta = ["dep:specta"]
 
 [dependencies]
 hypr-audio-utils = { workspace = true }
+hypr-denoise = { workspace = true, features = ["onnx"] }
 hypr-host = { workspace = true }
 hypr-language = { workspace = true }
+
+hound = { workspace = true }
 
 owhisper-client = { workspace = true, features = ["argmax"] }
 owhisper-interface = { workspace = true }

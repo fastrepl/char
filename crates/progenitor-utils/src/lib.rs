@@ -71,6 +71,16 @@ impl OpenApiSpec {
         self
     }
 
+    pub fn convert_31_to_30(&mut self) -> &mut Self {
+        let json = serde_json::to_string(&self.inner).expect("serialize to JSON");
+        let yaml_30 = openapi31to30::convert(&json).expect("3.1 -> 3.0 conversion failed");
+        self.inner = serde_json::to_value(
+            serde_yaml::from_str::<serde_yaml::Value>(&yaml_30).expect("parse converted YAML"),
+        )
+        .expect("convert YAML value to JSON value");
+        self
+    }
+
     pub fn generate(&self, filename: &str) {
         let openapi: openapiv3::OpenAPI =
             serde_json::from_value(self.inner.clone()).expect("filtered spec is not valid OpenAPI");

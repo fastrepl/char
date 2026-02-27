@@ -31,12 +31,12 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { title: TITLE },
       { name: "description", content: DESCRIPTION },
       { name: "keywords", content: KEYWORDS },
-      { name: "ai-sitemap", content: "https://hyprnote.com/llms.txt" },
+      { name: "ai-sitemap", content: "https://char.com/llms.txt" },
       { name: "ai-content", content: "public" },
       { property: "og:type", content: "website" },
       { property: "og:title", content: TITLE },
       { property: "og:description", content: DESCRIPTION },
-      { property: "og:url", content: "https://hyprnote.com" },
+      { property: "og:url", content: "https://char.com" },
       {
         property: "og:image",
         content: "/api/images/hyprnote/og-image.jpg",
@@ -48,7 +48,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { name: "twitter:creator", content: "@getcharnotes" },
       { name: "twitter:title", content: TITLE },
       { name: "twitter:description", content: DESCRIPTION },
-      { name: "twitter:url", content: "https://hyprnote.com" },
+      { name: "twitter:url", content: "https://char.com" },
       {
         name: "twitter:image",
         content: "/api/images/hyprnote/og-image.jpg",

@@ -44,11 +44,12 @@ async renderSupport(tpl: SupportTemplate) : Promise<Result<string, string>> {
 
 export type AccountInfo = { userId: string; email: string | null; fullName: string | null; avatarUrl: string | null; stripeCustomerId: string | null }
 export type BugReport = { description: string; platform: string; arch: string; osVersion: string; appVersion: string; source: string }
-export type ChatSystem = { language: string | null; context: SessionContext | null }
+export type ChatSystem = { language: string | null }
+export type ContextBlock = { contexts: SessionContext[] }
 export type DeviceInfo = { platform: string; arch: string; osVersion: string; appVersion: string; buildHash?: string | null; locale?: string | null }
 export type EnhanceSystem = { language: string | null }
 export type EnhanceTemplate = { title: string; description: string | null; sections: TemplateSection[] }
-export type EnhanceUser = { session: Session; participants: Participant[]; template: EnhanceTemplate | null; transcripts: Transcript[] }
+export type EnhanceUser = { session: Session; participants: Participant[]; template: EnhanceTemplate | null; transcripts: Transcript[]; preMeetingMemo: string; postMeetingMemo: string }
 export type Event = { name: string }
 export type FeatureRequest = { description: string; platform: string; arch: string; osVersion: string; appVersion: string; source: string }
 export type Grammar = { task: "enhance"; sections: string[] | null } | { task: "title" } | { task: "tags" } | { task: "email-to-name" }
@@ -60,7 +61,7 @@ export type Session = { title: string | null; startedAt: string | null; endedAt:
 export type SessionContext = { title: string | null; date: string | null; rawContent: string | null; enhancedContent: string | null; transcript: Transcript | null; participants: Participant[]; event: Event | null }
 export type SupportContext = { account: AccountInfo | null; device: DeviceInfo }
 export type SupportTemplate = { supportContext: SupportContext } | { bugReport: BugReport } | { featureRequest: FeatureRequest } | { logAnalysis: LogAnalysis }
-export type Template = { enhanceSystem: EnhanceSystem } | { enhanceUser: EnhanceUser } | { titleSystem: TitleSystem } | { titleUser: TitleUser } | { chatSystem: ChatSystem } | { toolSearchSessions: ToolSearchSessions }
+export type Template = { enhanceSystem: EnhanceSystem } | { enhanceUser: EnhanceUser } | { titleSystem: TitleSystem } | { titleUser: TitleUser } | { chatSystem: ChatSystem } | { contextBlock: ContextBlock } | { toolSearchSessions: ToolSearchSessions }
 export type TemplateSection = { title: string; description: string | null }
 export type TitleSystem = { language: string | null }
 export type TitleUser = { enhancedNote: string }

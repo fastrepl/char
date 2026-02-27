@@ -1,11 +1,10 @@
 import { createCustomPersister } from "tinybase/persisters/with-schemas";
 import type { Content } from "tinybase/with-schemas";
+import type { Store } from "~/store/tinybase/store/main";
+import { StoreOrMergeableStore } from "~/store/tinybase/store/shared";
+import { commands } from "~/types/tauri.gen";
 
 import type { Schemas } from "@hypr/store";
-
-import { commands } from "../../../../types/tauri.gen";
-import type { Store } from "../../store/main";
-import { StoreOrMergeableStore } from "../../store/shared";
 
 export function createValuesPersister(store: Store) {
   return createCustomPersister(

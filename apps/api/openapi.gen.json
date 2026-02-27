@@ -221,6 +221,16 @@
           "nango"
         ],
         "operationId": "create_connect_session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConnectSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Connect session created",
@@ -259,6 +269,47 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ListConnectionsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/nango/reconnect-session": {
+      "post": {
+        "tags": [
+          "nango"
+        ],
+        "operationId": "create_reconnect_session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReconnectSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Reconnect session created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectSessionResponse"
                 }
               }
             }
@@ -536,6 +587,37 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CanStartTrialResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    },
+    "/subscription/delete-account": {
+      "delete": {
+        "tags": [
+          "subscription"
+        ],
+        "operationId": "delete_account",
+        "responses": {
+          "200": {
+            "description": "Account deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteAccountResponse"
                 }
               }
             }
@@ -986,6 +1068,20 @@
           }
         }
       },
+      "CreateConnectSessionRequest": {
+        "type": "object",
+        "properties": {
+          "allowed_integrations": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "CreateContactRequest": {
         "type": "object",
         "required": [
@@ -1100,6 +1196,38 @@
         ],
         "properties": {
           "event": {}
+        }
+      },
+      "CreateReconnectSessionRequest": {
+        "type": "object",
+        "required": [
+          "connection_id",
+          "integration_id"
+        ],
+        "properties": {
+          "connection_id": {
+            "type": "string"
+          },
+          "integration_id": {
+            "type": "string"
+          }
+        }
+      },
+      "DeleteAccountResponse": {
+        "type": "object",
+        "required": [
+          "deleted"
+        ],
+        "properties": {
+          "deleted": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
         }
       },
       "DeviceInfo": {
@@ -1431,8 +1559,7 @@
         "type": "string",
         "enum": [
           "started",
-          "not_eligible",
-          "error"
+          "not_eligible"
         ]
       },
       "StartTrialResponse": {

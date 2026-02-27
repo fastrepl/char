@@ -6,6 +6,10 @@ import {
   streamText,
 } from "ai";
 import { z } from "zod";
+import type { Store } from "~/store/tinybase/store/main";
+import { getCustomPrompt } from "~/store/tinybase/store/prompts";
+import { normalizeBulletPoints } from "~/store/zustand/ai-task/shared/transform_impl";
+import { withEarlyValidationRetry } from "~/store/zustand/ai-task/shared/validate";
 
 import {
   commands as templateCommands,
@@ -14,10 +18,6 @@ import {
 import { templateSectionSchema } from "@hypr/store";
 
 import type { TaskArgsMapTransformed, TaskConfig } from ".";
-import type { Store } from "../../../tinybase/store/main";
-import { getCustomPrompt } from "../../../tinybase/store/prompts";
-import { normalizeBulletPoints } from "../shared/transform_impl";
-import { withEarlyValidationRetry } from "../shared/validate";
 import { createEnhanceValidator } from "./enhance-validator";
 
 export const enhanceWorkflow: Pick<
@@ -83,13 +83,22 @@ async function getUserPrompt(
   args: TaskArgsMapTransformed["enhance"],
   store: Store,
 ) {
-  const { session, participants, template, transcripts } = args;
+  const {
+    session,
+    participants,
+    template,
+    transcripts,
+    preMeetingMemo,
+    postMeetingMemo,
+  } = args;
 
   const ctx = {
     content: transcripts,
     session,
     participants,
     template,
+    pre_meeting_memo: preMeetingMemo,
+    post_meeting_memo: postMeetingMemo,
   };
 
   const customPrompt = getCustomPrompt(store, "enhance");
@@ -107,6 +116,8 @@ async function getUserPrompt(
       participants,
       template,
       transcripts,
+      preMeetingMemo,
+      postMeetingMemo,
     },
   });
 

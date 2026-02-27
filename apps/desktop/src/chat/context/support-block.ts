@@ -1,10 +1,10 @@
+import type { ContextEntity } from "~/chat/context-item";
+
 import type { AccountInfo } from "@hypr/plugin-auth";
 import { commands as authCommands } from "@hypr/plugin-auth";
 import type { DeviceInfo } from "@hypr/plugin-misc";
 import { commands as miscCommands } from "@hypr/plugin-misc";
 import { commands as templateCommands } from "@hypr/plugin-template";
-
-import type { ContextEntity } from "../context-item";
 
 async function getAccountInfo(): Promise<AccountInfo | null> {
   try {

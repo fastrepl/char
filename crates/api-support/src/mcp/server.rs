@@ -167,7 +167,7 @@ impl ServerHandler for SupportMcpServer {
                 .enable_prompts()
                 .build(),
             server_info: Implementation {
-                name: "hyprnote-support".to_string(),
+                name: "char-support".to_string(),
                 title: None,
                 version: env!("CARGO_PKG_VERSION").to_string(),
                 icons: None,

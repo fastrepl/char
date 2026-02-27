@@ -7,16 +7,20 @@ import { isRecord } from "./utils";
 
 export const CURRENT_SESSION_CONTEXT_KEY = "session:current";
 
-export type ContextEntitySource = "tool";
+export type ContextEntitySource = "tool" | "manual" | "auto-current";
+
+export type ContextRef = {
+  kind: "session";
+  key: string;
+  source?: ContextEntitySource;
+  sessionId: string;
+};
 
 export type ContextEntity =
-  | {
-      kind: "session";
-      key: string;
-      source?: ContextEntitySource;
-      sessionContext: SessionContext;
+  | (ContextRef & {
+      sessionContext?: SessionContext;
       removable?: boolean;
-    }
+    })
   | ({
       kind: "account";
       key: string;
@@ -29,6 +33,20 @@ export type ContextEntity =
     } & Partial<DeviceInfo>);
 
 export type ContextEntityKind = ContextEntity["kind"];
+
+export function dedupeByKey<T extends { key: string }>(groups: T[][]): T[] {
+  const seen = new Set<string>();
+  const merged: T[] = [];
+  for (const group of groups) {
+    for (const item of group) {
+      if (!seen.has(item.key)) {
+        seen.add(item.key);
+        merged.push(item);
+      }
+    }
+  }
+  return merged;
+}
 
 type ToolOutputAvailablePart = {
   type: string;
@@ -69,6 +87,7 @@ function parseSearchSessionsOutput(output: unknown): ContextEntity[] {
         kind: "session",
         key: `session:search:${item.id}`,
         source: "tool",
+        sessionId: String(item.id),
         sessionContext: parsedSessionContext ?? {
           title,
           date: null,
@@ -78,7 +97,6 @@ function parseSearchSessionsOutput(output: unknown): ContextEntity[] {
           participants: [],
           event: null,
         },
-        removable: true,
       },
     ];
   });
@@ -154,12 +172,18 @@ function parseSessionContext(value: unknown): SessionContext | null {
   };
 }
 
-const toolEntityExtractors: Record<
-  string,
-  (output: unknown) => ContextEntity[]
-> = {
+export type ToolContextExtractor = (output: unknown) => ContextEntity[];
+
+const toolEntityExtractors: Record<string, ToolContextExtractor> = {
   search_sessions: parseSearchSessionsOutput,
 };
+
+export function registerToolContextExtractor(
+  toolName: string,
+  extractor: ToolContextExtractor,
+): void {
+  toolEntityExtractors[toolName] = extractor;
+}
 
 export function extractToolContextEntities(
   messages: Array<Pick<HyprUIMessage, "parts">>,

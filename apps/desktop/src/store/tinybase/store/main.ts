@@ -9,11 +9,11 @@ import {
   createRelationships,
   type MergeableStore,
 } from "tinybase/with-schemas";
+import { getSessionEvent } from "~/session/utils";
 
 import { SCHEMA, type Schemas } from "@hypr/store";
 import { format } from "@hypr/utils";
 
-import { getSessionEvent } from "../../../utils/session-event";
 import { useMainPersisters } from "./persisters";
 
 export const STORE_ID = "main";

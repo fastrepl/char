@@ -1,4 +1,5 @@
-import type { SessionMetaJson } from "../types";
+import type { SessionMetaJson } from "~/store/tinybase/persister/session/types";
+
 import type { LoadedSessionData } from "./types";
 
 const LABEL = "SessionPersister";

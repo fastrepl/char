@@ -7,6 +7,9 @@ import {
   useMemo,
   useState,
 } from "react";
+import { useConfigValues } from "~/shared/config";
+import type { DownloadProgress } from "~/sidebar/toast/types";
+import { useTabs } from "~/store/zustand/tabs";
 
 import {
   commands as localSttCommands,
@@ -14,10 +17,6 @@ import {
   type ServerStatus,
   type SupportedSttModel,
 } from "@hypr/plugin-local-stt";
-
-import type { DownloadProgress } from "../components/main/sidebar/toast/types";
-import { useConfigValues } from "../config/use-config";
-import { useTabs } from "../store/zustand/tabs";
 
 interface NotificationState {
   hasActiveBanner: boolean;

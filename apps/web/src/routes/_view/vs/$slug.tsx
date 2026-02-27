@@ -42,7 +42,7 @@ export const Route = createFileRoute("/_view/vs/$slug")({
         { property: "og:type", content: "website" },
         {
           property: "og:url",
-          content: `https://hyprnote.com/vs/${doc.slug}`,
+          content: `https://char.com/vs/${doc.slug}`,
         },
         { name: "twitter:card", content: "summary" },
         { name: "twitter:title", content: metaTitle },
@@ -153,7 +153,7 @@ function HeroSection({
           </div>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif tracking-tight text-stone-600 mb-6">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif tracking-tight text-stone-700 mb-6">
           {headline}
         </h1>
         <p className="text-lg sm:text-xl text-neutral-600 mb-8">

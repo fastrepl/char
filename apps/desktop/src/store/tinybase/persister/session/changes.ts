@@ -5,7 +5,7 @@ import {
   SESSION_NOTE_EXTENSION,
   SESSION_TRANSCRIPT_FILE,
   type TablesContent,
-} from "../shared";
+} from "~/store/tinybase/persister/shared";
 
 export function parseSessionIdFromPath(path: string): string | null {
   const parts = path.split("/");

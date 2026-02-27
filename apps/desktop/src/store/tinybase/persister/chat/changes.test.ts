@@ -1,6 +1,9 @@
 import { describe, expect, test } from "vitest";
+import type {
+  ChangedTables,
+  TablesContent,
+} from "~/store/tinybase/persister/shared";
 
-import type { ChangedTables, TablesContent } from "../shared";
 import { getChangedChatGroupIds, parseChatGroupIdFromPath } from "./changes";
 
 describe("parseChatGroupIdFromPath", () => {

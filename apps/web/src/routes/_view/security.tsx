@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_view/security")({
           "Your meeting data deserves the highest level of protection. Learn how Char's security-first architecture keeps your conversations safe.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://hyprnote.com/security" },
+      { property: "og:url", content: "https://char.com/security" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Security - Char" },
       {
@@ -64,11 +64,11 @@ function HeroSection() {
     <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
       <div className="px-6 py-12 lg:py-20">
         <header className="mb-12 text-center max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-stone-100 rounded-full text-sm text-stone-600 mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-stone-100 rounded-full text-sm text-stone-700 mb-6">
             <Icon icon="mdi:shield-check" className="text-lg" />
             <span>Security-first architecture</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif text-stone-600 mb-6">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif text-stone-700 mb-6">
             Your data security
             <br />
             is our priority
@@ -115,7 +115,7 @@ function SecurityPrinciplesSection() {
 
   return (
     <section className="px-6 py-12 lg:py-16">
-      <h2 className="text-3xl font-serif text-stone-600 mb-4 text-center">
+      <h2 className="text-3xl font-serif text-stone-700 mb-4 text-center">
         Security principles we live by
       </h2>
       <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
@@ -130,9 +130,9 @@ function SecurityPrinciplesSection() {
           >
             <Icon
               icon={principle.icon}
-              className="text-3xl text-stone-600 mb-4"
+              className="text-3xl text-stone-700 mb-4"
             />
-            <h3 className="text-xl font-serif text-stone-600 mb-2">
+            <h3 className="text-xl font-serif text-stone-700 mb-2">
               {principle.title}
             </h3>
             <p className="text-neutral-600">{principle.description}</p>
@@ -150,9 +150,9 @@ function LocalFirstSection() {
         <div className="text-center mb-12">
           <Icon
             icon="mdi:desktop-classic"
-            className="text-5xl text-stone-600 mb-4"
+            className="text-5xl text-stone-700 mb-4"
           />
-          <h2 className="text-3xl font-serif text-stone-600 mb-4">
+          <h2 className="text-3xl font-serif text-stone-700 mb-4">
             Local-first means secure by default
           </h2>
           <p className="text-neutral-600 max-w-2xl mx-auto">
@@ -165,9 +165,9 @@ function LocalFirstSection() {
           <div className="text-center p-6">
             <Icon
               icon="mdi:microphone"
-              className="text-4xl text-stone-600 mb-4 mx-auto"
+              className="text-4xl text-stone-700 mb-4 mx-auto"
             />
-            <h3 className="font-medium text-stone-600 mb-2">
+            <h3 className="font-medium text-stone-700 mb-2">
               Audio stays local
             </h3>
             <p className="text-sm text-neutral-600">
@@ -178,9 +178,9 @@ function LocalFirstSection() {
           <div className="text-center p-6">
             <Icon
               icon="mdi:brain"
-              className="text-4xl text-stone-600 mb-4 mx-auto"
+              className="text-4xl text-stone-700 mb-4 mx-auto"
             />
-            <h3 className="font-medium text-stone-600 mb-2">On-device AI</h3>
+            <h3 className="font-medium text-stone-700 mb-2">On-device AI</h3>
             <p className="text-sm text-neutral-600">
               Transcription and summarization run locally using optimized AI
               models. Your words are processed without ever touching the cloud.
@@ -189,9 +189,9 @@ function LocalFirstSection() {
           <div className="text-center p-6">
             <Icon
               icon="mdi:database"
-              className="text-4xl text-stone-600 mb-4 mx-auto"
+              className="text-4xl text-stone-700 mb-4 mx-auto"
             />
-            <h3 className="font-medium text-stone-600 mb-2">Local storage</h3>
+            <h3 className="font-medium text-stone-700 mb-2">Local storage</h3>
             <p className="text-sm text-neutral-600">
               All notes, transcripts, and metadata are stored in an encrypted
               local database that only you can access.
@@ -203,10 +203,10 @@ function LocalFirstSection() {
           <div className="flex items-start gap-4">
             <Icon
               icon="mdi:wifi-off"
-              className="text-3xl text-stone-600 shrink-0"
+              className="text-3xl text-stone-700 shrink-0"
             />
             <div>
-              <h3 className="text-xl font-serif text-stone-600 mb-3">
+              <h3 className="text-xl font-serif text-stone-700 mb-3">
                 Works completely offline
               </h3>
               <p className="text-neutral-600">
@@ -229,8 +229,8 @@ function EncryptionSection() {
     <section className="px-6 py-12 lg:py-16">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <Icon icon="mdi:lock" className="text-5xl text-stone-600 mb-4" />
-          <h2 className="text-3xl font-serif text-stone-600 mb-4">
+          <Icon icon="mdi:lock" className="text-5xl text-stone-700 mb-4" />
+          <h2 className="text-3xl font-serif text-stone-700 mb-4">
             Enterprise-grade encryption
           </h2>
           <p className="text-neutral-600 max-w-2xl mx-auto">
@@ -244,10 +244,10 @@ function EncryptionSection() {
             <div className="flex items-start gap-4">
               <Icon
                 icon="mdi:harddisk"
-                className="text-2xl text-stone-600 shrink-0 mt-1"
+                className="text-2xl text-stone-700 shrink-0 mt-1"
               />
               <div>
-                <h3 className="font-medium text-stone-600 mb-2">
+                <h3 className="font-medium text-stone-700 mb-2">
                   Encryption at rest
                 </h3>
                 <p className="text-neutral-600">
@@ -263,10 +263,10 @@ function EncryptionSection() {
             <div className="flex items-start gap-4">
               <Icon
                 icon="mdi:swap-horizontal"
-                className="text-2xl text-stone-600 shrink-0 mt-1"
+                className="text-2xl text-stone-700 shrink-0 mt-1"
               />
               <div>
-                <h3 className="font-medium text-stone-600 mb-2">
+                <h3 className="font-medium text-stone-700 mb-2">
                   Encryption in transit
                 </h3>
                 <p className="text-neutral-600">
@@ -283,10 +283,10 @@ function EncryptionSection() {
             <div className="flex items-start gap-4">
               <Icon
                 icon="mdi:key"
-                className="text-2xl text-stone-600 shrink-0 mt-1"
+                className="text-2xl text-stone-700 shrink-0 mt-1"
               />
               <div>
-                <h3 className="font-medium text-stone-600 mb-2">
+                <h3 className="font-medium text-stone-700 mb-2">
                   Key management
                 </h3>
                 <p className="text-neutral-600">
@@ -310,9 +310,9 @@ function OpenSourceSecuritySection() {
         <div className="text-center mb-12">
           <Icon
             icon="mdi:code-braces"
-            className="text-5xl text-stone-600 mb-4"
+            className="text-5xl text-stone-700 mb-4"
           />
-          <h2 className="text-3xl font-serif text-stone-600 mb-4">
+          <h2 className="text-3xl font-serif text-stone-700 mb-4">
             Security through transparency
           </h2>
           <p className="text-neutral-600 max-w-2xl mx-auto">
@@ -324,8 +324,8 @@ function OpenSourceSecuritySection() {
 
         <div className="grid md:grid-cols-2 gap-8">
           <div className="p-6 border border-neutral-200 rounded-lg bg-white">
-            <Icon icon="mdi:magnify" className="text-3xl text-stone-600 mb-4" />
-            <h3 className="text-xl font-serif text-stone-600 mb-2">
+            <Icon icon="mdi:magnify" className="text-3xl text-stone-700 mb-4" />
+            <h3 className="text-xl font-serif text-stone-700 mb-2">
               Fully auditable
             </h3>
             <p className="text-neutral-600">
@@ -338,9 +338,9 @@ function OpenSourceSecuritySection() {
           <div className="p-6 border border-neutral-200 rounded-lg bg-white">
             <Icon
               icon="mdi:account-group"
-              className="text-3xl text-stone-600 mb-4"
+              className="text-3xl text-stone-700 mb-4"
             />
-            <h3 className="text-xl font-serif text-stone-600 mb-2">
+            <h3 className="text-xl font-serif text-stone-700 mb-2">
               Community reviewed
             </h3>
             <p className="text-neutral-600">
@@ -357,7 +357,7 @@ function OpenSourceSecuritySection() {
             href="https://github.com/fastrepl/char"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-stone-600 hover:text-stone-800 font-medium"
+            className="inline-flex items-center gap-2 text-stone-700 hover:text-stone-800 font-medium"
           >
             <Icon icon="mdi:github" className="text-lg" />
             Review our security implementation on GitHub
@@ -401,7 +401,7 @@ function EnterpriseSecuritySection() {
     <section className="px-6 py-12 lg:py-16">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-serif text-stone-600 mb-4">
+          <h2 className="text-3xl font-serif text-stone-700 mb-4">
             Enterprise-ready security
           </h2>
           <p className="text-neutral-600 max-w-2xl mx-auto">
@@ -418,9 +418,9 @@ function EnterpriseSecuritySection() {
             >
               <Icon
                 icon={feature.icon}
-                className="text-2xl text-stone-600 mb-3"
+                className="text-2xl text-stone-700 mb-3"
               />
-              <h3 className="font-medium text-stone-600 mb-2">
+              <h3 className="font-medium text-stone-700 mb-2">
                 {feature.title}
               </h3>
               <p className="text-sm text-neutral-600">{feature.description}</p>
@@ -431,7 +431,7 @@ function EnterpriseSecuritySection() {
         <div className="mt-8 text-center">
           <Link
             to="/enterprise/"
-            className="inline-flex items-center gap-2 text-stone-600 hover:text-stone-800 font-medium"
+            className="inline-flex items-center gap-2 text-stone-700 hover:text-stone-800 font-medium"
           >
             Learn more about enterprise features
             <Icon icon="mdi:arrow-right" className="text-lg" />
@@ -448,9 +448,9 @@ function CTASection() {
       <div className="max-w-3xl mx-auto text-center">
         <Icon
           icon="mdi:shield-check"
-          className="text-5xl text-stone-600 mb-6 mx-auto"
+          className="text-5xl text-stone-700 mb-6 mx-auto"
         />
-        <h2 className="text-3xl font-serif text-stone-600 mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 mb-4">
           Ready to take control of your meeting data?
         </h2>
         <p className="text-neutral-600 mb-8">
@@ -473,7 +473,7 @@ function CTASection() {
             to="/privacy/"
             className={cn([
               "inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-full",
-              "border border-neutral-300 text-stone-600",
+              "border border-neutral-300 text-stone-700",
               "hover:bg-stone-50 transition-colors",
             ])}
           >

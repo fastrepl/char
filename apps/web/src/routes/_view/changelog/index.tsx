@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_view/changelog/")({
         content: "Track every update, improvement, and fix to Char",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://hyprnote.com/changelog" },
+      { property: "og:url", content: "https://char.com/changelog" },
     ],
   }),
 });
@@ -67,7 +67,7 @@ function Component() {
 function HeroSection() {
   return (
     <div className="text-center">
-      <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
+      <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
         Changelog
       </h1>
       <p className="text-lg sm:text-xl text-neutral-600">

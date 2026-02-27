@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
+import type { Ctx } from "~/services/apple-calendar/ctx";
 
-import type { Ctx } from "../../ctx";
 import { syncSessionParticipants } from "./sync";
 
 type MockStoreData = {

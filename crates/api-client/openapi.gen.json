@@ -1,0 +1,1144 @@
+{
+  "components": {
+    "schemas": {
+      "CanStartTrialReason": {
+        "enum": [
+          "eligible",
+          "not_eligible",
+          "error"
+        ],
+        "type": "string"
+      },
+      "CanStartTrialResponse": {
+        "properties": {
+          "canStartTrial": {
+            "example": true,
+            "type": "boolean"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/CanStartTrialReason",
+            "nullable": true
+          }
+        },
+        "required": [
+          "canStartTrial"
+        ],
+        "type": "object"
+      },
+      "ConnectSessionResponse": {
+        "properties": {
+          "expires_at": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "expires_at"
+        ],
+        "type": "object"
+      },
+      "ConnectionItem": {
+        "properties": {
+          "connection_id": {
+            "type": "string"
+          },
+          "integration_id": {
+            "type": "string"
+          },
+          "updated_at": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "integration_id",
+          "connection_id"
+        ],
+        "type": "object"
+      },
+      "ConversationSummary": {
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "inboxId": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "CreateConnectSessionRequest": {
+        "properties": {
+          "allowed_integrations": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CreateContactRequest": {
+        "properties": {
+          "customAttributes": {},
+          "email": {
+            "nullable": true,
+            "type": "string"
+          },
+          "identifier": {
+            "type": "string"
+          },
+          "name": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "identifier"
+        ],
+        "type": "object"
+      },
+      "CreateContactResponse": {
+        "properties": {
+          "pubsubToken": {
+            "type": "string"
+          },
+          "sourceId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sourceId",
+          "pubsubToken"
+        ],
+        "type": "object"
+      },
+      "CreateConversationRequest": {
+        "properties": {
+          "customAttributes": {},
+          "sourceId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sourceId"
+        ],
+        "type": "object"
+      },
+      "CreateConversationResponse": {
+        "properties": {
+          "conversationId": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "conversationId"
+        ],
+        "type": "object"
+      },
+      "CreateEventRequest": {
+        "properties": {
+          "attendees": {
+            "items": {
+              "$ref": "#/components/schemas/EventAttendee"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "calendar_id": {
+            "type": "string"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "end": {
+            "$ref": "#/components/schemas/EventDateTime"
+          },
+          "location": {
+            "nullable": true,
+            "type": "string"
+          },
+          "start": {
+            "$ref": "#/components/schemas/EventDateTime"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "calendar_id",
+          "summary",
+          "start",
+          "end"
+        ],
+        "type": "object"
+      },
+      "CreateEventResponse": {
+        "properties": {
+          "event": {}
+        },
+        "required": [
+          "event"
+        ],
+        "type": "object"
+      },
+      "CreateReconnectSessionRequest": {
+        "properties": {
+          "connection_id": {
+            "type": "string"
+          },
+          "integration_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "connection_id",
+          "integration_id"
+        ],
+        "type": "object"
+      },
+      "DeleteAccountResponse": {
+        "properties": {
+          "deleted": {
+            "type": "boolean"
+          },
+          "error": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "deleted"
+        ],
+        "type": "object"
+      },
+      "DeviceInfo": {
+        "properties": {
+          "appVersion": {
+            "type": "string"
+          },
+          "arch": {
+            "type": "string"
+          },
+          "buildHash": {
+            "nullable": true,
+            "type": "string"
+          },
+          "locale": {
+            "nullable": true,
+            "type": "string"
+          },
+          "osVersion": {
+            "type": "string"
+          },
+          "platform": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "platform",
+          "arch",
+          "osVersion",
+          "appVersion"
+        ],
+        "type": "object"
+      },
+      "EventAttendee": {
+        "properties": {
+          "displayName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "optional": {
+            "nullable": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "type": "object"
+      },
+      "EventDateTime": {
+        "properties": {
+          "date": {
+            "nullable": true,
+            "type": "string"
+          },
+          "dateTime": {
+            "nullable": true,
+            "type": "string"
+          },
+          "timeZone": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FeedbackRequest": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "deviceInfo": {
+            "$ref": "#/components/schemas/DeviceInfo"
+          },
+          "logs": {
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/FeedbackType"
+          }
+        },
+        "required": [
+          "description",
+          "deviceInfo"
+        ],
+        "type": "object"
+      },
+      "FeedbackResponse": {
+        "properties": {
+          "error": {
+            "nullable": true,
+            "type": "string"
+          },
+          "issueUrl": {
+            "nullable": true,
+            "type": "string"
+          },
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success"
+        ],
+        "type": "object"
+      },
+      "FeedbackType": {
+        "enum": [
+          "bug",
+          "feature"
+        ],
+        "type": "string"
+      },
+      "Interval": {
+        "enum": [
+          "monthly",
+          "yearly"
+        ],
+        "type": "string"
+      },
+      "ListCalendarsResponse": {
+        "properties": {
+          "calendars": {
+            "items": {},
+            "type": "array"
+          }
+        },
+        "required": [
+          "calendars"
+        ],
+        "type": "object"
+      },
+      "ListConnectionsResponse": {
+        "properties": {
+          "connections": {
+            "items": {
+              "$ref": "#/components/schemas/ConnectionItem"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "connections"
+        ],
+        "type": "object"
+      },
+      "ListEventsRequest": {
+        "properties": {
+          "calendar_id": {
+            "type": "string"
+          },
+          "max_results": {
+            "format": "int32",
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
+          },
+          "order_by": {
+            "nullable": true,
+            "type": "string"
+          },
+          "page_token": {
+            "nullable": true,
+            "type": "string"
+          },
+          "single_events": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "time_max": {
+            "nullable": true,
+            "type": "string"
+          },
+          "time_min": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "calendar_id"
+        ],
+        "type": "object"
+      },
+      "ListEventsResponse": {
+        "properties": {
+          "events": {
+            "items": {},
+            "type": "array"
+          },
+          "next_page_token": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "events"
+        ],
+        "type": "object"
+      },
+      "MessageResponse": {
+        "properties": {
+          "content": {
+            "nullable": true,
+            "type": "string"
+          },
+          "createdAt": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "messageType": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "SendMessageRequest": {
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "messageType": {
+            "type": "string"
+          },
+          "sourceId": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "type": "object"
+      },
+      "StartTrialReason": {
+        "enum": [
+          "started",
+          "not_eligible"
+        ],
+        "type": "string"
+      },
+      "StartTrialResponse": {
+        "properties": {
+          "reason": {
+            "$ref": "#/components/schemas/StartTrialReason",
+            "nullable": true
+          },
+          "started": {
+            "example": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "started"
+        ],
+        "type": "object"
+      },
+      "WebhookResponse": {
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearer_auth": {
+        "bearerFormat": "JWT",
+        "description": "Supabase JWT token",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "description": "AI services API for speech-to-text transcription, LLM chat completions, and subscription management",
+    "license": {
+      "name": ""
+    },
+    "title": "Char AI API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/calendar/calendars": {
+      "post": {
+        "operationId": "list_calendars",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListCalendarsResponse"
+                }
+              }
+            },
+            "description": "Calendars fetched"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "tags": [
+          "calendar"
+        ]
+      }
+    },
+    "/calendar/events": {
+      "post": {
+        "operationId": "list_events",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListEventsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListEventsResponse"
+                }
+              }
+            },
+            "description": "Events fetched"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "tags": [
+          "calendar"
+        ]
+      }
+    },
+    "/calendar/events/create": {
+      "post": {
+        "operationId": "create_event",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEventRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateEventResponse"
+                }
+              }
+            },
+            "description": "Event created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "tags": [
+          "calendar"
+        ]
+      }
+    },
+    "/feedback/submit": {
+      "post": {
+        "operationId": "submit",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackResponse"
+                }
+              }
+            },
+            "description": "Feedback submitted successfully"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "tags": [
+          "feedback"
+        ]
+      }
+    },
+    "/nango/connect-session": {
+      "post": {
+        "operationId": "create_connect_session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConnectSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectSessionResponse"
+                }
+              }
+            },
+            "description": "Connect session created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "tags": [
+          "nango"
+        ]
+      }
+    },
+    "/nango/connections": {
+      "get": {
+        "operationId": "list_connections",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListConnectionsResponse"
+                }
+              }
+            },
+            "description": "List of active connections"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "tags": [
+          "nango"
+        ]
+      }
+    },
+    "/nango/reconnect-session": {
+      "post": {
+        "operationId": "create_reconnect_session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReconnectSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectSessionResponse"
+                }
+              }
+            },
+            "description": "Reconnect session created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "tags": [
+          "nango"
+        ]
+      }
+    },
+    "/nango/webhook": {
+      "post": {
+        "operationId": "nango_webhook",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookResponse"
+                }
+              }
+            },
+            "description": "Webhook processed"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Invalid signature"
+          }
+        },
+        "tags": [
+          "nango"
+        ]
+      }
+    },
+    "/subscription/can-start-trial": {
+      "get": {
+        "operationId": "can_start_trial",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CanStartTrialResponse"
+                }
+              }
+            },
+            "description": "Check successful"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "tags": [
+          "subscription"
+        ]
+      }
+    },
+    "/subscription/delete-account": {
+      "delete": {
+        "operationId": "delete_account",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteAccountResponse"
+                }
+              }
+            },
+            "description": "Account deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "tags": [
+          "subscription"
+        ]
+      }
+    },
+    "/subscription/start-trial": {
+      "post": {
+        "operationId": "start_trial",
+        "parameters": [
+          {
+            "example": "monthly",
+            "in": "query",
+            "name": "interval",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Interval"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StartTrialResponse"
+                }
+              }
+            },
+            "description": "Trial started successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "tags": [
+          "subscription"
+        ]
+      }
+    },
+    "/support/chatwoot/contact": {
+      "post": {
+        "operationId": "create_contact",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContactRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateContactResponse"
+                }
+              }
+            },
+            "description": "Contact created or found"
+          },
+          "500": {
+            "description": "Chatwoot API error"
+          }
+        },
+        "tags": [
+          "chatwoot"
+        ]
+      }
+    },
+    "/support/chatwoot/conversations": {
+      "get": {
+        "operationId": "list_conversations",
+        "parameters": [
+          {
+            "description": "Contact source ID",
+            "in": "query",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ConversationSummary"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "List of conversations"
+          },
+          "500": {
+            "description": "Chatwoot API error"
+          }
+        },
+        "tags": [
+          "chatwoot"
+        ]
+      },
+      "post": {
+        "operationId": "create_conversation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConversationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateConversationResponse"
+                }
+              }
+            },
+            "description": "Conversation created"
+          },
+          "500": {
+            "description": "Chatwoot API error"
+          }
+        },
+        "tags": [
+          "chatwoot"
+        ]
+      }
+    },
+    "/support/chatwoot/conversations/{conversation_id}/messages": {
+      "get": {
+        "operationId": "get_messages",
+        "parameters": [
+          {
+            "description": "Conversation ID",
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Contact source ID",
+            "in": "query",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MessageResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "List of messages"
+          },
+          "500": {
+            "description": "Chatwoot API error"
+          }
+        },
+        "tags": [
+          "chatwoot"
+        ]
+      },
+      "post": {
+        "operationId": "send_message",
+        "parameters": [
+          {
+            "description": "Conversation ID",
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            },
+            "description": "Message sent"
+          },
+          "500": {
+            "description": "Chatwoot API error"
+          }
+        },
+        "tags": [
+          "chatwoot"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "description": "Speech-to-text transcription endpoints",
+      "name": "stt"
+    },
+    {
+      "description": "LLM chat completions endpoints",
+      "name": "llm"
+    },
+    {
+      "description": "Calendar management",
+      "name": "calendar"
+    },
+    {
+      "description": "Integration management via Nango",
+      "name": "nango"
+    },
+    {
+      "description": "Subscription and trial management",
+      "name": "subscription"
+    },
+    {
+      "description": "Speech-to-text transcription proxy",
+      "name": "stt"
+    },
+    {
+      "description": "LLM chat completions proxy",
+      "name": "llm"
+    },
+    {
+      "description": "User feedback and support",
+      "name": "support"
+    },
+    {
+      "description": "Chatwoot conversation persistence",
+      "name": "chatwoot"
+    }
+  ]
+}

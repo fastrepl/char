@@ -39,7 +39,7 @@ function HeroSection() {
   return (
     <div className="px-6 py-16 lg:py-24">
       <div className="text-center max-w-3xl mx-auto">
-        <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
+        <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
           Jobs
         </h1>
         <p className="text-lg sm:text-xl text-neutral-600">
@@ -100,7 +100,7 @@ function JobCard({
       />
       <div className="absolute inset-0 bg-linear-to-b from-white/95 via-white/90 to-white/95" />
       <div className="relative z-10 h-full flex flex-col">
-        <h2 className="text-xl font-medium text-stone-600 mb-2">{job.title}</h2>
+        <h2 className="text-xl font-medium text-stone-700 mb-2">{job.title}</h2>
         <div className="flex items-center gap-3 text-sm text-neutral-500 mb-4">
           <span>Full-time</span>
           <span className="text-neutral-300">|</span>
@@ -141,7 +141,7 @@ function CTASection() {
         </p>
         <div className="pt-6">
           <a
-            href="mailto:founders@hyprnote.com"
+            href="mailto:founders@char.com"
             className="px-6 h-12 flex items-center justify-center text-base sm:text-lg bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%] transition-all"
           >
             Contact us

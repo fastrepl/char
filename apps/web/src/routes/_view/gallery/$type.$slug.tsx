@@ -38,10 +38,10 @@ export const Route = createFileRoute("/_view/gallery/$type/$slug")({
 
     const { type, item } = loaderData;
     const typeLabel = type === "template" ? "Template" : "Shortcut";
-    const url = `https://hyprnote.com/gallery/${type}/${item.slug}`;
+    const url = `https://char.com/gallery/${type}/${item.slug}`;
 
     const ogType = type === "template" ? "templates" : "shortcuts";
-    const ogImageUrl = `https://hyprnote.com/og?type=${ogType}&title=${encodeURIComponent(item.title)}&category=${encodeURIComponent(item.category)}${item.description ? `&description=${encodeURIComponent(item.description)}` : ""}&v=1`;
+    const ogImageUrl = `https://char.com/og?type=${ogType}&title=${encodeURIComponent(item.title)}&category=${encodeURIComponent(item.category)}${item.description ? `&description=${encodeURIComponent(item.description)}` : ""}&v=1`;
 
     return {
       meta: [
@@ -97,7 +97,7 @@ function LeftSidebar({
         <Link
           to="/gallery/"
           search={{ type }}
-          className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-stone-600 transition-colors mb-6 font-serif"
+          className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-stone-700 transition-colors mb-6 font-serif"
         >
           <Icon icon="mdi:arrow-left" className="text-base" />
           <span>Back to gallery</span>
@@ -127,7 +127,7 @@ function LeftSidebar({
             <Link
               to="/gallery/"
               search={{ type, category: item.category }}
-              className="text-sm text-stone-600 hover:text-stone-800 transition-colors"
+              className="text-sm text-stone-700 hover:text-stone-800 transition-colors"
             >
               {item.category}
             </Link>
@@ -140,7 +140,7 @@ function LeftSidebar({
             <nav className="flex flex-col gap-1">
               <a
                 href="#content"
-                className="block text-sm text-neutral-500 hover:text-stone-600 py-1 transition-colors"
+                className="block text-sm text-neutral-500 hover:text-stone-700 py-1 transition-colors"
               >
                 {type === "template" ? "Structure" : "Details"}
               </a>
@@ -165,7 +165,7 @@ function MainContent({
         <Link
           to="/gallery/"
           search={{ type }}
-          className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-stone-600 transition-colors font-serif"
+          className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-stone-700 transition-colors font-serif"
         >
           <Icon icon="mdi:arrow-left" className="text-base" />
           <span>Back to gallery</span>
@@ -204,7 +204,7 @@ function ItemHeader({
         </span>
         <span className="text-sm text-neutral-500">{item.category}</span>
       </div>
-      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif text-stone-600 mb-4">
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif text-stone-700 mb-4">
         {item.title}
       </h1>
       <p className="text-lg lg:text-xl text-neutral-600 leading-relaxed mb-6">
@@ -216,7 +216,7 @@ function ItemHeader({
           {item.targets.map((target) => (
             <span
               key={target}
-              className="text-sm px-3 py-1 bg-stone-50 text-stone-600 rounded-full border border-stone-100"
+              className="text-sm px-3 py-1 bg-stone-50 text-stone-700 rounded-full border border-stone-100"
             >
               {target}
             </span>
@@ -244,7 +244,7 @@ function ItemContent({
       <div className="border border-neutral-200 rounded-xs px-6 lg:px-8 pt-3 lg:pt-4 pb-6 lg:pb-8 bg-white">
         {isTemplate && "sections" in item && (
           <div className="mb-6">
-            <h3 className="text-sm font-semibold text-stone-600 uppercase tracking-wider mb-3">
+            <h3 className="text-sm font-semibold text-stone-700 uppercase tracking-wider mb-3">
               Template Sections
             </h3>
             <div className="flex flex-col gap-3">
@@ -254,7 +254,7 @@ function ItemContent({
                   className="p-3 rounded-lg bg-stone-50 border border-stone-100"
                 >
                   <div className="flex items-center gap-3 mb-1">
-                    <span className="w-5 h-5 rounded-full bg-stone-200 text-stone-600 text-xs font-medium flex items-center justify-center">
+                    <span className="w-5 h-5 rounded-full bg-stone-200 text-stone-700 text-xs font-medium flex items-center justify-center">
                       {index + 1}
                     </span>
                     <h4 className="font-medium text-stone-700 text-sm">
@@ -309,7 +309,7 @@ function SuggestedItems({
             params={{ type, slug: t.slug }}
             className="group p-4 border border-neutral-200 rounded-xs bg-white hover:shadow-md hover:border-neutral-300 transition-all"
           >
-            <h3 className="font-serif text-lg text-stone-600 mb-1 group-hover:text-stone-800 transition-colors">
+            <h3 className="font-serif text-lg text-stone-700 mb-1 group-hover:text-stone-800 transition-colors">
               {t.title}
             </h3>
             <p className="text-sm text-neutral-600 line-clamp-2">
@@ -328,7 +328,7 @@ function ItemFooter({ type }: { type: GalleryType }) {
       <Link
         to="/gallery/"
         search={{ type }}
-        className="inline-flex items-center gap-2 text-neutral-600 hover:text-stone-600 transition-colors font-medium"
+        className="inline-flex items-center gap-2 text-neutral-600 hover:text-stone-700 transition-colors font-medium"
       >
         <span>&larr;</span>
         <span>View all {type === "template" ? "templates" : "shortcuts"}</span>
@@ -352,7 +352,7 @@ function RightSidebar({
     <aside className="hidden sm:block w-80 shrink-0">
       <div className="sticky top-17.25 flex flex-col gap-4 px-4 py-6">
         <div className="border border-neutral-200 rounded-xs overflow-hidden bg-white bg-[linear-gradient(to_right,#f5f5f5_1px,transparent_1px),linear-gradient(to_bottom,#f5f5f5_1px,transparent_1px)] bg-size-[24px_24px] bg-position-[12px_12px,12px_12px] p-6 text-center">
-          <h3 className="font-serif text-lg text-stone-600 mb-3">
+          <h3 className="font-serif text-lg text-stone-700 mb-3">
             Use this {isTemplate ? "template" : "shortcut"}
           </h3>
           <p className="text-sm text-neutral-600 mb-6">
@@ -376,7 +376,7 @@ function RightSidebar({
         </a>
 
         <div className="border border-dashed border-neutral-300 rounded-xs p-6 bg-stone-50/50 text-center">
-          <h3 className="font-serif text-lg text-stone-600 mb-3">Contribute</h3>
+          <h3 className="font-serif text-lg text-stone-700 mb-3">Contribute</h3>
           <p className="text-sm text-neutral-600 mb-6">
             Have an idea? Submit a PR and help the community.
           </p>

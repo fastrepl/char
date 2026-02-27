@@ -19,6 +19,7 @@ type TranscriptRow = {
   ended_at: number;
   words: string;
   speaker_hints: string;
+  memo_md: string;
 };
 
 type ParticipantRow = {

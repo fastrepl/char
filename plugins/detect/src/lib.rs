@@ -4,29 +4,46 @@ use tauri::Manager;
 
 mod commands;
 mod dnd;
-mod env;
 mod error;
 mod events;
 mod ext;
-mod handler;
 mod mic_usage_tracker;
+
+#[cfg(feature = "test-support")]
+pub mod env;
+#[cfg(not(feature = "test-support"))]
+mod env;
+
+#[cfg(feature = "test-support")]
+pub mod handler;
+#[cfg(not(feature = "test-support"))]
+mod handler;
+
+#[cfg(feature = "test-support")]
+pub mod policy;
+#[cfg(not(feature = "test-support"))]
 mod policy;
 
 pub use dnd::*;
 pub use error::*;
 pub use events::*;
 pub use ext::*;
+pub use mic_usage_tracker::MicUsageTracker;
 pub use policy::*;
 
 const PLUGIN_NAME: &str = "detect";
 
 pub(crate) type DetectorState = Mutex<hypr_detect::Detector>;
+
+#[cfg(feature = "test-support")]
+pub type ProcessorState = Arc<Mutex<Processor>>;
+#[cfg(not(feature = "test-support"))]
 pub(crate) type ProcessorState = Arc<Mutex<Processor>>;
 
-pub(crate) struct Processor {
-    pub(crate) policy: policy::MicNotificationPolicy,
-    pub(crate) mic_usage_tracker: mic_usage_tracker::MicUsageTracker,
-    pub(crate) mic_active_threshold_secs: u64,
+pub struct Processor {
+    pub policy: policy::MicNotificationPolicy,
+    pub mic_usage_tracker: mic_usage_tracker::MicUsageTracker,
+    pub mic_active_threshold_secs: u64,
 }
 
 impl Default for Processor {

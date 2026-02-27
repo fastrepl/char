@@ -51,7 +51,7 @@ function HeroSection() {
   return (
     <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30 px-6 py-12 lg:py-20">
       <header className="mb-12 text-center max-w-4xl mx-auto">
-        <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
+        <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
           Everything in one place
         </h1>
         <p className="text-lg sm:text-xl text-neutral-600">
@@ -96,7 +96,7 @@ function ContactsSection() {
       <div>
         <div className="text-center">
           <div className="py-12 px-6">
-            <h2 className="text-3xl font-serif text-stone-600 mb-4">
+            <h2 className="text-3xl font-serif text-stone-700 mb-4">
               Contacts
             </h2>
             <p className="text-base text-neutral-600 max-w-2xl mx-auto">
@@ -133,7 +133,7 @@ function CalendarSection() {
       <div className="hidden sm:grid sm:grid-cols-2">
         <div className="flex items-center p-8">
           <div className="flex flex-col gap-4">
-            <h2 className="text-3xl font-serif text-stone-600">Calendar</h2>
+            <h2 className="text-3xl font-serif text-stone-700">Calendar</h2>
             <p className="text-base text-neutral-600 leading-relaxed">
               Connect your calendar for intelligent meeting preparation and
               automatic note organization.
@@ -168,7 +168,7 @@ function CalendarSection() {
                 className="text-2xl text-stone-700 shrink-0 mt-1"
               />
               <div className="flex-1">
-                <h4 className="text-lg font-serif text-stone-600 mb-1">
+                <h4 className="text-lg font-serif text-stone-700 mb-1">
                   Weekly Team Sync
                 </h4>
                 <p className="text-sm text-neutral-600">
@@ -181,7 +181,7 @@ function CalendarSection() {
             </div>
             <div className="flex flex-col gap-3">
               <div>
-                <h5 className="text-sm font-medium text-stone-600 mb-2">
+                <h5 className="text-sm font-medium text-stone-700 mb-2">
                   Last meeting context
                 </h5>
                 <div className="p-3 bg-stone-50 border border-stone-300 rounded text-xs">
@@ -201,7 +201,7 @@ function CalendarSection() {
 
       <div className="sm:hidden">
         <div className="p-6 border-b border-neutral-100">
-          <h2 className="text-2xl font-serif text-stone-600 mb-3">Calendar</h2>
+          <h2 className="text-2xl font-serif text-stone-700 mb-3">Calendar</h2>
           <p className="text-sm text-neutral-600 leading-relaxed mb-4">
             Connect your calendar for intelligent meeting preparation and
             automatic note organization.
@@ -235,7 +235,7 @@ function CalendarSection() {
                 className="text-2xl text-stone-700 shrink-0 mt-1"
               />
               <div className="flex-1">
-                <h4 className="text-lg font-serif text-stone-600 mb-1">
+                <h4 className="text-lg font-serif text-stone-700 mb-1">
                   Weekly Team Sync
                 </h4>
                 <p className="text-sm text-neutral-600">
@@ -248,7 +248,7 @@ function CalendarSection() {
             </div>
             <div className="flex flex-col gap-3">
               <div>
-                <h5 className="text-sm font-medium text-stone-600 mb-2">
+                <h5 className="text-sm font-medium text-stone-700 mb-2">
                   Last meeting context
                 </h5>
                 <div className="p-3 bg-stone-50 border border-stone-300 rounded text-xs">
@@ -275,7 +275,7 @@ function DailyNotesSection() {
       <div className="hidden sm:grid sm:grid-cols-2">
         <div className="flex items-center p-8">
           <div className="flex flex-col gap-4">
-            <h2 className="text-3xl font-serif text-stone-600">Daily Notes</h2>
+            <h2 className="text-3xl font-serif text-stone-700">Daily Notes</h2>
             <p className="text-base text-neutral-600 leading-relaxed">
               Consolidate all your meetings, action items, and insights in one
               place.
@@ -286,7 +286,7 @@ function DailyNotesSection() {
                 <span className="text-neutral-600">
                   Automatic aggregation of meetings
                 </span>
-                <span className="px-2 py-0.5 text-xs bg-stone-100 text-stone-600 rounded-full">
+                <span className="px-2 py-0.5 text-xs bg-stone-100 text-stone-700 rounded-full">
                   Coming soon
                 </span>
               </li>
@@ -295,7 +295,7 @@ function DailyNotesSection() {
                 <span className="text-neutral-600">
                   Chronological timeline view
                 </span>
-                <span className="px-2 py-0.5 text-xs bg-stone-100 text-stone-600 rounded-full">
+                <span className="px-2 py-0.5 text-xs bg-stone-100 text-stone-700 rounded-full">
                   Coming soon
                 </span>
               </li>
@@ -304,7 +304,7 @@ function DailyNotesSection() {
                 <span className="text-neutral-600">
                   AI-generated daily summary
                 </span>
-                <span className="px-2 py-0.5 text-xs bg-stone-100 text-stone-600 rounded-full">
+                <span className="px-2 py-0.5 text-xs bg-stone-100 text-stone-700 rounded-full">
                   Coming soon
                 </span>
               </li>
@@ -320,7 +320,7 @@ function DailyNotesSection() {
 
       <div className="sm:hidden">
         <div className="p-6 border-b border-neutral-100">
-          <h2 className="text-2xl font-serif text-stone-600 mb-3">
+          <h2 className="text-2xl font-serif text-stone-700 mb-3">
             Daily Notes
           </h2>
           <p className="text-sm text-neutral-600 leading-relaxed mb-4">
@@ -333,7 +333,7 @@ function DailyNotesSection() {
               <span className="text-neutral-600 text-sm">
                 Automatic aggregation of meetings
               </span>
-              <span className="px-2 py-0.5 text-xs bg-stone-100 text-stone-600 rounded-full shrink-0">
+              <span className="px-2 py-0.5 text-xs bg-stone-100 text-stone-700 rounded-full shrink-0">
                 Coming soon
               </span>
             </li>
@@ -342,7 +342,7 @@ function DailyNotesSection() {
               <span className="text-neutral-600 text-sm">
                 Chronological timeline view
               </span>
-              <span className="px-2 py-0.5 text-xs bg-stone-100 text-stone-600 rounded-full shrink-0">
+              <span className="px-2 py-0.5 text-xs bg-stone-100 text-stone-700 rounded-full shrink-0">
                 Coming soon
               </span>
             </li>
@@ -351,7 +351,7 @@ function DailyNotesSection() {
               <span className="text-neutral-600 text-sm">
                 AI-generated daily summary
               </span>
-              <span className="px-2 py-0.5 text-xs bg-stone-100 text-stone-600 rounded-full shrink-0">
+              <span className="px-2 py-0.5 text-xs bg-stone-100 text-stone-700 rounded-full shrink-0">
                 Coming soon
               </span>
             </li>
@@ -373,7 +373,7 @@ function FoldersSection() {
       <div className="hidden sm:grid sm:grid-cols-2">
         <div className="flex items-center p-8">
           <div className="flex flex-col gap-4">
-            <h2 className="text-3xl font-serif text-stone-600">Folders</h2>
+            <h2 className="text-3xl font-serif text-stone-700">Folders</h2>
             <p className="text-base text-neutral-600 leading-relaxed">
               Organize your meetings and notes into folders for easy access and
               better structure.
@@ -411,7 +411,7 @@ function FoldersSection() {
 
       <div className="sm:hidden">
         <div className="p-6 border-b border-neutral-100">
-          <h2 className="text-2xl font-serif text-stone-600 mb-3">Folders</h2>
+          <h2 className="text-2xl font-serif text-stone-700 mb-3">Folders</h2>
           <p className="text-sm text-neutral-600 leading-relaxed mb-4">
             Organize your meetings and notes into folders for easy access and
             better structure.
@@ -527,7 +527,7 @@ function AdvancedSearchSection() {
             <div className="inline-block px-4 py-1.5 rounded-full bg-linear-to-t from-stone-600 to-stone-500 text-white opacity-50 text-xs font-medium mb-4">
               Coming Soon
             </div>
-            <h2 className="text-3xl font-serif text-stone-600 mb-4">
+            <h2 className="text-3xl font-serif text-stone-700 mb-4">
               Advanced Search
             </h2>
             <p className="text-base text-neutral-600">
@@ -559,7 +559,7 @@ function AdvancedSearchSection() {
                   />
                 )}
                 <div className="p-6 relative">
-                  <h3 className="text-lg font-serif text-stone-600 mb-2">
+                  <h3 className="text-lg font-serif text-stone-700 mb-2">
                     {image.title}
                   </h3>
                   <p className="text-sm text-neutral-600">

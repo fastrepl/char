@@ -209,7 +209,7 @@ function HeroSection() {
   return (
     <div className="px-6 py-16 lg:py-24">
       <div className="text-center max-w-3xl mx-auto">
-        <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
+        <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
           Brand
         </h1>
         <p className="text-lg sm:text-xl text-neutral-600">
@@ -319,7 +319,7 @@ function VisualAssetsGrid({
                 className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform"
               />
             </div>
-            <div className="font-medium text-stone-600">{asset.name}</div>
+            <div className="font-medium text-stone-700">{asset.name}</div>
           </button>
         ))}
       </div>
@@ -345,13 +345,13 @@ function TypographyGrid({
             className="group flex flex-col items-center text-center p-4 rounded-lg hover:bg-stone-50 transition-colors cursor-pointer h-fit"
           >
             <div
-              className="mb-3 w-16 h-16 flex items-center justify-center text-3xl font-medium text-stone-600 group-hover:scale-110 transition-transform"
+              className="mb-3 w-16 h-16 flex items-center justify-center text-3xl font-medium text-stone-700 group-hover:scale-110 transition-transform"
               style={{ fontFamily: font.fontFamily }}
             >
               Aa
             </div>
             <div
-              className="font-medium text-stone-600"
+              className="font-medium text-stone-700"
               style={{ fontFamily: font.fontFamily }}
             >
               {font.name}
@@ -386,7 +386,7 @@ function ColorsGrid({
                 style={{ backgroundColor: color.hex }}
               />
             </div>
-            <div className="font-medium text-stone-600">{color.name}</div>
+            <div className="font-medium text-stone-700">{color.name}</div>
           </button>
         ))}
       </div>
@@ -451,7 +451,7 @@ function MobileSidebarDrawer({
             }}
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200 bg-stone-50">
-              <span className="text-sm font-medium text-stone-600">
+              <span className="text-sm font-medium text-stone-700">
                 Navigation
               </span>
               <button
@@ -583,7 +583,7 @@ function VisualAssetsSidebar({
               />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-stone-600 truncate">
+              <p className="text-sm font-medium text-stone-700 truncate">
                 {asset.name}
               </p>
               <p className="text-xs text-neutral-500 truncate">
@@ -623,14 +623,14 @@ function TypographySidebar({
             ])}
           >
             <div
-              className="w-12 h-12 shrink-0 flex items-center justify-center text-2xl font-medium text-stone-600"
+              className="w-12 h-12 shrink-0 flex items-center justify-center text-2xl font-medium text-stone-700"
               style={{ fontFamily: font.fontFamily }}
             >
               Aa
             </div>
             <div className="flex-1 min-w-0">
               <p
-                className="text-sm font-medium text-stone-600 truncate"
+                className="text-sm font-medium text-stone-700 truncate"
                 style={{ fontFamily: font.fontFamily }}
               >
                 {font.name}
@@ -681,7 +681,7 @@ function ColorsSidebar({
               />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-stone-600 truncate">
+              <p className="text-sm font-medium text-stone-700 truncate">
                 {color.name}
               </p>
               <p className="text-xs text-neutral-500 truncate font-mono">
@@ -746,7 +746,7 @@ function VisualAssetDetail({
   return (
     <>
       <div className="py-2 px-4 flex items-center justify-between border-b border-neutral-200">
-        <h2 className="font-medium text-stone-600">{asset.name}</h2>
+        <h2 className="font-medium text-stone-700">{asset.name}</h2>
         <div className="flex items-center gap-2">
           <a
             href={asset.url}
@@ -796,7 +796,7 @@ function TypographyDetail({
   return (
     <>
       <div className="py-2 px-4 flex items-center justify-between border-b border-neutral-200">
-        <h2 className="font-medium text-stone-600">{font.name}</h2>
+        <h2 className="font-medium text-stone-700">{font.name}</h2>
         <button
           onClick={onClose}
           className="text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer"
@@ -890,7 +890,7 @@ function ColorDetail({
   return (
     <>
       <div className="py-2 px-4 flex items-center justify-between border-b border-neutral-200">
-        <h2 className="font-medium text-stone-600">{color.name}</h2>
+        <h2 className="font-medium text-stone-700">{color.name}</h2>
         <button
           onClick={onClose}
           className="text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer"

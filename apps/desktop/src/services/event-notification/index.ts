@@ -1,13 +1,12 @@
+import { findSessionByEventId } from "~/session/utils";
+import type * as main from "~/store/tinybase/store/main";
+import type * as settings from "~/store/tinybase/store/settings";
+
 import {
   type EventDetails,
   commands as notificationCommands,
   type Participant,
 } from "@hypr/plugin-notification";
-import { format, TZDate } from "@hypr/utils";
-
-import type * as main from "../../store/tinybase/store/main";
-import type * as settings from "../../store/tinybase/store/settings";
-import { findSessionByEventId } from "../../utils/session-event";
 
 export const EVENT_NOTIFICATION_TASK_ID = "eventNotification";
 export const EVENT_NOTIFICATION_INTERVAL = 30 * 1000; // 30 sec
@@ -61,8 +60,7 @@ export function checkEventNotifications(
     }
   }
 
-  const ignoredNonRecurrentIds = new Set<string>();
-  const ignoredRecurrentMap = new Map<string, Set<string>>();
+  const ignoredIds = new Set<string>();
   const ignoredSeriesIds = new Set<string>();
 
   try {
@@ -70,16 +68,8 @@ export function checkEventNotifications(
     if (raw) {
       for (const e of JSON.parse(raw) as Array<{
         tracking_id: string;
-        is_recurrent: boolean;
-        day?: string;
       }>) {
-        if (e.is_recurrent) {
-          const set = ignoredRecurrentMap.get(e.tracking_id) ?? new Set();
-          if (e.day) set.add(e.day);
-          ignoredRecurrentMap.set(e.tracking_id, set);
-        } else {
-          ignoredNonRecurrentIds.add(e.tracking_id);
-        }
+        ignoredIds.add(e.tracking_id);
       }
     }
   } catch {}
@@ -95,8 +85,6 @@ export function checkEventNotifications(
     }
   } catch {}
 
-  const timezone = settingsStore?.getValue("timezone") as string | undefined;
-
   store.forEachRow("events", (eventId, _forEachCell) => {
     const event = store.getRow("events", eventId);
     if (!event?.started_at) return;
@@ -109,16 +97,9 @@ export function checkEventNotifications(
     const recurrenceSeriesId = event.recurrence_series_id as string | undefined;
 
     if (trackingId) {
-      if (!recurrenceSeriesId) {
-        if (ignoredNonRecurrentIds.has(trackingId)) return;
-      } else {
-        const day = format(
-          timezone ? new TZDate(startTime, timezone) : startTime,
-          "yyyy-MM-dd",
-        );
-        if (ignoredRecurrentMap.get(trackingId)?.has(day)) return;
-        if (ignoredSeriesIds.has(recurrenceSeriesId)) return;
-      }
+      if (ignoredIds.has(trackingId)) return;
+      if (recurrenceSeriesId && ignoredSeriesIds.has(recurrenceSeriesId))
+        return;
     }
 
     if (timeUntilStart > 0 && timeUntilStart <= NOTIFY_WINDOW_MS) {
@@ -139,7 +120,7 @@ export function checkEventNotifications(
       };
 
       let participants: Participant[] | null = null;
-      const sessionId = findSessionByEventId(store, eventId, timezone);
+      const sessionId = findSessionByEventId(store, eventId);
       if (sessionId) {
         const sessionParticipants = getParticipantsForSession(store, sessionId);
         if (sessionParticipants.length > 0) {

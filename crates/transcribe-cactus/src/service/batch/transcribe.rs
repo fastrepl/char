@@ -1,18 +1,27 @@
 use std::io::Write;
+use std::num::NonZeroU8;
 use std::path::Path;
 
 use owhisper_interface::ListenParams;
 use owhisper_interface::batch;
-use owhisper_interface::stream::{Extra, Metadata, ModelInfo};
+use owhisper_interface::progress::{InferencePhase, InferenceProgress};
+use rodio::Source;
+use tokio::sync::mpsc;
 
-use super::audio::{audio_duration_secs, content_type_to_extension};
+use super::chunk::{TARGET_SAMPLE_RATE, chunk_mono_audio};
 use super::response::build_batch_words;
+use hypr_audio_utils::content_type_to_extension;
 
+#[tracing::instrument(
+    skip(audio_data, progress_tx),
+    fields(audio_bytes = audio_data.len(), content_type, model_path = %model_path.display())
+)]
 pub(super) fn transcribe_batch(
     audio_data: &[u8],
     content_type: &str,
     params: &ListenParams,
     model_path: &Path,
+    progress_tx: Option<mpsc::UnboundedSender<InferenceProgress>>,
 ) -> Result<batch::Response, crate::Error> {
     let extension = content_type_to_extension(content_type);
     let mut temp_file = tempfile::Builder::new()
@@ -23,7 +32,25 @@ pub(super) fn transcribe_batch(
     temp_file.write_all(audio_data)?;
     temp_file.flush()?;
 
-    let model = hypr_cactus::Model::new(model_path)?;
+    let source = hypr_audio_utils::source_from_path(temp_file.path())?;
+    let channels = source.channels();
+    let resampled = hypr_audio_utils::resample_audio(source, TARGET_SAMPLE_RATE)?;
+    let mono = hypr_audio_utils::mix_down_to_mono(
+        &resampled,
+        NonZeroU8::new(channels as u8).unwrap_or(NonZeroU8::new(1).unwrap()),
+    );
+
+    let total_duration = mono.len() as f64 / TARGET_SAMPLE_RATE as f64;
+
+    let chunks = tokio::runtime::Handle::current().block_on(chunk_mono_audio(&mono))?;
+
+    let model = match hypr_cactus::Model::new(model_path) {
+        Ok(m) => m,
+        Err(e) => {
+            tracing::error!(error = %e, "failed to load model");
+            return Err(e.into());
+        }
+    };
 
     let custom_vocabulary = if params.keywords.is_empty() {
         None
@@ -37,27 +64,13 @@ pub(super) fn transcribe_batch(
         ..Default::default()
     };
 
-    let total_duration = audio_duration_secs(temp_file.path());
-
-    let cactus_response = model.transcribe_file(temp_file.path(), &options)?;
-    let transcript = cactus_response.text.trim().to_string();
-    let confidence = cactus_response.confidence as f64;
-    let words = build_batch_words(&transcript, total_duration, confidence);
-
-    let model_name = model_path
-        .file_stem()
-        .and_then(|s| s.to_str())
-        .unwrap_or("cactus");
-
-    let meta = Metadata {
-        model_info: ModelInfo {
-            name: model_name.to_string(),
-            version: "1.0".to_string(),
-            arch: "cactus".to_string(),
-        },
-        extra: Some(Extra::default().into()),
-        ..Default::default()
+    let (all_words, transcript, avg_confidence) = if chunks.is_empty() {
+        (vec![], String::new(), 0.0)
+    } else {
+        transcribe_chunks(&chunks, &model, &options, total_duration, progress_tx)?
     };
+
+    let meta = crate::service::build_metadata(model_path);
 
     let mut metadata = serde_json::to_value(&meta).unwrap_or_default();
     if let Some(obj) = metadata.as_object_mut() {
@@ -71,12 +84,109 @@ pub(super) fn transcribe_batch(
             channels: vec![batch::Channel {
                 alternatives: vec![batch::Alternatives {
                     transcript,
-                    confidence,
-                    words,
+                    confidence: avg_confidence,
+                    words: all_words,
                 }],
             }],
         },
     })
+}
+
+fn transcribe_chunks(
+    chunks: &[hypr_vad_chunking::AudioChunk],
+    model: &hypr_cactus::Model,
+    options: &hypr_cactus::TranscribeOptions,
+    total_duration: f64,
+    progress_tx: Option<mpsc::UnboundedSender<InferenceProgress>>,
+) -> Result<(Vec<batch::Word>, String, f64), crate::Error> {
+    let mut all_words = Vec::new();
+    let mut all_transcripts = Vec::new();
+    let mut cumulative_confidence = 0.0;
+
+    for (i, chunk) in chunks.iter().enumerate() {
+        let pcm_i16 = hypr_audio_utils::f32_to_i16_samples(&chunk.samples);
+        let pcm_bytes: Vec<u8> = pcm_i16.iter().flat_map(|s| s.to_le_bytes()).collect();
+
+        let chunk_start_sec = chunk.start_timestamp_ms as f64 / 1000.0;
+        let chunk_duration_sec =
+            (chunk.end_timestamp_ms - chunk.start_timestamp_ms) as f64 / 1000.0;
+
+        let cactus_response = if let Some(ref tx) = progress_tx {
+            let tx = tx.clone();
+            let completed_text: String = all_transcripts.join(" ");
+            let chunks_before_sec: f64 = if i > 0 {
+                chunks[i - 1].end_timestamp_ms as f64 / 1000.0
+            } else {
+                0.0
+            };
+
+            model.transcribe_pcm_with_callback(&pcm_bytes, options, |token| {
+                let mut partial = completed_text.clone();
+
+                if !token.starts_with("<|") || !token.ends_with("|>") {
+                    if !partial.is_empty() {
+                        partial.push(' ');
+                    }
+                    partial.push_str(token);
+                }
+
+                let chunk_progress = if chunk_duration_sec > 0.0 {
+                    if let Some(ts) = parse_timestamp_token(token) {
+                        (ts / chunk_duration_sec).clamp(0.0, 1.0)
+                    } else {
+                        0.0
+                    }
+                } else {
+                    0.0
+                };
+
+                let elapsed_sec = chunks_before_sec + chunk_progress * chunk_duration_sec;
+                let percentage = if total_duration > 0.0 {
+                    (elapsed_sec / total_duration).clamp(0.0, 1.0)
+                } else {
+                    0.0
+                };
+
+                let _ = tx.send(InferenceProgress {
+                    percentage,
+                    partial_text: Some(partial),
+                    phase: InferencePhase::Decoding,
+                });
+
+                true
+            })?
+        } else {
+            model.transcribe_pcm(&pcm_bytes, options)?
+        };
+
+        let chunk_text = cactus_response.text.trim().to_string();
+        if !chunk_text.is_empty() {
+            let mut words = build_batch_words(
+                &chunk_text,
+                chunk_duration_sec,
+                cactus_response.confidence as f64,
+            );
+            for w in &mut words {
+                w.start += chunk_start_sec;
+                w.end += chunk_start_sec;
+            }
+            all_words.extend(words);
+            all_transcripts.push(chunk_text);
+        }
+        cumulative_confidence += cactus_response.confidence as f64;
+    }
+
+    let transcript = all_transcripts.join(" ");
+    let avg_confidence = cumulative_confidence / chunks.len() as f64;
+
+    Ok((all_words, transcript, avg_confidence))
+}
+
+fn parse_timestamp_token(token: &str) -> Option<f64> {
+    token
+        .strip_prefix("<|")
+        .and_then(|s| s.strip_suffix("|>"))
+        .and_then(|s| s.parse::<f64>().ok())
 }
 
 #[cfg(test)]
@@ -91,9 +201,14 @@ mod tests {
     #[ignore = "requires local cactus model files"]
     #[test]
     fn e2e_transcribe_with_real_model_inference() {
-        let model_path =
-            std::env::var("CACTUS_STT_MODEL").unwrap_or_else(|_| "/tmp/cactus-model".to_string());
-        let model_path = Path::new(&model_path);
+        let model_path_str = std::env::var("CACTUS_STT_MODEL").unwrap_or_else(|_| {
+            dirs::data_dir()
+                .expect("could not find data dir")
+                .join("com.hyprnote.dev/models/cactus/whisper-small-int8-apple")
+                .to_string_lossy()
+                .into_owned()
+        });
+        let model_path = Path::new(&model_path_str);
         assert!(
             model_path.exists(),
             "model path does not exist: {}",
@@ -108,7 +223,7 @@ mod tests {
             ..Default::default()
         };
 
-        let response = transcribe_batch(&wav_bytes, "audio/wav", &params, model_path)
+        let response = transcribe_batch(&wav_bytes, "audio/wav", &params, model_path, None)
             .unwrap_or_else(|e| panic!("real-model batch transcription failed: {e}"));
 
         let Some(channel) = response.results.channels.first() else {

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
+import { DEFAULT_USER_ID } from "~/shared/utils";
 
-import { DEFAULT_USER_ID } from "../../../utils";
 import type { Store } from "./main";
 
 export function useInitializeStore(

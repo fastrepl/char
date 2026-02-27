@@ -1,9 +1,10 @@
 use tauri::{
     Result,
-    image::Image,
     menu::{Menu, MenuItemKind, PredefinedMenuItem, Submenu},
     tray::TrayIconBuilder,
 };
+
+use crate::tray_icon::TrayIconState;
 
 use crate::menu_items::{
     AppInfo, AppNew, HelpReportBug, HelpSuggestFeature, MenuItemHandler, TrayCheckUpdate, TrayOpen,
@@ -106,9 +107,7 @@ impl<'a, M: tauri::Manager<tauri::Wry>> Tray<'a, tauri::Wry, M> {
         )?;
 
         TrayIconBuilder::with_id(TRAY_ID)
-            .icon(Image::from_bytes(include_bytes!(
-                "../icons/tray_default.png"
-            ))?)
+            .icon(TrayIconState::Default.to_image()?)
             .icon_as_template(true)
             .menu(&menu)
             .show_menu_on_left_click(true)

@@ -45,7 +45,7 @@ export const Route = createFileRoute("/_view/gallery/")({
           "Browse our collection of AI meeting templates and shortcuts. From engineering standups to sales discovery calls, find the perfect tool for your workflow.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://hyprnote.com/gallery" },
+      { property: "og:url", content: "https://char.com/gallery" },
     ],
   }),
 });
@@ -229,7 +229,7 @@ function HeroSection({
     <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
       <section className="flex flex-col items-center text-center gap-8 py-24 px-4 laptop:px-0">
         <div className="flex flex-col gap-6 max-w-3xl">
-          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600">
+          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700">
             Gallery
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600">
@@ -244,7 +244,7 @@ function HeroSection({
               "px-4 py-2 text-sm font-medium rounded-full transition-colors cursor-pointer",
               selectedType === null
                 ? "bg-white text-stone-800 shadow-xs"
-                : "text-stone-600 hover:text-stone-800",
+                : "text-stone-700 hover:text-stone-800",
             ])}
           >
             All
@@ -255,7 +255,7 @@ function HeroSection({
               "px-4 py-2 text-sm font-medium rounded-full transition-colors cursor-pointer",
               selectedType === "template"
                 ? "bg-white text-stone-800 shadow-xs"
-                : "text-stone-600 hover:text-stone-800",
+                : "text-stone-700 hover:text-stone-800",
             ])}
           >
             Templates
@@ -266,7 +266,7 @@ function HeroSection({
               "px-4 py-2 text-sm font-medium rounded-full transition-colors cursor-pointer",
               selectedType === "shortcut"
                 ? "bg-white text-stone-800 shadow-xs"
-                : "text-stone-600 hover:text-stone-800",
+                : "text-stone-700 hover:text-stone-800",
             ])}
           >
             Shortcuts
@@ -292,7 +292,7 @@ function HeroSection({
 function QuoteSection() {
   return (
     <div className="py-4 px-4 text-center border-y border-neutral-100 bg-white bg-[linear-gradient(to_right,#f5f5f5_1px,transparent_1px),linear-gradient(to_bottom,#f5f5f5_1px,transparent_1px)] bg-size-[24px_24px] bg-position-[12px_12px,12px_12px]">
-      <p className="text-base text-stone-600 font-serif italic">
+      <p className="text-base text-stone-700 font-serif italic">
         "Curated by Char and the community"
       </p>
     </div>
@@ -317,7 +317,7 @@ function MobileCategoriesSection({
             "px-5 py-3 text-sm font-medium transition-colors whitespace-nowrap shrink-0 border-r border-neutral-100 cursor-pointer",
             selectedCategory === null
               ? "bg-stone-600 text-white"
-              : "text-stone-600 hover:bg-stone-100",
+              : "text-stone-700 hover:bg-stone-100",
           ])}
         >
           All
@@ -330,7 +330,7 @@ function MobileCategoriesSection({
               "px-5 py-3 text-sm font-medium transition-colors whitespace-nowrap shrink-0 border-r border-neutral-100 last:border-r-0 cursor-pointer",
               selectedCategory === category
                 ? "bg-stone-600 text-white"
-                : "text-stone-600 hover:bg-stone-100",
+                : "text-stone-700 hover:bg-stone-100",
             ])}
           >
             {category}
@@ -396,7 +396,7 @@ function DesktopSidebar({
               "w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer",
               selectedCategory === null
                 ? "bg-stone-100 text-stone-800"
-                : "text-stone-600 hover:bg-stone-50",
+                : "text-stone-700 hover:bg-stone-50",
             ])}
           >
             All
@@ -412,7 +412,7 @@ function DesktopSidebar({
                 "w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer",
                 selectedCategory === category
                   ? "bg-stone-100 text-stone-800"
-                  : "text-stone-600 hover:bg-stone-50",
+                  : "text-stone-700 hover:bg-stone-50",
               ])}
             >
               {category}
@@ -472,7 +472,7 @@ function ItemCard({ item }: { item: GalleryItem }) {
           <span className="mx-1">/</span>
           <span>{item.item.category}</span>
         </p>
-        <h3 className="font-serif text-lg text-stone-600 mb-1 group-hover:text-stone-800 transition-colors">
+        <h3 className="font-serif text-lg text-stone-700 mb-1 group-hover:text-stone-800 transition-colors">
           {item.item.title}
         </h3>
         <p className="text-sm text-neutral-600 line-clamp-2">
@@ -486,7 +486,7 @@ function ItemCard({ item }: { item: GalleryItem }) {
             <div className="text-xs font-medium text-neutral-400 uppercase tracking-wider mb-2">
               For
             </div>
-            <div className="text-xs text-stone-600">
+            <div className="text-xs text-stone-700">
               {item.item.targets.join(", ")}
             </div>
           </div>
@@ -498,7 +498,7 @@ function ItemCard({ item }: { item: GalleryItem }) {
 function ContributeCard() {
   return (
     <div className="p-4 border border-dashed border-neutral-300 rounded-xs bg-stone-50/50 flex flex-col items-center justify-center text-center">
-      <h3 className="font-serif text-lg text-stone-600 mb-2">Contribute</h3>
+      <h3 className="font-serif text-lg text-stone-700 mb-2">Contribute</h3>
       <p className="text-sm text-neutral-500 mb-4">
         Have an idea? Submit a PR and help the community.
       </p>
@@ -524,7 +524,7 @@ function CTASection() {
   return (
     <section className="py-16 px-6 text-center">
       <div className="max-w-2xl mx-auto flex flex-col gap-6">
-        <h2 className="text-3xl sm:text-4xl font-serif text-stone-600">
+        <h2 className="text-3xl sm:text-4xl font-serif text-stone-700">
           Ready to transform your meetings?
         </h2>
         <p className="text-lg text-neutral-600">

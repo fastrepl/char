@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_view/solution/project-management")({
       { property: "og:type", content: "website" },
       {
         property: "og:url",
-        content: "https://hyprnote.com/solution/project-management",
+        content: "https://char.com/solution/project-management",
       },
     ],
   }),
@@ -119,7 +119,7 @@ function HeroSection() {
             <Icon icon="mdi:clipboard-text" className="text-lg" />
             <span>For Project Management</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
+          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
             Keep projects on track
             <br />
             with AI-powered notes
@@ -160,7 +160,7 @@ function FeaturesSection() {
   return (
     <section className="px-6 py-16 border-t border-neutral-100">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-600 text-center mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
           Built for project managers
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
@@ -190,7 +190,7 @@ function UseCasesSection() {
   return (
     <section className="px-6 py-16 bg-stone-50/50 border-t border-neutral-100">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-600 text-center mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
           For every project meeting
         </h2>
         <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
@@ -220,7 +220,7 @@ function CTASection() {
   return (
     <section className="px-6 py-16 border-t border-neutral-100">
       <div className="max-w-2xl mx-auto text-center">
-        <h2 className="text-3xl font-serif text-stone-600 mb-4">
+        <h2 className="text-3xl font-serif text-stone-700 mb-4">
           Ready to improve project delivery?
         </h2>
         <p className="text-neutral-600 mb-8">

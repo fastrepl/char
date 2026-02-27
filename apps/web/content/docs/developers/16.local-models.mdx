@@ -4,19 +4,19 @@ section: "Developers"
 description: "Learn about local models in Char"
 ---
 
-## Language Models (LLM)
+## Language models (LLM)
 
 - https://lmstudio.ai
 - https://lemonade-server.ai
 
 For step-by-step setup instructions for LM Studio and Ollama, see the [Local LLM Setup guide](/docs/faq/local-llm-setup).
 
-## Speech-to-Text (STT)
+## Speech-to-text (STT)
 
 - All STT models are stored in `~/Library/Application Support/hyprnote/models/stt/`
 - The built-in whisper-cpp backend is now an optional compile-time feature. Production builds on macOS Apple Silicon use the Argmax sidecar by default. Whisper-cpp quantized models have been removed from the settings UI.
 
-### Cactus Engine (Beta)
+### Cactus engine (beta)
 
 Cactus is a new local STT backend that runs optimized Whisper models. Cactus models are listed in Settings > Transcription under the Hyprnote provider. Models with an "Apple NPU" suffix use the Apple Neural Engine for hardware-accelerated inference on Apple Silicon Macs; non-Apple variants run on any platform.
 
@@ -32,7 +32,7 @@ Cactus is a new local STT backend that runs optimized Whisper models. Cactus mod
 
 Cactus models are downloaded and managed from the Settings UI. They are stored in a separate `cactus/` directory within the models folder.
 
-### Argmax Models
+### Argmax models
 
 Manual download:
 

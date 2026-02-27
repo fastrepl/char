@@ -1,5 +1,6 @@
+import { id } from "~/shared/utils";
+
 import { type Tab, useTabs } from ".";
-import { id } from "../../../utils";
 import { computeHistoryFlags, type TabHistory } from "./navigation";
 
 type SessionTab = Extract<Tab, { type: "sessions" }>;

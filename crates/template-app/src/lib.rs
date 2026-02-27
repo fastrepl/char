@@ -28,6 +28,7 @@ common_derives! {
         TitleSystem(TitleSystem),
         TitleUser(TitleUser),
         ChatSystem(ChatSystem),
+        ContextBlock(ContextBlock),
         ToolSearchSessions(ToolSearchSessions),
     }
 }
@@ -49,6 +50,7 @@ pub fn render(t: Template) -> Result<String, Error> {
         Template::TitleSystem(t) => askama::Template::render(&t),
         Template::TitleUser(t) => askama::Template::render(&t),
         Template::ChatSystem(t) => askama::Template::render(&t),
+        Template::ContextBlock(t) => askama::Template::render(&t),
         Template::ToolSearchSessions(t) => askama::Template::render(&t),
     }?;
 

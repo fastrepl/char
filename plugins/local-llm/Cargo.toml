@@ -19,33 +19,20 @@ tauri-plugin-store = { workspace = true }
 [dependencies]
 hypr-download-interface = { workspace = true }
 hypr-file = { workspace = true }
-hypr-gbnf = { workspace = true }
-hypr-gguf = { workspace = true }
+hypr-local-llm-core = { workspace = true, features = ["specta"] }
 
 tauri = { workspace = true, features = ["test"] }
 tauri-specta = { workspace = true, features = ["derive", "typescript"] }
 
 tauri-plugin-settings = { workspace = true }
 tauri-plugin-store2 = { workspace = true }
-tauri-plugin-windows = { workspace = true, optional = true }
 
 thiserror = { workspace = true }
 tracing = { workspace = true }
-uuid = { workspace = true, features = ["v4"] }
 
 dirs = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 specta = { workspace = true }
-strum = { workspace = true, features = ["derive"] }
 
-async-openai = { workspace = true }
-async-stream = { workspace = true }
-axum = { workspace = true }
-
-futures-util = { workspace = true }
-reqwest = { workspace = true, features = ["stream"] }
-reqwest-streams = { workspace = true, features = ["json"] }
 tokio = { workspace = true, features = ["rt", "macros"] }
-tokio-util = { workspace = true }
-tower-http = { workspace = true, features = ["cors", "trace"] }

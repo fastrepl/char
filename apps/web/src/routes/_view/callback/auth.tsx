@@ -37,9 +37,12 @@ export const Route = createFileRoute("/_view/callback/auth")({
 
       if (result.success) {
         if (search.type === "recovery") {
-          throw redirect({ to: "/update-password/" });
+          throw redirect({ to: "/update-password/", search: {} });
         }
-        throw redirect({ to: search.redirect || "/app/account/" });
+        throw redirect({
+          to: search.redirect || "/app/account/",
+          search: {},
+        });
       } else {
         console.error(result.error);
       }
@@ -76,7 +79,7 @@ export const Route = createFileRoute("/_view/callback/auth")({
         });
 
         if (result.success) {
-          throw redirect({ to: "/update-password/" });
+          throw redirect({ to: "/update-password/", search: {} });
         } else {
           console.error(result.error);
         }
@@ -91,7 +94,10 @@ export const Route = createFileRoute("/_view/callback/auth")({
 
         if (result.success) {
           if (search.flow === "web") {
-            throw redirect({ to: search.redirect || "/app/account/" });
+            throw redirect({
+              to: search.redirect || "/app/account/",
+              search: {},
+            });
           }
 
           if (search.flow === "desktop") {
@@ -176,7 +182,11 @@ function Component() {
 
   useEffect(() => {
     if (search.flow === "web" && !search.error) {
-      navigate({ to: search.redirect || "/app/account/" });
+      navigate({
+        to: search.redirect || "/app/account/",
+        search: {},
+        replace: true,
+      });
     }
   }, [search, navigate]);
 
@@ -185,7 +195,7 @@ function Component() {
       <div className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white flex items-center justify-center p-6">
         <div className="max-w-md w-full text-center flex flex-col gap-8">
           <div className="flex flex-col gap-3">
-            <h1 className="text-3xl font-serif tracking-tight text-stone-600">
+            <h1 className="text-3xl font-serif tracking-tight text-stone-700">
               Sign-in failed
             </h1>
             <p className="text-neutral-600">
@@ -216,7 +226,7 @@ function Component() {
       <div className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white flex items-center justify-center p-6">
         <div className="max-w-md w-full text-center flex flex-col gap-8">
           <div className="flex flex-col gap-3">
-            <h1 className="text-3xl font-serif tracking-tight text-stone-600">
+            <h1 className="text-3xl font-serif tracking-tight text-stone-700">
               {hasTokens ? "Sign-in successful" : "Signing in..."}
             </h1>
             <p className="text-neutral-600">

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
+import { ok } from "~/store/tinybase/persister/shared/load-result";
+import { createTestMainStore } from "~/store/tinybase/persister/testing/mocks";
 
-import { ok } from "../shared/load-result";
-import { createTestMainStore } from "../testing/mocks";
 import { createMultiTableDirPersister } from "./multi-table-dir";
 
 const settingsMocks = vi.hoisted(() => ({

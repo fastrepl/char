@@ -1,9 +1,9 @@
 import * as _UI from "tinybase/ui-react/with-schemas";
+import type { Store } from "~/store/tinybase/store/main";
 
 import { getCurrentWebviewWindowLabel } from "@hypr/plugin-windows";
 import { type Schemas } from "@hypr/store";
 
-import type { Store } from "../../store/main";
 import { createChatShortcutPersister } from "./persister";
 
 const { useCreatePersister } = _UI as _UI.WithSchemas<Schemas>;

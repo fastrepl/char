@@ -13,7 +13,7 @@
     "test": "vitest run",
     "tauri:dev": "dotenvx run --ignore MISSING_ENV_FILE -f ../../.env.supabase -f .env -- tauri dev --no-watch",
     "tauri:build": "tauri build",
-    "gen:schema": "tsx src/components/devtool/seed/script.ts"
+    "gen:schema": "tsx src/shared/devtool/seed/script.ts"
   },
   "dependencies": {
     "@ai-sdk/amazon-bedrock": "^4.0.55",
@@ -51,6 +51,7 @@
     "@hypr/plugin-fs-sync": "workspace:*",
     "@hypr/plugin-fs2": "workspace:*",
     "@hypr/plugin-git": "workspace:*",
+    "@hypr/plugin-google-calendar": "workspace:*",
     "@hypr/plugin-hooks": "workspace:*",
     "@hypr/plugin-icon": "workspace:*",
     "@hypr/plugin-importer": "workspace:*",
@@ -172,6 +173,7 @@
     "tsx": "^4.21.0",
     "typescript": "~5.8.3",
     "vite": "^7.3.1",
+    "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
   }
 }

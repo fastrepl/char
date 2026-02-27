@@ -1,3 +1,7 @@
+import { findSessionByEventId } from "~/session/utils";
+import { DEFAULT_USER_ID } from "~/shared/utils";
+import { id } from "~/shared/utils";
+
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import type {
   Event,
@@ -8,9 +12,6 @@ import type {
 } from "@hypr/store";
 import { json2md } from "@hypr/tiptap/shared";
 
-import { DEFAULT_USER_ID } from "../../../utils";
-import { id } from "../../../utils";
-import { findSessionByEventId } from "../../../utils/session-event";
 import * as main from "./main";
 
 type Store = NonNullable<ReturnType<typeof main.UI.useStore>>;
@@ -34,7 +35,6 @@ export function getOrCreateSessionForEventId(
   store: Store,
   eventId: string,
   title?: string,
-  timezone?: string,
 ): string {
   if (!store.hasRow("events", eventId)) {
     console.trace(
@@ -43,7 +43,7 @@ export function getOrCreateSessionForEventId(
     return createSession(store, title);
   }
 
-  const existingSessionId = findSessionByEventId(store, eventId, timezone);
+  const existingSessionId = findSessionByEventId(store, eventId);
   if (existingSessionId) {
     return existingSessionId;
   }

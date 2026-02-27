@@ -1,8 +1,7 @@
 import type { StateCreator, StoreApi, StoreMutatorIdentifier } from "zustand";
+import { commands } from "~/types/tauri.gen";
 
 import { getCurrentWebviewWindowLabel } from "@hypr/plugin-windows";
-
-import { commands } from "../../../types/tauri.gen";
 
 const MAX_RECENT_SESSIONS = 10;
 

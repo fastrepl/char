@@ -1,7 +1,6 @@
 import type { Queries } from "tinybase/with-schemas";
+import type { Schemas, Store } from "~/store/tinybase/store/main";
 
-import type { Schemas, Store } from "../../store/tinybase/store/main";
-import type * as settings from "../../store/tinybase/store/settings";
 import { createCtx } from "./ctx";
 import {
   CalendarFetchError,
@@ -21,31 +20,24 @@ export const CALENDAR_SYNC_TASK_ID = "calendarSync";
 export async function syncCalendarEvents(
   store: Store,
   queries: Queries<Schemas>,
-  settingsStore?: settings.Store,
 ): Promise<void> {
   await Promise.all([
     new Promise((resolve) => setTimeout(resolve, 250)),
-    run(store, queries, settingsStore),
+    run(store, queries),
   ]);
 }
 
-async function run(
-  store: Store,
-  queries: Queries<Schemas>,
-  settingsStore?: settings.Store,
-) {
+async function run(store: Store, queries: Queries<Schemas>) {
   const ctx = createCtx(store, queries);
   if (!ctx) {
     return null;
   }
 
-  const timezone = settingsStore?.getValue("timezone") as string | undefined;
-
   let incoming;
   let incomingParticipants;
 
   try {
-    const result = await fetchIncomingEvents(ctx, timezone);
+    const result = await fetchIncomingEvents(ctx);
     incoming = result.events;
     incomingParticipants = result.participants;
   } catch (error) {
@@ -64,14 +56,12 @@ async function run(
     incoming,
     existing,
     incomingParticipants,
-    timezone,
   });
   executeForEventsSync(ctx, eventsOut);
-  syncSessionEmbeddedEvents(ctx, incoming, timezone);
+  syncSessionEmbeddedEvents(ctx, incoming);
 
   const participantsOut = syncSessionParticipants(ctx, {
     incomingParticipants,
-    timezone,
   });
   executeForParticipantsSync(ctx, participantsOut);
 }

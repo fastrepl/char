@@ -21,6 +21,7 @@ interface PricingPlan {
     included: boolean | "partial";
     tooltip?: string;
     comingSoon?: boolean;
+    partiallyImplemented?: boolean;
   }>;
 }
 
@@ -31,17 +32,26 @@ const pricingPlans: PricingPlan[] = [
     description:
       "Fully functional with your own API keys. Perfect for individuals who want complete control.",
     features: [
-      { label: "Local Transcription", included: true },
-      {
-        label: "Speaker Identification",
-        included: true,
-        comingSoon: true,
-      },
+      { label: "On-device Transcription", included: true },
+      { label: "Save Audio Recordings", included: true },
+      { label: "Audio Player with Transcript Tracking", included: true },
       { label: "Bring Your Own Key (STT & LLM)", included: true },
-      { label: "Basic Sharing (Copy, PDF)", included: true },
-      { label: "All Data Local", included: true },
-      { label: "Templates & Chat", included: true },
-      { label: "Integrations", included: false, comingSoon: true },
+      { label: "Export to PDF, TXT, Markdown", included: true },
+      {
+        label: "Local-first Data Architecture",
+        included: true,
+        tooltip:
+          "Filesystem-based by default: notes and transcripts are stored on your device first.",
+      },
+      {
+        label: "Custom Content Base Location",
+        included: true,
+        tooltip: "Move your default content folder to any location you prefer.",
+      },
+      { label: "Templates", included: true },
+      { label: "Shortcuts", included: true },
+      { label: "Chat", included: true },
+      { label: "Integrations", included: false },
       { label: "Cloud Services (STT & LLM)", included: false },
       { label: "Cloud Sync", included: false },
       { label: "Shareable Links", included: false },
@@ -62,6 +72,13 @@ const pricingPlans: PricingPlan[] = [
     popular: true,
     features: [
       { label: "Everything in Free", included: true },
+      { label: "Audio Player with Playback Rates", included: true },
+      {
+        label: "Speaker Identification",
+        included: "partial",
+        partiallyImplemented: true,
+      },
+      { label: "Advanced Templates", included: true },
       { label: "Integrations", included: true, comingSoon: true },
       { label: "Cloud Services (STT & LLM)", included: true },
       {
@@ -123,12 +140,11 @@ function HeroSection() {
   return (
     <section className="flex flex-col items-center text-center gap-6 py-24 px-4 laptop:px-0 border-b border-neutral-100">
       <div className="flex flex-col gap-4 max-w-3xl">
-        <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600">
-          Char Pricing
+        <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700">
+          Pricing
         </h1>
         <p className="text-lg sm:text-xl text-neutral-600">
-          Choose the plan that fits your needs. Start for free, upgrade when you
-          need cloud features.
+          Start for free, upgrade when you need cloud features.
         </p>
       </div>
     </section>
@@ -165,7 +181,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
 
       <div className="p-8 flex-1 flex flex-col">
         <div className="mb-6">
-          <h2 className="text-2xl font-serif text-stone-600 mb-2">
+          <h2 className="text-2xl font-serif text-stone-700 mb-2">
             {plan.name}
           </h2>
           <p className="text-sm text-neutral-600 mb-4">{plan.description}</p>
@@ -173,7 +189,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
           {plan.price ? (
             <div className="flex flex-col gap-2">
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-serif text-stone-600">
+                <span className="text-4xl font-serif text-stone-700">
                   ${plan.price.monthly}
                 </span>
                 {plan.originalPrice && (
@@ -194,7 +210,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
               </div>
             </div>
           ) : (
-            <div className="text-4xl font-serif text-stone-600">Free</div>
+            <div className="text-4xl font-serif text-stone-700">Free</div>
           )}
         </div>
 
@@ -233,9 +249,18 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
                     >
                       {feature.label}
                     </span>
-                    {feature.comingSoon && (
-                      <span className="text-xs font-medium text-neutral-500 bg-neutral-200 px-2 py-0.5 rounded-full">
-                        Coming Soon
+                    {(feature.comingSoon || feature.partiallyImplemented) && (
+                      <span
+                        className={cn([
+                          "text-xs font-medium px-2 py-0.5 rounded-full",
+                          feature.partiallyImplemented
+                            ? "text-yellow-800 bg-yellow-100"
+                            : "text-neutral-500 bg-neutral-200",
+                        ])}
+                      >
+                        {feature.partiallyImplemented
+                          ? "Partially Implemented"
+                          : "Coming Soon"}
                       </span>
                     )}
                   </div>
@@ -279,9 +304,14 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
 function FAQSection() {
   const faqs = [
     {
-      question: "What does 'Local only' transcription mean?",
+      question: "What does on-device transcription mean?",
       answer:
         "All transcription happens on your device. Your audio never leaves your computer, ensuring complete privacy.",
+    },
+    {
+      question: "What is local-first data architecture?",
+      answer:
+        "Your data is filesystem-based by default: notes and transcripts are saved on your device first, and you stay in control of where files live.",
     },
     {
       question: "What is BYOK (Bring Your Own Key)?",
@@ -294,21 +324,31 @@ function FAQSection() {
         "Pro users get DocSend-like controls: track who views your notes, set expiration dates, and revoke access anytime.",
     },
     {
-      question: "What is unified billing?",
+      question: "What are templates?",
       answer:
-        "Unified billing allows organizations to manage all team member subscriptions under a single invoice. Instead of individual team members paying separately, you get one consolidated bill for your entire team. This includes centralized access management, so admins can add or remove users, and handle all payments from one account.",
+        "Templates are our opinionated way to structure summaries. You can pick from a variety of templates we provide and create your own version as needed.",
     },
     {
-      question: "Is there a team discount?",
+      question: "What are advanced templates?",
       answer:
-        "Yes! We offer discounts based on both team size (volume) and contract commitment period. The more seats you need and the longer you commit (annual, multi-year), the better the discount. Contact us to discuss custom pricing for your team.",
+        "Advanced templates let you override Char’s default system prompt by configuring template variables and the overall instructions given to the AI.",
+    },
+    {
+      question: "What are shortcuts?",
+      answer:
+        "Shortcuts are saved prompts you use repeatedly, like “Write a follow-up to blog blah” or “Create a one-pager of the important stuff that’s been discussed.” They’re available in chat via the / command.",
+    },
+    {
+      question: "Do you offer student discounts?",
+      answer:
+        "Yes, we provide student discounts. Contact us and we’ll help you get set up with student pricing.",
     },
   ];
 
   return (
     <section className="py-16 px-4 laptop:px-0 border-t border-neutral-100">
       <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-600 mb-16 text-center">
+        <h2 className="text-3xl font-serif text-stone-700 mb-16 text-center">
           Frequently Asked Questions
         </h2>
         <div className="flex flex-col gap-6">

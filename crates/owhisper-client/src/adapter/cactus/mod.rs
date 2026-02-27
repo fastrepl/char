@@ -1,3 +1,5 @@
+#[cfg(feature = "argmax")]
+mod batch;
 mod live;
 
 #[derive(Clone, Default)]

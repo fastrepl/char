@@ -18,13 +18,13 @@ import {
   useRef,
   useState,
 } from "react";
+import { env } from "~/env";
+import { DEVICE_FINGERPRINT_HEADER, getScheme } from "~/shared/utils";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as miscCommands } from "@hypr/plugin-misc";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 
-import { env } from "../env";
-import { DEVICE_FINGERPRINT_HEADER, getScheme } from "../utils";
 import { supabase } from "./client";
 import { clearAuthStorage, isFatalSessionError } from "./errors";
 
@@ -104,13 +104,19 @@ async function initSession(
   }
 }
 
-let lastTrackedAccessToken: string | null = null;
+let trackedUserId: string | null = null;
 
 async function trackAuthEvent(
   event: AuthChangeEvent,
   session: Session | null,
 ): Promise<void> {
   if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
+    if (session.user.id === trackedUserId) {
+      return;
+    }
+
+    trackedUserId = session.user.id;
+
     const appVersion = await getVersion();
     void analyticsCommands.identify(session.user.id, {
       email: session.user.email,
@@ -123,19 +129,13 @@ async function trackAuthEvent(
       },
     });
 
-    if (event === "INITIAL_SESSION") {
-      // Seed the token so the immediate auto-refresh tick (which fires SIGNED_IN
-      // with the same token) doesn't look like a new sign-in.
-      lastTrackedAccessToken = session.access_token;
-    } else if (
-      event === "SIGNED_IN" &&
-      session.access_token !== lastTrackedAccessToken
-    ) {
-      // Supabase fires SIGNED_IN on every auto-refresh tick and window focus,
-      // not just on actual OAuth sign-ins. Only track when the token is genuinely new.
-      lastTrackedAccessToken = session.access_token;
+    if (event === "SIGNED_IN") {
       void analyticsCommands.event({ event: "user_signed_in" });
     }
+  }
+
+  if (event === "SIGNED_OUT") {
+    trackedUserId = null;
   }
 }
 

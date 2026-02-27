@@ -5,28 +5,30 @@ import {
 } from "@tanstack/react-router";
 import { isTauri } from "@tauri-apps/api/core";
 import { useCallback, useEffect, useRef } from "react";
-
-import { hydrateSessionContextFromFs } from "../../../chat/session-context-hydrator";
-import { buildChatTools } from "../../../chat/tools";
-import { AITaskProvider } from "../../../contexts/ai-task";
-import { NotificationProvider } from "../../../contexts/notifications";
-import { useSearchEngine } from "../../../contexts/search/engine";
-import { SearchEngineProvider } from "../../../contexts/search/engine";
-import { SearchUIProvider } from "../../../contexts/search/ui";
-import { ShellProvider } from "../../../contexts/shell";
-import { useRegisterTools } from "../../../contexts/tool";
-import { ToolRegistryProvider } from "../../../contexts/tool";
-import { useDeeplinkHandler } from "../../../hooks/useDeeplinkHandler";
-import { deleteSessionCascade } from "../../../store/tinybase/store/deleteSession";
-import * as main from "../../../store/tinybase/store/main";
-import { isSessionEmpty } from "../../../store/tinybase/store/sessions";
-import { listenerStore } from "../../../store/zustand/listener/instance";
+import { AITaskProvider } from "~/ai/contexts";
+import { useLanguageModel, useLLMConnection } from "~/ai/hooks";
+import { hydrateSessionContextFromFs } from "~/chat/session-context-hydrator";
+import { buildChatTools } from "~/chat/tools";
+import { NotificationProvider } from "~/contexts/notifications";
+import { ShellProvider } from "~/contexts/shell";
+import { useRegisterTools } from "~/contexts/tool";
+import { ToolRegistryProvider } from "~/contexts/tool";
+import { useSearchEngine } from "~/search/contexts/engine";
+import { SearchEngineProvider } from "~/search/contexts/engine";
+import { SearchUIProvider } from "~/search/contexts/ui";
+import { initEnhancerService } from "~/services/enhancer";
+import { useDeeplinkHandler } from "~/shared/hooks/useDeeplinkHandler";
+import { deleteSessionCascade } from "~/store/tinybase/store/deleteSession";
+import * as main from "~/store/tinybase/store/main";
+import { isSessionEmpty } from "~/store/tinybase/store/sessions";
+import * as settings from "~/store/tinybase/store/settings";
+import { listenerStore } from "~/store/zustand/listener/instance";
 import {
   restorePinnedTabsToStore,
   restoreRecentlyOpenedToStore,
   useTabs,
-} from "../../../store/zustand/tabs";
-import { commands } from "../../../types/tauri.gen";
+} from "~/store/zustand/tabs";
+import { commands } from "~/types/tauri.gen";
 
 export const Route = createFileRoute("/app/main/_layout")({
   component: Component,
@@ -120,6 +122,7 @@ function Component() {
             <AITaskProvider store={aiTaskStore}>
               <NotificationProvider>
                 <ToolRegistration />
+                <EnhancerInit />
                 <Outlet />
               </NotificationProvider>
             </AITaskProvider>
@@ -144,6 +147,44 @@ function ToolRegistration() {
       }),
     [search, store],
   );
+
+  return null;
+}
+
+function EnhancerInit() {
+  const { persistedStore, aiTaskStore } = useRouteContext({
+    from: "__root__",
+  });
+
+  const model = useLanguageModel("enhance");
+  const { conn: llmConn } = useLLMConnection();
+  const indexes = main.UI.useIndexes(main.STORE_ID);
+  const selectedTemplateId = settings.UI.useValue(
+    "selected_template_id",
+    settings.STORE_ID,
+  ) as string | undefined;
+
+  const modelRef = useRef(model);
+  modelRef.current = model;
+  const llmConnRef = useRef(llmConn);
+  llmConnRef.current = llmConn;
+  const templateIdRef = useRef(selectedTemplateId);
+  templateIdRef.current = selectedTemplateId;
+
+  useEffect(() => {
+    if (!persistedStore || !aiTaskStore || !indexes) return;
+
+    const service = initEnhancerService({
+      mainStore: persistedStore,
+      indexes,
+      aiTaskStore,
+      getModel: () => modelRef.current,
+      getLLMConn: () => llmConnRef.current,
+      getSelectedTemplateId: () => templateIdRef.current || undefined,
+    });
+
+    return () => service.dispose();
+  }, [persistedStore, aiTaskStore, indexes]);
 
   return null;
 }

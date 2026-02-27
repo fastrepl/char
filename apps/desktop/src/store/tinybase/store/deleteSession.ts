@@ -1,6 +1,8 @@
-import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
+import type { DeletedSessionData } from "~/store/zustand/undo-delete";
 
-import type { DeletedSessionData } from "../../zustand/undo-delete";
+import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
+import type { TranscriptStorage } from "@hypr/store";
+
 import * as main from "./main";
 
 type Store = NonNullable<ReturnType<typeof main.UI.useStore>>;
@@ -61,6 +63,7 @@ export function captureSessionData(
           ended_at: row.ended_at as number,
           words: row.words as string,
           speaker_hints: row.speaker_hints as string,
+          memo_md: (row.memo_md as string) ?? "",
         });
       }
     }
@@ -146,7 +149,7 @@ export function restoreSessionData(
     });
 
     for (const transcript of transcripts) {
-      store.setRow("transcripts", transcript.id, {
+      const transcriptRow = {
         user_id: transcript.user_id,
         created_at: transcript.created_at,
         session_id: transcript.session_id,
@@ -154,7 +157,10 @@ export function restoreSessionData(
         ended_at: transcript.ended_at,
         words: transcript.words,
         speaker_hints: transcript.speaker_hints,
-      });
+        memo_md: transcript.memo_md,
+      } satisfies TranscriptStorage;
+
+      store.setRow("transcripts", transcript.id, transcriptRow);
     }
 
     for (const participant of participants) {

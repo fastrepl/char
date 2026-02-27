@@ -1,10 +1,10 @@
 import { generateId, type LanguageModel, streamText } from "ai";
+import type { Store } from "~/store/tinybase/store/main";
+import { getCustomPrompt } from "~/store/tinybase/store/prompts";
 
 import { commands as templateCommands } from "@hypr/plugin-template";
 
 import type { TaskArgsMapTransformed, TaskConfig } from ".";
-import type { Store } from "../../../tinybase/store/main";
-import { getCustomPrompt } from "../../../tinybase/store/prompts";
 
 export const titleWorkflow: Pick<
   TaskConfig<"title">,

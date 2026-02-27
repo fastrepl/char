@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -10,11 +11,13 @@ const validateSearch = z.object({
   status: z.string(),
   flow: z.enum(["desktop", "web"]).default("desktop"),
   scheme: z.string().default("hyprnote"),
+  return_to: z.string().optional(),
 });
 
 type IntegrationDeeplinkParams = {
   integration_id: string;
   status: string;
+  return_to?: string;
 };
 
 export const Route = createFileRoute("/_view/callback/integration")({
@@ -33,18 +36,23 @@ function buildDeeplinkUrl(
     integration_id: search.integration_id,
     status: search.status,
   });
+  if (search.return_to) {
+    params.set("return_to", search.return_to);
+  }
   return `${scheme}://integration/callback?${params.toString()}`;
 }
 
 function Component() {
   const search = Route.useSearch();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [copied, setCopied] = useState(false);
 
   const getDeeplink = () => {
     return buildDeeplinkUrl(search.scheme, {
       integration_id: search.integration_id,
       status: search.status,
+      return_to: search.return_to,
     });
   };
 
@@ -66,9 +74,28 @@ function Component() {
 
   useEffect(() => {
     if (search.flow === "web") {
+      void queryClient.invalidateQueries({
+        queryKey: ["integration-status"],
+      });
       void navigate({ to: "/app/account/" });
     }
-  }, [search.flow, navigate]);
+  }, [search.flow, navigate, queryClient]);
+
+  useEffect(() => {
+    if (search.flow === "desktop" && search.status === "success") {
+      const deeplink = getDeeplink();
+      const timer = setTimeout(() => {
+        window.location.href = deeplink;
+      }, 250);
+      return () => clearTimeout(timer);
+    }
+  }, [
+    search.flow,
+    search.status,
+    search.scheme,
+    search.integration_id,
+    search.return_to,
+  ]);
 
   const isSuccess = search.status === "success";
 
@@ -77,7 +104,7 @@ function Component() {
       <div className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white flex items-center justify-center p-6">
         <div className="max-w-md w-full text-center flex flex-col gap-8">
           <div className="flex flex-col gap-3">
-            <h1 className="text-3xl font-serif tracking-tight text-stone-600">
+            <h1 className="text-3xl font-serif tracking-tight text-stone-700">
               {isSuccess ? "Connection successful" : "Connection failed"}
             </h1>
             <p className="text-neutral-600">

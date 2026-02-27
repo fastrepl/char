@@ -4,29 +4,7 @@ use axum::error_handling::HandleError;
 use axum::{Router, http::StatusCode};
 
 fn audio_wav_bytes() -> Vec<u8> {
-    let max_secs = std::env::var("E2E_AUDIO_SECS")
-        .ok()
-        .and_then(|s| s.parse::<usize>().ok())
-        .unwrap_or(usize::MAX);
-    let full = hypr_data::english_1::AUDIO;
-    let pcm = &full[..full.len().min(max_secs.saturating_mul(16000 * 2))];
-    let data_len = pcm.len() as u32;
-    let mut w = Vec::with_capacity(44 + pcm.len());
-    w.extend_from_slice(b"RIFF");
-    w.extend_from_slice(&(36 + data_len).to_le_bytes());
-    w.extend_from_slice(b"WAVE");
-    w.extend_from_slice(b"fmt ");
-    w.extend_from_slice(&16u32.to_le_bytes());
-    w.extend_from_slice(&1u16.to_le_bytes());
-    w.extend_from_slice(&1u16.to_le_bytes());
-    w.extend_from_slice(&16000u32.to_le_bytes());
-    w.extend_from_slice(&32000u32.to_le_bytes());
-    w.extend_from_slice(&2u16.to_le_bytes());
-    w.extend_from_slice(&16u16.to_le_bytes());
-    w.extend_from_slice(b"data");
-    w.extend_from_slice(&data_len.to_le_bytes());
-    w.extend_from_slice(pcm);
-    w
+    std::fs::read(hypr_data::english_1::AUDIO_PATH).expect("failed to read audio file")
 }
 
 use transcribe_cactus::TranscribeService;

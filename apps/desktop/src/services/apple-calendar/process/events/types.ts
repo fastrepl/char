@@ -1,10 +1,10 @@
-import type { EventParticipant } from "@hypr/store";
-
 import type {
   ExistingEvent,
   IncomingEvent,
   IncomingParticipants,
-} from "../../fetch/types";
+} from "~/services/apple-calendar/fetch/types";
+
+import type { EventParticipant } from "@hypr/store";
 
 export type EventId = string;
 
@@ -12,7 +12,6 @@ export type EventsSyncInput = {
   incoming: IncomingEvent[];
   existing: ExistingEvent[];
   incomingParticipants: IncomingParticipants;
-  timezone?: string;
 };
 
 export type EventToAdd = IncomingEvent & {

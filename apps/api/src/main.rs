@@ -18,23 +18,17 @@ use tower_http::{
 };
 use tracing_subscriber::prelude::*;
 
-use hypr_analytics::AnalyticsClientBuilder;
-
 use auth::AuthState;
 use env::env;
+
+use crate::env::Env;
 
 pub const DEVICE_FINGERPRINT_HEADER: &str = "x-device-fingerprint";
 
 async fn app() -> Router {
     let env = env();
 
-    let analytics = {
-        let mut builder = AnalyticsClientBuilder::default();
-        if let Some(key) = &env.posthog_api_key {
-            builder = builder.with_posthog(key);
-        }
-        Arc::new(builder.build())
-    };
+    let analytics = build_analytics_client(&env);
 
     let llm_config =
         hypr_llm_proxy::LlmProxyConfig::new(&env.llm).with_analytics(analytics.clone());
@@ -79,7 +73,7 @@ async fn app() -> Router {
     );
     let nango_connection_state = hypr_api_nango::NangoConnectionState::from_config(&nango_config);
     let subscription_config =
-        hypr_api_subscription::SubscriptionConfig::new(&env.supabase, &env.stripe)
+        hypr_api_subscription::SubscriptionConfig::new(&env.supabase, &env.stripe, &env.loops)
             .with_analytics(analytics.clone());
     let support_config = hypr_api_support::SupportConfig::new(
         &env.github_app,
@@ -105,7 +99,8 @@ async fn app() -> Router {
             hypr_transcribe_proxy::callback_router(stt_config.clone()),
         );
 
-    let auth_state_integration = AuthState::new(&env.supabase.supabase_url);
+    let auth_state_integration =
+        AuthState::new(&env.supabase.supabase_url).with_required_entitlement("hyprnote_pro");
 
     let pro_routes = Router::new()
         .merge(hypr_api_research::router(research_config))
@@ -263,6 +258,20 @@ async fn app() -> Router {
                         ),
                 ),
         )
+}
+
+fn build_analytics_client(env: &Env) -> Arc<hypr_analytics::AnalyticsClient> {
+    let mut builder = hypr_analytics::AnalyticsClientBuilder::default();
+    if cfg!(debug_assertions) {
+        tracing::info!("analytics: dev mode, printing events as tracing");
+    } else {
+        let key = env
+            .posthog_api_key
+            .as_ref()
+            .expect("POSTHOG_API_KEY is required in production");
+        builder = builder.with_posthog(key);
+    }
+    Arc::new(builder.build())
 }
 
 fn main() -> std::io::Result<()> {

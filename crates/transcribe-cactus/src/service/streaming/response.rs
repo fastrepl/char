@@ -2,9 +2,7 @@ use std::path::Path;
 
 use axum::extract::ws::{Message, WebSocket};
 use futures_util::{SinkExt, stream::SplitSink};
-use owhisper_interface::stream::{
-    Alternatives, Channel, Extra, Metadata, ModelInfo, StreamResponse, Word,
-};
+use owhisper_interface::stream::{Alternatives, Channel, Metadata, StreamResponse, Word};
 
 pub(super) type WsSender = SplitSink<WebSocket, Message>;
 
@@ -33,21 +31,7 @@ pub(super) async fn send_ws_best_effort(sender: &mut WsSender, value: &StreamRes
 }
 
 pub(super) fn build_session_metadata(model_path: &Path) -> Metadata {
-    let model_name = model_path
-        .file_stem()
-        .and_then(|s| s.to_str())
-        .unwrap_or("cactus")
-        .to_string();
-
-    Metadata {
-        model_info: ModelInfo {
-            name: model_name,
-            version: "1.0".to_string(),
-            arch: "cactus".to_string(),
-        },
-        extra: Some(Extra::default().into()),
-        ..Default::default()
-    }
+    crate::service::build_metadata(model_path)
 }
 
 pub(super) fn build_transcript_response(

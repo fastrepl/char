@@ -47,17 +47,17 @@ function Component() {
       <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
         <div className="px-6 py-16 lg:py-24">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-600 mb-6">
+            <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
               Press Kit
             </h1>
             <p className="text-lg sm:text-xl text-neutral-600">
               Download press materials, logos, screenshots, and learn more about
               Char. For press inquiries, contact us at{" "}
               <a
-                href="mailto:founders@hyprnote.com"
+                href="mailto:founders@char.com"
                 className="text-stone-600 underline hover:text-stone-700"
               >
-                founders@hyprnote.com
+                founders@char.com
               </a>
             </p>
           </div>
@@ -108,7 +108,7 @@ function Component() {
                       appIcon
                     />
                     <FinderAction
-                      href="mailto:founders@hyprnote.com"
+                      href="mailto:founders@char.com"
                       iconImage="/api/images/icons/macos-mail.png"
                       label="Contact"
                     />
