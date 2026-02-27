@@ -25,28 +25,38 @@ type RendererMap = {
 const renderers: RendererMap = {
   session: {
     toChip: (entity) => {
-      const { sessionContext } = entity;
+      const sc = entity.sessionContext;
+      if (!sc) {
+        return {
+          key: entity.key,
+          icon: CalendarIcon,
+          label: "Session",
+          tooltip: entity.sessionId,
+          removable: entity.removable,
+        };
+      }
+
       const wordCount =
-        sessionContext.transcript?.segments.reduce(
+        sc.transcript?.segments.reduce(
           (sum, s) => sum + s.text.split(/\s+/).filter(Boolean).length,
           0,
         ) ?? 0;
-      const participantCount = sessionContext.participants.length;
-      const eventTitle = sessionContext.event?.name ?? null;
+      const participantCount = sc.participants.length;
+      const eventTitle = sc.event?.name ?? null;
 
       if (
-        !sessionContext.title &&
-        !sessionContext.date &&
+        !sc.title &&
+        !sc.date &&
         !wordCount &&
-        !sessionContext.rawContent &&
+        !sc.rawContent &&
         participantCount === 0 &&
         !eventTitle
       ) {
         return null;
       }
       const lines: string[] = [];
-      if (sessionContext.title) lines.push(sessionContext.title);
-      if (sessionContext.date) lines.push(sessionContext.date);
+      if (sc.title) lines.push(sc.title);
+      if (sc.date) lines.push(sc.date);
       if (wordCount > 0) {
         lines.push(`Transcript: ${wordCount.toLocaleString()} words`);
       }
@@ -56,18 +66,18 @@ const renderers: RendererMap = {
       if (eventTitle) {
         lines.push(`Event: ${eventTitle}`);
       }
-      if (sessionContext.rawContent) {
+      if (sc.rawContent) {
         const truncated =
-          sessionContext.rawContent.length > 120
-            ? `${sessionContext.rawContent.slice(0, 120)}...`
-            : sessionContext.rawContent;
+          sc.rawContent.length > 120
+            ? `${sc.rawContent.slice(0, 120)}...`
+            : sc.rawContent;
         lines.push(`Raw note: ${truncated}`);
       }
       const isFromTool = entity.source === "tool";
       return {
         key: entity.key,
         icon: isFromTool ? SearchIcon : CalendarIcon,
-        label: sessionContext.title || sessionContext.date || "Session",
+        label: sc.title || sc.date || "Session",
         tooltip: lines.join("\n"),
         removable: entity.removable,
       };

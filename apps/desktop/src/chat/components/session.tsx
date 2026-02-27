@@ -45,7 +45,6 @@ interface ChatSessionProps {
     status: ChatStatus;
     error?: Error;
     contextEntities: ContextEntity[];
-    contextRefs: ContextRef[];
     onRemoveContextEntity: (key: string) => void;
     onAddContextEntity: (ref: ContextRef) => void;
     isSystemPromptReady: boolean;
@@ -181,16 +180,15 @@ export function ChatSession({
     }
   }, [chatGroupId, messages, status, store, createChatMessage, messageIds]);
 
-  const { contextEntities, contextRefs, onRemoveContextEntity } =
-    useChatContextPipeline({
-      sessionId,
-      chatGroupId,
-      messages,
-      sessionEntity,
-      persistedRefs,
-      persistContext,
-      store,
-    });
+  const { contextEntities, onRemoveContextEntity } = useChatContextPipeline({
+    sessionId,
+    chatGroupId,
+    messages,
+    sessionEntity,
+    persistedRefs,
+    persistContext,
+    store,
+  });
 
   return (
     <div className="flex-1 min-h-0 flex flex-col">
@@ -204,7 +202,6 @@ export function ChatSession({
         status,
         error,
         contextEntities,
-        contextRefs,
         onRemoveContextEntity,
         onAddContextEntity,
         isSystemPromptReady,

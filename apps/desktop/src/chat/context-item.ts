@@ -17,14 +17,10 @@ export type ContextRef = {
 };
 
 export type ContextEntity =
-  | {
-      kind: "session";
-      key: string;
-      source?: ContextEntitySource;
-      sessionId: string;
-      sessionContext: SessionContext;
+  | (ContextRef & {
+      sessionContext?: SessionContext;
       removable?: boolean;
-    }
+    })
   | ({
       kind: "account";
       key: string;
@@ -37,6 +33,20 @@ export type ContextEntity =
     } & Partial<DeviceInfo>);
 
 export type ContextEntityKind = ContextEntity["kind"];
+
+export function dedupeByKey<T extends { key: string }>(groups: T[][]): T[] {
+  const seen = new Set<string>();
+  const merged: T[] = [];
+  for (const group of groups) {
+    for (const item of group) {
+      if (!seen.has(item.key)) {
+        seen.add(item.key);
+        merged.push(item);
+      }
+    }
+  }
+  return merged;
+}
 
 type ToolOutputAvailablePart = {
   type: string;
@@ -168,65 +178,6 @@ const toolEntityExtractors: Record<string, ToolContextExtractor> = {
   search_sessions: parseSearchSessionsOutput,
 };
 
-function getSessionIdFromKey(key: string): string | null {
-  const parts = key.split(":");
-  if (parts.length < 3 || parts[0] !== "session") {
-    return null;
-  }
-
-  return parts.slice(2).join(":") || null;
-}
-
-export function toContextRef(entity: ContextEntity): ContextRef | null {
-  if (entity.kind !== "session") {
-    return null;
-  }
-
-  if (entity.sessionId) {
-    return {
-      kind: "session",
-      key: entity.key,
-      source: entity.source,
-      sessionId: entity.sessionId,
-    };
-  }
-
-  const parsedSessionId = getSessionIdFromKey(entity.key);
-  if (!parsedSessionId) {
-    return null;
-  }
-
-  return {
-    kind: "session",
-    key: entity.key,
-    source: entity.source,
-    sessionId: parsedSessionId,
-  };
-}
-
-export function composeContextRefs(groups: ContextRef[][]): ContextRef[] {
-  const seen = new Set<string>();
-  const merged: ContextRef[] = [];
-
-  for (const group of groups) {
-    for (const ref of group) {
-      if (seen.has(ref.key)) {
-        continue;
-      }
-      seen.add(ref.key);
-      merged.push(ref);
-    }
-  }
-
-  return merged;
-}
-
-/**
- * Register a context-entity extractor for a tool by its name (without the
- * "tool-" prefix). Any tool whose output should be reflected in the Context
- * Indicator must register here; tools without an extractor are silently
- * ignored.
- */
 export function registerToolContextExtractor(
   toolName: string,
   extractor: ToolContextExtractor,

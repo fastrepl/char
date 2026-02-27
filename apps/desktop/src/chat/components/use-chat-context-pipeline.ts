@@ -1,28 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  composeContextRefs,
   type ContextEntity,
   type ContextRef,
+  CURRENT_SESSION_CONTEXT_KEY,
+  dedupeByKey,
   extractToolContextEntities,
-  toContextRef,
 } from "~/chat/context-item";
-import { composeContextEntities } from "~/chat/context/composer";
-import {
-  getPersistableContextRefs,
-  stableContextFingerprint,
-} from "~/chat/context/prompt-context";
 import { hydrateSessionContextFromFs } from "~/chat/session-context-hydrator";
 import type { HyprUIMessage } from "~/chat/types";
 import type * as main from "~/store/tinybase/store/main";
-
-const EMPTY_REFS: ContextRef[] = [];
 
 type UseChatContextPipelineParams = {
   sessionId: string;
   chatGroupId?: string;
   messages: HyprUIMessage[];
   sessionEntity: Extract<ContextEntity, { kind: "session" }> | null;
-  persistedRefs?: ContextRef[];
+  persistedRefs: ContextRef[];
   persistContext: (groupId: string, refs: ContextRef[]) => void;
   store: ReturnType<typeof main.UI.useStore>;
 };
@@ -37,7 +30,6 @@ export function useChatContextPipeline({
   store,
 }: UseChatContextPipelineParams): {
   contextEntities: ContextEntity[];
-  contextRefs: ContextRef[];
   onRemoveContextEntity: (key: string) => void;
 } {
   const toolEntities = useMemo(
@@ -55,146 +47,101 @@ export function useChatContextPipeline({
     setRemovedKeys((prev) => new Set(prev).add(key));
   }, []);
 
-  const contextRefs = useMemo(() => {
-    const sessionRefs = sessionEntity ? [toContextRef(sessionEntity)] : [];
-    const toolRefs = toolEntities
-      .map((entity) => toContextRef(entity))
-      .filter((ref): ref is ContextRef => Boolean(ref));
+  // Hydrate persisted refs that aren't already provided by session/tool sources
+  const liveKeys = useMemo(() => {
+    const keys = new Set<string>();
+    if (sessionEntity) keys.add(sessionEntity.key);
+    for (const e of toolEntities) keys.add(e.key);
+    return keys;
+  }, [sessionEntity, toolEntities]);
 
-    return composeContextRefs([
-      sessionRefs.filter((ref): ref is ContextRef => Boolean(ref)),
-      toolRefs,
-      persistedRefs ?? EMPTY_REFS,
-    ]).filter((ref) => !removedKeys.has(ref.key));
-  }, [sessionEntity, toolEntities, persistedRefs, removedKeys]);
-
-  const [hydratedRefsByKey, setHydratedRefsByKey] = useState<
+  const [hydratedEntities, setHydratedEntities] = useState<
     Record<string, Extract<ContextEntity, { kind: "session" }>>
   >({});
 
   useEffect(() => {
-    setHydratedRefsByKey({});
+    setHydratedEntities({});
   }, [sessionId, chatGroupId]);
 
-  const nonPersistedKeys = useMemo(() => {
-    const keys = new Set<string>();
-    if (sessionEntity) {
-      keys.add(sessionEntity.key);
-    }
-    for (const entity of toolEntities) {
-      keys.add(entity.key);
-    }
-    return keys;
-  }, [sessionEntity, toolEntities]);
-
   useEffect(() => {
-    const refsToHydrate = contextRefs.filter(
-      (ref) => !nonPersistedKeys.has(ref.key) && !hydratedRefsByKey[ref.key],
+    const toHydrate = persistedRefs.filter(
+      (ref) => !liveKeys.has(ref.key) && !hydratedEntities[ref.key],
     );
-    if (!store || refsToHydrate.length === 0) {
-      return;
-    }
+    if (!store || toHydrate.length === 0) return;
 
     let stale = false;
-
     (async () => {
-      const next: Record<
-        string,
-        Extract<ContextEntity, { kind: "session" }>
-      > = {};
-      for (const ref of refsToHydrate) {
-        const sessionContext = await hydrateSessionContextFromFs(
-          store,
-          ref.sessionId,
-        );
-        if (!sessionContext) {
-          continue;
+      const next: typeof hydratedEntities = {};
+      for (const ref of toHydrate) {
+        const sc = await hydrateSessionContextFromFs(store, ref.sessionId);
+        if (sc) {
+          next[ref.key] = {
+            ...ref,
+            sessionContext: sc,
+            removable: ref.source !== "auto-current",
+          };
         }
-        next[ref.key] = {
-          kind: "session",
-          key: ref.key,
-          source: ref.source,
-          sessionId: ref.sessionId,
-          sessionContext,
-          removable: ref.source !== "auto-current",
-        };
       }
-
       if (!stale && Object.keys(next).length > 0) {
-        setHydratedRefsByKey((prev) => ({ ...prev, ...next }));
+        setHydratedEntities((prev) => ({ ...prev, ...next }));
       }
     })();
-
     return () => {
       stale = true;
     };
-  }, [contextRefs, hydratedRefsByKey, nonPersistedKeys, store]);
+  }, [persistedRefs, liveKeys, hydratedEntities, store]);
 
   const contextEntities = useMemo(() => {
     const sessionEntities: ContextEntity[] = sessionEntity
       ? [sessionEntity]
       : [];
-    const hydratedEntities = contextRefs.flatMap((ref) => {
-      if (nonPersistedKeys.has(ref.key)) {
-        return [];
-      }
-      const entity = hydratedRefsByKey[ref.key];
-      return entity ? [entity] : [];
-    });
+    const hydrated: ContextEntity[] = persistedRefs
+      .filter((ref) => !liveKeys.has(ref.key))
+      .map((ref) => hydratedEntities[ref.key] ?? { ...ref, removable: true });
 
-    return composeContextEntities([
-      sessionEntities,
-      toolEntities,
-      hydratedEntities,
-    ]).filter((entity) => !removedKeys.has(entity.key));
+    return dedupeByKey([sessionEntities, toolEntities, hydrated]).filter(
+      (e) => !removedKeys.has(e.key),
+    );
   }, [
-    contextRefs,
-    hydratedRefsByKey,
-    nonPersistedKeys,
-    removedKeys,
     sessionEntity,
     toolEntities,
+    persistedRefs,
+    liveKeys,
+    hydratedEntities,
+    removedKeys,
   ]);
 
-  const persistableRefs = useMemo(
-    () => getPersistableContextRefs(contextRefs),
-    [contextRefs],
-  );
-  const persistedRef = useRef<{
-    chatGroupId: string;
-    fingerprint: string;
-  } | null>(null);
-
-  const persistFingerprint = useMemo(
-    () => stableContextFingerprint(persistableRefs),
-    [persistableRefs],
-  );
+  // Persist manual context refs on change
+  const lastPersisted = useRef<string>("");
 
   useEffect(() => {
     if (!chatGroupId) {
-      persistedRef.current = null;
+      lastPersisted.current = "";
       return;
     }
 
-    const prev = persistedRef.current;
-    if (
-      prev &&
-      prev.chatGroupId === chatGroupId &&
-      prev.fingerprint === persistFingerprint
-    ) {
-      return;
-    }
+    const persistable = contextEntities
+      .filter(
+        (e): e is Extract<ContextEntity, { kind: "session" }> =>
+          e.kind === "session" &&
+          e.source !== "tool" &&
+          e.key !== CURRENT_SESSION_CONTEXT_KEY,
+      )
+      .map(
+        (e): ContextRef => ({
+          kind: e.kind,
+          key: e.key,
+          source: e.source,
+          sessionId: e.sessionId,
+        }),
+      );
 
-    persistContext(chatGroupId, persistableRefs);
-    persistedRef.current = {
-      chatGroupId,
-      fingerprint: persistFingerprint,
-    };
-  }, [chatGroupId, persistContext, persistFingerprint, persistableRefs]);
+    const fingerprint = JSON.stringify(persistable);
+    if (fingerprint === lastPersisted.current) return;
 
-  return {
-    contextEntities,
-    contextRefs,
-    onRemoveContextEntity,
-  };
+    lastPersisted.current = fingerprint;
+    persistContext(chatGroupId, persistable);
+  }, [chatGroupId, contextEntities, persistContext]);
+
+  return { contextEntities, onRemoveContextEntity };
 }
