@@ -1,5 +1,5 @@
 use crate::AppleCalendarPluginExt;
-use crate::types::{AppleCalendar, AppleEvent, CreateEventInput, EventFilter};
+use hypr_apple_calendar::types::{AppleCalendar, AppleEvent, CreateEventInput, EventFilter};
 
 #[tauri::command]
 #[specta::specta]

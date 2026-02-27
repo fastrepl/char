@@ -1,19 +1,16 @@
-#[cfg(target_os = "macos")]
-mod apple;
-
 #[cfg(feature = "fixture")]
-pub mod fixture;
+pub use hypr_apple_calendar::fixture;
 
 mod commands;
 mod error;
 mod events;
 mod ext;
-mod types;
 
 pub use error::{Error, Result};
 pub use events::*;
 pub use ext::{AppleCalendarExt, AppleCalendarPluginExt};
-pub use types::*;
+pub use hypr_apple_calendar::types;
+pub use hypr_apple_calendar::types::*;
 
 const PLUGIN_NAME: &str = "apple-calendar";
 
@@ -62,7 +59,7 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
                 use tauri_specta::Event;
 
                 let app_handle = app.app_handle().clone();
-                apple::setup_change_notification(move || {
+                hypr_apple_calendar::setup_change_notification(move || {
                     let _ = CalendarChangedEvent.emit(&app_handle);
                 });
             }
@@ -119,11 +116,13 @@ mod test {
                         "Testing with calendar: {} ({})",
                         calendar.title, calendar.id
                     );
-                    let events = app.apple_calendar().list_events(EventFilter {
-                        from: chrono::Utc::now(),
-                        to: chrono::Utc::now() + chrono::Duration::days(7),
-                        calendar_tracking_id: calendar.id.clone(),
-                    });
+                    let events = app.apple_calendar().list_events(
+                        hypr_apple_calendar::types::EventFilter {
+                            from: chrono::Utc::now(),
+                            to: chrono::Utc::now() + chrono::Duration::days(7),
+                            calendar_tracking_id: calendar.id.clone(),
+                        },
+                    );
                     println!("events: {:?}", events);
                 } else {
                     println!("No calendars found");

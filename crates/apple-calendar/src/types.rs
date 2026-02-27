@@ -1,15 +1,16 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 pub struct EventFilter {
     pub from: DateTime<Utc>,
     pub to: DateTime<Utc>,
     pub calendar_tracking_id: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 pub struct CreateEventInput {
     pub title: String,
     pub start_date: DateTime<Utc>,
@@ -23,7 +24,8 @@ pub struct CreateEventInput {
 
 macro_rules! common_derives {
     ($item:item) => {
-        #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type, schemars::JsonSchema)]
+        #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
+        #[cfg_attr(feature = "specta", derive(specta::Type))]
         $item
     };
 }
@@ -220,10 +222,6 @@ common_derives! {
     }
 }
 
-#[cfg(target_os = "macos")]
-pub type ParticipantContact = tauri_plugin_apple_contact::Contact;
-
-#[cfg(not(target_os = "macos"))]
 common_derives! {
     pub struct ParticipantContact {
         pub identifier: String,

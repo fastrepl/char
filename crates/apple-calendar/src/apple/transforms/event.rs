@@ -5,6 +5,7 @@ use objc2_foundation::{NSArray, NSDate, NSString, NSTimeZone};
 use crate::error::Error;
 use crate::types::{AppleEvent, CalendarRef, Participant, StructuredLocation};
 
+use super::super::contacts::ContactFetcher;
 use super::super::recurrence::{offset_date_time_from, parse_recurrence_info};
 use super::alarm::transform_alarm;
 use super::enums::{transform_event_availability, transform_event_status};
@@ -12,14 +13,17 @@ use super::location::transform_structured_location;
 use super::participant::transform_participant;
 use super::utils::get_url_string;
 
-pub fn transform_event(event: &EKEvent) -> Result<AppleEvent, Error> {
+pub fn transform_event(
+    event: &EKEvent,
+    contact_fetcher: Option<&dyn ContactFetcher>,
+) -> Result<AppleEvent, Error> {
     let identifiers = extract_event_identifiers(event);
     let calendar_ref = extract_event_calendar_ref(event);
     let basic_info = extract_event_basic_info(event);
     let dates = extract_event_dates(event);
     let status_info = extract_event_status_info(event);
     let flags = extract_event_flags(event);
-    let participants = extract_event_participants(event);
+    let participants = extract_event_participants(event, contact_fetcher);
     let location_info = extract_event_location_info(event);
     let recurrence_info = extract_event_recurrence_info(event, flags.has_recurrence_rules);
     let alarm_info = extract_event_alarm_info(event);
@@ -174,11 +178,19 @@ struct EventParticipants {
     attendees: Vec<Participant>,
 }
 
-fn extract_event_participants(event: &EKEvent) -> EventParticipants {
+fn extract_event_participants(
+    event: &EKEvent,
+    contact_fetcher: Option<&dyn ContactFetcher>,
+) -> EventParticipants {
     EventParticipants {
-        organizer: unsafe { event.organizer() }.map(|p| transform_participant(&p)),
+        organizer: unsafe { event.organizer() }
+            .map(|p| transform_participant(&p, contact_fetcher)),
         attendees: unsafe { event.attendees() }
-            .map(|arr| arr.iter().map(|p| transform_participant(&p)).collect())
+            .map(|arr| {
+                arr.iter()
+                    .map(|p| transform_participant(&p, contact_fetcher))
+                    .collect()
+            })
             .unwrap_or_default(),
     }
 }
