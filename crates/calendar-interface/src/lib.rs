@@ -1,5 +1,15 @@
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize, specta::Type)]
+#[serde(rename_all = "lowercase")]
+pub enum CalendarProviderType {
+    Apple,
+    Google,
+    Outlook,
+}
+
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
 pub struct CalendarEvent {
+    pub provider: CalendarProviderType,
+
     /// Unique between events. Synthesized for Apple events (eventIdentifier:YYYY-MM-DD for recurring).
     pub id: String,
     /// Calendar id.

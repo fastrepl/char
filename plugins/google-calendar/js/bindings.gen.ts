@@ -37,7 +37,7 @@ async listEvents(filter: EventFilter) : Promise<Result<CalendarEvent[], string>>
 export type AccessRole = "freeBusyReader" | "reader" | "writer" | "owner" | "unknown"
 export type AttendeeRole = "chair" | "required" | "optional" | "nonparticipant"
 export type AttendeeStatus = "pending" | "accepted" | "tentative" | "declined"
-export type CalendarEvent = { 
+export type CalendarEvent = { provider: CalendarProviderType; 
 /**
  * Unique between events. Synthesized for Apple events (eventIdentifier:YYYY-MM-DD for recurring).
  */
@@ -80,6 +80,7 @@ recurring_event_id: string | null;
 raw: string }
 export type CalendarListEntry = { id: string; kind?: string | null; etag?: string | null; summary?: string | null; description?: string | null; location?: string | null; timeZone?: string | null; summaryOverride?: string | null; colorId?: string | null; backgroundColor?: string | null; foregroundColor?: string | null; hidden?: boolean | null; selected?: boolean | null; primary?: boolean | null; deleted?: boolean | null; accessRole?: AccessRole | null; dataOwner?: string | null; defaultReminders?: Reminder[] | null; notificationSettings?: NotificationSettings | null; conferenceProperties?: ConferenceProperties | null; autoAcceptInvitations?: boolean | null }
 export type CalendarNotification = { method: NotificationMethod; type: NotificationType }
+export type CalendarProviderType = "apple" | "google" | "outlook"
 export type ConferenceProperties = { allowedConferenceSolutionTypes?: ConferenceSolutionType[] | null }
 export type ConferenceSolutionType = "addOn" | "hangoutsMeet" | "eventNamedHangout" | "eventHangout" | "unknown"
 export type EventAttendee = { name: string | null; 

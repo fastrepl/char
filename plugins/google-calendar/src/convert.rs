@@ -1,5 +1,6 @@
 use hypr_calendar_interface::{
-    AttendeeRole, AttendeeStatus, CalendarEvent, EventAttendee, EventPerson, EventStatus,
+    AttendeeRole, AttendeeStatus, CalendarEvent, CalendarProviderType, EventAttendee, EventPerson,
+    EventStatus,
 };
 use hypr_google_calendar::{
     Attendee, AttendeeResponseStatus, Event, EventDateTime, EventStatus as GoogleEventStatus,
@@ -57,6 +58,7 @@ fn convert_event(event: Event, calendar_id: &str) -> CalendarEvent {
     CalendarEvent {
         id: event.id,
         calendar_id: calendar_id.to_string(),
+        provider: CalendarProviderType::Google,
         external_id: event.ical_uid.unwrap_or_default(),
         title: event.summary.unwrap_or_default(),
         description: event.description,

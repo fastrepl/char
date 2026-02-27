@@ -61,7 +61,7 @@ export type AttendeeStatus = "pending" | "accepted" | "tentative" | "declined"
 export type CalendarChangedEvent = null
 export type CalendarColor = { red: number; green: number; blue: number; alpha: number }
 export type CalendarEntityType = "Event" | "Reminder"
-export type CalendarEvent = { 
+export type CalendarEvent = { provider: CalendarProviderType; 
 /**
  * Unique between events. Synthesized for Apple events (eventIdentifier:YYYY-MM-DD for recurring).
  */
@@ -102,6 +102,7 @@ recurring_event_id: string | null;
  * Raw data. JSON for both Apple and Google.
  */
 raw: string }
+export type CalendarProviderType = "apple" | "google" | "outlook"
 export type CalendarSource = { identifier: string; title: string; source_type: CalendarSourceType }
 export type CalendarSourceType = "Local" | "Exchange" | "CalDav" | "MobileMe" | "Subscribed" | "Birthdays"
 export type CalendarType = "Local" | "CalDav" | "Exchange" | "Subscription" | "Birthday"

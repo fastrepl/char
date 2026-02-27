@@ -2,7 +2,8 @@ use hypr_apple_calendar::types::{
     AppleEvent, EventStatus as AppleEventStatus, Participant, ParticipantRole, ParticipantStatus,
 };
 use hypr_calendar_interface::{
-    AttendeeRole, AttendeeStatus, CalendarEvent, EventAttendee, EventPerson, EventStatus,
+    AttendeeRole, AttendeeStatus, CalendarEvent, CalendarProviderType, EventAttendee, EventPerson,
+    EventStatus,
 };
 
 pub fn convert_events(events: Vec<AppleEvent>) -> Vec<CalendarEvent> {
@@ -46,6 +47,7 @@ fn convert_event(event: AppleEvent) -> CalendarEvent {
     CalendarEvent {
         id,
         calendar_id: event.calendar.id,
+        provider: CalendarProviderType::Apple,
         external_id: event.external_identifier,
         title: event.title,
         description: event.notes,
