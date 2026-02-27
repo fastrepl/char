@@ -39,27 +39,7 @@ fn write_fixture_wav(path: &Path, case: Case) -> Result<Vec<f32>, Box<dyn std::e
     Ok(samples)
 }
 
-fn write_fixture_wav_i16(path: &Path, case: Case) -> Result<(), Box<dyn std::error::Error>> {
-    let spec = hound::WavSpec {
-        channels: case.channels,
-        sample_rate: case.sample_rate,
-        bits_per_sample: 16,
-        sample_format: hound::SampleFormat::Int,
-    };
-
-    let mut writer = hound::WavWriter::create(path, spec)?;
-    for frame in 0..case.frames {
-        for channel in 0..case.channels as usize {
-            let sample = fixture_sample(frame, channel);
-            let sample_i16 = (sample * i16::MAX as f32) as i16;
-            writer.write_sample(sample_i16)?;
-        }
-    }
-    writer.finalize()?;
-    Ok(())
-}
-
-fn write_fixture_wav_i32(
+fn write_fixture_wav_int(
     path: &Path,
     case: Case,
     bits_per_sample: u16,
@@ -71,17 +51,19 @@ fn write_fixture_wav_i32(
         sample_format: hound::SampleFormat::Int,
     };
 
-    let mut writer = hound::WavWriter::create(path, spec)?;
     let max_amplitude = match bits_per_sample {
+        8 => i8::MAX as f32,
+        16 => i16::MAX as f32,
         17..=31 => ((1i64 << (bits_per_sample - 1)) - 1) as f32,
         32 => i32::MAX as f32,
-        bits => return Err(format!("unsupported bit depth for i32 fixture: {bits}").into()),
+        bits => return Err(format!("unsupported bit depth: {bits}").into()),
     };
+
+    let mut writer = hound::WavWriter::create(path, spec)?;
     for frame in 0..case.frames {
         for channel in 0..case.channels as usize {
             let sample = fixture_sample(frame, channel);
-            let sample_i32 = (sample * max_amplitude) as i32;
-            writer.write_sample(sample_i32)?;
+            writer.write_sample((sample * max_amplitude) as i32)?;
         }
     }
     writer.finalize()?;
@@ -122,6 +104,16 @@ fn write_malformed_stereo_wav_with_odd_samples(
     Ok(())
 }
 
+fn assert_samples_valid(samples: &[f32]) {
+    for sample in samples {
+        assert!(sample.is_finite(), "decoded sample is not finite");
+        assert!(
+            (-1.1..=1.1).contains(sample),
+            "decoded sample out of expected range: {sample}"
+        );
+    }
+}
+
 fn read_wav(path: &Path) -> Result<(hound::WavSpec, Vec<f32>), Box<dyn std::error::Error>> {
     let mut reader = hound::WavReader::open(path)?;
     let spec = reader.spec();
@@ -153,13 +145,7 @@ fn assert_roundtrip(case: Case) -> Result<(), Box<dyn std::error::Error>> {
         "sample rate changed"
     );
 
-    for sample in &decoded_samples {
-        assert!(sample.is_finite(), "decoded sample is not finite");
-        assert!(
-            (-1.1..=1.1).contains(sample),
-            "decoded sample out of expected range: {sample}"
-        );
-    }
+    assert_samples_valid(&decoded_samples);
 
     if case.frames == 0 {
         let max_len = 4096 * case.channels as usize;
@@ -249,149 +235,38 @@ fn rejects_more_than_two_channels() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-#[test]
-fn roundtrip_pcm16_stereo_input() -> Result<(), Box<dyn std::error::Error>> {
-    let tempdir = tempdir()?;
-    let case = Case {
-        channels: 2,
-        frames: 8_192,
-        sample_rate: 44_100,
+macro_rules! pcm_roundtrip_cases {
+    ($($name:ident => { bits: $bits:expr, channels: $channels:expr, frames: $frames:expr, sample_rate: $sample_rate:expr }),+ $(,)?) => {
+        $(
+            #[test]
+            fn $name() -> Result<(), Box<dyn std::error::Error>> {
+                let tempdir = tempdir()?;
+                let case = Case { channels: $channels, frames: $frames, sample_rate: $sample_rate };
+                let wav_path = tempdir.path().join("input.wav");
+                let mp3_path = tempdir.path().join("encoded.mp3");
+                let decoded_wav_path = tempdir.path().join("decoded.wav");
+
+                write_fixture_wav_int(&wav_path, case, $bits)?;
+                encode_wav(&wav_path, &mp3_path)?;
+                decode_to_wav(&mp3_path, &decoded_wav_path)?;
+
+                let (decoded_spec, decoded_samples) = read_wav(&decoded_wav_path)?;
+                assert_eq!(decoded_spec.channels, case.channels, "channel count changed");
+                assert_eq!(decoded_spec.sample_rate, case.sample_rate, "sample rate changed");
+                assert!(!decoded_samples.is_empty(), "decoded output is empty");
+                assert_samples_valid(&decoded_samples);
+
+                Ok(())
+            }
+        )+
     };
-    let wav_path = tempdir.path().join("input_i16.wav");
-    let mp3_path = tempdir.path().join("encoded.mp3");
-    let decoded_wav_path = tempdir.path().join("decoded.wav");
-
-    write_fixture_wav_i16(&wav_path, case)?;
-    encode_wav(&wav_path, &mp3_path)?;
-    decode_to_wav(&mp3_path, &decoded_wav_path)?;
-
-    let (decoded_spec, decoded_samples) = read_wav(&decoded_wav_path)?;
-    assert_eq!(
-        decoded_spec.channels, case.channels,
-        "channel count changed"
-    );
-    assert_eq!(
-        decoded_spec.sample_rate, case.sample_rate,
-        "sample rate changed"
-    );
-    assert!(
-        !decoded_samples.is_empty(),
-        "decoded pcm16 input to empty output"
-    );
-    for sample in &decoded_samples {
-        assert!(sample.is_finite(), "decoded sample is not finite");
-        assert!(
-            (-1.1..=1.1).contains(sample),
-            "decoded sample out of expected range: {sample}"
-        );
-    }
-
-    Ok(())
 }
 
-#[test]
-fn roundtrip_pcm8_mono_input() -> Result<(), Box<dyn std::error::Error>> {
-    let tempdir = tempdir()?;
-    let case = Case {
-        channels: 1,
-        frames: 4_096,
-        sample_rate: 16_000,
-    };
-    let wav_path = tempdir.path().join("input_i8.wav");
-    let mp3_path = tempdir.path().join("encoded.mp3");
-    let decoded_wav_path = tempdir.path().join("decoded.wav");
-
-    let spec = hound::WavSpec {
-        channels: case.channels,
-        sample_rate: case.sample_rate,
-        bits_per_sample: 8,
-        sample_format: hound::SampleFormat::Int,
-    };
-    let mut writer = hound::WavWriter::create(&wav_path, spec)?;
-    for frame in 0..case.frames {
-        let sample = fixture_sample(frame, 0);
-        writer.write_sample((sample * i8::MAX as f32) as i8)?;
-    }
-    writer.finalize()?;
-
-    encode_wav(&wav_path, &mp3_path)?;
-    decode_to_wav(&mp3_path, &decoded_wav_path)?;
-
-    let (decoded_spec, decoded_samples) = read_wav(&decoded_wav_path)?;
-    assert_eq!(decoded_spec.channels, case.channels);
-    assert_eq!(decoded_spec.sample_rate, case.sample_rate);
-    assert!(!decoded_samples.is_empty());
-    for sample in &decoded_samples {
-        assert!(sample.is_finite(), "decoded sample is not finite");
-        assert!(
-            (-1.1..=1.1).contains(sample),
-            "decoded sample out of expected range: {sample}"
-        );
-    }
-
-    Ok(())
-}
-
-#[test]
-fn roundtrip_pcm24_mono_input() -> Result<(), Box<dyn std::error::Error>> {
-    let tempdir = tempdir()?;
-    let case = Case {
-        channels: 1,
-        frames: 8_192,
-        sample_rate: 22_050,
-    };
-    let wav_path = tempdir.path().join("input_i24.wav");
-    let mp3_path = tempdir.path().join("encoded.mp3");
-    let decoded_wav_path = tempdir.path().join("decoded.wav");
-
-    write_fixture_wav_i32(&wav_path, case, 24)?;
-    encode_wav(&wav_path, &mp3_path)?;
-    decode_to_wav(&mp3_path, &decoded_wav_path)?;
-
-    let (decoded_spec, decoded_samples) = read_wav(&decoded_wav_path)?;
-    assert_eq!(decoded_spec.channels, case.channels);
-    assert_eq!(decoded_spec.sample_rate, case.sample_rate);
-    assert!(!decoded_samples.is_empty());
-    for sample in &decoded_samples {
-        assert!(sample.is_finite(), "decoded sample is not finite");
-        assert!(
-            (-1.1..=1.1).contains(sample),
-            "decoded sample out of expected range: {sample}"
-        );
-    }
-
-    Ok(())
-}
-
-#[test]
-fn roundtrip_pcm32_stereo_input() -> Result<(), Box<dyn std::error::Error>> {
-    let tempdir = tempdir()?;
-    let case = Case {
-        channels: 2,
-        frames: 6_321,
-        sample_rate: 48_000,
-    };
-    let wav_path = tempdir.path().join("input_i32.wav");
-    let mp3_path = tempdir.path().join("encoded.mp3");
-    let decoded_wav_path = tempdir.path().join("decoded.wav");
-
-    write_fixture_wav_i32(&wav_path, case, 32)?;
-    encode_wav(&wav_path, &mp3_path)?;
-    decode_to_wav(&mp3_path, &decoded_wav_path)?;
-
-    let (decoded_spec, decoded_samples) = read_wav(&decoded_wav_path)?;
-    assert_eq!(decoded_spec.channels, case.channels);
-    assert_eq!(decoded_spec.sample_rate, case.sample_rate);
-    assert!(!decoded_samples.is_empty());
-    for sample in &decoded_samples {
-        assert!(sample.is_finite(), "decoded sample is not finite");
-        assert!(
-            (-1.1..=1.1).contains(sample),
-            "decoded sample out of expected range: {sample}"
-        );
-    }
-
-    Ok(())
+pcm_roundtrip_cases! {
+    roundtrip_pcm8_mono    => { bits: 8,  channels: 1, frames: 4_096, sample_rate: 16_000 },
+    roundtrip_pcm16_stereo => { bits: 16, channels: 2, frames: 8_192, sample_rate: 44_100 },
+    roundtrip_pcm24_mono   => { bits: 24, channels: 1, frames: 8_192, sample_rate: 22_050 },
+    roundtrip_pcm32_stereo => { bits: 32, channels: 2, frames: 6_321, sample_rate: 48_000 },
 }
 
 #[test]
