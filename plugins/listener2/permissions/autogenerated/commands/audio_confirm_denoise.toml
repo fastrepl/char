@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-audio-confirm-denoise"
+description = "Enables the audio_confirm_denoise command without any pre-configured scope."
+commands.allow = ["audio_confirm_denoise"]
+
+[[permission]]
+identifier = "deny-audio-confirm-denoise"
+description = "Denies the audio_confirm_denoise command without any pre-configured scope."
+commands.deny = ["audio_confirm_denoise"]

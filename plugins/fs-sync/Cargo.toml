@@ -21,6 +21,7 @@ tokio = { workspace = true, features = ["macros"] }
 [dependencies]
 hypr-audio-utils = { workspace = true }
 hypr-frontmatter = { workspace = true }
+hypr-storage = { workspace = true }
 hypr-tiptap = { workspace = true }
 
 tauri = { workspace = true, features = ["test"] }

@@ -22,6 +22,22 @@ async runDenoise(params: DenoiseParams) : Promise<Result<null, string>> {
     else return { status: "error", error: e  as any };
 }
 },
+async audioConfirmDenoise(sessionId: string) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:listener2|audio_confirm_denoise", { sessionId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async audioRevertDenoise(sessionId: string) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:listener2|audio_revert_denoise", { sessionId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async parseSubtitle(path: string) : Promise<Result<Subtitle, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:listener2|parse_subtitle", { path }) };

@@ -49,6 +49,30 @@ pub async fn run_denoise<R: tauri::Runtime>(
 
 #[tauri::command]
 #[specta::specta]
+pub async fn audio_confirm_denoise<R: tauri::Runtime>(
+    app: tauri::AppHandle<R>,
+    session_id: String,
+) -> Result<(), String> {
+    app.listener2()
+        .confirm_denoise(&session_id)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn audio_revert_denoise<R: tauri::Runtime>(
+    app: tauri::AppHandle<R>,
+    session_id: String,
+) -> Result<(), String> {
+    app.listener2()
+        .revert_denoise(&session_id)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+#[specta::specta]
 pub async fn is_supported_languages_batch<R: tauri::Runtime>(
     _app: tauri::AppHandle<R>,
     provider: String,

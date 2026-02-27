@@ -54,7 +54,9 @@ pub fn init() -> tauri::plugin::TauriPlugin<tauri::Wry> {
             let app_handle = app.app_handle().clone();
 
             let runtime = Arc::new(TauriRuntime {
-                app: app_handle.clone(),
+                storage: tauri_plugin_settings::TauriStorageRuntime {
+                    app: app_handle.clone(),
+                },
             });
 
             tauri::async_runtime::spawn(async move {

@@ -1,6 +1,4 @@
-use std::sync::Arc;
 use tauri::Manager;
-use tokio::sync::Mutex;
 
 mod commands;
 mod events;
@@ -12,12 +10,7 @@ pub use ext::*;
 pub use hypr_listener2_core::{BatchParams, BatchProvider, DenoiseParams, Subtitle, VttWord};
 
 const PLUGIN_NAME: &str = "listener2";
-
-pub type SharedState = Arc<Mutex<State>>;
-
-pub struct State {
-    pub app: tauri::AppHandle,
-}
+pub type SharedState = tauri::AppHandle;
 
 fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
     tauri_specta::Builder::<R>::new()
@@ -25,6 +18,8 @@ fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
         .commands(tauri_specta::collect_commands![
             commands::run_batch::<tauri::Wry>,
             commands::run_denoise::<tauri::Wry>,
+            commands::audio_confirm_denoise::<tauri::Wry>,
+            commands::audio_revert_denoise::<tauri::Wry>,
             commands::parse_subtitle::<tauri::Wry>,
             commands::export_to_vtt::<tauri::Wry>,
             commands::is_supported_languages_batch::<tauri::Wry>,
@@ -42,10 +37,7 @@ pub fn init() -> tauri::plugin::TauriPlugin<tauri::Wry> {
         .invoke_handler(specta_builder.invoke_handler())
         .setup(move |app, _api| {
             specta_builder.mount_events(app);
-
-            let app_handle = app.app_handle().clone();
-            let state: SharedState = Arc::new(Mutex::new(State { app: app_handle }));
-            app.manage(state);
+            app.manage(app.app_handle().clone());
 
             Ok(())
         })

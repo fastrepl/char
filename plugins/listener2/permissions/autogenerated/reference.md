@@ -6,6 +6,8 @@ Default permissions for the plugin
 
 - `allow-run-batch`
 - `allow-run-denoise`
+- `allow-audio-confirm-denoise`
+- `allow-audio-revert-denoise`
 - `allow-parse-subtitle`
 - `allow-export-to-vtt`
 - `allow-is-supported-languages-batch`
@@ -20,6 +22,58 @@ Default permissions for the plugin
 <th>Description</th>
 </tr>
 
+
+<tr>
+<td>
+
+`listener2:allow-audio-confirm-denoise`
+
+</td>
+<td>
+
+Enables the audio_confirm_denoise command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`listener2:deny-audio-confirm-denoise`
+
+</td>
+<td>
+
+Denies the audio_confirm_denoise command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`listener2:allow-audio-revert-denoise`
+
+</td>
+<td>
+
+Enables the audio_revert_denoise command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`listener2:deny-audio-revert-denoise`
+
+</td>
+<td>
+
+Denies the audio_revert_denoise command without any pre-configured scope.
+
+</td>
+</tr>
 
 <tr>
 <td>

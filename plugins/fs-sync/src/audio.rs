@@ -7,13 +7,14 @@ use hypr_audio_utils::{
     Source, VorbisEncodeSettings, encode_vorbis_mono, mix_down_to_mono, resample_audio,
 };
 
+use hypr_storage::vault::audio::SESSION_AUDIO_CANDIDATES;
+
 use crate::error::{AudioImportError, AudioProcessingError};
 
 const TARGET_SAMPLE_RATE_HZ: u32 = 16_000;
-const AUDIO_FORMATS: [&str; 3] = ["audio.mp3", "audio.wav", "audio.ogg"];
 
 pub fn exists(session_dir: &Path) -> std::io::Result<bool> {
-    AUDIO_FORMATS
+    SESSION_AUDIO_CANDIDATES
         .iter()
         .map(|format| session_dir.join(format))
         .try_fold(false, |acc, path| {
@@ -22,7 +23,7 @@ pub fn exists(session_dir: &Path) -> std::io::Result<bool> {
 }
 
 pub fn delete(session_dir: &Path) -> std::io::Result<()> {
-    for format in AUDIO_FORMATS {
+    for format in SESSION_AUDIO_CANDIDATES {
         let path = session_dir.join(format);
         if std::fs::exists(&path).unwrap_or(false) {
             std::fs::remove_file(&path)?;
@@ -32,7 +33,7 @@ pub fn delete(session_dir: &Path) -> std::io::Result<()> {
 }
 
 pub fn path(session_dir: &Path) -> Option<PathBuf> {
-    AUDIO_FORMATS
+    SESSION_AUDIO_CANDIDATES
         .iter()
         .map(|format| session_dir.join(format))
         .find(|path| path.exists())
