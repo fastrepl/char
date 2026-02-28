@@ -3,6 +3,8 @@ const COMMANDS: &[&str] = &[
     "is_model_downloaded",
     "is_model_downloading",
     "download_model",
+    "cancel_download",
+    "delete_model",
     "get_current_model",
     "set_current_model",
     "list_downloaded_model",

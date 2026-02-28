@@ -155,6 +155,23 @@ async fn wait_until_done(manager: &ModelDownloadManager<TestModel>, model: &Test
     .expect("download did not complete within 10s");
 }
 
+fn part_files_in(dir: &Path) -> Vec<PathBuf> {
+    let mut out = Vec::new();
+    if let Ok(entries) = std::fs::read_dir(dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let is_part = path
+                .file_name()
+                .and_then(|s| s.to_str())
+                .is_some_and(|s| s.contains(".part-"));
+            if is_part {
+                out.push(path);
+            }
+        }
+    }
+    out
+}
+
 // --- tests ---
 
 #[tokio::test]
@@ -231,6 +248,10 @@ async fn stale_cleanup_does_not_remove_replacement_download() {
 
     assert!(manager.is_downloaded(&second).await.unwrap());
     assert!(!manager.is_downloading(&second).await);
+    assert!(
+        part_files_in(runtime.temp_dir.path()).is_empty(),
+        "should not leave .part-* files behind"
+    );
 }
 
 #[tokio::test]
@@ -290,6 +311,46 @@ async fn cancel_download_returns_true_and_cleans_up() {
     assert!(cancelled);
     assert!(!manager.is_downloading(&model).await);
     assert!(!manager.is_downloaded(&model).await.unwrap());
+    assert!(
+        part_files_in(runtime.temp_dir.path()).is_empty(),
+        "should not leave .part-* files behind"
+    );
+}
+
+#[tokio::test]
+async fn download_failure_cleans_up_part_file() {
+    let server = MockServer::start().await;
+
+    Mock::given(method("HEAD"))
+        .and(path("/fail.bin"))
+        .respond_with(ResponseTemplate::new(200).insert_header("content-length", "1024"))
+        .mount(&server)
+        .await;
+
+    Mock::given(method("GET"))
+        .and(path("/fail.bin"))
+        .respond_with(ResponseTemplate::new(500))
+        .mount(&server)
+        .await;
+
+    let url = format!("{}/fail.bin", server.uri());
+    let runtime = TestRuntime::new();
+    let manager = ModelDownloadManager::new(runtime.clone());
+    let model = TestModel::with_url("fail", url);
+
+    manager.download(&model).await.unwrap();
+    wait_until_done(&manager, &model).await;
+
+    assert!(!manager.is_downloading(&model).await);
+    assert!(!manager.is_downloaded(&model).await.unwrap());
+    assert!(
+        runtime.progress_values().contains(&-1),
+        "should emit -1 on download failure"
+    );
+    assert!(
+        part_files_in(runtime.temp_dir.path()).is_empty(),
+        "should not leave .part-* files behind"
+    );
 }
 
 #[tokio::test]

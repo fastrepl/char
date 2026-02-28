@@ -17,9 +17,8 @@ specta-typescript = { workspace = true }
 tauri-plugin-store = { workspace = true }
 
 [dependencies]
-hypr-download-interface = { workspace = true }
-hypr-file = { workspace = true }
 hypr-local-llm-core = { workspace = true, features = ["specta"] }
+hypr-model-downloader = { workspace = true }
 
 tauri = { workspace = true, features = ["test"] }
 tauri-specta = { workspace = true, features = ["derive", "typescript"] }

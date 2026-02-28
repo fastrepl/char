@@ -33,7 +33,15 @@ pub(crate) fn spawn_download_task<M: DownloadableModel>(
     start_rx: oneshot::Receiver<()>,
 ) -> JoinHandle<()> {
     tokio::spawn(async move {
-        let _ = start_rx.await;
+        if start_rx.await.is_err() {
+            // Manager dropped before it could signal start.
+            params
+                .registry
+                .remove_if_generation_matches(&params.key, params.generation)
+                .await;
+            let _ = fs::remove_file(&params.destination).await;
+            return;
+        }
 
         let progress_callback =
             make_progress_callback(params.runtime.clone(), params.model.clone());
@@ -47,6 +55,7 @@ pub(crate) fn spawn_download_task<M: DownloadableModel>(
         .await;
 
         if let Err(e) = download_result {
+            let _ = fs::remove_file(&params.destination).await;
             if !matches!(e, hypr_file::Error::Cancelled) {
                 tracing::error!(error = %e, "model_download_error");
                 params.runtime.emit_progress(&params.model, -1);
@@ -72,6 +81,7 @@ pub(crate) fn spawn_download_task<M: DownloadableModel>(
             Ok(Err(e)) => {
                 tracing::error!(error = %e, "model_finalize_error");
                 params.runtime.emit_progress(&params.model, -1);
+                let _ = fs::remove_file(&params.destination).await;
                 params
                     .registry
                     .remove_if_generation_matches(&params.key, params.generation)
@@ -81,6 +91,7 @@ pub(crate) fn spawn_download_task<M: DownloadableModel>(
             Err(e) => {
                 tracing::error!(error = %e, "model_finalize_join_error");
                 params.runtime.emit_progress(&params.model, -1);
+                let _ = fs::remove_file(&params.destination).await;
                 params
                     .registry
                     .remove_if_generation_matches(&params.key, params.generation)
@@ -95,15 +106,17 @@ pub(crate) fn spawn_download_task<M: DownloadableModel>(
             let promote_result =
                 match fs::rename(&params.destination, &params.final_destination).await {
                     Ok(()) => Ok(()),
-                    Err(_) => {
+                    Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {
                         let _ = fs::remove_file(&params.final_destination).await;
                         fs::rename(&params.destination, &params.final_destination).await
                     }
+                    Err(e) => Err(e),
                 };
 
             if let Err(e) = promote_result {
                 tracing::error!(error = %e, "model_download_promote_error");
                 params.runtime.emit_progress(&params.model, -1);
+                let _ = fs::remove_file(&params.destination).await;
                 params
                     .registry
                     .remove_if_generation_matches(&params.key, params.generation)
@@ -111,6 +124,8 @@ pub(crate) fn spawn_download_task<M: DownloadableModel>(
                 return;
             }
         }
+
+        params.runtime.emit_progress(&params.model, 100);
 
         params
             .registry
@@ -136,7 +151,8 @@ fn make_progress_callback<M: DownloadableModel>(
             }
 
             let percent = (downloaded as f64 / total_size as f64) * 100.0;
-            let current = (percent.clamp(0.0, 100.0) as i16) as i8;
+            // Reserve 100 for "fully finalized and promoted".
+            let current = (percent.floor().clamp(0.0, 99.0) as i16) as i8;
 
             let mut prev = last.load(Ordering::Relaxed);
             while current > prev {
@@ -155,8 +171,10 @@ fn make_progress_callback<M: DownloadableModel>(
             }
         }
         DownloadProgress::Finished => {
-            last.store(100, Ordering::Relaxed);
-            runtime.emit_progress(&model, 100);
+            let prev = last.swap(99, Ordering::Relaxed);
+            if prev < 99 {
+                runtime.emit_progress(&model, 99);
+            }
         }
     }
 }
