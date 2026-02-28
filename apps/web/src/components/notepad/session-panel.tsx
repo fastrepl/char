@@ -1,4 +1,4 @@
-import { RefreshCw } from "lucide-react";
+import { CircleAlert, RefreshCw } from "lucide-react";
 import {
   lazy,
   Suspense,
@@ -13,6 +13,12 @@ import type { JSONContent, TiptapEditor } from "@hypr/tiptap/editor";
 import { parseJsonContent } from "@hypr/tiptap/shared";
 import "@hypr/tiptap/styles.css";
 import type { Segment } from "@hypr/transcript";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@hypr/ui/components/ui/tooltip";
 
 import { EMPTY_MENTION_CONFIG } from "@/components/transcription/constants";
 import { FloatingCTA } from "@/components/transcription/floating-cta";
@@ -185,7 +191,30 @@ export function SessionPanel({
                 active={activeTab === "summary"}
                 onClick={() => setActiveTab("summary")}
                 trailing={
-                  activeTab === "summary" && transcript && !isSummarizing ? (
+                  isSummarizing ? (
+                    <div className="ml-1 animate-spin rounded-full h-3 w-3 border-b border-stone-600" />
+                  ) : summaryError ? (
+                    <TooltipProvider delayDuration={0}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRegenerate();
+                            }}
+                            className="ml-1 p-0.5 rounded hover:bg-neutral-200 transition-colors"
+                          >
+                            <CircleAlert size={12} className="text-red-500" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom">
+                          <p className="max-w-[240px]">{summaryError}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : activeTab === "summary" &&
+                    transcript &&
+                    !isSummarizing ? (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -195,8 +224,6 @@ export function SessionPanel({
                     >
                       <RefreshCw size={12} />
                     </button>
-                  ) : isSummarizing ? (
-                    <div className="ml-1 animate-spin rounded-full h-3 w-3 border-b border-stone-600" />
                   ) : null
                 }
               />
