@@ -93,6 +93,7 @@ fn validate_node(node: &Value, path: &str, errors: &mut Vec<ValidationError>) {
                         });
                     }
                 }
+                validate_node(child, &child_path, errors);
             }
         }
 
@@ -107,6 +108,7 @@ fn validate_node(node: &Value, path: &str, errors: &mut Vec<ValidationError>) {
                         });
                     }
                 }
+                validate_node(child, &child_path, errors);
             }
         }
 
@@ -247,9 +249,40 @@ fn validate_node(node: &Value, path: &str, errors: &mut Vec<ValidationError>) {
             }
         }
 
-        "text" | "hardBreak" | "horizontalRule" | "image" => {}
+        "text" => {
+            validate_marks(node, path, errors);
+        }
+
+        "hardBreak" | "horizontalRule" | "image" => {}
 
         _ => {}
+    }
+}
+
+fn validate_marks(node: &Value, path: &str, errors: &mut Vec<ValidationError>) {
+    let Some(marks) = node.get("marks").and_then(|m| m.as_array()) else {
+        return;
+    };
+
+    let mark_types: Vec<&str> = marks
+        .iter()
+        .filter_map(|m| m.get("type").and_then(|t| t.as_str()))
+        .collect();
+
+    // The `code` mark has `excludes: "_"` — it excludes all other marks.
+    if mark_types.contains(&"code") && mark_types.len() > 1 {
+        let other_marks: Vec<&str> = mark_types
+            .iter()
+            .filter(|&&t| t != "code")
+            .copied()
+            .collect();
+        errors.push(ValidationError {
+            path: path.to_string(),
+            message: format!(
+                "code mark excludes all other marks, but found alongside: {}",
+                other_marks.join(", ")
+            ),
+        });
     }
 }
 
@@ -420,5 +453,53 @@ mod tests {
             }),
             "doc child must be a block node",
         );
+    }
+
+    #[test]
+    fn invalid_code_with_bold_marks() {
+        assert_invalid(
+            &json!({
+                "type": "doc",
+                "content": [{
+                    "type": "paragraph",
+                    "content": [{
+                        "type": "text",
+                        "text": "code",
+                        "marks": [{ "type": "bold" }, { "type": "code" }]
+                    }]
+                }]
+            }),
+            "code mark excludes all other marks",
+        );
+    }
+
+    #[test]
+    fn valid_code_mark_alone() {
+        assert_valid(&json!({
+            "type": "doc",
+            "content": [{
+                "type": "paragraph",
+                "content": [{
+                    "type": "text",
+                    "text": "code",
+                    "marks": [{ "type": "code" }]
+                }]
+            }]
+        }));
+    }
+
+    #[test]
+    fn valid_bold_italic_marks() {
+        assert_valid(&json!({
+            "type": "doc",
+            "content": [{
+                "type": "paragraph",
+                "content": [{
+                    "type": "text",
+                    "text": "bold italic",
+                    "marks": [{ "type": "bold" }, { "type": "italic" }]
+                }]
+            }]
+        }));
     }
 }

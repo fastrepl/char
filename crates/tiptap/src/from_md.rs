@@ -238,30 +238,48 @@ fn convert_inline_node(node: &mdast::Node) -> Option<Value> {
 
 fn convert_marked_text(children: &[mdast::Node], mark_type: &str) -> Value {
     let text = extract_text(children);
-    let mut existing_marks = extract_marks(children);
-    existing_marks.push(json!({ "type": mark_type }));
+    let mut marks = extract_marks(children);
+    marks.push(json!({ "type": mark_type }));
+
+    let marks = sanitize_marks(marks);
 
     json!({
         "type": "text",
         "text": text,
-        "marks": existing_marks
+        "marks": marks
     })
+}
+
+/// The `code` mark has `excludes: "_"` in TipTap, meaning it excludes all other marks.
+/// When `code` is present, strip all other marks to match ProseMirror's schema rules.
+fn sanitize_marks(marks: Vec<Value>) -> Vec<Value> {
+    let has_code = marks
+        .iter()
+        .any(|m| m.get("type").and_then(|t| t.as_str()) == Some("code"));
+
+    if has_code {
+        vec![json!({ "type": "code" })]
+    } else {
+        marks
+    }
 }
 
 fn convert_link(l: &mdast::Link) -> Value {
     let text = extract_text(&l.children);
-    let mut existing_marks = extract_marks(&l.children);
+    let mut marks = extract_marks(&l.children);
 
     let mut link_attrs = json!({ "href": l.url });
     if let Some(title) = &l.title {
         link_attrs["title"] = json!(title);
     }
-    existing_marks.push(json!({ "type": "link", "attrs": link_attrs }));
+    marks.push(json!({ "type": "link", "attrs": link_attrs }));
+
+    let marks = sanitize_marks(marks);
 
     json!({
         "type": "text",
         "text": text,
-        "marks": existing_marks
+        "marks": marks
     })
 }
 
@@ -295,6 +313,9 @@ fn extract_marks(nodes: &[mdast::Node]) -> Vec<Value> {
             mdast::Node::Delete(d) => {
                 marks.push(json!({ "type": "strike" }));
                 marks.extend(extract_marks(&d.children));
+            }
+            mdast::Node::InlineCode(_) => {
+                marks.push(json!({ "type": "code" }));
             }
             _ => {}
         }

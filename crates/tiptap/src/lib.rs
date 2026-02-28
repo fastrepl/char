@@ -932,6 +932,50 @@ mod tests {
     }
 
     #[test]
+    fn test_schema_valid_bold_wrapping_code() {
+        assert_schema_valid("**`code`**");
+    }
+
+    #[test]
+    fn test_schema_valid_italic_wrapping_code() {
+        assert_schema_valid("*`code`*");
+    }
+
+    #[test]
+    fn test_schema_valid_strike_wrapping_code() {
+        assert_schema_valid("~~`code`~~");
+    }
+
+    #[test]
+    fn test_bold_code_produces_only_code_mark() {
+        let json = md_to_tiptap_json("**`code`**").unwrap();
+        let text_node = &json["content"][0]["content"][0];
+        assert_eq!(text_node["type"], "text");
+        assert_eq!(text_node["text"], "code");
+        let marks = text_node["marks"].as_array().unwrap();
+        assert_eq!(marks.len(), 1, "expected only code mark, got: {:?}", marks);
+        assert_eq!(marks[0]["type"], "code");
+    }
+
+    #[test]
+    fn test_italic_code_produces_only_code_mark() {
+        let json = md_to_tiptap_json("*`code`*").unwrap();
+        let text_node = &json["content"][0]["content"][0];
+        let marks = text_node["marks"].as_array().unwrap();
+        assert_eq!(marks.len(), 1);
+        assert_eq!(marks[0]["type"], "code");
+    }
+
+    #[test]
+    fn test_strike_code_produces_only_code_mark() {
+        let json = md_to_tiptap_json("~~`code`~~").unwrap();
+        let text_node = &json["content"][0]["content"][0];
+        let marks = text_node["marks"].as_array().unwrap();
+        assert_eq!(marks.len(), 1);
+        assert_eq!(marks[0]["type"], "code");
+    }
+
+    #[test]
     fn test_schema_valid_links() {
         assert_schema_valid("[link text](https://example.com)");
     }
