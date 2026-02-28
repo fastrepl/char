@@ -64,7 +64,12 @@ export function IntegrationsSettingsCard() {
                 onClick={() =>
                   navigate({
                     to: "/app/integration/",
-                    search: { integration_id: integration.id },
+                    search: {
+                      integration_id: integration.id,
+                      ...(connection
+                        ? { connection_id: connection.connection_id }
+                        : {}),
+                    },
                   })
                 }
                 className={cn([

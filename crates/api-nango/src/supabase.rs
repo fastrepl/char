@@ -7,6 +7,12 @@ pub(crate) struct NangoConnectionRow {
     pub updated_at: Option<String>,
 }
 
+#[derive(serde::Deserialize)]
+struct ConnectionExistsRow {
+    #[allow(dead_code)]
+    connection_id: String,
+}
+
 #[derive(Clone)]
 pub(crate) struct SupabaseClient {
     supabase_url: String,
@@ -53,6 +59,40 @@ impl SupabaseClient {
                 "supabase_service_role_key not configured".to_string(),
             )
         })
+    }
+
+    pub(crate) async fn verify_connection_ownership(
+        &self,
+        auth_token: &str,
+        user_id: &str,
+        connection_id: &str,
+        integration_id: &str,
+    ) -> Result<bool, crate::error::NangoError> {
+        let encoded_user_id = urlencoding::encode(user_id);
+        let encoded_connection_id = urlencoding::encode(connection_id);
+        let encoded_integration_id = urlencoding::encode(integration_id);
+        let url = format!(
+            "{}/rest/v1/nango_connections?select=connection_id&user_id=eq.{}&connection_id=eq.{}&integration_id=eq.{}",
+            self.supabase_url, encoded_user_id, encoded_connection_id, encoded_integration_id,
+        );
+
+        let response = self.anon_query(&url, auth_token).await?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
+            return Err(crate::error::NangoError::Internal(format!(
+                "ownership check failed: {} - {}",
+                status, body
+            )));
+        }
+
+        let rows: Vec<ConnectionExistsRow> = response
+            .json()
+            .await
+            .map_err(|e| crate::error::NangoError::Internal(e.to_string()))?;
+
+        Ok(!rows.is_empty())
     }
 
     pub(crate) async fn upsert_connection(
