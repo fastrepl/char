@@ -1,9 +1,11 @@
 mod commands;
 mod convert;
+mod error;
 mod ext;
 mod fetch;
 mod types;
 
+pub use error::Error;
 pub use ext::{GoogleCalendarExt, GoogleCalendarPluginExt};
 pub use hypr_google_calendar::{CalendarListEntry, Event};
 pub use types::EventFilter;
