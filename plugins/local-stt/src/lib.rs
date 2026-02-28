@@ -1,9 +1,7 @@
 use hypr_model_downloader::ModelDownloadManager;
 use hypr_supervisor::dynamic::DynamicSupervisorMsg;
 use ractor::{ActorCell, ActorRef};
-use std::collections::HashMap;
 use tauri::{Manager, Wry};
-use tokio_util::sync::CancellationToken;
 
 mod commands;
 mod error;
@@ -24,10 +22,9 @@ pub type SupervisorHandle = tokio::task::JoinHandle<()>;
 
 pub struct State {
     pub am_api_key: Option<String>,
-    pub download_task: HashMap<SupportedSttModel, (tokio::task::JoinHandle<()>, CancellationToken)>,
     pub stt_supervisor: Option<ActorRef<DynamicSupervisorMsg>>,
     pub supervisor_handle: Option<SupervisorHandle>,
-    pub cactus_downloader: Option<ModelDownloadManager>,
+    pub model_downloader: ModelDownloadManager<SupportedSttModel>,
 }
 
 #[derive(Default)]
@@ -71,14 +68,13 @@ pub fn init<R: tauri::Runtime>(options: InitOptions) -> tauri::plugin::TauriPlug
 
             let api_key = option_env!("AM_API_KEY").map(|s| s.to_string());
 
-            let cactus_downloader = ext::create_cactus_downloader(app.app_handle());
+            let model_downloader = ext::create_model_downloader(app.app_handle());
 
             let state = std::sync::Arc::new(tokio::sync::Mutex::new(State {
                 am_api_key: api_key,
-                download_task: HashMap::new(),
                 stt_supervisor: None,
                 supervisor_handle: None,
-                cactus_downloader: Some(cactus_downloader),
+                model_downloader,
             }));
 
             app.manage(state.clone());

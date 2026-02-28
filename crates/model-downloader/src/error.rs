@@ -4,14 +4,16 @@ pub enum Error {
     ModelNotDownloaded(String),
     #[error("download failed: {0}")]
     DownloadFailed(#[from] hypr_file::Error),
-    #[error("unpack failed: {0}")]
-    UnpackFailed(String),
     #[error("io error: {0}")]
     Io(#[from] std::io::Error),
+    #[error("zip error: {0}")]
+    Zip(#[from] zip::result::ZipError),
+    #[error("operation failed: {0}")]
+    OperationFailed(String),
+    #[error("finalize failed: {0}")]
+    FinalizeFailed(String),
     #[error("no download URL available for model: {0}")]
     NoDownloadUrl(String),
     #[error("delete failed: {0}")]
     DeleteFailed(String),
-    #[error("cancelled")]
-    Cancelled,
 }

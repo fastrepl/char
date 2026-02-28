@@ -10635,10 +10635,12 @@ dependencies = [
  "cactus-model",
  "download-interface",
  "file",
+ "tempfile",
  "thiserror 2.0.18",
  "tokio",
  "tokio-util",
  "tracing",
+ "wiremock",
  "zip 2.4.2",
 ]
 

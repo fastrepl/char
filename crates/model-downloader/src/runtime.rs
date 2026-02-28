@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
-use hypr_cactus_model::CactusModel;
+use crate::manager::DownloadableModel;
 
-pub trait ModelDownloaderRuntime: Send + Sync + 'static {
+pub trait ModelDownloaderRuntime<M: DownloadableModel>: Send + Sync + 'static {
     fn models_base(&self) -> Result<PathBuf, crate::Error>;
-    fn emit_progress(&self, model: &CactusModel, progress: i8);
+    fn emit_progress(&self, model: &M, progress: i8);
 }
