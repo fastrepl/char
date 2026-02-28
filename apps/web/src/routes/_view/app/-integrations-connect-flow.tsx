@@ -83,9 +83,12 @@ export function ConnectFlow() {
             statusRef.current !== "error"
           ) {
             inFlightRef.current = false;
+            statusRef.current = "idle";
             setStatus("idle");
           }
         } else if (event.type === "connect") {
+          inFlightRef.current = false;
+          statusRef.current = "success";
           setStatus("success");
           void navigate({
             to: "/callback/integration/",
