@@ -1,4 +1,4 @@
-use std::{collections::HashMap, path::PathBuf};
+use std::{collections::HashMap, path::PathBuf, sync::Arc};
 
 use ractor::{ActorRef, call_t, registry};
 use tauri_specta::Event;
@@ -7,8 +7,10 @@ use tokio_util::sync::CancellationToken;
 use tauri::{Manager, Runtime};
 use tauri_plugin_sidecar2::Sidecar2PluginExt;
 
+use hypr_cactus_model::CactusModel;
 use hypr_download_interface::DownloadProgress;
 use hypr_file::download_file_parallel_cancellable;
+use hypr_model_downloader::{ModelDownloadManager, ModelDownloaderRuntime};
 
 #[cfg(feature = "whisper-cpp")]
 use crate::server::internal;
@@ -19,6 +21,46 @@ use crate::{
     server::{ServerInfo, ServerStatus, ServerType, external, supervisor},
     types::DownloadProgressPayload,
 };
+
+struct TauriModelRuntime<R: Runtime> {
+    app_handle: tauri::AppHandle<R>,
+}
+
+impl<R: Runtime> ModelDownloaderRuntime for TauriModelRuntime<R> {
+    fn models_base(&self) -> Result<PathBuf, hypr_model_downloader::Error> {
+        use tauri_plugin_settings::SettingsPluginExt;
+        Ok(self
+            .app_handle
+            .settings()
+            .global_base()
+            .map(|base| base.join("models").join("cactus").into_std_path_buf())
+            .unwrap_or_else(|_| {
+                dirs::data_dir()
+                    .unwrap_or_default()
+                    .join("models")
+                    .join("cactus")
+            }))
+    }
+
+    fn emit_progress(&self, model: &CactusModel, progress: i8) {
+        if let CactusModel::Stt(stt_model) = model {
+            let _ = DownloadProgressPayload {
+                model: SupportedSttModel::Cactus(stt_model.clone()),
+                progress,
+            }
+            .emit(&self.app_handle);
+        }
+    }
+}
+
+pub fn create_cactus_downloader<R: Runtime>(
+    app_handle: &tauri::AppHandle<R>,
+) -> ModelDownloadManager {
+    let runtime = Arc::new(TauriModelRuntime {
+        app_handle: app_handle.clone(),
+    });
+    ModelDownloadManager::new(runtime)
+}
 
 pub struct LocalStt<'a, R: Runtime, M: Manager<R>> {
     manager: &'a M,
@@ -73,17 +115,13 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
                 Ok(self.models_dir().join(model.file_name()).exists())
             }
             SupportedSttModel::Cactus(m) => {
-                #[cfg(target_arch = "aarch64")]
-                {
-                    let model_dir = self.cactus_models_dir().join(m.dir_name());
-                    return Ok(model_dir.is_dir()
-                        && std::fs::read_dir(&model_dir)
-                            .map(|mut d| d.next().is_some())
-                            .unwrap_or(false));
-                }
-                #[cfg(not(target_arch = "aarch64"))]
-                {
-                    let _ = m;
+                let state = self.manager.state::<crate::SharedState>();
+                let guard = state.lock().await;
+                if let Some(ref downloader) = guard.cactus_downloader {
+                    Ok(downloader
+                        .is_downloaded(&CactusModel::Stt(m.clone()))
+                        .await?)
+                } else {
                     Err(crate::Error::UnsupportedModelType)
                 }
             }
@@ -233,6 +271,16 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
 
     #[tracing::instrument(skip_all)]
     pub async fn download_model(&self, model: SupportedSttModel) -> Result<(), crate::Error> {
+        if let SupportedSttModel::Cactus(m) = &model {
+            let state = self.manager.state::<crate::SharedState>();
+            let guard = state.lock().await;
+            if let Some(ref downloader) = guard.cactus_downloader {
+                downloader.download(&CactusModel::Stt(m.clone())).await?;
+                return Ok(());
+            }
+            return Err(crate::Error::UnsupportedModelType);
+        }
+
         {
             let existing = {
                 let state = self.manager.state::<crate::SharedState>();
@@ -340,28 +388,7 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
                     },
                 )
             }
-            SupportedSttModel::Cactus(m) => {
-                let Some(url) = m.model_url() else {
-                    return Err(crate::Error::UnsupportedModelType);
-                };
-                let cactus_dir = self.cactus_models_dir();
-                let zip_path = cactus_dir.join(m.zip_name());
-                let extract_dir = cactus_dir.join(m.dir_name());
-                spawn_download_task(
-                    url.to_string(),
-                    zip_path,
-                    model.clone(),
-                    state_for_cleanup,
-                    make_progress_callback(model.clone()),
-                    app_handle,
-                    cancellation_token.clone(),
-                    move |p| {
-                        extract_zip(p, &extract_dir)?;
-                        let _ = std::fs::remove_file(p);
-                        Ok(())
-                    },
-                )
-            }
+            SupportedSttModel::Cactus(_) => unreachable!(),
         };
 
         {
@@ -375,6 +402,18 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
 
     #[tracing::instrument(skip_all)]
     pub async fn cancel_download(&self, model: SupportedSttModel) -> bool {
+        if let SupportedSttModel::Cactus(m) = &model {
+            let state = self.manager.state::<crate::SharedState>();
+            let guard = state.lock().await;
+            if let Some(ref downloader) = guard.cactus_downloader {
+                return downloader
+                    .cancel_download(&CactusModel::Stt(m.clone()))
+                    .await
+                    .unwrap_or(false);
+            }
+            return false;
+        }
+
         let existing = {
             let state = self.manager.state::<crate::SharedState>();
             let mut s = state.lock().await;
@@ -394,10 +433,7 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
                     let model_path = self.models_dir().join(m.file_name());
                     let _ = std::fs::remove_file(&model_path);
                 }
-                SupportedSttModel::Cactus(m) => {
-                    let zip_path = self.cactus_models_dir().join(m.zip_name());
-                    let _ = std::fs::remove_file(&zip_path);
-                }
+                SupportedSttModel::Cactus(_) => unreachable!(),
             }
 
             let _ = DownloadProgressPayload {
@@ -414,6 +450,17 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
 
     #[tracing::instrument(skip_all)]
     pub async fn is_model_downloading(&self, model: &SupportedSttModel) -> bool {
+        if let SupportedSttModel::Cactus(m) = model {
+            let state = self.manager.state::<crate::SharedState>();
+            let guard = state.lock().await;
+            if let Some(ref downloader) = guard.cactus_downloader {
+                return downloader
+                    .is_downloading(&CactusModel::Stt(m.clone()))
+                    .await;
+            }
+            return false;
+        }
+
         let state = self.manager.state::<crate::SharedState>();
         {
             let guard = state.lock().await;
@@ -423,6 +470,16 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
 
     #[tracing::instrument(skip_all)]
     pub async fn delete_model(&self, model: &SupportedSttModel) -> Result<(), crate::Error> {
+        if let SupportedSttModel::Cactus(m) = model {
+            let state = self.manager.state::<crate::SharedState>();
+            let guard = state.lock().await;
+            if let Some(ref downloader) = guard.cactus_downloader {
+                downloader.delete(&CactusModel::Stt(m.clone())).await?;
+                return Ok(());
+            }
+            return Err(crate::Error::UnsupportedModelType);
+        }
+
         if !self.is_model_downloaded(model).await? {
             return Err(crate::Error::ModelNotDownloaded);
         }
@@ -442,13 +499,7 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
                         .map_err(|e| crate::Error::ModelDeleteFailed(e.to_string()))?;
                 }
             }
-            SupportedSttModel::Cactus(m) => {
-                let model_dir = self.cactus_models_dir().join(m.dir_name());
-                if model_dir.exists() {
-                    std::fs::remove_dir_all(&model_dir)
-                        .map_err(|e| crate::Error::ModelDeleteFailed(e.to_string()))?;
-                }
-            }
+            SupportedSttModel::Cactus(_) => unreachable!(),
         }
 
         Ok(())
@@ -654,23 +705,4 @@ fn spawn_download_task<R: Runtime>(
 
         cleanup().await;
     })
-}
-
-fn extract_zip(
-    zip_path: impl AsRef<std::path::Path>,
-    output_dir: impl AsRef<std::path::Path>,
-) -> Result<(), crate::Error> {
-    let file = std::fs::File::open(zip_path.as_ref())
-        .map_err(|e| crate::Error::ModelUnpackFailed(e.to_string()))?;
-    let mut archive =
-        zip::ZipArchive::new(file).map_err(|e| crate::Error::ModelUnpackFailed(e.to_string()))?;
-
-    std::fs::create_dir_all(output_dir.as_ref())
-        .map_err(|e| crate::Error::ModelUnpackFailed(e.to_string()))?;
-
-    archive
-        .extract(output_dir.as_ref())
-        .map_err(|e| crate::Error::ModelUnpackFailed(e.to_string()))?;
-
-    Ok(())
 }

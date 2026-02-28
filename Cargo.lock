@@ -10629,6 +10629,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "model-downloader"
+version = "0.1.0"
+dependencies = [
+ "cactus-model",
+ "download-interface",
+ "file",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "zip 2.4.2",
+]
+
+[[package]]
 name = "moxcms"
 version = "0.7.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -17709,6 +17723,7 @@ dependencies = [
  "host",
  "json-patch 4.1.0",
  "language",
+ "model-downloader",
  "owhisper-client",
  "owhisper-interface",
  "port-killer",
