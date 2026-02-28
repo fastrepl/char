@@ -21,9 +21,10 @@ const DEFAULT_CHUNK_MS: u64 = 500;
 const DEFAULT_DELAY_MS: u64 = 20;
 const DEVICE_FINGERPRINT_HEADER: &str = "x-device-fingerprint";
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, strum::Display, strum::EnumString)]
 #[cfg_attr(feature = "specta", derive(specta::Type))]
 #[serde(rename_all = "lowercase")]
+#[strum(serialize_all = "lowercase")]
 pub enum BatchProvider {
     Deepgram,
     Soniox,

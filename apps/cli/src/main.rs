@@ -31,6 +31,12 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     Auth,
+    Batch {
+        #[arg(long)]
+        file: String,
+        #[arg(long)]
+        provider: String,
+    },
 }
 
 #[tokio::main]
@@ -39,6 +45,32 @@ async fn main() {
 
     match cli.command {
         Some(Commands::Auth) => commands::auth::run(),
+        Some(Commands::Batch { file, provider }) => {
+            let base_url = cli.base_url.unwrap_or_else(|| {
+                eprintln!("error: --base-url (or CHAR_BASE_URL) is required");
+                std::process::exit(1);
+            });
+
+            let provider = provider.parse().unwrap_or_else(|_| {
+                eprintln!("error: unknown provider '{provider}'. expected: deepgram, soniox, assemblyai, am, cactus");
+                std::process::exit(1);
+            });
+
+            commands::batch::run(commands::batch::Args {
+                file,
+                provider,
+                base_url,
+                api_key: cli.api_key,
+                model: if cli.model.is_empty() {
+                    None
+                } else {
+                    Some(cli.model)
+                },
+                language: cli.language,
+                keywords: vec![],
+            })
+            .await;
+        }
         None => {
             let base_url = cli.base_url.unwrap_or_else(|| {
                 eprintln!("error: --base-url (or CHAR_BASE_URL) is required");

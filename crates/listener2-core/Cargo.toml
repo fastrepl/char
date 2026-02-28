@@ -20,6 +20,7 @@ owhisper-interface = { workspace = true }
 
 serde = { workspace = true }
 specta = { workspace = true, optional = true }
+strum = { workspace = true, features = ["derive"] }
 thiserror = { workspace = true }
 
 ractor = { workspace = true, features = ["async-trait"] }
