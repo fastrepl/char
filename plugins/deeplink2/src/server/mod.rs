@@ -203,9 +203,10 @@ async fn serve<R: tauri::Runtime>(
         servers.remove(&port);
     }
     if let Ok(mut active) = state.active_port.lock()
-        && *active == Some(port) {
-            *active = None;
-        }
+        && *active == Some(port)
+    {
+        *active = None;
+    }
 }
 
 pub async fn start<R: tauri::Runtime>(
