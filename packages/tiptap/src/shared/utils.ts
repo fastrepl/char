@@ -45,7 +45,8 @@ export function json2md(jsonContent: JSONContent): string {
 
 export function md2json(markdown: string): JSONContent {
   try {
-    return getMarkdownManager().parse(markdown);
+    const json = getMarkdownManager().parse(markdown);
+    return sanitizeMarks(json);
   } catch (error) {
     console.error(error);
 
@@ -59,4 +60,24 @@ export function md2json(markdown: string): JSONContent {
       ],
     };
   }
+}
+
+/**
+ * The `code` mark has `excludes: "_"` in TipTap, meaning it excludes all other marks.
+ * When `code` is present on a text node, strip all other marks to match ProseMirror's schema.
+ */
+function sanitizeMarks(node: JSONContent): JSONContent {
+  if (node.type === "text" && node.marks) {
+    const hasCode = node.marks.some((m) => m.type === "code");
+    if (hasCode && node.marks.length > 1) {
+      return { ...node, marks: [{ type: "code" }] };
+    }
+    return node;
+  }
+
+  if (node.content) {
+    return { ...node, content: node.content.map(sanitizeMarks) };
+  }
+
+  return node;
 }
