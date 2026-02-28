@@ -57,7 +57,9 @@ impl AnalyticsReporter for AnalyticsClient {
                 );
                 event.generation_id.clone()
             });
-            let _ = self.event(distinct_id, payload.build()).await;
+            if let Err(e) = self.event(distinct_id, payload.build()).await {
+                tracing::warn!("analytics event error: {e}");
+            }
         })
     }
 }
