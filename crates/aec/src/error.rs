@@ -1,4 +1,4 @@
-use serde::{Serialize, ser::Serializer};
+use serde::{ser::Serializer, Serialize};
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {

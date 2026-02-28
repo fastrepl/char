@@ -22,6 +22,8 @@ struct ProcessingContext {
     lpb_mag: Array3<f32>,
     estimated_block: Array3<f32>,
     in_lpb: Array3<f32>,
+    out_mask: Vec<f32>,
+    out_block: Vec<f32>,
 }
 
 impl ProcessingContext {
@@ -42,6 +44,8 @@ impl ProcessingContext {
             lpb_mag: Array3::<f32>::zeros((1, 1, block_len / 2 + 1)),
             estimated_block: Array3::<f32>::zeros((1, 1, block_len)),
             in_lpb: Array3::<f32>::zeros((1, 1, block_len)),
+            out_mask: vec![0.0f32; block_len / 2 + 1],
+            out_block: vec![0.0f32; block_len],
         }
     }
 }
@@ -120,64 +124,80 @@ impl AEC {
         Ok(())
     }
 
-    fn run_model_1(
-        &mut self,
-        in_mag: &Array3<f32>,
-        lpb_mag: &Array3<f32>,
-    ) -> Result<hypr_onnx::ndarray::Array1<f32>, crate::Error> {
+    fn run_model_1(&mut self, ctx: &mut ProcessingContext) -> Result<(), crate::Error> {
         let mut outputs = self.session_1.run(hypr_onnx::ort::inputs![
-            TensorRef::from_array_view(in_mag.view())?,
+            TensorRef::from_array_view(ctx.in_mag.view())?,
             TensorRef::from_array_view(self.states_1.view())?,
-            TensorRef::from_array_view(lpb_mag.view())?
+            TensorRef::from_array_view(ctx.lpb_mag.view())?
         ])?;
 
         let out_mask = outputs
             .remove("Identity")
-            .ok_or_else(|| crate::Error::MissingOutput("Identity".to_string()))?
-            .try_extract_array::<f32>()?
-            .view()
-            .to_owned();
-        let out_mask_1d = out_mask.into_shape_with_order((self.block_len / 2 + 1,))?;
+            .ok_or_else(|| crate::Error::MissingOutput("Identity".to_string()))?;
+        let out_mask_view = out_mask.try_extract_array::<f32>()?;
+        ctx.out_mask
+            .copy_from_slice(out_mask_view.view().as_slice().ok_or_else(|| {
+                crate::Error::ShapeError(hypr_onnx::ndarray::ShapeError::from_kind(
+                    hypr_onnx::ndarray::ErrorKind::IncompatibleLayout,
+                ))
+            })?);
 
-        self.states_1 = outputs
+        let new_states = outputs
             .remove("Identity_1")
-            .ok_or_else(|| crate::Error::MissingOutput("Identity_1".to_string()))?
-            .try_extract_array::<f32>()?
-            .view()
-            .to_owned()
-            .into_shape_with_order((1, 2, model::STATE_SIZE, 2))?;
+            .ok_or_else(|| crate::Error::MissingOutput("Identity_1".to_string()))?;
+        let new_states_view = new_states.try_extract_array::<f32>()?;
+        self.states_1
+            .as_slice_mut()
+            .ok_or_else(|| {
+                crate::Error::ShapeError(hypr_onnx::ndarray::ShapeError::from_kind(
+                    hypr_onnx::ndarray::ErrorKind::IncompatibleLayout,
+                ))
+            })?
+            .copy_from_slice(new_states_view.view().as_slice().ok_or_else(|| {
+                crate::Error::ShapeError(hypr_onnx::ndarray::ShapeError::from_kind(
+                    hypr_onnx::ndarray::ErrorKind::IncompatibleLayout,
+                ))
+            })?);
 
-        Ok(out_mask_1d)
+        Ok(())
     }
 
-    fn run_model_2(
-        &mut self,
-        estimated_block: &Array3<f32>,
-        in_lpb: &Array3<f32>,
-    ) -> Result<hypr_onnx::ndarray::Array1<f32>, crate::Error> {
+    fn run_model_2(&mut self, ctx: &mut ProcessingContext) -> Result<(), crate::Error> {
         let mut outputs = self.session_2.run(hypr_onnx::ort::inputs![
-            TensorRef::from_array_view(estimated_block.view())?,
+            TensorRef::from_array_view(ctx.estimated_block.view())?,
             TensorRef::from_array_view(self.states_2.view())?,
-            TensorRef::from_array_view(in_lpb.view())?
+            TensorRef::from_array_view(ctx.in_lpb.view())?
         ])?;
 
         let out_block = outputs
             .remove("Identity")
-            .ok_or_else(|| crate::Error::MissingOutput("Identity".into()))?
-            .try_extract_array::<f32>()?
-            .view()
-            .to_owned();
-        let out_block_1d = out_block.into_shape_with_order((self.block_len,))?;
+            .ok_or_else(|| crate::Error::MissingOutput("Identity".into()))?;
+        let out_block_view = out_block.try_extract_array::<f32>()?;
+        ctx.out_block
+            .copy_from_slice(out_block_view.view().as_slice().ok_or_else(|| {
+                crate::Error::ShapeError(hypr_onnx::ndarray::ShapeError::from_kind(
+                    hypr_onnx::ndarray::ErrorKind::IncompatibleLayout,
+                ))
+            })?);
 
-        self.states_2 = outputs
+        let new_states = outputs
             .remove("Identity_1")
-            .ok_or_else(|| crate::Error::MissingOutput("Identity_1".into()))?
-            .try_extract_array::<f32>()?
-            .view()
-            .to_owned()
-            .into_shape_with_order((1, 2, model::STATE_SIZE, 2))?;
+            .ok_or_else(|| crate::Error::MissingOutput("Identity_1".into()))?;
+        let new_states_view = new_states.try_extract_array::<f32>()?;
+        self.states_2
+            .as_slice_mut()
+            .ok_or_else(|| {
+                crate::Error::ShapeError(hypr_onnx::ndarray::ShapeError::from_kind(
+                    hypr_onnx::ndarray::ErrorKind::IncompatibleLayout,
+                ))
+            })?
+            .copy_from_slice(new_states_view.view().as_slice().ok_or_else(|| {
+                crate::Error::ShapeError(hypr_onnx::ndarray::ShapeError::from_kind(
+                    hypr_onnx::ndarray::ErrorKind::IncompatibleLayout,
+                ))
+            })?);
 
-        Ok(out_block_1d)
+        Ok(())
     }
 
     pub fn process_streaming(
@@ -277,11 +297,11 @@ impl AEC {
                 &mut ctx.lpb_mag,
             )?;
 
-            let out_mask_1d = self.run_model_1(&ctx.in_mag, &ctx.lpb_mag)?;
+            self.run_model_1(&mut ctx)?;
 
             // Apply mask and calculate IFFT
-            for (i, c) in ctx.in_block_fft.iter_mut().enumerate() {
-                *c *= out_mask_1d[i];
+            for (c, &m) in ctx.in_block_fft.iter_mut().zip(ctx.out_mask.iter()) {
+                *c *= m;
             }
 
             // IFFT
@@ -291,29 +311,20 @@ impl AEC {
                 &mut ctx.ifft_scratch,
             )?;
 
-            // Normalize IFFT result
+            // Normalize IFFT result and copy to Array3 for second model (fused)
             let norm_factor = 1.0 / self.block_len as f32;
-            ctx.estimated_block_vec
-                .iter_mut()
-                .for_each(|x| *x *= norm_factor);
-
-            // Copy to Array3 for second model
-            for (i, &val) in ctx.estimated_block_vec.iter().enumerate() {
-                ctx.estimated_block[[0, 0, i]] = val;
+            let est_slice = ctx.estimated_block.as_slice_mut().unwrap();
+            for (d, &s) in est_slice.iter_mut().zip(ctx.estimated_block_vec.iter()) {
+                *d = s * norm_factor;
             }
-            for (i, &val) in self.in_buffer_lpb.data().iter().enumerate() {
-                ctx.in_lpb[[0, 0, i]] = val;
-            }
+            ctx.in_lpb
+                .as_slice_mut()
+                .unwrap()
+                .copy_from_slice(self.in_buffer_lpb.data());
 
-            let out_block_1d = self.run_model_2(&ctx.estimated_block, &ctx.in_lpb)?;
+            self.run_model_2(&mut ctx)?;
 
-            // Shift output buffer and accumulate
-            let out_slice = out_block_1d.as_slice().ok_or_else(|| {
-                crate::Error::ShapeError(hypr_onnx::ndarray::ShapeError::from_kind(
-                    hypr_onnx::ndarray::ErrorKind::IncompatibleLayout,
-                ))
-            })?;
-            self.out_buffer.shift_and_accumulate(out_slice);
+            self.out_buffer.shift_and_accumulate(&ctx.out_block);
 
             // Write to output file
             let out_start = idx * self.block_shift;
