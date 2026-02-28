@@ -3,6 +3,11 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
+const MAX_MESSAGE_SIZE: usize = 256 * 1024;
+const MAX_URL_LENGTH: usize = 2048;
+const MAX_PARTICIPANTS: usize = 30;
+const MAX_PARTICIPANT_NAME_LENGTH: usize = 80;
+
 #[derive(Debug, Deserialize)]
 struct IncomingMessage {
     #[serde(rename = "type")]
@@ -19,14 +24,14 @@ pub struct Participant {
     pub is_self: bool,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct ChromeState {
     version: u32,
     timestamp_ms: u64,
     meeting: Option<MeetingState>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 struct MeetingState {
     url: String,
     is_active: bool,
@@ -34,11 +39,11 @@ struct MeetingState {
     participants: Vec<Participant>,
 }
 
-fn default_state_path() -> PathBuf {
-    dirs::data_dir()
-        .expect("failed to resolve data directory")
-        .join("char")
-        .join("chrome_state.json")
+fn default_state_path() -> io::Result<PathBuf> {
+    let data_dir = dirs::data_dir()
+        .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "data directory not found"))?;
+
+    Ok(data_dir.join("char").join("chrome_state.json"))
 }
 
 fn read_message(reader: &mut impl Read) -> io::Result<Option<Vec<u8>>> {
@@ -49,21 +54,82 @@ fn read_message(reader: &mut impl Read) -> io::Result<Option<Vec<u8>>> {
         Err(e) => return Err(e),
     }
     let len = u32::from_le_bytes(len_buf) as usize;
+    if len > MAX_MESSAGE_SIZE {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            format!("message too large: {len}"),
+        ));
+    }
+
     let mut buf = vec![0u8; len];
     reader.read_exact(&mut buf)?;
     Ok(Some(buf))
 }
 
-fn process_message(msg: IncomingMessage) -> Option<MeetingState> {
-    if msg.msg_type == "meeting_state" && msg.is_active.unwrap_or(false) {
-        Some(MeetingState {
-            url: msg.url.unwrap_or_default(),
-            is_active: true,
-            muted: msg.muted.unwrap_or(false),
-            participants: msg.participants.unwrap_or_default(),
+#[derive(Debug, PartialEq)]
+enum ProcessedMessage {
+    Ignore,
+    Update(Option<MeetingState>),
+}
+
+fn normalize_url(url: Option<String>) -> Option<String> {
+    let value = url?.trim().to_owned();
+    if value.is_empty() || value.len() > MAX_URL_LENGTH {
+        return None;
+    }
+
+    if !value.starts_with("https://meet.google.com/") {
+        return None;
+    }
+
+    Some(value)
+}
+
+fn normalize_participants(participants: Option<Vec<Participant>>) -> Vec<Participant> {
+    participants
+        .unwrap_or_default()
+        .into_iter()
+        .filter_map(|participant| {
+            let name = participant.name.trim();
+            if name.is_empty() || name.len() > MAX_PARTICIPANT_NAME_LENGTH {
+                return None;
+            }
+
+            Some(Participant {
+                name: name.to_owned(),
+                is_self: participant.is_self,
+            })
         })
-    } else {
-        None
+        .take(MAX_PARTICIPANTS)
+        .collect()
+}
+
+fn process_message(msg: IncomingMessage) -> ProcessedMessage {
+    match msg.msg_type.as_str() {
+        "meeting_state" => {
+            if !msg.is_active.unwrap_or(false) {
+                return ProcessedMessage::Update(None);
+            }
+
+            let Some(url) = normalize_url(msg.url) else {
+                return ProcessedMessage::Ignore;
+            };
+
+            ProcessedMessage::Update(Some(MeetingState {
+                url,
+                is_active: true,
+                muted: msg.muted.unwrap_or(false),
+                participants: normalize_participants(msg.participants),
+            }))
+        }
+        "meeting_ended" => {
+            if msg.is_active == Some(true) {
+                return ProcessedMessage::Ignore;
+            }
+
+            ProcessedMessage::Update(None)
+        }
+        _ => ProcessedMessage::Ignore,
     }
 }
 
@@ -95,10 +161,15 @@ fn run(reader: &mut impl Read, state_path: &Path) {
                     Err(_) => continue,
                 };
 
+                let meeting = match process_message(msg) {
+                    ProcessedMessage::Ignore => continue,
+                    ProcessedMessage::Update(meeting) => meeting,
+                };
+
                 let state = ChromeState {
                     version: 1,
                     timestamp_ms: timestamp_ms(),
-                    meeting: process_message(msg),
+                    meeting,
                 };
 
                 if let Err(e) = write_state(&state, state_path) {
@@ -116,7 +187,15 @@ fn run(reader: &mut impl Read, state_path: &Path) {
 
 fn main() {
     let mut stdin = io::stdin().lock();
-    run(&mut stdin, &default_state_path());
+    let state_path = match default_state_path() {
+        Ok(path) => path,
+        Err(error) => {
+            eprintln!("failed to resolve state path: {error}");
+            return;
+        }
+    };
+
+    run(&mut stdin, &state_path);
 }
 
 #[cfg(test)]
@@ -161,6 +240,14 @@ mod tests {
         assert!(read_message(&mut cursor).is_err());
     }
 
+    #[test]
+    fn test_read_message_rejects_oversized_message() {
+        let mut buf = vec![];
+        buf.extend_from_slice(&((MAX_MESSAGE_SIZE + 1) as u32).to_le_bytes());
+        let mut cursor = Cursor::new(buf);
+        assert!(read_message(&mut cursor).is_err());
+    }
+
     // --- process_message ---
 
     #[test]
@@ -175,11 +262,16 @@ mod tests {
                 is_self: true,
             }]),
         };
-        let result = process_message(msg).unwrap();
-        assert!(result.is_active);
-        assert!(result.muted);
-        assert_eq!(result.participants.len(), 1);
-        assert_eq!(result.url, "https://meet.google.com/abc");
+        let result = process_message(msg);
+        match result {
+            ProcessedMessage::Update(Some(meeting)) => {
+                assert!(meeting.is_active);
+                assert!(meeting.muted);
+                assert_eq!(meeting.participants.len(), 1);
+                assert_eq!(meeting.url, "https://meet.google.com/abc");
+            }
+            _ => panic!("expected active meeting state"),
+        }
     }
 
     #[test]
@@ -191,7 +283,7 @@ mod tests {
             muted: None,
             participants: None,
         };
-        assert!(process_message(msg).is_none());
+        assert_eq!(process_message(msg), ProcessedMessage::Update(None));
     }
 
     #[test]
@@ -203,20 +295,78 @@ mod tests {
             muted: Some(false),
             participants: None,
         };
-        assert!(process_message(msg).is_none());
+        assert_eq!(process_message(msg), ProcessedMessage::Update(None));
     }
 
     #[test]
     fn test_process_defaults_muted_false() {
         let msg = IncomingMessage {
             msg_type: "meeting_state".into(),
-            url: None,
+            url: Some("https://meet.google.com/abc".into()),
             is_active: Some(true),
             muted: None,
             participants: None,
         };
-        let result = process_message(msg).unwrap();
-        assert!(!result.muted);
+        let result = process_message(msg);
+        match result {
+            ProcessedMessage::Update(Some(meeting)) => {
+                assert!(!meeting.muted);
+            }
+            _ => panic!("expected active meeting state"),
+        }
+    }
+
+    #[test]
+    fn test_process_unknown_type_is_ignored() {
+        let msg = IncomingMessage {
+            msg_type: "unknown".into(),
+            url: Some("https://meet.google.com/abc".into()),
+            is_active: Some(true),
+            muted: Some(false),
+            participants: None,
+        };
+        assert_eq!(process_message(msg), ProcessedMessage::Ignore);
+    }
+
+    #[test]
+    fn test_process_invalid_url_is_ignored() {
+        let msg = IncomingMessage {
+            msg_type: "meeting_state".into(),
+            url: Some("https://example.com/abc".into()),
+            is_active: Some(true),
+            muted: Some(false),
+            participants: None,
+        };
+        assert_eq!(process_message(msg), ProcessedMessage::Ignore);
+    }
+
+    #[test]
+    fn test_process_participants_are_sanitized() {
+        let msg = IncomingMessage {
+            msg_type: "meeting_state".into(),
+            url: Some("https://meet.google.com/abc".into()),
+            is_active: Some(true),
+            muted: Some(false),
+            participants: Some(vec![
+                Participant {
+                    name: "  Alice  ".into(),
+                    is_self: false,
+                },
+                Participant {
+                    name: " ".into(),
+                    is_self: false,
+                },
+            ]),
+        };
+
+        let result = process_message(msg);
+        match result {
+            ProcessedMessage::Update(Some(meeting)) => {
+                assert_eq!(meeting.participants.len(), 1);
+                assert_eq!(meeting.participants[0].name, "Alice");
+            }
+            _ => panic!("expected active meeting state"),
+        }
     }
 
     // --- write_state + full round-trip ---
@@ -306,7 +456,7 @@ mod tests {
         let mut input = len.to_le_bytes().to_vec();
         input.extend_from_slice(bad);
 
-        let valid = r#"{"type":"meeting_state","is_active":true,"muted":true}"#;
+        let valid = r#"{"type":"meeting_state","url":"https://meet.google.com/xyz","is_active":true,"muted":true}"#;
         input.extend(encode_message(valid));
 
         let mut cursor = Cursor::new(input);
@@ -314,5 +464,24 @@ mod tests {
 
         // second (valid) message should still produce output
         assert!(state_path.exists());
+    }
+
+    #[test]
+    fn test_run_unknown_type_does_not_clear_existing_state() {
+        let dir = tempfile::tempdir().unwrap();
+        let state_path = dir.path().join("chrome_state.json");
+
+        let active = r#"{"type":"meeting_state","url":"https://meet.google.com/xyz","is_active":true,"muted":false,"participants":[]}"#;
+        let unknown = r#"{"type":"something_else"}"#;
+
+        let mut input = encode_message(active);
+        input.extend(encode_message(unknown));
+
+        let mut cursor = Cursor::new(input);
+        run(&mut cursor, &state_path);
+
+        let contents = std::fs::read_to_string(&state_path).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&contents).unwrap();
+        assert_eq!(parsed["meeting"]["url"], "https://meet.google.com/xyz");
     }
 }
