@@ -2,7 +2,9 @@
 name = "xtask"
 version = "0.1.0"
 edition = "2024"
+publish = false
 
-[[bin]]
-name = "xtask"
-path = "src/main.rs"
+[dependencies]
+anyhow = "1"
+tempfile = "3"
+xshell = "0.2"
