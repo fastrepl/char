@@ -1,3 +1,4 @@
+import { ResizableNodeView } from "@tiptap/core";
 import FileHandler from "@tiptap/extension-file-handler";
 import Highlight from "@tiptap/extension-highlight";
 import Image from "@tiptap/extension-image";
@@ -38,6 +39,14 @@ export type FileHandlerConfig = {
   onImageUpload?: (file: File) => Promise<ImageUploadResult>;
 };
 
+function extractAttachmentIdFromSrc(src: string): string | null {
+  const filename = src.split("/").pop() || "";
+  const match = filename.match(
+    /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\./i,
+  );
+  return match ? match[1] : null;
+}
+
 export type ExtensionOptions = {
   imageExtension?: any;
   onLinkOpen?: (url: string) => void;
@@ -57,6 +66,119 @@ const AttachmentImage = Image.extend({
           return { "data-attachment-id": attributes.attachmentId };
         },
       },
+      width: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("width"),
+        renderHTML: (attributes) => {
+          if (!attributes.width) {
+            return {};
+          }
+          return { width: attributes.width };
+        },
+      },
+      height: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("height"),
+        renderHTML: (attributes) => {
+          if (!attributes.height) {
+            return {};
+          }
+          return { height: attributes.height };
+        },
+      },
+    };
+  },
+
+  addNodeView() {
+    const resize = this.options.resize;
+    if (!resize || !resize.enabled) {
+      return null;
+    }
+
+    return ({ node, getPos, HTMLAttributes, editor }) => {
+      const img = document.createElement("img");
+
+      Object.entries(HTMLAttributes).forEach(([key, value]) => {
+        if (value == null) {
+          return;
+        }
+        img.setAttribute(key, String(value));
+      });
+
+      const width = node.attrs.width;
+      const height = node.attrs.height;
+      if (width != null) {
+        img.style.width =
+          typeof width === "number" ? `${width}px` : String(width);
+      }
+      if (height != null) {
+        img.style.height =
+          typeof height === "number" ? `${height}px` : String(height);
+      }
+
+      const min =
+        resize.minWidth || resize.minHeight
+          ? {
+              width: resize.minWidth,
+              height: resize.minHeight,
+            }
+          : undefined;
+
+      return new ResizableNodeView({
+        editor,
+        element: img,
+        node,
+        getPos,
+        onResize: (nextWidth, nextHeight) => {
+          img.style.width = `${nextWidth}px`;
+          img.style.height = `${nextHeight}px`;
+        },
+        onCommit: (nextWidth, nextHeight) => {
+          const pos = getPos();
+          if (pos === undefined) {
+            return;
+          }
+          editor.commands.updateAttributes("image", {
+            width: nextWidth,
+            height: nextHeight,
+          });
+        },
+        onUpdate: (updatedNode) => {
+          if (updatedNode.type !== node.type) {
+            return false;
+          }
+
+          const nextWidth = updatedNode.attrs.width;
+          const nextHeight = updatedNode.attrs.height;
+          if (nextWidth == null) {
+            img.style.removeProperty("width");
+          } else {
+            img.style.width =
+              typeof nextWidth === "number"
+                ? `${nextWidth}px`
+                : String(nextWidth);
+          }
+          if (nextHeight == null) {
+            img.style.removeProperty("height");
+          } else {
+            img.style.height =
+              typeof nextHeight === "number"
+                ? `${nextHeight}px`
+                : String(nextHeight);
+          }
+
+          if (updatedNode.attrs.src) {
+            img.setAttribute("src", String(updatedNode.attrs.src));
+          }
+
+          return true;
+        },
+        options: {
+          directions: resize.directions,
+          min,
+          preserveAspectRatio: resize.alwaysPreserveAspectRatio,
+        },
+      });
     };
   },
 
@@ -68,7 +190,7 @@ const AttachmentImage = Image.extend({
         src,
         alt: token.text || "",
         title: token.title || null,
-        attachmentId: null,
+        attachmentId: extractAttachmentIdFromSrc(src),
       },
     };
   },
@@ -115,6 +237,19 @@ export const getExtensions = (
     inline: false,
     allowBase64: true,
     HTMLAttributes: { class: "tiptap-image" },
+    resize: {
+      enabled: true,
+      directions: [
+        "top",
+        "bottom",
+        "left",
+        "right",
+        "top-left",
+        "top-right",
+        "bottom-left",
+        "bottom-right",
+      ],
+    },
   }),
   Underline,
   Placeholder.configure({
