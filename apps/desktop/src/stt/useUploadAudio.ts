@@ -1,9 +1,10 @@
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { useCallback, useRef, useState } from "react";
-import { useAuth } from "~/auth";
-import { env } from "~/env";
 
 import { uploadAudio } from "@hypr/supabase/storage";
+
+import { useAuth } from "~/auth";
+import { env } from "~/env";
 
 export function useUploadAudio() {
   const auth = useAuth();

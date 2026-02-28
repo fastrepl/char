@@ -1,14 +1,15 @@
 import React, { createContext, useContext, useEffect, useRef } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/shallow";
+
+import { events as detectEvents } from "@hypr/plugin-detect";
+import { commands as notificationCommands } from "@hypr/plugin-notification";
+
 import * as main from "~/store/tinybase/store/main";
 import {
   createListenerStore,
   type ListenerStore,
 } from "~/store/zustand/listener";
-
-import { events as detectEvents } from "@hypr/plugin-detect";
-import { commands as notificationCommands } from "@hypr/plugin-notification";
 
 const ListenerContext = createContext<ListenerStore | null>(null);
 

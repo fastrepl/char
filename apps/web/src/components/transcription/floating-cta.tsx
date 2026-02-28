@@ -20,7 +20,7 @@ export function FloatingCTA({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40">
+    <div className="absolute bottom-6 left-1/2 z-40 -translate-x-1/2">
       <input
         ref={fileInputRef}
         type="file"
@@ -31,14 +31,14 @@ export function FloatingCTA({
 
       {status === "uploading" ? (
         <div className={pillClasses}>
-          <div className="animate-spin rounded-full h-4 w-4 border-2 border-stone-300 border-t-stone-600" />
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-stone-300 border-t-stone-600" />
           <span className="text-sm font-medium text-neutral-700">
             Uploading... {progress}%
           </span>
         </div>
       ) : status === "transcribing" ? (
         <div className={pillClasses}>
-          <div className="animate-spin rounded-full h-4 w-4 border-2 border-stone-300 border-t-stone-600" />
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-stone-300 border-t-stone-600" />
           <span className="text-sm font-medium text-neutral-700">
             Transcribing...
           </span>

@@ -1,8 +1,4 @@
 import { FolderIcon } from "lucide-react";
-import { FolderBreadcrumb } from "~/shared/ui/folder-breadcrumb";
-import * as main from "~/store/tinybase/store/main";
-import { useSessionTitle } from "~/store/zustand/live-title";
-import { useTabs } from "~/store/zustand/tabs";
 
 import {
   Breadcrumb,
@@ -15,6 +11,11 @@ import {
 import { Button } from "@hypr/ui/components/ui/button";
 
 import { SearchableFolderDropdown } from "./shared/folder";
+
+import { FolderBreadcrumb } from "~/shared/ui/folder-breadcrumb";
+import * as main from "~/store/tinybase/store/main";
+import { useSessionTitle } from "~/store/zustand/live-title";
+import { useTabs } from "~/store/zustand/tabs";
 
 export function FolderChain({ sessionId }: { sessionId: string }) {
   const folderId = main.UI.useCell(
@@ -41,8 +42,8 @@ export function FolderChain({ sessionId }: { sessionId: string }) {
 
   return (
     <Breadcrumb className="ml-1.5 min-w-0">
-      <BreadcrumbList className="text-neutral-700 text-xs flex-nowrap overflow-hidden gap-0.5">
-        {folderId && <FolderIcon className="w-3 h-3 mr-1 shrink-0" />}
+      <BreadcrumbList className="flex-nowrap gap-0.5 overflow-hidden text-xs text-neutral-700">
+        {folderId && <FolderIcon className="mr-1 h-3 w-3 shrink-0" />}
         {!folderId ? (
           <RenderIfRootNotExist
             title={title}
@@ -119,7 +120,7 @@ function RenderIfRootNotExist({
         <SearchableFolderDropdown
           sessionId={sessionId}
           trigger={
-            <button className="text-neutral-500 hover:text-neutral-700 transition-colors outline-hidden">
+            <button className="text-neutral-500 outline-hidden transition-colors hover:text-neutral-700">
               Select folder
             </button>
           }
@@ -146,7 +147,7 @@ function TitleInput({
     <input
       type="text"
       placeholder="Untitled"
-      className="truncate min-w-0 w-full border-none bg-transparent text-neutral-700 focus:outline-hidden focus:underline"
+      className="w-full min-w-0 truncate border-none bg-transparent text-neutral-700 focus:underline focus:outline-hidden"
       value={title ?? ""}
       onChange={(e) => handleChangeTitle(e.target.value)}
     />

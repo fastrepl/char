@@ -41,10 +41,10 @@ function Component() {
   );
   return (
     <main
-      className="flex-1 bg-linear-to-b from-white via-stone-50/20 to-white min-h-screen"
+      className="min-h-screen flex-1 bg-linear-to-b from-white via-stone-50/20 to-white"
       style={{ backgroundImage: "url(/patterns/dots.svg)" }}
     >
-      <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
+      <div className="mx-auto max-w-6xl border-x border-neutral-100 bg-white">
         <div className="px-6 py-16 lg:py-24">
           <HeroSection />
         </div>
@@ -52,17 +52,17 @@ function Component() {
         <div className="py-8">
           {sortedUpdates.map((update, index) => (
             <div key={update.slug}>
-              <div className="max-w-4xl mx-auto px-6">
+              <div className="mx-auto max-w-4xl px-6">
                 <UpdateSection update={update} />
               </div>
               {index < sortedUpdates.length - 1 && (
-                <div className="border-b border-neutral-100 my-8" />
+                <div className="my-8 border-b border-neutral-100" />
               )}
             </div>
           ))}
         </div>
         <div className="border-t border-neutral-100" />
-        <div className="max-w-3xl mx-auto px-6 py-16 lg:py-24">
+        <div className="mx-auto max-w-3xl px-6 py-16 lg:py-24">
           <SubscribeSection />
         </div>
       </div>
@@ -72,11 +72,11 @@ function Component() {
 
 function HeroSection() {
   return (
-    <div className="text-center flex flex-col items-center gap-6">
-      <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700">
+    <div className="flex flex-col items-center gap-6 text-center">
+      <h1 className="font-serif text-4xl tracking-tight text-stone-700 sm:text-5xl">
         Updates
       </h1>
-      <p className="text-lg sm:text-xl text-neutral-600">
+      <p className="text-lg text-neutral-600 sm:text-xl">
         Weekly updates from the Char team
       </p>
       <EmailSubscribeField
@@ -90,8 +90,8 @@ function HeroSection() {
 
 function SubscribeSection() {
   return (
-    <div className="flex flex-col items-center text-center gap-4">
-      <h2 className="text-3xl font-serif text-stone-700">
+    <div className="flex flex-col items-center gap-4 text-center">
+      <h2 className="font-serif text-3xl text-stone-700">
         Get updates in your inbox
       </h2>
       <p className="text-neutral-600">
@@ -108,14 +108,14 @@ function SubscribeSection() {
 
 function UpdateSection({ update }: { update: Update }) {
   return (
-    <section className="grid grid-cols-1 md:grid-cols-[160px_1fr] gap-6 md:gap-12">
-      <div className="md:sticky md:top-24 md:self-start flex flex-col gap-1">
+    <section className="grid grid-cols-1 gap-6 md:grid-cols-[160px_1fr] md:gap-12">
+      <div className="flex flex-col gap-1 md:sticky md:top-24 md:self-start">
         <Link to="/updates/$slug/" params={{ slug: update.slug }}>
-          <h2 className="text-xl font-serif font-medium text-stone-700 hover:text-stone-900 transition-colors cursor-pointer">
+          <h2 className="cursor-pointer font-serif text-xl font-medium text-stone-700 transition-colors hover:text-stone-900">
             {getWeekLabel(update.date)}
           </h2>
         </Link>
-        <time className="text-sm text-neutral-500 mt-1" dateTime={update.date}>
+        <time className="mt-1 text-sm text-neutral-500" dateTime={update.date}>
           {new Date(update.date).toLocaleDateString("en-US", {
             year: "numeric",
             month: "long",
@@ -133,7 +133,7 @@ function UpdateSection({ update }: { update: Update }) {
           <Link
             to="/updates/$slug/"
             params={{ slug: update.slug }}
-            className="absolute left-0 bottom-1 inline-flex items-center gap-1 text-sm text-stone-600 hover:text-stone-900 transition-colors z-10 bg-white/95 pr-2"
+            className="absolute bottom-1 left-0 z-10 inline-flex items-center gap-1 bg-white/95 pr-2 text-sm text-stone-600 transition-colors hover:text-stone-900"
           >
             Read more
             <Icon icon="mdi:arrow-right" className="text-base" />

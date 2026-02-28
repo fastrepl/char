@@ -1,8 +1,5 @@
 import { CalendarIcon, ExternalLinkIcon, SparklesIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { StandardTabWrapper } from "~/shared/main";
-import { type TabItem, TabItemBase } from "~/shared/tabs";
-import { type Tab } from "~/store/zustand/tabs";
 
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 import NoteEditor from "@hypr/tiptap/editor";
@@ -20,6 +17,10 @@ import {
   useScrollFade,
 } from "@hypr/ui/components/ui/scroll-fade";
 import { safeFormat } from "@hypr/utils";
+
+import { StandardTabWrapper } from "~/shared/main";
+import { type TabItem, TabItemBase } from "~/shared/tabs";
+import { type Tab } from "~/store/zustand/tabs";
 
 export const changelogFiles = import.meta.glob(
   "../../../../../../web/content/changelog/*.mdx",
@@ -79,7 +80,7 @@ export const TabItemChangelog: TabItem<Extract<Tab, { type: "changelog" }>> = ({
   handleUnpinThis,
 }) => (
   <TabItemBase
-    icon={<SparklesIcon className="w-4 h-4" />}
+    icon={<SparklesIcon className="h-4 w-4" />}
     title="What's New"
     selected={tab.active}
     pinned={tab.pinned}
@@ -115,18 +116,18 @@ export function TabContentChangelog({
 
   return (
     <StandardTabWrapper>
-      <div className="flex flex-col h-full">
-        <div className="pl-2 pr-1 shrink-0">
+      <div className="flex h-full flex-col">
+        <div className="shrink-0 pr-1 pl-2">
           <ChangelogHeader version={current} date={date} />
         </div>
 
-        <div className="mt-2 px-3 shrink-0">
+        <div className="mt-2 shrink-0 px-3">
           <h1 className="text-xl font-semibold text-neutral-900">
             What's new in {current}?
           </h1>
         </div>
 
-        <div className="mt-4 flex-1 min-h-0 relative overflow-hidden">
+        <div className="relative mt-4 min-h-0 flex-1 overflow-hidden">
           {!atStart && <ScrollFadeOverlay position="top" />}
           {!atEnd && <ScrollFadeOverlay position="bottom" />}
           <div ref={scrollRef} className="h-full overflow-y-auto px-3">
@@ -164,7 +165,7 @@ function ChangelogHeader({
       <div className="flex items-center gap-2">
         <div className="min-w-0 flex-1">
           <Breadcrumb className="ml-1.5 min-w-0">
-            <BreadcrumbList className="text-neutral-700 text-xs flex-nowrap overflow-hidden gap-0.5">
+            <BreadcrumbList className="flex-nowrap gap-0.5 overflow-hidden text-xs text-neutral-700">
               <BreadcrumbItem className="shrink-0">
                 <span className="text-neutral-500">Changelog</span>
               </BreadcrumbItem>
@@ -176,7 +177,7 @@ function ChangelogHeader({
           </Breadcrumb>
         </div>
 
-        <div className="flex items-center shrink-0">
+        <div className="flex shrink-0 items-center">
           {formattedDate && (
             <Button
               size="sm"

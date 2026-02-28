@@ -1,7 +1,7 @@
-import { useTabs } from "~/store/zustand/tabs";
-
 import { registerPluginView } from "./registry";
 import type { PluginContext } from "./types";
+
+import { useTabs } from "~/store/zustand/tabs";
 
 export function createPluginContext(pluginId: string): PluginContext {
   return {
@@ -10,8 +10,8 @@ export function createPluginContext(pluginId: string): PluginContext {
     },
     openTab: (targetPluginId = pluginId, state) => {
       useTabs.getState().openNew({
-        type: "plugin",
-        pluginId: targetPluginId,
+        type: "extension",
+        extensionId: targetPluginId,
         state: state ?? {},
       });
     },

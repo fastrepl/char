@@ -2,8 +2,6 @@ import { getIdentifier } from "@tauri-apps/api/app";
 import { Effect, Exit } from "effect";
 import { create as mutate } from "mutative";
 import type { StoreApi } from "zustand";
-import { buildSessionPath } from "~/store/tinybase/persister/shared/paths";
-import { fromResult } from "~/stt/fromResult";
 
 import { commands as detectCommands } from "@hypr/plugin-detect";
 import { commands as hooksCommands } from "@hypr/plugin-hooks";
@@ -28,6 +26,9 @@ import { commands as settingsCommands } from "@hypr/plugin-settings";
 
 import type { BatchActions, BatchState } from "./batch";
 import type { HandlePersistCallback, TranscriptActions } from "./transcript";
+
+import { buildSessionPath } from "~/store/tinybase/persister/shared/paths";
+import { fromResult } from "~/stt/fromResult";
 
 type LiveSessionStatus = "inactive" | "active" | "finalizing";
 export type SessionMode = LiveSessionStatus | "running_batch";

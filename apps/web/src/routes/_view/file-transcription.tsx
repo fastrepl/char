@@ -72,7 +72,7 @@ function Component() {
           content: (
             <>
               <div className="px-6 pt-6 pb-24">
-                <h2 className="text-xl font-semibold text-muted-foreground">
+                <h2 className="text-muted-foreground text-xl font-semibold">
                   Untitled
                 </h2>
 
@@ -87,7 +87,7 @@ function Component() {
                 </div>
               </div>
 
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40">
+              <div className="absolute bottom-6 left-1/2 z-40 -translate-x-1/2">
                 <button
                   onClick={handleUploadClick}
                   className={cn([

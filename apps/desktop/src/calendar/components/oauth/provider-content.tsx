@@ -1,9 +1,4 @@
 import { useCallback } from "react";
-import { useAuth } from "~/auth";
-import { useBillingAccess } from "~/auth/billing";
-import { useConnections } from "~/auth/useConnections";
-import type { CalendarProvider } from "~/calendar/components/shared";
-import { buildWebAppUrl } from "~/shared/utils";
 
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 import {
@@ -12,6 +7,12 @@ import {
   TooltipTrigger,
 } from "@hypr/ui/components/ui/tooltip";
 import { cn } from "@hypr/utils";
+
+import { useAuth } from "~/auth";
+import { useBillingAccess } from "~/auth/billing";
+import { useConnections } from "~/auth/useConnections";
+import type { CalendarProvider } from "~/calendar/components/shared";
+import { buildWebAppUrl } from "~/shared/utils";
 
 export function OAuthProviderContent({ config }: { config: CalendarProvider }) {
   const auth = useAuth();
@@ -50,8 +51,8 @@ export function OAuthProviderContent({ config }: { config: CalendarProvider }) {
         onClick={handleConnect}
         disabled={reconnectDisabled}
         className={cn([
-          "text-xs text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer",
-          reconnectDisabled && "opacity-50 cursor-not-allowed",
+          "cursor-pointer text-xs text-neutral-400 transition-colors hover:text-neutral-600",
+          reconnectDisabled && "cursor-not-allowed opacity-50",
         ])}
       >
         Reconnect
@@ -63,8 +64,8 @@ export function OAuthProviderContent({ config }: { config: CalendarProvider }) {
         onClick={handleDisconnect}
         disabled={disconnectDisabled}
         className={cn([
-          "text-xs text-red-500 hover:text-red-600 transition-colors cursor-pointer",
-          disconnectDisabled && "opacity-50 cursor-not-allowed",
+          "cursor-pointer text-xs text-red-500 transition-colors hover:text-red-600",
+          disconnectDisabled && "cursor-not-allowed opacity-50",
         ])}
       >
         Disconnect
@@ -83,8 +84,8 @@ export function OAuthProviderContent({ config }: { config: CalendarProvider }) {
 
     return (
       <div className="flex items-center justify-between px-1 pt-1 pb-2">
-        <span className="text-xs text-green-600 font-medium flex items-center gap-1">
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500" />
+        <span className="flex items-center gap-1 text-xs font-medium text-green-600">
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-500" />
           Connected
         </span>
 
@@ -132,8 +133,8 @@ export function OAuthProviderContent({ config }: { config: CalendarProvider }) {
       <button
         disabled
         className={cn([
-          "w-full h-9 flex items-center justify-center text-sm font-medium transition-all rounded-lg",
-          "bg-neutral-900 text-white opacity-50 cursor-not-allowed",
+          "flex h-9 w-full items-center justify-center rounded-lg text-sm font-medium transition-all",
+          "cursor-not-allowed bg-neutral-900 text-white opacity-50",
         ])}
       >
         Connect {config.displayName} Calendar
@@ -156,9 +157,9 @@ export function OAuthProviderContent({ config }: { config: CalendarProvider }) {
 
   if (!billing.isPro) {
     return (
-      <div className="px-1 pt-1 pb-2 flex flex-col gap-1.5">
+      <div className="flex flex-col gap-1.5 px-1 pt-1 pb-2">
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
+          <span className="rounded border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
             Pro
           </span>
           <span className="text-xs text-neutral-500">
@@ -168,7 +169,7 @@ export function OAuthProviderContent({ config }: { config: CalendarProvider }) {
         <button
           onClick={() => billing.upgradeToPro()}
           className={cn([
-            "w-full h-9 flex items-center justify-center text-sm font-medium transition-all cursor-pointer rounded-lg",
+            "flex h-9 w-full cursor-pointer items-center justify-center rounded-lg text-sm font-medium transition-all",
             "bg-neutral-900 text-white hover:bg-neutral-800 active:scale-[98%]",
           ])}
         >
@@ -183,7 +184,7 @@ export function OAuthProviderContent({ config }: { config: CalendarProvider }) {
       <button
         onClick={handleConnect}
         className={cn([
-          "w-full h-9 flex items-center justify-center text-sm font-medium transition-all cursor-pointer rounded-lg",
+          "flex h-9 w-full cursor-pointer items-center justify-center rounded-lg text-sm font-medium transition-all",
           "bg-neutral-900 text-white hover:bg-neutral-800 active:scale-[98%]",
         ])}
       >

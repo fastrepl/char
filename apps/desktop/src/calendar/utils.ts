@@ -1,4 +1,5 @@
 import type { Store } from "tinybase/with-schemas";
+
 import type { Schemas } from "~/store/tinybase/store/main";
 
 export function findCalendarByTrackingId(

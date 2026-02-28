@@ -107,7 +107,7 @@ const hasMetadata = (metadata: ModelMetadata | undefined): boolean => {
   return false;
 };
 
-export const partition = <T,>(
+export const partition = <T>(
   items: readonly T[],
   shouldIgnore: (item: T) => ModelIgnoreReason[] | null,
   extract: (item: T) => string,
@@ -129,7 +129,7 @@ export const partition = <T,>(
   return { models, ignored };
 };
 
-export const extractMetadataMap = <T,>(
+export const extractMetadataMap = <T>(
   items: readonly T[],
   extract: (item: T) => string,
   extractMetadata: (item: T) => ModelMetadata | undefined,

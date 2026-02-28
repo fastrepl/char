@@ -1,10 +1,11 @@
 import { useCallback, useMemo } from "react";
-import { useTranscriptSearch } from "~/session/components/note-input/transcript/search-context";
-import { useNativeContextMenu } from "~/shared/hooks/useNativeContextMenu";
 
 import type { Operations, SegmentWord } from "@hypr/transcript";
 import type { HighlightSegment } from "@hypr/transcript/ui";
 import { WordSpan as SharedWordSpan } from "@hypr/transcript/ui";
+
+import { useTranscriptSearch } from "~/session/components/note-input/transcript/search-context";
+import { useNativeContextMenu } from "~/shared/hooks/useNativeContextMenu";
 
 interface WordSpanProps {
   word: SegmentWord;

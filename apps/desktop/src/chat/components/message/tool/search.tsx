@@ -1,9 +1,5 @@
 import { SearchIcon } from "lucide-react";
 import { useCallback } from "react";
-import { Disclosure } from "~/chat/components/message/shared";
-import { ToolRenderer } from "~/chat/components/message/types";
-import * as main from "~/store/tinybase/store/main";
-import { useTabs } from "~/store/zustand/tabs";
 
 import { Card, CardContent } from "@hypr/ui/components/ui/card";
 import {
@@ -15,6 +11,11 @@ import {
 } from "@hypr/ui/components/ui/carousel";
 
 import { useToolState } from "./shared";
+
+import { Disclosure } from "~/chat/components/message/shared";
+import { ToolRenderer } from "~/chat/components/message/types";
+import * as main from "~/store/tinybase/store/main";
+import { useTabs } from "~/store/zustand/tabs";
 
 type Renderer = ToolRenderer<"tool-search_sessions">;
 type Part = Parameters<Renderer>[0]["part"];
@@ -51,7 +52,7 @@ export const ToolSearchSessions: Renderer = ({ part }) => {
 
   return (
     <Disclosure
-      icon={<SearchIcon className="w-3 h-3" />}
+      icon={<SearchIcon className="h-3 w-3" />}
       title={getTitle(part)}
       disabled={disabled}
     >
@@ -82,7 +83,7 @@ function RenderContent({ part }: { part: Part }) {
 
     if (!results || results.length === 0) {
       return (
-        <div className="text-xs text-muted-foreground flex justify-center items-center py-2">
+        <div className="text-muted-foreground flex items-center justify-center py-2 text-xs">
           No results found
         </div>
       );
@@ -95,7 +96,7 @@ function RenderContent({ part }: { part: Part }) {
             {results.map((result, index: number) => (
               <CarouselItem
                 key={result.id || index}
-                className="pl-1 basis-full sm:basis-1/2 lg:basis-1/3"
+                className="basis-full pl-1 sm:basis-1/2 lg:basis-1/3"
               >
                 <Card className="h-full bg-neutral-50">
                   <CardContent className="px-2 py-0.5">
@@ -141,7 +142,7 @@ function RenderSession({ sessionId }: { sessionId: string }) {
 
   if (!session) {
     return (
-      <div className="text-xs text-muted-foreground italic">
+      <div className="text-muted-foreground text-xs italic">
         Session unavailable
       </div>
     );
@@ -151,9 +152,9 @@ function RenderSession({ sessionId }: { sessionId: string }) {
     <button
       type="button"
       onClick={handleClick}
-      className="text-xs flex flex-col gap-1 w-full text-left"
+      className="flex w-full flex-col gap-1 text-left text-xs"
     >
-      <span className="font-medium truncate">
+      <span className="truncate font-medium">
         {session.title || "Untitled"}
       </span>
       <span className="text-muted-foreground truncate">

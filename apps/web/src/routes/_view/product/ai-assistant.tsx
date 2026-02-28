@@ -24,10 +24,10 @@ export const Route = createFileRoute("/_view/product/ai-assistant")({
 function Component() {
   return (
     <div
-      className="bg-linear-to-b from-white via-stone-50/20 to-white min-h-screen"
+      className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white"
       style={{ backgroundImage: "url(/patterns/dots.svg)" }}
     >
-      <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
+      <div className="mx-auto max-w-6xl border-x border-neutral-100 bg-white">
         <HeroSection />
         <SlashSeparator />
         <BeforeMeetingSection />
@@ -45,26 +45,26 @@ function Component() {
 function HeroSection() {
   return (
     <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30 px-6 py-12 lg:py-20">
-      <header className="text-center max-w-4xl mx-auto">
-        <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6 flex items-center justify-center flex-wrap">
+      <header className="mx-auto max-w-4xl text-center">
+        <h1 className="mb-6 flex flex-wrap items-center justify-center font-serif text-4xl tracking-tight text-stone-700 sm:text-5xl">
           <span>AI Chat</span>
           <img
             src="/api/images/hyprnote/ai-assistant.gif"
             alt="AI Chat"
-            className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-full inline-block ml-1 mr-2 sm:mr-0"
+            className="mr-2 ml-1 inline-block h-12 w-12 rounded-full object-cover sm:mr-0 sm:h-16 sm:w-16"
           />
           <span>for your meetings</span>
         </h1>
-        <p className="text-lg sm:text-xl text-neutral-600">
+        <p className="text-lg text-neutral-600 sm:text-xl">
           Prepare, engage, and follow through with AI-powered assistance
         </p>
         <div className="mt-8">
           <Link
             to="/download/"
             className={cn([
-              "inline-block px-8 py-3 text-base font-medium rounded-full",
+              "inline-block rounded-full px-8 py-3 text-base font-medium",
               "bg-linear-to-t from-stone-600 to-stone-500 text-white",
-              "hover:scale-105 active:scale-95 transition-transform",
+              "transition-transform hover:scale-105 active:scale-95",
             ])}
           >
             Download for free
@@ -78,18 +78,18 @@ function HeroSection() {
 function BeforeMeetingSection() {
   return (
     <section id="before-meeting">
-      <div className="text-center font-medium text-neutral-600 uppercase tracking-wide py-6 font-serif">
+      <div className="py-6 text-center font-serif font-medium tracking-wide text-neutral-600 uppercase">
         Before meetings
       </div>
 
       <div className="border-t border-neutral-100">
         <div className="grid md:grid-cols-2">
-          <div className="p-8 border-b md:border-b-0 md:border-r border-neutral-100">
-            <Icon icon="mdi:magnify" className="text-3xl text-stone-700 mb-4" />
-            <h3 className="text-xl font-serif text-stone-700 mb-3">
+          <div className="border-b border-neutral-100 p-8 md:border-r md:border-b-0">
+            <Icon icon="mdi:magnify" className="mb-4 text-3xl text-stone-700" />
+            <h3 className="mb-3 font-serif text-xl text-stone-700">
               Deep research with chat
             </h3>
-            <p className="text-neutral-600 mb-4 leading-relaxed">
+            <p className="mb-4 leading-relaxed text-neutral-600">
               Chat with your AI assistant to learn more about the people you're
               meeting with. Search through past conversations, extract key
               insights, and understand context before you join.
@@ -98,7 +98,7 @@ function BeforeMeetingSection() {
               <li className="flex items-start gap-2">
                 <Icon
                   icon="mdi:check"
-                  className="text-stone-700 shrink-0 mt-0.5"
+                  className="mt-0.5 shrink-0 text-stone-700"
                 />
                 <span className="text-sm text-neutral-600">
                   "What did we discuss last time with Sarah?"
@@ -107,7 +107,7 @@ function BeforeMeetingSection() {
               <li className="flex items-start gap-2">
                 <Icon
                   icon="mdi:check"
-                  className="text-stone-700 shrink-0 mt-0.5"
+                  className="mt-0.5 shrink-0 text-stone-700"
                 />
                 <span className="text-sm text-neutral-600">
                   "What are the client's main concerns?"
@@ -116,7 +116,7 @@ function BeforeMeetingSection() {
               <li className="flex items-start gap-2">
                 <Icon
                   icon="mdi:check"
-                  className="text-stone-700 shrink-0 mt-0.5"
+                  className="mt-0.5 shrink-0 text-stone-700"
                 />
                 <span className="text-sm text-neutral-600">
                   "Show me all action items from previous meetings"
@@ -125,15 +125,15 @@ function BeforeMeetingSection() {
             </ul>
           </div>
 
-          <div className="p-8 border-b md:border-b-0 border-neutral-100">
+          <div className="border-b border-neutral-100 p-8 md:border-b-0">
             <Icon
               icon="mdi:file-document-edit"
-              className="text-3xl text-stone-700 mb-4"
+              className="mb-4 text-3xl text-stone-700"
             />
-            <h3 className="text-xl font-serif text-stone-700 mb-3">
+            <h3 className="mb-3 font-serif text-xl text-stone-700">
               Generate custom templates
             </h3>
-            <p className="text-neutral-600 mb-4 leading-relaxed">
+            <p className="mb-4 leading-relaxed text-neutral-600">
               Create tailored meeting templates on the spot. Ask your AI
               assistant to generate agendas, question lists, or note structures
               specific to your meeting type.
@@ -142,7 +142,7 @@ function BeforeMeetingSection() {
               <li className="flex items-start gap-2">
                 <Icon
                   icon="mdi:check"
-                  className="text-stone-700 shrink-0 mt-0.5"
+                  className="mt-0.5 shrink-0 text-stone-700"
                 />
                 <span className="text-sm text-neutral-600">
                   "Create a customer discovery template"
@@ -151,7 +151,7 @@ function BeforeMeetingSection() {
               <li className="flex items-start gap-2">
                 <Icon
                   icon="mdi:check"
-                  className="text-stone-700 shrink-0 mt-0.5"
+                  className="mt-0.5 shrink-0 text-stone-700"
                 />
                 <span className="text-sm text-neutral-600">
                   "Generate questions for a technical interview"
@@ -160,7 +160,7 @@ function BeforeMeetingSection() {
               <li className="flex items-start gap-2">
                 <Icon
                   icon="mdi:check"
-                  className="text-stone-700 shrink-0 mt-0.5"
+                  className="mt-0.5 shrink-0 text-stone-700"
                 />
                 <span className="text-sm text-neutral-600">
                   "Build an agenda for our quarterly review"
@@ -170,15 +170,15 @@ function BeforeMeetingSection() {
           </div>
         </div>
 
-        <div className="p-8 border-t border-neutral-100">
+        <div className="border-t border-neutral-100 p-8">
           <Icon
             icon="mdi:message-question"
-            className="text-3xl text-stone-700 mb-4"
+            className="mb-4 text-3xl text-stone-700"
           />
-          <h3 className="text-xl font-serif text-stone-700 mb-3">
+          <h3 className="mb-3 font-serif text-xl text-stone-700">
             Ask about past conversations
           </h3>
-          <p className="text-neutral-600 leading-relaxed max-w-3xl">
+          <p className="max-w-3xl leading-relaxed text-neutral-600">
             Query your entire conversation history to refresh your memory. Find
             decisions, action items, or specific topics discussed in previous
             meetings—all in natural language.
@@ -192,39 +192,39 @@ function BeforeMeetingSection() {
 function DuringMeetingSection() {
   return (
     <section id="during-meeting">
-      <div className="text-center font-medium text-neutral-600 uppercase tracking-wide py-6 font-serif">
+      <div className="py-6 text-center font-serif font-medium tracking-wide text-neutral-600 uppercase">
         During meetings
       </div>
 
       <div className="border-t border-neutral-100">
         <div className="grid md:grid-cols-2">
-          <div className="p-8 border-b md:border-b-0 md:border-r border-neutral-100">
-            <Icon icon="mdi:chat" className="text-3xl text-stone-700 mb-4" />
-            <h3 className="text-xl font-serif text-stone-700 mb-3">
+          <div className="border-b border-neutral-100 p-8 md:border-r md:border-b-0">
+            <Icon icon="mdi:chat" className="mb-4 text-3xl text-stone-700" />
+            <h3 className="mb-3 font-serif text-xl text-stone-700">
               Ask questions in realtime
             </h3>
-            <p className="text-neutral-600 leading-relaxed">
+            <p className="leading-relaxed text-neutral-600">
               Type questions to your AI assistant during the meeting without
               interrupting the conversation. Get instant answers from the
               current transcript and past meeting context.
             </p>
           </div>
 
-          <div className="p-8 border-b md:border-b-0 border-neutral-100">
+          <div className="border-b border-neutral-100 p-8 md:border-b-0">
             <Icon
               icon="mdi:lightbulb-on"
-              className="text-3xl text-stone-700 mb-4"
+              className="mb-4 text-3xl text-stone-700"
             />
-            <h3 className="text-xl font-serif text-stone-700 mb-3">
+            <h3 className="mb-3 font-serif text-xl text-stone-700">
               Realtime insights via{" "}
               <Link
                 to="/product/extensions/"
-                className="text-stone-700 hover:text-stone-800 underline decoration-dotted underline-offset-2"
+                className="text-stone-700 underline decoration-dotted underline-offset-2 hover:text-stone-800"
               >
                 extensions
               </Link>
             </h3>
-            <p className="text-neutral-600 mb-4 leading-relaxed">
+            <p className="mb-4 leading-relaxed text-neutral-600">
               AI-powered extensions provide live assistance during your meeting.
               Built on our extension framework, these tools adapt to your needs
               in realtime.
@@ -233,29 +233,29 @@ function DuringMeetingSection() {
         </div>
 
         <div className="border-t border-neutral-100">
-          <div className="py-8 px-6 lg:px-8">
-            <h4 className="text-lg font-serif text-stone-700 mb-6 text-center">
+          <div className="px-6 py-8 lg:px-8">
+            <h4 className="mb-6 text-center font-serif text-lg text-stone-700">
               Available realtime extensions
             </h4>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="p-6 bg-stone-50 border border-neutral-200 rounded-lg">
+            <div className="grid gap-6 md:grid-cols-3">
+              <div className="rounded-lg border border-neutral-200 bg-stone-50 p-6">
                 <Icon
                   icon="mdi:comment-check"
-                  className="text-2xl text-stone-700 mb-3"
+                  className="mb-3 text-2xl text-stone-700"
                 />
-                <h5 className="font-medium text-stone-700 mb-2">Suggestions</h5>
+                <h5 className="mb-2 font-medium text-stone-700">Suggestions</h5>
                 <p className="text-sm text-neutral-600">
                   Get AI-generated advice and recommendations based on the
                   conversation flow
                 </p>
               </div>
 
-              <div className="p-6 bg-stone-50 border border-neutral-200 rounded-lg">
+              <div className="rounded-lg border border-neutral-200 bg-stone-50 p-6">
                 <Icon
                   icon="mdi:account-voice"
-                  className="text-2xl text-stone-700 mb-3"
+                  className="mb-3 text-2xl text-stone-700"
                 />
-                <h5 className="font-medium text-stone-700 mb-2">
+                <h5 className="mb-2 font-medium text-stone-700">
                   Talk time tracking
                 </h5>
                 <p className="text-sm text-neutral-600">
@@ -264,12 +264,12 @@ function DuringMeetingSection() {
                 </p>
               </div>
 
-              <div className="p-6 bg-stone-50 border border-neutral-200 rounded-lg">
+              <div className="rounded-lg border border-neutral-200 bg-stone-50 p-6">
                 <Icon
                   icon="mdi:school"
-                  className="text-2xl text-stone-700 mb-3"
+                  className="mb-3 text-2xl text-stone-700"
                 />
-                <h5 className="font-medium text-stone-700 mb-2">
+                <h5 className="mb-2 font-medium text-stone-700">
                   ELI5 explanations
                 </h5>
                 <p className="text-sm text-neutral-600">
@@ -282,7 +282,7 @@ function DuringMeetingSection() {
             <div className="mt-6 text-center">
               <Link
                 to="/product/extensions/"
-                className="inline-flex items-center gap-2 text-stone-700 hover:text-stone-800 font-medium"
+                className="inline-flex items-center gap-2 font-medium text-stone-700 hover:text-stone-800"
               >
                 Learn more about extensions
                 <Icon icon="mdi:arrow-right" className="text-lg" />
@@ -320,7 +320,7 @@ function AfterMeetingSection() {
             layout on iOS devices.
           </p>
           <div className="mt-3 flex flex-row items-center gap-2 text-xs text-neutral-500">
-            <div className="h-6 w-6 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px]">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-[10px] text-white">
               S
             </div>
             <span>Sarah</span>
@@ -333,7 +333,7 @@ function AfterMeetingSection() {
       prompt: "Send the summary to #engineering and update the Q4 roadmap now",
       card: (
         <div
-          className="w-full max-w-[420px] rounded-[18px] border border-neutral-200 bg-white px-4 py-4 text-sm text-neutral-700 mt-1"
+          className="mt-1 w-full max-w-[420px] rounded-[18px] border border-neutral-200 bg-white px-4 py-4 text-sm text-neutral-700"
           dir="ltr"
         >
           <div className="flex items-center gap-2 text-xs text-neutral-500">
@@ -362,7 +362,7 @@ function AfterMeetingSection() {
         "Schedule a follow-up next week with the client and share the agenda",
       card: (
         <div
-          className="w-full max-w-[420px] rounded-[18px] border border-neutral-200 bg-white px-4 py-4 text-sm text-neutral-700 mt-1"
+          className="mt-1 w-full max-w-[420px] rounded-[18px] border border-neutral-200 bg-white px-4 py-4 text-sm text-neutral-700"
           dir="ltr"
         >
           <div className="flex items-center gap-2 text-xs text-neutral-500">
@@ -377,13 +377,13 @@ function AfterMeetingSection() {
               2 guests · 1 yes, 1 awaiting
             </p>
             <div className="mt-2 flex items-center gap-2 text-xs text-neutral-500">
-              <div className="size-5 rounded-full bg-stone-200 flex items-center justify-center text-[10px] text-stone-700">
+              <div className="flex size-5 items-center justify-center rounded-full bg-stone-200 text-[10px] text-stone-700">
                 A
               </div>
               <span>John Smith</span>
             </div>
             <div className="mt-1 flex items-center gap-2 text-xs text-neutral-500">
-              <div className="size-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px]">
+              <div className="flex size-5 items-center justify-center rounded-full bg-amber-500 text-[10px] text-white">
                 M
               </div>
               <span>Mudit Jain</span>
@@ -418,29 +418,29 @@ function AfterMeetingSection() {
 
   return (
     <section id="after-meeting" dir="ltr">
-      <div className="text-center font-medium text-neutral-600 uppercase tracking-wide py-6 font-serif">
+      <div className="py-6 text-center font-serif font-medium tracking-wide text-neutral-600 uppercase">
         After meetings
       </div>
 
       <div className="border-t border-neutral-100">
         <div className="grid md:grid-cols-2">
-          <div className="p-8 border-b md:border-b-0 md:border-r border-neutral-100">
+          <div className="border-b border-neutral-100 p-8 md:border-r md:border-b-0">
             <Icon
               icon="mdi:workflow"
-              className="text-3xl text-stone-700 mb-4"
+              className="mb-4 text-3xl text-stone-700"
             />
-            <h3 className="text-xl font-serif text-stone-700 mb-3">
+            <h3 className="mb-3 font-serif text-xl text-stone-700">
               Execute workflows with natural language
             </h3>
-            <p className="text-neutral-600 mb-4 leading-relaxed">
+            <p className="mb-4 leading-relaxed text-neutral-600">
               Describe what you want to do, and let your AI assistant handle the
               rest. Automate follow-up tasks across your tools without manual
               data entry.
             </p>
             <div className="flex flex-col gap-6">
-              <div className="flex flex-col items-center gap-1 h-[236px]">
+              <div className="flex h-[236px] flex-col items-center gap-1">
                 <div
-                  className="max-w-[420px] rounded-[18px] border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm text-neutral-700 text-center"
+                  className="max-w-[420px] rounded-[18px] border border-neutral-200 bg-neutral-50 px-4 py-2 text-center text-sm text-neutral-700"
                   style={{
                     fontFamily:
                       '"SF Pro", -apple-system, BlinkMacSystemFont, sans-serif',
@@ -449,7 +449,7 @@ function AfterMeetingSection() {
                   "{activeSlide.prompt}"
                 </div>
                 <div className="h-5 w-px border-l-2 border-dotted border-neutral-300" />
-                <div className="w-full flex justify-center" dir="ltr">
+                <div className="flex w-full justify-center" dir="ltr">
                   {activeSlide.card}
                 </div>
               </div>
@@ -461,7 +461,7 @@ function AfterMeetingSection() {
                   <button
                     key={slide.prompt}
                     type="button"
-                    className="h-10 min-w-12 rounded-[12px] border border-neutral-200 text-neutral-600 flex items-center justify-center px-2 bg-stone-50 hover:text-stone-700 transition-colors"
+                    className="flex h-10 min-w-12 items-center justify-center rounded-[12px] border border-neutral-200 bg-stone-50 px-2 text-neutral-600 transition-colors hover:text-stone-700"
                     onClick={() => {
                       setProgress(0);
                       setActiveIndex(index);
@@ -484,21 +484,21 @@ function AfterMeetingSection() {
             </div>
           </div>
 
-          <div className="p-8 border-b md:border-b-0 border-neutral-100">
-            <Icon icon="mdi:brain" className="text-3xl text-stone-700 mb-4" />
-            <h3 className="text-xl font-serif text-stone-700 mb-3">
+          <div className="border-b border-neutral-100 p-8 md:border-b-0">
+            <Icon icon="mdi:brain" className="mb-4 text-3xl text-stone-700" />
+            <h3 className="mb-3 font-serif text-xl text-stone-700">
               Learns and adapts with memory
             </h3>
-            <p className="text-neutral-600 leading-relaxed">
+            <p className="leading-relaxed text-neutral-600">
               Your AI assistant builds memory from your interactions. It
               remembers preferences, learns from edits you make to summaries,
               and continuously improves its assistance based on your patterns.
             </p>
-            <ul className="flex flex-col gap-3 mt-4">
+            <ul className="mt-4 flex flex-col gap-3">
               <li className="flex items-start gap-3">
                 <Icon
                   icon="mdi:check-circle"
-                  className="text-stone-700 shrink-0 mt-0.5"
+                  className="mt-0.5 shrink-0 text-stone-700"
                 />
                 <span className="text-sm text-neutral-600">
                   Remembers your meeting preferences and formats
@@ -507,7 +507,7 @@ function AfterMeetingSection() {
               <li className="flex items-start gap-3">
                 <Icon
                   icon="mdi:check-circle"
-                  className="text-stone-700 shrink-0 mt-0.5"
+                  className="mt-0.5 shrink-0 text-stone-700"
                 />
                 <span className="text-sm text-neutral-600">
                   Learns from your edits to improve future summaries
@@ -516,7 +516,7 @@ function AfterMeetingSection() {
               <li className="flex items-start gap-3">
                 <Icon
                   icon="mdi:check-circle"
-                  className="text-stone-700 shrink-0 mt-0.5"
+                  className="mt-0.5 shrink-0 text-stone-700"
                 />
                 <span className="text-sm text-neutral-600">
                   Adapts to your workflow and tool preferences
@@ -525,7 +525,7 @@ function AfterMeetingSection() {
               <li className="flex items-start gap-3">
                 <Icon
                   icon="mdi:check-circle"
-                  className="text-stone-700 shrink-0 mt-0.5"
+                  className="mt-0.5 shrink-0 text-stone-700"
                 />
                 <span className="text-sm text-neutral-600">
                   Builds context about your team and projects over time
@@ -541,30 +541,30 @@ function AfterMeetingSection() {
 
 function CTASection() {
   return (
-    <section className="py-16 bg-linear-to-t from-stone-50/30 to-stone-100/30 px-4 lg:px-0">
-      <div className="flex flex-col gap-6 items-center text-center">
-        <div className="mb-4 size-40 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[48px] bg-transparent">
+    <section className="bg-linear-to-t from-stone-50/30 to-stone-100/30 px-4 py-16 lg:px-0">
+      <div className="flex flex-col items-center gap-6 text-center">
+        <div className="mb-4 flex size-40 items-center justify-center rounded-[48px] border border-neutral-100 bg-transparent shadow-2xl">
           <img
             src="/api/images/hyprnote/icon.png"
             alt="Char"
             width={144}
             height={144}
-            className="size-36 mx-auto rounded-[40px] border border-neutral-100"
+            className="mx-auto size-36 rounded-[40px] border border-neutral-100"
           />
         </div>
-        <h2 className="text-2xl sm:text-3xl font-serif">
+        <h2 className="font-serif text-2xl sm:text-3xl">
           Start using your AI assistant
         </h2>
-        <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
+        <p className="mx-auto max-w-2xl text-lg text-neutral-600">
           Get AI-powered help before, during, and after every meeting with Char
         </p>
-        <div className="pt-6 flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <div className="flex flex-col items-center justify-center gap-4 pt-6 sm:flex-row">
           <Link
             to="/download/"
             className={cn([
-              "group px-6 h-12 flex items-center justify-center text-base sm:text-lg",
-              "bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full",
-              "shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
+              "group flex h-12 items-center justify-center px-6 text-base sm:text-lg",
+              "rounded-full bg-linear-to-t from-stone-600 to-stone-500 text-white",
+              "shadow-md hover:scale-[102%] hover:shadow-lg active:scale-[98%]",
               "transition-all",
             ])}
           >
@@ -575,7 +575,7 @@ function CTASection() {
               viewBox="0 0 24 24"
               strokeWidth="1.5"
               stroke="currentColor"
-              className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform"
+              className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1"
             >
               <path
                 strokeLinecap="round"
@@ -587,9 +587,9 @@ function CTASection() {
           <Link
             to="/product/ai-notetaking/"
             className={cn([
-              "px-6 h-12 flex items-center justify-center text-base sm:text-lg",
-              "border border-neutral-300 text-stone-700 rounded-full",
-              "hover:bg-white transition-colors",
+              "flex h-12 items-center justify-center px-6 text-base sm:text-lg",
+              "rounded-full border border-neutral-300 text-stone-700",
+              "transition-colors hover:bg-white",
             ])}
           >
             Learn about AI Notetaking

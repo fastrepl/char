@@ -1,5 +1,3 @@
-import type { Ctx } from "~/services/apple-calendar/ctx";
-
 import type { CalendarEvent } from "@hypr/plugin-apple-calendar";
 import { commands as appleCalendarCommands } from "@hypr/plugin-apple-calendar";
 import { commands as miscCommands } from "@hypr/plugin-misc";
@@ -9,6 +7,8 @@ import type {
   IncomingEvent,
   IncomingParticipants,
 } from "./types";
+
+import type { Ctx } from "~/services/apple-calendar/ctx";
 
 export class CalendarFetchError extends Error {
   constructor(

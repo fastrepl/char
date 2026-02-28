@@ -5,9 +5,10 @@ import {
   type SupportedStorage,
 } from "@supabase/supabase-js";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
-import { env } from "~/env";
 
 import { commands as authCommands } from "@hypr/plugin-auth";
+
+import { env } from "~/env";
 
 export const tauriStorage: SupportedStorage = {
   async getItem(key: string): Promise<string | null> {

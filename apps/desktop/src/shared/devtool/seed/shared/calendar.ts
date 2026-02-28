@@ -1,8 +1,9 @@
 import { faker } from "@faker-js/faker/locale/en";
-import { DEFAULT_USER_ID, id } from "~/shared/utils";
 
 import type { AppleCalendar } from "@hypr/plugin-apple-calendar";
 import type { Calendar } from "@hypr/store";
+
+import { DEFAULT_USER_ID, id } from "~/shared/utils";
 
 export const createCalendar = () => {
   const template = faker.helpers.arrayElement([

@@ -1,6 +1,4 @@
 import { CircleDotIcon, SearchIcon } from "lucide-react";
-import type { ToolRenderer } from "~/chat/components/message/types";
-import { parseSearchIssuesOutput } from "~/chat/support-mcp-tools";
 
 import { cn } from "@hypr/utils";
 
@@ -12,6 +10,9 @@ import {
   useMcpOutput,
   useToolState,
 } from "./shared";
+
+import type { ToolRenderer } from "~/chat/components/message/types";
+import { parseSearchIssuesOutput } from "~/chat/support-mcp-tools";
 
 type Renderer = ToolRenderer<"tool-search_issues">;
 
@@ -55,21 +56,21 @@ export const ToolSearchIssues: Renderer = ({ part }) => {
               href={issue.url}
               target="_blank"
               rel="noreferrer"
-              className="flex items-start gap-2 rounded-md border border-neutral-200 p-2 hover:border-neutral-300 transition-colors"
+              className="flex items-start gap-2 rounded-md border border-neutral-200 p-2 transition-colors hover:border-neutral-300"
             >
               <CircleDotIcon
                 className={cn([
-                  "w-3.5 h-3.5 mt-0.5 shrink-0",
+                  "mt-0.5 h-3.5 w-3.5 shrink-0",
                   issue.state.toLowerCase() === "open"
                     ? "text-emerald-500"
                     : "text-purple-500",
                 ])}
               />
-              <div className="flex flex-col gap-0.5 min-w-0">
-                <p className="text-xs text-neutral-800 leading-snug">
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <p className="text-xs leading-snug text-neutral-800">
                   {issue.title}
                 </p>
-                <div className="flex items-center gap-1.5 flex-wrap">
+                <div className="flex flex-wrap items-center gap-1.5">
                   <span className="text-[11px] text-neutral-500">
                     #{issue.number}
                   </span>
@@ -90,7 +91,7 @@ export const ToolSearchIssues: Renderer = ({ part }) => {
 
       {parsed && parsed.issues.length === 0 ? (
         <ToolCardBody>
-          <p className="text-xs text-neutral-500 text-center py-1">
+          <p className="py-1 text-center text-xs text-neutral-500">
             No issues found
           </p>
         </ToolCardBody>

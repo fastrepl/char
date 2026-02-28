@@ -1,11 +1,12 @@
 import { Icon } from "@iconify-icon/react";
-import { commands } from "~/types/tauri.gen";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 import { commands as sfxCommands } from "@hypr/plugin-sfx";
 
 import { OnboardingButton } from "./shared";
+
+import { commands } from "~/types/tauri.gen";
 
 const SOCIALS = [
   {
@@ -38,7 +39,7 @@ export function FinalSection({ onContinue }: { onContinue: () => void }) {
             <button
               key={label}
               onClick={() => void openerCommands.openUrl(url, null)}
-              className="inline-flex items-center justify-center size-6 rounded-md text-neutral-400 transition-colors duration-150 hover:text-neutral-700"
+              className="inline-flex size-6 items-center justify-center rounded-md text-neutral-400 transition-colors duration-150 hover:text-neutral-700"
               aria-label={label}
             >
               <Icon icon={icon} width={size} height={size} />

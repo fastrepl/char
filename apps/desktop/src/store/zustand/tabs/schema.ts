@@ -7,6 +7,7 @@ import type {
   ContactsSelection,
   ContactsState,
   EditorView,
+  ExtensionsState,
   PromptsState,
   SearchState,
   SessionsState,
@@ -23,6 +24,7 @@ export type {
   ContactsSelection,
   ContactsState,
   EditorView,
+  ExtensionsState,
   PromptsState,
   SearchState,
   SessionsState,
@@ -89,9 +91,13 @@ export type Tab =
   | (BaseTab & { type: "folders"; id: string | null })
   | (BaseTab & { type: "empty" })
   | (BaseTab & {
-      type: "plugin";
-      pluginId: string;
+      type: "extension";
+      extensionId: string;
       state: Record<string, unknown>;
+    })
+  | (BaseTab & {
+      type: "extensions";
+      state: ExtensionsState;
     })
   | (BaseTab & { type: "calendar" })
   | (BaseTab & {
@@ -169,12 +175,18 @@ export const getDefaultState = (tab: TabInput): Tab => {
       return { ...base, type: "folders", id: tab.id };
     case "empty":
       return { ...base, type: "empty" };
-    case "plugin":
+    case "extension":
       return {
         ...base,
-        type: "plugin",
-        pluginId: tab.pluginId,
+        type: "extension",
+        extensionId: tab.extensionId,
         state: tab.state ?? {},
+      };
+    case "extensions":
+      return {
+        ...base,
+        type: "extensions",
+        state: tab.state ?? { selectedExtension: null },
       };
     case "calendar":
       return { ...base, type: "calendar" };
@@ -235,8 +247,10 @@ export const uniqueIdfromTab = (tab: Tab): string => {
       return `folders-${tab.id ?? "all"}`;
     case "empty":
       return `empty-${tab.slotId}`;
-    case "plugin":
-      return `plugin-${tab.pluginId}`;
+    case "extension":
+      return `extension-${tab.extensionId}`;
+    case "extensions":
+      return `extensions`;
     case "calendar":
       return `calendar`;
     case "changelog":

@@ -1,9 +1,10 @@
 import { createMergeableStore } from "tinybase/with-schemas";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { createTestSettingsStore } from "~/store/tinybase/persister/testing/mocks";
-import { SCHEMA } from "~/store/tinybase/store/settings";
 
 import { settingsToContent, storeToSettings } from "./transform";
+
+import { createTestSettingsStore } from "~/store/tinybase/persister/testing/mocks";
+import { SCHEMA } from "~/store/tinybase/store/settings";
 
 type FileChangeCallback = (event: { payload: { path: string } }) => void;
 

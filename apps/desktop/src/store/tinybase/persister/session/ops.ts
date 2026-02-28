@@ -1,6 +1,6 @@
-import type { Store } from "~/store/tinybase/store/main";
-
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
+
+import type { Store } from "~/store/tinybase/store/main";
 
 export interface SessionOpsConfig {
   store: Store;

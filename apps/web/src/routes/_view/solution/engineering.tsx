@@ -247,10 +247,10 @@ const faqs = [
 function Component() {
   return (
     <div
-      className="bg-linear-to-b from-white via-stone-50/20 to-white min-h-screen overflow-x-hidden"
+      className="min-h-screen overflow-x-hidden bg-linear-to-b from-white via-stone-50/20 to-white"
       style={{ backgroundImage: "url(/patterns/dots.svg)" }}
     >
-      <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
+      <div className="mx-auto max-w-6xl border-x border-neutral-100 bg-white">
         <HeroSection />
         <SlashSeparator />
         <TechnicalSpecsSection />
@@ -277,30 +277,30 @@ function HeroSection() {
   return (
     <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
       <div className="px-6 py-12 lg:py-20">
-        <header className="mb-8 text-center max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-stone-100 text-stone-600 text-sm mb-6">
+        <header className="mx-auto mb-8 max-w-4xl text-center">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-stone-100 px-4 py-2 text-sm text-stone-600">
             <Icon icon="mdi:code-braces" className="text-lg" />
             <span>For Developers</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
+          <h1 className="mb-6 font-serif text-4xl tracking-tight text-stone-700 sm:text-5xl">
             The Only Meeting AI You Can
             <br />
             Fork, Fix & Make Your Own
           </h1>
-          <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-lg text-neutral-600 sm:text-xl">
             Build React extensions, automate with shell hooks, bring your own
             keys. Self-host or run local. No proprietary modules, just open
             source code you can inspect and modify.
           </p>
-          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
             <a
               href="https://github.com/fastrepl/char"
               target="_blank"
               rel="noopener noreferrer"
               className={cn([
-                "inline-flex items-center justify-center gap-2 px-8 py-3 text-base font-medium rounded-full",
+                "inline-flex items-center justify-center gap-2 rounded-full px-8 py-3 text-base font-medium",
                 "bg-linear-to-t from-neutral-800 to-neutral-700 text-white",
-                "hover:scale-105 active:scale-95 transition-transform",
+                "transition-transform hover:scale-105 active:scale-95",
               ])}
             >
               <Icon icon="mdi:github" className="text-lg" />
@@ -309,9 +309,9 @@ function HeroSection() {
             <Link
               to="/download/"
               className={cn([
-                "inline-block px-8 py-3 text-base font-medium rounded-full",
+                "inline-block rounded-full px-8 py-3 text-base font-medium",
                 "border border-stone-300 text-stone-600",
-                "hover:bg-stone-50 transition-colors",
+                "transition-colors hover:bg-stone-50",
               ])}
             >
               Download Char
@@ -326,11 +326,11 @@ function HeroSection() {
 function TechnicalSpecsSection() {
   return (
     <section className="px-6 py-16">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
+      <div className="mx-auto max-w-4xl">
+        <h2 className="mb-4 text-center font-serif text-3xl text-stone-700">
           Technical Specs
         </h2>
-        <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
+        <p className="mx-auto mb-12 max-w-2xl text-center text-neutral-600">
           Built with modern, privacy-respecting technologies that run locally on
           your device.
         </p>
@@ -338,10 +338,10 @@ function TechnicalSpecsSection() {
           <table className="w-full">
             <thead>
               <tr className="bg-stone-50/50">
-                <th className="text-left px-6 py-4 text-sm font-medium text-stone-700 border-b border-neutral-100">
+                <th className="border-b border-neutral-100 px-6 py-4 text-left text-sm font-medium text-stone-700">
                   Feature
                 </th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-stone-700 border-b border-neutral-100">
+                <th className="border-b border-neutral-100 px-6 py-4 text-left text-sm font-medium text-stone-700">
                   Details
                 </th>
               </tr>
@@ -378,16 +378,16 @@ function FeatureGrid({
   features: Array<{ icon: string; title: string; description: string }>;
 }) {
   return (
-    <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+    <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
       {features.map((feature) => (
         <div
           key={feature.title}
-          className="p-6 rounded-xl bg-stone-50/50 border border-neutral-100"
+          className="rounded-xl border border-neutral-100 bg-stone-50/50 p-6"
         >
-          <div className="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center mb-4">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-stone-100">
             <Icon icon={feature.icon} className="text-2xl text-stone-600" />
           </div>
-          <h3 className="text-base font-medium text-stone-700 mb-2">
+          <h3 className="mb-2 text-base font-medium text-stone-700">
             {feature.title}
           </h3>
           <p className="text-sm text-neutral-600">{feature.description}</p>
@@ -400,11 +400,11 @@ function FeatureGrid({
 function BYOKSection() {
   return (
     <section className="px-6 py-16">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
+      <div className="mx-auto max-w-4xl">
+        <h2 className="mb-4 text-center font-serif text-3xl text-stone-700">
           Bring Your Own Key
         </h2>
-        <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
+        <p className="mx-auto mb-12 max-w-2xl text-center text-neutral-600">
           Use your preferred AI providers or run everything locally. No vendor
           lock-in, no forced subscriptions.
         </p>
@@ -416,12 +416,12 @@ function BYOKSection() {
 
 function AutomationHooksSection() {
   return (
-    <section className="px-6 py-16 bg-stone-50/30">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
+    <section className="bg-stone-50/30 px-6 py-16">
+      <div className="mx-auto max-w-4xl">
+        <h2 className="mb-4 text-center font-serif text-3xl text-stone-700">
           Automation Hooks
         </h2>
-        <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
+        <p className="mx-auto mb-12 max-w-2xl text-center text-neutral-600">
           Trigger custom workflows when events happen. No polling, no
           webhooks—just shell scripts that run automatically.
         </p>
@@ -434,11 +434,11 @@ function AutomationHooksSection() {
 function ExtensibilitySection() {
   return (
     <section className="px-6 py-16">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
+      <div className="mx-auto max-w-4xl">
+        <h2 className="mb-4 text-center font-serif text-3xl text-stone-700">
           Fully Extensible
         </h2>
-        <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
+        <p className="mx-auto mb-12 max-w-2xl text-center text-neutral-600">
           Build custom UI panels, access app state, and create entirely new
           workflows with our extension system.
         </p>
@@ -450,12 +450,12 @@ function ExtensibilitySection() {
 
 function CLISection() {
   return (
-    <section className="px-6 py-16 bg-stone-50/30">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
+    <section className="bg-stone-50/30 px-6 py-16">
+      <div className="mx-auto max-w-4xl">
+        <h2 className="mb-4 text-center font-serif text-3xl text-stone-700">
           Cross-Platform CLI
         </h2>
-        <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
+        <p className="mx-auto mb-12 max-w-2xl text-center text-neutral-600">
           Manage sessions, export data, and automate workflows from the command
           line.
         </p>
@@ -468,30 +468,30 @@ function CLISection() {
 function APISection() {
   return (
     <section className="px-6 py-16">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-serif text-stone-700 mb-4">
+      <div className="mx-auto max-w-4xl">
+        <div className="mb-12 text-center">
+          <h2 className="mb-4 font-serif text-3xl text-stone-700">
             API Access
           </h2>
-          <p className="text-neutral-600 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-neutral-600">
             Programmatic control over sessions, transcripts, and AI processing
             for enterprise integrations.
           </p>
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 text-amber-700 text-sm mt-4">
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-amber-50 px-4 py-2 text-sm text-amber-700">
             <Icon icon="mdi:clock-outline" className="text-lg" />
             <span>Coming Soon</span>
           </div>
         </div>
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid gap-6 md:grid-cols-3">
           {apiFeatures.map((feature) => (
             <div
               key={feature.title}
-              className="p-6 rounded-xl bg-stone-50/50 border border-neutral-100 opacity-75"
+              className="rounded-xl border border-neutral-100 bg-stone-50/50 p-6 opacity-75"
             >
-              <div className="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center mb-4">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-stone-100">
                 <Icon icon={feature.icon} className="text-2xl text-stone-400" />
               </div>
-              <h3 className="text-base font-medium text-stone-500 mb-2">
+              <h3 className="mb-2 text-base font-medium text-stone-500">
                 {feature.title}
               </h3>
               <p className="text-sm text-neutral-500">{feature.description}</p>
@@ -506,11 +506,11 @@ function APISection() {
 function FAQSection() {
   return (
     <section className="px-6 py-16">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
+      <div className="mx-auto max-w-4xl">
+        <h2 className="mb-4 text-center font-serif text-3xl text-stone-700">
           Frequently Asked Questions
         </h2>
-        <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
+        <p className="mx-auto mb-12 max-w-2xl text-center text-neutral-600">
           Common questions about building with Char.
         </p>
         <Accordion type="single" collapsible className="space-y-2">
@@ -518,12 +518,12 @@ function FAQSection() {
             <AccordionItem
               key={index}
               value={`item-${index}`}
-              className="bg-white rounded-xl border border-neutral-100 px-6 data-[state=open]:shadow-sm"
+              className="rounded-xl border border-neutral-100 bg-white px-6 data-[state=open]:shadow-sm"
             >
-              <AccordionTrigger className="text-lg font-medium text-stone-700 hover:no-underline hover:text-stone-900">
+              <AccordionTrigger className="text-lg font-medium text-stone-700 hover:text-stone-900 hover:no-underline">
                 {faq.question}
               </AccordionTrigger>
-              <AccordionContent className="text-neutral-600 leading-relaxed">
+              <AccordionContent className="leading-relaxed text-neutral-600">
                 {faq.answer}
               </AccordionContent>
             </AccordionItem>
@@ -536,22 +536,22 @@ function FAQSection() {
 
 function CTASection() {
   return (
-    <section className="px-6 py-16 bg-linear-to-t from-stone-600 to-stone-500 border-t border-stone-500">
-      <div className="max-w-2xl mx-auto text-center">
-        <h2 className="text-3xl font-serif text-white mb-4">Ready to build?</h2>
-        <p className="text-stone-100 mb-8">
+    <section className="border-t border-stone-500 bg-linear-to-t from-stone-600 to-stone-500 px-6 py-16">
+      <div className="mx-auto max-w-2xl text-center">
+        <h2 className="mb-4 font-serif text-3xl text-white">Ready to build?</h2>
+        <p className="mb-8 text-stone-100">
           Fork the repo, explore the codebase, and start building your own
           meeting AI.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex flex-col justify-center gap-4 sm:flex-row">
           <a
             href="https://github.com/fastrepl/char"
             target="_blank"
             rel="noopener noreferrer"
             className={cn([
-              "inline-flex items-center justify-center gap-2 px-8 py-3 text-base font-medium rounded-full",
+              "inline-flex items-center justify-center gap-2 rounded-full px-8 py-3 text-base font-medium",
               "bg-white text-stone-600",
-              "hover:scale-105 active:scale-95 transition-transform",
+              "transition-transform hover:scale-105 active:scale-95",
             ])}
           >
             <Icon icon="mdi:github" className="text-lg" />
@@ -560,9 +560,9 @@ function CTASection() {
           <Link
             to="/download/"
             className={cn([
-              "inline-block px-8 py-3 text-base font-medium rounded-full",
+              "inline-block rounded-full px-8 py-3 text-base font-medium",
               "border border-stone-300 text-white",
-              "hover:bg-stone-500/50 transition-colors",
+              "transition-colors hover:bg-stone-500/50",
             ])}
           >
             Download Char

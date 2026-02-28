@@ -1,10 +1,5 @@
 import { Globe, MessageSquare, Plus, Search, X } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
-import { StandardTabWrapper } from "~/shared/main";
-import { type TabItem, TabItemBase } from "~/shared/tabs";
-import { ResourceListLayout, useWebResources } from "~/shared/ui/resource-list";
-import * as main from "~/store/tinybase/store/main";
-import { type Tab, useTabs } from "~/store/zustand/tabs";
 
 import type { ChatShortcut } from "@hypr/store";
 import { Button } from "@hypr/ui/components/ui/button";
@@ -17,6 +12,12 @@ import {
 import { cn } from "@hypr/utils";
 
 import { ChatShortcutDetailsColumn } from "./details";
+
+import { StandardTabWrapper } from "~/shared/main";
+import { type TabItem, TabItemBase } from "~/shared/tabs";
+import { ResourceListLayout, useWebResources } from "~/shared/ui/resource-list";
+import * as main from "~/store/tinybase/store/main";
+import { type Tab, useTabs } from "~/store/zustand/tabs";
 
 export const TabItemChatShortcut: TabItem<
   Extract<Tab, { type: "chat_shortcuts" }>
@@ -32,7 +33,7 @@ export const TabItemChatShortcut: TabItem<
 }) => {
   return (
     <TabItemBase
-      icon={<MessageSquare className="w-4 h-4" />}
+      icon={<MessageSquare className="h-4 w-4" />}
       title="Shortcuts"
       selected={tab.active}
       pinned={tab.pinned}
@@ -283,9 +284,9 @@ function ShortcutListColumn({
   const items = isWebMode ? filteredWeb : filteredMine;
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="flex h-full w-full flex-col">
       <div className="border-b border-neutral-200">
-        <div className="py-2 pl-3 pr-1 flex items-center justify-between h-12">
+        <div className="flex h-12 items-center justify-between py-2 pr-1 pl-3">
           <h3 className="text-sm font-medium">Shortcuts</h3>
           <div className="flex items-center gap-1">
             <Tooltip>
@@ -327,7 +328,7 @@ function ShortcutListColumn({
           </div>
         </div>
         {showSearch && (
-          <div className="flex items-center gap-2 px-3 border-t bg-white border-neutral-200 h-12">
+          <div className="flex h-12 items-center gap-2 border-t border-neutral-200 bg-white px-3">
             <Search className="h-4 w-4 text-neutral-400" />
             <input
               type="text"
@@ -340,13 +341,13 @@ function ShortcutListColumn({
                 }
               }}
               placeholder="Search shortcuts..."
-              className="w-full bg-transparent text-sm focus:outline-hidden placeholder:text-neutral-400"
+              className="w-full bg-transparent text-sm placeholder:text-neutral-400 focus:outline-hidden"
               autoFocus
             />
             {search && (
               <button
                 onClick={() => setSearch("")}
-                className="p-1 rounded-xs hover:bg-neutral-100"
+                className="rounded-xs p-1 hover:bg-neutral-100"
               >
                 <X className="h-4 w-4 text-neutral-400" />
               </button>
@@ -359,14 +360,14 @@ function ShortcutListColumn({
         {isWebMode && isWebLoading ? (
           <div className="flex flex-col gap-2">
             {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="px-3 py-2 rounded-md animate-pulse">
+              <div key={i} className="animate-pulse rounded-md px-3 py-2">
                 <div className="h-4 w-3/4 rounded-xs bg-neutral-200" />
-                <div className="h-3 w-1/2 rounded-xs bg-neutral-100 mt-1.5" />
+                <div className="mt-1.5 h-3 w-1/2 rounded-xs bg-neutral-100" />
               </div>
             ))}
           </div>
         ) : items.length === 0 ? (
-          <div className="text-center py-8 text-neutral-500">
+          <div className="py-8 text-center text-neutral-500">
             <MessageSquare
               size={32}
               className="mx-auto mb-2 text-neutral-300"
@@ -385,25 +386,25 @@ function ShortcutListColumn({
               key={`web-${index}`}
               onClick={() => setSelectedWebIndex(index)}
               className={cn([
-                "w-full text-left px-3 py-2 rounded-md text-sm border hover:bg-neutral-100",
+                "w-full rounded-md border px-3 py-2 text-left text-sm hover:bg-neutral-100",
                 selectedWebIndex === index
                   ? "border-neutral-500 bg-neutral-100"
                   : "border-transparent",
               ])}
             >
               <div className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-neutral-500 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium truncate">
+                <MessageSquare className="h-4 w-4 shrink-0 text-neutral-500" />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-medium">
                     {item.title || "Untitled"}
                     {item.category && (
-                      <span className="text-xs text-stone-400 font-mono ml-1">
+                      <span className="ml-1 font-mono text-xs text-stone-400">
                         ({item.category})
                       </span>
                     )}
                   </div>
                   {item.description && (
-                    <div className="text-xs text-neutral-500 truncate">
+                    <div className="truncate text-xs text-neutral-500">
                       {item.description}
                     </div>
                   )}
@@ -417,16 +418,16 @@ function ShortcutListColumn({
               key={item.id}
               onClick={() => setSelectedMineId(item.id)}
               className={cn([
-                "w-full text-left px-3 py-2 rounded-md text-sm border hover:bg-neutral-100",
+                "w-full rounded-md border px-3 py-2 text-left text-sm hover:bg-neutral-100",
                 selectedMineId === item.id
                   ? "border-neutral-500 bg-neutral-100"
                   : "border-transparent",
               ])}
             >
               <div className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-neutral-500 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium truncate">
+                <MessageSquare className="h-4 w-4 shrink-0 text-neutral-500" />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-medium">
                     {getMineTitle(item)}
                   </div>
                 </div>

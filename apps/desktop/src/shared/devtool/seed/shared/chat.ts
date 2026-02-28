@@ -1,7 +1,8 @@
 import { faker } from "@faker-js/faker/locale/en";
-import { DEFAULT_USER_ID, id } from "~/shared/utils";
 
 import type { ChatGroup, ChatMessageStorage } from "@hypr/store";
+
+import { DEFAULT_USER_ID, id } from "~/shared/utils";
 
 export const createChatGroup = (): { id: string; data: ChatGroup } => ({
   id: id(),

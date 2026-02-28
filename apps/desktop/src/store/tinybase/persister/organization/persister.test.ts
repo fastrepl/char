@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
+
+import { createOrganizationPersister } from "./persister";
+
 import {
   createTestMainStore,
   MOCK_DATA_DIR,
 } from "~/store/tinybase/persister/testing/mocks";
-
-import { createOrganizationPersister } from "./persister";
 
 const settingsMocks = vi.hoisted(() => ({
   vaultBase: vi

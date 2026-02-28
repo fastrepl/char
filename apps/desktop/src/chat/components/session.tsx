@@ -8,6 +8,12 @@ import {
   useMemo,
   useState,
 } from "react";
+
+import { commands as templateCommands } from "@hypr/plugin-template";
+
+import { useChatContextPipeline } from "./use-chat-context-pipeline";
+import { useSessionContextEntity } from "./use-session-context-entity";
+
 import { useLanguageModel } from "~/ai/hooks";
 import type { ContextEntity, ContextRef } from "~/chat/context-item";
 import { useCreateChatMessage } from "~/chat/hooks/useCreateChatMessage";
@@ -18,11 +24,6 @@ import { useToolRegistry } from "~/contexts/tool";
 import { id } from "~/shared/utils";
 import * as main from "~/store/tinybase/store/main";
 import { useChatContext } from "~/store/zustand/chat-context";
-
-import { commands as templateCommands } from "@hypr/plugin-template";
-
-import { useChatContextPipeline } from "./use-chat-context-pipeline";
-import { useSessionContextEntity } from "./use-session-context-entity";
 
 const EMPTY_CONTEXT_REFS: ContextRef[] = [];
 
@@ -191,7 +192,7 @@ export function ChatSession({
   });
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       {children({
         sessionId,
         messages,

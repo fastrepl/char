@@ -1,4 +1,5 @@
 import { UserIcon } from "lucide-react";
+
 import { StandardTabWrapper } from "~/shared/main";
 import { type TabItem, TabItemBase } from "~/shared/tabs";
 import * as main from "~/store/tinybase/store/main";
@@ -18,7 +19,7 @@ export const TabItemHuman: TabItem<Extract<Tab, { type: "humans" }>> = ({
 
   return (
     <TabItemBase
-      icon={<UserIcon className="w-4 h-4" />}
+      icon={<UserIcon className="h-4 w-4" />}
       title={title ?? "Human"}
       selected={tab.active}
       pinned={tab.pinned}

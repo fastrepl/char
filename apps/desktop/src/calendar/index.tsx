@@ -1,9 +1,10 @@
 import { CalendarDays } from "lucide-react";
+
+import { CalendarView } from "./components/calendar-view";
+
 import { StandardTabWrapper } from "~/shared/main";
 import { type TabItem, TabItemBase } from "~/shared/tabs";
 import { type Tab } from "~/store/zustand/tabs";
-
-import { CalendarView } from "./components/calendar-view";
 
 export const TabItemCalendar: TabItem<Extract<Tab, { type: "calendar" }>> = ({
   tab,
@@ -17,7 +18,7 @@ export const TabItemCalendar: TabItem<Extract<Tab, { type: "calendar" }>> = ({
 }) => {
   return (
     <TabItemBase
-      icon={<CalendarDays className="w-4 h-4" />}
+      icon={<CalendarDays className="h-4 w-4" />}
       title={"Calendar"}
       selected={tab.active}
       pinned={tab.pinned}

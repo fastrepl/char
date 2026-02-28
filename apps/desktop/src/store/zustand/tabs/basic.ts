@@ -1,6 +1,4 @@
 import type { StoreApi } from "zustand";
-import { id } from "~/shared/utils";
-import { listenerStore } from "~/store/zustand/listener/instance";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 
@@ -13,6 +11,9 @@ import type {
   RecentlyOpenedState,
 } from "./recently-opened";
 import { getDefaultState, isSameTab, type Tab, type TabInput } from "./schema";
+
+import { id } from "~/shared/utils";
+import { listenerStore } from "~/store/zustand/listener/instance";
 
 export type BasicState = {
   tabs: Tab[];

@@ -22,8 +22,8 @@ function ClipNodeView({ node, updateAttributes, selected }: NodeViewProps) {
   if (isEditing || !node.attrs.src) {
     return (
       <NodeViewWrapper>
-        <div className="my-4 p-4 border border-dashed border-neutral-300 rounded-md bg-neutral-50">
-          <label className="block text-xs text-neutral-500 mb-2">
+        <div className="my-4 rounded-md border border-dashed border-neutral-300 bg-neutral-50 p-4">
+          <label className="mb-2 block text-xs text-neutral-500">
             YouTube Clip Embed URL
           </label>
           <div className="flex gap-2">
@@ -32,7 +32,7 @@ function ClipNodeView({ node, updateAttributes, selected }: NodeViewProps) {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="https://www.youtube.com/embed/..."
-              className="flex-1 px-3 py-1.5 text-sm border border-neutral-200 rounded focus:outline-none focus:border-blue-500"
+              className="flex-1 rounded border border-neutral-200 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
@@ -44,7 +44,7 @@ function ClipNodeView({ node, updateAttributes, selected }: NodeViewProps) {
             <button
               type="button"
               onClick={handleSubmit}
-              className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="rounded bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700"
             >
               Embed
             </button>
@@ -66,7 +66,7 @@ function ClipNodeView({ node, updateAttributes, selected }: NodeViewProps) {
         <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
           <iframe
             src={node.attrs.src}
-            className="absolute inset-0 w-full h-full"
+            className="absolute inset-0 h-full w-full"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             referrerPolicy="strict-origin-when-cross-origin"
             allowFullScreen

@@ -1,4 +1,7 @@
 import { type RefObject, useCallback } from "react";
+
+import { TranscriptContainer } from "./shared";
+
 import { id } from "~/shared/utils";
 import * as main from "~/store/tinybase/store/main";
 import type { SpeakerHintWithId } from "~/stt/types";
@@ -8,8 +11,6 @@ import {
   updateTranscriptHints,
   updateTranscriptWords,
 } from "~/stt/utils";
-
-import { TranscriptContainer } from "./shared";
 
 type Store = NonNullable<ReturnType<typeof main.UI.useStore>>;
 

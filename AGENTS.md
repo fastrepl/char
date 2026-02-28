@@ -16,6 +16,7 @@ TinyBase as the primary data store (schema at `packages/store/src/tinybase.ts`),
 ## Guidelines
 
 - Format via dprint after making changes.
+- JavaScript/TypeScript formatting runs through `oxfmt` via dprint's exec plugin.
 - Run `pnpm -r typecheck` after TypeScript changes, `cargo check` after Rust changes.
 - Use `useForm` (tanstack-form) and `useQuery`/`useMutation` (tanstack-query) for form/mutation state. Avoid manual state management (e.g. `setError`).
 - Branch naming: `fix/`, `chore/`, `refactor/` prefixes.

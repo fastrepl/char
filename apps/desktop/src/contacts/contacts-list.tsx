@@ -3,13 +3,14 @@ import { Building2, CornerDownLeft, Pin } from "lucide-react";
 import { Reorder } from "motion/react";
 import React, { useCallback, useMemo, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { useNativeContextMenu } from "~/shared/hooks/useNativeContextMenu";
-import * as main from "~/store/tinybase/store/main";
 
 import type { ContactsSelection } from "@hypr/plugin-windows";
 import { cn } from "@hypr/utils";
 
 import { ColumnHeader, getContactBgClass, type SortOption } from "./shared";
+
+import { useNativeContextMenu } from "~/shared/hooks/useNativeContextMenu";
+import * as main from "~/store/tinybase/store/main";
 
 type ContactItem =
   | { kind: "person"; id: string }
@@ -235,7 +236,7 @@ export function ContactsListColumn({
   };
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="flex h-full w-full flex-col">
       <ColumnHeader
         title="Contacts"
         sortOption={sortOption}
@@ -315,7 +316,7 @@ export function ContactsListColumn({
             </div>
           )}
           {pinnedItems.length > 0 && nonPinnedItems.length > 0 && (
-            <div className="h-px bg-neutral-200 mx-3 my-1" />
+            <div className="mx-3 my-1 h-px bg-neutral-200" />
           )}
           {nonPinnedItems.map((item) =>
             item.kind === "person" ? (
@@ -416,7 +417,7 @@ function PersonItem({
         }
       }}
       className={cn([
-        "group w-full text-left px-3 py-2 rounded-md text-sm border hover:bg-neutral-100 transition-colors flex items-center gap-2 bg-white overflow-hidden",
+        "group flex w-full items-center gap-2 overflow-hidden rounded-md border bg-white px-3 py-2 text-left text-sm transition-colors hover:bg-neutral-100",
         active ? "border-neutral-500 bg-neutral-100" : "border-transparent",
       ])}
     >
@@ -429,18 +430,18 @@ function PersonItem({
           colorClasses={[bgClass]}
         />
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="font-medium truncate flex items-center gap-1">
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1 truncate font-medium">
           {personName || personEmail || "Unnamed"}
         </div>
         {personEmail && personName && (
-          <div className="text-xs text-neutral-500 truncate">{personEmail}</div>
+          <div className="truncate text-xs text-neutral-500">{personEmail}</div>
         )}
       </div>
       <button
         onClick={handleTogglePin}
         className={cn([
-          "shrink-0 p-1 rounded-xs transition-colors",
+          "shrink-0 rounded-xs p-1 transition-colors",
           isPinned
             ? "text-blue-600 hover:text-blue-700"
             : "text-neutral-300 opacity-0 group-hover:opacity-100 hover:text-neutral-500",
@@ -532,20 +533,20 @@ function OrganizationItem({
         }
       }}
       className={cn([
-        "group w-full text-left px-3 py-2 rounded-md text-sm border hover:bg-neutral-100 transition-colors flex items-center gap-2 overflow-hidden",
+        "group flex w-full items-center gap-2 overflow-hidden rounded-md border px-3 py-2 text-left text-sm transition-colors hover:bg-neutral-100",
         active ? "border-neutral-500 bg-neutral-100" : "border-transparent",
       ])}
     >
-      <div className="shrink-0 w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-100">
         <Building2 className="h-4 w-4 text-neutral-500" />
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="font-medium truncate">{organization.name}</div>
+      <div className="min-w-0 flex-1">
+        <div className="truncate font-medium">{organization.name}</div>
       </div>
       <button
         onClick={handleTogglePin}
         className={cn([
-          "shrink-0 p-1 rounded-xs transition-colors",
+          "shrink-0 rounded-xs p-1 transition-colors",
           isPinned
             ? "text-blue-600 hover:text-blue-700"
             : "text-neutral-300 opacity-0 group-hover:opacity-100 hover:text-neutral-500",
@@ -615,20 +616,20 @@ function NewPersonForm({
   return (
     <div className="p-2">
       <form onSubmit={handleSubmit}>
-        <div className="flex items-center w-full px-2 py-1.5 gap-2 rounded-xs bg-neutral-50 border border-neutral-200">
+        <div className="flex w-full items-center gap-2 rounded-xs border border-neutral-200 bg-neutral-50 px-2 py-1.5">
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Add person"
-            className="w-full bg-transparent text-sm focus:outline-hidden placeholder:text-neutral-400"
+            className="w-full bg-transparent text-sm placeholder:text-neutral-400 focus:outline-hidden"
             autoFocus
           />
           {name.trim() && (
             <button
               type="submit"
-              className="text-neutral-500 hover:text-neutral-700 transition-colors shrink-0"
+              className="shrink-0 text-neutral-500 transition-colors hover:text-neutral-700"
               aria-label="Add person"
             >
               <CornerDownLeft className="size-4" />

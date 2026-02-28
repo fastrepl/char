@@ -1,9 +1,9 @@
-import type { DeletedSessionData } from "~/store/zustand/undo-delete";
-
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 import type { TranscriptStorage } from "@hypr/store";
 
 import * as main from "./main";
+
+import type { DeletedSessionData } from "~/store/zustand/undo-delete";
 
 type Store = NonNullable<ReturnType<typeof main.UI.useStore>>;
 type Indexes = NonNullable<ReturnType<typeof main.UI.useIndexes>>;

@@ -5,7 +5,7 @@ import { SelectProviderAndModel } from "./select";
 export function STT() {
   return (
     <SttSettingsProvider>
-      <div className="flex flex-col gap-6 mt-4">
+      <div className="mt-4 flex flex-col gap-6">
         <SelectProviderAndModel />
         <ConfigureProviders />
       </div>

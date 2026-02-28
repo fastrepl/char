@@ -1,4 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
+
+import { commands as templateCommands } from "@hypr/plugin-template";
+import { PromptEditor } from "@hypr/tiptap/prompt";
+import { Button } from "@hypr/ui/components/ui/button";
+
 import * as main from "~/store/tinybase/store/main";
 import {
   AVAILABLE_FILTERS,
@@ -8,10 +13,6 @@ import {
   type TaskType,
 } from "~/store/tinybase/store/prompts";
 
-import { commands as templateCommands } from "@hypr/plugin-template";
-import { PromptEditor } from "@hypr/tiptap/prompt";
-import { Button } from "@hypr/ui/components/ui/button";
-
 export function PromptDetailsColumn({
   selectedTask,
 }: {
@@ -19,7 +20,7 @@ export function PromptDetailsColumn({
 }) {
   if (!selectedTask) {
     return (
-      <div className="h-full flex items-center justify-center">
+      <div className="flex h-full items-center justify-center">
         <p className="text-sm text-neutral-500">
           Select a task type to view or customize its prompt
         </p>
@@ -104,12 +105,12 @@ function PromptDetails({ selectedTask }: { selectedTask: TaskType }) {
   const hasCustomPrompt = !!customContent;
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="px-6 py-4 border-b border-neutral-200">
+    <div className="flex h-full flex-col">
+      <div className="border-b border-neutral-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold">{taskConfig?.label}</h2>
-            <p className="text-sm text-neutral-500 mt-1">
+            <p className="mt-1 text-sm text-neutral-500">
               {taskConfig?.description}
             </p>
           </div>
@@ -126,15 +127,15 @@ function PromptDetails({ selectedTask }: { selectedTask: TaskType }) {
         </div>
       </div>
 
-      <div className="px-6 py-3 border-b border-neutral-200 bg-neutral-50">
-        <h3 className="text-xs font-medium text-neutral-600 mb-2">
+      <div className="border-b border-neutral-200 bg-neutral-50 px-6 py-3">
+        <h3 className="mb-2 text-xs font-medium text-neutral-600">
           Available Variables
         </h3>
         <div className="flex flex-wrap gap-1.5">
           {variables.map((variable) => (
             <code
               key={variable}
-              className="text-xs bg-white border border-neutral-200 px-2 py-0.5 rounded-xs font-mono"
+              className="rounded-xs border border-neutral-200 bg-white px-2 py-0.5 font-mono text-xs"
             >
               {"{{ "}
               {variable}
@@ -146,7 +147,7 @@ function PromptDetails({ selectedTask }: { selectedTask: TaskType }) {
           <span className="font-medium">Filters:</span>{" "}
           {AVAILABLE_FILTERS.map((filter, i) => (
             <span key={filter}>
-              <code className="bg-white border border-neutral-200 px-1 rounded-xs">
+              <code className="rounded-xs border border-neutral-200 bg-white px-1">
                 {filter}
               </code>
               {i < AVAILABLE_FILTERS.length - 1 && ", "}
@@ -155,9 +156,9 @@ function PromptDetails({ selectedTask }: { selectedTask: TaskType }) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden flex flex-col">
+      <div className="flex flex-1 flex-col overflow-hidden">
         <div className="flex-1 p-6">
-          <div className="h-full border border-neutral-200 rounded-lg overflow-hidden">
+          <div className="h-full overflow-hidden rounded-lg border border-neutral-200">
             <PromptEditor
               value={localValue}
               onChange={setLocalValue}
@@ -170,9 +171,9 @@ function PromptDetails({ selectedTask }: { selectedTask: TaskType }) {
 
         <div className="border-t border-neutral-200">
           <details className="group">
-            <summary className="px-6 py-3 cursor-pointer text-sm font-medium text-neutral-600 hover:bg-neutral-50 list-none flex items-center gap-2">
+            <summary className="flex cursor-pointer list-none items-center gap-2 px-6 py-3 text-sm font-medium text-neutral-600 hover:bg-neutral-50">
               <svg
-                className="w-4 h-4 transition-transform group-open:rotate-90"
+                className="h-4 w-4 transition-transform group-open:rotate-90"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -186,11 +187,11 @@ function PromptDetails({ selectedTask }: { selectedTask: TaskType }) {
               </svg>
               Default Template Reference
             </summary>
-            <div className="px-6 pb-4 max-h-64 overflow-auto">
+            <div className="max-h-64 overflow-auto px-6 pb-4">
               {isLoading ? (
                 <div className="text-sm text-neutral-500">Loading...</div>
               ) : (
-                <pre className="text-xs bg-neutral-50 p-4 rounded-lg border border-neutral-200 whitespace-pre-wrap font-mono text-neutral-600">
+                <pre className="rounded-lg border border-neutral-200 bg-neutral-50 p-4 font-mono text-xs whitespace-pre-wrap text-neutral-600">
                   {defaultContent || "No default template available"}
                 </pre>
               )}

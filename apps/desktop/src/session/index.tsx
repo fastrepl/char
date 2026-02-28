@@ -4,17 +4,6 @@ import { StickyNoteIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useTitleGeneration } from "~/ai/hooks";
-import * as AudioPlayer from "~/audio-player";
-import { useShell } from "~/contexts/shell";
-import { StandardTabWrapper } from "~/shared/main";
-import { type TabItem, TabItemBase } from "~/shared/tabs";
-import * as main from "~/store/tinybase/store/main";
-import { useSessionTitle } from "~/store/zustand/live-title";
-import { type Tab, useTabs } from "~/store/zustand/tabs";
-import { useListener } from "~/stt/contexts";
-import { useStartListening } from "~/stt/useStartListening";
-import { useSTTConnection } from "~/stt/useSTTConnection";
 
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 import { cn } from "@hypr/utils";
@@ -29,6 +18,18 @@ import { useCurrentNoteTab, useHasTranscript } from "./components/shared";
 import { TitleInput } from "./components/title-input";
 import { useAutoEnhance } from "./hooks/useAutoEnhance";
 import { useIsSessionEnhancing } from "./hooks/useEnhancedNotes";
+
+import { useTitleGeneration } from "~/ai/hooks";
+import * as AudioPlayer from "~/audio-player";
+import { useShell } from "~/contexts/shell";
+import { StandardTabWrapper } from "~/shared/main";
+import { type TabItem, TabItemBase } from "~/shared/tabs";
+import * as main from "~/store/tinybase/store/main";
+import { useSessionTitle } from "~/store/zustand/live-title";
+import { type Tab, useTabs } from "~/store/zustand/tabs";
+import { useListener } from "~/stt/contexts";
+import { useStartListening } from "~/stt/useStartListening";
+import { useSTTConnection } from "~/stt/useSTTConnection";
 
 const SIDEBAR_WIDTH = 280;
 const LAYOUT_PADDING = 4;
@@ -81,7 +82,7 @@ export const TabItemNote: TabItem<Extract<Tab, { type: "sessions" }>> = ({
   return (
     <SessionPreviewCard sessionId={tab.id} side="bottom" enabled={!tab.active}>
       <TabItemBase
-        icon={<StickyNoteIcon className="w-4 h-4" />}
+        icon={<StickyNoteIcon className="h-4 w-4" />}
         title={title || "Untitled"}
         selected={tab.active}
         active={isActive}
@@ -252,11 +253,11 @@ function TabContentNoteInner({
         floatingButton={<FloatingActionButton tab={tab} />}
         showTimeline={showTimeline}
       >
-        <div className="flex flex-col h-full">
-          <div className="pl-2 pr-1">
+        <div className="flex h-full flex-col">
+          <div className="pr-1 pl-2">
             <OuterHeader sessionId={tab.id} currentView={currentView} />
           </div>
-          <div className="mt-2 px-3 shrink-0">
+          <div className="mt-2 shrink-0 px-3">
             <TitleInput
               ref={titleInputRef}
               tab={tab}
@@ -264,7 +265,7 @@ function TabContentNoteInner({
               onGenerateTitle={hasTranscript ? generateTitle : undefined}
             />
           </div>
-          <div className="mt-2 px-2 flex-1 min-h-0">
+          <div className="mt-2 min-h-0 flex-1 px-2">
             <NoteInput
               ref={noteInputRef}
               tab={tab}
@@ -344,8 +345,8 @@ function StatusBanner({
           transition={{ duration: 0.3, ease: "easeOut" }}
           style={{ left: `calc(50% + ${totalOffset}px)` }}
           className={cn([
-            "fixed -translate-x-1/2 z-50",
-            "whitespace-nowrap text-center text-xs",
+            "fixed z-50 -translate-x-1/2",
+            "text-center text-xs whitespace-nowrap",
             skipReason ? "text-red-400" : "text-stone-300",
             showTimeline ? "bottom-[76px]" : "bottom-6",
           ])}

@@ -1,7 +1,8 @@
 import { faker } from "@faker-js/faker/locale/en";
-import { DEFAULT_USER_ID, id } from "~/shared/utils";
 
 import type { ChatShortcutStorage } from "@hypr/store";
+
+import { DEFAULT_USER_ID, id } from "~/shared/utils";
 
 export const createChatShortcut = (): {
   id: string;

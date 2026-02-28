@@ -29,7 +29,7 @@ export function Section({
       </div>
 
       {children || (
-        <div className="text-sm text-muted-foreground py-4">Empty</div>
+        <div className="text-muted-foreground py-4 text-sm">Empty</div>
       )}
     </div>
   );

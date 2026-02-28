@@ -1,11 +1,12 @@
 import { useMemo } from "react";
-import { useConfigValue } from "~/shared/config";
-import * as settings from "~/store/tinybase/store/settings";
 
 import {
   SearchableSelect,
   type SearchableSelectOption,
 } from "./searchable-select";
+
+import { useConfigValue } from "~/shared/config";
+import * as settings from "~/store/tinybase/store/settings";
 
 const COMMON_TIMEZONES = [
   { value: "Pacific/Honolulu", label: "Hawaii", detail: "UTC-10" },
@@ -56,7 +57,7 @@ export function TimezoneSelector() {
   return (
     <div className="flex flex-row items-center justify-between">
       <div>
-        <h3 className="text-sm font-medium mb-1">Timezone</h3>
+        <h3 className="mb-1 text-sm font-medium">Timezone</h3>
         <p className="text-xs text-neutral-600">
           Override the timezone used for the sidebar timeline
         </p>

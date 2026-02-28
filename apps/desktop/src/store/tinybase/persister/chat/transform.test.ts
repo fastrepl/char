@@ -1,5 +1,4 @@
 import { describe, expect, test } from "vitest";
-import type { TablesContent } from "~/store/tinybase/persister/shared";
 
 import {
   chatJsonToData,
@@ -8,6 +7,8 @@ import {
 } from "./load";
 import { tablesToChatJsonList } from "./save";
 import type { ChatJson, LoadedChatData } from "./types";
+
+import type { TablesContent } from "~/store/tinybase/persister/shared";
 
 describe("chatJsonToData", () => {
   test("converts ChatJson to LoadedChatData", () => {

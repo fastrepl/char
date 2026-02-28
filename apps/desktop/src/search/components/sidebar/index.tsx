@@ -1,11 +1,12 @@
 import { SearchXIcon } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
 import { forwardRef } from "react";
-import { type GroupedSearchResults, useSearch } from "~/search/contexts/ui";
 
 import { cn } from "@hypr/utils";
 
 import { SearchResultGroup } from "./group";
+
+import { type GroupedSearchResults, useSearch } from "~/search/contexts/ui";
 
 export function SearchResults() {
   const { results, query, setQuery, selectedIndex } = useSearch();
@@ -53,7 +54,7 @@ const SearchYesResults = forwardRef<
   { results: GroupedSearchResults; selectedId: string | null }
 >(({ results, selectedId }, ref) => {
   return (
-    <div ref={ref} className="h-full overflow-y-auto scrollbar-hide">
+    <div ref={ref} className="scrollbar-hide h-full overflow-y-auto">
       {results.groups.map((group) => (
         <SearchResultGroup
           key={group.key}
@@ -72,15 +73,15 @@ function SearchNoResults({
   setQuery: (query: string) => void;
 }) {
   return (
-    <div className="h-full flex items-center justify-center">
-      <div className="text-center px-4 max-w-xs">
-        <div className="flex justify-center mb-3">
+    <div className="flex h-full items-center justify-center">
+      <div className="max-w-xs px-4 text-center">
+        <div className="mb-3 flex justify-center">
           <SearchXIcon className="h-10 w-10 text-neutral-300" />
         </div>
         <p className="text-sm font-medium text-neutral-700">
           No results found for "{query}"
         </p>
-        <p className="text-xs text-neutral-500 mt-2 leading-relaxed underline">
+        <p className="mt-2 text-xs leading-relaxed text-neutral-500 underline">
           Help us improve search
         </p>
       </div>

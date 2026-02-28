@@ -1,6 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import type { ComponentRef } from "react";
+
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@hypr/ui/components/ui/resizable";
+
 import { PersistentChatPanel } from "~/chat/components/persistent-chat";
 import { useShell } from "~/contexts/shell";
 import { useSearch } from "~/search/contexts/ui";
@@ -8,12 +15,6 @@ import { Body } from "~/shared/main";
 import { LeftSidebar } from "~/sidebar";
 import { useTabs } from "~/store/zustand/tabs";
 import { commands } from "~/types/tauri.gen";
-
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@hypr/ui/components/ui/resizable";
 
 export const Route = createFileRoute("/app/main/_layout/")({
   component: Component,
@@ -71,14 +72,14 @@ function Component() {
 
   return (
     <div
-      className="flex h-full overflow-hidden gap-1 p-1"
+      className="flex h-full gap-1 overflow-hidden p-1"
       data-testid="main-app-shell"
     >
       {leftsidebar.expanded && !isOnboarding && <LeftSidebar />}
 
       <ResizablePanelGroup
         direction="horizontal"
-        className="flex-1 overflow-hidden flex"
+        className="flex flex-1 overflow-hidden"
         autoSaveId="main-chat"
       >
         <ResizablePanel ref={bodyPanelRef} className="flex-1 overflow-hidden">

@@ -65,17 +65,17 @@ function Component() {
   return (
     <div
       className={cn([
-        "flex items-center justify-center min-h-screen p-4",
+        "flex min-h-screen items-center justify-center p-4",
         "bg-linear-to-b from-stone-50 via-stone-100/50 to-stone-50",
       ])}
     >
-      <div className="bg-white border border-neutral-200 rounded-xs p-8 max-w-md mx-auto">
-        <div className="text-center mb-8">
+      <div className="mx-auto max-w-md rounded-xs border border-neutral-200 bg-white p-8">
+        <div className="mb-8 text-center">
           <div
             className={cn([
-              "mb-6 mx-auto size-28",
-              "shadow-xl border border-neutral-200",
-              "flex justify-center items-center",
+              "mx-auto mb-6 size-28",
+              "border border-neutral-200 shadow-xl",
+              "flex items-center justify-center",
               "rounded-4xl bg-transparent",
             ])}
           >
@@ -90,7 +90,7 @@ function Component() {
               ])}
             />
           </div>
-          <h1 className="text-3xl font-serif text-stone-800 mb-2">
+          <h1 className="mb-2 font-serif text-3xl text-stone-800">
             Set new password
           </h1>
           <p className="text-sm text-neutral-500">
@@ -107,9 +107,9 @@ function Component() {
             required
             className={cn([
               "w-full px-4 py-2",
-              "border border-neutral-300 rounded-lg",
+              "rounded-lg border border-neutral-300",
               "text-neutral-700 placeholder:text-neutral-400",
-              "focus:outline-hidden focus:ring-2 focus:ring-stone-500 focus:ring-offset-2",
+              "focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 focus:outline-hidden",
             ])}
           />
           <input
@@ -120,24 +120,24 @@ function Component() {
             required
             className={cn([
               "w-full px-4 py-2",
-              "border border-neutral-300 rounded-lg",
+              "rounded-lg border border-neutral-300",
               "text-neutral-700 placeholder:text-neutral-400",
-              "focus:outline-hidden focus:ring-2 focus:ring-stone-500 focus:ring-offset-2",
+              "focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 focus:outline-hidden",
             ])}
           />
           {errorMessage && (
-            <p className="text-sm text-red-500 text-center">{errorMessage}</p>
+            <p className="text-center text-sm text-red-500">{errorMessage}</p>
           )}
           <button
             type="submit"
             disabled={updateMutation.isPending || !password || !confirmPassword}
             className={cn([
-              "w-full px-4 py-2 cursor-pointer",
+              "w-full cursor-pointer px-4 py-2",
               "border border-neutral-300",
               "rounded-lg font-medium text-neutral-700",
               "hover:bg-neutral-50",
-              "focus:outline-hidden focus:ring-2 focus:ring-stone-500 focus:ring-offset-2",
-              "disabled:opacity-50 disabled:cursor-not-allowed",
+              "focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 focus:outline-hidden",
+              "disabled:cursor-not-allowed disabled:opacity-50",
               "transition-colors",
               "flex items-center justify-center gap-2",
             ])}
@@ -148,7 +148,7 @@ function Component() {
 
         <Link
           to="/auth/"
-          className="flex items-center justify-center gap-1 text-sm text-neutral-500 hover:text-neutral-700 transition-colors mt-4"
+          className="mt-4 flex items-center justify-center gap-1 text-sm text-neutral-500 transition-colors hover:text-neutral-700"
         >
           Back to sign in
         </Link>

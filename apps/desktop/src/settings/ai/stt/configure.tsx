@@ -9,16 +9,6 @@ import {
   X,
 } from "lucide-react";
 import { useCallback } from "react";
-import { useBillingAccess } from "~/auth/billing";
-import {
-  HyprCloudCTAButton,
-  HyprProviderRow,
-  NonHyprProviderCard,
-  StyledStreamdown,
-} from "~/settings/ai/shared";
-import * as settings from "~/store/tinybase/store/settings";
-import { useListener } from "~/stt/contexts";
-import { localSttQueries, useLocalModelDownload } from "~/stt/useLocalSttModel";
 
 import {
   commands as localSttCommands,
@@ -37,13 +27,24 @@ import { cn } from "@hypr/utils";
 import { useSttSettings } from "./context";
 import { ProviderId, PROVIDERS } from "./shared";
 
+import { useBillingAccess } from "~/auth/billing";
+import {
+  HyprCloudCTAButton,
+  HyprProviderRow,
+  NonHyprProviderCard,
+  StyledStreamdown,
+} from "~/settings/ai/shared";
+import * as settings from "~/store/tinybase/store/settings";
+import { useListener } from "~/stt/contexts";
+import { localSttQueries, useLocalModelDownload } from "~/stt/useLocalSttModel";
+
 export function ConfigureProviders() {
   const { accordionValue, setAccordionValue, hyprAccordionRef } =
     useSttSettings();
 
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="text-md font-semibold font-serif">Configure Providers</h3>
+      <h3 className="text-md font-serif font-semibold">Configure Providers</h3>
       <Accordion
         type="single"
         collapsible
@@ -77,7 +78,7 @@ export function ConfigureProviders() {
 function ModelGroupLabel({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-2 pt-1">
-      <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-widest shrink-0">
+      <span className="shrink-0 text-[10px] font-medium tracking-widest text-neutral-400 uppercase">
         {label}
       </span>
       <div className="flex-1 border-t border-neutral-200" />
@@ -132,13 +133,13 @@ function HyprProviderCard({
       ])}
     >
       <AccordionTrigger
-        className={cn(["capitalize gap-2 px-4 hover:no-underline"])}
+        className={cn(["gap-2 px-4 capitalize hover:no-underline"])}
       >
         <div className="flex items-center gap-2">
           {icon}
           <span>{providerName}</span>
           {badge && (
-            <span className="text-xs text-neutral-500 font-light border border-neutral-300 rounded-full px-2">
+            <span className="rounded-full border border-neutral-300 px-2 text-xs font-light text-neutral-500">
               {badge}
             </span>
           )}
@@ -157,7 +158,7 @@ function HyprProviderCard({
                   href="https://char.com/docs/developers/local-models"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-neutral-400 hover:underline flex items-center gap-1"
+                  className="flex items-center gap-1 text-xs text-neutral-400 hover:underline"
                 >
                   <span>or use on-device model</span>
                   <HelpCircle className="size-3" />
@@ -404,7 +405,7 @@ function LocalModelAction({
         <button
           onClick={onOpen}
           className={cn([
-            "h-8.5 px-4 rounded-full text-xs font-mono text-center",
+            "h-8.5 rounded-full px-4 text-center font-mono text-xs",
             "bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900",
             "shadow-xs hover:shadow-md",
             "transition-all duration-150",
@@ -420,7 +421,7 @@ function LocalModelAction({
           className={cn([
             "size-8.5 rounded-full",
             "bg-linear-to-t from-red-200 to-red-100 text-red-600",
-            "shadow-xs hover:shadow-md hover:from-red-300 hover:to-red-200",
+            "shadow-xs hover:from-red-300 hover:to-red-200 hover:shadow-md",
             "transition-all duration-150",
             "flex items-center justify-center",
           ])}
@@ -436,9 +437,9 @@ function LocalModelAction({
       <button
         onClick={onDownload}
         className={cn([
-          "w-fit h-8.5 px-4 rounded-full text-xs font-mono text-center",
+          "h-8.5 w-fit rounded-full px-4 text-center font-mono text-xs",
           "bg-linear-to-t from-red-600 to-red-500 text-white",
-          "shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
+          "shadow-md hover:scale-[102%] hover:shadow-lg active:scale-[98%]",
           "transition-all duration-150",
           "flex items-center justify-center gap-1.5",
         ])}
@@ -454,15 +455,15 @@ function LocalModelAction({
       <button
         onClick={onCancel}
         className={cn([
-          "relative overflow-hidden group",
-          "w-27.5 h-8.5 px-4 rounded-full text-xs font-mono text-center",
+          "group relative overflow-hidden",
+          "h-8.5 w-27.5 rounded-full px-4 text-center font-mono text-xs",
           "bg-linear-to-t from-neutral-300 to-neutral-200 text-neutral-900",
           "shadow-xs",
           "transition-all duration-150",
         ])}
       >
         <div
-          className="absolute inset-0 bg-neutral-400/50 transition-all duration-300 rounded-full"
+          className="absolute inset-0 rounded-full bg-neutral-400/50 transition-all duration-300"
           style={{ width: `${progress}%` }}
         />
         <div className="relative z-10 flex items-center justify-center gap-1.5 group-hover:hidden">
@@ -481,10 +482,10 @@ function LocalModelAction({
     <button
       onClick={onDownload}
       className={cn([
-        "relative overflow-hidden w-fit h-8.5",
-        "px-4 rounded-full text-xs font-mono text-center",
+        "relative h-8.5 w-fit overflow-hidden",
+        "rounded-full px-4 text-center font-mono text-xs",
         "bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900",
-        "shadow-xs hover:shadow-md hover:scale-[102%] active:scale-[98%]",
+        "shadow-xs hover:scale-[102%] hover:shadow-md active:scale-[98%]",
         "transition-all duration-150",
         "flex items-center justify-center gap-1.5",
       ])}
@@ -498,7 +499,7 @@ function LocalModelAction({
           ])}
         />
       )}
-      <Download className="size-4 relative z-10" />
+      <Download className="relative z-10 size-4" />
       <span className="relative z-10">Download</span>
     </button>
   );

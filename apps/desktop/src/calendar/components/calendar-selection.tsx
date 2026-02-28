@@ -46,18 +46,18 @@ export function CalendarSelection({
     return (
       <div
         className={cn([
-          "flex flex-col items-center justify-center py-6 px-4",
+          "flex flex-col items-center justify-center px-4 py-6",
           className,
         ])}
       >
         {isLoading ? (
           <>
-            <Loader2Icon className="size-6 text-neutral-300 mb-2 animate-spin" />
+            <Loader2Icon className="mb-2 size-6 animate-spin text-neutral-300" />
             <p className="text-xs text-neutral-500">Loading calendars…</p>
           </>
         ) : (
           <>
-            <CalendarOffIcon className="size-6 text-neutral-300 mb-2" />
+            <CalendarOffIcon className="mb-2 size-6 text-neutral-300" />
             <p className="text-xs text-neutral-500">No calendars found</p>
           </>
         )}
@@ -82,15 +82,15 @@ export function CalendarSelection({
           >
             <AccordionTrigger
               className={cn([
-                "py-2 cursor-pointer hover:no-underline",
-                "hover:bg-neutral-50 -mx-2 px-2 rounded-md",
+                "cursor-pointer py-2 hover:no-underline",
+                "-mx-2 rounded-md px-2 hover:bg-neutral-50",
               ])}
             >
               <div className="flex items-center gap-2">
                 <span className="text-xs font-medium text-neutral-600">
                   {group.sourceName}
                 </span>
-                <span className="text-[10px] tabular-nums text-neutral-400">
+                <span className="text-[10px] text-neutral-400 tabular-nums">
                   {enabledCount}/{group.calendars.length}
                 </span>
               </div>
@@ -129,11 +129,11 @@ function CalendarToggleRow({
     <button
       type="button"
       onClick={() => onToggle(!enabled)}
-      className="flex items-center gap-2 py-1 w-full text-left"
+      className="flex w-full items-center gap-2 py-1 text-left"
     >
       <div
         className={cn([
-          "size-4 rounded shrink-0 flex items-center justify-center border",
+          "flex size-4 shrink-0 items-center justify-center rounded border",
           "transition-colors duration-100",
         ])}
         style={
@@ -144,7 +144,7 @@ function CalendarToggleRow({
       >
         {enabled && <CheckIcon className="size-3 text-white" strokeWidth={3} />}
       </div>
-      <span className="text-sm truncate">{calendar.title}</span>
+      <span className="truncate text-sm">{calendar.title}</span>
     </button>
   );
 }

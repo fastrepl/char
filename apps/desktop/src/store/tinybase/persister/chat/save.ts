@@ -1,4 +1,7 @@
 import { sep } from "@tauri-apps/api/path";
+
+import type { ChatGroupData, ChatJson, ChatMessageWithId } from "./types";
+
 import {
   buildChatPath,
   CHAT_MESSAGES_FILE,
@@ -6,8 +9,6 @@ import {
   type TablesContent,
   type WriteOperation,
 } from "~/store/tinybase/persister/shared";
-
-import type { ChatGroupData, ChatJson, ChatMessageWithId } from "./types";
 
 export function tablesToChatJsonList(tables: TablesContent): ChatJson[] {
   const chatGroups = iterateTableRows(tables, "chat_groups");

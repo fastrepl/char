@@ -7,7 +7,6 @@ import {
   RefreshCcw,
 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
-import { useModelMetadata } from "~/ai/hooks";
 
 import { Button } from "@hypr/ui/components/ui/button";
 import {
@@ -31,6 +30,8 @@ import {
 import { cn } from "@hypr/utils";
 
 import type { ListModelsResult, ModelIgnoreReason } from "./list-common";
+
+import { useModelMetadata } from "~/ai/hooks";
 
 const filterFunction = (value: string, search: string) => {
   const v = value.toLocaleLowerCase();
@@ -145,11 +146,11 @@ export function ModelCombobox({
           disabled={disabled || isLoadingModels}
           aria-expanded={open}
           className={cn([
-            "w-full justify-between font-normal bg-white shadow-none focus-visible:ring-0",
+            "w-full justify-between bg-white font-normal shadow-none focus-visible:ring-0",
             "rounded-md px-3",
           ])}
         >
-          <span className="flex items-center justify-between gap-2 w-full min-w-0">
+          <span className="flex w-full min-w-0 items-center justify-between gap-2">
             {value && value.length > 0 ? (
               <span className="truncate">
                 {getDisplayName(providerId, value)}
@@ -184,7 +185,7 @@ export function ModelCombobox({
             }}
           />
           <CommandEmpty>
-            <div className="py-1.5 px-2 text-sm text-muted-foreground">
+            <div className="text-muted-foreground px-2 py-1.5 text-sm">
               {trimmedQuery.length > 0 ? (
                 <p>No results found.</p>
               ) : hasIgnoredOptions ? (
@@ -213,7 +214,7 @@ export function ModelCombobox({
                   }}
                   className={cn([
                     "cursor-pointer",
-                    "focus:bg-neutral-200! hover:bg-neutral-200! aria-selected:bg-transparent",
+                    "hover:bg-neutral-200! focus:bg-neutral-200! aria-selected:bg-transparent",
                   ])}
                 >
                   <span className="truncate">
@@ -239,12 +240,12 @@ export function ModelCombobox({
                     }}
                     className={cn([
                       "cursor-pointer opacity-50",
-                      "focus:bg-neutral-200! hover:bg-neutral-200! aria-selected:bg-transparent",
+                      "hover:bg-neutral-200! focus:bg-neutral-200! aria-selected:bg-transparent",
                     ])}
                   >
                     <Tooltip delayDuration={10}>
                       <TooltipTrigger asChild>
-                        <span className="truncate w-full">{option.id}</span>
+                        <span className="w-full truncate">{option.id}</span>
                       </TooltipTrigger>
                       <TooltipContent side="right" className="text-xs">
                         <div className="flex flex-col gap-0.5">
@@ -275,7 +276,7 @@ export function ModelCombobox({
                   }}
                   className={cn([
                     "cursor-pointer",
-                    "focus:bg-neutral-200! hover:bg-neutral-200! aria-selected:bg-transparent",
+                    "hover:bg-neutral-200! focus:bg-neutral-200! aria-selected:bg-transparent",
                   ])}
                 >
                   <CirclePlus className="mr-2 h-4 w-4" />
@@ -285,11 +286,11 @@ export function ModelCombobox({
             </CommandGroup>
           </CommandList>
 
-          <div className="px-2 py-1.5 text-xs text-muted-foreground border-t flex items-center justify-between">
+          <div className="text-muted-foreground flex items-center justify-between border-t px-2 py-1.5 text-xs">
             <button
               type="button"
               onClick={toggleShowIgnored}
-              className="flex items-center gap-1 text-xs hover:text-foreground transition-colors mr-1"
+              className="hover:text-foreground mr-1 flex items-center gap-1 text-xs transition-colors"
             >
               {showIgnored ? (
                 <EyeOff className="h-3 w-3" />
@@ -310,7 +311,7 @@ export function ModelCombobox({
               type="button"
               onClick={() => refetch()}
               disabled={isFetching}
-              className="flex items-center gap-1 text-xs hover:text-foreground transition-colors disabled:opacity-50 ml-auto"
+              className="hover:text-foreground ml-auto flex items-center gap-1 text-xs transition-colors disabled:opacity-50"
             >
               <RefreshCcw
                 className={cn(["h-3 w-3", isFetching && "animate-spin"])}

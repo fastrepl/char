@@ -1,7 +1,8 @@
 import { faker } from "@faker-js/faker/locale/en";
-import { DEFAULT_USER_ID, id } from "~/shared/utils";
 
 import type { TemplateSection, TemplateStorage } from "@hypr/store";
+
+import { DEFAULT_USER_ID, id } from "~/shared/utils";
 
 export const createTemplate = (): { id: string; data: TemplateStorage } => {
   const sectionCount = faker.number.int({ min: 2, max: 5 });

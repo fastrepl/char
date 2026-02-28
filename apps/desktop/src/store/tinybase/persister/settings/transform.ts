@@ -1,4 +1,5 @@
 import type { Content } from "tinybase/with-schemas";
+
 import type { Schemas, Store } from "~/store/tinybase/store/settings";
 import { SETTINGS_MAPPING } from "~/store/tinybase/store/settings";
 

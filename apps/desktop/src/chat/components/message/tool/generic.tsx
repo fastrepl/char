@@ -1,6 +1,4 @@
 import { WrenchIcon } from "lucide-react";
-import { Disclosure } from "~/chat/components/message/shared";
-import { extractMcpOutputText } from "~/chat/mcp-utils";
 
 import {
   ToolCard,
@@ -10,6 +8,9 @@ import {
   useToolApproval,
   useToolState,
 } from "./shared";
+
+import { Disclosure } from "~/chat/components/message/shared";
+import { extractMcpOutputText } from "~/chat/mcp-utils";
 
 function formatToolName(name: string): string {
   return name.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
@@ -71,7 +72,7 @@ export function ToolGeneric({ part }: { part: Record<string, unknown> }) {
 
     return (
       <Disclosure
-        icon={<WrenchIcon className="w-3 h-3" />}
+        icon={<WrenchIcon className="h-3 w-3" />}
         title={
           failed
             ? `${formatToolName(toolName)} failed`
@@ -86,7 +87,7 @@ export function ToolGeneric({ part }: { part: Record<string, unknown> }) {
             </p>
           ) : null}
           {outputText ? (
-            <p className="text-xs text-neutral-600 whitespace-pre-wrap">
+            <p className="text-xs whitespace-pre-wrap text-neutral-600">
               {outputText}
             </p>
           ) : null}
@@ -97,7 +98,7 @@ export function ToolGeneric({ part }: { part: Record<string, unknown> }) {
 
   return (
     <Disclosure
-      icon={<WrenchIcon className="w-3 h-3" />}
+      icon={<WrenchIcon className="h-3 w-3" />}
       title={`Running ${formatToolName(toolName)}…`}
       disabled
     >
@@ -112,11 +113,11 @@ function InputDisplay({ input }: { input: unknown }) {
   if (entries.length === 0) return null;
 
   return (
-    <dl className="text-xs text-neutral-500 flex flex-col gap-1">
+    <dl className="flex flex-col gap-1 text-xs text-neutral-500">
       {entries.map(([key, value]) => (
         <div key={key}>
-          <dt className="font-medium text-neutral-600 inline">{key}: </dt>
-          <dd className="inline whitespace-pre-wrap wrap-break-word">
+          <dt className="inline font-medium text-neutral-600">{key}: </dt>
+          <dd className="inline wrap-break-word whitespace-pre-wrap">
             {typeof value === "string" ? value : JSON.stringify(value)}
           </dd>
         </div>

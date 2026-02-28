@@ -1,11 +1,12 @@
 import { Resizable } from "re-resizable";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { useShell } from "~/contexts/shell";
 
 import { cn } from "@hypr/utils";
 
 import { ChatView } from "./view";
+
+import { useShell } from "~/contexts/shell";
 
 export function PersistentChatPanel({
   panelContainerRef,
@@ -137,9 +138,9 @@ export function PersistentChatPanel({
         minHeight={isFloating ? 400 : undefined}
         bounds={isFloating ? "window" : undefined}
         className={cn([
-          "flex flex-col pointer-events-auto",
+          "pointer-events-auto flex flex-col",
           isFloating && [
-            "bg-white rounded-b-2xl rounded-t-xl shadow-2xl",
+            "rounded-t-xl rounded-b-2xl bg-white shadow-2xl",
             "border border-neutral-200",
             !isResizing && "transition-all duration-200",
           ],

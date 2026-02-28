@@ -15,11 +15,11 @@ export const Route = createFileRoute("/_view/docs")({
 function Component() {
   return (
     <div
-      className="bg-linear-to-b from-white via-stone-50/20 to-white min-h-[calc(100vh-4rem)]"
+      className="min-h-[calc(100vh-4rem)] bg-linear-to-b from-white via-stone-50/20 to-white"
       style={{ backgroundImage: "url(/patterns/dots.svg)" }}
     >
       <LeftSidebar />
-      <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
+      <div className="mx-auto max-w-6xl border-x border-neutral-100 bg-white">
         <Outlet />
       </div>
     </div>
@@ -81,17 +81,17 @@ function LeftSidebar() {
 
   return (
     <motion.div
-      className="fixed left-0 top-1/2 -translate-y-1/2 z-30 hidden md:flex h-[80vh] drop-shadow-lg"
+      className="fixed top-1/2 left-0 z-30 hidden h-[80vh] -translate-y-1/2 drop-shadow-lg md:flex"
       initial={false}
       animate={{ x: isOpen ? 0 : -256 }}
       transition={{ type: "spring", stiffness: 400, damping: 35 }}
       onMouseEnter={open}
       onMouseLeave={close}
     >
-      <div className="w-64 h-full bg-white/95 backdrop-blur-sm border border-l-0 border-neutral-200 rounded-r-2xl overflow-hidden">
+      <div className="h-full w-64 overflow-hidden rounded-r-2xl border border-l-0 border-neutral-200 bg-white/95 backdrop-blur-sm">
         <div
           ref={scrollContainerRef}
-          className="h-full overflow-y-auto scrollbar-hide px-4 py-6"
+          className="scrollbar-hide h-full overflow-y-auto px-4 py-6"
         >
           <SidebarNavigation
             sections={sections}
@@ -105,15 +105,15 @@ function LeftSidebar() {
         </div>
       </div>
       <motion.div
-        className="self-center -ml-px"
+        className="-ml-px self-center"
         animate={{ opacity: isOpen ? 0 : 1 }}
         transition={{ duration: 0.2 }}
       >
         <div
           className={cn([
             "flex items-center justify-center",
-            "w-7 h-20 rounded-r-xl",
-            "bg-white/95 backdrop-blur-sm border border-l-0 border-neutral-200",
+            "h-20 w-7 rounded-r-xl",
+            "border border-l-0 border-neutral-200 bg-white/95 backdrop-blur-sm",
             "text-neutral-400 hover:text-neutral-600",
             "cursor-pointer transition-colors",
           ])}

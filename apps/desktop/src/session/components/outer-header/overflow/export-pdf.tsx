@@ -2,16 +2,6 @@ import { useMutation } from "@tanstack/react-query";
 import { downloadDir, join } from "@tauri-apps/api/path";
 import { FileTextIcon, Loader2Icon } from "lucide-react";
 import { useMemo } from "react";
-import { useSessionEvent } from "~/store/tinybase/hooks";
-import * as main from "~/store/tinybase/store/main";
-import type { EditorView } from "~/store/zustand/tabs/schema";
-import { buildSegments, SegmentKey } from "~/stt/segment";
-import {
-  defaultRenderLabelContext,
-  SpeakerLabelManager,
-} from "~/stt/segment/shared";
-import { convertStorageHintsToRuntime } from "~/stt/speaker-hints";
-import { parseTranscriptHints, parseTranscriptWords } from "~/stt/utils";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
@@ -22,6 +12,17 @@ import {
 } from "@hypr/plugin-pdf";
 import { json2md } from "@hypr/tiptap/shared";
 import { DropdownMenuItem } from "@hypr/ui/components/ui/dropdown-menu";
+
+import { useSessionEvent } from "~/store/tinybase/hooks";
+import * as main from "~/store/tinybase/store/main";
+import type { EditorView } from "~/store/zustand/tabs/schema";
+import { buildSegments, SegmentKey } from "~/stt/segment";
+import {
+  defaultRenderLabelContext,
+  SpeakerLabelManager,
+} from "~/stt/segment/shared";
+import { convertStorageHintsToRuntime } from "~/stt/speaker-hints";
+import { parseTranscriptHints, parseTranscriptWords } from "~/stt/utils";
 
 function formatDate(isoString: string): string {
   const date = new Date(isoString);

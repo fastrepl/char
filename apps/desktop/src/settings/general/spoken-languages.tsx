@@ -102,14 +102,14 @@ export function SpokenLanguagesView({
 
   return (
     <div>
-      <h3 className="text-sm font-medium mb-1">Spoken languages</h3>
-      <p className="text-xs text-neutral-600 mb-3">
+      <h3 className="mb-1 text-sm font-medium">Spoken languages</h3>
+      <p className="mb-3 text-xs text-neutral-600">
         Add other languages you use other than the main language
       </p>
       <div className="relative">
         <div
           className={cn([
-            "flex flex-wrap items-center w-full px-2 py-1.5 gap-1.5 rounded-lg bg-white border border-neutral-200 focus-within:border-neutral-300 min-h-[38px]",
+            "flex min-h-[38px] w-full flex-wrap items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2 py-1.5 focus-within:border-neutral-300",
             languageInputFocused && "border-neutral-300",
           ])}
           onClick={() =>
@@ -120,14 +120,14 @@ export function SpokenLanguagesView({
             <Badge
               key={code}
               variant="secondary"
-              className="flex items-center gap-1 px-2 py-0.5 text-xs bg-muted"
+              className="bg-muted flex items-center gap-1 px-2 py-0.5 text-xs"
             >
               {getLanguageDisplayName(code)}
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-3 w-3 p-0 hover:bg-transparent ml-0.5"
+                className="ml-0.5 h-3 w-3 p-0 hover:bg-transparent"
                 onClick={(e) => {
                   e.stopPropagation();
                   onChange(value.filter((c) => c !== code));
@@ -138,7 +138,7 @@ export function SpokenLanguagesView({
             </Badge>
           ))}
           {value.length === 0 && (
-            <Search className="size-4 text-neutral-700 shrink-0" />
+            <Search className="size-4 shrink-0 text-neutral-700" />
           )}
           <input
             id="language-search-input"
@@ -162,7 +162,7 @@ export function SpokenLanguagesView({
             }
             aria-label="Add spoken language"
             placeholder={value.length === 0 ? "Add language" : ""}
-            className="flex-1 min-w-[120px] bg-transparent text-sm focus:outline-hidden placeholder:text-neutral-500"
+            className="min-w-[120px] flex-1 bg-transparent text-sm placeholder:text-neutral-500 focus:outline-hidden"
           />
         </div>
 
@@ -170,7 +170,7 @@ export function SpokenLanguagesView({
           <div
             id="language-options"
             role="listbox"
-            className="absolute top-full left-0 right-0 mt-1 flex flex-col w-full rounded-xs border border-neutral-200 overflow-hidden bg-white shadow-md z-10 max-h-60 overflow-y-auto"
+            className="absolute top-full right-0 left-0 z-10 mt-1 flex max-h-60 w-full flex-col overflow-hidden overflow-y-auto rounded-xs border border-neutral-200 bg-white shadow-md"
           >
             {filteredLanguages.length > 0 ? (
               filteredLanguages.map((langCode, index) => (
@@ -188,19 +188,19 @@ export function SpokenLanguagesView({
                   onMouseDown={(e) => e.preventDefault()}
                   onMouseEnter={() => setLanguageSelectedIndex(index)}
                   className={cn([
-                    "flex items-center justify-between px-3 py-2 text-sm text-left transition-colors w-full",
+                    "flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors",
                     languageSelectedIndex === index
                       ? "bg-neutral-200"
                       : "hover:bg-neutral-100",
                   ])}
                 >
-                  <span className="font-medium truncate">
+                  <span className="truncate font-medium">
                     {getLanguageDisplayName(langCode)}
                   </span>
                 </button>
               ))
             ) : (
-              <div className="px-3 py-2 text-sm text-neutral-500 text-center">
+              <div className="px-3 py-2 text-center text-sm text-neutral-500">
                 No matching languages found
               </div>
             )}

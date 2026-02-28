@@ -1,14 +1,15 @@
 import { createCustomPersister } from "tinybase/persisters/with-schemas";
 import type { Content } from "tinybase/with-schemas";
-import { createFileListener } from "~/store/tinybase/persister/shared/listener";
-import type { Schemas, Store } from "~/store/tinybase/store/settings";
-import { StoreOrMergeableStore } from "~/store/tinybase/store/shared";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as detectCommands } from "@hypr/plugin-detect";
 import { commands } from "@hypr/plugin-settings";
 
 import { settingsToContent, storeToSettings } from "./transform";
+
+import { createFileListener } from "~/store/tinybase/persister/shared/listener";
+import type { Schemas, Store } from "~/store/tinybase/store/settings";
+import { StoreOrMergeableStore } from "~/store/tinybase/store/shared";
 
 const SETTINGS_FILENAME = "settings.json";
 

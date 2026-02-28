@@ -1,7 +1,8 @@
 import { Building2Icon, FileTextIcon, UserIcon } from "lucide-react";
-import type { SearchResult } from "~/search/contexts/ui";
 
 import { cn } from "@hypr/utils";
+
+import type { SearchResult } from "~/search/contexts/ui";
 
 const TYPE_ICONS = {
   session: FileTextIcon,
@@ -23,23 +24,23 @@ export function ResultItem({ result, onClick, isSelected }: ResultItemProps) {
       data-result-id={result.id}
       onClick={onClick}
       className={cn([
-        "w-full flex items-start gap-3 p-3",
+        "flex w-full items-start gap-3 p-3",
         "rounded-lg text-left",
-        "hover:bg-neutral-100 transition-colors",
+        "transition-colors hover:bg-neutral-100",
         isSelected && "bg-neutral-100",
       ])}
     >
       <div className="mt-0.5 shrink-0">
         <Icon className="h-4 w-4 text-neutral-400" />
       </div>
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <div
-          className="font-medium text-neutral-900 truncate"
+          className="truncate font-medium text-neutral-900"
           dangerouslySetInnerHTML={{ __html: result.titleHighlighted }}
         />
         {result.content && (
           <div
-            className="text-sm text-neutral-500 truncate mt-0.5"
+            className="mt-0.5 truncate text-sm text-neutral-500"
             dangerouslySetInnerHTML={{ __html: result.contentHighlighted }}
           />
         )}

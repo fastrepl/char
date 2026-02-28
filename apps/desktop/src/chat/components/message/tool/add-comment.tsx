@@ -1,6 +1,4 @@
 import { MessageSquareIcon } from "lucide-react";
-import type { ToolRenderer } from "~/chat/components/message/types";
-import { parseAddCommentOutput } from "~/chat/support-mcp-tools";
 
 import {
   MarkdownPreview,
@@ -14,6 +12,9 @@ import {
   useToolApproval,
   useToolState,
 } from "./shared";
+
+import type { ToolRenderer } from "~/chat/components/message/types";
+import { parseAddCommentOutput } from "~/chat/support-mcp-tools";
 
 type Renderer = ToolRenderer<"tool-add_comment">;
 

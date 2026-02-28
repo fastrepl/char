@@ -1,7 +1,8 @@
 import { describe, expect, test, vi } from "vitest";
-import { createTestMainStore } from "~/store/tinybase/persister/testing/mocks";
 
 import { buildSessionSaveOps, tablesToSessionMetaMap } from "./session";
+
+import { createTestMainStore } from "~/store/tinybase/persister/testing/mocks";
 
 vi.mock("@tauri-apps/api/path", () => ({
   sep: () => "/",

@@ -8,7 +8,7 @@ export type PluginManifestEntry = {
 export type PluginContext = {
   registerView: (viewId: string, factory: () => React.ReactNode) => void;
   openTab: (
-    pluginId?: string,
+    extensionId?: string,
     state?: Partial<Record<string, string | number | boolean | null>>,
   ) => void;
 };

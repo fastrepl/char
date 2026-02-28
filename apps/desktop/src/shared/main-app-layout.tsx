@@ -1,6 +1,11 @@
 import { Outlet, useNavigate } from "@tanstack/react-router";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { useEffect } from "react";
+
+import { events as windowsEvents } from "@hypr/plugin-windows";
+
+import { useNewNote } from "./main/useNewNote";
+
 import { AuthProvider } from "~/auth";
 import { BillingProvider } from "~/auth/billing";
 import { NetworkProvider } from "~/contexts/network";
@@ -9,10 +14,6 @@ import {
   UndoDeleteToast,
 } from "~/sidebar/toast/undo-delete-toast";
 import { useTabs } from "~/store/zustand/tabs";
-
-import { events as windowsEvents } from "@hypr/plugin-windows";
-
-import { useNewNote } from "./main/useNewNote";
 
 export default function MainAppLayout() {
   useNavigationEvents();

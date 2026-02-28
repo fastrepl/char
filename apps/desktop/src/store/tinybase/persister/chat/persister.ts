@@ -1,7 +1,3 @@
-import { createMultiTableDirPersister } from "~/store/tinybase/persister/factories";
-import { CHAT_MESSAGES_FILE } from "~/store/tinybase/persister/shared";
-import type { Store } from "~/store/tinybase/store/main";
-
 import type { Schemas } from "@hypr/store";
 
 import { getChangedChatGroupIds, parseChatGroupIdFromPath } from "./changes";
@@ -11,6 +7,10 @@ import {
   loadSingleChatGroup,
 } from "./load";
 import { buildChatSaveOps } from "./save";
+
+import { createMultiTableDirPersister } from "~/store/tinybase/persister/factories";
+import { CHAT_MESSAGES_FILE } from "~/store/tinybase/persister/shared";
+import type { Store } from "~/store/tinybase/store/main";
 
 export function createChatPersister(store: Store) {
   return createMultiTableDirPersister<Schemas, LoadedChatData>(store, {

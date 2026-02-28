@@ -1,6 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchEngine } from "~/search/contexts/engine";
-import * as main from "~/store/tinybase/store/main";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import type {
@@ -9,6 +7,9 @@ import type {
   TiptapEditor,
 } from "@hypr/tiptap/chat";
 import { EMPTY_TIPTAP_DOC } from "@hypr/tiptap/shared";
+
+import { useSearchEngine } from "~/search/contexts/engine";
+import * as main from "~/store/tinybase/store/main";
 
 const draftsByKey = new Map<string, JSONContent>();
 

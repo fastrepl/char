@@ -1,4 +1,5 @@
 import { MessageCircle } from "lucide-react";
+
 import { useShell } from "~/contexts/shell";
 import { type TabItem, TabItemBase } from "~/shared/tabs";
 import type { Tab } from "~/store/zustand/tabs";
@@ -16,7 +17,7 @@ export const TabItemChat: TabItem<Extract<Tab, { type: "chat_support" }>> = ({
   const { chat } = useShell();
   return (
     <TabItemBase
-      icon={<MessageCircle className="w-4 h-4" />}
+      icon={<MessageCircle className="h-4 w-4" />}
       title="Chat (Support)"
       selected={tab.active}
       pinned={tab.pinned}

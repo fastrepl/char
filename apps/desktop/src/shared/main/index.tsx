@@ -11,6 +11,20 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useResizeObserver } from "usehooks-ts";
 import { useShallow } from "zustand/shallow";
+
+import { commands as flagCommands } from "@hypr/plugin-flag";
+import { Button } from "@hypr/ui/components/ui/button";
+import { Kbd } from "@hypr/ui/components/ui/kbd";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@hypr/ui/components/ui/tooltip";
+import { cn } from "@hypr/utils";
+
+import { TabContentEmpty, TabItemEmpty } from "./empty";
+import { useNewNote, useNewNoteAndListen } from "./useNewNote";
+
 import { TabContentAI, TabItemAI } from "~/ai";
 import { TabContentCalendar, TabItemCalendar } from "~/calendar";
 import { TabContentChat, TabItemChat } from "~/chat";
@@ -38,19 +52,6 @@ import { type Tab, uniqueIdfromTab, useTabs } from "~/store/zustand/tabs";
 import { useListener } from "~/stt/contexts";
 import { TabContentTemplate, TabItemTemplate } from "~/templates";
 
-import { commands as flagCommands } from "@hypr/plugin-flag";
-import { Button } from "@hypr/ui/components/ui/button";
-import { Kbd } from "@hypr/ui/components/ui/kbd";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@hypr/ui/components/ui/tooltip";
-import { cn } from "@hypr/utils";
-
-import { TabContentEmpty, TabItemEmpty } from "./empty";
-import { useNewNote, useNewNoteAndListen } from "./useNewNote";
-
 export function Body() {
   const { tabs, currentTab } = useTabs(
     useShallow((state) => ({
@@ -68,7 +69,7 @@ export function Body() {
   }
 
   return (
-    <div className="flex flex-col gap-1 h-full flex-1 relative">
+    <div className="relative flex h-full flex-1 flex-col gap-1">
       <Header tabs={tabs} />
       <div className="flex-1 overflow-auto">
         <ContentWrapper key={uniqueIdfromTab(currentTab)} tab={currentTab} />
@@ -162,7 +163,7 @@ function Header({ tabs }: { tabs: Tab[] }) {
     <div
       data-tauri-drag-region
       className={cn([
-        "w-full h-9 flex items-center",
+        "flex h-9 w-full items-center",
         isSidebarHidden && (isLinux ? "pl-3" : "pl-20"),
       ])}
     >
@@ -190,7 +191,7 @@ function Header({ tabs }: { tabs: Tab[] }) {
       )}
 
       {!isOnboarding && (
-        <div className="flex items-center h-full shrink-0">
+        <div className="flex h-full shrink-0 items-center">
           <Button
             onClick={goBack}
             disabled={!canGoBack}
@@ -211,7 +212,7 @@ function Header({ tabs }: { tabs: Tab[] }) {
       )}
 
       {listeningTab && (
-        <div className="flex items-center h-full shrink-0 mr-1">
+        <div className="mr-1 flex h-full shrink-0 items-center">
           <TabItem
             tab={listeningTab}
             handleClose={close}
@@ -232,8 +233,8 @@ function Header({ tabs }: { tabs: Tab[] }) {
           ref={tabsScrollContainerRef}
           data-tauri-drag-region
           className={cn([
-            "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]",
-            "w-full overflow-x-auto overflow-y-hidden h-full",
+            "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+            "h-full w-full overflow-x-auto overflow-y-hidden",
           ])}
         >
           <Reorder.Group
@@ -242,7 +243,7 @@ function Header({ tabs }: { tabs: Tab[] }) {
             axis="x"
             values={regularTabs}
             onReorder={reorder}
-            className="flex w-max gap-1 h-full"
+            className="flex h-full w-max gap-1"
           >
             {regularTabs.map((tab, index) => {
               const isLastTab = index === regularTabs.length - 1;
@@ -265,7 +266,7 @@ function Header({ tabs }: { tabs: Tab[] }) {
                   as="div"
                   ref={(el) => setTabRef(tab, el)}
                   style={{ position: "relative" }}
-                  className="h-full z-10"
+                  className="z-10 h-full"
                   transition={{ layout: { duration: 0.15 } }}
                 >
                   <TabItem
@@ -288,16 +289,16 @@ function Header({ tabs }: { tabs: Tab[] }) {
           </Reorder.Group>
         </div>
         {!scrollState.atStart && (
-          <div className="absolute left-0 top-0 h-full w-8 z-20 pointer-events-none bg-linear-to-r from-white to-transparent" />
+          <div className="pointer-events-none absolute top-0 left-0 z-20 h-full w-8 bg-linear-to-r from-white to-transparent" />
         )}
         {!scrollState.atEnd && (
-          <div className="absolute right-0 top-0 h-full w-8 z-20 pointer-events-none bg-linear-to-l from-white to-transparent" />
+          <div className="pointer-events-none absolute top-0 right-0 z-20 h-full w-8 bg-linear-to-l from-white to-transparent" />
         )}
       </div>
 
       <div
         data-tauri-drag-region
-        className="flex-1 flex h-full items-center justify-between"
+        className="flex h-full flex-1 items-center justify-between"
       >
         {!isSearchManuallyExpanded && (
           <Button
@@ -308,14 +309,14 @@ function Header({ tabs }: { tabs: Tab[] }) {
             size="icon"
             className={cn([
               "text-neutral-600",
-              isOnboarding && "opacity-40 cursor-not-allowed",
+              isOnboarding && "cursor-not-allowed opacity-40",
             ])}
           >
             <PlusIcon size={16} />
           </Button>
         )}
 
-        <div className="flex items-center gap-1 h-full ml-auto">
+        <div className="ml-auto flex h-full items-center gap-1">
           <Update />
           {!isOnboarding && (
             <Search onManualExpandChange={setIsSearchManuallyExpanded} />
@@ -440,7 +441,7 @@ function TabItem({
       />
     );
   }
-  if (tab.type === "plugin") {
+  if (tab.type === "extension") {
     return (
       <TabItemPlugin
         tab={tab}
@@ -589,7 +590,7 @@ function ContentWrapper({ tab }: { tab: Tab }) {
   if (tab.type === "calendar") {
     return <TabContentCalendar />;
   }
-  if (tab.type === "plugin") {
+  if (tab.type === "extension") {
     return <TabContentPlugin tab={tab} />;
   }
   if (tab.type === "changelog") {
@@ -678,8 +679,8 @@ export function StandardTabWrapper({
   showTimeline?: boolean;
 }) {
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex flex-col rounded-xl border border-neutral-200 flex-1 overflow-hidden relative">
+    <div className="flex h-full flex-col">
+      <div className="relative flex flex-1 flex-col overflow-hidden rounded-xl border border-neutral-200">
         {children}
         {floatingButton}
         <StandardTabChatButton showTimeline={showTimeline} />

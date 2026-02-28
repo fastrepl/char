@@ -15,17 +15,17 @@ export const Route = createFileRoute("/_view/download/")({
 function Component() {
   return (
     <div
-      className="bg-linear-to-b from-white via-blue-50/20 to-white min-h-screen"
+      className="min-h-screen bg-linear-to-b from-white via-blue-50/20 to-white"
       style={{ backgroundImage: "url(/patterns/dots.svg)" }}
     >
-      <div className="max-w-6xl mx-auto bg-white border-x border-neutral-100">
+      <div className="mx-auto max-w-6xl border-x border-neutral-100 bg-white">
         <div
           className={cn([
             "flex items-center justify-center gap-2 text-center",
-            "bg-stone-50/70 border-b border-stone-100",
-            "py-3 px-4",
+            "border-b border-stone-100 bg-stone-50/70",
+            "px-4 py-3",
             "font-serif text-sm text-stone-700",
-            "hover:bg-stone-50 transition-all",
+            "transition-all hover:bg-stone-50",
           ])}
         >
           <span>
@@ -35,21 +35,21 @@ function Component() {
         </div>
 
         <div className="py-12">
-          <section className="py-16 px-4 sm:px-6">
-            <div className="flex flex-col gap-6 max-w-2xl mx-auto text-center mb-16">
-              <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700">
+          <section className="px-4 py-16 sm:px-6">
+            <div className="mx-auto mb-16 flex max-w-2xl flex-col gap-6 text-center">
+              <h1 className="font-serif text-4xl tracking-tight text-stone-700 sm:text-5xl">
                 Download Char
               </h1>
-              <p className="text-lg sm:text-xl text-neutral-600">
+              <p className="text-lg text-neutral-600 sm:text-xl">
                 Choose your platform to get started with Char
               </p>
             </div>
 
             <div className="mb-16">
-              <h2 className="text-2xl font-serif tracking-tight mb-6 text-center">
+              <h2 className="mb-6 text-center font-serif text-2xl tracking-tight">
                 macOS
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+              <div className="mx-auto grid max-w-2xl grid-cols-1 gap-6 md:grid-cols-2">
                 <DownloadCard
                   iconName="simple-icons:apple"
                   spec="macOS 14.2+ (Apple Silicon)"
@@ -104,22 +104,22 @@ function DownloadCard({
   return (
     <div
       className={cn([
-        "flex flex-col items-center p-6 rounded-xs border transition-all duration-200",
+        "flex flex-col items-center rounded-xs border p-6 transition-all duration-200",
         isNightly
-          ? ["bg-blue-50/50 border-blue-200"]
-          : ["bg-white border-neutral-100 hover:bg-stone-50"],
+          ? ["border-blue-200 bg-blue-50/50"]
+          : ["border-neutral-100 bg-white hover:bg-stone-50"],
       ])}
     >
-      <Icon icon={iconName} className="text-5xl text-neutral-700 mb-4" />
-      <p className="text-sm text-neutral-600 mb-6 text-center">{spec}</p>
+      <Icon icon={iconName} className="mb-4 text-5xl text-neutral-700" />
+      <p className="mb-6 text-center text-sm text-neutral-600">{spec}</p>
 
-      <div className="relative w-full group/tooltip">
+      <div className="group/tooltip relative w-full">
         <a
           href={isNightly ? nightlyDownloadUrl : downloadUrl}
           download
           onClick={handleClick}
           className={cn([
-            "group gap-2 w-full px-4 h-11 flex items-center justify-center rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%] transition-all text-base font-medium",
+            "group flex h-11 w-full items-center justify-center gap-2 rounded-full px-4 text-base font-medium shadow-md transition-all hover:scale-[102%] hover:shadow-lg active:scale-[98%]",
             isNightly
               ? ["bg-linear-to-b from-[#03BCF1] to-[#127FE5] text-white"]
               : ["bg-linear-to-t from-stone-600 to-stone-500 text-white"],
@@ -128,14 +128,14 @@ function DownloadCard({
           {isNightly ? "Download Nightly" : "Download"}
           <Icon
             icon="ph:arrow-circle-right"
-            className="text-xl group-hover:translate-x-1 transition-transform"
+            className="text-xl transition-transform group-hover:translate-x-1"
           />
         </a>
       </div>
 
       <button
         onClick={() => setIsNightly(!isNightly)}
-        className="mt-3 text-xs text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer"
+        className="mt-3 cursor-pointer text-xs text-neutral-400 transition-colors hover:text-neutral-600"
       >
         {isNightly
           ? "It might be less stable though."
@@ -170,9 +170,9 @@ function FAQSection() {
   ];
 
   return (
-    <section className="py-16 px-4 laptop:px-0">
-      <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-700 mb-16 text-center">
+    <section className="laptop:px-0 px-4 py-16">
+      <div className="mx-auto max-w-3xl">
+        <h2 className="mb-16 text-center font-serif text-3xl text-stone-700">
           Frequently Asked Questions
         </h2>
         <div className="flex flex-col gap-6">
@@ -181,7 +181,7 @@ function FAQSection() {
               key={idx}
               className="border-b border-neutral-100 pb-6 last:border-b-0"
             >
-              <h3 className="text-lg font-medium text-neutral-900 mb-2">
+              <h3 className="mb-2 text-lg font-medium text-neutral-900">
                 {faq.question}
               </h3>
               <p className="text-neutral-600">{faq.answer}</p>
@@ -195,28 +195,28 @@ function FAQSection() {
 
 function CTASection() {
   return (
-    <section className="py-16 bg-linear-to-t from-stone-50/30 to-stone-100/30 px-4 laptop:px-0">
-      <div className="flex flex-col gap-6 items-center text-center">
-        <div className="mb-4 size-40 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[48px] bg-transparent">
+    <section className="laptop:px-0 bg-linear-to-t from-stone-50/30 to-stone-100/30 px-4 py-16">
+      <div className="flex flex-col items-center gap-6 text-center">
+        <div className="mb-4 flex size-40 items-center justify-center rounded-[48px] border border-neutral-100 bg-transparent shadow-2xl">
           <Image
             src="/api/images/hyprnote/icon.png"
             alt="Char"
             width={144}
             height={144}
-            className="size-36 mx-auto rounded-[40px] border border-neutral-100"
+            className="mx-auto size-36 rounded-[40px] border border-neutral-100"
           />
         </div>
-        <h2 className="text-2xl sm:text-3xl font-serif">
+        <h2 className="font-serif text-2xl sm:text-3xl">
           Need something else?
         </h2>
-        <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
+        <p className="mx-auto max-w-2xl text-lg text-neutral-600">
           Book a call to discuss custom solutions for your specific needs
         </p>
         <div className="pt-6">
           <Link
             to="/founders/"
             search={{ source: "download" }}
-            className="px-6 h-12 flex items-center justify-center text-base sm:text-lg bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%] transition-all"
+            className="flex h-12 items-center justify-center rounded-full bg-linear-to-t from-stone-600 to-stone-500 px-6 text-base text-white shadow-md transition-all hover:scale-[102%] hover:shadow-lg active:scale-[98%] sm:text-lg"
           >
             Book a call
           </Link>

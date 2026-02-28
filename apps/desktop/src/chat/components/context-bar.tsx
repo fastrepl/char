@@ -1,8 +1,5 @@
 import { ChevronUpIcon, PlusIcon, XIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { ContextEntity, ContextRef } from "~/chat/context-item";
-import { type ContextChipProps, renderChip } from "~/chat/context/registry";
-import { useSearchEngine } from "~/search/contexts/engine";
 
 import {
   Popover,
@@ -15,6 +12,10 @@ import {
   TooltipTrigger,
 } from "@hypr/ui/components/ui/tooltip";
 import { cn } from "@hypr/utils";
+
+import type { ContextEntity, ContextRef } from "~/chat/context-item";
+import { type ContextChipProps, renderChip } from "~/chat/context/registry";
+import { useSearchEngine } from "~/search/contexts/engine";
 
 function ContextChip({
   chip,
@@ -30,7 +31,7 @@ function ContextChip({
       <TooltipTrigger asChild>
         <span
           className={cn([
-            "group max-w-48 rounded-md bg-neutral-500/10 px-1.5 py-0.5 text-xs text-neutral-600 cursor-default",
+            "group max-w-48 cursor-default rounded-md bg-neutral-500/10 px-1.5 py-0.5 text-xs text-neutral-600",
             "inline-flex items-center gap-1",
           ])}
         >
@@ -43,7 +44,7 @@ function ContextChip({
                 e.stopPropagation();
                 onRemove(chip.key);
               }}
-              className="hidden group-hover:inline-flex items-center justify-center rounded-sm hover:bg-neutral-500/20 ml-0.5"
+              className="ml-0.5 hidden items-center justify-center rounded-sm group-hover:inline-flex hover:bg-neutral-500/20"
             >
               <XIcon className="size-2.5" />
             </button>
@@ -95,7 +96,7 @@ function SessionPicker({
         placeholder="Search sessions..."
         className="w-full rounded-md border border-neutral-200 bg-white px-2.5 py-1.5 text-xs outline-none focus:border-neutral-400"
       />
-      <div className="flex flex-col gap-0.5 max-h-48 overflow-y-auto">
+      <div className="flex max-h-48 flex-col gap-0.5 overflow-y-auto">
         {results.map((result) => (
           <button
             key={result.id}
@@ -104,9 +105,9 @@ function SessionPicker({
               onSelect(result.id);
               onClose();
             }}
-            className="flex flex-col items-start rounded-md px-2 py-1.5 text-left hover:bg-neutral-100 transition-colors"
+            className="flex flex-col items-start rounded-md px-2 py-1.5 text-left transition-colors hover:bg-neutral-100"
           >
-            <span className="text-xs font-medium text-neutral-700 truncate w-full">
+            <span className="w-full truncate text-xs font-medium text-neutral-700">
               {result.title || "Untitled"}
             </span>
             <span className="text-[10px] text-neutral-400">
@@ -115,7 +116,7 @@ function SessionPicker({
           </button>
         ))}
         {results.length === 0 && (
-          <span className="text-xs text-neutral-400 px-2 py-1.5">
+          <span className="px-2 py-1.5 text-xs text-neutral-400">
             No sessions found
           </span>
         )}
@@ -215,9 +216,9 @@ export function ContextBar({
   };
 
   return (
-    <div className="relative mx-2 rounded-t-xl border-t border-l border-r border-neutral-200 bg-neutral-100">
+    <div className="relative mx-2 rounded-t-xl border-t border-r border-l border-neutral-200 bg-neutral-100">
       {expanded && (
-        <div className="absolute bottom-full left-0 right-0 rounded-t-lg bg-neutral-100 border-b border-neutral-200/60 max-h-40 overflow-y-auto px-2.5 py-2">
+        <div className="absolute right-0 bottom-full left-0 max-h-40 overflow-y-auto rounded-t-lg border-b border-neutral-200/60 bg-neutral-100 px-2.5 py-2">
           <div className="flex flex-wrap items-center gap-1.5">
             {chips.slice(visibleCount).map((chip) => (
               <ContextChip
@@ -231,7 +232,7 @@ export function ContextBar({
       )}
       <div
         ref={innerRef}
-        className="flex items-center gap-1.5 px-2.5 py-2 overflow-hidden"
+        className="flex items-center gap-1.5 overflow-hidden px-2.5 py-2"
       >
         {displayChips.map((chip) => (
           <ContextChip key={chip.key} chip={chip} onRemove={onRemoveEntity} />
@@ -241,7 +242,7 @@ export function ContextBar({
             type="button"
             onClick={() => setExpanded((v) => !v)}
             className={cn([
-              "shrink-0 inline-flex items-center justify-center rounded-md bg-neutral-500/10 px-1 py-0.5 text-xs text-neutral-400 hover:text-neutral-600 hover:bg-neutral-500/20 transition-colors",
+              "inline-flex shrink-0 items-center justify-center rounded-md bg-neutral-500/10 px-1 py-0.5 text-xs text-neutral-400 transition-colors hover:bg-neutral-500/20 hover:text-neutral-600",
             ])}
           >
             {expanded ? (
@@ -260,7 +261,7 @@ export function ContextBar({
               <button
                 type="button"
                 className={cn([
-                  "shrink-0 inline-flex items-center justify-center rounded-md bg-neutral-500/10 p-0.5 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-500/20 transition-colors",
+                  "inline-flex shrink-0 items-center justify-center rounded-md bg-neutral-500/10 p-0.5 text-neutral-400 transition-colors hover:bg-neutral-500/20 hover:text-neutral-600",
                 ])}
               >
                 <PlusIcon className="size-3.5" />

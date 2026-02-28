@@ -40,10 +40,10 @@ function Component() {
 
   return (
     <div
-      className="bg-linear-to-b from-white via-stone-50/20 to-white min-h-screen"
+      className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white"
       style={{ backgroundImage: "url(/patterns/dots.svg)" }}
     >
-      <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
+      <div className="mx-auto max-w-6xl border-x border-neutral-100 bg-white">
         <HeroSection />
         <SlashSeparator />
         <WhyWereDifferentSection />
@@ -64,15 +64,15 @@ function HeroSection() {
   return (
     <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
       <div className="px-6 py-16 lg:py-24">
-        <div className="text-center max-w-3xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif tracking-tight text-stone-700 mb-8">
+        <div className="mx-auto max-w-3xl text-center">
+          <h1 className="mb-8 font-serif text-4xl tracking-tight text-stone-700 sm:text-5xl lg:text-6xl">
             Why Char exists
           </h1>
-          <p className="text-lg sm:text-xl text-neutral-600 leading-relaxed mb-6">
+          <p className="mb-6 text-lg leading-relaxed text-neutral-600 sm:text-xl">
             Most AI note-takers lock your data in their database, force you to
             use their AI stack, and make you lose everything if you leave.
           </p>
-          <p className="text-lg sm:text-xl text-neutral-600 leading-relaxed font-medium">
+          <p className="text-lg leading-relaxed font-medium text-neutral-600 sm:text-xl">
             We thought that was bullshit.
           </p>
         </div>
@@ -114,24 +114,24 @@ const differentiators = [
 
 function WhyWereDifferentSection() {
   return (
-    <section className="px-6 py-16 lg:py-24 bg-stone-50/30">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl sm:text-4xl font-serif text-stone-700 mb-12 text-center">
+    <section className="bg-stone-50/30 px-6 py-16 lg:py-24">
+      <div className="mx-auto max-w-4xl">
+        <h2 className="mb-12 text-center font-serif text-3xl text-stone-700 sm:text-4xl">
           So we built Char to give you back control.
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {differentiators.slice(0, 3).map((item) => (
             <div
               key={item.title}
-              className="p-6 bg-white rounded-lg border border-neutral-100"
+              className="rounded-lg border border-neutral-100 bg-white p-6"
             >
               <div className="flex items-start gap-4">
-                <div className="p-2 bg-stone-100 rounded-lg shrink-0">
+                <div className="shrink-0 rounded-lg bg-stone-100 p-2">
                   <Icon icon={item.icon} className="text-2xl text-stone-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-stone-700 mb-1">
+                  <h3 className="mb-1 font-semibold text-stone-700">
                     {item.title}
                   </h3>
                   <p className="text-sm text-neutral-600">{item.description}</p>
@@ -141,18 +141,18 @@ function WhyWereDifferentSection() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 max-w-2xl mx-auto lg:max-w-none lg:flex lg:justify-center lg:gap-6">
+        <div className="mx-auto mt-6 grid max-w-2xl grid-cols-1 gap-6 md:grid-cols-2 lg:flex lg:max-w-none lg:justify-center lg:gap-6">
           {differentiators.slice(3).map((item) => (
             <div
               key={item.title}
-              className="p-6 bg-white rounded-lg border border-neutral-100 lg:w-[calc(33.333%-1rem)]"
+              className="rounded-lg border border-neutral-100 bg-white p-6 lg:w-[calc(33.333%-1rem)]"
             >
               <div className="flex items-start gap-4">
-                <div className="p-2 bg-stone-100 rounded-lg shrink-0">
+                <div className="shrink-0 rounded-lg bg-stone-100 p-2">
                   <Icon icon={item.icon} className="text-2xl text-stone-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-stone-700 mb-1">
+                  <h3 className="mb-1 font-semibold text-stone-700">
                     {item.title}
                   </h3>
                   <p className="text-sm text-neutral-600">{item.description}</p>
@@ -202,8 +202,8 @@ const audiences = [
 function WhoThisIsForSection() {
   return (
     <section className="px-6 py-16 lg:py-24">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl sm:text-4xl font-serif text-stone-700 mb-4 text-center">
+      <div className="mx-auto max-w-4xl">
+        <h2 className="mb-4 text-center font-serif text-3xl text-stone-700 sm:text-4xl">
           Char's for you, if
         </h2>
 
@@ -211,16 +211,16 @@ function WhoThisIsForSection() {
           {audiences.map((item) => (
             <div
               key={item.title}
-              className="flex gap-4 p-6 bg-stone-50/50 rounded-lg border border-neutral-100"
+              className="flex gap-4 rounded-lg border border-neutral-100 bg-stone-50/50 p-6"
             >
-              <div className="p-2 size-10 flex items-center justify-center bg-white rounded-lg shrink-0 h-fit border border-neutral-100">
+              <div className="flex size-10 h-fit shrink-0 items-center justify-center rounded-lg border border-neutral-100 bg-white p-2">
                 <Icon icon={item.icon} className="text-2xl text-stone-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-stone-700 mb-2">
+                <h3 className="mb-2 font-semibold text-stone-700">
                   {item.title}
                 </h3>
-                <p className="text-neutral-600 leading-relaxed">
+                <p className="leading-relaxed text-neutral-600">
                   {item.description}
                 </p>
               </div>
@@ -234,8 +234,8 @@ function WhoThisIsForSection() {
 
 function WhatWereBuildingTowardSection() {
   return (
-    <section className="py-16 px-4 laptop:px-0 bg-[linear-gradient(to_right,#f5f5f5_1px,transparent_1px),linear-gradient(to_bottom,#f5f5f5_1px,transparent_1px)] bg-size-[24px_24px] bg-position-[12px_12px,12px_12px]">
-      <div className="max-w-4xl mx-auto">
+    <section className="laptop:px-0 bg-[linear-gradient(to_right,#f5f5f5_1px,transparent_1px),linear-gradient(to_bottom,#f5f5f5_1px,transparent_1px)] bg-size-[24px_24px] bg-position-[12px_12px,12px_12px] px-4 py-16">
+      <div className="mx-auto max-w-4xl">
         <div
           className="border border-neutral-200 p-4"
           style={{
@@ -243,16 +243,16 @@ function WhatWereBuildingTowardSection() {
           }}
         >
           <div
-            className="bg-stone-50 border border-neutral-200 rounded-xs p-8 sm:p-12"
+            className="rounded-xs border border-neutral-200 bg-stone-50 p-8 sm:p-12"
             style={{
               backgroundImage: "url(/api/images/texture/paper.png)",
             }}
           >
-            <h2 className="text-2xl sm:text-3xl font-serif text-stone-700 mb-4">
+            <h2 className="mb-4 font-serif text-2xl text-stone-700 sm:text-3xl">
               What we're building toward
             </h2>
 
-            <div className="flex flex-col gap-4 text-neutral-700 leading-relaxed">
+            <div className="flex flex-col gap-4 leading-relaxed text-neutral-700">
               <p>
                 We're not betting on GPT-5 or Claude Opus 7 or whatever comes
                 next.
@@ -275,26 +275,26 @@ function WhatWereBuildingTowardSection() {
               </p>
             </div>
 
-            <div className="flex gap-2 mt-12 mb-4">
+            <div className="mt-12 mb-4 flex gap-2">
               <Image
                 src="/api/images/team/john.png"
                 alt="John Jeong"
                 width={32}
                 height={32}
-                className="rounded-full object-cover border border-neutral-200"
+                className="rounded-full border border-neutral-200 object-cover"
               />
               <Image
                 src="/api/images/team/yujong.png"
                 alt="Yujong Lee"
                 width={32}
                 height={32}
-                className="rounded-full object-cover border border-neutral-200"
+                className="rounded-full border border-neutral-200 object-cover"
               />
             </div>
 
             <div className="flex flex-col gap-4">
               <div>
-                <p className="text-base text-neutral-600 font-medium italic font-serif">
+                <p className="font-serif text-base font-medium text-neutral-600 italic">
                   Char
                 </p>
                 <p className="text-sm text-neutral-500">
@@ -309,7 +309,7 @@ function WhatWereBuildingTowardSection() {
                   width={124}
                   height={60}
                   layout="constrained"
-                  className="opacity-80 object-contain"
+                  className="object-contain opacity-80"
                 />
               </div>
             </div>
@@ -331,12 +331,12 @@ const commitments = [
 function HereForTheLongHaulSection() {
   return (
     <section className="px-6 py-16 lg:py-24">
-      <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl sm:text-4xl font-serif text-stone-700 mb-8 text-center">
+      <div className="mx-auto max-w-3xl">
+        <h2 className="mb-8 text-center font-serif text-3xl text-stone-700 sm:text-4xl">
           Here for the long haul
         </h2>
 
-        <div className="flex flex-col gap-6 text-neutral-700 leading-relaxed">
+        <div className="flex flex-col gap-6 leading-relaxed text-neutral-700">
           <p>
             This isn't a bait-and-switch. We're not looking to get acquired and
             cash out.
@@ -354,7 +354,7 @@ function HereForTheLongHaulSection() {
           <ul className="flex flex-col gap-3">
             {commitments.map((commitment) => (
               <li key={commitment} className="flex items-center gap-3">
-                <div className="p-1 size-6 flex items-center justify-center bg-stone-100 rounded-full shrink-0">
+                <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-stone-100 p-1">
                   <Icon icon="mdi:check" className="text-lg text-stone-600" />
                 </div>
                 <span>{commitment}</span>
@@ -367,7 +367,7 @@ function HereForTheLongHaulSection() {
             <Link
               to="/"
               hash="hero"
-              className="font-semibold text-stone-700 hover:underline decoration-dotted"
+              className="font-semibold text-stone-700 decoration-dotted hover:underline"
             >
               download Char and try it
             </Link>

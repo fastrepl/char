@@ -1,10 +1,11 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { isTauri } from "@tauri-apps/api/core";
 import { useEffect } from "react";
-import { useAuth } from "~/auth";
-import { useTabs } from "~/store/zustand/tabs";
 
 import { events as deeplink2Events } from "@hypr/plugin-deeplink2";
+
+import { useAuth } from "~/auth";
+import { useTabs } from "~/store/zustand/tabs";
 
 export function useDeeplinkHandler() {
   const auth = useAuth();

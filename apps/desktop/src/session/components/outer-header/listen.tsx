@@ -1,6 +1,15 @@
 import { useHover } from "@uidotdev/usehooks";
 import { MicOff } from "lucide-react";
 import { useCallback } from "react";
+
+import { DancingSticks } from "@hypr/ui/components/ui/dancing-sticks";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@hypr/ui/components/ui/tooltip";
+import { cn } from "@hypr/utils";
+
 import {
   ActionableTooltipContent,
   RecordingIcon,
@@ -10,14 +19,6 @@ import {
 import { useTabs } from "~/store/zustand/tabs";
 import { useListener } from "~/stt/contexts";
 import { useStartListening } from "~/stt/useStartListening";
-
-import { DancingSticks } from "@hypr/ui/components/ui/dancing-sticks";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@hypr/ui/components/ui/tooltip";
-import { cn } from "@hypr/utils";
 
 export function ListenButton({ sessionId }: { sessionId: string }) {
   const { shouldRender } = useListenButtonState(sessionId);
@@ -52,12 +53,12 @@ function StartButton({ sessionId }: { sessionId: string }) {
         "inline-flex items-center justify-center rounded-md text-xs font-medium",
         "bg-white text-neutral-900 hover:bg-neutral-100",
         "gap-1.5",
-        "px-2 h-7",
+        "h-7 px-2",
         "disabled:pointer-events-none disabled:opacity-50",
       ])}
     >
       <RecordingIcon />
-      <span className="text-neutral-900 hover:text-neutral-800 whitespace-nowrap">
+      <span className="whitespace-nowrap text-neutral-900 hover:text-neutral-800">
         Resume listening
       </span>
     </button>
@@ -127,7 +128,7 @@ function InMeetingIndicator({ sessionId }: { sessionId: string }) {
                   "text-red-500 hover:text-red-600",
                   "bg-red-50 hover:bg-red-100",
                 ],
-            "w-20 h-7",
+            "h-7 w-20",
             "disabled:pointer-events-none disabled:opacity-50",
           ])}
           aria-label={finalizing ? "Finalizing" : "Stop listening"}
@@ -161,7 +162,7 @@ function InMeetingIndicator({ sessionId }: { sessionId: string }) {
                   hovered ? "flex" : "hidden",
                 ])}
               >
-                <span className="size-2 bg-red-500 rounded-none" />
+                <span className="size-2 rounded-none bg-red-500" />
                 <span className="text-xs">Stop</span>
               </div>
             </>

@@ -1,17 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { useAuth } from "~/auth";
-import { useBillingAccess } from "~/auth/billing";
-import { env } from "~/env";
-import { providerRowId } from "~/settings/ai/shared";
-import { type ProviderId } from "~/settings/ai/stt/shared";
-import * as settings from "~/store/tinybase/store/settings";
 
 import {
   commands as localSttCommands,
   type SupportedSttModel,
 } from "@hypr/plugin-local-stt";
 import type { AIProviderStorage } from "@hypr/store";
+
+import { useAuth } from "~/auth";
+import { useBillingAccess } from "~/auth/billing";
+import { env } from "~/env";
+import { providerRowId } from "~/settings/ai/shared";
+import { type ProviderId } from "~/settings/ai/stt/shared";
+import * as settings from "~/store/tinybase/store/settings";
 
 export const useSTTConnection = () => {
   const auth = useAuth();

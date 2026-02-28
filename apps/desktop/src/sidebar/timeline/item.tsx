@@ -1,21 +1,4 @@
 import { memo, useCallback, useMemo } from "react";
-import { SessionPreviewCard } from "~/session/components/session-preview-card";
-import { useIsSessionEnhancing } from "~/session/hooks/useEnhancedNotes";
-import { getSessionEvent } from "~/session/utils";
-import type { MenuItemDef } from "~/shared/hooks/useNativeContextMenu";
-import { InteractiveButton } from "~/shared/ui/interactive-button";
-import { useIgnoredEvents } from "~/store/tinybase/hooks";
-import {
-  captureSessionData,
-  deleteSessionCascade,
-} from "~/store/tinybase/store/deleteSession";
-import * as main from "~/store/tinybase/store/main";
-import { getOrCreateSessionForEventId } from "~/store/tinybase/store/sessions";
-import { useSessionTitle } from "~/store/zustand/live-title";
-import { type TabInput, useTabs } from "~/store/zustand/tabs";
-import { useTimelineSelection } from "~/store/zustand/timeline-selection";
-import { useUndoDelete } from "~/store/zustand/undo-delete";
-import { useListener } from "~/stt/contexts";
 
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
@@ -33,6 +16,24 @@ import {
   type TimelineItem,
   TimelinePrecision,
 } from "./utils";
+
+import { SessionPreviewCard } from "~/session/components/session-preview-card";
+import { useIsSessionEnhancing } from "~/session/hooks/useEnhancedNotes";
+import { getSessionEvent } from "~/session/utils";
+import type { MenuItemDef } from "~/shared/hooks/useNativeContextMenu";
+import { InteractiveButton } from "~/shared/ui/interactive-button";
+import { useIgnoredEvents } from "~/store/tinybase/hooks";
+import {
+  captureSessionData,
+  deleteSessionCascade,
+} from "~/store/tinybase/store/deleteSession";
+import * as main from "~/store/tinybase/store/main";
+import { getOrCreateSessionForEventId } from "~/store/tinybase/store/sessions";
+import { useSessionTitle } from "~/store/zustand/live-title";
+import { type TabInput, useTabs } from "~/store/zustand/tabs";
+import { useTimelineSelection } from "~/store/zustand/timeline-selection";
+import { useUndoDelete } from "~/store/zustand/undo-delete";
+import { useListener } from "~/stt/contexts";
 
 export const TimelineItemComponent = memo(
   ({
@@ -109,7 +110,7 @@ function ItemBase({
       onShiftClick={onShiftClick}
       contextMenu={hasSelection ? undefined : contextMenu}
       className={cn([
-        "cursor-pointer w-full text-left px-3 py-2 rounded-lg",
+        "w-full cursor-pointer rounded-lg px-3 py-2 text-left",
         multiSelected && "bg-neutral-200",
         !multiSelected && selected && "bg-neutral-200",
         !multiSelected && !selected && "hover:bg-neutral-100",
@@ -122,10 +123,10 @@ function ItemBase({
             <Spinner size={14} />
           </div>
         )}
-        <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <div
             className={cn(
-              "text-sm font-normal truncate pointer-events-none",
+              "pointer-events-none truncate text-sm font-normal",
               ignored && "line-through",
             )}
           >
@@ -470,7 +471,7 @@ function CalendarIndicator({ calendarId }: { calendarId: string }) {
     <Tooltip delayDuration={0}>
       <TooltipTrigger asChild>
         <div
-          className="size-2 rounded-full shrink-0 opacity-60"
+          className="size-2 shrink-0 rounded-full opacity-60"
           style={{ backgroundColor: color }}
         />
       </TooltipTrigger>

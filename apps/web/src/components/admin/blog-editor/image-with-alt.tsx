@@ -50,9 +50,9 @@ function ImageNodeView({ node, updateAttributes, selected }: NodeViewProps) {
           draggable={false}
         />
         {showAltField && (
-          <div className="absolute bottom-2 left-2 right-2 bg-white/95 backdrop-blur-sm rounded-md shadow-lg border border-neutral-200 p-2">
+          <div className="absolute right-2 bottom-2 left-2 rounded-md border border-neutral-200 bg-white/95 p-2 shadow-lg backdrop-blur-sm">
             <label className="flex items-center gap-2">
-              <span className="text-xs text-neutral-500 whitespace-nowrap">
+              <span className="text-xs whitespace-nowrap text-neutral-500">
                 Alt text:
               </span>
               <input
@@ -64,7 +64,7 @@ function ImageNodeView({ node, updateAttributes, selected }: NodeViewProps) {
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
                 placeholder="Describe this image..."
-                className="flex-1 text-sm bg-transparent border-none outline-none text-neutral-700 placeholder:text-neutral-400"
+                className="flex-1 border-none bg-transparent text-sm text-neutral-700 outline-none placeholder:text-neutral-400"
               />
             </label>
           </div>

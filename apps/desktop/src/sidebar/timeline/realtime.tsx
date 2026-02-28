@@ -1,9 +1,10 @@
 import { forwardRef, useEffect, useState } from "react";
-import { getSessionEvent } from "~/session/utils";
 
 import { safeParseDate } from "@hypr/utils";
 
 import type { TimelineEventsTable, TimelineSessionsTable } from "./utils";
+
+import { getSessionEvent } from "~/session/utils";
 
 export const CurrentTimeIndicator = forwardRef<HTMLDivElement>((_, ref) => (
   <div ref={ref} className="py-0.5" aria-hidden />

@@ -15,7 +15,7 @@ export function NoteTab({
     <button
       onClick={onClick}
       className={cn([
-        "relative my-2 border-b-2 px-1 py-0.5 text-xs font-medium transition-all duration-200 shrink-0",
+        "relative my-2 shrink-0 border-b-2 px-1 py-0.5 text-xs font-medium transition-all duration-200",
         isActive
           ? ["border-neutral-900", "text-neutral-900"]
           : [
@@ -26,7 +26,7 @@ export function NoteTab({
         className,
       ])}
     >
-      <span className="flex items-center gap-1 h-5">{children}</span>
+      <span className="flex h-5 items-center gap-1">{children}</span>
     </button>
   );
 }

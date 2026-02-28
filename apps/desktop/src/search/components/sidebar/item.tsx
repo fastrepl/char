@@ -1,11 +1,12 @@
 import DOMPurify from "dompurify";
 import { Facehash } from "facehash";
 import { useCallback, useMemo } from "react";
+
+import { cn } from "@hypr/utils";
+
 import { type SearchResult } from "~/search/contexts/ui";
 import * as main from "~/store/tinybase/store/main";
 import { type TabInput, useTabs } from "~/store/zustand/tabs";
-
-import { cn } from "@hypr/utils";
 
 export function SearchResultItem({
   result,
@@ -95,10 +96,10 @@ function HumanSearchResultItem({
           showInitial={false}
         />
       </div>
-      <div className={cn(["flex-1 min-w-0"])}>
+      <div className={cn(["min-w-0 flex-1"])}>
         <div
           className={cn([
-            "text-sm font-normal truncate [&_mark]:bg-yellow-200 [&_mark]:font-semibold [&_mark]:text-neutral-900",
+            "truncate text-sm font-normal [&_mark]:bg-yellow-200 [&_mark]:font-semibold [&_mark]:text-neutral-900",
           ])}
           dangerouslySetInnerHTML={{ __html: sanitizedTitle }}
         />
@@ -147,14 +148,14 @@ function OrganizationSearchResultItem({
         isSelected && "bg-neutral-100",
       ])}
     >
-      <div className={cn(["flex-1 min-w-0"])}>
+      <div className={cn(["min-w-0 flex-1"])}>
         <div
           className={cn([
-            "text-sm font-normal truncate [&_mark]:bg-yellow-200 [&_mark]:font-semibold [&_mark]:text-neutral-900",
+            "truncate text-sm font-normal [&_mark]:bg-yellow-200 [&_mark]:font-semibold [&_mark]:text-neutral-900",
           ])}
           dangerouslySetInnerHTML={{ __html: sanitizedTitle }}
         />
-        <div className={cn(["text-xs text-neutral-500 truncate mt-0.5"])}>
+        <div className={cn(["mt-0.5 truncate text-xs text-neutral-500"])}>
           {memberText}
         </div>
       </div>
@@ -256,7 +257,7 @@ function SessionSearchResultItem({
     >
       <div
         className={cn([
-          "text-sm font-medium text-neutral-900 truncate [&_mark]:bg-yellow-200 [&_mark]:font-semibold",
+          "truncate text-sm font-medium text-neutral-900 [&_mark]:bg-yellow-200 [&_mark]:font-semibold",
           "w-full",
         ])}
         dangerouslySetInnerHTML={{ __html: displayTitle }}
@@ -264,7 +265,7 @@ function SessionSearchResultItem({
       {snippet && (
         <div
           className={cn([
-            "text-xs text-neutral-500 line-clamp-2 [&_mark]:bg-yellow-200 [&_mark]:font-semibold [&_mark]:text-neutral-900",
+            "line-clamp-2 text-xs text-neutral-500 [&_mark]:bg-yellow-200 [&_mark]:font-semibold [&_mark]:text-neutral-900",
           ])}
           dangerouslySetInnerHTML={{ __html: snippet }}
         />

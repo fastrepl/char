@@ -1,9 +1,10 @@
 import { getVersion } from "@tauri-apps/api/app";
 import { check } from "@tauri-apps/plugin-updater";
 import { useSelector } from "@xstate/store/react";
-import { relaunch } from "~/store/tinybase/store/save";
 
 import { updateStore } from "./store";
+
+import { relaunch } from "~/store/tinybase/store/save";
 
 export function useOTA() {
   const snapshot = useSelector(updateStore, (state) => state.context);

@@ -2,16 +2,6 @@ import { useMutation } from "@tanstack/react-query";
 import { downloadDir, join } from "@tauri-apps/api/path";
 import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { useSessionEvent } from "~/store/tinybase/hooks";
-import * as main from "~/store/tinybase/store/main";
-import type { EditorView } from "~/store/zustand/tabs/schema";
-import { buildSegments, SegmentKey } from "~/stt/segment";
-import {
-  defaultRenderLabelContext,
-  SpeakerLabelManager,
-} from "~/stt/segment/shared";
-import { convertStorageHintsToRuntime } from "~/stt/speaker-hints";
-import { parseTranscriptHints, parseTranscriptWords } from "~/stt/utils";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as fs2Commands } from "@hypr/plugin-fs2";
@@ -23,6 +13,17 @@ import {
 } from "@hypr/plugin-pdf";
 import { json2md } from "@hypr/tiptap/shared";
 import { cn } from "@hypr/utils";
+
+import { useSessionEvent } from "~/store/tinybase/hooks";
+import * as main from "~/store/tinybase/store/main";
+import type { EditorView } from "~/store/zustand/tabs/schema";
+import { buildSegments, SegmentKey } from "~/stt/segment";
+import {
+  defaultRenderLabelContext,
+  SpeakerLabelManager,
+} from "~/stt/segment/shared";
+import { convertStorageHintsToRuntime } from "~/stt/speaker-hints";
+import { parseTranscriptHints, parseTranscriptWords } from "~/stt/utils";
 
 type FileFormat = "pdf" | "txt" | "md";
 
@@ -422,14 +423,14 @@ export function ExportModal({
       onClick={() => onOpenChange(false)}
     >
       <div
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xs px-4"
+        className="absolute top-1/2 left-1/2 w-full max-w-xs -translate-x-1/2 -translate-y-1/2 px-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div
           className={cn([
-            "bg-[#faf8f5] rounded-xl border border-neutral-200/80",
+            "rounded-xl border border-neutral-200/80 bg-[#faf8f5]",
             "shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]",
-            "p-5 flex flex-col gap-4 text-center",
+            "flex flex-col gap-4 p-5 text-center",
           ])}
         >
           <div className="flex flex-col gap-1">
@@ -446,7 +447,7 @@ export function ExportModal({
                 {(["pdf", "txt", "md"] as const).map((f) => (
                   <label
                     key={f}
-                    className="flex items-center gap-1.5 cursor-pointer text-sm"
+                    className="flex cursor-pointer items-center gap-1.5 text-sm"
                   >
                     <input
                       type="radio"
@@ -472,7 +473,7 @@ export function ExportModal({
                 ).map(([label, checked, setter]) => (
                   <label
                     key={label}
-                    className="flex items-center gap-1.5 cursor-pointer text-sm"
+                    className="flex cursor-pointer items-center gap-1.5 text-sm"
                   >
                     <input
                       type="checkbox"
@@ -490,7 +491,7 @@ export function ExportModal({
           <button
             onClick={() => mutate(null)}
             disabled={isPending || !hasAnyContentSelected}
-            className="w-full h-10 rounded-full bg-stone-800 hover:bg-stone-700 text-white text-sm font-medium border-2 border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="h-10 w-full rounded-full border-2 border-stone-600 bg-stone-800 text-sm font-medium text-white shadow-[0_4px_14px_rgba(87,83,78,0.4)] transition-all duration-200 hover:bg-stone-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPending ? "Exporting..." : "Export"}
           </button>

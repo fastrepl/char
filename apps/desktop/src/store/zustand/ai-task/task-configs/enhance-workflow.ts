@@ -6,10 +6,6 @@ import {
   streamText,
 } from "ai";
 import { z } from "zod";
-import type { Store } from "~/store/tinybase/store/main";
-import { getCustomPrompt } from "~/store/tinybase/store/prompts";
-import { normalizeBulletPoints } from "~/store/zustand/ai-task/shared/transform_impl";
-import { withEarlyValidationRetry } from "~/store/zustand/ai-task/shared/validate";
 
 import {
   commands as templateCommands,
@@ -19,6 +15,11 @@ import { templateSectionSchema } from "@hypr/store";
 
 import type { TaskArgsMapTransformed, TaskConfig } from ".";
 import { createEnhanceValidator } from "./enhance-validator";
+
+import type { Store } from "~/store/tinybase/store/main";
+import { getCustomPrompt } from "~/store/tinybase/store/prompts";
+import { normalizeBulletPoints } from "~/store/zustand/ai-task/shared/transform_impl";
+import { withEarlyValidationRetry } from "~/store/zustand/ai-task/shared/validate";
 
 export const enhanceWorkflow: Pick<
   TaskConfig<"enhance">,

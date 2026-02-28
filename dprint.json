@@ -61,7 +61,7 @@
         ]
       },
       {
-        "command": "pnpm exec prettier --config .prettierrc --write",
+        "command": "pnpm exec oxfmt --stdin-filepath {{file_path}}",
         "exts": [
           "js",
           "ts",
@@ -69,6 +69,10 @@
           "tsx",
           "mjs",
           "mts"
+        ],
+        "cacheKeyFiles": [
+          ".oxfmtrc.json",
+          "package.json"
         ]
       },
       {

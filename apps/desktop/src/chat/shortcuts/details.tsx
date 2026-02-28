@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
+
+import { Button } from "@hypr/ui/components/ui/button";
+import { Input } from "@hypr/ui/components/ui/input";
+import { Textarea } from "@hypr/ui/components/ui/textarea";
+
 import {
   DangerZone,
   ResourceDetailEmpty,
   ResourcePreviewHeader,
 } from "~/shared/ui/resource-list";
 import * as main from "~/store/tinybase/store/main";
-
-import { Button } from "@hypr/ui/components/ui/button";
-import { Input } from "@hypr/ui/components/ui/input";
-import { Textarea } from "@hypr/ui/components/ui/textarea";
 
 type WebShortcut = {
   slug: string;
@@ -65,7 +66,7 @@ function WebShortcutPreview({
   onClone: (shortcut: WebShortcut) => void;
 }) {
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       <ResourcePreviewHeader
         title={shortcut.title}
         description={shortcut.description}
@@ -75,11 +76,11 @@ function WebShortcutPreview({
       />
 
       <div className="flex-1 p-6">
-        <h3 className="text-sm font-medium text-neutral-600 mb-3">
+        <h3 className="mb-3 text-sm font-medium text-neutral-600">
           Prompt Content
         </h3>
-        <div className="p-4 bg-neutral-50 rounded-lg border border-neutral-200">
-          <p className="text-sm text-neutral-700 whitespace-pre-wrap">
+        <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+          <p className="text-sm whitespace-pre-wrap text-neutral-700">
             {shortcut.prompt}
           </p>
         </div>
@@ -137,12 +138,12 @@ function ChatShortcutForm({
     localTitle !== (title || "") || localContent !== (content || "");
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="px-6 py-4 border-b border-neutral-200">
+    <div className="flex h-full flex-col">
+      <div className="border-b border-neutral-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold">Edit Shortcut</h2>
-            <p className="text-sm text-neutral-500 mt-1">
+            <p className="mt-1 text-sm text-neutral-500">
               Create a quick shortcut for chat inputs
             </p>
           </div>
@@ -154,9 +155,9 @@ function ChatShortcutForm({
         </div>
       </div>
 
-      <div className="flex-1 p-6 flex flex-col gap-4">
+      <div className="flex flex-1 flex-col gap-4 p-6">
         <div>
-          <label className="text-sm font-medium text-neutral-700 mb-1.5 block">
+          <label className="mb-1.5 block text-sm font-medium text-neutral-700">
             Title
           </label>
           <Input
@@ -166,7 +167,7 @@ function ChatShortcutForm({
           />
         </div>
         <div>
-          <label className="text-sm font-medium text-neutral-700 mb-1.5 block">
+          <label className="mb-1.5 block text-sm font-medium text-neutral-700">
             Content
           </label>
           <Textarea
@@ -178,7 +179,7 @@ function ChatShortcutForm({
         </div>
       </div>
 
-      <div className="p-6 border-t border-neutral-200">
+      <div className="border-t border-neutral-200 p-6">
         <DangerZone
           title="Delete this shortcut"
           description="This action cannot be undone"

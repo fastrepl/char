@@ -1,12 +1,13 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { message } from "@tauri-apps/plugin-dialog";
-import { relaunch } from "~/store/tinybase/store/save";
 
 import {
   type Permission,
   commands as permissionsCommands,
   type PermissionStatus,
 } from "@hypr/plugin-permissions";
+
+import { relaunch } from "~/store/tinybase/store/save";
 
 export function usePermission(type: Permission) {
   const status = useQuery({

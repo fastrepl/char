@@ -1,5 +1,6 @@
 import { createRootRouteWithContext } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
+
 import type { Context } from "~/types";
 
 const MainAppLayout = lazy(() => import("~/shared/main-app-layout"));

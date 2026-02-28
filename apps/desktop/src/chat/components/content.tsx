@@ -1,12 +1,13 @@
 import type { ChatStatus } from "ai";
 import { useMemo } from "react";
-import type { useLanguageModel } from "~/ai/hooks";
-import type { ContextEntity, ContextRef } from "~/chat/context-item";
-import type { HyprUIMessage } from "~/chat/types";
 
 import { ChatBody } from "./body";
 import { ContextBar } from "./context-bar";
 import { ChatMessageInput, type McpIndicator } from "./input";
+
+import type { useLanguageModel } from "~/ai/hooks";
+import type { ContextEntity, ContextRef } from "~/chat/context-item";
+import type { HyprUIMessage } from "~/chat/types";
 
 function toContextRefs(entities: ContextEntity[]): ContextRef[] {
   return entities.flatMap((e) =>

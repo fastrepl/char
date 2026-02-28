@@ -1,10 +1,11 @@
 import { useRouteContext } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { useShallow } from "zustand/shallow";
-import { id } from "~/shared/utils";
-import { useTabs } from "~/store/zustand/tabs";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
+
+import { id } from "~/shared/utils";
+import { useTabs } from "~/store/zustand/tabs";
 
 export function useNewNote({
   behavior = "new",

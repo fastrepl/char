@@ -1,11 +1,12 @@
 import { PuzzleIcon } from "lucide-react";
+
+import { getPluginDisplayName, getPluginView } from "./registry";
+
 import { StandardTabWrapper } from "~/shared/main";
 import { type TabItem, TabItemBase } from "~/shared/tabs";
 import { type Tab } from "~/store/zustand/tabs";
 
-import { getPluginDisplayName, getPluginView } from "./registry";
-
-type PluginTab = Extract<Tab, { type: "plugin" }>;
+type PluginTab = Extract<Tab, { type: "extension" }>;
 
 export const TabItemPlugin: TabItem<PluginTab> = ({
   tab,
@@ -19,8 +20,8 @@ export const TabItemPlugin: TabItem<PluginTab> = ({
 }) => {
   return (
     <TabItemBase
-      icon={<PuzzleIcon className="w-4 h-4" />}
-      title={getPluginDisplayName(tab.pluginId)}
+      icon={<PuzzleIcon className="h-4 w-4" />}
+      title={getPluginDisplayName(tab.extensionId)}
       selected={tab.active}
       pinned={tab.pinned}
       tabIndex={tabIndex}
@@ -35,15 +36,17 @@ export const TabItemPlugin: TabItem<PluginTab> = ({
 };
 
 export function TabContentPlugin({ tab }: { tab: PluginTab }) {
-  const render = getPluginView(tab.pluginId);
+  const render = getPluginView(tab.extensionId);
 
   return (
     <StandardTabWrapper>
       {render?.() ?? (
-        <div className="flex items-center justify-center h-full">
+        <div className="flex h-full items-center justify-center">
           <div className="text-center">
-            <PuzzleIcon size={48} className="mx-auto text-neutral-300 mb-4" />
-            <p className="text-neutral-500">Plugin not found: {tab.pluginId}</p>
+            <PuzzleIcon size={48} className="mx-auto mb-4 text-neutral-300" />
+            <p className="text-neutral-500">
+              Plugin not found: {tab.extensionId}
+            </p>
           </div>
         </div>
       )}

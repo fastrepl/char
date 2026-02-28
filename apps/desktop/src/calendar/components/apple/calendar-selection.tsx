@@ -1,13 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { RefreshCwIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo } from "react";
-import {
-  type CalendarGroup,
-  type CalendarItem,
-  CalendarSelection,
-} from "~/calendar/components/calendar-selection";
-import { findCalendarByTrackingId } from "~/calendar/utils";
-import * as main from "~/store/tinybase/store/main";
 
 import {
   commands as appleCalendarCommands,
@@ -18,6 +11,14 @@ import { cn } from "@hypr/utils";
 
 import { useSync } from "./context";
 import { SyncIndicator } from "./sync";
+
+import {
+  type CalendarGroup,
+  type CalendarItem,
+  CalendarSelection,
+} from "~/calendar/components/calendar-selection";
+import { findCalendarByTrackingId } from "~/calendar/utils";
+import * as main from "~/store/tinybase/store/main";
 
 export function Section({
   title,
@@ -31,7 +32,7 @@ export function Section({
   return (
     <div className="flex flex-col gap-2 border-t border-neutral-200 pt-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-xs font-medium text-neutral-400 uppercase tracking-wide">
+        <h4 className="text-xs font-medium tracking-wide text-neutral-400 uppercase">
           {title}
         </h4>
         {action}

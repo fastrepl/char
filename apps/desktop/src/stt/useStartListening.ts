@@ -1,4 +1,12 @@
 import { useCallback } from "react";
+
+import { commands as analyticsCommands } from "@hypr/plugin-analytics";
+import type { TranscriptStorage } from "@hypr/store";
+
+import { useListener } from "./contexts";
+import { useKeywords } from "./useKeywords";
+import { useSTTConnection } from "./useSTTConnection";
+
 import { getSessionEventById } from "~/session/utils";
 import { useConfigValue } from "~/shared/config";
 import { id } from "~/shared/utils";
@@ -11,13 +19,6 @@ import {
   updateTranscriptHints,
   updateTranscriptWords,
 } from "~/stt/utils";
-
-import { commands as analyticsCommands } from "@hypr/plugin-analytics";
-import type { TranscriptStorage } from "@hypr/store";
-
-import { useListener } from "./contexts";
-import { useKeywords } from "./useKeywords";
-import { useSTTConnection } from "./useSTTConnection";
 
 export function useStartListening(sessionId: string) {
   const { user_id } = main.UI.useValues(main.STORE_ID);

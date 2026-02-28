@@ -64,10 +64,10 @@ export function DisconnectFlow() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white flex items-center justify-center p-6">
-      <div className="max-w-md w-full text-center flex flex-col gap-8">
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-b from-white via-stone-50/20 to-white p-6">
+      <div className="flex w-full max-w-md flex-col gap-8 text-center">
         <div className="flex flex-col gap-3">
-          <h1 className="text-3xl font-serif tracking-tight text-stone-700">
+          <h1 className="font-serif text-3xl tracking-tight text-stone-700">
             Disconnect {display.name}
           </h1>
           <p className="text-neutral-600">
@@ -80,11 +80,11 @@ export function DisconnectFlow() {
             onClick={handleDisconnect}
             disabled={status === "loading" || !search.connection_id}
             className={cn([
-              "w-full h-12 flex items-center justify-center gap-2 text-base font-medium transition-all rounded-full shadow-md",
+              "flex h-12 w-full items-center justify-center gap-2 rounded-full text-base font-medium shadow-md transition-all",
               "bg-linear-to-t from-red-600 to-red-500 text-white",
               status === "loading" || !search.connection_id
-                ? "opacity-70 cursor-not-allowed"
-                : "cursor-pointer hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
+                ? "cursor-not-allowed opacity-70"
+                : "cursor-pointer hover:scale-[102%] hover:shadow-lg active:scale-[98%]",
             ])}
           >
             {status === "loading" ? "Disconnecting..." : "Disconnect"}
@@ -99,8 +99,8 @@ export function DisconnectFlow() {
             <button
               onClick={handleDisconnect}
               className={cn([
-                "w-full h-12 flex items-center justify-center text-base font-medium transition-all cursor-pointer",
-                "bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
+                "flex h-12 w-full cursor-pointer items-center justify-center text-base font-medium transition-all",
+                "rounded-full bg-linear-to-t from-stone-600 to-stone-500 text-white shadow-md hover:scale-[102%] hover:shadow-lg active:scale-[98%]",
               ])}
             >
               Try again

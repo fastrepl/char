@@ -4,14 +4,6 @@ import { open as selectFile } from "@tauri-apps/plugin-dialog";
 import { Effect, pipe } from "effect";
 import { EllipsisVerticalIcon } from "lucide-react";
 import { useCallback, useState } from "react";
-import { getEnhancerService } from "~/services/enhancer";
-import * as main from "~/store/tinybase/store/main";
-import { useTabs } from "~/store/zustand/tabs";
-import type { Tab } from "~/store/zustand/tabs/schema";
-import { useListener } from "~/stt/contexts";
-import { fromResult } from "~/stt/fromResult";
-import { ChannelProfile } from "~/stt/segment";
-import { useRunBatch } from "~/stt/useRunBatch";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
@@ -30,6 +22,15 @@ import {
 } from "@hypr/ui/components/ui/tooltip";
 
 import { ActionableTooltipContent } from "./shared";
+
+import { getEnhancerService } from "~/services/enhancer";
+import * as main from "~/store/tinybase/store/main";
+import { useTabs } from "~/store/zustand/tabs";
+import type { Tab } from "~/store/zustand/tabs/schema";
+import { useListener } from "~/stt/contexts";
+import { fromResult } from "~/stt/fromResult";
+import { ChannelProfile } from "~/stt/segment";
+import { useRunBatch } from "~/stt/useRunBatch";
 
 type FileSelection = string | string[] | null;
 
@@ -297,7 +298,7 @@ export function OptionsMenu({
 
   const moreButton = (
     <button
-      className="absolute right-2 top-1/2 -translate-y-1/2 z-10 cursor-pointer text-white/70 hover:text-white transition-colors disabled:opacity-50"
+      className="absolute top-1/2 right-2 z-10 -translate-y-1/2 cursor-pointer text-white/70 transition-colors hover:text-white disabled:opacity-50"
       disabled={disabled}
       onClick={(e) => {
         e.stopPropagation();
@@ -356,19 +357,19 @@ export function OptionsMenu({
         side="top"
         align="center"
         sideOffset={8}
-        className="w-43 p-1.5 rounded-xl"
+        className="w-43 rounded-xl p-1.5"
       >
         <div className="flex flex-col gap-1">
           <Button
             variant="ghost"
-            className="justify-center h-9 px-3 whitespace-nowrap"
+            className="h-9 justify-center px-3 whitespace-nowrap"
             onClick={handleUploadAudio}
           >
             <span className="text-sm">Upload audio</span>
           </Button>
           <Button
             variant="ghost"
-            className="justify-center h-9 px-3 whitespace-nowrap"
+            className="h-9 justify-center px-3 whitespace-nowrap"
             onClick={handleUploadTranscript}
           >
             <span className="text-sm">Upload transcript</span>

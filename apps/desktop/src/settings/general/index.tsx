@@ -1,9 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { useQuery } from "@tanstack/react-query";
 import { disable, enable } from "@tauri-apps/plugin-autostart";
-import { Data } from "~/settings/data";
-import { useConfigValues } from "~/shared/config";
-import * as settings from "~/store/tinybase/store/settings";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as listenerCommands } from "@hypr/plugin-listener";
@@ -19,6 +16,10 @@ import { SpokenLanguagesView } from "./spoken-languages";
 import { StorageSettingsView } from "./storage";
 import { TimezoneSelector } from "./timezone";
 import { WeekStartSelector } from "./week-start";
+
+import { Data } from "~/settings/data";
+import { useConfigValues } from "~/shared/config";
+import * as settings from "~/store/tinybase/store/settings";
 
 function useSettingsForm() {
   const value = useConfigValues([
@@ -101,7 +102,7 @@ function useSettingsForm() {
 
 export function SettingsAccount() {
   return (
-    <div className="h-full flex items-center justify-center">
+    <div className="flex h-full items-center justify-center">
       <div className="w-full max-w-md">
         <AccountSettings />
       </div>
@@ -178,7 +179,7 @@ export function SettingsApp() {
       </form.Field>
 
       <div>
-        <h2 className="text-lg font-semibold font-serif mb-4">
+        <h2 className="mb-4 font-serif text-lg font-semibold">
           Language & Region
         </h2>
         <div className="flex flex-col gap-6">
@@ -197,7 +198,7 @@ export function SettingsApp() {
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold font-serif mb-4">Transcription</h2>
+        <h2 className="mb-4 font-serif text-lg font-semibold">Transcription</h2>
         <div className="flex flex-col gap-6">
           <form.Field name="spoken_languages">
             {(field) => (
@@ -214,7 +215,7 @@ export function SettingsApp() {
       <StorageSettingsView />
 
       <div>
-        <h2 className="text-lg font-semibold font-serif mb-4">Data</h2>
+        <h2 className="mb-4 font-serif text-lg font-semibold">Data</h2>
         <Data />
       </div>
     </div>

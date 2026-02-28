@@ -7,10 +7,11 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { Streamdown } from "streamdown";
-import { extractMcpOutputText } from "~/chat/mcp-utils";
-import { useElicitation } from "~/contexts/elicitation";
 
 import { cn } from "@hypr/utils";
+
+import { extractMcpOutputText } from "~/chat/mcp-utils";
+import { useElicitation } from "~/contexts/elicitation";
 
 export function ToolCard({
   failed,
@@ -22,7 +23,7 @@ export function ToolCard({
   return (
     <div
       className={cn([
-        "my-2.5 rounded-xl border overflow-hidden shadow-sm",
+        "my-2.5 overflow-hidden rounded-xl border shadow-sm",
         failed ? "border-red-200" : "border-neutral-200/80",
       ])}
     >
@@ -49,7 +50,7 @@ export function ToolCardHeader({
   return (
     <div
       className={cn([
-        "px-3.5 py-2 flex items-center gap-2.5 text-[13px]",
+        "flex items-center gap-2.5 px-3.5 py-2 text-[13px]",
         failed
           ? "bg-red-50 text-red-700"
           : awaitingApproval
@@ -58,13 +59,13 @@ export function ToolCardHeader({
       ])}
     >
       {running && !awaitingApproval ? (
-        <Loader2Icon className="w-4 h-4 animate-spin" />
+        <Loader2Icon className="h-4 w-4 animate-spin" />
       ) : awaitingApproval ? (
-        <ShieldAlertIcon className="w-4 h-4 text-neutral-500" />
+        <ShieldAlertIcon className="h-4 w-4 text-neutral-500" />
       ) : (
         <span
           className={cn([
-            "shrink-0 [&>svg]:w-4 [&>svg]:h-4",
+            "shrink-0 [&>svg]:h-4 [&>svg]:w-4",
             failed
               ? "text-red-500"
               : done
@@ -81,7 +82,7 @@ export function ToolCardHeader({
 }
 
 export function ToolCardBody({ children }: { children: ReactNode }) {
-  return <div className="px-3.5 py-2.5 flex flex-col gap-2.5">{children}</div>;
+  return <div className="flex flex-col gap-2.5 px-3.5 py-2.5">{children}</div>;
 }
 
 export function ToolCardFooterSuccess({
@@ -96,19 +97,19 @@ export function ToolCardFooterSuccess({
       href={href}
       target="_blank"
       rel="noreferrer"
-      className="px-3.5 py-2.5 bg-emerald-50 border-t border-emerald-200 flex items-center gap-2 hover:bg-emerald-100/80 transition-colors"
+      className="flex items-center gap-2 border-t border-emerald-200 bg-emerald-50 px-3.5 py-2.5 transition-colors hover:bg-emerald-100/80"
     >
-      <CheckCircle2Icon className="w-4 h-4 text-emerald-600 shrink-0" />
-      <span className="text-[13px] text-emerald-700 font-medium">{label}</span>
-      <ExternalLinkIcon className="w-3.5 h-3.5 text-emerald-500 ml-auto shrink-0" />
+      <CheckCircle2Icon className="h-4 w-4 shrink-0 text-emerald-600" />
+      <span className="text-[13px] font-medium text-emerald-700">{label}</span>
+      <ExternalLinkIcon className="ml-auto h-3.5 w-3.5 shrink-0 text-emerald-500" />
     </a>
   );
 }
 
 export function ToolCardFooterError({ text }: { text: string }) {
   return (
-    <div className="px-3.5 py-2.5 bg-red-50 border-t border-red-200 flex items-center gap-2">
-      <XCircleIcon className="w-4 h-4 text-red-500 shrink-0" />
+    <div className="flex items-center gap-2 border-t border-red-200 bg-red-50 px-3.5 py-2.5">
+      <XCircleIcon className="h-4 w-4 shrink-0 text-red-500" />
       <p className="text-[13px] text-red-600">{text}</p>
     </div>
   );
@@ -116,8 +117,8 @@ export function ToolCardFooterError({ text }: { text: string }) {
 
 export function ToolCardFooterRaw({ text }: { text: string }) {
   return (
-    <div className="px-3.5 py-2.5 bg-neutral-50/80 border-t border-neutral-200/80">
-      <p className="text-[13px] text-neutral-600 whitespace-pre-wrap">{text}</p>
+    <div className="border-t border-neutral-200/80 bg-neutral-50/80 px-3.5 py-2.5">
+      <p className="text-[13px] whitespace-pre-wrap text-neutral-600">{text}</p>
     </div>
   );
 }
@@ -170,18 +171,18 @@ export function ToolCardApproval() {
   }
 
   return (
-    <div className="px-3.5 py-2.5 bg-neutral-50/80 border-t border-neutral-200/80 flex items-center gap-2.5">
+    <div className="flex items-center gap-2.5 border-t border-neutral-200/80 bg-neutral-50/80 px-3.5 py-2.5">
       <span className="flex-1 text-[13px] text-neutral-500">
         {pending.message}
       </span>
       <button
-        className="px-3 py-1 text-[13px] rounded-md border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-600 transition-colors"
+        className="rounded-md border border-neutral-300 bg-white px-3 py-1 text-[13px] text-neutral-600 transition-colors hover:bg-neutral-50"
         onClick={() => respond(false)}
       >
         Decline
       </button>
       <button
-        className="px-3 py-1 text-[13px] rounded-md bg-neutral-800 hover:bg-neutral-700 text-white transition-colors"
+        className="rounded-md bg-neutral-800 px-3 py-1 text-[13px] text-white transition-colors hover:bg-neutral-700"
         onClick={() => respond(true)}
         autoFocus
       >
@@ -199,9 +200,9 @@ export function useToolApproval(running: boolean) {
 export function MarkdownPreview({ children }: { children: string }) {
   return (
     <div className="rounded-lg border border-neutral-200/80 bg-white">
-      <div className="px-3 py-2.5 max-h-64 overflow-y-auto">
+      <div className="max-h-64 overflow-y-auto px-3 py-2.5">
         <Streamdown
-          className="text-[13px] text-neutral-700 leading-relaxed"
+          className="text-[13px] leading-relaxed text-neutral-700"
           linkSafety={{ enabled: false }}
         >
           {children}

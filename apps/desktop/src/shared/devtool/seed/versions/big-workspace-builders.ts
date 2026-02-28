@@ -1,13 +1,14 @@
 import { faker } from "@faker-js/faker/locale/en";
-import { createSession, toSessionEvent } from "~/shared/devtool/seed/shared";
-import { DEFAULT_USER_ID, id } from "~/shared/utils";
-import type { WordWithId } from "~/stt/types";
 
 import type {
   EventStorage,
   SessionStorage,
   TranscriptStorage,
 } from "@hypr/store";
+
+import { createSession, toSessionEvent } from "~/shared/devtool/seed/shared";
+import { DEFAULT_USER_ID, id } from "~/shared/utils";
+import type { WordWithId } from "~/stt/types";
 
 export const buildSessionsForBigWorkspace = (
   count: number,

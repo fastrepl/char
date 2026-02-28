@@ -1,11 +1,5 @@
 import { type UnlistenFn } from "@tauri-apps/api/event";
 import { useEffect, useRef } from "react";
-import * as main from "~/store/tinybase/store/main";
-import {
-  createSession,
-  getOrCreateSessionForEventId,
-} from "~/store/tinybase/store/sessions";
-import { useTabs } from "~/store/zustand/tabs";
 
 import { events as notificationEvents } from "@hypr/plugin-notification";
 import {
@@ -13,6 +7,13 @@ import {
   events as updaterEvents,
 } from "@hypr/plugin-updater2";
 import { getCurrentWebviewWindowLabel } from "@hypr/plugin-windows";
+
+import * as main from "~/store/tinybase/store/main";
+import {
+  createSession,
+  getOrCreateSessionForEventId,
+} from "~/store/tinybase/store/sessions";
+import { useTabs } from "~/store/zustand/tabs";
 
 function useUpdaterEvents() {
   const openNew = useTabs((state) => state.openNew);

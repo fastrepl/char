@@ -34,14 +34,14 @@ export function MessageBubble({
   return (
     <div
       className={cn([
-        "text-sm select-text-deep",
+        "select-text-deep text-sm",
         variant === "user" &&
-          "rounded-2xl px-3 py-1 bg-blue-100 text-neutral-800",
+          "rounded-2xl bg-blue-100 px-3 py-1 text-neutral-800",
         variant === "assistant" && "text-neutral-800",
         variant === "loading" && "text-neutral-800",
         variant === "error" &&
-          "rounded-2xl px-3 py-1 bg-red-50 text-red-600 border border-red-200",
-        withActionButton && "relative group",
+          "rounded-2xl border border-red-200 bg-red-50 px-3 py-1 text-red-600",
+        withActionButton && "group relative",
       ])}
     >
       {children}
@@ -68,7 +68,7 @@ export function ActionButton({
         "absolute -top-1 -right-1",
         "opacity-0 group-hover:opacity-100",
         "transition-opacity",
-        "p-1 rounded-full",
+        "rounded-full p-1",
         variant === "default" && [
           "bg-neutral-200 hover:bg-neutral-300",
           "text-neutral-600 hover:text-neutral-800",
@@ -79,7 +79,7 @@ export function ActionButton({
         ],
       ])}
     >
-      <Icon className="w-3 h-3" />
+      <Icon className="h-3 w-3" />
     </button>
   );
 }
@@ -98,7 +98,7 @@ export function Disclosure({
   return (
     <details
       className={cn([
-        "group px-2 py-1 my-2 border rounded-md transition-colors",
+        "group my-2 rounded-md border px-2 py-1 transition-colors",
         "cursor-pointer border-neutral-200 hover:border-neutral-300",
       ])}
     >
@@ -111,19 +111,19 @@ export function Disclosure({
         className={cn([
           "w-full",
           "text-xs text-neutral-500",
-          "select-none list-none marker:hidden",
+          "list-none select-none marker:hidden",
           "flex items-center gap-2",
           disabled && "cursor-default",
         ])}
       >
-        {disabled ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+        {disabled ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
         {!disabled && icon && <span className="shrink-0">{icon}</span>}
         <span className={cn(["flex-1 truncate", "group-open:font-medium"])}>
           {title}
         </span>
-        <ChevronRight className="w-3 h-3 shrink-0 transition-transform group-open:rotate-90" />
+        <ChevronRight className="h-3 w-3 shrink-0 transition-transform group-open:rotate-90" />
       </summary>
-      <div className="mt-1 pt-2 px-1 border-t border-neutral-200">
+      <div className="mt-1 border-t border-neutral-200 px-1 pt-2">
         {children}
       </div>
     </details>

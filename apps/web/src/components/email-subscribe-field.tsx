@@ -48,7 +48,7 @@ export function EmailSubscribeField({
         }}
         className={cn([
           isHeroVariant &&
-            "relative flex items-center border-2 rounded-full overflow-hidden transition-all duration-200 border-neutral-200 focus-within:border-stone-500 bg-white",
+            "relative flex items-center overflow-hidden rounded-full border-2 border-neutral-200 bg-white transition-all duration-200 focus-within:border-stone-500",
           !isHeroVariant && "border border-neutral-100 bg-white transition-all",
           formClassName,
         ])}
@@ -60,13 +60,13 @@ export function EmailSubscribeField({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Subscribe to updates"
-              className="flex-1 px-6 py-4 pr-36 text-base outline-hidden bg-white placeholder:text-neutral-400"
+              className="flex-1 bg-white px-6 py-4 pr-36 text-base outline-hidden placeholder:text-neutral-400"
               disabled={mutation.isPending || mutation.isSuccess}
             />
             <button
               type="submit"
               disabled={!email || mutation.isPending || mutation.isSuccess}
-              className="absolute right-1 px-6 py-3 text-sm bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%] transition-all disabled:opacity-50"
+              className="absolute right-1 rounded-full bg-linear-to-t from-stone-600 to-stone-500 px-6 py-3 text-sm text-white shadow-md transition-all hover:scale-[102%] hover:shadow-lg active:scale-[98%] disabled:opacity-50"
             >
               {mutation.isPending
                 ? "Sending..."
@@ -84,7 +84,7 @@ export function EmailSubscribeField({
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Subscribe to updates"
               className={cn([
-                "min-w-0 flex-1 pl-8 pr-2 py-1.5 text-sm",
+                "min-w-0 flex-1 py-1.5 pr-2 pl-8 text-sm",
                 "bg-transparent placeholder:text-neutral-400",
                 "focus:outline-none",
               ])}
@@ -105,18 +105,18 @@ export function EmailSubscribeField({
       </form>
 
       {isHeroVariant && mutation.isSuccess && (
-        <p className="text-green-600 mt-4 text-sm">
+        <p className="mt-4 text-sm text-green-600">
           Thanks! We'll be in touch soon.
         </p>
       )}
       {isHeroVariant && mutation.isError && (
-        <p className="text-red-600 mt-4 text-sm">
+        <p className="mt-4 text-sm text-red-600">
           Something went wrong. Please try again.
         </p>
       )}
 
       {!isHeroVariant && mutation.isError && (
-        <p className="text-xs text-red-500 mt-1">
+        <p className="mt-1 text-xs text-red-500">
           Something went wrong. Please try again.
         </p>
       )}

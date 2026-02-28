@@ -1,6 +1,4 @@
 import { CircleDotIcon, TagIcon } from "lucide-react";
-import type { ToolRenderer } from "~/chat/components/message/types";
-import { parseCreateIssueOutput } from "~/chat/support-mcp-tools";
 
 import {
   MarkdownPreview,
@@ -14,6 +12,9 @@ import {
   useToolApproval,
   useToolState,
 } from "./shared";
+
+import type { ToolRenderer } from "~/chat/components/message/types";
+import { parseCreateIssueOutput } from "~/chat/support-mcp-tools";
 
 type Renderer = ToolRenderer<"tool-create_issue">;
 
@@ -65,13 +66,13 @@ export const ToolCreateIssue: Renderer = ({ part }) => {
       {part.input ? (
         <ToolCardBody>
           {part.input.title ? (
-            <p className="text-sm font-semibold text-neutral-900 leading-snug">
+            <p className="text-sm leading-snug font-semibold text-neutral-900">
               {part.input.title}
             </p>
           ) : null}
           {labels.length > 0 ? (
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <TagIcon className="w-3 h-3 text-neutral-400 shrink-0" />
+            <div className="flex flex-wrap items-center gap-1.5">
+              <TagIcon className="h-3 w-3 shrink-0 text-neutral-400" />
               {labels.map((label) => (
                 <span
                   key={label}

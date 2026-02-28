@@ -1,7 +1,7 @@
+import { CONFIG_REGISTRY, type ConfigKey } from "./registry";
+
 import * as settings from "~/store/tinybase/store/settings";
 import { useListener } from "~/stt/contexts";
-
-import { CONFIG_REGISTRY, type ConfigKey } from "./registry";
 
 type ConfigValueType<K extends ConfigKey> =
   (typeof CONFIG_REGISTRY)[K]["default"];

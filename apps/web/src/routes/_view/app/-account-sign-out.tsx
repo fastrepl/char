@@ -29,7 +29,7 @@ export function SignOutSection() {
       <button
         onClick={() => signOut.mutate()}
         disabled={signOut.isPending}
-        className="cursor-pointer px-4 h-8 flex items-center text-sm text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-full transition-all disabled:opacity-50 disabled:hover:border-red-200"
+        className="flex h-8 cursor-pointer items-center rounded-full border border-red-200 px-4 text-sm text-red-600 transition-all hover:border-red-300 hover:text-red-700 disabled:opacity-50 disabled:hover:border-red-200"
       >
         {signOut.isPending ? "Signing out..." : "Sign out"}
       </button>

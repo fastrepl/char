@@ -36,7 +36,7 @@ export function StorageSettingsView() {
 
   return (
     <div>
-      <h2 className="text-lg font-semibold font-serif mb-4">Storage</h2>
+      <h2 className="mb-4 font-serif text-lg font-semibold">Storage</h2>
       <div className="flex flex-col gap-3">
         <StoragePathRow
           icon={FolderIcon}
@@ -92,7 +92,7 @@ function StoragePathRow({
     <div className="flex items-center gap-3">
       <Tooltip delayDuration={0}>
         <TooltipTrigger asChild>
-          <div className="flex items-center gap-2 w-24 shrink-0 cursor-default">
+          <div className="flex w-24 shrink-0 cursor-default items-center gap-2">
             <Icon className="size-4 text-neutral-500" />
             <span className="text-sm font-medium">{title}</span>
           </div>
@@ -103,7 +103,7 @@ function StoragePathRow({
       </Tooltip>
       <button
         onClick={handleOpenPath}
-        className="flex-1 text-left text-sm text-neutral-500 truncate min-w-0 hover:underline cursor-pointer"
+        className="min-w-0 flex-1 cursor-pointer truncate text-left text-sm text-neutral-500 hover:underline"
       >
         {path ?? "Loading..."}
       </button>

@@ -1,4 +1,9 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
+
+import { cn } from "@hypr/utils";
+
+import { ListenButton } from "./listen";
+
 import { useShell } from "~/contexts/shell";
 import { useCaretPosition } from "~/session/components/caret-position-context";
 import {
@@ -6,10 +11,6 @@ import {
   useHasTranscript,
 } from "~/session/components/shared";
 import type { Tab } from "~/store/zustand/tabs/schema";
-
-import { cn } from "@hypr/utils";
-
-import { ListenButton } from "./listen";
 
 const SIDEBAR_WIDTH = 280;
 const LAYOUT_PADDING = 4;
@@ -110,7 +111,7 @@ function FloatingButtonContainer({ children }: { children: ReactNode }) {
       ref={containerRef}
       style={{ left: `calc(50% + ${totalOffset}px)` }}
       className={cn([
-        "fixed -translate-x-1/2 z-40 flex items-center gap-3",
+        "fixed z-40 flex -translate-x-1/2 items-center gap-3",
         "transition-all duration-200 ease-out",
         shouldHide ? "bottom-0 translate-y-[85%]" : "bottom-4",
       ])}

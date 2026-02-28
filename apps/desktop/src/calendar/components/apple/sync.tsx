@@ -23,7 +23,7 @@ export function SyncIndicator() {
         <span
           className={cn([
             "size-2.5 rounded-full",
-            status === "syncing" && "bg-blue-500 animate-pulse",
+            status === "syncing" && "animate-pulse bg-blue-500",
             status === "scheduled" && "bg-amber-500",
             status === "idle" && "bg-neutral-300",
           ])}

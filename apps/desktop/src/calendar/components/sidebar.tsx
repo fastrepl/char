@@ -1,5 +1,4 @@
 import { platform } from "@tauri-apps/plugin-os";
-import { usePermission } from "~/shared/hooks/usePermissions";
 
 import {
   Accordion,
@@ -13,6 +12,8 @@ import { SyncProvider } from "./apple/context";
 import { AccessPermissionRow } from "./apple/permission";
 import { OAuthProviderContent } from "./oauth/provider-content";
 import { PROVIDERS } from "./shared";
+
+import { usePermission } from "~/shared/hooks/usePermissions";
 
 export function CalendarSidebarContent() {
   const isMacos = platform() === "macos";
@@ -34,7 +35,7 @@ export function CalendarSidebarContent() {
             {provider.icon}
             <span className="text-sm font-medium">{provider.displayName}</span>
             {provider.badge && (
-              <span className="text-xs text-neutral-500 font-light border border-neutral-300 rounded-full px-2">
+              <span className="rounded-full border border-neutral-300 px-2 text-xs font-light text-neutral-500">
                 {provider.badge}
               </span>
             )}
@@ -52,7 +53,7 @@ export function CalendarSidebarContent() {
                   {provider.displayName}
                 </span>
                 {provider.badge && (
-                  <span className="text-xs text-neutral-500 font-light border border-neutral-300 rounded-full px-2">
+                  <span className="rounded-full border border-neutral-300 px-2 text-xs font-light text-neutral-500">
                     {provider.badge}
                   </span>
                 )}

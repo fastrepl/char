@@ -1,5 +1,4 @@
 import type { Queries } from "tinybase/with-schemas";
-import type { Schemas, Store } from "~/store/tinybase/store/main";
 
 import { createCtx } from "./ctx";
 import {
@@ -14,6 +13,8 @@ import {
   syncSessionEmbeddedEvents,
   syncSessionParticipants,
 } from "./process";
+
+import type { Schemas, Store } from "~/store/tinybase/store/main";
 
 export const CALENDAR_SYNC_TASK_ID = "calendarSync";
 

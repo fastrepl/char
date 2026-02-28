@@ -37,10 +37,10 @@ export const Route = createFileRoute("/_view/security")({
 function Component() {
   return (
     <div
-      className="bg-linear-to-b from-white via-stone-50/20 to-white min-h-screen"
+      className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white"
       style={{ backgroundImage: "url(/patterns/dots.svg)" }}
     >
-      <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
+      <div className="mx-auto max-w-6xl border-x border-neutral-100 bg-white">
         <HeroSection />
         <SlashSeparator />
         <SecurityPrinciplesSection />
@@ -63,17 +63,17 @@ function HeroSection() {
   return (
     <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
       <div className="px-6 py-12 lg:py-20">
-        <header className="mb-12 text-center max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-stone-100 rounded-full text-sm text-stone-700 mb-6">
+        <header className="mx-auto mb-12 max-w-4xl text-center">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-stone-100 px-4 py-2 text-sm text-stone-700">
             <Icon icon="mdi:shield-check" className="text-lg" />
             <span>Security-first architecture</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif text-stone-700 mb-6">
+          <h1 className="mb-6 font-serif text-4xl text-stone-700 sm:text-5xl lg:text-6xl">
             Your data security
             <br />
             is our priority
           </h1>
-          <p className="text-lg sm:text-xl text-neutral-600 leading-relaxed max-w-3xl mx-auto">
+          <p className="mx-auto max-w-3xl text-lg leading-relaxed text-neutral-600 sm:text-xl">
             At Char, we believe your meeting conversations are among your most
             sensitive data. That's why we've built security into every layer of
             our architecture, not as an afterthought, but as a foundational
@@ -115,24 +115,24 @@ function SecurityPrinciplesSection() {
 
   return (
     <section className="px-6 py-12 lg:py-16">
-      <h2 className="text-3xl font-serif text-stone-700 mb-4 text-center">
+      <h2 className="mb-4 text-center font-serif text-3xl text-stone-700">
         Security principles we live by
       </h2>
-      <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
+      <p className="mx-auto mb-12 max-w-2xl text-center text-neutral-600">
         These aren't just marketing claims. They're architectural decisions
         baked into every aspect of Char.
       </p>
-      <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+      <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
         {principles.map((principle, index) => (
           <div
             key={index}
-            className="p-6 border border-neutral-200 rounded-lg bg-white"
+            className="rounded-lg border border-neutral-200 bg-white p-6"
           >
             <Icon
               icon={principle.icon}
-              className="text-3xl text-stone-700 mb-4"
+              className="mb-4 text-3xl text-stone-700"
             />
-            <h3 className="text-xl font-serif text-stone-700 mb-2">
+            <h3 className="mb-2 font-serif text-xl text-stone-700">
               {principle.title}
             </h3>
             <p className="text-neutral-600">{principle.description}</p>
@@ -145,29 +145,29 @@ function SecurityPrinciplesSection() {
 
 function LocalFirstSection() {
   return (
-    <section className="px-6 py-12 lg:py-16 bg-stone-50/30">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
+    <section className="bg-stone-50/30 px-6 py-12 lg:py-16">
+      <div className="mx-auto max-w-4xl">
+        <div className="mb-12 text-center">
           <Icon
             icon="mdi:desktop-classic"
-            className="text-5xl text-stone-700 mb-4"
+            className="mb-4 text-5xl text-stone-700"
           />
-          <h2 className="text-3xl font-serif text-stone-700 mb-4">
+          <h2 className="mb-4 font-serif text-3xl text-stone-700">
             Local-first means secure by default
           </h2>
-          <p className="text-neutral-600 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-neutral-600">
             Unlike cloud-based alternatives that upload your audio to remote
             servers, Char processes everything on your machine.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="text-center p-6">
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="p-6 text-center">
             <Icon
               icon="mdi:microphone"
-              className="text-4xl text-stone-700 mb-4 mx-auto"
+              className="mx-auto mb-4 text-4xl text-stone-700"
             />
-            <h3 className="font-medium text-stone-700 mb-2">
+            <h3 className="mb-2 font-medium text-stone-700">
               Audio stays local
             </h3>
             <p className="text-sm text-neutral-600">
@@ -175,23 +175,23 @@ function LocalFirstSection() {
               no third-party access, no data mining.
             </p>
           </div>
-          <div className="text-center p-6">
+          <div className="p-6 text-center">
             <Icon
               icon="mdi:brain"
-              className="text-4xl text-stone-700 mb-4 mx-auto"
+              className="mx-auto mb-4 text-4xl text-stone-700"
             />
-            <h3 className="font-medium text-stone-700 mb-2">On-device AI</h3>
+            <h3 className="mb-2 font-medium text-stone-700">On-device AI</h3>
             <p className="text-sm text-neutral-600">
               Transcription and summarization run locally using optimized AI
               models. Your words are processed without ever touching the cloud.
             </p>
           </div>
-          <div className="text-center p-6">
+          <div className="p-6 text-center">
             <Icon
               icon="mdi:database"
-              className="text-4xl text-stone-700 mb-4 mx-auto"
+              className="mx-auto mb-4 text-4xl text-stone-700"
             />
-            <h3 className="font-medium text-stone-700 mb-2">Local storage</h3>
+            <h3 className="mb-2 font-medium text-stone-700">Local storage</h3>
             <p className="text-sm text-neutral-600">
               All notes, transcripts, and metadata are stored in an encrypted
               local database that only you can access.
@@ -199,14 +199,14 @@ function LocalFirstSection() {
           </div>
         </div>
 
-        <div className="mt-12 p-8 border border-neutral-200 rounded-lg bg-white">
+        <div className="mt-12 rounded-lg border border-neutral-200 bg-white p-8">
           <div className="flex items-start gap-4">
             <Icon
               icon="mdi:wifi-off"
-              className="text-3xl text-stone-700 shrink-0"
+              className="shrink-0 text-3xl text-stone-700"
             />
             <div>
-              <h3 className="text-xl font-serif text-stone-700 mb-3">
+              <h3 className="mb-3 font-serif text-xl text-stone-700">
                 Works completely offline
               </h3>
               <p className="text-neutral-600">
@@ -227,27 +227,27 @@ function LocalFirstSection() {
 function EncryptionSection() {
   return (
     <section className="px-6 py-12 lg:py-16">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <Icon icon="mdi:lock" className="text-5xl text-stone-700 mb-4" />
-          <h2 className="text-3xl font-serif text-stone-700 mb-4">
+      <div className="mx-auto max-w-4xl">
+        <div className="mb-12 text-center">
+          <Icon icon="mdi:lock" className="mb-4 text-5xl text-stone-700" />
+          <h2 className="mb-4 font-serif text-3xl text-stone-700">
             Enterprise-grade encryption
           </h2>
-          <p className="text-neutral-600 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-neutral-600">
             Your data is protected with the same encryption standards used by
             banks and government agencies.
           </p>
         </div>
 
         <div className="flex flex-col gap-6">
-          <div className="p-6 border border-neutral-200 rounded-lg bg-white">
+          <div className="rounded-lg border border-neutral-200 bg-white p-6">
             <div className="flex items-start gap-4">
               <Icon
                 icon="mdi:harddisk"
-                className="text-2xl text-stone-700 shrink-0 mt-1"
+                className="mt-1 shrink-0 text-2xl text-stone-700"
               />
               <div>
-                <h3 className="font-medium text-stone-700 mb-2">
+                <h3 className="mb-2 font-medium text-stone-700">
                   Encryption at rest
                 </h3>
                 <p className="text-neutral-600">
@@ -259,14 +259,14 @@ function EncryptionSection() {
             </div>
           </div>
 
-          <div className="p-6 border border-neutral-200 rounded-lg bg-white">
+          <div className="rounded-lg border border-neutral-200 bg-white p-6">
             <div className="flex items-start gap-4">
               <Icon
                 icon="mdi:swap-horizontal"
-                className="text-2xl text-stone-700 shrink-0 mt-1"
+                className="mt-1 shrink-0 text-2xl text-stone-700"
               />
               <div>
-                <h3 className="font-medium text-stone-700 mb-2">
+                <h3 className="mb-2 font-medium text-stone-700">
                   Encryption in transit
                 </h3>
                 <p className="text-neutral-600">
@@ -279,14 +279,14 @@ function EncryptionSection() {
             </div>
           </div>
 
-          <div className="p-6 border border-neutral-200 rounded-lg bg-white">
+          <div className="rounded-lg border border-neutral-200 bg-white p-6">
             <div className="flex items-start gap-4">
               <Icon
                 icon="mdi:key"
-                className="text-2xl text-stone-700 shrink-0 mt-1"
+                className="mt-1 shrink-0 text-2xl text-stone-700"
               />
               <div>
-                <h3 className="font-medium text-stone-700 mb-2">
+                <h3 className="mb-2 font-medium text-stone-700">
                   Key management
                 </h3>
                 <p className="text-neutral-600">
@@ -305,27 +305,27 @@ function EncryptionSection() {
 
 function OpenSourceSecuritySection() {
   return (
-    <section className="px-6 py-12 lg:py-16 bg-stone-50/30">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
+    <section className="bg-stone-50/30 px-6 py-12 lg:py-16">
+      <div className="mx-auto max-w-4xl">
+        <div className="mb-12 text-center">
           <Icon
             icon="mdi:code-braces"
-            className="text-5xl text-stone-700 mb-4"
+            className="mb-4 text-5xl text-stone-700"
           />
-          <h2 className="text-3xl font-serif text-stone-700 mb-4">
+          <h2 className="mb-4 font-serif text-3xl text-stone-700">
             Security through transparency
           </h2>
-          <p className="text-neutral-600 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-neutral-600">
             Open source isn't just about collaboration. It's about trust. When
             you can see exactly how your data is handled, you don't have to take
             our word for it.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="p-6 border border-neutral-200 rounded-lg bg-white">
-            <Icon icon="mdi:magnify" className="text-3xl text-stone-700 mb-4" />
-            <h3 className="text-xl font-serif text-stone-700 mb-2">
+        <div className="grid gap-8 md:grid-cols-2">
+          <div className="rounded-lg border border-neutral-200 bg-white p-6">
+            <Icon icon="mdi:magnify" className="mb-4 text-3xl text-stone-700" />
+            <h3 className="mb-2 font-serif text-xl text-stone-700">
               Fully auditable
             </h3>
             <p className="text-neutral-600">
@@ -335,12 +335,12 @@ function OpenSourceSecuritySection() {
               program.
             </p>
           </div>
-          <div className="p-6 border border-neutral-200 rounded-lg bg-white">
+          <div className="rounded-lg border border-neutral-200 bg-white p-6">
             <Icon
               icon="mdi:account-group"
-              className="text-3xl text-stone-700 mb-4"
+              className="mb-4 text-3xl text-stone-700"
             />
-            <h3 className="text-xl font-serif text-stone-700 mb-2">
+            <h3 className="mb-2 font-serif text-xl text-stone-700">
               Community reviewed
             </h3>
             <p className="text-neutral-600">
@@ -357,7 +357,7 @@ function OpenSourceSecuritySection() {
             href="https://github.com/fastrepl/char"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-stone-700 hover:text-stone-800 font-medium"
+            className="inline-flex items-center gap-2 font-medium text-stone-700 hover:text-stone-800"
           >
             <Icon icon="mdi:github" className="text-lg" />
             Review our security implementation on GitHub
@@ -399,28 +399,28 @@ function EnterpriseSecuritySection() {
 
   return (
     <section className="px-6 py-12 lg:py-16">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-serif text-stone-700 mb-4">
+      <div className="mx-auto max-w-4xl">
+        <div className="mb-12 text-center">
+          <h2 className="mb-4 font-serif text-3xl text-stone-700">
             Enterprise-ready security
           </h2>
-          <p className="text-neutral-600 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-neutral-600">
             For organizations with advanced security requirements, Char offers
             enterprise features that meet the most demanding standards.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-6">
+        <div className="grid gap-6 sm:grid-cols-2">
           {features.map((feature, index) => (
             <div
               key={index}
-              className="p-6 border border-neutral-200 rounded-lg bg-white"
+              className="rounded-lg border border-neutral-200 bg-white p-6"
             >
               <Icon
                 icon={feature.icon}
-                className="text-2xl text-stone-700 mb-3"
+                className="mb-3 text-2xl text-stone-700"
               />
-              <h3 className="font-medium text-stone-700 mb-2">
+              <h3 className="mb-2 font-medium text-stone-700">
                 {feature.title}
               </h3>
               <p className="text-sm text-neutral-600">{feature.description}</p>
@@ -431,7 +431,7 @@ function EnterpriseSecuritySection() {
         <div className="mt-8 text-center">
           <Link
             to="/enterprise/"
-            className="inline-flex items-center gap-2 text-stone-700 hover:text-stone-800 font-medium"
+            className="inline-flex items-center gap-2 font-medium text-stone-700 hover:text-stone-800"
           >
             Learn more about enterprise features
             <Icon icon="mdi:arrow-right" className="text-lg" />
@@ -444,26 +444,26 @@ function EnterpriseSecuritySection() {
 
 function CTASection() {
   return (
-    <section className="px-6 py-16 lg:py-20 bg-stone-50/30">
-      <div className="max-w-3xl mx-auto text-center">
+    <section className="bg-stone-50/30 px-6 py-16 lg:py-20">
+      <div className="mx-auto max-w-3xl text-center">
         <Icon
           icon="mdi:shield-check"
-          className="text-5xl text-stone-700 mb-6 mx-auto"
+          className="mx-auto mb-6 text-5xl text-stone-700"
         />
-        <h2 className="text-3xl font-serif text-stone-700 mb-4">
+        <h2 className="mb-4 font-serif text-3xl text-stone-700">
           Ready to take control of your meeting data?
         </h2>
-        <p className="text-neutral-600 mb-8">
+        <p className="mb-8 text-neutral-600">
           Join thousands of professionals who trust Char to keep their
           conversations secure and private.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex flex-col justify-center gap-4 sm:flex-row">
           <Link
             to="/download/"
             className={cn([
-              "inline-flex items-center justify-center gap-2 px-8 py-3 text-base font-medium rounded-full",
+              "inline-flex items-center justify-center gap-2 rounded-full px-8 py-3 text-base font-medium",
               "bg-linear-to-t from-stone-600 to-stone-500 text-white",
-              "hover:scale-105 active:scale-95 transition-transform shadow-md hover:shadow-lg",
+              "shadow-md transition-transform hover:scale-105 hover:shadow-lg active:scale-95",
             ])}
           >
             <Icon icon="mdi:download" className="text-lg" />
@@ -472,9 +472,9 @@ function CTASection() {
           <Link
             to="/privacy/"
             className={cn([
-              "inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-full",
+              "inline-flex items-center justify-center rounded-full px-8 py-3 text-base font-medium",
               "border border-neutral-300 text-stone-700",
-              "hover:bg-stone-50 transition-colors",
+              "transition-colors hover:bg-stone-50",
             ])}
           >
             Learn about privacy

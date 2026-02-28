@@ -133,9 +133,9 @@ export function SettingsIntegrations() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h2 className="font-semibold font-serif cursor-default">
+            <h2 className="cursor-default font-serif font-semibold">
               Integrations
             </h2>
             <Badge variant="secondary" className="text-xs">
@@ -172,7 +172,7 @@ export function SettingsIntegrations() {
 
         <div className="relative mb-6">
           <Search
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400"
+            className="absolute top-1/2 left-3 -translate-y-1/2 transform text-neutral-400"
             size={16}
           />
           <Input
@@ -186,10 +186,10 @@ export function SettingsIntegrations() {
 
         <div className="flex flex-col gap-4">
           {filteredIntegrations.length === 0 ? (
-            <div className="text-center py-12 text-neutral-500">
+            <div className="py-12 text-center text-neutral-500">
               <Puzzle size={48} className="mx-auto mb-4 text-neutral-300" />
               <p className="text-sm">No integrations found</p>
-              <p className="text-xs text-neutral-400 mt-1">
+              <p className="mt-1 text-xs text-neutral-400">
                 Try a different search term
               </p>
             </div>
@@ -246,11 +246,11 @@ function IntegrationCard({
 
   if (!integration.connected) {
     return (
-      <div className="border border-neutral-200 rounded-lg p-4">
+      <div className="rounded-lg border border-neutral-200 p-4">
         <div className="flex items-start gap-4">
           <div className="mt-1">{getProviderIcon(integration.provider)}</div>
           <div className="flex-1">
-            <h3 className="text-sm font-medium mb-1">{integration.name}</h3>
+            <h3 className="mb-1 text-sm font-medium">{integration.name}</h3>
             <p className="text-xs text-neutral-600">
               {integration.description}
             </p>

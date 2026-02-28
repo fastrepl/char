@@ -72,13 +72,13 @@ function Component() {
 
   return (
     <main
-      className="flex-1 bg-linear-to-b from-white via-stone-50/20 to-white min-h-screen"
+      className="min-h-screen flex-1 bg-linear-to-b from-white via-stone-50/20 to-white"
       style={{ backgroundImage: "url(/patterns/dots.svg)" }}
     >
-      <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
-        <div className="max-w-3xl mx-auto px-6 pt-16 lg:pt-24 pb-8">
-          <div className="flex flex-col items-center text-center gap-2 mb-12">
-            <h1 className="text-3xl sm:text-4xl font-serif font-medium text-stone-700">
+      <div className="mx-auto max-w-6xl border-x border-neutral-100 bg-white">
+        <div className="mx-auto max-w-3xl px-6 pt-16 pb-8 lg:pt-24">
+          <div className="mb-12 flex flex-col items-center gap-2 text-center">
+            <h1 className="font-serif text-3xl font-medium text-stone-700 sm:text-4xl">
               {getWeekLabel(update.date)}
             </h1>
             <time className="text-sm text-neutral-500" dateTime={update.date}>
@@ -97,13 +97,13 @@ function Component() {
 
         <div className="border-t border-neutral-100" />
 
-        <div className="max-w-3xl mx-auto px-6 py-12">
+        <div className="mx-auto max-w-3xl px-6 py-12">
           <div className="flex items-center justify-center gap-1">
             {newerSlug && (
               <Link
                 to="/updates/$slug/"
                 params={{ slug: newerSlug }}
-                className="inline-flex items-center text-stone-400 hover:text-stone-700 transition-colors px-1 py-1"
+                className="inline-flex items-center px-1 py-1 text-stone-400 transition-colors hover:text-stone-700"
               >
                 <Icon icon="mdi:arrow-left" className="text-base" />
               </Link>
@@ -117,9 +117,9 @@ function Component() {
                   to="/updates/$slug/"
                   params={{ slug: u.slug }}
                   className={cn([
-                    "text-sm px-2 py-1 rounded transition-colors",
+                    "rounded px-2 py-1 text-sm transition-colors",
                     isCurrent
-                      ? "font-medium text-stone-900 bg-stone-100"
+                      ? "bg-stone-100 font-medium text-stone-900"
                       : "text-stone-500 hover:text-stone-800",
                   ])}
                 >
@@ -131,7 +131,7 @@ function Component() {
               <Link
                 to="/updates/$slug/"
                 params={{ slug: olderSlug }}
-                className="inline-flex items-center text-stone-400 hover:text-stone-700 transition-colors px-1 py-1"
+                className="inline-flex items-center px-1 py-1 text-stone-400 transition-colors hover:text-stone-700"
               >
                 <Icon icon="mdi:arrow-right" className="text-base" />
               </Link>
@@ -141,9 +141,9 @@ function Component() {
 
         <div className="border-t border-neutral-100" />
 
-        <div className="max-w-3xl mx-auto px-6 py-16 lg:py-24">
-          <div className="flex flex-col items-center text-center gap-4">
-            <h2 className="text-3xl font-serif text-stone-700">
+        <div className="mx-auto max-w-3xl px-6 py-16 lg:py-24">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <h2 className="font-serif text-3xl text-stone-700">
               Get updates in your inbox
             </h2>
             <p className="text-neutral-600">

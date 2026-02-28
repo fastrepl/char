@@ -56,7 +56,7 @@ export function ChatMessageInput({
   return (
     <Container hasContextBar={hasContextBar}>
       <div className="flex flex-col px-3 pt-3 pb-2">
-        <div className="flex-1 mb-1">
+        <div className="mb-1 flex-1">
           <ChatEditor
             ref={editorRef}
             editable={!disabled}
@@ -88,12 +88,12 @@ export function ChatMessageInput({
               onClick={handleSubmit}
               disabled={disabled}
               className={cn([
-                "inline-flex items-center gap-1.5 h-7 pl-2.5 pr-1.5 rounded-lg text-xs font-medium transition-all duration-100",
+                "inline-flex h-7 items-center gap-1.5 rounded-lg pr-1.5 pl-2.5 text-xs font-medium transition-all duration-100",
                 "border",
                 disabled
-                  ? "text-neutral-300 border-neutral-200 cursor-default"
+                  ? "cursor-default border-neutral-200 text-neutral-300"
                   : [
-                      "text-white bg-stone-800 border-stone-600",
+                      "border-stone-600 bg-stone-800 text-white",
                       "hover:bg-stone-700",
                       "active:scale-[0.97] active:bg-stone-600",
                     ],
@@ -103,7 +103,7 @@ export function ChatMessageInput({
               Send
               <span
                 className={cn([
-                  "text-xs font-mono",
+                  "font-mono text-xs",
                   disabled ? "text-neutral-300" : "text-stone-400",
                 ])}
               >
@@ -128,7 +128,7 @@ function Container({
     <div className={cn(["relative", "px-2 pb-2"])}>
       <div
         className={cn([
-          "flex flex-col border border-neutral-200 rounded-b-xl",
+          "flex flex-col rounded-b-xl border border-neutral-200",
           hasContextBar && "rounded-t-none border-t-0",
         ])}
       >

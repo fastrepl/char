@@ -1,13 +1,14 @@
 import type { LanguageModel } from "ai";
+
+import { commands as analyticsCommands } from "@hypr/plugin-analytics";
+
+import { getEligibility } from "./eligibility";
+
 import type { Store as MainStore } from "~/store/tinybase/store/main";
 import { INDEXES } from "~/store/tinybase/store/main";
 import { createTaskId } from "~/store/zustand/ai-task/task-configs";
 import type { TasksActions } from "~/store/zustand/ai-task/tasks";
 import { listenerStore } from "~/store/zustand/listener/instance";
-
-import { commands as analyticsCommands } from "@hypr/plugin-analytics";
-
-import { getEligibility } from "./eligibility";
 
 type EnhanceResult =
   | { type: "started"; noteId: string }

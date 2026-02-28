@@ -19,9 +19,9 @@ export function IntegrationsSettingsCard() {
   };
 
   return (
-    <div className="border border-neutral-100 rounded-xs">
+    <div className="rounded-xs border border-neutral-100">
       <div className="p-4">
-        <h3 className="font-serif text-lg font-semibold mb-2">Integrations</h3>
+        <h3 className="mb-2 font-serif text-lg font-semibold">Integrations</h3>
         <p className="text-sm text-neutral-600">
           Connect third-party services to enhance your experience
         </p>
@@ -39,18 +39,18 @@ export function IntegrationsSettingsCard() {
             <div className="flex items-center gap-3">
               <div className="text-sm font-medium">{integration.name}</div>
               {!billing.isPro && (
-                <span className="text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full">
+                <span className="rounded-full border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
                   Pro
                 </span>
               )}
               {isLoading ? (
                 <span className="text-xs text-neutral-400">Checking...</span>
               ) : isError ? (
-                <span className="text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+                <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs text-red-600">
                   Check failed
                 </span>
               ) : isConnected ? (
-                <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                <span className="rounded-full bg-green-50 px-2 py-0.5 text-xs text-green-600">
                   Connected
                 </span>
               ) : null}
@@ -59,7 +59,7 @@ export function IntegrationsSettingsCard() {
               <Link
                 to="/app/checkout/"
                 search={{ period: "monthly" }}
-                className="px-4 h-8 flex items-center text-sm bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%] transition-all"
+                className="flex h-8 items-center rounded-full bg-linear-to-t from-stone-600 to-stone-500 px-4 text-sm text-white shadow-md transition-all hover:scale-[102%] hover:shadow-lg active:scale-[98%]"
               >
                 Upgrade to Pro
               </Link>
@@ -79,10 +79,10 @@ export function IntegrationsSettingsCard() {
                     })
                   }
                   className={cn([
-                    "px-4 h-8 flex items-center text-sm rounded-full transition-all cursor-pointer",
+                    "flex h-8 cursor-pointer items-center rounded-full px-4 text-sm transition-all",
                     isConnected
-                      ? "bg-linear-to-b from-white to-stone-50 border border-neutral-300 text-neutral-700 shadow-xs hover:shadow-md hover:scale-[102%] active:scale-[98%]"
-                      : "bg-linear-to-t from-stone-600 to-stone-500 text-white shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
+                      ? "border border-neutral-300 bg-linear-to-b from-white to-stone-50 text-neutral-700 shadow-xs hover:scale-[102%] hover:shadow-md active:scale-[98%]"
+                      : "bg-linear-to-t from-stone-600 to-stone-500 text-white shadow-md hover:scale-[102%] hover:shadow-lg active:scale-[98%]",
                   ])}
                 >
                   {isConnected ? "Reconnect" : "Connect"}
@@ -99,7 +99,7 @@ export function IntegrationsSettingsCard() {
                         },
                       })
                     }
-                    className="px-4 h-8 flex items-center text-sm rounded-full transition-all cursor-pointer bg-linear-to-t from-red-600 to-red-500 text-white shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]"
+                    className="flex h-8 cursor-pointer items-center rounded-full bg-linear-to-t from-red-600 to-red-500 px-4 text-sm text-white shadow-md transition-all hover:scale-[102%] hover:shadow-lg active:scale-[98%]"
                   >
                     Disconnect
                   </button>

@@ -2,15 +2,6 @@ import { useForm } from "@tanstack/react-form";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { arch } from "@tauri-apps/plugin-os";
 import { Check, Loader2 } from "lucide-react";
-import { useBillingAccess } from "~/auth/billing";
-import { useNotifications } from "~/contexts/notifications";
-import { providerRowId } from "~/settings/ai/shared";
-import {
-  getProviderSelectionBlockers,
-  requiresEntitlement,
-} from "~/settings/ai/shared/eligibility";
-import { useConfigValues } from "~/shared/config";
-import * as settings from "~/store/tinybase/store/settings";
 
 import { commands as listenerCommands } from "@hypr/plugin-listener";
 import {
@@ -36,6 +27,16 @@ import {
   PROVIDERS,
   sttModelQueries,
 } from "./shared";
+
+import { useBillingAccess } from "~/auth/billing";
+import { useNotifications } from "~/contexts/notifications";
+import { providerRowId } from "~/settings/ai/shared";
+import {
+  getProviderSelectionBlockers,
+  requiresEntitlement,
+} from "~/settings/ai/shared/eligibility";
+import { useConfigValues } from "~/shared/config";
+import * as settings from "~/store/tinybase/store/settings";
 
 export function SelectProviderAndModel() {
   const { current_stt_provider, current_stt_model, spoken_languages } =
@@ -112,11 +113,11 @@ export function SelectProviderAndModel() {
 
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="text-md font-semibold font-serif">Model being used</h3>
+      <h3 className="text-md font-serif font-semibold">Model being used</h3>
       <div
         className={cn([
           "flex flex-col gap-4",
-          "p-4 rounded-xl border border-neutral-200",
+          "rounded-xl border border-neutral-200 p-4",
           !isConfigured || hasError
             ? "bg-red-50"
             : hasLanguageWarning
@@ -134,7 +135,7 @@ export function SelectProviderAndModel() {
             }}
           >
             {(field) => (
-              <div className="flex-2 min-w-0" data-stt-provider-selector>
+              <div className="min-w-0 flex-2" data-stt-provider-selector>
                 <Select
                   value={field.state.value}
                   onValueChange={(value) => field.handleChange(value)}
@@ -165,7 +166,7 @@ export function SelectProviderAndModel() {
                                 {provider.icon}
                                 <span>{provider.displayName}</span>
                                 {requiresPro ? (
-                                  <span className="text-[10px] uppercase tracking-wide text-neutral-500 border border-neutral-200 rounded-full px-2 py-0.5">
+                                  <span className="rounded-full border border-neutral-200 px-2 py-0.5 text-[10px] tracking-wide text-neutral-500 uppercase">
                                     Pro
                                   </span>
                                 ) : null}
@@ -195,7 +196,7 @@ export function SelectProviderAndModel() {
               ) as ProviderId;
               if (providerId === "custom") {
                 return (
-                  <div className="flex-3 min-w-0">
+                  <div className="min-w-0 flex-3">
                     <Input
                       value={field.state.value}
                       onChange={(event) =>
@@ -211,7 +212,7 @@ export function SelectProviderAndModel() {
               const models = configuredProviders?.[providerId]?.models ?? [];
 
               return (
-                <div className="flex-3 min-w-0">
+                <div className="min-w-0 flex-3">
                   <Select
                     value={field.state.value}
                     onValueChange={(value) => field.handleChange(value)}
@@ -220,7 +221,7 @@ export function SelectProviderAndModel() {
                     <SelectTrigger
                       className={cn([
                         "bg-white shadow-none focus:ring-0",
-                        "[&>span]:flex [&>span]:items-center [&>span]:justify-between [&>span]:w-full [&>span]:gap-2",
+                        "[&>span]:flex [&>span]:w-full [&>span]:items-center [&>span]:justify-between [&>span]:gap-2",
                         isConfigured && "[&>svg:last-child]:hidden",
                       ])}
                     >
@@ -250,7 +251,7 @@ export function SelectProviderAndModel() {
         </div>
 
         {!isConfigured && (
-          <div className="flex items-center gap-2 pt-2 border-t border-red-200">
+          <div className="flex items-center gap-2 border-t border-red-200 pt-2">
             <span className="text-sm text-red-600">
               <strong className="font-medium">Transcription model</strong> is
               needed to make Char listen to your conversations.
@@ -259,12 +260,12 @@ export function SelectProviderAndModel() {
         )}
 
         {hasError && health.message && (
-          <div className="flex items-center gap-2 pt-2 border-t border-red-200">
+          <div className="flex items-center gap-2 border-t border-red-200 pt-2">
             <span className="text-sm text-red-600">{health.message}</span>
           </div>
         )}
         {hasLanguageWarning && (
-          <div className="flex items-center gap-2 pt-2 border-t border-amber-200">
+          <div className="flex items-center gap-2 border-t border-amber-200 pt-2">
             <span className="text-sm text-amber-600">
               Selected model may not support all your spoken languages.
             </span>
@@ -451,7 +452,7 @@ function ModelSelectItem({
       {isDownloading ? (
         <span
           className={cn([
-            "px-2 py-0.5 rounded-full text-[11px] font-medium",
+            "rounded-full px-2 py-0.5 text-[11px] font-medium",
             "flex items-center gap-1",
             "bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-500",
           ])}
@@ -462,7 +463,7 @@ function ModelSelectItem({
       ) : (
         <button
           className={cn([
-            "px-2 py-0.5 rounded-full text-[11px] font-medium",
+            "rounded-full px-2 py-0.5 text-[11px] font-medium",
             "opacity-0 group-hover:opacity-100",
             "transition-all duration-150",
             isCloud

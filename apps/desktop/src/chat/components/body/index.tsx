@@ -1,9 +1,10 @@
 import type { ChatStatus } from "ai";
 import { useEffect, useRef } from "react";
-import type { HyprUIMessage } from "~/chat/types";
 
 import { ChatBodyEmpty } from "./empty";
 import { ChatBodyNonEmpty } from "./non-empty";
+
+import type { HyprUIMessage } from "~/chat/types";
 
 export function ChatBody({
   messages,
@@ -27,7 +28,7 @@ export function ChatBody({
   }, [messages, status, error]);
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto flex flex-col">
+    <div ref={scrollRef} className="flex flex-1 flex-col overflow-y-auto">
       <div className="flex-1" />
       {messages.length === 0 ? (
         <ChatBodyEmpty isModelConfigured={isModelConfigured} />

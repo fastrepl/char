@@ -18,8 +18,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { env } from "~/env";
-import { DEVICE_FINGERPRINT_HEADER, getScheme } from "~/shared/utils";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as miscCommands } from "@hypr/plugin-misc";
@@ -27,6 +25,9 @@ import { commands as openerCommands } from "@hypr/plugin-opener2";
 
 import { supabase } from "./client";
 import { clearAuthStorage, isFatalSessionError } from "./errors";
+
+import { env } from "~/env";
+import { DEVICE_FINGERPRINT_HEADER, getScheme } from "~/shared/utils";
 
 type AuthState = {
   supabase: SupabaseClient | null;

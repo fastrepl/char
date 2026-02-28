@@ -16,7 +16,6 @@ import {
   ChevronRightIcon,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useCalendarData, useNow, useWeekStartsOn } from "~/calendar/hooks";
 
 import { Button } from "@hypr/ui/components/ui/button";
 import { ButtonGroup } from "@hypr/ui/components/ui/button-group";
@@ -24,6 +23,8 @@ import { cn } from "@hypr/utils";
 
 import { DayCell } from "./day-cell";
 import { CalendarSidebarContent } from "./sidebar";
+
+import { useCalendarData, useNow, useWeekStartsOn } from "~/calendar/hooks";
 
 const WEEKDAY_HEADERS_SUN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const WEEKDAY_HEADERS_MON = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -116,13 +117,13 @@ export function CalendarView() {
     <div className="flex h-full overflow-hidden">
       <div
         className={cn([
-          "border-r border-neutral-200 flex flex-col transition-all duration-200",
+          "flex flex-col border-r border-neutral-200 transition-all duration-200",
           showSettings ? "w-72" : "w-0 border-r-0",
         ])}
       >
         {showSettings && (
           <>
-            <div className="px-2 pt-1 pb-1 border-b border-neutral-200 shrink-0 flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2 border-b border-neutral-200 px-2 pt-1 pb-1">
               <Button
                 variant="ghost"
                 size="icon"
@@ -141,11 +142,11 @@ export function CalendarView() {
           </>
         )}
       </div>
-      <div ref={containerRef} className="flex flex-col flex-1 min-w-0">
+      <div ref={containerRef} className="flex min-w-0 flex-1 flex-col">
         <div
           className={cn([
             "flex items-center justify-between",
-            "py-2 pl-3 pr-1 h-12 border-b border-neutral-200",
+            "h-12 border-b border-neutral-200 py-2 pr-1 pl-3",
           ])}
         >
           <div className="flex items-center gap-2">
@@ -178,7 +179,7 @@ export function CalendarView() {
             <Button
               variant="outline"
               size="sm"
-              className="shadow-none px-3"
+              className="px-3 shadow-none"
               onClick={goToToday}
             >
               Today
@@ -216,7 +217,7 @@ export function CalendarView() {
 
         <div
           className={cn([
-            "flex-1 grid overflow-hidden",
+            "grid flex-1 overflow-hidden",
             isMonthView ? "auto-rows-fr" : "grid-rows-1",
           ])}
           style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}

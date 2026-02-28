@@ -1,5 +1,10 @@
 import { TrashIcon } from "lucide-react";
 import { useCallback } from "react";
+
+import { commands as analyticsCommands } from "@hypr/plugin-analytics";
+import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
+import { DropdownMenuItem } from "@hypr/ui/components/ui/dropdown-menu";
+
 import {
   captureSessionData,
   deleteSessionCascade,
@@ -7,10 +12,6 @@ import {
 import * as main from "~/store/tinybase/store/main";
 import { useTabs } from "~/store/zustand/tabs";
 import { useUndoDelete } from "~/store/zustand/undo-delete";
-
-import { commands as analyticsCommands } from "@hypr/plugin-analytics";
-import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
-import { DropdownMenuItem } from "@hypr/ui/components/ui/dropdown-menu";
 
 export function DeleteNote({ sessionId }: { sessionId: string }) {
   const store = main.UI.useStore(main.STORE_ID);
@@ -45,7 +46,7 @@ export function DeleteNote({ sessionId }: { sessionId: string }) {
   return (
     <DropdownMenuItem
       onClick={handleDeleteNote}
-      className="text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer"
+      className="cursor-pointer text-red-600 hover:bg-red-50 hover:text-red-700"
     >
       <TrashIcon />
       <span>Delete</span>

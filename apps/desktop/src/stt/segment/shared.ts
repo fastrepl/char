@@ -1,7 +1,8 @@
 import { Schema } from "effect";
-import { type Store } from "~/store/tinybase/store/main";
 
 import { ChannelProfile, type RenderLabelContext } from "@hypr/transcript";
+
+import { type Store } from "~/store/tinybase/store/main";
 
 export {
   ChannelProfile,

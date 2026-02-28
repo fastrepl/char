@@ -5,8 +5,6 @@ import {
   useScheduleTaskRunCallback,
   useSetTask,
 } from "tinytick/ui-react";
-import * as main from "~/store/tinybase/store/main";
-import * as settings from "~/store/tinybase/store/settings";
 
 import { events as appleCalendarEvents } from "@hypr/plugin-apple-calendar";
 
@@ -17,6 +15,9 @@ import {
   EVENT_NOTIFICATION_TASK_ID,
   type NotifiedEventsMap,
 } from "./event-notification";
+
+import * as main from "~/store/tinybase/store/main";
+import * as settings from "~/store/tinybase/store/settings";
 
 const CALENDAR_SYNC_INTERVAL = 60 * 1000; // 60 sec
 

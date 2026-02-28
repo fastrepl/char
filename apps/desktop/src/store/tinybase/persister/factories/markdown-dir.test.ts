@@ -1,14 +1,15 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
+
+import type { JsonValue } from "@hypr/plugin-fs-sync";
+
+import { createMarkdownDirPersister } from "./markdown-dir";
+
 import {
   createTestMainStore,
   MOCK_DATA_DIR,
   TEST_UUID_1,
   TEST_UUID_2,
 } from "~/store/tinybase/persister/testing/mocks";
-
-import type { JsonValue } from "@hypr/plugin-fs-sync";
-
-import { createMarkdownDirPersister } from "./markdown-dir";
 
 const settingsMocks = vi.hoisted(() => ({
   vaultBase: vi

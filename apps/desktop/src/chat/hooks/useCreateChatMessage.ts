@@ -1,6 +1,6 @@
-import * as main from "~/store/tinybase/store/main";
-
 import type { ChatMessage, ChatMessageStorage } from "@hypr/store";
+
+import * as main from "~/store/tinybase/store/main";
 
 export function useCreateChatMessage() {
   const { user_id } = main.UI.useValues(main.STORE_ID);

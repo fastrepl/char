@@ -115,10 +115,10 @@ function Component() {
 
   return (
     <main
-      className="flex-1 bg-linear-to-b from-white via-stone-50/20 to-white min-h-screen"
+      className="min-h-screen flex-1 bg-linear-to-b from-white via-stone-50/20 to-white"
       style={{ backgroundImage: "url(/patterns/dots.svg)" }}
     >
-      <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
+      <div className="mx-auto max-w-6xl border-x border-neutral-100 bg-white">
         <AnnouncementBanner />
         <HeroSection
           onVideoExpand={setExpandedVideo}
@@ -169,10 +169,10 @@ function AnnouncementBanner() {
       <div
         className={cn([
           "flex items-center justify-center gap-2 text-center",
-          "bg-stone-50/70 border-b border-stone-100",
-          "py-3 px-4",
+          "border-b border-stone-100 bg-stone-50/70",
+          "px-4 py-3",
           "font-serif text-sm text-stone-700",
-          "hover:bg-stone-50 transition-all",
+          "transition-all hover:bg-stone-50",
         ])}
       >
         <span className="group-hover:font-medium">Hyprnote is now Char.</span>
@@ -257,13 +257,13 @@ function HeroSection({
       <div className="flex flex-col items-center text-center">
         <section
           id="hero"
-          className="flex flex-col items-center text-center gap-12 py-24 px-4 laptop:px-0"
+          className="laptop:px-0 flex flex-col items-center gap-12 px-4 py-24 text-center"
         >
           <div className="flex flex-col gap-6">
-            <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700">
+            <h1 className="font-serif text-4xl tracking-tight text-stone-700 sm:text-5xl">
               {heroContent.title}
             </h1>
-            <p className="text-lg sm:text-xl text-neutral-600">
+            <p className="text-lg text-neutral-600 sm:text-xl">
               {heroContent.subtitle}
             </p>
           </div>
@@ -294,7 +294,7 @@ function HeroSection({
                   <>
                     <div
                       className={cn([
-                        "relative flex items-center border-2 rounded-full overflow-hidden transition-all duration-200",
+                        "relative flex items-center overflow-hidden rounded-full border-2 transition-all duration-200",
                         shake && "animate-shake border-stone-600",
                         !shake && mutation.isError && "border-red-500",
                         !shake && mutation.isSuccess && "border-green-500",
@@ -311,13 +311,13 @@ function HeroSection({
                         onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
                         placeholder={heroCTA.inputPlaceholder}
-                        className="flex-1 px-6 py-4 text-base outline-hidden bg-white"
+                        className="flex-1 bg-white px-6 py-4 text-base outline-hidden"
                         disabled={mutation.isPending || mutation.isSuccess}
                       />
                       <button
                         type="submit"
                         disabled={mutation.isPending || mutation.isSuccess}
-                        className="absolute right-1 px-6 py-3 text-sm bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%] transition-all disabled:opacity-50"
+                        className="absolute right-1 rounded-full bg-linear-to-t from-stone-600 to-stone-500 px-6 py-3 text-sm text-white shadow-md transition-all hover:scale-[102%] hover:shadow-lg active:scale-[98%] disabled:opacity-50"
                       >
                         {mutation.isPending
                           ? "Sending..."
@@ -327,12 +327,12 @@ function HeroSection({
                       </button>
                     </div>
                     {mutation.isSuccess && (
-                      <p className="text-green-600 mt-4 text-sm">
+                      <p className="mt-4 text-sm text-green-600">
                         Thanks! We'll be in touch soon.
                       </p>
                     )}
                     {mutation.isError && (
-                      <p className="text-red-600 mt-4 text-sm">
+                      <p className="mt-4 text-sm text-red-600">
                         {mutation.error instanceof Error
                           ? mutation.error.message
                           : "Something went wrong. Please try again."}
@@ -345,12 +345,12 @@ function HeroSection({
                           to={heroCTA.subtextLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-neutral-500 hover:text-neutral-700 hover:underline decoration-dotted mt-4 text-sm block transition-colors"
+                          className="mt-4 block text-sm text-neutral-500 decoration-dotted transition-colors hover:text-neutral-700 hover:underline"
                         >
                           {heroCTA.subtext}
                         </Link>
                       ) : (
-                        <p className="text-neutral-500 mt-4 text-sm">
+                        <p className="mt-4 text-sm text-neutral-500">
                           {heroCTA.subtext}
                         </p>
                       ))}
@@ -359,23 +359,23 @@ function HeroSection({
               </form.Field>
             </form>
           ) : (
-            <div className="flex flex-col gap-4 items-center">
+            <div className="flex flex-col items-center gap-4">
               <DownloadButton />
               {heroCTA.subtextLink ? (
                 <Link
                   to={heroCTA.subtextLink}
-                  className="text-neutral-500 hover:text-neutral-700 text-sm transition-colors"
+                  className="text-sm text-neutral-500 transition-colors hover:text-neutral-700"
                 >
                   {heroCTA.subtext}
                 </Link>
               ) : (
-                <p className="text-neutral-500 text-sm">{heroCTA.subtext}</p>
+                <p className="text-sm text-neutral-500">{heroCTA.subtext}</p>
               )}
             </div>
           )}
         </section>
 
-        <div className="relative aspect-video w-full max-w-4xl border-t border-neutral-100 md:hidden overflow-hidden">
+        <div className="relative aspect-video w-full max-w-4xl overflow-hidden border-t border-neutral-100 md:hidden">
           <VideoThumbnail
             playbackId={MUX_PLAYBACK_ID}
             onPlay={() => onVideoExpand(MUX_PLAYBACK_ID)}
@@ -384,7 +384,7 @@ function HeroSection({
 
         <div className="w-full">
           <ValuePropsGrid valueProps={heroContent.valueProps} />
-          <div className="relative aspect-video w-full border-t border-neutral-100 hidden md:block overflow-hidden">
+          <div className="relative hidden aspect-video w-full overflow-hidden border-t border-neutral-100 md:block">
             <VideoThumbnail
               playbackId={MUX_PLAYBACK_ID}
               onPlay={() => onVideoExpand(MUX_PLAYBACK_ID)}
@@ -405,20 +405,20 @@ function ValuePropsGrid({
   }>;
 }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 border-t border-neutral-100">
+    <div className="grid grid-cols-1 border-t border-neutral-100 md:grid-cols-3">
       {valueProps.map((prop, index) => (
         <div
           key={prop.title}
           className={cn([
-            "p-6 text-left border-b md:border-b-0",
+            "border-b p-6 text-left md:border-b-0",
             index < valueProps.length - 1 && "md:border-r",
             "border-neutral-100",
           ])}
         >
-          <h3 className="font-medium mb-1 text-stone-700 font-serif">
+          <h3 className="mb-1 font-serif font-medium text-stone-700">
             {prop.title}
           </h3>
-          <p className="text-base text-neutral-600 leading-relaxed">
+          <p className="text-base leading-relaxed text-neutral-600">
             {prop.description}
           </p>
         </div>
@@ -431,7 +431,7 @@ function TestimonialsSection() {
   return (
     <section>
       <div className="text-center">
-        <p className="font-medium text-neutral-600 uppercase tracking-wide py-6 font-serif">
+        <p className="py-6 font-serif font-medium tracking-wide text-neutral-600 uppercase">
           Loved by professionals at
         </p>
 
@@ -448,7 +448,7 @@ function TestimonialsSection() {
 
 function TestimonialsMobileGrid() {
   return (
-    <div className="md:hidden flex flex-col">
+    <div className="flex flex-col md:hidden">
       <SocialCard
         platform="reddit"
         author="spilledcarryout"
@@ -545,7 +545,7 @@ Thank you for your dedication and for building a tool that not only saves time, 
 
 Cheers!"
           url="https://www.reddit.com/r/macapps/comments/1lo24b9/comment/n15dr0t/"
-          className="w-full h-full border-l-0 border-r-0 border-b-0"
+          className="h-full w-full border-r-0 border-b-0 border-l-0"
         />
       </div>
 
@@ -579,7 +579,7 @@ Been using it for daily tasks, even simple note-taking is GREAT because I can re
 
 Mad respect to the team. This is how you build in 2025. 🚀"
           url="https://www.linkedin.com/posts/flaviews_guys-at-hyprnote-yc-s25-are-wild-had-activity-7360606765530386434-Klj-"
-          className="w-full h-full border-r-0 border-b-0"
+          className="h-full w-full border-r-0 border-b-0"
         />
       </div>
 
@@ -590,7 +590,7 @@ Mad respect to the team. This is how you build in 2025. 🚀"
           username="yoran_beisher"
           body="Been using Hypernote for a while now, truly one of the best AI apps I've used all year. Like they said, the best thing since sliced bread"
           url="https://x.com/yoran_beisher/status/1953147865486012611"
-          className="w-full h-full overflow-hidden border-r-0 border-b-0"
+          className="h-full w-full overflow-hidden border-r-0 border-b-0"
         />
       </div>
 
@@ -601,7 +601,7 @@ Mad respect to the team. This is how you build in 2025. 🚀"
           username="tomyang11_"
           body="I love the flexibility that @tryhyprnote gives me to integrate personal notes with AI summaries. I can quickly jot down important points during the meeting without getting distracted, then trust that the AI will capture them in full detail for review afterwards."
           url="https://twitter.com/tomyang11_/status/1956395933538902092"
-          className="w-full h-full overflow-hidden border-r-0 border-b-0"
+          className="h-full w-full overflow-hidden border-r-0 border-b-0"
         />
       </div>
     </div>
@@ -611,51 +611,51 @@ Mad respect to the team. This is how you build in 2025. 🚀"
 export function CoolStuffSection() {
   return (
     <section>
-      <div className="text-center border-b border-neutral-100">
-        <p className="font-medium text-neutral-600 uppercase tracking-wide py-6 font-serif">
+      <div className="border-b border-neutral-100 text-center">
+        <p className="py-6 font-serif font-medium tracking-wide text-neutral-600 uppercase">
           Secure by Design
         </p>
       </div>
 
       <div className="hidden sm:grid sm:grid-cols-2">
-        <div className="border-r border-neutral-100 flex flex-col">
-          <div className="p-8 flex flex-col gap-4">
+        <div className="flex flex-col border-r border-neutral-100">
+          <div className="flex flex-col gap-4 p-8">
             <div className="flex items-center gap-3">
               <Icon
                 icon="mdi:robot-off-outline"
                 className="text-3xl text-stone-600"
               />
-              <h3 className="text-2xl font-serif text-stone-700">No bots</h3>
+              <h3 className="font-serif text-2xl text-stone-700">No bots</h3>
             </div>
-            <p className="text-base text-neutral-600 leading-relaxed">
+            <p className="text-base leading-relaxed text-neutral-600">
               Captures system audio—no bots join your calls.
             </p>
           </div>
-          <div className="flex-1 flex items-center justify-center overflow-hidden">
+          <div className="flex flex-1 items-center justify-center overflow-hidden">
             <Image
               src="/api/images/hyprnote/no-bots.jpg"
               alt="No bots interface"
-              className="w-full h-full object-contain"
+              className="h-full w-full object-contain"
             />
           </div>
         </div>
         <div className="flex flex-col">
-          <div className="p-8 flex flex-col gap-4">
+          <div className="flex flex-col gap-4 p-8">
             <div className="flex items-center gap-3">
               <Icon icon="mdi:wifi-off" className="text-3xl text-stone-600" />
-              <h3 className="text-2xl font-serif text-stone-700">
+              <h3 className="font-serif text-2xl text-stone-700">
                 Fully local option
               </h3>
             </div>
-            <p className="text-base text-neutral-600 leading-relaxed">
+            <p className="text-base leading-relaxed text-neutral-600">
               Audio, transcripts, and notes stay on your device as files.
             </p>
           </div>
-          <div className="flex-1 flex items-center justify-center overflow-hidden">
+          <div className="flex flex-1 items-center justify-center overflow-hidden">
             <Image
               src="/api/images/hyprnote/no-wifi.png"
               alt="No internet interface"
-              className="w-full h-full object-contain"
+              className="h-full w-full object-contain"
             />
           </div>
         </div>
@@ -664,14 +664,14 @@ export function CoolStuffSection() {
       <div className="sm:hidden">
         <div className="border-b border-neutral-100">
           <div className="p-6">
-            <div className="flex items-center gap-3 mb-3">
+            <div className="mb-3 flex items-center gap-3">
               <Icon
                 icon="mdi:robot-off-outline"
                 className="text-2xl text-stone-600"
               />
-              <h3 className="text-xl font-serif text-stone-700">No bots</h3>
+              <h3 className="font-serif text-xl text-stone-700">No bots</h3>
             </div>
-            <p className="text-base text-neutral-600 leading-relaxed mb-4">
+            <p className="mb-4 text-base leading-relaxed text-neutral-600">
               Captures system audio—no bots join your calls.
             </p>
           </div>
@@ -679,19 +679,19 @@ export function CoolStuffSection() {
             <Image
               src="/api/images/hyprnote/no-bots.jpg"
               alt="No bots interface"
-              className="w-full h-auto object-contain"
+              className="h-auto w-full object-contain"
             />
           </div>
         </div>
         <div>
           <div className="p-6">
-            <div className="flex items-center gap-3 mb-3">
+            <div className="mb-3 flex items-center gap-3">
               <Icon icon="mdi:wifi-off" className="text-2xl text-stone-600" />
-              <h3 className="text-xl font-serif text-stone-700">
+              <h3 className="font-serif text-xl text-stone-700">
                 Fully local option
               </h3>
             </div>
-            <p className="text-base text-neutral-600 leading-relaxed mb-4">
+            <p className="mb-4 text-base leading-relaxed text-neutral-600">
               Audio, transcripts, and notes stay on your device as files.
             </p>
           </div>
@@ -699,7 +699,7 @@ export function CoolStuffSection() {
             <Image
               src="/api/images/hyprnote/no-wifi.png"
               alt="No internet interface"
-              className="w-full h-auto object-contain"
+              className="h-auto w-full object-contain"
             />
           </div>
         </div>
@@ -773,28 +773,28 @@ export function HowItWorksSection() {
 
   return (
     <section>
-      <div className="text-center border-b border-neutral-100">
-        <p className="font-medium text-neutral-600 uppercase tracking-wide py-6 font-serif">
+      <div className="border-b border-neutral-100 text-center">
+        <p className="py-6 font-serif font-medium tracking-wide text-neutral-600 uppercase">
           How it works
         </p>
       </div>
       <div className="hidden sm:grid sm:grid-cols-2">
-        <div className="border-r border-neutral-100 flex flex-col overflow-clip">
-          <div className="p-8 flex flex-col gap-4">
-            <p className="text-lg font-serif text-neutral-600 leading-relaxed">
+        <div className="flex flex-col overflow-clip border-r border-neutral-100">
+          <div className="flex flex-col gap-4 p-8">
+            <p className="font-serif text-lg leading-relaxed text-neutral-600">
               <span className="font-semibold">While you take notes,</span> Char
               listens and keeps track of everything that happens during the
               meeting.
             </p>
           </div>
-          <div className="flex-1 flex items-end justify-center px-8 pb-0 bg-stone-50/30">
+          <div className="flex flex-1 items-end justify-center bg-stone-50/30 px-8 pb-0">
             <MockWindow showAudioIndicator={enhancedLines === 0}>
-              <div className="p-6 h-75 overflow-hidden">
+              <div className="h-75 overflow-hidden p-6">
                 <div className="text-neutral-700">ui update - moble</div>
                 <div className="text-neutral-700">api</div>
-                <div className="text-neutral-700 mt-4">new dash - urgnet</div>
+                <div className="mt-4 text-neutral-700">new dash - urgnet</div>
                 <div className="text-neutral-700">a/b tst next wk</div>
-                <div className="text-neutral-700 mt-4">
+                <div className="mt-4 text-neutral-700">
                   {typedText1}
                   {typedText1 && typedText1.length < text1.length && (
                     <span className="animate-pulse">|</span>
@@ -812,16 +812,16 @@ export function HowItWorksSection() {
         </div>
 
         <div className="flex flex-col overflow-clip">
-          <div className="p-8 flex flex-col gap-4">
-            <p className="text-lg font-serif text-neutral-600 leading-relaxed">
+          <div className="flex flex-col gap-4 p-8">
+            <p className="font-serif text-lg leading-relaxed text-neutral-600">
               <span className="font-semibold">After the meeting is over,</span>{" "}
               Char combines your notes with transcripts to create a perfect
               summary.
             </p>
           </div>
-          <div className="flex-1 flex items-end justify-center px-8 pb-0 bg-stone-50/30">
+          <div className="flex flex-1 items-end justify-center bg-stone-50/30 px-8 pb-0">
             <MockWindow>
-              <div className="p-6 flex flex-col gap-4 h-75 overflow-hidden">
+              <div className="flex h-75 flex-col gap-4 overflow-hidden p-6">
                 <div className="flex flex-col gap-2">
                   <h4
                     className={cn([
@@ -831,7 +831,7 @@ export function HowItWorksSection() {
                   >
                     Mobile UI Update and API Adjustments
                   </h4>
-                  <ul className="flex flex-col gap-2 text-neutral-700 list-disc pl-5">
+                  <ul className="flex list-disc flex-col gap-2 pl-5 text-neutral-700">
                     <li
                       className={cn(
                         "transition-opacity duration-500",
@@ -873,7 +873,7 @@ export function HowItWorksSection() {
                   >
                     New Dashboard – Urgent Priority
                   </h4>
-                  <ul className="flex flex-col gap-2 text-sm text-neutral-700 list-disc pl-5">
+                  <ul className="flex list-disc flex-col gap-2 pl-5 text-sm text-neutral-700">
                     <li
                       className={cn([
                         "transition-opacity duration-500",
@@ -903,23 +903,23 @@ export function HowItWorksSection() {
       <div className="sm:hidden">
         <div className="border-b border-neutral-100">
           <div className="p-6 pb-2">
-            <p className="text-base font-serif text-neutral-600 leading-relaxed mb-4">
+            <p className="mb-4 font-serif text-base leading-relaxed text-neutral-600">
               <span className="font-semibold">While you take notes,</span> Char
               listens and keeps track of everything that happens during the
               meeting.
             </p>
           </div>
-          <div className="px-6 pb-0 bg-stone-50/30 overflow-clip">
+          <div className="overflow-clip bg-stone-50/30 px-6 pb-0">
             <MockWindow
               variant="mobile"
               showAudioIndicator={enhancedLines === 0}
             >
-              <div className="p-6 h-50 overflow-hidden">
+              <div className="h-50 overflow-hidden p-6">
                 <div className="text-neutral-700">ui update - moble</div>
                 <div className="text-neutral-700">api</div>
-                <div className="text-neutral-700 mt-3">new dash - urgnet</div>
+                <div className="mt-3 text-neutral-700">new dash - urgnet</div>
                 <div className="text-neutral-700">a/b tst next wk</div>
-                <div className="text-neutral-700 mt-3">
+                <div className="mt-3 text-neutral-700">
                   {typedText1}
                   {typedText1 && typedText1.length < text1.length && (
                     <span className="animate-pulse">|</span>
@@ -938,20 +938,20 @@ export function HowItWorksSection() {
 
         <div>
           <div className="p-6 pb-2">
-            <p className="text-base font-serif text-neutral-600 leading-relaxed mb-4">
+            <p className="mb-4 font-serif text-base leading-relaxed text-neutral-600">
               <span className="font-semibold">After the meeting is over,</span>{" "}
               Char combines your notes with transcripts to create a perfect
               summary.
             </p>
           </div>
-          <div className="px-6 pb-0 bg-stone-50/30 overflow-clip">
+          <div className="overflow-clip bg-stone-50/30 px-6 pb-0">
             <MockWindow variant="mobile">
-              <div className="p-6 flex flex-col gap-4 h-50 overflow-hidden">
+              <div className="flex h-50 flex-col gap-4 overflow-hidden p-6">
                 <div className="flex flex-col gap-2">
                   <h4 className="text-lg font-semibold text-stone-700">
                     Mobile UI Update and API Adjustments
                   </h4>
-                  <ul className="flex flex-col gap-2 text-neutral-700 list-disc pl-4">
+                  <ul className="flex list-disc flex-col gap-2 pl-4 text-neutral-700">
                     <li
                       className={cn([
                         "transition-opacity duration-500",
@@ -988,7 +988,7 @@ export function HowItWorksSection() {
                   <h4 className="text-lg font-semibold text-stone-700">
                     New Dashboard – Urgent Priority
                   </h4>
-                  <ul className="flex flex-col gap-2 text-neutral-700 list-disc pl-4">
+                  <ul className="flex list-disc flex-col gap-2 pl-4 text-neutral-700">
                     <li
                       className={cn([
                         "transition-opacity duration-500",
@@ -1116,8 +1116,8 @@ export function MainFeaturesSection({
 
   return (
     <section>
-      <div className="text-center py-16 px-4">
-        <div className="mb-6 mx-auto size-28 shadow-xl border border-neutral-100 flex justify-center items-center rounded-4xl bg-transparent">
+      <div className="px-4 py-16 text-center">
+        <div className="mx-auto mb-6 flex size-28 items-center justify-center rounded-4xl border border-neutral-100 bg-transparent shadow-xl">
           <Image
             src="/api/images/hyprnote/icon.png"
             alt="Char"
@@ -1126,10 +1126,10 @@ export function MainFeaturesSection({
             className="size-24 rounded-3xl border border-neutral-100"
           />
         </div>
-        <h2 className="text-3xl font-serif text-stone-700 mb-4">
+        <h2 className="mb-4 font-serif text-3xl text-stone-700">
           Works like charm
         </h2>
-        <p className="text-neutral-600 max-w-lg mx-auto">
+        <p className="mx-auto max-w-lg text-neutral-600">
           {
             "Super simple and easy to use with its clean interface. And it's getting better with every update — every single week."
           }
@@ -1163,10 +1163,10 @@ function FeaturesMobileCarousel({
   const isSwiping = useRef(false);
 
   return (
-    <div className="max-[800px]:block hidden">
+    <div className="hidden max-[800px]:block">
       <div
         ref={featuresScrollRef}
-        className="overflow-x-auto scrollbar-hide snap-x snap-mandatory"
+        className="scrollbar-hide snap-x snap-mandatory overflow-x-auto"
         onTouchStart={() => {
           isSwiping.current = true;
           onIndexChange(selectedFeature);
@@ -1187,11 +1187,11 @@ function FeaturesMobileCarousel({
         <div className="flex">
           {mainFeatures.map((feature, index) => (
             <div key={index} className="w-full shrink-0 snap-center">
-              <div className="border-y border-neutral-100 overflow-hidden flex flex-col">
+              <div className="flex flex-col overflow-hidden border-y border-neutral-100">
                 <Link
                   to={feature.link}
                   className={cn([
-                    "aspect-video border-b border-neutral-100 overflow-hidden relative block",
+                    "relative block aspect-video overflow-hidden border-b border-neutral-100",
                     (feature.image || feature.muxPlaybackId) &&
                       "bg-neutral-100",
                   ])}
@@ -1206,23 +1206,23 @@ function FeaturesMobileCarousel({
                     <Image
                       src={feature.image}
                       alt={`${feature.title} feature`}
-                      className="w-full h-full object-contain"
+                      className="h-full w-full object-contain"
                     />
                   ) : (
                     <img
                       src="/api/images/hyprnote/static.webp"
                       alt={`${feature.title} feature`}
-                      className="w-full h-full object-cover"
+                      className="h-full w-full object-cover"
                     />
                   )}
                 </Link>
                 <div className="p-6">
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="mb-2 flex items-center gap-3">
                     <Icon
                       icon={feature.icon}
                       className="text-2xl text-stone-600"
                     />
-                    <h3 className="text-lg font-serif text-stone-700">
+                    <h3 className="font-serif text-lg text-stone-700">
                       {feature.title}
                     </h3>
                   </div>
@@ -1242,7 +1242,7 @@ function FeaturesMobileCarousel({
             key={index}
             onClick={() => scrollToFeature(index)}
             className={cn([
-              "h-1 rounded-full cursor-pointer overflow-hidden",
+              "h-1 cursor-pointer overflow-hidden rounded-full",
               selectedFeature === index
                 ? "w-8 bg-neutral-300"
                 : "w-8 bg-neutral-300 hover:bg-neutral-400",
@@ -1289,12 +1289,12 @@ function MobileFeatureVideo({
   }, [isActive]);
 
   return (
-    <div className="w-full h-full relative">
+    <div className="relative h-full w-full">
       <img
         src={thumbnailUrl}
         alt={alt}
         className={cn([
-          "w-full h-full object-contain absolute inset-0 transition-opacity duration-300",
+          "absolute inset-0 h-full w-full object-contain transition-opacity duration-300",
           isActive ? "opacity-0" : "opacity-100",
         ])}
       />
@@ -1307,7 +1307,7 @@ function MobileFeatureVideo({
         maxResolution="1080p"
         minResolution="720p"
         className={cn([
-          "w-full h-full object-contain transition-opacity duration-300",
+          "h-full w-full object-contain transition-opacity duration-300",
           isActive ? "opacity-100" : "opacity-0",
         ])}
         style={
@@ -1345,12 +1345,12 @@ function FeatureVideo({
   }, [isHovered]);
 
   return (
-    <div className="w-full h-full relative">
+    <div className="relative h-full w-full">
       <img
         src={thumbnailUrl}
         alt={alt}
         className={cn([
-          "w-full h-full object-contain absolute inset-0 transition-opacity duration-300",
+          "absolute inset-0 h-full w-full object-contain transition-opacity duration-300",
           isHovered ? "opacity-0" : "opacity-100",
         ])}
       />
@@ -1363,7 +1363,7 @@ function FeatureVideo({
         maxResolution="1080p"
         minResolution="720p"
         className={cn([
-          "w-full h-full object-contain transition-opacity duration-300",
+          "h-full w-full object-contain transition-opacity duration-300",
           isHovered ? "opacity-100" : "opacity-0",
         ])}
         style={
@@ -1388,19 +1388,19 @@ function FeaturesDesktopGrid() {
   ];
 
   return (
-    <div className="min-[800px]:grid hidden grid-cols-6">
+    <div className="hidden grid-cols-6 min-[800px]:grid">
       {mainFeatures.map((feature, index) => (
         <div
           key={index}
           className={cn(
             gridClasses[index],
-            "border-neutral-100 overflow-hidden flex flex-col",
+            "flex flex-col overflow-hidden border-neutral-100",
           )}
         >
           <Link
             to={feature.link}
             className={cn([
-              "aspect-video border-b border-neutral-100 overflow-hidden relative group block",
+              "group relative block aspect-video overflow-hidden border-b border-neutral-100",
               (feature.image || feature.muxPlaybackId) && "bg-neutral-100",
             ])}
             onMouseEnter={() => setHoveredFeature(index)}
@@ -1416,20 +1416,20 @@ function FeaturesDesktopGrid() {
               <Image
                 src={feature.image}
                 alt={`${feature.title} feature`}
-                className="w-full h-full object-contain"
+                className="h-full w-full object-contain"
               />
             ) : (
               <img
                 src="/api/images/hyprnote/static.webp"
                 alt={`${feature.title} feature`}
-                className="w-full h-full object-cover"
+                className="h-full w-full object-cover"
               />
             )}
           </Link>
-          <div className="p-6 flex-1">
-            <div className="flex items-center gap-3 mb-2">
+          <div className="flex-1 p-6">
+            <div className="mb-2 flex items-center gap-3">
               <Icon icon={feature.icon} className="text-2xl text-stone-600" />
-              <h3 className="text-lg font-serif text-stone-700">
+              <h3 className="font-serif text-lg text-stone-700">
                 {feature.title}
               </h3>
             </div>
@@ -1473,8 +1473,8 @@ const templateCategories = [
 export function TemplatesSection() {
   return (
     <section>
-      <div className="text-center py-12 px-4 laptop:px-0">
-        <h2 className="text-3xl font-serif text-stone-700 mb-4">
+      <div className="laptop:px-0 px-4 py-12 text-center">
+        <h2 className="mb-4 font-serif text-3xl text-stone-700">
           A template for every meeting
         </h2>
         <p className="text-neutral-600">
@@ -1486,7 +1486,7 @@ export function TemplatesSection() {
       <TemplatesMobileView />
       <TemplatesDesktopView />
 
-      <div className="text-center py-8 border-t border-neutral-100">
+      <div className="border-t border-neutral-100 py-8 text-center">
         <Link
           to="/gallery/"
           search={{ type: "template" }}
@@ -1506,7 +1506,7 @@ export function TemplatesSection() {
 
 function TemplatesMobileView() {
   return (
-    <div className="md:hidden border-t border-neutral-100">
+    <div className="border-t border-neutral-100 md:hidden">
       {templateCategories.map((category, index) => (
         <div
           key={category.category}
@@ -1516,20 +1516,20 @@ function TemplatesMobileView() {
               "border-b border-neutral-100",
           ])}
         >
-          <div className="flex items-center gap-3 mb-3">
+          <div className="mb-3 flex items-center gap-3">
             <Icon icon={category.icon} className="text-2xl text-stone-600" />
-            <h3 className="text-lg font-serif text-stone-700">
+            <h3 className="font-serif text-lg text-stone-700">
               {category.category}
             </h3>
           </div>
-          <p className="text-base text-neutral-600 mb-4">
+          <p className="mb-4 text-base text-neutral-600">
             {category.description}
           </p>
           <div className="text-left">
             {category.templates.map((template, i) => (
               <span
                 key={template}
-                className="text-[11px] font-mono text-stone-400"
+                className="font-mono text-[11px] text-stone-400"
               >
                 {template}
                 {i < category.templates.length - 1 ? ", " : ""}
@@ -1544,7 +1544,7 @@ function TemplatesMobileView() {
 
 function TemplatesDesktopView() {
   return (
-    <div className="hidden md:grid grid-cols-3 border-t border-neutral-100">
+    <div className="hidden grid-cols-3 border-t border-neutral-100 md:grid">
       {templateCategories.map((category, index) => (
         <div
           key={category.category}
@@ -1554,20 +1554,20 @@ function TemplatesDesktopView() {
               "border-r border-neutral-100",
           ])}
         >
-          <div className="flex items-center gap-3 mb-3">
+          <div className="mb-3 flex items-center gap-3">
             <Icon icon={category.icon} className="text-2xl text-stone-600" />
-            <h3 className="text-lg font-serif text-stone-700">
+            <h3 className="font-serif text-lg text-stone-700">
               {category.category}
             </h3>
           </div>
-          <p className="text-base text-neutral-600 mb-4">
+          <p className="mb-4 text-base text-neutral-600">
             {category.description}
           </p>
           <div className="text-left">
             {category.templates.map((template, i) => (
               <span
                 key={template}
-                className="text-[11px] font-mono text-stone-400"
+                className="font-mono text-[11px] text-stone-400"
               >
                 {template}
                 {i < category.templates.length - 1 ? ", " : ""}
@@ -1582,10 +1582,10 @@ function TemplatesDesktopView() {
 
 function FAQSection() {
   return (
-    <section className="py-16 px-4 laptop:px-0">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-serif text-stone-700 mb-4">
+    <section className="laptop:px-0 px-4 py-16">
+      <div className="mx-auto max-w-4xl">
+        <div className="mb-12 text-center">
+          <h2 className="mb-4 font-serif text-3xl text-stone-700">
             Frequently Asked Questions
           </h2>
         </div>
@@ -1627,8 +1627,8 @@ function FAQSection() {
 
 function ManifestoSection() {
   return (
-    <section className="py-16 px-4 laptop:px-0 bg-[linear-gradient(to_right,#f5f5f5_1px,transparent_1px),linear-gradient(to_bottom,#f5f5f5_1px,transparent_1px)] bg-size-[24px_24px] bg-position-[12px_12px,12px_12px]">
-      <div className="max-w-4xl mx-auto">
+    <section className="laptop:px-0 bg-[linear-gradient(to_right,#f5f5f5_1px,transparent_1px),linear-gradient(to_bottom,#f5f5f5_1px,transparent_1px)] bg-size-[24px_24px] bg-position-[12px_12px,12px_12px] px-4 py-16">
+      <div className="mx-auto max-w-4xl">
         <div
           className="border border-neutral-200 p-4"
           style={{
@@ -1636,16 +1636,16 @@ function ManifestoSection() {
           }}
         >
           <div
-            className="bg-stone-50 border border-neutral-200 rounded-xs p-8 sm:p-12"
+            className="rounded-xs border border-neutral-200 bg-stone-50 p-8 sm:p-12"
             style={{
               backgroundImage: "url(/api/images/texture/paper.png)",
             }}
           >
-            <h2 className="text-2xl sm:text-3xl font-serif text-stone-700 mb-4">
+            <h2 className="mb-4 font-serif text-2xl text-stone-700 sm:text-3xl">
               Our manifesto
             </h2>
 
-            <div className="flex flex-col gap-4 text-neutral-700 leading-relaxed">
+            <div className="flex flex-col gap-4 leading-relaxed text-neutral-700">
               <p>
                 We believe in the power of notetaking, not notetakers. Meetings
                 should be moments of presence, not passive attendance. If you
@@ -1664,26 +1664,26 @@ function ManifestoSection() {
               </p>
             </div>
 
-            <div className="flex gap-2 mt-12 mb-4">
+            <div className="mt-12 mb-4 flex gap-2">
               <Image
                 src="/api/images/team/john.png"
                 alt="John Jeong"
                 width={32}
                 height={32}
-                className="rounded-full object-cover border border-neutral-200"
+                className="rounded-full border border-neutral-200 object-cover"
               />
               <Image
                 src="/api/images/team/yujong.png"
                 alt="Yujong Lee"
                 width={32}
                 height={32}
-                className="rounded-full object-cover border border-neutral-200"
+                className="rounded-full border border-neutral-200 object-cover"
               />
             </div>
 
             <div className="flex flex-col gap-4">
               <div>
-                <p className="text-base text-neutral-600 font-medium italic font-serif">
+                <p className="font-serif text-base font-medium text-neutral-600 italic">
                   Char
                 </p>
                 <p className="text-sm text-neutral-500">
@@ -1698,7 +1698,7 @@ function ManifestoSection() {
                   width={124}
                   height={60}
                   layout="constrained"
-                  className="opacity-80 object-contain"
+                  className="object-contain opacity-80"
                 />
               </div>
             </div>
@@ -1724,16 +1724,16 @@ function BlogSection() {
 
   return (
     <section className="border-t border-neutral-100 py-16">
-      <div className="text-center mb-12 px-4">
-        <h2 className="text-3xl font-serif text-stone-700 mb-4">
+      <div className="mb-12 px-4 text-center">
+        <h2 className="mb-4 font-serif text-3xl text-stone-700">
           Latest from our blog
         </h2>
-        <p className="text-neutral-600 max-w-lg mx-auto">
+        <p className="mx-auto max-w-lg text-neutral-600">
           Insights, updates, and stories from the Char team
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3 px-4">
+      <div className="grid gap-4 px-4 md:grid-cols-3">
         {sortedArticles.map((article) => {
           const ogImage =
             article.coverImage ||
@@ -1746,25 +1746,25 @@ function BlogSection() {
               params={{ slug: article.slug }}
               className="group block h-full"
             >
-              <article className="h-full border border-neutral-100 rounded-xs overflow-hidden bg-white hover:shadow-lg transition-all duration-300 flex flex-col">
+              <article className="flex h-full flex-col overflow-hidden rounded-xs border border-neutral-100 bg-white transition-all duration-300 hover:shadow-lg">
                 <div className="aspect-40/21 overflow-hidden border-b border-neutral-100 bg-stone-50">
                   <img
                     src={ogImage}
                     alt={article.display_title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+                    className="h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
                   />
                 </div>
 
-                <div className="p-6 flex flex-col flex-1">
-                  <h3 className="text-xl font-serif text-stone-700 mb-2 group-hover:text-stone-800 transition-colors line-clamp-2">
+                <div className="flex flex-1 flex-col p-6">
+                  <h3 className="mb-2 line-clamp-2 font-serif text-xl text-stone-700 transition-colors group-hover:text-stone-800">
                     {article.display_title || article.meta_title}
                   </h3>
 
-                  <p className="text-base text-neutral-600 leading-relaxed mb-4 line-clamp-3 flex-1">
+                  <p className="mb-4 line-clamp-3 flex-1 text-base leading-relaxed text-neutral-600">
                     {article.meta_description}
                   </p>
 
-                  <div className="flex items-center justify-between gap-4 pt-4 border-t border-neutral-100">
+                  <div className="flex items-center justify-between gap-4 border-t border-neutral-100 pt-4">
                     <time
                       dateTime={article.date}
                       className="text-xs text-neutral-500"
@@ -1776,7 +1776,7 @@ function BlogSection() {
                       })}
                     </time>
 
-                    <span className="text-xs text-neutral-500 group-hover:text-stone-600 transition-colors font-medium">
+                    <span className="text-xs font-medium text-neutral-500 transition-colors group-hover:text-stone-600">
                       Read →
                     </span>
                   </div>
@@ -1787,10 +1787,10 @@ function BlogSection() {
         })}
       </div>
 
-      <div className="text-center mt-8">
+      <div className="mt-8 text-center">
         <Link
           to="/blog/"
-          className="inline-flex items-center gap-2 text-stone-600 hover:text-stone-800 font-medium transition-colors"
+          className="inline-flex items-center gap-2 font-medium text-stone-600 transition-colors hover:text-stone-800"
         >
           View all articles
           <svg
@@ -1850,34 +1850,34 @@ export function CTASection({
   };
 
   return (
-    <section className="py-16 bg-linear-to-t from-stone-50/30 to-stone-100/30 px-4 laptop:px-0">
-      <div className="flex flex-col gap-6 items-center text-center">
-        <div className="mb-4 size-40 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[48px] bg-transparent">
+    <section className="laptop:px-0 bg-linear-to-t from-stone-50/30 to-stone-100/30 px-4 py-16">
+      <div className="flex flex-col items-center gap-6 text-center">
+        <div className="mb-4 flex size-40 items-center justify-center rounded-[48px] border border-neutral-100 bg-transparent shadow-2xl">
           <Image
             src="/api/images/hyprnote/icon.png"
             alt="Char"
             width={144}
             height={144}
-            className="size-36 mx-auto rounded-[40px] border border-neutral-100"
+            className="mx-auto size-36 rounded-[40px] border border-neutral-100"
           />
         </div>
-        <h2 className="text-2xl sm:text-3xl font-serif text-stone-700">
+        <h2 className="font-serif text-2xl text-stone-700 sm:text-3xl">
           Your meetings. Your data.
           <br className="sm:hidden" /> Your control.
         </h2>
-        <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
+        <p className="mx-auto max-w-2xl text-lg text-neutral-600">
           Start taking meeting notes with AI—without the lock-in
         </p>
-        <div className="pt-6 flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <div className="flex flex-col items-center justify-center gap-4 pt-6 sm:flex-row">
           {platformCTA.action === "download" ? (
             <DownloadButton />
           ) : (
             <button
               onClick={handleCTAClick}
               className={cn([
-                "group px-6 h-12 flex items-center justify-center text-base sm:text-lg",
-                "bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full",
-                "shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
+                "group flex h-12 items-center justify-center px-6 text-base sm:text-lg",
+                "rounded-full bg-linear-to-t from-stone-600 to-stone-500 text-white",
+                "shadow-md hover:scale-[102%] hover:shadow-lg active:scale-[98%]",
                 "transition-all",
               ])}
             >
@@ -1888,7 +1888,7 @@ export function CTASection({
                 viewBox="0 0 24 24"
                 strokeWidth="1.5"
                 stroke="currentColor"
-                className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform"
+                className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1"
               >
                 <path
                   strokeLinecap="round"

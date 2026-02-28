@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { env } from "~/env";
 
 import { listConnections } from "@hypr/api-client";
 import { createClient } from "@hypr/api-client/client";
 
 import { useAuth } from "./context";
+
+import { env } from "~/env";
 
 export function useConnections() {
   const auth = useAuth();

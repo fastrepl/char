@@ -1,6 +1,6 @@
-import type { Ctx } from "~/services/apple-calendar/ctx";
-
 import type { EventsSyncInput, EventsSyncOutput } from "./types";
+
+import type { Ctx } from "~/services/apple-calendar/ctx";
 
 export function syncEvents(
   ctx: Ctx,

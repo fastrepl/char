@@ -55,8 +55,8 @@ function Component() {
 
   if (!billing.isReady) {
     return (
-      <div className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white flex items-center justify-center p-6">
-        <div className="max-w-md w-full text-center">
+      <div className="flex min-h-screen items-center justify-center bg-linear-to-b from-white via-stone-50/20 to-white p-6">
+        <div className="w-full max-w-md text-center">
           <p className="text-neutral-500">Loading...</p>
         </div>
       </div>

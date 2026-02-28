@@ -1,3 +1,14 @@
+import type {
+  EnhanceTemplate,
+  Participant,
+  Segment,
+  Session,
+  TemplateSection,
+  Transcript,
+} from "@hypr/plugin-template";
+
+import type { TaskArgsMap, TaskArgsMapTransformed, TaskConfig } from ".";
+
 import { getSessionEventById } from "~/session/utils";
 import type { Store as MainStore } from "~/store/tinybase/store/main";
 import type { Store as SettingsStore } from "~/store/tinybase/store/settings";
@@ -12,17 +23,6 @@ import {
   SpeakerLabelManager,
 } from "~/stt/segment/shared";
 import { convertStorageHintsToRuntime } from "~/stt/speaker-hints";
-
-import type {
-  EnhanceTemplate,
-  Participant,
-  Segment,
-  Session,
-  TemplateSection,
-  Transcript,
-} from "@hypr/plugin-template";
-
-import type { TaskArgsMap, TaskArgsMapTransformed, TaskConfig } from ".";
 
 type TranscriptMeta = {
   id: string;

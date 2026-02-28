@@ -22,14 +22,14 @@ export function TrafficLights({ className }: { className?: string }) {
   const onMaximize = () => withWindow((w) => w.toggleMaximize());
 
   return (
-    <div className={cn(["flex gap-2 items-center", className])}>
+    <div className={cn(["flex items-center gap-2", className])}>
       <button
         type="button"
         data-tauri-drag-region="false"
         onClick={() => {
           void onClose();
         }}
-        className="h-3 w-3 rounded-full bg-[#ff5f57] border border-black/10 hover:brightness-90 transition-all"
+        className="h-3 w-3 rounded-full border border-black/10 bg-[#ff5f57] transition-all hover:brightness-90"
       />
       <button
         type="button"
@@ -37,7 +37,7 @@ export function TrafficLights({ className }: { className?: string }) {
         onClick={() => {
           void onMinimize();
         }}
-        className="h-3 w-3 rounded-full bg-[#ffbd2e] border border-black/10 hover:brightness-90 transition-all"
+        className="h-3 w-3 rounded-full border border-black/10 bg-[#ffbd2e] transition-all hover:brightness-90"
       />
       <button
         type="button"
@@ -45,7 +45,7 @@ export function TrafficLights({ className }: { className?: string }) {
         onClick={() => {
           void onMaximize();
         }}
-        className="h-3 w-3 rounded-full bg-[#28c840] border border-black/10 hover:brightness-90 transition-all"
+        className="h-3 w-3 rounded-full border border-black/10 bg-[#28c840] transition-all hover:brightness-90"
       />
     </div>
   );

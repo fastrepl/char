@@ -1,9 +1,9 @@
-export const loadJsonData = async <T,>(path: string): Promise<T> => {
+export const loadJsonData = async <T>(path: string): Promise<T> => {
   const module = await import(/* @vite-ignore */ path);
   return module.default;
 };
 
-export const mergeRecords = <T,>(
+export const mergeRecords = <T>(
   base: Record<string, T>,
   override: Record<string, Partial<T>>,
 ): Record<string, T> => {
@@ -36,7 +36,7 @@ export const overrideById = <T extends { id?: string }>(
   return result;
 };
 
-export const appendRecords = <T,>(
+export const appendRecords = <T>(
   base: Record<string, T>,
   additional: Record<string, T>,
 ): Record<string, T> => {

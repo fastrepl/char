@@ -1,5 +1,18 @@
 import { useForm } from "@tanstack/react-form";
 import { useMemo } from "react";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@hypr/ui/components/ui/select";
+import { cn } from "@hypr/utils";
+
+import { HealthStatusIndicator, useConnectionHealth } from "./health";
+import { PROVIDERS } from "./shared";
+
 import { useAuth } from "~/auth";
 import { useBillingAccess } from "~/auth/billing";
 import { providerRowId } from "~/settings/ai/shared";
@@ -26,18 +39,6 @@ import { listOpenRouterModels } from "~/settings/ai/shared/list-openrouter";
 import { ModelCombobox } from "~/settings/ai/shared/model-combobox";
 import { useConfigValues } from "~/shared/config";
 import * as settings from "~/store/tinybase/store/settings";
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@hypr/ui/components/ui/select";
-import { cn } from "@hypr/utils";
-
-import { HealthStatusIndicator, useConnectionHealth } from "./health";
-import { PROVIDERS } from "./shared";
 
 export function SelectProviderAndModel() {
   const configuredProviders = useConfiguredMapping();
@@ -90,11 +91,11 @@ export function SelectProviderAndModel() {
 
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="text-md font-semibold font-serif">Model being used</h3>
+      <h3 className="text-md font-serif font-semibold">Model being used</h3>
       <div
         className={cn([
           "flex flex-col gap-4",
-          "p-4 rounded-xl border border-neutral-200",
+          "rounded-xl border border-neutral-200 p-4",
           !isConfigured || hasError ? "bg-red-50" : "bg-neutral-50",
         ])}
       >
@@ -112,7 +113,7 @@ export function SelectProviderAndModel() {
             }}
           >
             {(field) => (
-              <div className="flex-2 min-w-0" data-llm-provider-selector>
+              <div className="min-w-0 flex-2" data-llm-provider-selector>
                 <Select
                   value={field.state.value}
                   onValueChange={(value) => {
@@ -146,7 +147,7 @@ export function SelectProviderAndModel() {
                               {provider.icon}
                               <span>{provider.displayName}</span>
                               {requiresPro ? (
-                                <span className="text-[10px] uppercase tracking-wide text-neutral-500 border border-neutral-200 rounded-full px-2 py-0.5">
+                                <span className="rounded-full border border-neutral-200 px-2 py-0.5 text-[10px] tracking-wide text-neutral-500 uppercase">
                                   Pro
                                 </span>
                               ) : null}
@@ -174,7 +175,7 @@ export function SelectProviderAndModel() {
               const status = configuredProviders[providerId];
 
               return (
-                <div className="flex-3 min-w-0">
+                <div className="min-w-0 flex-3">
                   <ModelCombobox
                     providerId={providerId}
                     value={field.state.value}
@@ -193,7 +194,7 @@ export function SelectProviderAndModel() {
         </div>
 
         {!isConfigured && (
-          <div className="flex items-center gap-2 pt-2 border-t border-red-200">
+          <div className="flex items-center gap-2 border-t border-red-200 pt-2">
             <span className="text-sm text-red-600">
               <strong className="font-medium">Language model</strong> is needed
               to make Char summarize and chat about your conversations.
@@ -202,7 +203,7 @@ export function SelectProviderAndModel() {
         )}
 
         {hasError && health.message && (
-          <div className="flex items-center gap-2 pt-2 border-t border-red-200">
+          <div className="flex items-center gap-2 border-t border-red-200 pt-2">
             <span className="text-sm text-red-600">{health.message}</span>
           </div>
         )}

@@ -1,12 +1,13 @@
 import { forwardRef, useMemo } from "react";
-import { useSearchEngine } from "~/search/contexts/engine";
-import { useImageUpload } from "~/shared/hooks/useImageUpload";
-import * as main from "~/store/tinybase/store/main";
 
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 import { type JSONContent, TiptapEditor } from "@hypr/tiptap/editor";
 import NoteEditor from "@hypr/tiptap/editor";
 import { parseJsonContent } from "@hypr/tiptap/shared";
+
+import { useSearchEngine } from "~/search/contexts/engine";
+import { useImageUpload } from "~/shared/hooks/useImageUpload";
+import * as main from "~/store/tinybase/store/main";
 
 export const EnhancedEditor = forwardRef<
   { editor: TiptapEditor | null },

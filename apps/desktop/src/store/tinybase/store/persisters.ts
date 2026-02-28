@@ -1,4 +1,11 @@
 import { useEffect } from "react";
+
+import { getCurrentWebviewWindowLabel } from "@hypr/plugin-windows";
+
+import { useInitializeStore } from "./initialize";
+import { type Store } from "./main";
+import { registerSaveHandler } from "./save";
+
 import { useCalendarPersister } from "~/store/tinybase/persister/calendar";
 import { useChatPersister } from "~/store/tinybase/persister/chat";
 import { useChatShortcutPersister } from "~/store/tinybase/persister/chat-shortcuts";
@@ -10,12 +17,6 @@ import { usePromptPersister } from "~/store/tinybase/persister/prompts";
 import { useSessionPersister } from "~/store/tinybase/persister/session";
 import { useTemplatePersister } from "~/store/tinybase/persister/templates";
 import { useValuesPersister } from "~/store/tinybase/persister/values";
-
-import { getCurrentWebviewWindowLabel } from "@hypr/plugin-windows";
-
-import { useInitializeStore } from "./initialize";
-import { type Store } from "./main";
-import { registerSaveHandler } from "./save";
 
 export function useMainPersisters(store: Store) {
   const valuesPersister = useValuesPersister(store);

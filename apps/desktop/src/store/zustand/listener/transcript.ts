@@ -1,10 +1,11 @@
 import { create as mutate } from "mutative";
 import type { StoreApi } from "zustand";
-import type { RuntimeSpeakerHint, WordLike } from "~/stt/segment";
 
 import type { StreamResponse } from "@hypr/plugin-listener";
 
 import { transformWordEntries } from "./utils";
+
+import type { RuntimeSpeakerHint, WordLike } from "~/stt/segment";
 
 type WordsByChannel = Record<number, WordLike[]>;
 

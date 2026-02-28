@@ -69,10 +69,10 @@ function Component() {
 
   return (
     <div
-      className="bg-linear-to-b from-white via-stone-50/20 to-white min-h-screen"
+      className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white"
       style={{ backgroundImage: "url(/patterns/dots.svg)" }}
     >
-      <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
+      <div className="mx-auto max-w-6xl border-x border-neutral-100 bg-white">
         <HeroSection
           competitorIcon={doc.icon}
           competitorName={doc.name}
@@ -114,17 +114,17 @@ function HeroSection({
 }) {
   return (
     <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30 px-6 py-12 lg:py-20">
-      <header className="text-center max-w-4xl mx-auto">
-        <div className="flex flex-row items-center justify-center mb-12 sm:gap-0">
-          <div className="relative w-40 h-40 sm:hidden">
-            <div className="absolute top-0 left-0 size-28 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-4xl bg-white opacity-50 z-0">
+      <header className="mx-auto max-w-4xl text-center">
+        <div className="mb-12 flex flex-row items-center justify-center sm:gap-0">
+          <div className="relative h-40 w-40 sm:hidden">
+            <div className="absolute top-0 left-0 z-0 flex size-28 items-center justify-center rounded-4xl border border-neutral-100 bg-white opacity-50 shadow-2xl">
               <img
                 src={competitorIcon}
                 alt={competitorName}
                 className="size-24 rounded-[28px] border border-neutral-100"
               />
             </div>
-            <div className="absolute bottom-0 right-0 size-28 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-4xl bg-white z-10">
+            <div className="absolute right-0 bottom-0 z-10 flex size-28 items-center justify-center rounded-4xl border border-neutral-100 bg-white shadow-2xl">
               <img
                 src="/api/images/hyprnote/icon.png"
                 alt="Char"
@@ -133,17 +133,17 @@ function HeroSection({
             </div>
           </div>
           <div className="hidden sm:flex sm:flex-row sm:items-center sm:gap-0">
-            <div className="size-32 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[40px] bg-transparent opacity-30">
+            <div className="flex size-32 items-center justify-center rounded-[40px] border border-neutral-100 bg-transparent opacity-30 shadow-2xl">
               <img
                 src={competitorIcon}
                 alt={competitorName}
                 className="size-28 rounded-4xl border border-neutral-100"
               />
             </div>
-            <div className="text-3xl text-neutral-400 font-light pl-5 pr-6">
+            <div className="pr-6 pl-5 text-3xl font-light text-neutral-400">
               vs
             </div>
-            <div className="size-32 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[40px] bg-transparent scale-110">
+            <div className="flex size-32 scale-110 items-center justify-center rounded-[40px] border border-neutral-100 bg-transparent shadow-2xl">
               <img
                 src="/api/images/hyprnote/icon.png"
                 alt="Char"
@@ -153,10 +153,10 @@ function HeroSection({
           </div>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif tracking-tight text-stone-700 mb-6">
+        <h1 className="mb-6 font-serif text-3xl tracking-tight text-stone-700 sm:text-4xl lg:text-5xl">
           {headline}
         </h1>
-        <p className="text-lg sm:text-xl text-neutral-600 mb-8">
+        <p className="mb-8 text-lg text-neutral-600 sm:text-xl">
           {description}
         </p>
 
@@ -164,9 +164,9 @@ function HeroSection({
           <Link
             to="/download/"
             className={cn([
-              "inline-block px-8 py-3 text-base font-medium rounded-full",
+              "inline-block rounded-full px-8 py-3 text-base font-medium",
               "bg-linear-to-t from-stone-600 to-stone-500 text-white",
-              "hover:scale-105 active:scale-95 transition-transform",
+              "transition-transform hover:scale-105 active:scale-95",
             ])}
           >
             Download Char for free

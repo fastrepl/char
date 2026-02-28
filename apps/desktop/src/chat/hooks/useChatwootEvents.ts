@@ -1,9 +1,10 @@
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { useEffect, useRef } from "react";
-import { useAuth } from "~/auth";
-import { env } from "~/env";
 
 import { createClient } from "@hypr/api-client/client";
+
+import { useAuth } from "~/auth";
+import { env } from "~/env";
 
 export function useChatwootEvents({
   pubsubToken,

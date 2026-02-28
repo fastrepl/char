@@ -1,6 +1,4 @@
 import { CreditCardIcon } from "lucide-react";
-import type { ToolRenderer } from "~/chat/components/message/types";
-import { parseListSubscriptionsOutput } from "~/chat/support-mcp-tools";
 
 import { cn } from "@hypr/utils";
 
@@ -12,6 +10,9 @@ import {
   useMcpOutput,
   useToolState,
 } from "./shared";
+
+import type { ToolRenderer } from "~/chat/components/message/types";
+import { parseListSubscriptionsOutput } from "~/chat/support-mcp-tools";
 
 type Renderer = ToolRenderer<"tool-list_subscriptions">;
 
@@ -68,15 +69,15 @@ export const ToolListSubscriptions: Renderer = ({ part }) => {
           {parsed.map((sub) => (
             <div
               key={sub.id}
-              className="rounded-md border border-neutral-200 p-2 flex flex-col gap-1"
+              className="flex flex-col gap-1 rounded-md border border-neutral-200 p-2"
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-medium text-neutral-800 truncate">
+                <span className="truncate text-xs font-medium text-neutral-800">
                   {sub.id}
                 </span>
                 <span
                   className={cn([
-                    "inline-flex items-center rounded-full border px-2 py-0 text-[10px] font-medium shrink-0",
+                    "inline-flex shrink-0 items-center rounded-full border px-2 py-0 text-[10px] font-medium",
                     statusClass(sub.status),
                   ])}
                 >
@@ -94,7 +95,7 @@ export const ToolListSubscriptions: Renderer = ({ part }) => {
 
       {parsed && parsed.length === 0 ? (
         <ToolCardBody>
-          <p className="text-xs text-neutral-500 text-center py-1">
+          <p className="py-1 text-center text-xs text-neutral-500">
             No subscriptions found
           </p>
         </ToolCardBody>

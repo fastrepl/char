@@ -1,11 +1,12 @@
 import { format } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
-import { useConfigValue } from "~/shared/config";
-import { useIgnoredEvents } from "~/store/tinybase/hooks";
-import * as main from "~/store/tinybase/store/main";
 
 import { safeParseDate } from "@hypr/utils";
 import { TZDate } from "@hypr/utils";
+
+import { useConfigValue } from "~/shared/config";
+import { useIgnoredEvents } from "~/store/tinybase/hooks";
+import * as main from "~/store/tinybase/store/main";
 
 export function useTimezone() {
   return useConfigValue("timezone") || undefined;

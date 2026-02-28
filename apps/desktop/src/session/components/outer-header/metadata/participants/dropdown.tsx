@@ -40,7 +40,7 @@ export function ParticipantDropdown({
   }
 
   return (
-    <div className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-md overflow-hidden">
+    <div className="bg-popover absolute z-50 mt-1 w-full overflow-hidden rounded-md border shadow-md">
       <div ref={listRef} className="max-h-50 overflow-auto py-1">
         {options.map((option, index) => (
           <button
@@ -56,7 +56,7 @@ export function ParticipantDropdown({
             onClick={() => onSelect(option)}
             onMouseEnter={() => onHover(index)}
           >
-            <span className="flex items-center justify-between w-full">
+            <span className="flex w-full items-center justify-between">
               {option.isNew ? (
                 <span>
                   Add "<span className="font-medium">{option.name}</span>"
@@ -65,14 +65,14 @@ export function ParticipantDropdown({
                 <span className="flex items-center gap-2">
                   <span className="font-medium">{option.name}</span>
                   {option.jobTitle && (
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-muted-foreground text-xs">
                       {option.jobTitle}
                     </span>
                   )}
                 </span>
               )}
               {selectedIndex === index && (
-                <CornerDownLeft className="size-3 text-muted-foreground" />
+                <CornerDownLeft className="text-muted-foreground size-3" />
               )}
             </span>
           </button>

@@ -36,7 +36,7 @@ function ToggleButton({
         <button
           onClick={onClick}
           className={cn([
-            "p-0.5 rounded-sm transition-colors",
+            "rounded-sm p-0.5 transition-colors",
             active
               ? "bg-neutral-300 text-neutral-700"
               : "text-neutral-400 hover:bg-neutral-200 hover:text-neutral-500",
@@ -68,10 +68,10 @@ function IconButton({
       onClick={onClick}
       disabled={disabled}
       className={cn([
-        "p-0.5 rounded-sm transition-colors",
+        "rounded-sm p-0.5 transition-colors",
         disabled
-          ? "text-neutral-300 cursor-not-allowed"
-          : "hover:bg-neutral-200 text-neutral-500",
+          ? "cursor-not-allowed text-neutral-300"
+          : "text-neutral-500 hover:bg-neutral-200",
       ])}
     >
       {children}
@@ -156,7 +156,7 @@ export function SearchBar() {
 
   return (
     <div className="flex flex-col gap-1">
-      <div className="flex items-center gap-1.5 h-7 px-2 rounded-lg bg-neutral-100">
+      <div className="flex h-7 items-center gap-1.5 rounded-lg bg-neutral-100 px-2">
         <input
           ref={searchInputRef}
           type="text"
@@ -164,7 +164,7 @@ export function SearchBar() {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleSearchKeyDown}
           placeholder="Search..."
-          className="flex-1 min-w-0 h-full bg-transparent text-xs placeholder:text-neutral-400 focus:outline-hidden"
+          className="h-full min-w-0 flex-1 bg-transparent text-xs placeholder:text-neutral-400 focus:outline-hidden"
         />
         <div className="flex items-center gap-0.5">
           <ToggleButton
@@ -194,7 +194,7 @@ export function SearchBar() {
             <ReplaceIcon className="size-3.5" />
           </ToggleButton>
         </div>
-        <span className="text-[10px] text-neutral-400 whitespace-nowrap tabular-nums">
+        <span className="text-[10px] whitespace-nowrap text-neutral-400 tabular-nums">
           {displayCount}
         </span>
         <div className="flex items-center">
@@ -237,7 +237,7 @@ export function SearchBar() {
       </div>
 
       {showReplace && (
-        <div className="flex items-center gap-1.5 h-7 px-2 rounded-lg bg-neutral-100">
+        <div className="flex h-7 items-center gap-1.5 rounded-lg bg-neutral-100 px-2">
           <input
             ref={replaceInputRef}
             type="text"
@@ -245,7 +245,7 @@ export function SearchBar() {
             onChange={(e) => setReplaceQuery(e.target.value)}
             onKeyDown={handleReplaceKeyDown}
             placeholder="Replace with..."
-            className="flex-1 min-w-0 h-full bg-transparent text-xs placeholder:text-neutral-400 focus:outline-hidden"
+            className="h-full min-w-0 flex-1 bg-transparent text-xs placeholder:text-neutral-400 focus:outline-hidden"
           />
           <div className="flex items-center gap-0.5">
             <IconButton

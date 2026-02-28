@@ -72,7 +72,7 @@ function ToolbarButton({
 }
 
 function ToolbarDivider() {
-  return <div className="w-px h-5 bg-neutral-200 mx-1" />;
+  return <div className="mx-1 h-5 w-px bg-neutral-200" />;
 }
 
 export function Toolbar({
@@ -195,7 +195,7 @@ export function Toolbar({
 
   return (
     <div className="border-b border-neutral-200 bg-white">
-      <div className="flex items-center gap-0.5 p-2 flex-wrap">
+      <div className="flex flex-wrap items-center gap-0.5 p-2">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           isActive={editorState?.isBold}
@@ -333,13 +333,13 @@ export function Toolbar({
           </ToolbarButton>
 
           {showLinkInput && (
-            <div className="absolute top-full left-0 mt-1 z-10 bg-white border border-neutral-200 rounded shadow-lg p-2 flex gap-2">
+            <div className="absolute top-full left-0 z-10 mt-1 flex gap-2 rounded border border-neutral-200 bg-white p-2 shadow-lg">
               <input
                 type="url"
                 value={linkUrl}
                 onChange={(e) => setLinkUrl(e.target.value)}
                 placeholder="https://..."
-                className="px-2 py-1 text-sm border border-neutral-200 rounded w-48 focus:outline-none focus:border-blue-500"
+                className="w-48 rounded border border-neutral-200 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     handleLinkSubmit();
@@ -353,7 +353,7 @@ export function Toolbar({
               <button
                 type="button"
                 onClick={handleLinkSubmit}
-                className="px-2 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="rounded bg-blue-600 px-2 py-1 text-sm text-white hover:bg-blue-700"
               >
                 Add
               </button>
@@ -382,13 +382,13 @@ export function Toolbar({
           </ToolbarButton>
 
           {showClipInput && (
-            <div className="absolute top-full left-0 mt-1 z-10 bg-white border border-neutral-200 rounded shadow-lg p-2 flex gap-2">
+            <div className="absolute top-full left-0 z-10 mt-1 flex gap-2 rounded border border-neutral-200 bg-white p-2 shadow-lg">
               <input
                 type="url"
                 value={clipUrl}
                 onChange={(e) => setClipUrl(e.target.value)}
                 placeholder="YouTube embed URL..."
-                className="px-2 py-1 text-sm border border-neutral-200 rounded w-64 focus:outline-none focus:border-blue-500"
+                className="w-64 rounded border border-neutral-200 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -431,7 +431,7 @@ export function Toolbar({
                     setShowClipInput(false);
                   }
                 }}
-                className="px-2 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="rounded bg-blue-600 px-2 py-1 text-sm text-white hover:bg-blue-700"
               >
                 Add
               </button>
@@ -451,16 +451,16 @@ export function Toolbar({
       </div>
 
       {showSearch && (
-        <div className="px-2 pb-2 space-y-2">
+        <div className="space-y-2 px-2 pb-2">
           <div className="flex items-center gap-2">
-            <div className="flex-1 flex items-center gap-1 border border-neutral-200 rounded px-2 py-1.5 focus-within:border-blue-500">
+            <div className="flex flex-1 items-center gap-1 rounded border border-neutral-200 px-2 py-1.5 focus-within:border-blue-500">
               <input
                 ref={searchInputRef}
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search..."
-                className="flex-1 bg-transparent text-sm focus:outline-none min-w-0"
+                className="min-w-0 flex-1 bg-transparent text-sm focus:outline-none"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -506,7 +506,7 @@ export function Toolbar({
               type="button"
               onClick={() => editor.commands.previousSearchResult()}
               disabled={resultCount === 0}
-              className="p-1.5 rounded hover:bg-neutral-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded p-1.5 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50"
               title="Previous (Shift+Enter)"
             >
               <ChevronLeftIcon className="size-4" />
@@ -516,13 +516,13 @@ export function Toolbar({
               type="button"
               onClick={() => editor.commands.nextSearchResult()}
               disabled={resultCount === 0}
-              className="p-1.5 rounded hover:bg-neutral-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded p-1.5 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50"
               title="Next (Enter)"
             >
               <ChevronRightIcon className="size-4" />
             </button>
 
-            <span className="text-xs text-neutral-500 min-w-[3rem] text-center">
+            <span className="min-w-[3rem] text-center text-xs text-neutral-500">
               {searchTerm
                 ? resultCount > 0
                   ? `${currentIndex}/${resultCount}`
@@ -533,7 +533,7 @@ export function Toolbar({
             <button
               type="button"
               onClick={handleCloseSearch}
-              className="p-1.5 rounded hover:bg-neutral-100"
+              className="rounded p-1.5 hover:bg-neutral-100"
               title="Close (Escape)"
             >
               <XIcon className="size-4" />
@@ -542,14 +542,14 @@ export function Toolbar({
 
           {showReplace && (
             <div className="flex items-center gap-2">
-              <div className="flex-1 flex items-center gap-1 border border-neutral-200 rounded px-2 py-1.5 focus-within:border-blue-500">
+              <div className="flex flex-1 items-center gap-1 rounded border border-neutral-200 px-2 py-1.5 focus-within:border-blue-500">
                 <input
                   ref={replaceInputRef}
                   type="text"
                   value={replaceTerm}
                   onChange={(e) => setReplaceTerm(e.target.value)}
                   placeholder="Replace with..."
-                  className="flex-1 bg-transparent text-sm focus:outline-none min-w-0"
+                  className="min-w-0 flex-1 bg-transparent text-sm focus:outline-none"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
@@ -566,7 +566,7 @@ export function Toolbar({
                 onClick={() => editor.commands.replace()}
                 disabled={resultCount === 0}
                 title="Replace"
-                className="p-1.5 rounded hover:bg-neutral-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded p-1.5 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ReplaceIcon className="size-4" />
               </button>
@@ -576,7 +576,7 @@ export function Toolbar({
                 onClick={() => editor.commands.replaceAll()}
                 disabled={resultCount === 0}
                 title="Replace All"
-                className="p-1.5 rounded hover:bg-neutral-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded p-1.5 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ReplaceAllIcon className="size-4" />
               </button>

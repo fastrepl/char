@@ -1,6 +1,6 @@
-import { collectSupportContextBlock } from "~/chat/context/support-block";
-
 import { useMCP } from "./useMCP";
+
+import { collectSupportContextBlock } from "~/chat/context/support-block";
 
 export function useSupportMCP(enabled: boolean, accessToken?: string | null) {
   return useMCP({

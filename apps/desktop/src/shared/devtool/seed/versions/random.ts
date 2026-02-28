@@ -1,4 +1,7 @@
 import { faker } from "@faker-js/faker/locale/en";
+
+import type { AppleCalendar } from "@hypr/plugin-apple-calendar";
+
 import type { SeedDefinition } from "~/shared/devtool/seed/shared";
 import {
   buildCalendars,
@@ -17,8 +20,6 @@ import {
   buildTranscriptsForSessions,
 } from "~/shared/devtool/seed/shared";
 import type { Store as MainStore } from "~/store/tinybase/store/main";
-
-import type { AppleCalendar } from "@hypr/plugin-apple-calendar";
 
 const buildRandomData = (fixtureCalendars?: AppleCalendar[]) => {
   faker.seed(123);

@@ -1,3 +1,5 @@
+import "../../styles.css";
+
 import { isNodeActive } from "@tiptap/core";
 import {
   EditorContent,
@@ -8,7 +10,6 @@ import {
 import { forwardRef, useEffect, useMemo, useRef } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 
-import "../../styles.css";
 import * as shared from "../shared";
 import type { ExtensionOptions, FileHandlerConfig } from "../shared/extensions";
 import type { PlaceholderFunction } from "../shared/extensions/placeholder";

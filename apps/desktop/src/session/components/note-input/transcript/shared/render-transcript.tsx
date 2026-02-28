@@ -1,9 +1,4 @@
 import { memo, useCallback, useEffect, useMemo } from "react";
-import * as main from "~/store/tinybase/store/main";
-import {
-  defaultRenderLabelContext,
-  SpeakerLabelManager,
-} from "~/stt/segment/shared";
 
 import type {
   PartialWord,
@@ -24,6 +19,12 @@ import {
 } from "./hooks";
 import { Operations } from "./operations";
 import { SegmentRenderer } from "./segment-renderer";
+
+import * as main from "~/store/tinybase/store/main";
+import {
+  defaultRenderLabelContext,
+  SpeakerLabelManager,
+} from "~/stt/segment/shared";
 
 export function RenderTranscript({
   scrollElement,

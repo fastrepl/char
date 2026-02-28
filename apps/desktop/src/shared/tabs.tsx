@@ -1,7 +1,5 @@
 import { Pin, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { InteractiveButton } from "~/shared/ui/interactive-button";
-import { type Tab } from "~/store/zustand/tabs";
 
 import { Button } from "@hypr/ui/components/ui/button";
 import { Kbd } from "@hypr/ui/components/ui/kbd";
@@ -13,6 +11,9 @@ import {
 import { Spinner } from "@hypr/ui/components/ui/spinner";
 import { useCmdKeyPressed } from "@hypr/ui/hooks/use-cmd-key-pressed";
 import { cn } from "@hypr/utils";
+
+import { InteractiveButton } from "~/shared/ui/interactive-button";
+import { type Tab } from "~/store/zustand/tabs";
 
 type TabItemProps<T extends Tab = Tab> = { tab: T; tabIndex?: number } & {
   handleSelectThis: (tab: T) => void;
@@ -212,7 +213,7 @@ export function TabItemBase({
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="h-full relative"
+      className="relative h-full"
     >
       <InteractiveButton
         asChild
@@ -220,16 +221,16 @@ export function TabItemBase({
         onClick={handleSelectThis}
         onMouseDown={handleMouseDown}
         className={cn([
-          "flex items-center gap-1 relative",
-          "w-[160px] h-full px-2",
+          "relative flex items-center gap-1",
+          "h-full w-[160px] px-2",
           "rounded-xl border",
-          "cursor-pointer group",
+          "group cursor-pointer",
           "transition-colors duration-200",
           selected ? colors.selected : colors.unselected,
         ])}
       >
-        <div className="flex items-center gap-2 text-sm flex-1 min-w-0">
-          <div className="shrink-0 relative w-4 h-4">
+        <div className="flex min-w-0 flex-1 items-center gap-2 text-sm">
+          <div className="relative h-4 w-4 shrink-0">
             <div
               className={cn([
                 "absolute inset-0 flex items-center justify-center transition-opacity duration-200",
@@ -243,7 +244,7 @@ export function TabItemBase({
               ) : active ? (
                 <div className="relative size-2">
                   <div className="absolute inset-0 rounded-full bg-red-600"></div>
-                  <div className="absolute inset-0 rounded-full bg-red-300 animate-ping"></div>
+                  <div className="absolute inset-0 animate-ping rounded-full bg-red-300"></div>
                 </div>
               ) : pinned ? (
                 <button
@@ -284,10 +285,10 @@ export function TabItemBase({
               </div>
             )}
           </div>
-          <span className="truncate pointer-events-none">{title}</span>
+          <span className="pointer-events-none truncate">{title}</span>
         </div>
         {showShortcut && (
-          <div className="absolute top-0.75 right-2 pointer-events-none">
+          <div className="pointer-events-none absolute top-0.75 right-2">
             <Kbd>⌘ {tabIndex}</Kbd>
           </div>
         )}
@@ -297,12 +298,12 @@ export function TabItemBase({
         onOpenChange={handleCloseConfirmationChange}
       >
         <PopoverTrigger asChild>
-          <div className="absolute inset-0 pointer-events-none" />
+          <div className="pointer-events-none absolute inset-0" />
         </PopoverTrigger>
         <PopoverContent
           side="bottom"
           align="start"
-          className="w-[240px] p-3 rounded-xl"
+          className="w-[240px] rounded-xl p-3"
           sideOffset={2}
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
@@ -313,7 +314,7 @@ export function TabItemBase({
             </p>
             <Button
               variant="destructive"
-              className="w-full h-9 rounded-lg flex items-center justify-center relative group"
+              className="group relative flex h-9 w-full items-center justify-center rounded-lg"
               onClick={(e) => {
                 e.stopPropagation();
                 handleConfirmClose();
@@ -323,7 +324,7 @@ export function TabItemBase({
               <Kbd
                 className={cn([
                   "absolute right-2",
-                  "bg-red-200/20 border-red-200/30 text-red-100",
+                  "border-red-200/30 bg-red-200/20 text-red-100",
                   "transition-all duration-100",
                   "group-hover:-translate-y-0.5 group-hover:shadow-[0_2px_0_0_rgba(0,0,0,0.15),inset_0_1px_0_0_rgba(255,255,255,0.8)]",
                   "group-active:translate-y-0.5 group-active:shadow-none",

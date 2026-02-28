@@ -1,10 +1,11 @@
 import { Streamdown } from "streamdown";
-import { useAITaskTask } from "~/ai/hooks";
-import { createTaskId } from "~/store/zustand/ai-task/task-configs";
-import { type TaskStepInfo } from "~/store/zustand/ai-task/tasks";
 
 import { streamdownComponents } from "@hypr/tiptap/shared";
 import { cn } from "@hypr/utils";
+
+import { useAITaskTask } from "~/ai/hooks";
+import { createTaskId } from "~/store/zustand/ai-task/task-configs";
+import { type TaskStepInfo } from "~/store/zustand/ai-task/tasks";
 
 export function StreamingView({ enhancedNoteId }: { enhancedNoteId: string }) {
   const taskId = createTaskId(enhancedNoteId, "enhance");

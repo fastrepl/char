@@ -1,16 +1,5 @@
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
-import { useConfigValue } from "~/shared/config";
-import { useNativeContextMenu } from "~/shared/hooks/useNativeContextMenu";
-import { useIgnoredEvents } from "~/store/tinybase/hooks";
-import {
-  captureSessionData,
-  deleteSessionCascade,
-} from "~/store/tinybase/store/deleteSession";
-import * as main from "~/store/tinybase/store/main";
-import { useTabs } from "~/store/zustand/tabs";
-import { useTimelineSelection } from "~/store/zustand/timeline-selection";
-import { useUndoDelete } from "~/store/zustand/undo-delete";
 
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 import { Button } from "@hypr/ui/components/ui/button";
@@ -31,6 +20,18 @@ import {
   type TimelineItem,
   type TimelinePrecision,
 } from "./utils";
+
+import { useConfigValue } from "~/shared/config";
+import { useNativeContextMenu } from "~/shared/hooks/useNativeContextMenu";
+import { useIgnoredEvents } from "~/store/tinybase/hooks";
+import {
+  captureSessionData,
+  deleteSessionCascade,
+} from "~/store/tinybase/store/deleteSession";
+import * as main from "~/store/tinybase/store/main";
+import { useTabs } from "~/store/zustand/tabs";
+import { useTimelineSelection } from "~/store/zustand/timeline-selection";
+import { useUndoDelete } from "~/store/zustand/undo-delete";
 
 export function TimelineView() {
   const allBuckets = useTimelineData();
@@ -210,8 +211,8 @@ export function TimelineView() {
         ref={containerRef}
         onContextMenu={showContextMenu}
         className={cn([
-          "flex flex-col h-full overflow-y-auto scrollbar-hide",
-          "bg-neutral-50 rounded-xl",
+          "scrollbar-hide flex h-full flex-col overflow-y-auto",
+          "rounded-xl bg-neutral-50",
         ])}
       >
         {buckets.map((bucket, index) => {
@@ -227,7 +228,7 @@ export function TimelineView() {
               <div
                 className={cn([
                   "sticky top-0 z-10",
-                  "bg-neutral-50 pl-3 pr-1 py-1",
+                  "bg-neutral-50 py-1 pr-1 pl-3",
                 ])}
               >
                 <div className="text-base font-bold text-neutral-900">
@@ -276,9 +277,9 @@ export function TimelineView() {
           onClick={scrollToToday}
           size="sm"
           className={cn([
-            "absolute left-1/2 transform -translate-x-1/2",
+            "absolute left-1/2 -translate-x-1/2 transform",
             "rounded-full bg-white hover:bg-neutral-50",
-            "text-neutral-700 border border-neutral-200",
+            "border border-neutral-200 text-neutral-700",
             "z-20 flex items-center gap-1",
             "shadow-xs",
             isScrolledPastToday ? "top-2" : "bottom-2",
@@ -337,7 +338,7 @@ function TodayBucket({
       return (
         <>
           <CurrentTimeIndicator ref={registerIndicator} />
-          <div className="px-3 py-4 text-sm text-neutral-400 text-center">
+          <div className="px-3 py-4 text-center text-sm text-neutral-400">
             No items today
           </div>
         </>

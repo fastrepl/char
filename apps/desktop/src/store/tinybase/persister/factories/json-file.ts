@@ -5,18 +5,19 @@ import type {
   Persists,
 } from "tinybase/persisters/with-schemas";
 import type { MergeableStore, OptionalSchemas } from "tinybase/with-schemas";
-import { isFileNotFoundError } from "~/store/tinybase/persister/shared/fs";
-import type { ChangedTables } from "~/store/tinybase/persister/shared/types";
-import { StoreOrMergeableStore } from "~/store/tinybase/store/shared";
 
-import { commands as fs2Commands } from "@hypr/plugin-fs2";
 import {
   commands as fsSyncCommands,
   type JsonValue,
 } from "@hypr/plugin-fs-sync";
+import { commands as fs2Commands } from "@hypr/plugin-fs2";
 import { events as notifyEvents } from "@hypr/plugin-notify";
 import { commands as settingsCommands } from "@hypr/plugin-settings";
 import { asTablesChanges, extractChangedTables } from "@hypr/tinybase-utils";
+
+import { isFileNotFoundError } from "~/store/tinybase/persister/shared/fs";
+import type { ChangedTables } from "~/store/tinybase/persister/shared/types";
+import { StoreOrMergeableStore } from "~/store/tinybase/store/shared";
 
 export type ListenMode = "notify" | "poll" | "both";
 

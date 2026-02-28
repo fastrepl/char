@@ -1,6 +1,6 @@
-import { DEFAULT_USER_ID, id } from "~/shared/utils";
-
 import type { MappingSessionParticipant, MappingTagSession } from "@hypr/store";
+
+import { DEFAULT_USER_ID, id } from "~/shared/utils";
 
 export const createMappingSessionParticipant = (
   session_id: string,

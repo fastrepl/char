@@ -1,3 +1,5 @@
+import "./styles/globals.css";
+
 import * as Sentry from "@sentry/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
@@ -32,7 +34,6 @@ import {
 } from "./store/tinybase/store/settings";
 import { createAITaskStore } from "./store/zustand/ai-task";
 import { listenerStore } from "./store/zustand/listener/instance";
-import "./styles/globals.css";
 
 const toolRegistry = createToolRegistry();
 const queryClient = new QueryClient();

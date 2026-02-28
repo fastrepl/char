@@ -7,9 +7,6 @@ import {
   UserIcon,
 } from "lucide-react";
 import { useCallback, useRef } from "react";
-import { StandardTabWrapper } from "~/shared/main";
-import { type TabItem, TabItemBase } from "~/shared/tabs";
-import { type SettingsTab, type Tab, useTabs } from "~/store/zustand/tabs";
 
 import { Button } from "@hypr/ui/components/ui/button";
 import {
@@ -26,6 +23,10 @@ import {
 } from "./general";
 import { SettingsLab } from "./lab";
 
+import { StandardTabWrapper } from "~/shared/main";
+import { type TabItem, TabItemBase } from "~/shared/tabs";
+import { type SettingsTab, type Tab, useTabs } from "~/store/zustand/tabs";
+
 export const TabItemSettings: TabItem<Extract<Tab, { type: "settings" }>> = ({
   tab,
   tabIndex,
@@ -38,7 +39,7 @@ export const TabItemSettings: TabItem<Extract<Tab, { type: "settings" }>> = ({
 }) => {
   return (
     <TabItemBase
-      icon={<SettingsIcon className="w-4 h-4" />}
+      icon={<SettingsIcon className="h-4 w-4" />}
       title={"Settings"}
       selected={tab.active}
       pinned={tab.pinned}
@@ -108,7 +109,7 @@ function SettingsView({ tab }: { tab: Extract<Tab, { type: "settings" }> }) {
   };
 
   return (
-    <div className="flex flex-col flex-1 w-full overflow-hidden">
+    <div className="flex w-full flex-1 flex-col overflow-hidden">
       <div className="flex flex-wrap gap-1 px-6 pt-6 pb-2">
         {SECTIONS.map(({ id, label, icon: Icon }) => (
           <Button
@@ -117,13 +118,13 @@ function SettingsView({ tab }: { tab: Extract<Tab, { type: "settings" }> }) {
             size="sm"
             onClick={() => setActiveTab(id)}
             className={cn([
-              "px-1 gap-1.5 h-7 border border-transparent shrink-0",
+              "h-7 shrink-0 gap-1.5 border border-transparent px-1",
               id === "lab" &&
                 "ml-2 text-amber-600 hover:bg-amber-50 hover:text-amber-700",
               activeTab === id &&
                 (id === "lab"
-                  ? "bg-amber-100 border-amber-300 text-amber-800"
-                  : "bg-neutral-100 border-neutral-200"),
+                  ? "border-amber-300 bg-amber-100 text-amber-800"
+                  : "border-neutral-200 bg-neutral-100"),
             ])}
           >
             <Icon size={14} />
@@ -131,10 +132,10 @@ function SettingsView({ tab }: { tab: Extract<Tab, { type: "settings" }> }) {
           </Button>
         ))}
       </div>
-      <div className="relative flex-1 w-full overflow-hidden">
+      <div className="relative w-full flex-1 overflow-hidden">
         <div
           ref={ref}
-          className="flex-1 w-full h-full overflow-y-auto scrollbar-hide px-6 pb-6"
+          className="scrollbar-hide h-full w-full flex-1 overflow-y-auto px-6 pb-6"
         >
           {renderContent()}
         </div>

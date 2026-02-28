@@ -1,9 +1,5 @@
 import { SparklesIcon } from "lucide-react";
 import { useCallback } from "react";
-import { StandardTabWrapper } from "~/shared/main";
-import { type TabItem, TabItemBase } from "~/shared/tabs";
-import type { TaskType } from "~/store/tinybase/store/prompts";
-import { type Tab, useTabs } from "~/store/zustand/tabs";
 
 import {
   ResizableHandle,
@@ -13,6 +9,11 @@ import {
 
 import { PromptDetailsColumn } from "./details";
 import { PromptsListColumn } from "./list";
+
+import { StandardTabWrapper } from "~/shared/main";
+import { type TabItem, TabItemBase } from "~/shared/tabs";
+import type { TaskType } from "~/store/tinybase/store/prompts";
+import { type Tab, useTabs } from "~/store/zustand/tabs";
 
 export const TabItemPrompt: TabItem<Extract<Tab, { type: "prompts" }>> = ({
   tab,
@@ -26,7 +27,7 @@ export const TabItemPrompt: TabItem<Extract<Tab, { type: "prompts" }>> = ({
 }) => {
   return (
     <TabItemBase
-      icon={<SparklesIcon className="w-4 h-4" />}
+      icon={<SparklesIcon className="h-4 w-4" />}
       title={"Prompts"}
       selected={tab.active}
       pinned={tab.pinned}
