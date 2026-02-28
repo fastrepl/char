@@ -16,30 +16,58 @@ import { cn } from "@hypr/utils";
 export function OAuthProviderContent({ config }: { config: CalendarProvider }) {
   const auth = useAuth();
   const billing = useBillingAccess();
-  const { data: connections } = useConnections();
+  const { data: connections, isError } = useConnections();
   const connection = connections?.find(
     (c) => c.integration_id === config.nangoIntegrationId,
   );
 
   const handleConnect = useCallback(
     () =>
-      openIntegrationUrl(config.nangoIntegrationId, connection?.connection_id),
+      openIntegrationUrl(
+        config.nangoIntegrationId,
+        connection?.connection_id,
+        "connect",
+      ),
+    [config.nangoIntegrationId, connection?.connection_id],
+  );
+
+  const handleDisconnect = useCallback(
+    () =>
+      openIntegrationUrl(
+        config.nangoIntegrationId,
+        connection?.connection_id,
+        "disconnect",
+      ),
     [config.nangoIntegrationId, connection?.connection_id],
   );
 
   if (connection) {
-    const disabled = !auth.session || !billing.isPro;
+    const reconnectDisabled = !auth.session || !billing.isPro;
+    const disconnectDisabled = !auth.session;
 
     const reconnectButton = (
       <button
         onClick={handleConnect}
-        disabled={disabled}
+        disabled={reconnectDisabled}
         className={cn([
           "text-xs text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer",
-          disabled && "opacity-50 cursor-not-allowed",
+          reconnectDisabled && "opacity-50 cursor-not-allowed",
         ])}
       >
         Reconnect
+      </button>
+    );
+
+    const disconnectButton = (
+      <button
+        onClick={handleDisconnect}
+        disabled={disconnectDisabled}
+        className={cn([
+          "text-xs text-red-500 hover:text-red-600 transition-colors cursor-pointer",
+          disconnectDisabled && "opacity-50 cursor-not-allowed",
+        ])}
+      >
+        Disconnect
       </button>
     );
 
@@ -49,6 +77,10 @@ export function OAuthProviderContent({ config }: { config: CalendarProvider }) {
         ? "Upgrade to Pro to use this integration"
         : null;
 
+    const disconnectTooltipMessage = !auth.session
+      ? "Sign in to manage your calendar connection"
+      : null;
+
     return (
       <div className="flex items-center justify-between px-1 pt-1 pb-2">
         <span className="text-xs text-green-600 font-medium flex items-center gap-1">
@@ -56,16 +88,41 @@ export function OAuthProviderContent({ config }: { config: CalendarProvider }) {
           Connected
         </span>
 
-        {tooltipMessage ? (
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
-              <span tabIndex={0}>{reconnectButton}</span>
-            </TooltipTrigger>
-            <TooltipContent side="bottom">{tooltipMessage}</TooltipContent>
-          </Tooltip>
-        ) : (
-          reconnectButton
-        )}
+        <div className="flex items-center gap-3">
+          {tooltipMessage ? (
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <span tabIndex={0}>{reconnectButton}</span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">{tooltipMessage}</TooltipContent>
+            </Tooltip>
+          ) : (
+            reconnectButton
+          )}
+
+          {disconnectTooltipMessage ? (
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <span tabIndex={0}>{disconnectButton}</span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                {disconnectTooltipMessage}
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            disconnectButton
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="px-1 pt-1 pb-2">
+        <span className="text-xs text-red-600">
+          Failed to load integration status
+        </span>
       </div>
     );
   }
@@ -139,9 +196,11 @@ export function OAuthProviderContent({ config }: { config: CalendarProvider }) {
 async function openIntegrationUrl(
   nangoIntegrationId: string | undefined,
   connectionId: string | undefined,
+  action: "connect" | "disconnect",
 ) {
   if (!nangoIntegrationId) return;
   const params: Record<string, string> = {
+    action,
     integration_id: nangoIntegrationId,
     return_to: "calendar",
   };

@@ -215,6 +215,15 @@ export type DeleteAccountResponse = {
     error?: string | null;
 };
 
+export type DeleteConnectionRequest = {
+    connection_id: string;
+    integration_id: string;
+};
+
+export type DeleteConnectionResponse = {
+    status: string;
+};
+
 export type DeviceInfo = {
     appVersion: string;
     arch: string;
@@ -999,6 +1008,37 @@ export type CreateConnectSessionResponses = {
 
 export type CreateConnectSessionResponse = CreateConnectSessionResponses[keyof CreateConnectSessionResponses];
 
+export type DeleteConnectionData = {
+    body: DeleteConnectionRequest;
+    path?: never;
+    query?: never;
+    url: '/nango/connections';
+};
+
+export type DeleteConnectionErrors = {
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Internal server error
+     */
+    500: unknown;
+};
+
+export type DeleteConnectionResponses = {
+    /**
+     * Connection disconnected
+     */
+    200: DeleteConnectionResponse;
+};
+
+export type DeleteConnectionResponse2 = DeleteConnectionResponses[keyof DeleteConnectionResponses];
+
 export type ListConnectionsData = {
     body?: never;
     path?: never;
@@ -1038,6 +1078,10 @@ export type CreateReconnectSessionErrors = {
      * Unauthorized
      */
     401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
     /**
      * Internal server error
      */

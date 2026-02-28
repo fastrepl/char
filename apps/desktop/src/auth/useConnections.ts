@@ -8,9 +8,10 @@ import { useAuth } from "./context";
 
 export function useConnections() {
   const auth = useAuth();
+  const userId = auth?.session?.user.id;
 
   return useQuery({
-    queryKey: ["integration-status"],
+    queryKey: ["integration-status", userId],
     queryFn: async () => {
       const headers = auth?.getHeaders();
       if (!headers) {
@@ -19,10 +20,10 @@ export function useConnections() {
       const client = createClient({ baseUrl: env.VITE_API_URL, headers });
       const { data, error } = await listConnections({ client });
       if (error) {
-        return [];
+        throw new Error("Failed to load integrations");
       }
       return data?.connections ?? [];
     },
-    enabled: !!auth?.session,
+    enabled: !!userId,
   });
 }

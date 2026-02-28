@@ -51,6 +51,16 @@ pub async fn nango_webhook(
     );
 
     if payload.r#type == "auth" && state.supabase.is_configured() {
+        if payload.operation == "refresh" && !payload.success {
+            tracing::warn!(
+                connection_id = %payload.connection_id,
+                end_user_id = %payload.end_user.end_user_id,
+                integration_id = %payload.provider_config_key,
+                error = ?payload.error,
+                "nango token refresh failed"
+            );
+        }
+
         if payload.success && payload.operation != "deletion" {
             state
                 .supabase

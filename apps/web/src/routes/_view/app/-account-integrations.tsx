@@ -12,7 +12,7 @@ const INTEGRATIONS = [
 export function IntegrationsSettingsCard() {
   const navigate = useNavigate();
   const billing = useBilling();
-  const { data: connections, isLoading } = useConnections();
+  const { data: connections, isLoading, isError } = useConnections();
 
   const getConnectionStatus = (integrationId: string) => {
     return connections?.find((c) => c.integration_id === integrationId);
@@ -45,13 +45,17 @@ export function IntegrationsSettingsCard() {
               )}
               {isLoading ? (
                 <span className="text-xs text-neutral-400">Checking...</span>
+              ) : isError ? (
+                <span className="text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+                  Check failed
+                </span>
               ) : isConnected ? (
                 <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
                   Connected
                 </span>
               ) : null}
             </div>
-            {!billing.isPro ? (
+            {!billing.isPro && !isConnected ? (
               <Link
                 to="/app/checkout/"
                 search={{ period: "monthly" }}
@@ -60,27 +64,47 @@ export function IntegrationsSettingsCard() {
                 Upgrade to Pro
               </Link>
             ) : (
-              <button
-                onClick={() =>
-                  navigate({
-                    to: "/app/integration/",
-                    search: {
-                      integration_id: integration.id,
-                      ...(connection
-                        ? { connection_id: connection.connection_id }
-                        : {}),
-                    },
-                  })
-                }
-                className={cn([
-                  "px-4 h-8 flex items-center text-sm rounded-full transition-all cursor-pointer",
-                  isConnected
-                    ? "bg-linear-to-b from-white to-stone-50 border border-neutral-300 text-neutral-700 shadow-xs hover:shadow-md hover:scale-[102%] active:scale-[98%]"
-                    : "bg-linear-to-t from-stone-600 to-stone-500 text-white shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
-                ])}
-              >
-                {isConnected ? "Reconnect" : "Connect"}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() =>
+                    navigate({
+                      to: "/app/integration/",
+                      search: {
+                        integration_id: integration.id,
+                        action: "connect",
+                        ...(connection
+                          ? { connection_id: connection.connection_id }
+                          : {}),
+                      },
+                    })
+                  }
+                  className={cn([
+                    "px-4 h-8 flex items-center text-sm rounded-full transition-all cursor-pointer",
+                    isConnected
+                      ? "bg-linear-to-b from-white to-stone-50 border border-neutral-300 text-neutral-700 shadow-xs hover:shadow-md hover:scale-[102%] active:scale-[98%]"
+                      : "bg-linear-to-t from-stone-600 to-stone-500 text-white shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
+                  ])}
+                >
+                  {isConnected ? "Reconnect" : "Connect"}
+                </button>
+                {isConnected && connection && (
+                  <button
+                    onClick={() =>
+                      navigate({
+                        to: "/app/integration/",
+                        search: {
+                          action: "disconnect",
+                          integration_id: integration.id,
+                          connection_id: connection.connection_id,
+                        },
+                      })
+                    }
+                    className="px-4 h-8 flex items-center text-sm rounded-full transition-all cursor-pointer bg-linear-to-t from-red-600 to-red-500 text-white shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]"
+                  >
+                    Disconnect
+                  </button>
+                )}
+              </div>
             )}
           </div>
         );

@@ -1,4 +1,5 @@
 pub(crate) mod connect;
+pub(crate) mod disconnect;
 pub(crate) mod status;
 pub(crate) mod webhook;
 
@@ -13,6 +14,7 @@ use crate::state::AppState;
 pub use connect::{
     ConnectSessionResponse, CreateConnectSessionRequest, CreateReconnectSessionRequest,
 };
+pub use disconnect::{DeleteConnectionRequest, DeleteConnectionResponse};
 pub use status::{ConnectionItem, ListConnectionsResponse};
 pub use webhook::WebhookResponse;
 
@@ -25,7 +27,10 @@ pub fn router(config: NangoConfig) -> Router {
             "/reconnect-session",
             post(connect::create_reconnect_session),
         )
-        .route("/connections", get(status::list_connections))
+        .route(
+            "/connections",
+            get(status::list_connections).delete(disconnect::delete_connection),
+        )
         .with_state(state)
 }
 

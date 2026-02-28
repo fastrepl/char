@@ -4,11 +4,13 @@ import { z } from "zod";
 import { useBilling } from "@/hooks/use-billing";
 
 import { ConnectFlow } from "./-integrations-connect-flow";
+import { DisconnectFlow } from "./-integrations-disconnect-flow";
 import { UpgradePrompt } from "./-integrations-upgrade-prompt";
 
 const validateSearch = z.object({
   integration_id: z.string().default("google-calendar"),
   connection_id: z.string().optional(),
+  action: z.enum(["connect", "disconnect"]).default("connect"),
   flow: z.enum(["desktop", "web"]).default("web"),
   scheme: z.string().default("hyprnote"),
   return_to: z.string().optional(),
@@ -46,6 +48,10 @@ export const Route = createFileRoute("/_view/app/integration")({
 function Component() {
   const search = Route.useSearch();
   const billing = useBilling();
+
+  if (search.action === "disconnect") {
+    return <DisconnectFlow />;
+  }
 
   if (!billing.isReady) {
     return (

@@ -75,7 +75,7 @@ function Component() {
   useEffect(() => {
     if (search.flow === "web") {
       void queryClient.invalidateQueries({
-        queryKey: ["integration-status"],
+        predicate: (query) => query.queryKey[0] === "integration-status",
       });
       void navigate({ to: "/app/account/" });
     }

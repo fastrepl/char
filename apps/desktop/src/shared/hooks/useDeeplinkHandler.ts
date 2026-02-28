@@ -29,9 +29,9 @@ export function useDeeplinkHandler() {
       } else if (payload.to === "/integration/callback") {
         const { integration_id, status, return_to } = payload.search;
         if (status === "success") {
-          console.log(`[deeplink] integration connected: ${integration_id}`);
+          console.log(`[deeplink] integration updated: ${integration_id}`);
           void queryClient.invalidateQueries({
-            queryKey: ["integration-status"],
+            predicate: (query) => query.queryKey[0] === "integration-status",
           });
           if (return_to === "calendar") {
             openNew({ type: "calendar" });

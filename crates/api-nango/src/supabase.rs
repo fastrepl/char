@@ -95,6 +95,34 @@ impl SupabaseClient {
         Ok(!rows.is_empty())
     }
 
+    pub(crate) async fn list_user_connections(
+        &self,
+        auth_token: &str,
+        user_id: &str,
+    ) -> Result<Vec<NangoConnectionRow>, crate::error::NangoError> {
+        let encoded_user_id = urlencoding::encode(user_id);
+        let url = format!(
+            "{}/rest/v1/nango_connections?select=integration_id,connection_id,updated_at&user_id=eq.{}",
+            self.supabase_url, encoded_user_id,
+        );
+
+        let response = self.anon_query(&url, auth_token).await?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
+            return Err(crate::error::NangoError::Internal(format!(
+                "query failed: {} - {}",
+                status, body
+            )));
+        }
+
+        response
+            .json()
+            .await
+            .map_err(|e| crate::error::NangoError::Internal(e.to_string()))
+    }
+
     pub(crate) async fn upsert_connection(
         &self,
         user_id: &str,

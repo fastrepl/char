@@ -1,0 +1,72 @@
+use axum::{Extension, Json, extract::State};
+use hypr_api_auth::AuthContext;
+use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
+
+use crate::error::Result;
+use crate::state::AppState;
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct DeleteConnectionRequest {
+    pub connection_id: String,
+    pub integration_id: String,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct DeleteConnectionResponse {
+    pub status: String,
+}
+
+#[utoipa::path(
+    delete,
+    path = "/connections",
+    request_body(content = DeleteConnectionRequest, content_type = "application/json"),
+    responses(
+        (status = 200, description = "Connection disconnected", body = DeleteConnectionResponse),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden"),
+        (status = 500, description = "Internal server error"),
+    ),
+    tag = "nango",
+)]
+pub async fn delete_connection(
+    State(state): State<AppState>,
+    Extension(auth): Extension<AuthContext>,
+    Json(body): Json<DeleteConnectionRequest>,
+) -> Result<Json<DeleteConnectionResponse>> {
+    let owns = state
+        .supabase
+        .verify_connection_ownership(
+            &auth.token,
+            &auth.claims.sub,
+            &body.connection_id,
+            &body.integration_id,
+        )
+        .await?;
+
+    if !owns {
+        tracing::warn!(
+            user_id = %auth.claims.sub,
+            connection_id = %body.connection_id,
+            integration_id = %body.integration_id,
+            "disconnect denied: connection not owned by user"
+        );
+        return Err(crate::error::NangoError::Forbidden(
+            "connection not found or not owned by user".to_string(),
+        ));
+    }
+
+    state
+        .nango
+        .delete_connection(&body.connection_id, &body.integration_id)
+        .await?;
+
+    state
+        .supabase
+        .delete_connection(&auth.claims.sub, &body.integration_id)
+        .await?;
+
+    Ok(Json(DeleteConnectionResponse {
+        status: "ok".to_string(),
+    }))
+}

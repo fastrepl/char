@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { CanStartTrialData, CanStartTrialErrors, CanStartTrialResponses, CreateConnectSessionData, CreateConnectSessionErrors, CreateConnectSessionResponses, CreateContactData, CreateContactErrors, CreateContactResponses, CreateConversationData, CreateConversationErrors, CreateConversationResponses, CreateReconnectSessionData, CreateReconnectSessionErrors, CreateReconnectSessionResponses, DeleteAccountData, DeleteAccountErrors, DeleteAccountResponses, GetMessagesData, GetMessagesErrors, GetMessagesResponses, GoogleListCalendarsData, GoogleListCalendarsErrors, GoogleListCalendarsResponses, GoogleListEventsData, GoogleListEventsErrors, GoogleListEventsResponses, ListConnectionsData, ListConnectionsErrors, ListConnectionsResponses, ListConversationsData, ListConversationsErrors, ListConversationsResponses, LlmChatCompletionsData, LlmChatCompletionsErrors, LlmChatCompletionsResponses, NangoWebhookData, NangoWebhookErrors, NangoWebhookResponses, OutlookListCalendarsData, OutlookListCalendarsErrors, OutlookListCalendarsResponses, OutlookListEventsData, OutlookListEventsErrors, OutlookListEventsResponses, SendMessageData, SendMessageErrors, SendMessageResponses, StartTrialData, StartTrialErrors, StartTrialResponses, SttListenBatchData, SttListenBatchErrors, SttListenBatchResponses, SttListenStreamData, SttListenStreamErrors, SttStatusData, SttStatusErrors, SttStatusResponses, SubmitData, SubmitErrors, SubmitResponses } from './types.gen';
+import type { CanStartTrialData, CanStartTrialErrors, CanStartTrialResponses, CreateConnectSessionData, CreateConnectSessionErrors, CreateConnectSessionResponses, CreateContactData, CreateContactErrors, CreateContactResponses, CreateConversationData, CreateConversationErrors, CreateConversationResponses, CreateReconnectSessionData, CreateReconnectSessionErrors, CreateReconnectSessionResponses, DeleteAccountData, DeleteAccountErrors, DeleteAccountResponses, DeleteConnectionData, DeleteConnectionErrors, DeleteConnectionResponses, GetMessagesData, GetMessagesErrors, GetMessagesResponses, GoogleListCalendarsData, GoogleListCalendarsErrors, GoogleListCalendarsResponses, GoogleListEventsData, GoogleListEventsErrors, GoogleListEventsResponses, ListConnectionsData, ListConnectionsErrors, ListConnectionsResponses, ListConversationsData, ListConversationsErrors, ListConversationsResponses, LlmChatCompletionsData, LlmChatCompletionsErrors, LlmChatCompletionsResponses, NangoWebhookData, NangoWebhookErrors, NangoWebhookResponses, OutlookListCalendarsData, OutlookListCalendarsErrors, OutlookListCalendarsResponses, OutlookListEventsData, OutlookListEventsErrors, OutlookListEventsResponses, SendMessageData, SendMessageErrors, SendMessageResponses, StartTrialData, StartTrialErrors, StartTrialResponses, SttListenBatchData, SttListenBatchErrors, SttListenBatchResponses, SttListenStreamData, SttListenStreamErrors, SttStatusData, SttStatusErrors, SttStatusResponses, SubmitData, SubmitErrors, SubmitResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -64,6 +64,16 @@ export const llmChatCompletions = <ThrowOnError extends boolean = false>(options
 export const createConnectSession = <ThrowOnError extends boolean = false>(options: Options<CreateConnectSessionData, ThrowOnError>) => (options.client ?? client).post<CreateConnectSessionResponses, CreateConnectSessionErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/nango/connect-session',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const deleteConnection = <ThrowOnError extends boolean = false>(options: Options<DeleteConnectionData, ThrowOnError>) => (options.client ?? client).delete<DeleteConnectionResponses, DeleteConnectionErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/nango/connections',
     ...options,
     headers: {
         'Content-Type': 'application/json',
