@@ -84,25 +84,10 @@ fn resolve_via_nsrunningapp(pid: i32) -> Option<InstalledApp> {
 fn resolve_via_nsrunningapp_inner(pid: i32) -> Option<InstalledApp> {
     let app = NSRunningApplication::runningApplicationWithProcessIdentifier(pid)?;
 
-    if let Some(bundle_url) = app.bundleURL() {
-        if let Some(path_ns) = bundle_url.path() {
-            let path_str = path_ns.to_string();
-            if let Some(resolved) = find_outermost_app(Path::new(&path_str)) {
-                return Some(resolved);
-            }
-        }
-    }
-
-    let bundle_id = app.bundleIdentifier()?.to_string();
-    let name = app
-        .localizedName()
-        .map(|s| s.to_string())
-        .unwrap_or_else(|| bundle_id.clone());
-
-    Some(InstalledApp {
-        id: bundle_id,
-        name,
-    })
+    let bundle_url = app.bundleURL()?;
+    let path_ns = bundle_url.path()?;
+    let path_str = path_ns.to_string();
+    find_outermost_app(Path::new(&path_str))
 }
 
 fn resolve_via_sysinfo(pid: i32) -> Option<InstalledApp> {
@@ -155,6 +140,56 @@ mod tests {
         println!("Got {} apps", apps.len());
         for app in &apps {
             println!("- {} ({})", app.name, app.id);
+        }
+    }
+
+    #[test]
+    fn test_find_outermost_app_system_daemon_path() {
+        let result = find_outermost_app(Path::new("/usr/libexec/avconferenced"));
+        assert!(
+            result.is_none(),
+            "system daemon should not resolve to an app"
+        );
+    }
+
+    #[test]
+    fn test_find_outermost_app_system_library_path() {
+        let result =
+            find_outermost_app(Path::new("/System/Library/PrivateFrameworks/SomeFramework"));
+        assert!(
+            result.is_none(),
+            "system framework should not resolve to an app"
+        );
+    }
+
+    // cargo test -p detect --features list,mic,app test_resolve_to_app_filters_system_daemons -- --ignored --nocapture
+    #[test]
+    #[ignore]
+    fn test_resolve_to_app_filters_system_daemons() {
+        let result = resolve_to_app(1);
+        println!("launchd (pid 1) resolved to: {:?}", result);
+        assert!(
+            result.is_none(),
+            "launchd (pid 1) is a system daemon and should not resolve to an app"
+        );
+    }
+
+    // cargo test -p detect --features list,mic,app test_mic_using_apps_no_system_daemons -- --ignored --nocapture
+    #[test]
+    #[ignore]
+    fn test_mic_using_apps_no_system_daemons() {
+        let apps = list_mic_using_apps();
+        println!("Mic-using apps:");
+        for app in &apps {
+            println!("- {} ({})", app.name, app.id);
+        }
+        for app in &apps {
+            assert!(
+                !app.name.ends_with('d') || app.name.contains('.'),
+                "detected app '{}' ({}) looks like a system daemon",
+                app.name,
+                app.id,
+            );
         }
     }
 }
