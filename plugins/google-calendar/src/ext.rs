@@ -18,10 +18,9 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> GoogleCalendarExt<'a, R, M> {
         match token {
             Some(t) if !t.is_empty() => {
                 let config = self.manager.state::<crate::PluginConfig>();
-                let client = self.manager.state::<reqwest::Client>();
-                fetch::list_calendars(&client, &config.api_base_url, &t).await
+                fetch::list_calendars(&config.api_base_url, &t).await
             }
-            _ => crate::fixture::list_calendars(),
+            _ => Err("not authenticated".to_string()),
         }
     }
 
@@ -32,10 +31,9 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> GoogleCalendarExt<'a, R, M> {
         match token {
             Some(t) if !t.is_empty() => {
                 let config = self.manager.state::<crate::PluginConfig>();
-                let client = self.manager.state::<reqwest::Client>();
-                fetch::list_events(&client, &config.api_base_url, &t, filter).await
+                fetch::list_events(&config.api_base_url, &t, filter).await
             }
-            _ => crate::fixture::list_events(filter),
+            _ => Err("not authenticated".to_string()),
         }
     }
 }

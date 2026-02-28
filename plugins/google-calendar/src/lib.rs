@@ -2,7 +2,6 @@ mod commands;
 mod convert;
 mod ext;
 mod fetch;
-mod fixture;
 mod types;
 
 pub use ext::{GoogleCalendarExt, GoogleCalendarPluginExt};
@@ -34,7 +33,6 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
         .setup(move |app, _api| {
             use tauri::Manager;
 
-            app.manage(reqwest::Client::new());
             app.manage(PluginConfig { api_base_url });
 
             Ok(())
@@ -85,16 +83,16 @@ mod test {
     }
 
     #[tokio::test]
-    async fn test_list_calendars() {
+    async fn test_list_calendars_requires_auth() {
         let app = create_app(tauri::test::mock_builder());
-        let calendars = app.google_calendar().list_calendars().await;
-        assert!(calendars.is_ok());
+        let result = app.google_calendar().list_calendars().await;
+        assert!(result.is_err());
     }
 
     #[tokio::test]
-    async fn test_list_events() {
+    async fn test_list_events_requires_auth() {
         let app = create_app(tauri::test::mock_builder());
-        let events = app
+        let result = app
             .google_calendar()
             .list_events(types::EventFilter {
                 from: chrono::Utc::now(),
@@ -102,6 +100,6 @@ mod test {
                 calendar_tracking_id: "primary".to_string(),
             })
             .await;
-        assert!(events.is_ok());
+        assert!(result.is_err());
     }
 }

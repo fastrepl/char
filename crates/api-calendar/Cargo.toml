@@ -6,18 +6,14 @@ edition = "2024"
 [dependencies]
 hypr-api-error = { workspace = true }
 hypr-api-nango = { workspace = true }
-hypr-google-calendar = { workspace = true }
+hypr-google-calendar = { workspace = true, features = ["utoipa"] }
 hypr-nango = { workspace = true }
-hypr-outlook-calendar = { workspace = true }
+hypr-outlook-calendar = { workspace = true, features = ["utoipa"] }
 
 chrono = { workspace = true, features = ["serde"] }
 
+axum = { workspace = true }
 utoipa = { workspace = true }
 
-axum = { workspace = true }
-sentry = { workspace = true }
-tracing = { workspace = true }
-
 serde = { workspace = true, features = ["derive"] }
-serde_json = { workspace = true }
 thiserror = { workspace = true }

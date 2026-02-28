@@ -1,6 +1,272 @@
 {
   "components": {
     "schemas": {
+      "AccessRole": {
+        "enum": [
+          "freeBusyReader",
+          "reader",
+          "writer",
+          "owner",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "AttendeeResponseStatus": {
+        "enum": [
+          "needsAction",
+          "declined",
+          "tentative",
+          "accepted",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "AttendeeType": {
+        "enum": [
+          "required",
+          "optional",
+          "resource",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "AutoDeclineMode": {
+        "enum": [
+          "declineNone",
+          "declineAllConflictingInvitations",
+          "declineOnlyNewConflictingInvitations",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "BirthdayProperties": {
+        "properties": {
+          "contact": {
+            "nullable": true,
+            "type": "string"
+          },
+          "customTypeName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/BirthdayPropertyType",
+            "nullable": true
+          }
+        },
+        "type": "object"
+      },
+      "BirthdayPropertyType": {
+        "enum": [
+          "birthday",
+          "anniversary",
+          "self",
+          "other",
+          "custom",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "BodyType": {
+        "enum": [
+          "text",
+          "html",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "Calendar": {
+        "properties": {
+          "allowedOnlineMeetingProviders": {
+            "items": {
+              "$ref": "#/components/schemas/OnlineMeetingProviderType"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "canEdit": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "canShare": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "canViewPrivateItems": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "changeKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "color": {
+            "$ref": "#/components/schemas/CalendarColor",
+            "nullable": true
+          },
+          "defaultOnlineMeetingProvider": {
+            "$ref": "#/components/schemas/OnlineMeetingProviderType",
+            "nullable": true
+          },
+          "hexColor": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "isDefaultCalendar": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "isRemovable": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "isTallyingResponses": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "name": {
+            "nullable": true,
+            "type": "string"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/EmailAddress",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "CalendarColor": {
+        "enum": [
+          "auto",
+          "lightBlue",
+          "lightGreen",
+          "lightOrange",
+          "lightGray",
+          "lightYellow",
+          "lightTeal",
+          "lightPink",
+          "lightBrown",
+          "lightRed",
+          "maxColor",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "CalendarListEntry": {
+        "properties": {
+          "accessRole": {
+            "$ref": "#/components/schemas/AccessRole",
+            "nullable": true
+          },
+          "autoAcceptInvitations": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "backgroundColor": {
+            "nullable": true,
+            "type": "string"
+          },
+          "colorId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "conferenceProperties": {
+            "$ref": "#/components/schemas/ConferenceProperties",
+            "nullable": true
+          },
+          "dataOwner": {
+            "nullable": true,
+            "type": "string"
+          },
+          "defaultReminders": {
+            "items": {
+              "$ref": "#/components/schemas/Reminder"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "deleted": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "etag": {
+            "nullable": true,
+            "type": "string"
+          },
+          "foregroundColor": {
+            "nullable": true,
+            "type": "string"
+          },
+          "hidden": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "nullable": true,
+            "type": "string"
+          },
+          "location": {
+            "nullable": true,
+            "type": "string"
+          },
+          "notificationSettings": {
+            "$ref": "#/components/schemas/NotificationSettings",
+            "nullable": true
+          },
+          "primary": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "selected": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "summary": {
+            "nullable": true,
+            "type": "string"
+          },
+          "summaryOverride": {
+            "nullable": true,
+            "type": "string"
+          },
+          "timeZone": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "CalendarNotification": {
+        "properties": {
+          "method": {
+            "$ref": "#/components/schemas/NotificationMethod"
+          },
+          "type": {
+            "$ref": "#/components/schemas/NotificationType"
+          }
+        },
+        "required": [
+          "method",
+          "type"
+        ],
+        "type": "object"
+      },
       "CanStartTrialReason": {
         "enum": [
           "eligible",
@@ -24,6 +290,133 @@
           "canStartTrial"
         ],
         "type": "object"
+      },
+      "ChatStatus": {
+        "enum": [
+          "available",
+          "doNotDisturb",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "ConferenceCreateRequest": {
+        "properties": {
+          "conferenceSolutionKey": {
+            "$ref": "#/components/schemas/ConferenceSolutionKey",
+            "nullable": true
+          },
+          "requestId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ConferenceCreateRequestStatus",
+            "nullable": true
+          }
+        },
+        "type": "object"
+      },
+      "ConferenceCreateRequestStatus": {
+        "properties": {
+          "statusCode": {
+            "$ref": "#/components/schemas/ConferenceCreateStatusCode"
+          }
+        },
+        "required": [
+          "statusCode"
+        ],
+        "type": "object"
+      },
+      "ConferenceCreateStatusCode": {
+        "enum": [
+          "pending",
+          "success",
+          "failure",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "ConferenceData": {
+        "properties": {
+          "conferenceId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "conferenceSolution": {
+            "$ref": "#/components/schemas/ConferenceSolution",
+            "nullable": true
+          },
+          "createRequest": {
+            "$ref": "#/components/schemas/ConferenceCreateRequest",
+            "nullable": true
+          },
+          "entryPoints": {
+            "items": {
+              "$ref": "#/components/schemas/EntryPoint"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "notes": {
+            "nullable": true,
+            "type": "string"
+          },
+          "signature": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ConferenceProperties": {
+        "properties": {
+          "allowedConferenceSolutionTypes": {
+            "items": {
+              "$ref": "#/components/schemas/ConferenceSolutionType"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ConferenceSolution": {
+        "properties": {
+          "iconUri": {
+            "nullable": true,
+            "type": "string"
+          },
+          "key": {
+            "$ref": "#/components/schemas/ConferenceSolutionKey",
+            "nullable": true
+          },
+          "name": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ConferenceSolutionKey": {
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ConferenceSolutionType"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "ConferenceSolutionType": {
+        "enum": [
+          "addOn",
+          "hangoutsMeet",
+          "eventNamedHangout",
+          "eventHangout",
+          "unknown"
+        ],
+        "type": "string"
       },
       "ConnectSessionResponse": {
         "properties": {
@@ -146,53 +539,6 @@
         ],
         "type": "object"
       },
-      "CreateEventRequest": {
-        "properties": {
-          "attendees": {
-            "items": {
-              "$ref": "#/components/schemas/EventAttendee"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "calendar_id": {
-            "type": "string"
-          },
-          "description": {
-            "nullable": true,
-            "type": "string"
-          },
-          "end": {
-            "$ref": "#/components/schemas/EventDateTime"
-          },
-          "location": {
-            "nullable": true,
-            "type": "string"
-          },
-          "start": {
-            "$ref": "#/components/schemas/EventDateTime"
-          },
-          "summary": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "calendar_id",
-          "summary",
-          "start",
-          "end"
-        ],
-        "type": "object"
-      },
-      "CreateEventResponse": {
-        "properties": {
-          "event": {}
-        },
-        "required": [
-          "event"
-        ],
-        "type": "object"
-      },
       "CreateReconnectSessionRequest": {
         "properties": {
           "connection_id": {
@@ -207,6 +553,43 @@
           "integration_id"
         ],
         "type": "object"
+      },
+      "CustomLocation": {
+        "properties": {
+          "label": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DateTimeTimeZone": {
+        "properties": {
+          "dateTime": {
+            "type": "string"
+          },
+          "timeZone": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "dateTime"
+        ],
+        "type": "object"
+      },
+      "DayOfWeek": {
+        "enum": [
+          "sunday",
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday",
+          "unknown"
+        ],
+        "type": "string"
       },
       "DeleteAccountResponse": {
         "properties": {
@@ -254,38 +637,190 @@
         ],
         "type": "object"
       },
-      "EventAttendee": {
+      "EmailAddress": {
         "properties": {
-          "displayName": {
+          "address": {
             "nullable": true,
             "type": "string"
           },
-          "email": {
+          "name": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EntryPoint": {
+        "properties": {
+          "accessCode": {
+            "nullable": true,
             "type": "string"
           },
-          "optional": {
+          "entryPointType": {
+            "$ref": "#/components/schemas/EntryPointType"
+          },
+          "label": {
             "nullable": true,
-            "type": "boolean"
+            "type": "string"
+          },
+          "meetingCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "passcode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "password": {
+            "nullable": true,
+            "type": "string"
+          },
+          "pin": {
+            "nullable": true,
+            "type": "string"
+          },
+          "uri": {
+            "type": "string"
           }
         },
         "required": [
-          "email"
+          "entryPointType",
+          "uri"
         ],
+        "type": "object"
+      },
+      "EntryPointType": {
+        "enum": [
+          "video",
+          "phone",
+          "sip",
+          "more",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "EventAttachment": {
+        "properties": {
+          "fileId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "fileUrl": {
+            "nullable": true,
+            "type": "string"
+          },
+          "iconLink": {
+            "nullable": true,
+            "type": "string"
+          },
+          "mimeType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "EventDateTime": {
         "properties": {
           "date": {
+            "format": "date",
             "nullable": true,
             "type": "string"
           },
           "dateTime": {
+            "format": "date-time",
             "nullable": true,
             "type": "string"
           },
           "timeZone": {
             "nullable": true,
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventPerson": {
+        "properties": {
+          "displayName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "email": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "self": {
+            "nullable": true,
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "EventShowAs": {
+        "enum": [
+          "free",
+          "tentative",
+          "busy",
+          "oof",
+          "workingElsewhere",
+          "unknown",
+          "other"
+        ],
+        "type": "string"
+      },
+      "EventSource": {
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "title"
+        ],
+        "type": "object"
+      },
+      "EventStatus": {
+        "enum": [
+          "confirmed",
+          "tentative",
+          "cancelled",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "ExtendedProperties": {
+        "properties": {
+          "private": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "nullable": true,
+            "propertyNames": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "shared": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "nullable": true,
+            "propertyNames": {
+              "type": "string"
+            },
+            "type": "object"
           }
         },
         "type": "object"
@@ -338,40 +873,77 @@
         ],
         "type": "string"
       },
-      "Interval": {
+      "FocusTimeProperties": {
+        "properties": {
+          "autoDeclineMode": {
+            "$ref": "#/components/schemas/AutoDeclineMode",
+            "nullable": true
+          },
+          "chatStatus": {
+            "$ref": "#/components/schemas/ChatStatus",
+            "nullable": true
+          },
+          "declineMessage": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Gadget": {
+        "properties": {
+          "display": {
+            "$ref": "#/components/schemas/GadgetDisplay",
+            "nullable": true
+          },
+          "height": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "iconLink": {
+            "nullable": true,
+            "type": "string"
+          },
+          "link": {
+            "nullable": true,
+            "type": "string"
+          },
+          "preferences": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "nullable": true,
+            "propertyNames": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "title": {
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "nullable": true,
+            "type": "string"
+          },
+          "width": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "GadgetDisplay": {
         "enum": [
-          "monthly",
-          "yearly"
+          "chip",
+          "icon",
+          "unknown"
         ],
         "type": "string"
       },
-      "ListCalendarsResponse": {
-        "properties": {
-          "calendars": {
-            "items": {},
-            "type": "array"
-          }
-        },
-        "required": [
-          "calendars"
-        ],
-        "type": "object"
-      },
-      "ListConnectionsResponse": {
-        "properties": {
-          "connections": {
-            "items": {
-              "$ref": "#/components/schemas/ConnectionItem"
-            },
-            "type": "array"
-          }
-        },
-        "required": [
-          "connections"
-        ],
-        "type": "object"
-      },
-      "ListEventsRequest": {
+      "GoogleListEventsRequest": {
         "properties": {
           "calendar_id": {
             "type": "string"
@@ -408,21 +980,93 @@
         ],
         "type": "object"
       },
-      "ListEventsResponse": {
+      "Importance": {
+        "enum": [
+          "low",
+          "normal",
+          "high",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "Interval": {
+        "enum": [
+          "monthly",
+          "yearly"
+        ],
+        "type": "string"
+      },
+      "ItemBody": {
         "properties": {
-          "events": {
-            "items": {},
-            "type": "array"
+          "content": {
+            "nullable": true,
+            "type": "string"
           },
-          "next_page_token": {
+          "contentType": {
+            "$ref": "#/components/schemas/BodyType",
+            "nullable": true
+          }
+        },
+        "type": "object"
+      },
+      "ListConnectionsResponse": {
+        "properties": {
+          "connections": {
+            "items": {
+              "$ref": "#/components/schemas/ConnectionItem"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "connections"
+        ],
+        "type": "object"
+      },
+      "Location": {
+        "properties": {
+          "address": {
+            "$ref": "#/components/schemas/PhysicalAddress",
+            "nullable": true
+          },
+          "coordinates": {
+            "$ref": "#/components/schemas/OutlookGeoCoordinates",
+            "nullable": true
+          },
+          "displayName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "locationType": {
+            "$ref": "#/components/schemas/LocationType",
+            "nullable": true
+          },
+          "uniqueId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "uniqueIdType": {
             "nullable": true,
             "type": "string"
           }
         },
-        "required": [
-          "events"
-        ],
         "type": "object"
+      },
+      "LocationType": {
+        "enum": [
+          "default",
+          "conferenceRoom",
+          "homeAddress",
+          "businessAddress",
+          "geoCoordinates",
+          "streetAddress",
+          "hotel",
+          "restaurant",
+          "localBusiness",
+          "postalAddress",
+          "unknown"
+        ],
+        "type": "string"
       },
       "MessageResponse": {
         "properties": {
@@ -447,6 +1091,370 @@
         ],
         "type": "object"
       },
+      "NotificationMethod": {
+        "enum": [
+          "email",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "NotificationSettings": {
+        "properties": {
+          "notifications": {
+            "items": {
+              "$ref": "#/components/schemas/CalendarNotification"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationType": {
+        "enum": [
+          "eventCreation",
+          "eventChange",
+          "eventCancellation",
+          "eventResponse",
+          "agenda",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "OfficeLocation": {
+        "properties": {
+          "buildingId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "deskId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "floorId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "floorSectionId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "label": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OnlineMeetingInfo": {
+        "properties": {
+          "conferenceId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "joinUrl": {
+            "nullable": true,
+            "type": "string"
+          },
+          "quickDial": {
+            "nullable": true,
+            "type": "string"
+          },
+          "tollFreeNumbers": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "tollNumber": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OnlineMeetingProviderType": {
+        "enum": [
+          "teamsForBusiness",
+          "skypeForBusiness",
+          "skypeForConsumer",
+          "unknown",
+          "other"
+        ],
+        "type": "string"
+      },
+      "OutOfOfficeProperties": {
+        "properties": {
+          "autoDeclineMode": {
+            "$ref": "#/components/schemas/AutoDeclineMode",
+            "nullable": true
+          },
+          "declineMessage": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OutlookGeoCoordinates": {
+        "properties": {
+          "accuracy": {
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          },
+          "altitude": {
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          },
+          "altitudeAccuracy": {
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          },
+          "latitude": {
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          },
+          "longitude": {
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "OutlookListEventsRequest": {
+        "properties": {
+          "calendar_id": {
+            "type": "string"
+          },
+          "max_results": {
+            "format": "int32",
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
+          },
+          "order_by": {
+            "nullable": true,
+            "type": "string"
+          },
+          "time_max": {
+            "nullable": true,
+            "type": "string"
+          },
+          "time_min": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "calendar_id"
+        ],
+        "type": "object"
+      },
+      "PatternedRecurrence": {
+        "properties": {
+          "pattern": {
+            "$ref": "#/components/schemas/RecurrencePattern",
+            "nullable": true
+          },
+          "range": {
+            "$ref": "#/components/schemas/RecurrenceRange",
+            "nullable": true
+          }
+        },
+        "type": "object"
+      },
+      "PhysicalAddress": {
+        "properties": {
+          "city": {
+            "nullable": true,
+            "type": "string"
+          },
+          "countryOrRegion": {
+            "nullable": true,
+            "type": "string"
+          },
+          "postalCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "state": {
+            "nullable": true,
+            "type": "string"
+          },
+          "street": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Recipient": {
+        "properties": {
+          "emailAddress": {
+            "$ref": "#/components/schemas/EmailAddress",
+            "nullable": true
+          }
+        },
+        "type": "object"
+      },
+      "RecurrencePattern": {
+        "properties": {
+          "dayOfMonth": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "daysOfWeek": {
+            "items": {
+              "$ref": "#/components/schemas/DayOfWeek"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "firstDayOfWeek": {
+            "$ref": "#/components/schemas/DayOfWeek",
+            "nullable": true
+          },
+          "index": {
+            "$ref": "#/components/schemas/WeekIndex",
+            "nullable": true
+          },
+          "interval": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "month": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "type": {
+            "$ref": "#/components/schemas/RecurrencePatternType",
+            "nullable": true
+          }
+        },
+        "type": "object"
+      },
+      "RecurrencePatternType": {
+        "enum": [
+          "daily",
+          "weekly",
+          "absoluteMonthly",
+          "relativeMonthly",
+          "absoluteYearly",
+          "relativeYearly",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "RecurrenceRange": {
+        "properties": {
+          "endDate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "numberOfOccurrences": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "recurrenceTimeZone": {
+            "nullable": true,
+            "type": "string"
+          },
+          "startDate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/RecurrenceRangeType",
+            "nullable": true
+          }
+        },
+        "type": "object"
+      },
+      "RecurrenceRangeType": {
+        "enum": [
+          "endDate",
+          "noEnd",
+          "numbered",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "Reminder": {
+        "properties": {
+          "method": {
+            "$ref": "#/components/schemas/ReminderMethod"
+          },
+          "minutes": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "method",
+          "minutes"
+        ],
+        "type": "object"
+      },
+      "ReminderMethod": {
+        "enum": [
+          "email",
+          "popup",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "Reminders": {
+        "properties": {
+          "overrides": {
+            "items": {
+              "$ref": "#/components/schemas/Reminder"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "useDefault": {
+            "nullable": true,
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ResponseStatus": {
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/ResponseType",
+            "nullable": true
+          },
+          "time": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ResponseType": {
+        "enum": [
+          "none",
+          "organizer",
+          "tentativelyAccepted",
+          "accepted",
+          "declined",
+          "notResponded",
+          "unknown"
+        ],
+        "type": "string"
+      },
       "SendMessageRequest": {
         "properties": {
           "content": {
@@ -464,6 +1472,16 @@
           "content"
         ],
         "type": "object"
+      },
+      "Sensitivity": {
+        "enum": [
+          "normal",
+          "personal",
+          "private",
+          "confidential",
+          "unknown"
+        ],
+        "type": "string"
       },
       "StartTrialReason": {
         "enum": [
@@ -488,6 +1506,24 @@
         ],
         "type": "object"
       },
+      "Transparency": {
+        "enum": [
+          "opaque",
+          "transparent",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "Visibility": {
+        "enum": [
+          "default",
+          "public",
+          "private",
+          "confidential",
+          "unknown"
+        ],
+        "type": "string"
+      },
       "WebhookResponse": {
         "properties": {
           "status": {
@@ -497,6 +1533,619 @@
         "required": [
           "status"
         ],
+        "type": "object"
+      },
+      "WeekIndex": {
+        "enum": [
+          "first",
+          "second",
+          "third",
+          "fourth",
+          "last",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "WorkingLocationProperties": {
+        "properties": {
+          "customLocation": {
+            "$ref": "#/components/schemas/CustomLocation",
+            "nullable": true
+          },
+          "homeOffice": {},
+          "officeLocation": {
+            "$ref": "#/components/schemas/OfficeLocation",
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/WorkingLocationType",
+            "nullable": true
+          }
+        },
+        "type": "object"
+      },
+      "WorkingLocationType": {
+        "enum": [
+          "homeOffice",
+          "officeLocation",
+          "customLocation",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "google.Attendee": {
+        "properties": {
+          "additionalGuests": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "comment": {
+            "nullable": true,
+            "type": "string"
+          },
+          "displayName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "email": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "optional": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "organizer": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "resource": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "responseStatus": {
+            "$ref": "#/components/schemas/AttendeeResponseStatus",
+            "nullable": true
+          },
+          "self": {
+            "nullable": true,
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "google.Event": {
+        "properties": {
+          "anyoneCanAddSelf": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "attachments": {
+            "items": {
+              "$ref": "#/components/schemas/EventAttachment"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "attendees": {
+            "items": {
+              "$ref": "#/components/schemas/google.Attendee"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "attendeesOmitted": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "birthdayProperties": {
+            "$ref": "#/components/schemas/BirthdayProperties",
+            "nullable": true
+          },
+          "colorId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "conferenceData": {
+            "$ref": "#/components/schemas/ConferenceData",
+            "nullable": true
+          },
+          "created": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/EventPerson",
+            "nullable": true
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "end": {
+            "$ref": "#/components/schemas/EventDateTime",
+            "nullable": true
+          },
+          "endTimeUnspecified": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "etag": {
+            "nullable": true,
+            "type": "string"
+          },
+          "eventType": {
+            "$ref": "#/components/schemas/google.EventType",
+            "nullable": true
+          },
+          "extendedProperties": {
+            "$ref": "#/components/schemas/ExtendedProperties",
+            "nullable": true
+          },
+          "focusTimeProperties": {
+            "$ref": "#/components/schemas/FocusTimeProperties",
+            "nullable": true
+          },
+          "gadget": {
+            "$ref": "#/components/schemas/Gadget",
+            "nullable": true
+          },
+          "guestsCanInviteOthers": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "guestsCanModify": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "guestsCanSeeOtherGuests": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "hangoutLink": {
+            "nullable": true,
+            "type": "string"
+          },
+          "htmlLink": {
+            "nullable": true,
+            "type": "string"
+          },
+          "iCalUID": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "nullable": true,
+            "type": "string"
+          },
+          "location": {
+            "nullable": true,
+            "type": "string"
+          },
+          "locked": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "organizer": {
+            "$ref": "#/components/schemas/EventPerson",
+            "nullable": true
+          },
+          "originalStartTime": {
+            "$ref": "#/components/schemas/EventDateTime",
+            "nullable": true
+          },
+          "outOfOfficeProperties": {
+            "$ref": "#/components/schemas/OutOfOfficeProperties",
+            "nullable": true
+          },
+          "privateCopy": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "recurrence": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "recurringEventId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reminders": {
+            "$ref": "#/components/schemas/Reminders",
+            "nullable": true
+          },
+          "sequence": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "source": {
+            "$ref": "#/components/schemas/EventSource",
+            "nullable": true
+          },
+          "start": {
+            "$ref": "#/components/schemas/EventDateTime",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/EventStatus",
+            "nullable": true
+          },
+          "summary": {
+            "nullable": true,
+            "type": "string"
+          },
+          "transparency": {
+            "$ref": "#/components/schemas/Transparency",
+            "nullable": true
+          },
+          "updated": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/Visibility",
+            "nullable": true
+          },
+          "workingLocationProperties": {
+            "$ref": "#/components/schemas/WorkingLocationProperties",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "google.EventType": {
+        "enum": [
+          "default",
+          "birthday",
+          "focusTime",
+          "fromGmail",
+          "outOfOffice",
+          "workingLocation",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "google.ListCalendarsResponse": {
+        "properties": {
+          "etag": {
+            "nullable": true,
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CalendarListEntry"
+            },
+            "type": "array"
+          },
+          "kind": {
+            "nullable": true,
+            "type": "string"
+          },
+          "nextPageToken": {
+            "nullable": true,
+            "type": "string"
+          },
+          "nextSyncToken": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "google.ListEventsResponse": {
+        "properties": {
+          "accessRole": {
+            "$ref": "#/components/schemas/AccessRole",
+            "nullable": true
+          },
+          "defaultReminders": {
+            "items": {
+              "$ref": "#/components/schemas/Reminder"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "etag": {
+            "nullable": true,
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/google.Event"
+            },
+            "type": "array"
+          },
+          "kind": {
+            "nullable": true,
+            "type": "string"
+          },
+          "nextPageToken": {
+            "nullable": true,
+            "type": "string"
+          },
+          "nextSyncToken": {
+            "nullable": true,
+            "type": "string"
+          },
+          "summary": {
+            "nullable": true,
+            "type": "string"
+          },
+          "timeZone": {
+            "nullable": true,
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "outlook.Attendee": {
+        "properties": {
+          "emailAddress": {
+            "$ref": "#/components/schemas/EmailAddress",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/ResponseStatus",
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/AttendeeType",
+            "nullable": true
+          }
+        },
+        "type": "object"
+      },
+      "outlook.Event": {
+        "properties": {
+          "allowNewTimeProposals": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "attendees": {
+            "items": {
+              "$ref": "#/components/schemas/outlook.Attendee"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "body": {
+            "$ref": "#/components/schemas/ItemBody",
+            "nullable": true
+          },
+          "bodyPreview": {
+            "nullable": true,
+            "type": "string"
+          },
+          "categories": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "changeKey": {
+            "nullable": true,
+            "type": "string"
+          },
+          "createdDateTime": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "end": {
+            "$ref": "#/components/schemas/DateTimeTimeZone",
+            "nullable": true
+          },
+          "hasAttachments": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "hideAttendees": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "iCalUId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "importance": {
+            "$ref": "#/components/schemas/Importance",
+            "nullable": true
+          },
+          "isAllDay": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "isCancelled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "isDraft": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "isOnlineMeeting": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "isOrganizer": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "isReminderOn": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "lastModifiedDateTime": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "location": {
+            "$ref": "#/components/schemas/Location",
+            "nullable": true
+          },
+          "locations": {
+            "items": {
+              "$ref": "#/components/schemas/Location"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "onlineMeeting": {
+            "$ref": "#/components/schemas/OnlineMeetingInfo",
+            "nullable": true
+          },
+          "onlineMeetingProvider": {
+            "$ref": "#/components/schemas/OnlineMeetingProviderType",
+            "nullable": true
+          },
+          "onlineMeetingUrl": {
+            "nullable": true,
+            "type": "string"
+          },
+          "organizer": {
+            "$ref": "#/components/schemas/Recipient",
+            "nullable": true
+          },
+          "originalEndTimeZone": {
+            "nullable": true,
+            "type": "string"
+          },
+          "originalStartTimeZone": {
+            "nullable": true,
+            "type": "string"
+          },
+          "recurrence": {
+            "$ref": "#/components/schemas/PatternedRecurrence",
+            "nullable": true
+          },
+          "reminderMinutesBeforeStart": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "responseRequested": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "responseStatus": {
+            "$ref": "#/components/schemas/ResponseStatus",
+            "nullable": true
+          },
+          "sensitivity": {
+            "$ref": "#/components/schemas/Sensitivity",
+            "nullable": true
+          },
+          "seriesMasterId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "showAs": {
+            "$ref": "#/components/schemas/EventShowAs",
+            "nullable": true
+          },
+          "start": {
+            "$ref": "#/components/schemas/DateTimeTimeZone",
+            "nullable": true
+          },
+          "subject": {
+            "nullable": true,
+            "type": "string"
+          },
+          "transactionId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/outlook.EventType",
+            "nullable": true
+          },
+          "webLink": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "outlook.EventType": {
+        "enum": [
+          "singleInstance",
+          "occurrence",
+          "exception",
+          "seriesMaster",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "outlook.ListCalendarsResponse": {
+        "properties": {
+          "@odata.context": {
+            "nullable": true,
+            "type": "string"
+          },
+          "@odata.nextLink": {
+            "nullable": true,
+            "type": "string"
+          },
+          "value": {
+            "items": {
+              "$ref": "#/components/schemas/Calendar"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "outlook.ListEventsResponse": {
+        "properties": {
+          "@odata.context": {
+            "nullable": true,
+            "type": "string"
+          },
+          "@odata.nextLink": {
+            "nullable": true,
+            "type": "string"
+          },
+          "value": {
+            "items": {
+              "$ref": "#/components/schemas/outlook.Event"
+            },
+            "type": "array"
+          }
+        },
         "type": "object"
       }
     },
@@ -519,19 +2168,19 @@
   },
   "openapi": "3.0.3",
   "paths": {
-    "/calendar/calendars": {
+    "/calendar/google/list-calendars": {
       "post": {
-        "operationId": "list_calendars",
+        "operationId": "google_list_calendars",
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListCalendarsResponse"
+                  "$ref": "#/components/schemas/google.ListCalendarsResponse"
                 }
               }
             },
-            "description": "Calendars fetched"
+            "description": "Google calendars fetched"
           },
           "401": {
             "description": "Unauthorized"
@@ -550,14 +2199,14 @@
         ]
       }
     },
-    "/calendar/events": {
+    "/calendar/google/list-events": {
       "post": {
-        "operationId": "list_events",
+        "operationId": "google_list_events",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ListEventsRequest"
+                "$ref": "#/components/schemas/GoogleListEventsRequest"
               }
             }
           },
@@ -568,11 +2217,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListEventsResponse"
+                  "$ref": "#/components/schemas/google.ListEventsResponse"
                 }
               }
             },
-            "description": "Events fetched"
+            "description": "Google events fetched"
           },
           "401": {
             "description": "Unauthorized"
@@ -591,14 +2240,45 @@
         ]
       }
     },
-    "/calendar/events/create": {
+    "/calendar/outlook/list-calendars": {
       "post": {
-        "operationId": "create_event",
+        "operationId": "outlook_list_calendars",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/outlook.ListCalendarsResponse"
+                }
+              }
+            },
+            "description": "Outlook calendars fetched"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "tags": [
+          "calendar"
+        ]
+      }
+    },
+    "/calendar/outlook/list-events": {
+      "post": {
+        "operationId": "outlook_list_events",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateEventRequest"
+                "$ref": "#/components/schemas/OutlookListEventsRequest"
               }
             }
           },
@@ -609,11 +2289,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CreateEventResponse"
+                  "$ref": "#/components/schemas/outlook.ListEventsResponse"
                 }
               }
             },
-            "description": "Event created"
+            "description": "Outlook events fetched"
           },
           "401": {
             "description": "Unauthorized"

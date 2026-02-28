@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { CanStartTrialData, CanStartTrialErrors, CanStartTrialResponses, CreateConnectSessionData, CreateConnectSessionErrors, CreateConnectSessionResponses, CreateContactData, CreateContactErrors, CreateContactResponses, CreateConversationData, CreateConversationErrors, CreateConversationResponses, CreateEventData, CreateEventErrors, CreateEventResponses, CreateReconnectSessionData, CreateReconnectSessionErrors, CreateReconnectSessionResponses, DeleteAccountData, DeleteAccountErrors, DeleteAccountResponses, GetMessagesData, GetMessagesErrors, GetMessagesResponses, ListCalendarsData, ListCalendarsErrors, ListCalendarsResponses, ListConnectionsData, ListConnectionsErrors, ListConnectionsResponses, ListConversationsData, ListConversationsErrors, ListConversationsResponses, ListEventsData, ListEventsErrors, ListEventsResponses, LlmChatCompletionsData, LlmChatCompletionsErrors, LlmChatCompletionsResponses, NangoWebhookData, NangoWebhookErrors, NangoWebhookResponses, SendMessageData, SendMessageErrors, SendMessageResponses, StartTrialData, StartTrialErrors, StartTrialResponses, SttListenBatchData, SttListenBatchErrors, SttListenBatchResponses, SttListenStreamData, SttListenStreamErrors, SttStatusData, SttStatusErrors, SttStatusResponses, SubmitData, SubmitErrors, SubmitResponses } from './types.gen';
+import type { CanStartTrialData, CanStartTrialErrors, CanStartTrialResponses, CreateConnectSessionData, CreateConnectSessionErrors, CreateConnectSessionResponses, CreateContactData, CreateContactErrors, CreateContactResponses, CreateConversationData, CreateConversationErrors, CreateConversationResponses, CreateReconnectSessionData, CreateReconnectSessionErrors, CreateReconnectSessionResponses, DeleteAccountData, DeleteAccountErrors, DeleteAccountResponses, GetMessagesData, GetMessagesErrors, GetMessagesResponses, GoogleListCalendarsData, GoogleListCalendarsErrors, GoogleListCalendarsResponses, GoogleListEventsData, GoogleListEventsErrors, GoogleListEventsResponses, ListConnectionsData, ListConnectionsErrors, ListConnectionsResponses, ListConversationsData, ListConversationsErrors, ListConversationsResponses, LlmChatCompletionsData, LlmChatCompletionsErrors, LlmChatCompletionsResponses, NangoWebhookData, NangoWebhookErrors, NangoWebhookResponses, OutlookListCalendarsData, OutlookListCalendarsErrors, OutlookListCalendarsResponses, OutlookListEventsData, OutlookListEventsErrors, OutlookListEventsResponses, SendMessageData, SendMessageErrors, SendMessageResponses, StartTrialData, StartTrialErrors, StartTrialResponses, SttListenBatchData, SttListenBatchErrors, SttListenBatchResponses, SttListenStreamData, SttListenStreamErrors, SttStatusData, SttStatusErrors, SttStatusResponses, SubmitData, SubmitErrors, SubmitResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -18,15 +18,15 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
     meta?: Record<string, unknown>;
 };
 
-export const listCalendars = <ThrowOnError extends boolean = false>(options?: Options<ListCalendarsData, ThrowOnError>) => (options?.client ?? client).post<ListCalendarsResponses, ListCalendarsErrors, ThrowOnError>({
+export const googleListCalendars = <ThrowOnError extends boolean = false>(options?: Options<GoogleListCalendarsData, ThrowOnError>) => (options?.client ?? client).post<GoogleListCalendarsResponses, GoogleListCalendarsErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/calendar/calendars',
+    url: '/calendar/google/list-calendars',
     ...options
 });
 
-export const listEvents = <ThrowOnError extends boolean = false>(options: Options<ListEventsData, ThrowOnError>) => (options.client ?? client).post<ListEventsResponses, ListEventsErrors, ThrowOnError>({
+export const googleListEvents = <ThrowOnError extends boolean = false>(options: Options<GoogleListEventsData, ThrowOnError>) => (options.client ?? client).post<GoogleListEventsResponses, GoogleListEventsErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/calendar/events',
+    url: '/calendar/google/list-events',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -34,9 +34,15 @@ export const listEvents = <ThrowOnError extends boolean = false>(options: Option
     }
 });
 
-export const createEvent = <ThrowOnError extends boolean = false>(options: Options<CreateEventData, ThrowOnError>) => (options.client ?? client).post<CreateEventResponses, CreateEventErrors, ThrowOnError>({
+export const outlookListCalendars = <ThrowOnError extends boolean = false>(options?: Options<OutlookListCalendarsData, ThrowOnError>) => (options?.client ?? client).post<OutlookListCalendarsResponses, OutlookListCalendarsErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/calendar/events/create',
+    url: '/calendar/outlook/list-calendars',
+    ...options
+});
+
+export const outlookListEvents = <ThrowOnError extends boolean = false>(options: Options<OutlookListEventsData, ThrowOnError>) => (options.client ?? client).post<OutlookListEventsResponses, OutlookListEventsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/calendar/outlook/list-events',
     ...options,
     headers: {
         'Content-Type': 'application/json',

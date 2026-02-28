@@ -1,9 +1,14 @@
 mod error;
+mod google;
 mod openapi;
-mod provider;
-mod providers;
-mod routes;
+mod outlook;
+
+use axum::Router;
 
 pub use openapi::openapi;
-pub use provider::CalendarConfig;
-pub use routes::router;
+
+pub fn router() -> Router {
+    Router::new()
+        .nest("/google", google::router())
+        .nest("/outlook", outlook::router())
+}
