@@ -271,6 +271,9 @@ importers:
       '@hypr/plugin-screen':
         specifier: workspace:*
         version: link:../../plugins/screen
+      '@hypr/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
       '@hypr/plugin-settings':
         specifier: workspace:*
         version: link:../../plugins/settings
@@ -1090,6 +1093,21 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  examples/plugins/hello-world:
+    devDependencies:
+      '@hypr/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/plugin-sdk
+      '@types/react':
+        specifier: ^19.2.14
+        version: 19.2.14
+      esbuild:
+        specifier: ^0.27.0
+        version: 0.27.3
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
   packages/agent-core:
     dependencies:
       '@langchain/core':
@@ -1276,6 +1294,19 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.13)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  packages/plugin-sdk:
+    dependencies:
+      react:
+        specifier: ^19.2.4
+        version: 19.2.4
+    devDependencies:
+      '@types/react':
+        specifier: ^19.2.13
+        version: 19.2.14
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -8377,6 +8408,9 @@ packages:
 
   '@types/react@19.2.13':
     resolution: {integrity: sha512-KkiJeU6VbYbUOp5ITMIc7kBfqlYkKA5KhEHVrGMmUUMt7NeaZg65ojdPk+FtNrBAOXNVM5QM72jnADjM+XVRAQ==}
+
+  '@types/react@19.2.14':
+    resolution: {integrity: sha512-ilcTH/UniCkMdtexkoCN0bI7pMcJDvmQFPvuPvmEaYA/NSfFTAgdUSLAoVjaRJm7+6PvcM+q1zYOwS4wTYMF9w==}
 
   '@types/resolve@1.20.6':
     resolution: {integrity: sha512-A4STmOXPhMUtHH+S6ymgE2GiBSMqf4oTvcQZMcHzokuTLVYzXTB8ttjcgxOVaAp2lGwEdzZ0J+cRbbeevQj1UQ==}
@@ -24436,6 +24470,10 @@ snapshots:
       '@types/react': 19.2.13
 
   '@types/react@19.2.13':
+    dependencies:
+      csstype: 3.2.3
+
+  '@types/react@19.2.14':
     dependencies:
       csstype: 3.2.3
 

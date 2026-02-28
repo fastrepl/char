@@ -6,7 +6,9 @@ await esbuild.build({
   format: "iife",
   outfile: "dist/main.js",
   platform: "browser",
-  jsx: "automatic",
+  jsx: "transform",
+  jsxFactory: "React.createElement",
+  jsxFragment: "React.Fragment",
   minify: false,
   sourcemap: true,
 });

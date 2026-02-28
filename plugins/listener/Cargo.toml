@@ -22,7 +22,7 @@ uuid = { workspace = true }
 [dependencies]
 hypr-audio = { workspace = true }
 hypr-language = { workspace = true }
-hypr-listener-core = { workspace = true, features = ["specta"] }
+hypr-listener-core = { workspace = true, features = ["specta", "tauri-event"] }
 hypr-storage = { workspace = true }
 hypr-transcript = { workspace = true }
 

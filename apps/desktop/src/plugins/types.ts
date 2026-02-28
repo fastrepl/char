@@ -1,3 +1,12 @@
+import type {
+  PluginCleanup,
+  PluginContext as PluginContextBase,
+  PluginEventRef,
+  PluginModule as PluginModuleBase,
+} from "@hypr/plugin-sdk";
+
+import type { pluginEvents } from "./events";
+
 export type PluginManifestEntry = {
   id: string;
   name: string;
@@ -5,16 +14,8 @@ export type PluginManifestEntry = {
   mainPath: string;
 };
 
-export type PluginContext = {
-  registerView: (viewId: string, factory: () => React.ReactNode) => void;
-  openTab: (
-    extensionId?: string,
-    state?: Partial<Record<string, string | number | boolean | null>>,
-  ) => void;
-};
+export type PluginEvents = typeof pluginEvents;
 
-export type PluginModule = {
-  id: string;
-  onload: (ctx: PluginContext) => void | Promise<void>;
-  onunload?: () => void | Promise<void>;
-};
+export type PluginContext = PluginContextBase<PluginEvents>;
+export type PluginModule = PluginModuleBase<PluginEvents>;
+export type { PluginCleanup, PluginEventRef };

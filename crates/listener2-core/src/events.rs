@@ -3,6 +3,7 @@ use owhisper_interface::stream::StreamResponse;
 
 #[derive(serde::Serialize, Clone)]
 #[cfg_attr(feature = "specta", derive(specta::Type))]
+#[cfg_attr(feature = "tauri-event", derive(tauri_specta::Event))]
 #[serde(tag = "type")]
 pub enum BatchEvent {
     #[serde(rename = "batchStarted")]
@@ -24,6 +25,7 @@ pub enum BatchEvent {
 
 #[derive(serde::Serialize, Clone)]
 #[cfg_attr(feature = "specta", derive(specta::Type))]
+#[cfg_attr(feature = "tauri-event", derive(tauri_specta::Event))]
 #[serde(tag = "type")]
 pub enum DenoiseEvent {
     #[serde(rename = "denoiseStarted")]

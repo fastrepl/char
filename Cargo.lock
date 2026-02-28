@@ -2263,7 +2263,7 @@ dependencies = [
  "bitflags 2.11.0",
  "cexpr",
  "clang-sys",
- "itertools 0.12.1",
+ "itertools 0.13.0",
  "log",
  "prettyplease",
  "proc-macro2",
@@ -2283,7 +2283,7 @@ dependencies = [
  "bitflags 2.11.0",
  "cexpr",
  "clang-sys",
- "itertools 0.12.1",
+ "itertools 0.13.0",
  "log",
  "prettyplease",
  "proc-macro2",
@@ -9960,11 +9960,13 @@ dependencies = [
  "owhisper-client",
  "owhisper-interface",
  "ractor",
+ "sentry",
  "serde",
  "serde_json",
  "specta",
  "storage",
  "supervisor",
+ "tauri-specta",
  "thiserror 2.0.18",
  "tokio",
  "tokio-stream",
@@ -9994,6 +9996,7 @@ dependencies = [
  "serde",
  "specta",
  "strum 0.27.2",
+ "tauri-specta",
  "thiserror 2.0.18",
  "tokio",
  "tokio-stream",
@@ -13067,7 +13070,7 @@ version = "0.13.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be769465445e8c1474e9c5dac2018218498557af32d9ed057325ec9a41ae81bf"
 dependencies = [
- "heck 0.4.1",
+ "heck 0.5.0",
  "itertools 0.14.0",
  "log",
  "multimap",
@@ -15628,7 +15631,7 @@ version = "0.8.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c1c97747dbf44bb1ca44a561ece23508e99cb592e862f22222dcf42f51d1e451"
 dependencies = [
- "heck 0.4.1",
+ "heck 0.5.0",
  "proc-macro2",
  "quote",
  "syn 2.0.117",
@@ -17631,7 +17634,6 @@ dependencies = [
  "quickcheck_macros",
  "ractor",
  "rodio",
- "sentry",
  "serde",
  "serde_json",
  "specta",
@@ -20329,6 +20331,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "uniffi-bindgen"
+version = "0.1.0"
+dependencies = [
+ "uniffi",
+]
+
+[[package]]
 name = "uniffi_bindgen"
 version = "0.29.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -22445,8 +22454,28 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ce9e2f4a404d9ebffc0a9832cf4f50907220ba3d7fffa9099261a5cab52f2dd7"
 
 [[package]]
+name = "xshell"
+version = "0.2.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9e7290c623014758632efe00737145b6867b66292c42167f2ec381eb566a373d"
+dependencies = [
+ "xshell-macros",
+]
+
+[[package]]
+name = "xshell-macros"
+version = "0.2.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "32ac00cd3f8ec9c1d33fb3e7958a82df6989c42d747bd326c822b1d625283547"
+
+[[package]]
 name = "xtask"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "tempfile",
+ "xshell",
+]
 
 [[package]]
 name = "xz2"

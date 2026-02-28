@@ -2,9 +2,14 @@ import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 
 import { createPluginContext } from "./context";
 import { getRegisteredPluginModule, setPluginDisplayName } from "./registry";
-import type { PluginManifestEntry } from "./types";
+import type { PluginCleanup, PluginManifestEntry, PluginModule } from "./types";
 
 let loadingPromise: Promise<void> | null = null;
+const loadedPlugins = new Map<
+  string,
+  { module: PluginModule; cleanups: PluginCleanup[] }
+>();
+let beforeUnloadRegistered = false;
 
 export function loadPlugins() {
   if (!loadingPromise) {
@@ -13,7 +18,19 @@ export function loadPlugins() {
   return loadingPromise;
 }
 
+export async function unloadPlugins() {
+  const pluginIds = Array.from(loadedPlugins.keys());
+
+  for (const pluginId of pluginIds) {
+    await unloadPlugin(pluginId);
+  }
+
+  loadingPromise = null;
+}
+
 async function loadPluginsInner() {
+  registerBeforeUnloadHandler();
+
   const plugins = await invoke<PluginManifestEntry[]>("list_plugins").catch(
     (error) => {
       console.error("Failed to list plugins", error);
@@ -39,11 +56,61 @@ async function loadPluginsInner() {
       continue;
     }
 
-    await Promise.resolve(module.onload(createPluginContext(plugin.id))).catch(
-      (error) => {
+    await unloadPlugin(plugin.id);
+
+    const cleanups: PluginCleanup[] = [];
+    const addCleanup = (cleanup: PluginCleanup) => {
+      cleanups.push(cleanup);
+    };
+
+    const context = createPluginContext(plugin.id, addCleanup);
+    const loadedModule = await Promise.resolve(module.onload(context))
+      .then(() => module)
+      .catch(async (error) => {
         console.error(`Plugin onload failed: ${plugin.id}`, error);
-      },
-    );
+        await runCleanups(plugin.id, cleanups);
+        return null;
+      });
+
+    if (!loadedModule) {
+      continue;
+    }
+
+    loadedPlugins.set(plugin.id, { module: loadedModule, cleanups });
+  }
+}
+
+function registerBeforeUnloadHandler() {
+  if (beforeUnloadRegistered) {
+    return;
+  }
+
+  beforeUnloadRegistered = true;
+  window.addEventListener("beforeunload", () => {
+    void unloadPlugins();
+  });
+}
+
+async function unloadPlugin(pluginId: string) {
+  const loadedPlugin = loadedPlugins.get(pluginId);
+  if (!loadedPlugin) {
+    return;
+  }
+
+  loadedPlugins.delete(pluginId);
+
+  await runCleanups(pluginId, loadedPlugin.cleanups);
+
+  await Promise.resolve(loadedPlugin.module.onunload?.()).catch((error) => {
+    console.error(`Plugin onunload failed: ${pluginId}`, error);
+  });
+}
+
+async function runCleanups(pluginId: string, cleanups: PluginCleanup[]) {
+  for (const cleanup of [...cleanups].reverse()) {
+    await Promise.resolve(cleanup()).catch((error) => {
+      console.error(`Plugin cleanup failed: ${pluginId}`, error);
+    });
   }
 }
 

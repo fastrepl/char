@@ -5,14 +5,12 @@ use tauri::Manager;
 
 mod commands;
 mod error;
-mod events;
 mod ext;
 mod runtime;
 
 pub use error::{DegradedError, Error, Result};
-pub use events::*;
 pub use ext::*;
-pub use hypr_listener_core::State;
+pub use hypr_listener_core::*;
 
 use hypr_listener_core::actors::{RootActor, RootArgs};
 use runtime::TauriRuntime;

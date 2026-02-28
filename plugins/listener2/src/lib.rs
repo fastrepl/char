@@ -3,13 +3,11 @@ use tauri::Manager;
 use tokio::sync::Mutex;
 
 mod commands;
-mod events;
 mod ext;
 
-pub use events::*;
 pub use ext::*;
 
-pub use hypr_listener2_core::{BatchParams, BatchProvider, DenoiseParams, Subtitle, VttWord};
+pub use hypr_listener2_core::*;
 
 const PLUGIN_NAME: &str = "listener2";
 

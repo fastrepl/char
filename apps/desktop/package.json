@@ -66,6 +66,7 @@
     "@hypr/plugin-opener2": "workspace:*",
     "@hypr/plugin-overlay": "workspace:*",
     "@hypr/plugin-path2": "workspace:*",
+    "@hypr/plugin-sdk": "workspace:*",
     "@hypr/plugin-pdf": "workspace:*",
     "@hypr/plugin-permissions": "workspace:*",
     "@hypr/plugin-relay": "workspace:*",

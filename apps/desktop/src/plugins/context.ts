@@ -1,9 +1,13 @@
+import { pluginEvents } from "./events";
 import { registerPluginView } from "./registry";
-import type { PluginContext } from "./types";
+import type { PluginCleanup, PluginContext } from "./types";
 
 import { useTabs } from "~/store/zustand/tabs";
 
-export function createPluginContext(pluginId: string): PluginContext {
+export function createPluginContext(
+  pluginId: string,
+  addCleanup: (cleanup: PluginCleanup) => void,
+): PluginContext {
   return {
     registerView: (viewId, factory) => {
       registerPluginView(pluginId, viewId, factory);
@@ -15,5 +19,13 @@ export function createPluginContext(pluginId: string): PluginContext {
         state: state ?? {},
       });
     },
+    events: pluginEvents,
+    registerEvent: (eventRef) => {
+      addCleanup(async () => {
+        const unlisten = await eventRef;
+        unlisten();
+      });
+    },
+    registerCleanup: addCleanup,
   };
 }

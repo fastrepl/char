@@ -80,8 +80,7 @@ struct TauriBatchRuntime {
 
 impl core::BatchRuntime for TauriBatchRuntime {
     fn emit(&self, event: core::BatchEvent) {
-        let tauri_event: crate::BatchEvent = event.into();
-        let _ = tauri_event.emit(&self.app);
+        let _ = event.emit(&self.app);
     }
 }
 
@@ -91,7 +90,6 @@ struct TauriDenoiseRuntime {
 
 impl core::DenoiseRuntime for TauriDenoiseRuntime {
     fn emit(&self, event: core::DenoiseEvent) {
-        let tauri_event: crate::DenoiseEvent = event.into();
-        let _ = tauri_event.emit(&self.app);
+        let _ = event.emit(&self.app);
     }
 }
