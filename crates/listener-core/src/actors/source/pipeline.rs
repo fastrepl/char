@@ -1,5 +1,6 @@
 use std::{
     collections::{HashMap, VecDeque},
+    env,
     sync::Arc,
     time::{Duration, Instant},
 };
@@ -35,9 +36,13 @@ impl Pipeline {
 
     pub(super) fn new(runtime: Arc<dyn ListenerRuntime>, session_id: String) -> Self {
         Self {
-            aec: AEC::new()
-                .map_err(|e| tracing::warn!(error = ?e, "aec_init_failed"))
-                .ok(),
+            aec: if env::var("NO_AEC").as_deref() == Ok("1") {
+                None
+            } else {
+                AEC::new()
+                    .map_err(|e| tracing::warn!(error = ?e, "aec_init_failed"))
+                    .ok()
+            },
             joiner: Joiner::new(),
             amplitude: AmplitudeEmitter::new(runtime, session_id),
             audio_buffer: AudioBuffer::new(MAX_BUFFER_CHUNKS),
