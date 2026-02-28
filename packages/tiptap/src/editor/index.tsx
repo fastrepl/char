@@ -13,6 +13,7 @@ import { useDebounceCallback } from "usehooks-ts";
 import * as shared from "../shared";
 import type { ExtensionOptions, FileHandlerConfig } from "../shared/extensions";
 import type { PlaceholderFunction } from "../shared/extensions/placeholder";
+import { FormattingBubbleMenu } from "./bubble-menu";
 import { isMentionActive, mention, type MentionConfig } from "./mention";
 
 const safeRequestIdleCallback =
@@ -269,7 +270,10 @@ const Editor = forwardRef<{ editor: TiptapEditor | null }, EditorProps>(
     }, []);
 
     return (
-      <EditorContent editor={editor} className="tiptap-root" role="textbox" />
+      <>
+        <EditorContent editor={editor} className="tiptap-root" role="textbox" />
+        {editor && editable && <FormattingBubbleMenu editor={editor} />}
+      </>
     );
   },
 );
