@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::path::PathBuf;
 use std::sync::Arc;
 
 use tokio::sync::Mutex;
@@ -13,6 +14,7 @@ pub(crate) struct DownloadEntry {
     pub(crate) task: JoinHandle<()>,
     pub(crate) token: CancellationToken,
     pub(crate) generation: u64,
+    pub(crate) download_path: PathBuf,
 }
 
 impl DownloadsRegistry {

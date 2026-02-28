@@ -21,6 +21,7 @@ pub(crate) struct DownloadTaskParams<M: DownloadableModel> {
     pub(crate) model: M,
     pub(crate) url: String,
     pub(crate) destination: PathBuf,
+    pub(crate) final_destination: PathBuf,
     pub(crate) models_base: PathBuf,
     pub(crate) key: String,
     pub(crate) generation: u64,
@@ -90,6 +91,25 @@ pub(crate) fn spawn_download_task<M: DownloadableModel>(
 
         if params.model.remove_destination_after_finalize() {
             let _ = fs::remove_file(&params.destination).await;
+        } else {
+            let promote_result =
+                match fs::rename(&params.destination, &params.final_destination).await {
+                    Ok(()) => Ok(()),
+                    Err(_) => {
+                        let _ = fs::remove_file(&params.final_destination).await;
+                        fs::rename(&params.destination, &params.final_destination).await
+                    }
+                };
+
+            if let Err(e) = promote_result {
+                tracing::error!(error = %e, "model_download_promote_error");
+                params.runtime.emit_progress(&params.model, -1);
+                params
+                    .registry
+                    .remove_if_generation_matches(&params.key, params.generation)
+                    .await;
+                return;
+            }
         }
 
         params

@@ -228,9 +228,12 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
         &self,
         model: &SupportedSttModel,
     ) -> Result<bool, crate::Error> {
-        let state = self.manager.state::<crate::SharedState>();
-        let guard = state.lock().await;
-        Ok(guard.model_downloader.is_downloaded(model).await?)
+        let downloader = {
+            let state = self.manager.state::<crate::SharedState>();
+            let guard = state.lock().await;
+            guard.model_downloader.clone()
+        };
+        Ok(downloader.is_downloaded(model).await?)
     }
 
     #[tracing::instrument(skip_all)]
@@ -376,35 +379,43 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
 
     #[tracing::instrument(skip_all)]
     pub async fn download_model(&self, model: SupportedSttModel) -> Result<(), crate::Error> {
-        let state = self.manager.state::<crate::SharedState>();
-        let guard = state.lock().await;
-        guard.model_downloader.download(&model).await?;
+        let downloader = {
+            let state = self.manager.state::<crate::SharedState>();
+            let guard = state.lock().await;
+            guard.model_downloader.clone()
+        };
+        downloader.download(&model).await?;
         Ok(())
     }
 
     #[tracing::instrument(skip_all)]
     pub async fn cancel_download(&self, model: SupportedSttModel) -> bool {
-        let state = self.manager.state::<crate::SharedState>();
-        let guard = state.lock().await;
-        guard
-            .model_downloader
-            .cancel_download(&model)
-            .await
-            .unwrap_or(false)
+        let downloader = {
+            let state = self.manager.state::<crate::SharedState>();
+            let guard = state.lock().await;
+            guard.model_downloader.clone()
+        };
+        downloader.cancel_download(&model).await.unwrap_or(false)
     }
 
     #[tracing::instrument(skip_all)]
     pub async fn is_model_downloading(&self, model: &SupportedSttModel) -> bool {
-        let state = self.manager.state::<crate::SharedState>();
-        let guard = state.lock().await;
-        guard.model_downloader.is_downloading(model).await
+        let downloader = {
+            let state = self.manager.state::<crate::SharedState>();
+            let guard = state.lock().await;
+            guard.model_downloader.clone()
+        };
+        downloader.is_downloading(model).await
     }
 
     #[tracing::instrument(skip_all)]
     pub async fn delete_model(&self, model: &SupportedSttModel) -> Result<(), crate::Error> {
-        let state = self.manager.state::<crate::SharedState>();
-        let guard = state.lock().await;
-        guard.model_downloader.delete(model).await?;
+        let downloader = {
+            let state = self.manager.state::<crate::SharedState>();
+            let guard = state.lock().await;
+            guard.model_downloader.clone()
+        };
+        downloader.delete(model).await?;
         Ok(())
     }
 }

@@ -1,3 +1,4 @@
+use std::ffi::OsString;
 use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -47,7 +48,7 @@ impl<M: DownloadableModel> Clone for ModelDownloadManager<M> {
 }
 
 impl<M: DownloadableModel> ModelDownloadManager<M> {
-    const TASK_JOIN_TIMEOUT: Duration = Duration::from_secs(5);
+    const TASK_JOIN_WARN_AFTER: Duration = Duration::from_secs(5);
 
     pub fn new(runtime: Arc<dyn ModelDownloaderRuntime<M>>) -> Self {
         Self {
@@ -75,13 +76,26 @@ impl<M: DownloadableModel> ModelDownloadManager<M> {
     }
 
     async fn wait_for_task_exit(task: JoinHandle<()>, context: &'static str) {
-        match tokio::time::timeout(Self::TASK_JOIN_TIMEOUT, task).await {
-            Ok(Ok(())) => {}
-            Ok(Err(e)) => {
-                tracing::warn!(%context, error = %e, "model_download_task_join_failed");
+        let warn_after = tokio::time::sleep(Self::TASK_JOIN_WARN_AFTER);
+        tokio::pin!(warn_after);
+        tokio::pin!(task);
+
+        let join_result = tokio::select! {
+            result = &mut task => result,
+            _ = &mut warn_after => {
+                tracing::warn!(
+                    %context,
+                    timeout_secs = Self::TASK_JOIN_WARN_AFTER.as_secs(),
+                    "model_download_task_join_slow"
+                );
+                task.await
             }
-            Err(_) => {
-                tracing::warn!(%context, timeout_secs = Self::TASK_JOIN_TIMEOUT.as_secs(), "model_download_task_join_timed_out");
+        };
+
+        match join_result {
+            Ok(()) => {}
+            Err(e) => {
+                tracing::warn!(%context, error = %e, "model_download_task_join_failed");
             }
         }
     }
@@ -95,7 +109,8 @@ impl<M: DownloadableModel> ModelDownloadManager<M> {
             .ok_or_else(|| Error::NoDownloadUrl(model.download_key()))?;
 
         let models_base = self.runtime.models_base()?;
-        let destination = model.download_destination(&models_base);
+        let final_destination = model.download_destination(&models_base);
+        let destination = generation_download_path(&final_destination, generation);
         if let Some(parent) = destination.parent() {
             fs::create_dir_all(parent).await?;
         }
@@ -110,6 +125,7 @@ impl<M: DownloadableModel> ModelDownloadManager<M> {
                 model: model.clone(),
                 url,
                 destination: destination.clone(),
+                final_destination: final_destination.clone(),
                 models_base: models_base.clone(),
                 key: key.clone(),
                 generation,
@@ -126,6 +142,7 @@ impl<M: DownloadableModel> ModelDownloadManager<M> {
                     task,
                     token: cancellation_token,
                     generation,
+                    download_path: destination,
                 },
             )
             .await;
@@ -148,11 +165,7 @@ impl<M: DownloadableModel> ModelDownloadManager<M> {
         if let Some(entry) = existing {
             entry.token.cancel();
             Self::wait_for_task_exit(entry.task, "cancel_download").await;
-
-            let models_base = self.runtime.models_base()?;
-            if let Some(path) = model.cleanup_path_on_cancel(&models_base) {
-                let _ = fs::remove_file(path).await;
-            }
+            let _ = fs::remove_file(entry.download_path).await;
 
             self.runtime.emit_progress(model, -1);
             Ok(true)
@@ -172,4 +185,18 @@ impl<M: DownloadableModel> ModelDownloadManager<M> {
             .await
             .map_err(|e| Error::OperationFailed(e.to_string()))?
     }
+}
+fn generation_download_path(destination: &Path, generation: u64) -> PathBuf {
+    let mut path = destination.to_path_buf();
+    let suffix = format!(".part-{generation}");
+
+    if let Some(file_name) = destination.file_name() {
+        let mut generated_name = OsString::from(file_name);
+        generated_name.push(suffix);
+        path.set_file_name(generated_name);
+    } else {
+        path.push(format!("download{suffix}"));
+    }
+
+    path
 }

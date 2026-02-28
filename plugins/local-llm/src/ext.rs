@@ -84,6 +84,10 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
     ) -> Result<(), crate::Error> {
         let m = model.clone();
         let path = self.models_dir().join(m.file_name());
+        let shared_state = {
+            let state = self.state::<crate::SharedState>();
+            state.inner().clone()
+        };
 
         {
             let existing = {
@@ -98,6 +102,7 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
             }
         }
 
+        let task_model = model.clone();
         let task = tokio::spawn(async move {
             let last_progress = std::sync::Arc::new(std::sync::Mutex::new(0i8));
 
@@ -129,6 +134,9 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
                 tracing::error!("model_download_error: {}", e);
                 let _ = channel.send(-1);
             }
+
+            let mut guard = shared_state.lock().await;
+            guard.download_task.remove(&task_model);
         });
 
         {
@@ -196,11 +204,13 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
     async fn start_server(&self) -> Result<String, crate::Error> {
         let state = self.state::<crate::SharedState>();
 
-        {
+        let existing_server = {
             let mut guard = state.lock().await;
-            if let Some(server) = guard.server.take() {
-                server.stop().await;
-            }
+            guard.server.take()
+        };
+
+        if let Some(server) = existing_server {
+            server.stop().await;
         }
 
         let selection = self.get_current_model_selection()?;
@@ -220,9 +230,13 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
     #[tracing::instrument(skip_all)]
     async fn stop_server(&self) -> Result<(), crate::Error> {
         let state = self.state::<crate::SharedState>();
-        let mut guard = state.lock().await;
 
-        if let Some(server) = guard.server.take() {
+        let existing_server = {
+            let mut guard = state.lock().await;
+            guard.server.take()
+        };
+
+        if let Some(server) = existing_server {
             server.stop().await;
         }
 
