@@ -32,6 +32,56 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Database2<'a, R, M> {
         Ok(())
     }
 
+    pub async fn sync_init(&self) -> Result<(), crate::Error> {
+        let state = self.manager.state::<crate::ManagedState>();
+        let guard = state.lock().await;
+
+        if let Some(db) = &guard.local_db {
+            let conn = db.conn()?;
+
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS sync_file_registry (
+                    file_id TEXT PRIMARY KEY,
+                    vault_path TEXT NOT NULL,
+                    version INTEGER NOT NULL DEFAULT 0,
+                    content_hash TEXT,
+                    last_synced_at TEXT,
+                    UNIQUE(vault_path)
+                )",
+                (),
+            )
+            .await
+            .map_err(|e| hypr_db_core::Error::from(e))?;
+
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS sync_pending_ops (
+                    op_id TEXT PRIMARY KEY,
+                    file_id TEXT NOT NULL,
+                    op_type TEXT NOT NULL,
+                    payload_json TEXT,
+                    base_version INTEGER NOT NULL,
+                    created_at TEXT NOT NULL
+                )",
+                (),
+            )
+            .await
+            .map_err(|e| hypr_db_core::Error::from(e))?;
+
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS sync_cursor (
+                    vault_id TEXT PRIMARY KEY,
+                    last_seq INTEGER NOT NULL DEFAULT 0,
+                    last_synced_at TEXT
+                )",
+                (),
+            )
+            .await
+            .map_err(|e| hypr_db_core::Error::from(e))?;
+        }
+
+        Ok(())
+    }
+
     pub async fn init_cloud(&self, connection_str: &str) -> Result<(), crate::Error> {
         let (client, connection) =
             tokio_postgres::connect(connection_str, tokio_postgres::NoTls).await?;

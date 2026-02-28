@@ -8,6 +8,7 @@ mod error;
 mod ext;
 mod folder;
 mod frontmatter;
+pub mod hash;
 mod json;
 mod path;
 mod scan;
@@ -51,6 +52,7 @@ fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
             commands::attachment_save::<tauri::Wry>,
             commands::attachment_list::<tauri::Wry>,
             commands::attachment_remove::<tauri::Wry>,
+            commands::content_hash,
         ])
         .error_handling(tauri_specta::ErrorHandlingMode::Result)
 }

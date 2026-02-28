@@ -156,6 +156,18 @@ async fn app() -> Router {
             auth::optional_auth,
         ));
 
+    let sync_config =
+        hypr_api_sync::SyncConfig::new(&env.supabase.supabase_url, &env.supabase.supabase_anon_key);
+    let sync_state = hypr_api_sync::AppState::new(sync_config);
+    let auth_state_sync = AuthState::new(&env.supabase.supabase_url);
+    let sync_routes = Router::new()
+        .nest("/sync", hypr_api_sync::router(sync_state))
+        .route_layer(middleware::from_fn(auth::sentry_and_analytics))
+        .route_layer(middleware::from_fn_with_state(
+            auth_state_sync,
+            auth::require_auth,
+        ));
+
     Router::new()
         .route("/health", axum::routing::get(version))
         .route("/openapi.json", axum::routing::get(openapi_json))
@@ -164,6 +176,7 @@ async fn app() -> Router {
         .merge(pro_routes)
         .merge(integration_routes)
         .merge(auth_routes)
+        .merge(sync_routes)
         .layer(
             CorsLayer::new()
                 .allow_origin(cors::Any)
