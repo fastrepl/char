@@ -131,7 +131,6 @@ common_derives! {
 }
 
 common_derives! {
-    #[derive(Default)]
     pub struct ListenParams {
         #[serde(default)]
         pub model: Option<String>,
@@ -148,6 +147,19 @@ common_derives! {
         #[serde(default)]
         #[cfg_attr(feature = "openapi", schema(value_type = Option<Object>))]
         pub custom_query: Option<std::collections::HashMap<String, String>>,
+    }
+}
+
+impl Default for ListenParams {
+    fn default() -> Self {
+        Self {
+            model: None,
+            channels: Self::default_channels(),
+            sample_rate: Self::default_sample_rate(),
+            languages: Vec::new(),
+            keywords: Vec::new(),
+            custom_query: None,
+        }
     }
 }
 
