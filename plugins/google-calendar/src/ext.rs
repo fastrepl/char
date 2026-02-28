@@ -1,6 +1,7 @@
 use hypr_google_calendar::{CalendarListEntry, Event};
 use tauri_plugin_auth::AuthPluginExt;
 
+use crate::error::Error;
 use crate::fetch;
 use crate::types::EventFilter;
 
@@ -12,30 +13,34 @@ pub struct GoogleCalendarExt<'a, R: tauri::Runtime, M: tauri::Manager<R>> {
 
 impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> GoogleCalendarExt<'a, R, M> {
     #[tracing::instrument(skip_all)]
-    pub async fn list_calendars(&self) -> Result<Vec<CalendarListEntry>, String> {
-        let token = self.manager.access_token().map_err(|e| e.to_string())?;
+    pub async fn list_calendars(&self) -> Result<Vec<CalendarListEntry>, Error> {
+        let token = self
+            .manager
+            .access_token()
+            .map_err(|e| Error::Auth(e.to_string()))?;
 
         match token {
             Some(t) if !t.is_empty() => {
                 let config = self.manager.state::<crate::PluginConfig>();
-                let client = self.manager.state::<reqwest::Client>();
-                fetch::list_calendars(&client, &config.api_base_url, &t).await
+                fetch::list_calendars(&config.api_base_url, &t).await
             }
-            _ => crate::fixture::list_calendars(),
+            _ => Err(Error::NotAuthenticated),
         }
     }
 
     #[tracing::instrument(skip_all)]
-    pub async fn list_events(&self, filter: EventFilter) -> Result<Vec<Event>, String> {
-        let token = self.manager.access_token().map_err(|e| e.to_string())?;
+    pub async fn list_events(&self, filter: EventFilter) -> Result<Vec<Event>, Error> {
+        let token = self
+            .manager
+            .access_token()
+            .map_err(|e| Error::Auth(e.to_string()))?;
 
         match token {
             Some(t) if !t.is_empty() => {
                 let config = self.manager.state::<crate::PluginConfig>();
-                let client = self.manager.state::<reqwest::Client>();
-                fetch::list_events(&client, &config.api_base_url, &t, filter).await
+                fetch::list_events(&config.api_base_url, &t, filter).await
             }
-            _ => crate::fixture::list_events(filter),
+            _ => Err(Error::NotAuthenticated),
         }
     }
 }

@@ -540,11 +540,8 @@ dependencies = [
  "google-calendar",
  "nango",
  "outlook-calendar",
- "sentry",
  "serde",
- "serde_json",
  "thiserror 2.0.18",
- "tracing",
  "utoipa",
 ]
 
@@ -553,6 +550,8 @@ name = "api-client"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "google-calendar",
+ "outlook-calendar",
  "progenitor-client 0.13.0",
  "progenitor-utils",
  "reqwest 0.13.2",
@@ -7953,6 +7952,7 @@ dependencies = [
  "thiserror 2.0.18",
  "tokio",
  "urlencoding",
+ "utoipa",
 ]
 
 [[package]]
@@ -10211,6 +10211,7 @@ dependencies = [
  "ractor",
  "serde",
  "specta",
+ "strum 0.27.2",
  "thiserror 2.0.18",
  "tokio",
  "tokio-stream",
@@ -12153,6 +12154,7 @@ dependencies = [
  "thiserror 2.0.18",
  "tokio",
  "urlencoding",
+ "utoipa",
 ]
 
 [[package]]
@@ -17913,6 +17915,7 @@ dependencies = [
  "tauri-plugin",
  "tauri-plugin-auth",
  "tauri-specta",
+ "thiserror 2.0.18",
  "tokio",
  "tracing",
 ]

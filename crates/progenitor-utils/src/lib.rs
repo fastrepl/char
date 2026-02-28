@@ -82,9 +82,19 @@ impl OpenApiSpec {
     }
 
     pub fn generate(&self, filename: &str) {
+        self.generate_with_replacements(filename, &[]);
+    }
+
+    pub fn generate_with_replacements(&self, filename: &str, replacements: &[(&str, &str)]) {
         let openapi: openapiv3::OpenAPI =
             serde_json::from_value(self.inner.clone()).expect("filtered spec is not valid OpenAPI");
-        let tokens = progenitor::Generator::default()
+
+        let mut settings = progenitor::GenerationSettings::new();
+        for (type_name, replace_name) in replacements {
+            settings.with_replacement(*type_name, *replace_name, std::iter::empty());
+        }
+
+        let tokens = progenitor::Generator::new(&settings)
             .generate_tokens(&openapi)
             .expect("progenitor code generation failed");
 

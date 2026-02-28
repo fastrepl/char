@@ -8,6 +8,25 @@ const ALLOWED_PATH_PREFIXES: &[&str] = &[
     "/support",
 ];
 
+const TYPE_REPLACEMENTS: &[(&str, &str)] = &[
+    (
+        "GoogleListCalendarsResponse",
+        "hypr_google_calendar::ListCalendarsResponse",
+    ),
+    (
+        "GoogleListEventsResponse",
+        "hypr_google_calendar::ListEventsResponse",
+    ),
+    (
+        "OutlookListCalendarsResponse",
+        "hypr_outlook_calendar::ListCalendarsResponse",
+    ),
+    (
+        "OutlookListEventsResponse",
+        "hypr_outlook_calendar::ListEventsResponse",
+    ),
+];
+
 fn main() {
     let src = concat!(
         env!("CARGO_MANIFEST_DIR"),
@@ -22,5 +41,5 @@ fn main() {
         .convert_31_to_30()
         .remove_unreferenced_schemas()
         .write_filtered(std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("openapi.gen.json"))
-        .generate("codegen.rs");
+        .generate_with_replacements("codegen.rs", TYPE_REPLACEMENTS);
 }

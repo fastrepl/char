@@ -110,13 +110,8 @@ async fn app() -> Router {
             auth::require_auth,
         ));
 
-    let calendar_config = hypr_api_calendar::CalendarConfig {
-        google: true,
-        ..Default::default()
-    };
-
     let integration_routes = Router::new()
-        .nest("/calendar", hypr_api_calendar::router(calendar_config))
+        .nest("/calendar", hypr_api_calendar::router())
         .nest("/nango", hypr_api_nango::router(nango_config.clone()))
         .layer(axum::Extension(nango_connection_state))
         .route_layer(middleware::from_fn(auth::sentry_and_analytics))

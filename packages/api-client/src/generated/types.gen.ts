@@ -4,6 +4,14 @@ export type ClientOptions = {
     baseUrl: `${string}://${string}` | (string & {});
 };
 
+export type AccessRole = 'freeBusyReader' | 'reader' | 'writer' | 'owner' | 'unknown';
+
+export type AttendeeResponseStatus = 'needsAction' | 'declined' | 'tentative' | 'accepted' | 'unknown';
+
+export type AttendeeType = 'required' | 'optional' | 'resource' | 'unknown';
+
+export type AutoDeclineMode = 'declineNone' | 'declineAllConflictingInvitations' | 'declineOnlyNewConflictingInvitations' | 'unknown';
+
 export type BatchAlternatives = {
     confidence: number;
     transcript: string;
@@ -34,6 +42,64 @@ export type BatchWord = {
     word: string;
 };
 
+export type BirthdayProperties = {
+    contact?: string | null;
+    customTypeName?: string | null;
+    type?: null | BirthdayPropertyType;
+};
+
+export type BirthdayPropertyType = 'birthday' | 'anniversary' | 'self' | 'other' | 'custom' | 'unknown';
+
+export type BodyType = 'text' | 'html' | 'unknown';
+
+export type Calendar = {
+    allowedOnlineMeetingProviders?: Array<OnlineMeetingProviderType> | null;
+    canEdit?: boolean | null;
+    canShare?: boolean | null;
+    canViewPrivateItems?: boolean | null;
+    changeKey?: string | null;
+    color?: null | CalendarColor;
+    defaultOnlineMeetingProvider?: null | OnlineMeetingProviderType;
+    hexColor?: string | null;
+    id: string;
+    isDefaultCalendar?: boolean | null;
+    isRemovable?: boolean | null;
+    isTallyingResponses?: boolean | null;
+    name?: string | null;
+    owner?: null | EmailAddress;
+};
+
+export type CalendarColor = 'auto' | 'lightBlue' | 'lightGreen' | 'lightOrange' | 'lightGray' | 'lightYellow' | 'lightTeal' | 'lightPink' | 'lightBrown' | 'lightRed' | 'maxColor' | 'unknown';
+
+export type CalendarListEntry = {
+    accessRole?: null | AccessRole;
+    autoAcceptInvitations?: boolean | null;
+    backgroundColor?: string | null;
+    colorId?: string | null;
+    conferenceProperties?: null | ConferenceProperties;
+    dataOwner?: string | null;
+    defaultReminders?: Array<Reminder> | null;
+    deleted?: boolean | null;
+    description?: string | null;
+    etag?: string | null;
+    foregroundColor?: string | null;
+    hidden?: boolean | null;
+    id: string;
+    kind?: string | null;
+    location?: string | null;
+    notificationSettings?: null | NotificationSettings;
+    primary?: boolean | null;
+    selected?: boolean | null;
+    summary?: string | null;
+    summaryOverride?: string | null;
+    timeZone?: string | null;
+};
+
+export type CalendarNotification = {
+    method: NotificationMethod;
+    type: NotificationType;
+};
+
 export type CanStartTrialReason = 'eligible' | 'not_eligible' | 'error';
 
 export type CanStartTrialResponse = {
@@ -42,6 +108,45 @@ export type CanStartTrialResponse = {
 };
 
 export type CharTask = 'chat' | 'enhance' | 'title';
+
+export type ChatStatus = 'available' | 'doNotDisturb' | 'unknown';
+
+export type ConferenceCreateRequest = {
+    conferenceSolutionKey?: null | ConferenceSolutionKey;
+    requestId?: string | null;
+    status?: null | ConferenceCreateRequestStatus;
+};
+
+export type ConferenceCreateRequestStatus = {
+    statusCode: ConferenceCreateStatusCode;
+};
+
+export type ConferenceCreateStatusCode = 'pending' | 'success' | 'failure' | 'unknown';
+
+export type ConferenceData = {
+    conferenceId?: string | null;
+    conferenceSolution?: null | ConferenceSolution;
+    createRequest?: null | ConferenceCreateRequest;
+    entryPoints?: Array<EntryPoint> | null;
+    notes?: string | null;
+    signature?: string | null;
+};
+
+export type ConferenceProperties = {
+    allowedConferenceSolutionTypes?: Array<ConferenceSolutionType> | null;
+};
+
+export type ConferenceSolution = {
+    iconUri?: string | null;
+    key?: null | ConferenceSolutionKey;
+    name?: string | null;
+};
+
+export type ConferenceSolutionKey = {
+    type: ConferenceSolutionType;
+};
+
+export type ConferenceSolutionType = 'addOn' | 'hangoutsMeet' | 'eventNamedHangout' | 'eventHangout' | 'unknown';
 
 export type ConnectSessionResponse = {
     expires_at: string;
@@ -85,23 +190,25 @@ export type CreateConversationResponse = {
 };
 
 export type CreateEventRequest = {
-    attendees?: Array<EventAttendee> | null;
     calendar_id: string;
-    description?: string | null;
-    end: EventDateTime;
-    location?: string | null;
-    start: EventDateTime;
-    summary: string;
-};
-
-export type CreateEventResponse = {
-    event: unknown;
+    event: GoogleCreateEventBody;
 };
 
 export type CreateReconnectSessionRequest = {
     connection_id: string;
     integration_id: string;
 };
+
+export type CustomLocation = {
+    label?: string | null;
+};
+
+export type DateTimeTimeZone = {
+    dateTime: string;
+    timeZone?: string | null;
+};
+
+export type DayOfWeek = 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'unknown';
 
 export type DeleteAccountResponse = {
     deleted: boolean;
@@ -117,16 +224,63 @@ export type DeviceInfo = {
     platform: string;
 };
 
-export type EventAttendee = {
-    displayName?: string | null;
-    email: string;
-    optional?: boolean | null;
+export type EmailAddress = {
+    address?: string | null;
+    name?: string | null;
+};
+
+export type EntryPoint = {
+    accessCode?: string | null;
+    entryPointType: EntryPointType;
+    label?: string | null;
+    meetingCode?: string | null;
+    passcode?: string | null;
+    password?: string | null;
+    pin?: string | null;
+    uri: string;
+};
+
+export type EntryPointType = 'video' | 'phone' | 'sip' | 'more' | 'unknown';
+
+export type EventAttachment = {
+    fileId?: string | null;
+    fileUrl?: string | null;
+    iconLink?: string | null;
+    mimeType?: string | null;
+    title?: string | null;
 };
 
 export type EventDateTime = {
     date?: string | null;
     dateTime?: string | null;
     timeZone?: string | null;
+};
+
+export type EventOrderBy = 'startTime' | 'updated';
+
+export type EventPerson = {
+    displayName?: string | null;
+    email?: string | null;
+    id?: string | null;
+    self?: boolean | null;
+};
+
+export type EventShowAs = 'free' | 'tentative' | 'busy' | 'oof' | 'workingElsewhere' | 'unknown' | 'other';
+
+export type EventSource = {
+    title: string;
+    url: string;
+};
+
+export type EventStatus = 'confirmed' | 'tentative' | 'cancelled' | 'unknown';
+
+export type ExtendedProperties = {
+    private?: {
+        [key: string]: string;
+    } | null;
+    shared?: {
+        [key: string]: string;
+    } | null;
 };
 
 export type FeedbackRequest = {
@@ -144,10 +298,44 @@ export type FeedbackResponse = {
 
 export type FeedbackType = 'bug' | 'feature';
 
+export type FocusTimeProperties = {
+    autoDeclineMode?: null | AutoDeclineMode;
+    chatStatus?: null | ChatStatus;
+    declineMessage?: string | null;
+};
+
+export type Gadget = {
+    display?: null | GadgetDisplay;
+    height?: number | null;
+    iconLink?: string | null;
+    link?: string | null;
+    preferences?: {
+        [key: string]: string;
+    } | null;
+    title?: string | null;
+    type?: string | null;
+    width?: number | null;
+};
+
+export type GadgetDisplay = 'chip' | 'icon' | 'unknown';
+
+export type GoogleListEventsRequest = {
+    calendar_id: string;
+    max_results?: number | null;
+    order_by?: string | null;
+    page_token?: string | null;
+    single_events?: boolean | null;
+    time_max?: string | null;
+    time_min?: string | null;
+};
+
+export type Importance = 'low' | 'normal' | 'high' | 'unknown';
+
 export type Interval = 'monthly' | 'yearly';
 
-export type ListCalendarsResponse = {
-    calendars: Array<unknown>;
+export type ItemBody = {
+    content?: string | null;
+    contentType?: null | BodyType;
 };
 
 export type ListConnectionsResponse = {
@@ -160,17 +348,20 @@ export type ListConversationsQuery = {
 
 export type ListEventsRequest = {
     calendar_id: string;
+    event_types?: Array<GoogleEventType> | null;
+    i_cal_uid?: string | null;
     max_results?: number | null;
-    order_by?: string | null;
+    order_by?: null | EventOrderBy;
     page_token?: string | null;
+    q?: string | null;
+    show_deleted?: boolean | null;
+    show_hidden_invitations?: boolean | null;
     single_events?: boolean | null;
+    sync_token?: string | null;
     time_max?: string | null;
     time_min?: string | null;
-};
-
-export type ListEventsResponse = {
-    events: Array<unknown>;
-    next_page_token?: string | null;
+    time_zone?: string | null;
+    updated_min?: string | null;
 };
 
 export type ListenCallbackRequest = {
@@ -181,6 +372,17 @@ export type ListenCallbackResponse = {
     request_id: string;
 };
 
+export type Location = {
+    address?: null | PhysicalAddress;
+    coordinates?: null | OutlookGeoCoordinates;
+    displayName?: string | null;
+    locationType?: null | LocationType;
+    uniqueId?: string | null;
+    uniqueIdType?: string | null;
+};
+
+export type LocationType = 'default' | 'conferenceRoom' | 'homeAddress' | 'businessAddress' | 'geoCoordinates' | 'streetAddress' | 'hotel' | 'restaurant' | 'localBusiness' | 'postalAddress' | 'unknown';
+
 export type MessageResponse = {
     content?: string | null;
     createdAt?: string | null;
@@ -188,13 +390,120 @@ export type MessageResponse = {
     messageType?: string | null;
 };
 
+export type NotificationMethod = 'email' | 'unknown';
+
+export type NotificationSettings = {
+    notifications?: Array<CalendarNotification> | null;
+};
+
+export type NotificationType = 'eventCreation' | 'eventChange' | 'eventCancellation' | 'eventResponse' | 'agenda' | 'unknown';
+
+export type OfficeLocation = {
+    buildingId?: string | null;
+    deskId?: string | null;
+    floorId?: string | null;
+    floorSectionId?: string | null;
+    label?: string | null;
+};
+
+export type OnlineMeetingInfo = {
+    conferenceId?: string | null;
+    joinUrl?: string | null;
+    quickDial?: string | null;
+    tollFreeNumbers?: Array<string> | null;
+    tollNumber?: string | null;
+};
+
+export type OnlineMeetingProviderType = 'teamsForBusiness' | 'skypeForBusiness' | 'skypeForConsumer' | 'unknown' | 'other';
+
+export type OutOfOfficeProperties = {
+    autoDeclineMode?: null | AutoDeclineMode;
+    declineMessage?: string | null;
+};
+
+export type OutlookGeoCoordinates = {
+    accuracy?: number | null;
+    altitude?: number | null;
+    altitudeAccuracy?: number | null;
+    latitude?: number | null;
+    longitude?: number | null;
+};
+
+export type OutlookListEventsRequest = {
+    calendar_id: string;
+    max_results?: number | null;
+    order_by?: string | null;
+    time_max?: string | null;
+    time_min?: string | null;
+};
+
+export type PatternedRecurrence = {
+    pattern?: null | RecurrencePattern;
+    range?: null | RecurrenceRange;
+};
+
+export type PhysicalAddress = {
+    city?: string | null;
+    countryOrRegion?: string | null;
+    postalCode?: string | null;
+    state?: string | null;
+    street?: string | null;
+};
+
 export type PipelineStatus = 'processing' | 'done' | 'error';
+
+export type Recipient = {
+    emailAddress?: null | EmailAddress;
+};
+
+export type RecurrencePattern = {
+    dayOfMonth?: number | null;
+    daysOfWeek?: Array<DayOfWeek> | null;
+    firstDayOfWeek?: null | DayOfWeek;
+    index?: null | WeekIndex;
+    interval?: number | null;
+    month?: number | null;
+    type?: null | RecurrencePatternType;
+};
+
+export type RecurrencePatternType = 'daily' | 'weekly' | 'absoluteMonthly' | 'relativeMonthly' | 'absoluteYearly' | 'relativeYearly' | 'unknown';
+
+export type RecurrenceRange = {
+    endDate?: string | null;
+    numberOfOccurrences?: number | null;
+    recurrenceTimeZone?: string | null;
+    startDate?: string | null;
+    type?: null | RecurrenceRangeType;
+};
+
+export type RecurrenceRangeType = 'endDate' | 'noEnd' | 'numbered' | 'unknown';
+
+export type Reminder = {
+    method: ReminderMethod;
+    minutes: number;
+};
+
+export type ReminderMethod = 'email' | 'popup' | 'unknown';
+
+export type Reminders = {
+    overrides?: Array<Reminder> | null;
+    useDefault?: boolean | null;
+};
+
+export type ResponseStatus = {
+    response?: null | ResponseType;
+    time?: string | null;
+};
+
+export type ResponseType = 'none' | 'organizer' | 'tentativelyAccepted' | 'accepted' | 'declined' | 'notResponded' | 'unknown';
 
 export type SendMessageRequest = {
     content: string;
     messageType?: string;
     sourceId?: string | null;
 };
+
+export type Sensitivity = 'normal' | 'personal' | 'private' | 'confidential' | 'unknown';
 
 export type StartTrialReason = 'started' | 'not_eligible';
 
@@ -279,18 +588,222 @@ export type SttStatusResponse = {
     status: PipelineStatus;
 };
 
+export type Transparency = 'opaque' | 'transparent' | 'unknown';
+
+export type Visibility = 'default' | 'public' | 'private' | 'confidential' | 'unknown';
+
 export type WebhookResponse = {
     status: string;
 };
 
-export type ListCalendarsData = {
+export type WeekIndex = 'first' | 'second' | 'third' | 'fourth' | 'last' | 'unknown';
+
+export type WorkingLocationProperties = {
+    customLocation?: null | CustomLocation;
+    homeOffice?: unknown;
+    officeLocation?: null | OfficeLocation;
+    type?: null | WorkingLocationType;
+};
+
+export type WorkingLocationType = 'homeOffice' | 'officeLocation' | 'customLocation' | 'unknown';
+
+export type GoogleAttendee = {
+    additionalGuests?: number | null;
+    comment?: string | null;
+    displayName?: string | null;
+    email?: string | null;
+    id?: string | null;
+    optional?: boolean | null;
+    organizer?: boolean | null;
+    resource?: boolean | null;
+    responseStatus?: null | AttendeeResponseStatus;
+    self?: boolean | null;
+};
+
+export type GoogleCreateEventBody = {
+    attendees?: Array<GoogleAttendee> | null;
+    colorId?: string | null;
+    conferenceData?: null | ConferenceData;
+    description?: string | null;
+    end?: EventDateTime;
+    eventType?: null | GoogleEventType;
+    extendedProperties?: null | ExtendedProperties;
+    guestsCanInviteOthers?: boolean | null;
+    guestsCanModify?: boolean | null;
+    guestsCanSeeOtherGuests?: boolean | null;
+    location?: string | null;
+    recurrence?: Array<string> | null;
+    reminders?: null | Reminders;
+    source?: null | EventSource;
+    start?: EventDateTime;
+    summary?: string;
+    transparency?: null | Transparency;
+    visibility?: null | Visibility;
+};
+
+export type GoogleEvent = {
+    anyoneCanAddSelf?: boolean | null;
+    attachments?: Array<EventAttachment> | null;
+    attendees?: Array<GoogleAttendee> | null;
+    attendeesOmitted?: boolean | null;
+    birthdayProperties?: null | BirthdayProperties;
+    colorId?: string | null;
+    conferenceData?: null | ConferenceData;
+    created?: string | null;
+    creator?: null | EventPerson;
+    description?: string | null;
+    end?: null | EventDateTime;
+    endTimeUnspecified?: boolean | null;
+    etag?: string | null;
+    eventType?: null | GoogleEventType;
+    extendedProperties?: null | ExtendedProperties;
+    focusTimeProperties?: null | FocusTimeProperties;
+    gadget?: null | Gadget;
+    guestsCanInviteOthers?: boolean | null;
+    guestsCanModify?: boolean | null;
+    guestsCanSeeOtherGuests?: boolean | null;
+    hangoutLink?: string | null;
+    htmlLink?: string | null;
+    iCalUID?: string | null;
+    id: string;
+    kind?: string | null;
+    location?: string | null;
+    locked?: boolean | null;
+    organizer?: null | EventPerson;
+    originalStartTime?: null | EventDateTime;
+    outOfOfficeProperties?: null | OutOfOfficeProperties;
+    privateCopy?: boolean | null;
+    recurrence?: Array<string> | null;
+    recurringEventId?: string | null;
+    reminders?: null | Reminders;
+    sequence?: number | null;
+    source?: null | EventSource;
+    start?: null | EventDateTime;
+    status?: null | EventStatus;
+    summary?: string | null;
+    transparency?: null | Transparency;
+    updated?: string | null;
+    visibility?: null | Visibility;
+    workingLocationProperties?: null | WorkingLocationProperties;
+};
+
+export type GoogleEventType = 'default' | 'birthday' | 'focusTime' | 'fromGmail' | 'outOfOffice' | 'workingLocation' | 'unknown';
+
+export type GoogleListCalendarsResponse = {
+    etag?: string | null;
+    items?: Array<CalendarListEntry>;
+    kind?: string | null;
+    nextPageToken?: string | null;
+    nextSyncToken?: string | null;
+};
+
+export type GoogleListEventsResponse = {
+    accessRole?: null | AccessRole;
+    defaultReminders?: Array<Reminder> | null;
+    description?: string | null;
+    etag?: string | null;
+    items?: Array<GoogleEvent>;
+    kind?: string | null;
+    nextPageToken?: string | null;
+    nextSyncToken?: string | null;
+    summary?: string | null;
+    timeZone?: string | null;
+    updated?: string | null;
+};
+
+export type OutlookAttendee = {
+    emailAddress?: null | EmailAddress;
+    status?: null | ResponseStatus;
+    type?: null | AttendeeType;
+};
+
+export type OutlookCreateEventBody = {
+    allowNewTimeProposals?: boolean | null;
+    attendees?: Array<OutlookAttendee> | null;
+    body?: null | ItemBody;
+    categories?: Array<string> | null;
+    end?: DateTimeTimeZone;
+    hideAttendees?: boolean | null;
+    importance?: null | Importance;
+    isAllDay?: boolean | null;
+    isOnlineMeeting?: boolean | null;
+    isReminderOn?: boolean | null;
+    location?: null | Location;
+    onlineMeetingProvider?: null | OnlineMeetingProviderType;
+    recurrence?: null | PatternedRecurrence;
+    reminderMinutesBeforeStart?: number | null;
+    responseRequested?: boolean | null;
+    sensitivity?: null | Sensitivity;
+    showAs?: null | EventShowAs;
+    start?: DateTimeTimeZone;
+    subject?: string;
+};
+
+export type OutlookEvent = {
+    allowNewTimeProposals?: boolean | null;
+    attendees?: Array<OutlookAttendee> | null;
+    body?: null | ItemBody;
+    bodyPreview?: string | null;
+    categories?: Array<string> | null;
+    changeKey?: string | null;
+    createdDateTime?: string | null;
+    end?: null | DateTimeTimeZone;
+    hasAttachments?: boolean | null;
+    hideAttendees?: boolean | null;
+    iCalUId?: string | null;
+    id: string;
+    importance?: null | Importance;
+    isAllDay?: boolean | null;
+    isCancelled?: boolean | null;
+    isDraft?: boolean | null;
+    isOnlineMeeting?: boolean | null;
+    isOrganizer?: boolean | null;
+    isReminderOn?: boolean | null;
+    lastModifiedDateTime?: string | null;
+    location?: null | Location;
+    locations?: Array<Location> | null;
+    onlineMeeting?: null | OnlineMeetingInfo;
+    onlineMeetingProvider?: null | OnlineMeetingProviderType;
+    onlineMeetingUrl?: string | null;
+    organizer?: null | Recipient;
+    originalEndTimeZone?: string | null;
+    originalStartTimeZone?: string | null;
+    recurrence?: null | PatternedRecurrence;
+    reminderMinutesBeforeStart?: number | null;
+    responseRequested?: boolean | null;
+    responseStatus?: null | ResponseStatus;
+    sensitivity?: null | Sensitivity;
+    seriesMasterId?: string | null;
+    showAs?: null | EventShowAs;
+    start?: null | DateTimeTimeZone;
+    subject?: string | null;
+    transactionId?: string | null;
+    type?: null | OutlookEventType;
+    webLink?: string | null;
+};
+
+export type OutlookEventType = 'singleInstance' | 'occurrence' | 'exception' | 'seriesMaster' | 'unknown';
+
+export type OutlookListCalendarsResponse = {
+    '@odata.context'?: string | null;
+    '@odata.nextLink'?: string | null;
+    value?: Array<Calendar>;
+};
+
+export type OutlookListEventsResponse = {
+    '@odata.context'?: string | null;
+    '@odata.nextLink'?: string | null;
+    value?: Array<OutlookEvent>;
+};
+
+export type GoogleListCalendarsData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/calendar/calendars';
+    url: '/calendar/google/list-calendars';
 };
 
-export type ListCalendarsErrors = {
+export type GoogleListCalendarsErrors = {
     /**
      * Unauthorized
      */
@@ -301,23 +814,23 @@ export type ListCalendarsErrors = {
     500: unknown;
 };
 
-export type ListCalendarsResponses = {
+export type GoogleListCalendarsResponses = {
     /**
-     * Calendars fetched
+     * Google calendars fetched
      */
-    200: ListCalendarsResponse;
+    200: GoogleListCalendarsResponse;
 };
 
-export type ListCalendarsResponse2 = ListCalendarsResponses[keyof ListCalendarsResponses];
+export type GoogleListCalendarsResponse2 = GoogleListCalendarsResponses[keyof GoogleListCalendarsResponses];
 
-export type ListEventsData = {
-    body: ListEventsRequest;
+export type GoogleListEventsData = {
+    body: GoogleListEventsRequest;
     path?: never;
     query?: never;
-    url: '/calendar/events';
+    url: '/calendar/google/list-events';
 };
 
-export type ListEventsErrors = {
+export type GoogleListEventsErrors = {
     /**
      * Unauthorized
      */
@@ -328,23 +841,23 @@ export type ListEventsErrors = {
     500: unknown;
 };
 
-export type ListEventsResponses = {
+export type GoogleListEventsResponses = {
     /**
-     * Events fetched
+     * Google events fetched
      */
-    200: ListEventsResponse;
+    200: GoogleListEventsResponse;
 };
 
-export type ListEventsResponse2 = ListEventsResponses[keyof ListEventsResponses];
+export type GoogleListEventsResponse2 = GoogleListEventsResponses[keyof GoogleListEventsResponses];
 
-export type CreateEventData = {
-    body: CreateEventRequest;
+export type OutlookListCalendarsData = {
+    body?: never;
     path?: never;
     query?: never;
-    url: '/calendar/events/create';
+    url: '/calendar/outlook/list-calendars';
 };
 
-export type CreateEventErrors = {
+export type OutlookListCalendarsErrors = {
     /**
      * Unauthorized
      */
@@ -355,14 +868,41 @@ export type CreateEventErrors = {
     500: unknown;
 };
 
-export type CreateEventResponses = {
+export type OutlookListCalendarsResponses = {
     /**
-     * Event created
+     * Outlook calendars fetched
      */
-    200: CreateEventResponse;
+    200: OutlookListCalendarsResponse;
 };
 
-export type CreateEventResponse2 = CreateEventResponses[keyof CreateEventResponses];
+export type OutlookListCalendarsResponse2 = OutlookListCalendarsResponses[keyof OutlookListCalendarsResponses];
+
+export type OutlookListEventsData = {
+    body: OutlookListEventsRequest;
+    path?: never;
+    query?: never;
+    url: '/calendar/outlook/list-events';
+};
+
+export type OutlookListEventsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Internal server error
+     */
+    500: unknown;
+};
+
+export type OutlookListEventsResponses = {
+    /**
+     * Outlook events fetched
+     */
+    200: OutlookListEventsResponse;
+};
+
+export type OutlookListEventsResponse2 = OutlookListEventsResponses[keyof OutlookListEventsResponses];
 
 export type SubmitData = {
     body: FeedbackRequest;

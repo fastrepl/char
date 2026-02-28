@@ -1,25 +1,17 @@
 use utoipa::OpenApi;
 
-use crate::routes::ListEventsResponse;
-
 #[derive(OpenApi)]
 #[openapi(
     paths(
-        crate::routes::calendar::list_calendars,
-        crate::routes::calendar::list_events,
-        crate::routes::calendar::create_event,
+        crate::google::routes::list_calendars,
+        crate::google::routes::list_events,
+        crate::outlook::routes::list_calendars,
+        crate::outlook::routes::list_events,
     ),
-    components(
-        schemas(
-            crate::routes::calendar::ListCalendarsResponse,
-            crate::routes::calendar::ListEventsRequest,
-            ListEventsResponse,
-            crate::routes::calendar::CreateEventRequest,
-            crate::routes::calendar::CreateEventResponse,
-            crate::routes::calendar::EventDateTime,
-            crate::routes::calendar::EventAttendee,
-        )
-    ),
+    components(schemas(
+        crate::google::routes::GoogleListEventsRequest,
+        crate::outlook::routes::OutlookListEventsRequest,
+    )),
     tags(
         (name = "calendar", description = "Calendar management")
     )
@@ -27,5 +19,8 @@ use crate::routes::ListEventsResponse;
 struct ApiDoc;
 
 pub fn openapi() -> utoipa::openapi::OpenApi {
-    ApiDoc::openapi()
+    let mut doc = ApiDoc::openapi();
+    doc.merge(hypr_google_calendar::openapi::openapi());
+    doc.merge(hypr_outlook_calendar::openapi::openapi());
+    doc
 }

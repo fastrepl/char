@@ -137,3 +137,110 @@ fn extract_video_entry_point(event: &Event) -> Option<String> {
         })
         .map(|ep| ep.uri.clone())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use hypr_google_calendar::{
+        Attendee, AttendeeResponseStatus, EventDateTime, EventStatus as GoogleEventStatus,
+    };
+
+    #[test]
+    fn status_maps_correctly() {
+        assert!(matches!(convert_status(None), EventStatus::Confirmed));
+        assert!(matches!(
+            convert_status(Some(GoogleEventStatus::Confirmed)),
+            EventStatus::Confirmed
+        ));
+        assert!(matches!(
+            convert_status(Some(GoogleEventStatus::Unknown)),
+            EventStatus::Confirmed
+        ));
+        assert!(matches!(
+            convert_status(Some(GoogleEventStatus::Tentative)),
+            EventStatus::Tentative
+        ));
+        assert!(matches!(
+            convert_status(Some(GoogleEventStatus::Cancelled)),
+            EventStatus::Cancelled
+        ));
+    }
+
+    #[test]
+    fn attendee_status_needs_action_and_unknown_are_pending() {
+        assert!(matches!(
+            convert_attendee_status(&Some(AttendeeResponseStatus::NeedsAction)),
+            AttendeeStatus::Pending
+        ));
+        assert!(matches!(
+            convert_attendee_status(&None),
+            AttendeeStatus::Pending
+        ));
+        assert!(matches!(
+            convert_attendee_status(&Some(AttendeeResponseStatus::Unknown)),
+            AttendeeStatus::Pending
+        ));
+    }
+
+    #[test]
+    fn attendee_role_organizer_is_chair() {
+        let attendee = Attendee {
+            organizer: Some(true),
+            optional: Some(false),
+            ..Default::default()
+        };
+        assert!(matches!(
+            convert_attendee(&attendee).role,
+            AttendeeRole::Chair
+        ));
+    }
+
+    #[test]
+    fn attendee_role_optional_beats_non_organizer() {
+        let attendee = Attendee {
+            organizer: Some(false),
+            optional: Some(true),
+            ..Default::default()
+        };
+        assert!(matches!(
+            convert_attendee(&attendee).role,
+            AttendeeRole::Optional
+        ));
+    }
+
+    #[test]
+    fn attendee_role_defaults_to_required() {
+        let attendee = Attendee::default();
+        assert!(matches!(
+            convert_attendee(&attendee).role,
+            AttendeeRole::Required
+        ));
+    }
+
+    #[test]
+    fn all_day_event_converts_to_midnight_utc() {
+        let date = chrono::NaiveDate::from_ymd_opt(2024, 6, 15).unwrap();
+        let edt = EventDateTime {
+            date: Some(date),
+            date_time: None,
+            time_zone: None,
+        };
+        let iso = event_datetime_to_iso(&edt).unwrap();
+        assert!(iso.starts_with("2024-06-15T00:00:00+00:00"));
+    }
+
+    #[test]
+    fn timed_event_preserves_offset() {
+        use chrono::{FixedOffset, TimeZone};
+        let offset = FixedOffset::east_opt(9 * 3600).unwrap();
+        let dt = offset.with_ymd_and_hms(2024, 6, 15, 10, 0, 0).unwrap();
+        let edt = EventDateTime {
+            date: None,
+            date_time: Some(dt),
+            time_zone: None,
+        };
+        let iso = event_datetime_to_iso(&edt).unwrap();
+        assert!(iso.contains("10:00:00"));
+        assert!(iso.contains("+09:00"));
+    }
+}

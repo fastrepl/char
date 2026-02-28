@@ -6,6 +6,7 @@ edition = "2024"
 [features]
 default = []
 specta = ["dep:specta"]
+utoipa = ["dep:utoipa"]
 
 [dependencies]
 hypr-http = { workspace = true }
@@ -16,6 +17,7 @@ serde_json = { workspace = true }
 specta = { workspace = true, optional = true, features = ["chrono"] }
 thiserror = { workspace = true }
 urlencoding = { workspace = true }
+utoipa = { workspace = true, optional = true, features = ["chrono"] }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
