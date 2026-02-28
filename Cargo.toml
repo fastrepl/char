@@ -64,7 +64,6 @@ hypr-docs = { path = "crates/docs", package = "docs" }
 hypr-download-interface = { path = "crates/download-interface", package = "download-interface" }
 hypr-eval = { path = "crates/eval", package = "eval" }
 hypr-exa = { path = "crates/exa", package = "exa" }
-hypr-extensions-runtime = { path = "crates/extensions-runtime", package = "extensions-runtime" }
 hypr-file = { path = "crates/file", package = "file" }
 hypr-frontmatter = { path = "crates/frontmatter", package = "frontmatter" }
 hypr-gbnf = { path = "crates/gbnf", package = "gbnf" }
@@ -167,7 +166,6 @@ tauri-plugin-db2 = { path = "plugins/db2" }
 tauri-plugin-deeplink2 = { path = "plugins/deeplink2" }
 tauri-plugin-detect = { path = "plugins/detect" }
 tauri-plugin-dock = { path = "plugins/dock" }
-tauri-plugin-extensions = { path = "plugins/extensions" }
 tauri-plugin-flag = { path = "plugins/flag" }
 tauri-plugin-fs-db = { path = "plugins/fs-db" }
 tauri-plugin-fs-sync = { path = "plugins/fs-sync" }

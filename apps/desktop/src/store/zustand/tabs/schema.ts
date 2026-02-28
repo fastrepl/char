@@ -7,7 +7,6 @@ import type {
   ContactsSelection,
   ContactsState,
   EditorView,
-  ExtensionsState,
   PromptsState,
   SearchState,
   SessionsState,
@@ -24,7 +23,6 @@ export type {
   ContactsSelection,
   ContactsState,
   EditorView,
-  ExtensionsState,
   PromptsState,
   SearchState,
   SessionsState,
@@ -84,16 +82,15 @@ export type Tab =
       state: ChatShortcutsState;
     })
   | (BaseTab & {
-      type: "extensions";
-      state: ExtensionsState;
+      type: "humans";
+      id: string;
     })
-  | (BaseTab & { type: "humans"; id: string })
   | (BaseTab & { type: "organizations"; id: string })
   | (BaseTab & { type: "folders"; id: string | null })
   | (BaseTab & { type: "empty" })
   | (BaseTab & {
-      type: "extension";
-      extensionId: string;
+      type: "plugin";
+      pluginId: string;
       state: Record<string, unknown>;
     })
   | (BaseTab & { type: "calendar" })
@@ -164,14 +161,6 @@ export const getDefaultState = (tab: TabInput): Tab => {
           selectedWebIndex: null,
         },
       };
-    case "extensions":
-      return {
-        ...base,
-        type: "extensions",
-        state: tab.state ?? {
-          selectedExtension: null,
-        },
-      };
     case "humans":
       return { ...base, type: "humans", id: tab.id };
     case "organizations":
@@ -180,11 +169,11 @@ export const getDefaultState = (tab: TabInput): Tab => {
       return { ...base, type: "folders", id: tab.id };
     case "empty":
       return { ...base, type: "empty" };
-    case "extension":
+    case "plugin":
       return {
         ...base,
-        type: "extension",
-        extensionId: tab.extensionId,
+        type: "plugin",
+        pluginId: tab.pluginId,
         state: tab.state ?? {},
       };
     case "calendar":
@@ -242,14 +231,12 @@ export const uniqueIdfromTab = (tab: Tab): string => {
       return `prompts`;
     case "chat_shortcuts":
       return `chat_shortcuts`;
-    case "extensions":
-      return `extensions`;
     case "folders":
       return `folders-${tab.id ?? "all"}`;
     case "empty":
       return `empty-${tab.slotId}`;
-    case "extension":
-      return `extension-${tab.extensionId}`;
+    case "plugin":
+      return `plugin-${tab.pluginId}`;
     case "calendar":
       return `calendar`;
     case "changelog":

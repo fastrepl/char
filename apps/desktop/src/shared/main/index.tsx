@@ -20,15 +20,10 @@ import { TabContentContact, TabItemContact } from "~/contacts";
 import { TabContentHuman, TabItemHuman } from "~/contacts/humans";
 import { useNotifications } from "~/contexts/notifications";
 import { useShell } from "~/contexts/shell";
-import {
-  TabContentExtension,
-  TabContentExtensions,
-  TabItemExtension,
-  TabItemExtensions,
-} from "~/extensions";
-import { loadExtensionPanels } from "~/extensions/registry";
 import { TabContentFolder, TabItemFolder } from "~/folders";
 import { TabContentOnboarding, TabItemOnboarding } from "~/onboarding";
+import { TabContentPlugin, TabItemPlugin } from "~/plugins";
+import { loadPlugins } from "~/plugins/loader";
 import { TabContentSearch, TabItemSearch } from "~/search/advanced";
 import { Search } from "~/search/components/search";
 import { TabContentNote, TabItemNote } from "~/session";
@@ -65,7 +60,7 @@ export function Body() {
   );
 
   useEffect(() => {
-    void loadExtensionPanels();
+    void loadPlugins();
   }, []);
 
   if (!currentTab) {
@@ -445,23 +440,9 @@ function TabItem({
       />
     );
   }
-  if (tab.type === "extension") {
+  if (tab.type === "plugin") {
     return (
-      <TabItemExtension
-        tab={tab}
-        tabIndex={tabIndex}
-        handleCloseThis={handleClose}
-        handleSelectThis={handleSelect}
-        handleCloseOthers={handleCloseOthers}
-        handleCloseAll={handleCloseAll}
-        handlePinThis={handlePinThis}
-        handleUnpinThis={handleUnpinThis}
-      />
-    );
-  }
-  if (tab.type === "extensions") {
-    return (
-      <TabItemExtensions
+      <TabItemPlugin
         tab={tab}
         tabIndex={tabIndex}
         handleCloseThis={handleClose}
@@ -608,11 +589,8 @@ function ContentWrapper({ tab }: { tab: Tab }) {
   if (tab.type === "calendar") {
     return <TabContentCalendar />;
   }
-  if (tab.type === "extension") {
-    return <TabContentExtension tab={tab} />;
-  }
-  if (tab.type === "extensions") {
-    return <TabContentExtensions tab={tab} />;
+  if (tab.type === "plugin") {
+    return <TabContentPlugin tab={tab} />;
   }
   if (tab.type === "changelog") {
     return <TabContentChangelog tab={tab} />;

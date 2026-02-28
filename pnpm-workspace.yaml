@@ -2,7 +2,6 @@ packages:
   - apps/*
   - packages/*
   - plugins/*
-  - extensions/*
   - e2e/*
 
 onlyBuiltDependencies:
