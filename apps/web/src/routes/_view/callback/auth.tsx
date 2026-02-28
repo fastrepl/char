@@ -7,6 +7,12 @@ import { z } from "zod";
 import { cn } from "@hypr/utils";
 
 import { exchangeOAuthCode, exchangeOtpToken } from "@/functions/auth";
+import {
+  buildDesktopCallbackUrls,
+  desktopRedirectUriSchema,
+  desktopSchemeSchema,
+  getDesktopReturnContext,
+} from "@/functions/desktop-flow";
 import { useAnalytics } from "@/hooks/use-posthog";
 
 const validateSearch = z.object({
@@ -14,8 +20,9 @@ const validateSearch = z.object({
   token_hash: z.string().optional(),
   type: z.enum(["email", "recovery"]).optional(),
   flow: z.enum(["desktop", "web"]).default("desktop"),
-  scheme: z.string().default("hyprnote"),
+  scheme: desktopSchemeSchema.default("hyprnote"),
   redirect: z.string().optional(),
+  redirect_uri: desktopRedirectUriSchema,
   access_token: z.string().optional(),
   refresh_token: z.string().optional(),
   error: z.string().optional(),
@@ -59,6 +66,7 @@ export const Route = createFileRoute("/_view/callback/auth")({
           search: {
             flow: "desktop",
             scheme: search.scheme,
+            redirect_uri: search.redirect_uri,
             access_token: result.access_token,
             refresh_token: result.refresh_token,
           },
@@ -106,6 +114,7 @@ export const Route = createFileRoute("/_view/callback/auth")({
               search: {
                 flow: "desktop",
                 scheme: search.scheme,
+                redirect_uri: search.redirect_uri,
                 access_token: result.access_token,
                 refresh_token: result.refresh_token,
               },
@@ -125,6 +134,22 @@ function Component() {
   const { identify: identifyOutlit, isInitialized } = useOutlit();
   const { identify: identifyPosthog } = useAnalytics();
   const [copied, setCopied] = useState(false);
+  const [localAttemptFailed, setLocalAttemptFailed] = useState(false);
+  const desktopContext = getDesktopReturnContext({
+    flow: search.flow,
+    scheme: search.scheme,
+    redirect_uri: search.redirect_uri,
+  });
+  const callbackUrls =
+    search.access_token && search.refresh_token
+      ? buildDesktopCallbackUrls(desktopContext, {
+          type: "auth",
+          access_token: search.access_token,
+          refresh_token: search.refresh_token,
+        })
+      : {};
+  const manualUrl =
+    callbackUrls.fallback ?? callbackUrls.scheme ?? callbackUrls.primary;
 
   useEffect(() => {
     if (!search.access_token || !isInitialized) return;
@@ -149,36 +174,59 @@ function Component() {
     }
   }, [search.access_token, identifyOutlit, isInitialized]);
 
-  const getDeeplink = () => {
-    if (search.access_token && search.refresh_token) {
-      const params = new URLSearchParams();
-      params.set("access_token", search.access_token);
-      params.set("refresh_token", search.refresh_token);
-      return `${search.scheme}://auth/callback?${params.toString()}`;
-    }
-    return null;
-  };
-
   // Browsers require a user gesture (click) to open custom URL schemes.
   // Auto-triggering via setTimeout fails for email magic links because
   // the page is opened from an external context (email client) without
   // "transient user activation". OAuth redirects work because they maintain
   // activation through the redirect chain.
   const handleDeeplink = () => {
-    const deeplink = getDeeplink();
+    const deeplink = manualUrl;
     if (search.flow === "desktop" && deeplink) {
       window.location.href = deeplink;
     }
   };
 
   const handleCopy = async () => {
-    const deeplink = getDeeplink();
+    const deeplink = manualUrl;
     if (deeplink) {
       await navigator.clipboard.writeText(deeplink);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
   };
+
+  useEffect(() => {
+    if (
+      !desktopContext.isDesktop ||
+      !search.access_token ||
+      !search.refresh_token ||
+      !callbackUrls.local
+    ) {
+      return;
+    }
+
+    let cancelled = false;
+    void fetch(callbackUrls.local, { mode: "no-cors", cache: "no-store" })
+      .then(() => {
+        if (!cancelled) {
+          setLocalAttemptFailed(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setLocalAttemptFailed(true);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    desktopContext.isDesktop,
+    search.access_token,
+    search.refresh_token,
+    callbackUrls.local,
+  ]);
 
   useEffect(() => {
     if (search.flow === "web" && !search.error) {
@@ -191,6 +239,17 @@ function Component() {
   }, [search, navigate]);
 
   if (search.error) {
+    const retryParams = new URLSearchParams({
+      flow: search.flow,
+      scheme: search.scheme,
+    });
+    if (search.redirect) {
+      retryParams.set("redirect", search.redirect);
+    }
+    if (desktopContext.redirectUri) {
+      retryParams.set("redirect_uri", desktopContext.redirectUri);
+    }
+
     return (
       <div className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white flex items-center justify-center p-6">
         <div className="max-w-md w-full text-center flex flex-col gap-8">
@@ -206,7 +265,7 @@ function Component() {
           </div>
 
           <a
-            href={`/auth?flow=${search.flow}&scheme=${search.scheme}`}
+            href={`/auth?${retryParams.toString()}`}
             className={cn([
               "w-full h-12 flex items-center justify-center text-base font-medium transition-all cursor-pointer",
               "bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
@@ -231,12 +290,20 @@ function Component() {
             </h1>
             <p className="text-neutral-600">
               {hasTokens
-                ? "Click the button below to return to the app"
+                ? callbackUrls.local
+                  ? "We tried to return you to the app automatically. If needed, use the button below."
+                  : "Click the button below to return to the app"
                 : "Please wait while we complete the sign-in"}
             </p>
+            {localAttemptFailed && (
+              <p className="text-sm text-neutral-500">
+                Could not reach the local callback server. Open the app
+                manually.
+              </p>
+            )}
           </div>
 
-          {hasTokens && (
+          {hasTokens && manualUrl && (
             <div className="flex flex-col gap-4">
               <button
                 onClick={handleDeeplink}

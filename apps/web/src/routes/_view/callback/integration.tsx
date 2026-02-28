@@ -6,19 +6,21 @@ import { z } from "zod";
 
 import { cn } from "@hypr/utils";
 
+import {
+  buildDesktopCallbackUrls,
+  desktopRedirectUriSchema,
+  desktopSchemeSchema,
+  getDesktopReturnContext,
+} from "@/functions/desktop-flow";
+
 const validateSearch = z.object({
   integration_id: z.string(),
   status: z.string(),
   flow: z.enum(["desktop", "web"]).default("desktop"),
-  scheme: z.string().default("hyprnote"),
+  scheme: desktopSchemeSchema.default("hyprnote"),
+  redirect_uri: desktopRedirectUriSchema,
   return_to: z.string().optional(),
 });
-
-type IntegrationDeeplinkParams = {
-  integration_id: string;
-  status: string;
-  return_to?: string;
-};
 
 export const Route = createFileRoute("/_view/callback/integration")({
   validateSearch,
@@ -28,43 +30,37 @@ export const Route = createFileRoute("/_view/callback/integration")({
   }),
 });
 
-function buildDeeplinkUrl(
-  scheme: string,
-  search: IntegrationDeeplinkParams,
-): string {
-  const params = new URLSearchParams({
-    integration_id: search.integration_id,
-    status: search.status,
-  });
-  if (search.return_to) {
-    params.set("return_to", search.return_to);
-  }
-  return `${scheme}://integration/callback?${params.toString()}`;
-}
-
 function Component() {
   const search = Route.useSearch();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [copied, setCopied] = useState(false);
-
-  const getDeeplink = () => {
-    return buildDeeplinkUrl(search.scheme, {
-      integration_id: search.integration_id,
-      status: search.status,
-      return_to: search.return_to,
-    });
-  };
+  const [localAttemptFailed, setLocalAttemptFailed] = useState(false);
+  const desktopContext = getDesktopReturnContext({
+    flow: search.flow,
+    scheme: search.scheme,
+    redirect_uri: search.redirect_uri,
+  });
+  const callbackUrls = buildDesktopCallbackUrls(desktopContext, {
+    type: "integration",
+    integration_id: search.integration_id,
+    status: search.status,
+    return_to: search.return_to,
+  });
+  const manualUrl =
+    callbackUrls.fallback ?? callbackUrls.scheme ?? callbackUrls.primary;
+  const localAttemptUrl = callbackUrls.local;
+  const returnUrl = manualUrl ?? callbackUrls.primary ?? null;
 
   const handleDeeplink = () => {
-    const deeplink = getDeeplink();
+    const deeplink = returnUrl;
     if (search.flow === "desktop" && deeplink) {
       window.location.href = deeplink;
     }
   };
 
   const handleCopy = async () => {
-    const deeplink = getDeeplink();
+    const deeplink = returnUrl;
     if (deeplink) {
       await navigator.clipboard.writeText(deeplink);
       setCopied(true);
@@ -83,11 +79,31 @@ function Component() {
 
   useEffect(() => {
     if (search.flow === "desktop" && search.status === "success") {
-      const deeplink = getDeeplink();
-      const timer = setTimeout(() => {
-        window.location.href = deeplink;
-      }, 250);
-      return () => clearTimeout(timer);
+      if (localAttemptUrl) {
+        let cancelled = false;
+        void fetch(localAttemptUrl, { mode: "no-cors", cache: "no-store" })
+          .then(() => {
+            if (!cancelled) {
+              setLocalAttemptFailed(false);
+            }
+          })
+          .catch(() => {
+            if (!cancelled) {
+              setLocalAttemptFailed(true);
+            }
+          });
+        return () => {
+          cancelled = true;
+        };
+      }
+
+      const deeplink = returnUrl;
+      if (deeplink) {
+        const timer = setTimeout(() => {
+          window.location.href = deeplink;
+        }, 250);
+        return () => clearTimeout(timer);
+      }
     }
   }, [
     search.flow,
@@ -95,6 +111,9 @@ function Component() {
     search.scheme,
     search.integration_id,
     search.return_to,
+    search.redirect_uri,
+    localAttemptUrl,
+    returnUrl,
   ]);
 
   const isSuccess = search.status === "success";
@@ -109,12 +128,20 @@ function Component() {
             </h1>
             <p className="text-neutral-600">
               {isSuccess
-                ? "Click the button below to return to the app"
+                ? callbackUrls.local
+                  ? "We tried to return you to the app automatically. If needed, use the button below."
+                  : "Click the button below to return to the app"
                 : "Something went wrong during the connection"}
             </p>
+            {localAttemptFailed && (
+              <p className="text-sm text-neutral-500">
+                Could not reach the local callback server. Open the app
+                manually.
+              </p>
+            )}
           </div>
 
-          {isSuccess && (
+          {isSuccess && manualUrl && (
             <div className="flex flex-col gap-4">
               <button
                 onClick={handleDeeplink}

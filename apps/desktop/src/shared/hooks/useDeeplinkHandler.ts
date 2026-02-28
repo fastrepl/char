@@ -4,7 +4,10 @@ import { useEffect } from "react";
 import { useAuth } from "~/auth";
 import { useTabs } from "~/store/zustand/tabs";
 
-import { events as deeplink2Events } from "@hypr/plugin-deeplink2";
+import {
+  commands as deeplink2Commands,
+  events as deeplink2Events,
+} from "@hypr/plugin-deeplink2";
 
 export function useDeeplinkHandler() {
   const auth = useAuth();
@@ -17,6 +20,8 @@ export function useDeeplinkHandler() {
     }
 
     const unlisten = deeplink2Events.deepLinkEvent.listen(({ payload }) => {
+      void deeplink2Commands.stopCallbackServer();
+
       if (payload.to === "/auth/callback") {
         const { access_token, refresh_token } = payload.search;
         if (access_token && refresh_token && auth) {

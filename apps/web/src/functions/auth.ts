@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { env } from "@/env";
 import { isAdminEmail } from "@/functions/admin";
+import { getDesktopReturnContext } from "@/functions/desktop-flow";
 import {
   getSupabaseAdminClient,
   getSupabaseDesktopFlowClient,
@@ -14,6 +15,7 @@ const shared = z.object({
   flow: z.enum(["desktop", "web"]).default("desktop"),
   scheme: z.string().optional(),
   redirect: z.string().optional(),
+  redirect_uri: z.string().optional(),
 });
 
 type Flow = z.infer<typeof shared>["flow"];
@@ -26,10 +28,13 @@ function buildAuthCallbackParams(data: {
   flow: Flow;
   scheme?: string;
   redirect?: string;
+  redirect_uri?: string;
 }) {
   const params = new URLSearchParams({ flow: data.flow });
+  const { redirectUri } = getDesktopReturnContext(data);
   if (data.scheme) params.set("scheme", data.scheme);
   if (data.redirect) params.set("redirect", data.redirect);
+  if (redirectUri) params.set("redirect_uri", redirectUri);
   return params;
 }
 

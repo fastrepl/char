@@ -9,6 +9,7 @@ import {
 import { createClient } from "@hypr/api-client/client";
 
 import { env, requireEnv } from "@/env";
+import { getDesktopReturnContext } from "@/functions/desktop-flow";
 import { getStripeClient } from "@/functions/stripe";
 import { getSupabaseServerClient } from "@/functions/supabase";
 
@@ -58,7 +59,9 @@ const getStripeCustomerIdForUser = async (
 
 const createCheckoutSessionInput = z.object({
   period: z.enum(["monthly", "yearly"]),
+  flow: z.enum(["desktop", "web"]).default("web"),
   scheme: z.string().optional(),
+  redirect_uri: z.string().optional(),
 });
 
 export const createCheckoutSession = createServerFn({ method: "POST" })
@@ -125,8 +128,15 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         : requireEnv(env.STRIPE_MONTHLY_PRICE_ID, "STRIPE_MONTHLY_PRICE_ID");
 
     const successParams = new URLSearchParams({ success: "true" });
+    const { redirectUri } = getDesktopReturnContext(data);
+    if (data.flow === "desktop") {
+      successParams.set("flow", "desktop");
+    }
     if (data.scheme) {
       successParams.set("scheme", data.scheme);
+    }
+    if (redirectUri) {
+      successParams.set("redirect_uri", redirectUri);
     }
 
     const checkout = await stripe.checkout.sessions.create({

@@ -16,11 +16,17 @@ import {
   doPasswordSignUp,
   fetchUser,
 } from "@/functions/auth";
+import {
+  desktopRedirectUriSchema,
+  desktopSchemeSchema,
+  getDesktopReturnContext,
+} from "@/functions/desktop-flow";
 
 const validateSearch = z.object({
   flow: z.enum(["desktop", "web"]).default("web"),
-  scheme: z.string().default("hyprnote"),
+  scheme: desktopSchemeSchema.default("hyprnote"),
   redirect: z.string().optional(),
+  redirect_uri: desktopRedirectUriSchema,
   provider: z.enum(["github", "google"]).optional(),
   rra: z.boolean().optional(),
 });
@@ -32,6 +38,7 @@ export const Route = createFileRoute("/auth")({
     meta: [{ name: "robots", content: "noindex, nofollow" }],
   }),
   beforeLoad: async ({ search }) => {
+    const desktopContext = getDesktopReturnContext(search);
     const user = await fetchUser();
 
     if (user) {
@@ -50,6 +57,7 @@ export const Route = createFileRoute("/auth")({
             search: {
               flow: "desktop",
               scheme: search.scheme,
+              redirect_uri: desktopContext.redirectUri,
               access_token: result.access_token,
               refresh_token: result.refresh_token,
             },
@@ -65,7 +73,14 @@ export const Route = createFileRoute("/auth")({
 type AuthView = "main" | "email";
 
 function Component() {
-  const { flow, scheme, redirect, provider, rra } = Route.useSearch();
+  const {
+    flow,
+    scheme,
+    redirect,
+    redirect_uri: redirectUri,
+    provider,
+    rra,
+  } = Route.useSearch();
   const { existingUser } = Route.useRouteContext();
   const [view, setView] = useState<AuthView>("main");
 
@@ -73,7 +88,11 @@ function Component() {
     return (
       <Container>
         <Header />
-        <DesktopReauthView email={existingUser.email} scheme={scheme} />
+        <DesktopReauthView
+          email={existingUser.email}
+          scheme={scheme}
+          redirectUri={redirectUri}
+        />
       </Container>
     );
   }
@@ -93,6 +112,7 @@ function Component() {
                 flow={flow}
                 scheme={scheme}
                 redirect={redirect}
+                redirectUri={redirectUri}
                 provider="google"
               />
             )}
@@ -101,6 +121,7 @@ function Component() {
                 flow={flow}
                 scheme={scheme}
                 redirect={redirect}
+                redirectUri={redirectUri}
                 provider="github"
                 rra={rra}
               />
@@ -131,6 +152,7 @@ function Component() {
           flow={flow}
           scheme={scheme}
           redirect={redirect}
+          redirectUri={redirectUri}
           onBack={() => setView("main")}
         />
       )}
@@ -182,17 +204,28 @@ function Header() {
 function DesktopReauthView({
   email,
   scheme,
+  redirectUri,
 }: {
   email: string;
   scheme: string;
+  redirectUri?: string;
 }) {
   const retryMutation = useMutation({
     mutationFn: () => createDesktopSession({ data: { email } }),
     onSuccess: (result) => {
       if (result) {
+        const desktopContext = getDesktopReturnContext({
+          flow: "desktop",
+          scheme,
+          redirect_uri: redirectUri,
+        });
+
         const params = new URLSearchParams();
         params.set("flow", "desktop");
         params.set("scheme", scheme);
+        if (desktopContext.redirectUri) {
+          params.set("redirect_uri", desktopContext.redirectUri);
+        }
         params.set("access_token", result.access_token);
         params.set("refresh_token", result.refresh_token);
         window.location.href = `/callback/auth?${params.toString()}`;
@@ -223,8 +256,18 @@ function DesktopReauthView({
             </p>
           </div>
           <div className="flex flex-col gap-2">
-            <OAuthButton flow="desktop" scheme={scheme} provider="google" />
-            <OAuthButton flow="desktop" scheme={scheme} provider="github" />
+            <OAuthButton
+              flow="desktop"
+              scheme={scheme}
+              redirectUri={redirectUri}
+              provider="google"
+            />
+            <OAuthButton
+              flow="desktop"
+              scheme={scheme}
+              redirectUri={redirectUri}
+              provider="github"
+            />
           </div>
         </>
       )}
@@ -260,11 +303,13 @@ function EmailAuthView({
   flow,
   scheme,
   redirect,
+  redirectUri,
   onBack,
 }: {
   flow: "desktop" | "web";
   scheme?: string;
   redirect?: string;
+  redirectUri?: string;
   onBack: () => void;
 }) {
   const [mode, setMode] = useState<EmailMode>("password");
@@ -305,10 +350,20 @@ function EmailAuthView({
       </div>
 
       {mode === "password" && (
-        <PasswordForm flow={flow} scheme={scheme} redirect={redirect} />
+        <PasswordForm
+          flow={flow}
+          scheme={scheme}
+          redirect={redirect}
+          redirectUri={redirectUri}
+        />
       )}
       {mode === "magic-link" && (
-        <MagicLinkForm flow={flow} scheme={scheme} redirect={redirect} />
+        <MagicLinkForm
+          flow={flow}
+          scheme={scheme}
+          redirect={redirect}
+          redirectUri={redirectUri}
+        />
       )}
 
       <LegalText />
@@ -320,10 +375,12 @@ function PasswordForm({
   flow,
   scheme,
   redirect,
+  redirectUri,
 }: {
   flow: "desktop" | "web";
   scheme?: string;
   redirect?: string;
+  redirectUri?: string;
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -335,7 +392,14 @@ function PasswordForm({
   const signInMutation = useMutation({
     mutationFn: () =>
       doPasswordSignIn({
-        data: { email, password, flow, scheme, redirect },
+        data: {
+          email,
+          password,
+          flow,
+          scheme,
+          redirect,
+          redirect_uri: redirectUri,
+        },
       }),
     onSuccess: (result) => {
       if (result && "error" in result && result.error) {
@@ -356,6 +420,7 @@ function PasswordForm({
           flow,
           scheme,
           redirect,
+          redirectUri,
         );
       }
     },
@@ -364,7 +429,14 @@ function PasswordForm({
   const signUpMutation = useMutation({
     mutationFn: () =>
       doPasswordSignUp({
-        data: { email, password, flow, scheme, redirect },
+        data: {
+          email,
+          password,
+          flow,
+          scheme,
+          redirect,
+          redirect_uri: redirectUri,
+        },
       }),
     onSuccess: (result) => {
       if (result && "error" in result && result.error) {
@@ -385,6 +457,7 @@ function PasswordForm({
             flow,
             scheme,
             redirect,
+            redirectUri,
           );
         }
       }
@@ -520,11 +593,20 @@ function handlePasswordSuccess(
   flow: "desktop" | "web",
   scheme?: string,
   redirectPath?: string,
+  redirectUri?: string,
 ) {
-  if (flow === "desktop") {
+  const desktopContext = getDesktopReturnContext({
+    flow,
+    scheme,
+    redirect_uri: redirectUri,
+  });
+  if (desktopContext.isDesktop) {
     const params = new URLSearchParams();
     params.set("flow", "desktop");
     if (scheme) params.set("scheme", scheme);
+    if (desktopContext.redirectUri) {
+      params.set("redirect_uri", desktopContext.redirectUri);
+    }
     params.set("access_token", accessToken);
     params.set("refresh_token", refreshToken);
     window.location.href = `/callback/auth?${params.toString()}`;
@@ -537,10 +619,12 @@ function MagicLinkForm({
   flow,
   scheme,
   redirect,
+  redirectUri,
 }: {
   flow: "desktop" | "web";
   scheme?: string;
   redirect?: string;
+  redirectUri?: string;
 }) {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -553,6 +637,7 @@ function MagicLinkForm({
           flow,
           scheme,
           redirect,
+          redirect_uri: redirectUri,
         },
       }),
     onSuccess: (result) => {
@@ -625,12 +710,14 @@ function OAuthButton({
   flow,
   scheme,
   redirect,
+  redirectUri,
   provider,
   rra,
 }: {
   flow: "desktop" | "web";
   scheme?: string;
   redirect?: string;
+  redirectUri?: string;
   provider: "google" | "github";
   rra?: boolean;
 }) {
@@ -642,6 +729,7 @@ function OAuthButton({
           flow,
           scheme,
           redirect,
+          redirect_uri: redirectUri,
           rra,
         },
       }),
