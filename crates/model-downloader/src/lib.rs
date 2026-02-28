@@ -1,3 +1,5 @@
+mod download_task;
+mod downloads_registry;
 mod error;
 mod manager;
 mod runtime;
