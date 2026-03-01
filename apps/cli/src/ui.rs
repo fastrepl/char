@@ -3,14 +3,14 @@ use hypr_transcript::WordState;
 use ratatui::{
     Frame,
     layout::{Constraint, Layout, Position, Rect},
-    style::{Color, Modifier, Style},
     text::{Line, Span},
     widgets::{Block, Borders, Padding, Paragraph, Wrap},
 };
 
-use crate::app::App;
+use crate::{app::App, theme::Theme};
 
 pub fn draw(frame: &mut Frame, app: &App) {
+    let theme = Theme::default();
     let [content_area, status_area] =
         Layout::vertical([Constraint::Min(8), Constraint::Length(1)]).areas(frame.area());
 
@@ -20,12 +20,12 @@ pub fn draw(frame: &mut Frame, app: &App) {
     ])
     .areas(content_area);
 
-    draw_notepad(frame, app, notepad_area);
-    draw_sidebar(frame, app, sidebar_area);
-    draw_status_bar(frame, app, status_area);
+    draw_notepad(frame, app, notepad_area, &theme);
+    draw_sidebar(frame, app, sidebar_area, &theme);
+    draw_status_bar(frame, app, status_area, &theme);
 }
 
-fn draw_sidebar(frame: &mut Frame, app: &App, area: Rect) {
+fn draw_sidebar(frame: &mut Frame, app: &App, area: Rect, theme: &Theme) {
     let [metadata_area, meters_area, transcript_area] = Layout::vertical([
         Constraint::Length(8),
         Constraint::Length(5),
@@ -33,12 +33,12 @@ fn draw_sidebar(frame: &mut Frame, app: &App, area: Rect) {
     ])
     .areas(area);
 
-    draw_sidebar_metadata(frame, app, metadata_area);
-    draw_sidebar_meters(frame, app, meters_area);
-    draw_transcript(frame, app, transcript_area);
+    draw_sidebar_metadata(frame, app, metadata_area, theme);
+    draw_sidebar_meters(frame, app, meters_area, theme);
+    draw_transcript(frame, app, transcript_area, theme);
 }
 
-fn draw_sidebar_metadata(frame: &mut Frame, app: &App, area: Rect) {
+fn draw_sidebar_metadata(frame: &mut Frame, app: &App, area: Rect, theme: &Theme) {
     let elapsed = app.elapsed();
     let secs = elapsed.as_secs();
     let time_str = format!(
@@ -49,10 +49,10 @@ fn draw_sidebar_metadata(frame: &mut Frame, app: &App, area: Rect) {
     );
 
     let state_style = match app.state {
-        State::Active if app.degraded.is_some() => Style::new().fg(Color::Yellow),
-        State::Active => Style::new().fg(Color::Green),
-        State::Finalizing => Style::new().fg(Color::Yellow),
-        State::Inactive => Style::new().fg(Color::Red),
+        State::Active if app.degraded.is_some() => theme.status_degraded,
+        State::Active => theme.status_active,
+        State::Finalizing => theme.status_degraded,
+        State::Inactive => theme.status_inactive,
     };
 
     let mut lines = vec![
@@ -66,29 +66,23 @@ fn draw_sidebar_metadata(frame: &mut Frame, app: &App, area: Rect) {
 
     if let Some(err) = app.errors.last() {
         lines.push(Line::default());
-        lines.push(Line::from(vec![Span::styled(
-            "Last error",
-            Style::new().fg(Color::Red),
-        )]));
-        lines.push(Line::from(vec![Span::styled(
-            err,
-            Style::new().fg(Color::DarkGray),
-        )]));
+        lines.push(Line::from(vec![Span::styled("Last error", theme.error)]));
+        lines.push(Line::from(vec![Span::styled(err, theme.muted)]));
     }
 
     let block = Block::new()
         .borders(Borders::ALL)
-        .border_style(Style::new().fg(Color::DarkGray))
+        .border_style(theme.border)
         .title(" Session ")
         .padding(Padding::new(1, 1, 0, 0));
 
     frame.render_widget(Paragraph::new(lines).block(block), area);
 }
 
-fn draw_sidebar_meters(frame: &mut Frame, app: &App, area: Rect) {
+fn draw_sidebar_meters(frame: &mut Frame, app: &App, area: Rect, theme: &Theme) {
     let block = Block::new()
         .borders(Borders::ALL)
-        .border_style(Style::new().fg(Color::DarkGray))
+        .border_style(theme.border)
         .title(" Audio ")
         .padding(Padding::new(1, 1, 0, 0));
     let inner = block.inner(area);
@@ -107,7 +101,7 @@ fn draw_sidebar_meters(frame: &mut Frame, app: &App, area: Rect) {
     let active_width = ((waveform_width as f64) * 0.78).round() as usize;
     let active_width = active_width.clamp(8, waveform_width);
     let side_gutter = (waveform_width.saturating_sub(active_width)) / 2;
-    let waveform = build_waveform_spans(app, active_width);
+    let waveform = build_waveform_spans(app, active_width, theme);
 
     let mut lines = (0..inner.height)
         .map(|_| Line::from(" ".repeat(inner.width as usize)))
@@ -125,13 +119,13 @@ fn draw_sidebar_meters(frame: &mut Frame, app: &App, area: Rect) {
     lines[middle_row] = Line::from(middle_spans);
 
     if app.mic_muted {
-        lines[0] = Line::from(Span::styled("mic muted", Style::new().fg(Color::DarkGray)));
+        lines[0] = Line::from(Span::styled("mic muted", theme.muted));
     }
 
     frame.render_widget(Paragraph::new(lines), inner);
 }
 
-fn build_waveform_spans(app: &App, width: usize) -> Vec<Span<'static>> {
+fn build_waveform_spans(app: &App, width: usize, theme: &Theme) -> Vec<Span<'static>> {
     if width == 0 {
         return Vec::new();
     }
@@ -156,7 +150,7 @@ fn build_waveform_spans(app: &App, width: usize) -> Vec<Span<'static>> {
         let raw_value = column_energy(&combined, x, width) as f64;
         let envelope = edge_envelope(x, width);
         let value = (raw_value * envelope).round() as u64;
-        let mut style = Style::new().fg(Color::Red);
+        let mut style = theme.waveform_normal;
 
         let normalized = (value as f64 / 1000.0).clamp(0.0, 1.0);
         let level = if value == 0 {
@@ -166,13 +160,13 @@ fn build_waveform_spans(app: &App, width: usize) -> Vec<Span<'static>> {
         };
 
         if level == 0 || envelope < 0.22 {
-            style = Style::new().fg(Color::DarkGray);
+            style = theme.waveform_silent;
         } else if level >= 6 && envelope > 0.7 {
-            style = Style::new().fg(Color::LightRed);
+            style = theme.waveform_hot;
         }
 
         if app.mic_muted {
-            style = Style::new().fg(Color::DarkGray);
+            style = theme.waveform_silent;
         }
 
         spans.push(Span::styled(level_char(level).to_string(), style));
@@ -263,13 +257,13 @@ fn level_char(level: u8) -> char {
     }
 }
 
-fn draw_transcript(frame: &mut Frame, app: &App, area: Rect) {
+fn draw_transcript(frame: &mut Frame, app: &App, area: Rect, theme: &Theme) {
     let mut spans: Vec<Span> = Vec::new();
 
     for word in &app.words {
         let style = match word.state {
-            WordState::Final => Style::new(),
-            WordState::Pending => Style::new().fg(Color::Yellow),
+            WordState::Final => theme.transcript_final,
+            WordState::Pending => theme.transcript_pending,
         };
         spans.push(Span::styled(&word.text, style));
         spans.push(Span::raw(" "));
@@ -277,29 +271,21 @@ fn draw_transcript(frame: &mut Frame, app: &App, area: Rect) {
 
     if !app.partials.is_empty() {
         for partial in &app.partials {
-            spans.push(Span::styled(
-                &partial.text,
-                Style::new()
-                    .fg(Color::DarkGray)
-                    .add_modifier(Modifier::ITALIC),
-            ));
+            spans.push(Span::styled(&partial.text, theme.transcript_partial));
             spans.push(Span::raw(" "));
         }
     }
 
     if spans.is_empty() {
-        spans.push(Span::styled(
-            "Waiting for speech...",
-            Style::new().fg(Color::DarkGray).italic(),
-        ));
+        spans.push(Span::styled("Waiting for speech...", theme.placeholder));
     }
 
     let text = vec![Line::from(spans)];
 
     let border_style = if app.transcript_focused && !app.memo_focused {
-        Style::new().fg(Color::Cyan)
+        theme.border_focused
     } else {
-        Style::new().fg(Color::DarkGray)
+        theme.border
     };
 
     let block = Block::new()
@@ -316,15 +302,15 @@ fn draw_transcript(frame: &mut Frame, app: &App, area: Rect) {
     frame.render_widget(paragraph, area);
 }
 
-fn draw_notepad(frame: &mut Frame, app: &App, area: Rect) {
+fn draw_notepad(frame: &mut Frame, app: &App, area: Rect, theme: &Theme) {
     if area.width < 3 || area.height < 3 {
         return;
     }
 
     let border_style = if app.memo_focused {
-        Style::new().fg(Color::Cyan)
+        theme.border_focused
     } else {
-        Style::new().fg(Color::DarkGray)
+        theme.border
     };
 
     let block = Block::new()
@@ -339,7 +325,7 @@ fn draw_notepad(frame: &mut Frame, app: &App, area: Rect) {
     let lines = if app.memo_is_empty() && !app.memo_focused {
         vec![Line::from(vec![Span::styled(
             "press [m] to start writing notes...",
-            Style::new().fg(Color::DarkGray).italic(),
+            theme.placeholder,
         )])]
     } else {
         view.lines.into_iter().map(Line::from).collect::<Vec<_>>()
@@ -356,38 +342,35 @@ fn draw_notepad(frame: &mut Frame, app: &App, area: Rect) {
     }
 }
 
-fn draw_status_bar(frame: &mut Frame, app: &App, area: Rect) {
+fn draw_status_bar(frame: &mut Frame, app: &App, area: Rect, theme: &Theme) {
     let word_count = app.words.len();
 
     let line = if app.memo_focused {
         Line::from(vec![
-            Span::styled(" [esc]", Style::new().fg(Color::DarkGray)),
+            Span::styled(" [esc]", theme.shortcut_key),
             Span::raw(" transcript  "),
-            Span::styled("[tab]", Style::new().fg(Color::DarkGray)),
+            Span::styled("[tab]", theme.shortcut_key),
             Span::raw(" toggle  "),
-            Span::styled("[ctrl+left/right]", Style::new().fg(Color::DarkGray)),
+            Span::styled("[ctrl+left/right]", theme.shortcut_key),
             Span::raw(" panes  "),
-            Span::styled("[ctrl+u]", Style::new().fg(Color::DarkGray)),
+            Span::styled("[ctrl+u]", theme.shortcut_key),
             Span::raw(" clear  "),
-            Span::styled("[ctrl+c]", Style::new().fg(Color::DarkGray)),
+            Span::styled("[ctrl+c]", theme.shortcut_key),
             Span::raw(" quit  "),
         ])
     } else {
         Line::from(vec![
-            Span::styled(" [q]", Style::new().fg(Color::DarkGray)),
+            Span::styled(" [q]", theme.shortcut_key),
             Span::raw(" quit  "),
-            Span::styled("[j/k]", Style::new().fg(Color::DarkGray)),
+            Span::styled("[j/k]", theme.shortcut_key),
             Span::raw(" transcript  "),
-            Span::styled("[m]", Style::new().fg(Color::DarkGray)),
+            Span::styled("[m]", theme.shortcut_key),
             Span::raw(" notepad  "),
-            Span::styled("[tab]", Style::new().fg(Color::DarkGray)),
+            Span::styled("[tab]", theme.shortcut_key),
             Span::raw(" toggle  "),
-            Span::styled("[ctrl+left/right]", Style::new().fg(Color::DarkGray)),
+            Span::styled("[ctrl+left/right]", theme.shortcut_key),
             Span::raw(" panes  "),
-            Span::styled(
-                format!("{word_count} words"),
-                Style::new().fg(Color::DarkGray),
-            ),
+            Span::styled(format!("{word_count} words"), theme.muted),
         ])
     };
 

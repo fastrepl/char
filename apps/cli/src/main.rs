@@ -3,6 +3,7 @@ mod commands;
 mod event;
 mod frame;
 mod runtime;
+mod theme;
 mod ui;
 
 use clap::{Parser, Subcommand};
