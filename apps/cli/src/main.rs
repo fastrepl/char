@@ -56,18 +56,6 @@ fn required_base_url(base_url: Option<String>) -> String {
 enum Commands {
     Listen,
     Auth,
-    Update {
-        #[arg(long, env = "CHAR_UPDATE_ENDPOINT")]
-        endpoint: Option<String>,
-        #[arg(long, env = "CHAR_UPDATE_PUBKEY")]
-        pubkey: Option<String>,
-        #[arg(long, env = "CHAR_UPDATE_TARGET")]
-        target: Option<String>,
-        #[arg(long)]
-        check_only: bool,
-        #[arg(long)]
-        allow_downgrade: bool,
-    },
     Batch {
         #[arg(long)]
         file: String,
@@ -95,22 +83,6 @@ async fn main() {
                 model: cli.model,
                 language: cli.language,
                 record: cli.record,
-            })
-            .await;
-        }
-        Some(Commands::Update {
-            endpoint,
-            pubkey,
-            target,
-            check_only,
-            allow_downgrade,
-        }) => {
-            commands::update::run(commands::update::Args {
-                endpoint,
-                pubkey,
-                target,
-                check_only,
-                allow_downgrade,
             })
             .await;
         }
