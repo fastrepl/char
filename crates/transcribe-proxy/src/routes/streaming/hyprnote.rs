@@ -78,8 +78,9 @@ fn build_response_transformer(
     provider: Provider,
 ) -> impl Fn(&str) -> Option<String> + Send + Sync + 'static {
     let mistral_adapter = MistralAdapter::default();
+    let provider_name = format!("{:?}", provider).to_lowercase();
     move |raw: &str| {
-        let responses: Vec<owhisper_interface::stream::StreamResponse> = match provider {
+        let mut responses: Vec<owhisper_interface::stream::StreamResponse> = match provider {
             Provider::Deepgram => DeepgramAdapter.parse_response(raw),
             Provider::AssemblyAI => AssemblyAIAdapter.parse_response(raw),
             Provider::Soniox => SonioxAdapter.parse_response(raw),
@@ -93,6 +94,10 @@ fn build_response_transformer(
 
         if responses.is_empty() {
             return None;
+        }
+
+        for response in &mut responses {
+            response.set_provider(&provider_name);
         }
 
         if responses.len() == 1 {
