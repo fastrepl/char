@@ -98,7 +98,8 @@ export function AccountSettingsCard() {
 
       <div className="flex items-center justify-between border-t border-neutral-100 p-4">
         <div className="text-sm">
-          Current plan: <span className="font-medium">{planDisplay}</span>
+          Current plan: <span className="font-medium">{planDisplay}</span>{" "}
+          <button onClick={() => billing.refreshBilling()}>Refresh</button>
         </div>
         {renderPlanButton()}
       </div>

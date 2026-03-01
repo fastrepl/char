@@ -13,11 +13,15 @@ import { useBillingAccess } from "~/auth/billing";
 import { useConnections } from "~/auth/useConnections";
 import type { CalendarProvider } from "~/calendar/components/shared";
 import { buildWebAppUrl } from "~/shared/utils";
+import { useTabs } from "~/store/zustand/tabs";
 
 export function OAuthProviderContent({ config }: { config: CalendarProvider }) {
   const auth = useAuth();
   const billing = useBillingAccess();
-  const { data: connections, isError } = useConnections();
+  const openNew = useTabs((state) => state.openNew);
+  const { data: connections, isError } = useConnections({
+    enabled: billing.isPro,
+  });
   const connection = connections?.find(
     (c) => c.integration_id === config.nangoIntegrationId,
   );
@@ -118,16 +122,6 @@ export function OAuthProviderContent({ config }: { config: CalendarProvider }) {
     );
   }
 
-  if (isError) {
-    return (
-      <div className="px-1 pt-1 pb-2">
-        <span className="text-xs text-red-600">
-          Failed to load integration status
-        </span>
-      </div>
-    );
-  }
-
   if (!auth.session) {
     const connectButton = (
       <button
@@ -158,23 +152,25 @@ export function OAuthProviderContent({ config }: { config: CalendarProvider }) {
   if (!billing.isPro) {
     return (
       <div className="flex flex-col gap-1.5 px-1 pt-1 pb-2">
-        <div className="flex items-center gap-1.5">
-          <span className="rounded border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
-            Pro
-          </span>
-          <span className="text-xs text-neutral-500">
-            Required to connect {config.displayName} Calendar
-          </span>
-        </div>
         <button
-          onClick={() => billing.upgradeToPro()}
+          onClick={() => openNew({ type: "settings" })}
           className={cn([
             "flex h-9 w-full cursor-pointer items-center justify-center rounded-lg text-sm font-medium transition-all",
             "bg-neutral-900 text-white hover:bg-neutral-800 active:scale-[98%]",
           ])}
         >
-          Upgrade to Pro
+          Pro Plan Required
         </button>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="px-1 pt-1 pb-2">
+        <span className="text-xs text-red-600">
+          Failed to load integration status
+        </span>
       </div>
     );
   }

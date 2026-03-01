@@ -35,21 +35,18 @@ function deriveFromStripe(
 const DEFAULT_BILLING = deriveBillingInfo(null);
 
 export function useBilling() {
-  const queryClient = useQueryClient();
-
   const jwtQuery = useQuery({
     queryKey: ["billing", "jwt"],
     queryFn: async () => {
       const token = await getAccessToken();
+      console.log("decodeJwtPayload", decodeJwtPayload(token));
       return deriveBillingInfo(decodeJwtPayload(token));
     },
-    retry: false,
   });
 
   const stripeQuery = useQuery({
     queryKey: ["billing", "stripe"],
     queryFn: async () => deriveFromStripe(await syncAfterSuccess()),
-    retry: false,
   });
 
   const billing: BillingInfo =
@@ -60,8 +57,11 @@ export function useBilling() {
   const refreshBilling = useCallback(async () => {
     const supabase = getSupabaseBrowserClient();
     await supabase.auth.refreshSession();
-    await queryClient.invalidateQueries({ queryKey: ["billing"] });
-  }, [queryClient]);
+    console.log("refreshBilling");
+    await jwtQuery.refetch();
+    await stripeQuery.refetch();
+    console.log("refreshBilling done");
+  }, [jwtQuery, stripeQuery]);
 
   return {
     ...billing,

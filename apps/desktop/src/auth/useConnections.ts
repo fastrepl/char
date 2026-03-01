@@ -7,7 +7,7 @@ import { useAuth } from "./context";
 
 import { env } from "~/env";
 
-export function useConnections() {
+export function useConnections({ enabled = true }: { enabled?: boolean } = {}) {
   const auth = useAuth();
   const userId = auth?.session?.user.id;
 
@@ -25,6 +25,6 @@ export function useConnections() {
       }
       return data?.connections ?? [];
     },
-    enabled: !!userId,
+    enabled: !!userId && enabled,
   });
 }
