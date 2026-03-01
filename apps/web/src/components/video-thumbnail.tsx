@@ -24,7 +24,7 @@ export function VideoThumbnail({
     >
       <MuxPlayer
         playbackId={playbackId}
-        poster="https://image.mux.com/bpcBHf4Qv5FbhwWD02zyFDb24EBuEuTPHKFUrZEktULQ/thumbnail.png?width=1152&height=648&time=58"
+        poster="https://image.mux.com/bpcBHf4Qv5FbhwWD02zyFDb24EBuEuTPHKFUrZEktULQ/thumbnail.png?width=1152&height=648&time=58.6"
         muted
         playsInline
         className="pointer-events-none aspect-video h-full w-full object-cover"
