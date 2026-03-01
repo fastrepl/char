@@ -1,3 +1,5 @@
+import "./blog-editor.css";
+
 import { Markdown } from "@tiptap/markdown";
 import {
   EditorContent,
@@ -10,7 +12,6 @@ import { useDebounceCallback } from "usehooks-ts";
 import { getExtensions, type ImageUploadResult } from "@hypr/tiptap/shared";
 import "@hypr/tiptap/styles.css";
 
-import "./blog-editor.css";
 import { ClipNode } from "./clip-embed";
 import { GoogleDocsImport } from "./google-docs-import";
 import { BlogImage } from "./image-with-alt";
@@ -165,7 +166,7 @@ function BlogEditor({
   }, []);
 
   return (
-    <div className="relative flex flex-col h-full">
+    <div className="relative flex h-full flex-col">
       {editable && showToolbar && (
         <div className="shrink-0">
           <Toolbar
@@ -178,7 +179,7 @@ function BlogEditor({
           />
         </div>
       )}
-      <div className="flex-1 min-h-0 overflow-y-auto p-6">
+      <div className="min-h-0 flex-1 overflow-y-auto p-6">
         <EditorContent
           editor={editor}
           className="tiptap-root blog-editor"

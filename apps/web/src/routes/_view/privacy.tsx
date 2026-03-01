@@ -37,10 +37,10 @@ export const Route = createFileRoute("/_view/privacy")({
 function Component() {
   return (
     <div
-      className="bg-linear-to-b from-white via-stone-50/20 to-white min-h-screen"
+      className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white"
       style={{ backgroundImage: "url(/patterns/dots.svg)" }}
     >
-      <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
+      <div className="mx-auto max-w-6xl border-x border-neutral-100 bg-white">
         <HeroSection />
         <SlashSeparator />
         <PrivacyPromiseSection />
@@ -63,17 +63,17 @@ function HeroSection() {
   return (
     <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
       <div className="px-6 py-12 lg:py-20">
-        <header className="mb-12 text-center max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-stone-100 rounded-full text-sm text-stone-600 mb-6">
+        <header className="mx-auto mb-12 max-w-4xl text-center">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-stone-100 px-4 py-2 text-sm text-stone-600">
             <Icon icon="mdi:eye-off" className="text-lg" />
             <span>Privacy-first by design</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif text-stone-600 mb-6">
+          <h1 className="mb-6 font-serif text-4xl text-stone-600 sm:text-5xl lg:text-6xl">
             Your conversations
             <br />
             belong to you
           </h1>
-          <p className="text-lg sm:text-xl text-neutral-600 leading-relaxed max-w-3xl mx-auto">
+          <p className="mx-auto max-w-3xl text-lg leading-relaxed text-neutral-600 sm:text-xl">
             At Char, we believe privacy isn't just a feature—it's a fundamental
             right. Your meeting conversations contain your most sensitive ideas,
             strategies, and personal moments. We've built Char to ensure they
@@ -115,24 +115,24 @@ function PrivacyPromiseSection() {
 
   return (
     <section className="px-6 py-12 lg:py-16">
-      <h2 className="text-3xl font-serif text-stone-600 mb-4 text-center">
+      <h2 className="mb-4 text-center font-serif text-3xl text-stone-600">
         Our privacy promise
       </h2>
-      <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
+      <p className="mx-auto mb-12 max-w-2xl text-center text-neutral-600">
         These aren't just policies—they're principles embedded in our
         architecture. We couldn't violate your privacy even if we wanted to.
       </p>
-      <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+      <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
         {promises.map((promise, index) => (
           <div
             key={index}
-            className="p-6 border border-neutral-200 rounded-lg bg-white"
+            className="rounded-lg border border-neutral-200 bg-white p-6"
           >
             <Icon
               icon={promise.icon}
-              className="text-3xl text-stone-600 mb-4"
+              className="mb-4 text-3xl text-stone-600"
             />
-            <h3 className="text-xl font-serif text-stone-600 mb-2">
+            <h3 className="mb-2 font-serif text-xl text-stone-600">
               {promise.title}
             </h3>
             <p className="text-neutral-600">{promise.description}</p>
@@ -145,51 +145,51 @@ function PrivacyPromiseSection() {
 
 function DataOwnershipSection() {
   return (
-    <section className="px-6 py-12 lg:py-16 bg-stone-50/30">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
+    <section className="bg-stone-50/30 px-6 py-12 lg:py-16">
+      <div className="mx-auto max-w-4xl">
+        <div className="mb-12 text-center">
           <Icon
             icon="mdi:folder-lock"
-            className="text-5xl text-stone-600 mb-4"
+            className="mb-4 text-5xl text-stone-600"
           />
-          <h2 className="text-3xl font-serif text-stone-600 mb-4">
+          <h2 className="mb-4 font-serif text-3xl text-stone-600">
             You own your data, completely
           </h2>
-          <p className="text-neutral-600 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-neutral-600">
             With Char, data ownership isn't a marketing term—it's a technical
             reality. Your data lives on your device, in formats you control.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="text-center p-6">
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="p-6 text-center">
             <Icon
               icon="mdi:folder-home"
-              className="text-4xl text-stone-600 mb-4 mx-auto"
+              className="mx-auto mb-4 text-4xl text-stone-600"
             />
-            <h3 className="font-medium text-stone-600 mb-2">Local storage</h3>
+            <h3 className="mb-2 font-medium text-stone-600">Local storage</h3>
             <p className="text-sm text-neutral-600">
               All your notes, recordings, and transcripts are stored in a local
               database on your computer. No cloud dependency, no remote access.
             </p>
           </div>
-          <div className="text-center p-6">
+          <div className="p-6 text-center">
             <Icon
               icon="mdi:export"
-              className="text-4xl text-stone-600 mb-4 mx-auto"
+              className="mx-auto mb-4 text-4xl text-stone-600"
             />
-            <h3 className="font-medium text-stone-600 mb-2">Full export</h3>
+            <h3 className="mb-2 font-medium text-stone-600">Full export</h3>
             <p className="text-sm text-neutral-600">
               Export all your data anytime in standard formats. Your notes,
               transcripts, and recordings are always accessible and portable.
             </p>
           </div>
-          <div className="text-center p-6">
+          <div className="p-6 text-center">
             <Icon
               icon="mdi:delete-forever"
-              className="text-4xl text-stone-600 mb-4 mx-auto"
+              className="mx-auto mb-4 text-4xl text-stone-600"
             />
-            <h3 className="font-medium text-stone-600 mb-2">True deletion</h3>
+            <h3 className="mb-2 font-medium text-stone-600">True deletion</h3>
             <p className="text-sm text-neutral-600">
               When you delete something, it's gone. No hidden backups, no
               retention periods, no "soft deletes" that keep your data around.
@@ -197,14 +197,14 @@ function DataOwnershipSection() {
           </div>
         </div>
 
-        <div className="mt-12 p-8 border border-neutral-200 rounded-lg bg-white">
+        <div className="mt-12 rounded-lg border border-neutral-200 bg-white p-8">
           <div className="flex items-start gap-4">
             <Icon
               icon="mdi:sync-off"
-              className="text-3xl text-stone-600 shrink-0"
+              className="shrink-0 text-3xl text-stone-600"
             />
             <div>
-              <h3 className="text-xl font-serif text-stone-600 mb-3">
+              <h3 className="mb-3 font-serif text-xl text-stone-600">
                 Optional sync, your choice
               </h3>
               <p className="text-neutral-600">
@@ -225,30 +225,30 @@ function DataOwnershipSection() {
 function NoTrackingSection() {
   return (
     <section className="px-6 py-12 lg:py-16">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
+      <div className="mx-auto max-w-4xl">
+        <div className="mb-12 text-center">
           <Icon
             icon="mdi:shield-off-outline"
-            className="text-5xl text-stone-600 mb-4"
+            className="mb-4 text-5xl text-stone-600"
           />
-          <h2 className="text-3xl font-serif text-stone-600 mb-4">
+          <h2 className="mb-4 font-serif text-3xl text-stone-600">
             No tracking, no profiling
           </h2>
-          <p className="text-neutral-600 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-neutral-600">
             We don't track your behavior, build profiles, or analyze your
             content. Your meeting data is not a product.
           </p>
         </div>
 
         <div className="flex flex-col gap-6">
-          <div className="p-6 border border-neutral-200 rounded-lg bg-white">
+          <div className="rounded-lg border border-neutral-200 bg-white p-6">
             <div className="flex items-start gap-4">
               <Icon
                 icon="mdi:robot-off"
-                className="text-2xl text-stone-600 shrink-0 mt-1"
+                className="mt-1 shrink-0 text-2xl text-stone-600"
               />
               <div>
-                <h3 className="font-medium text-stone-600 mb-2">
+                <h3 className="mb-2 font-medium text-stone-600">
                   No AI training on your data
                 </h3>
                 <p className="text-neutral-600">
@@ -260,14 +260,14 @@ function NoTrackingSection() {
             </div>
           </div>
 
-          <div className="p-6 border border-neutral-200 rounded-lg bg-white">
+          <div className="rounded-lg border border-neutral-200 bg-white p-6">
             <div className="flex items-start gap-4">
               <Icon
                 icon="mdi:target-account"
-                className="text-2xl text-stone-600 shrink-0 mt-1"
+                className="mt-1 shrink-0 text-2xl text-stone-600"
               />
               <div>
-                <h3 className="font-medium text-stone-600 mb-2">
+                <h3 className="mb-2 font-medium text-stone-600">
                   No behavioral tracking
                 </h3>
                 <p className="text-neutral-600">
@@ -279,14 +279,14 @@ function NoTrackingSection() {
             </div>
           </div>
 
-          <div className="p-6 border border-neutral-200 rounded-lg bg-white">
+          <div className="rounded-lg border border-neutral-200 bg-white p-6">
             <div className="flex items-start gap-4">
               <Icon
                 icon="mdi:currency-usd-off"
-                className="text-2xl text-stone-600 shrink-0 mt-1"
+                className="mt-1 shrink-0 text-2xl text-stone-600"
               />
               <div>
-                <h3 className="font-medium text-stone-600 mb-2">
+                <h3 className="mb-2 font-medium text-stone-600">
                   No data monetization
                 </h3>
                 <p className="text-neutral-600">
@@ -305,29 +305,29 @@ function NoTrackingSection() {
 
 function TransparencySection() {
   return (
-    <section className="px-6 py-12 lg:py-16 bg-stone-50/30">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
+    <section className="bg-stone-50/30 px-6 py-12 lg:py-16">
+      <div className="mx-auto max-w-4xl">
+        <div className="mb-12 text-center">
           <Icon
             icon="mdi:code-braces"
-            className="text-5xl text-stone-600 mb-4"
+            className="mb-4 text-5xl text-stone-600"
           />
-          <h2 className="text-3xl font-serif text-stone-600 mb-4">
+          <h2 className="mb-4 font-serif text-3xl text-stone-600">
             Verify, don't trust
           </h2>
-          <p className="text-neutral-600 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-neutral-600">
             We don't ask you to take our word for it. Char is fully open source,
             so you can verify every privacy claim yourself.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="p-6 border border-neutral-200 rounded-lg bg-white">
+        <div className="grid gap-8 md:grid-cols-2">
+          <div className="rounded-lg border border-neutral-200 bg-white p-6">
             <Icon
               icon="mdi:source-repository"
-              className="text-3xl text-stone-600 mb-4"
+              className="mb-4 text-3xl text-stone-600"
             />
-            <h3 className="text-xl font-serif text-stone-600 mb-2">
+            <h3 className="mb-2 font-serif text-xl text-stone-600">
               Open source code
             </h3>
             <p className="text-neutral-600">
@@ -336,12 +336,12 @@ function TransparencySection() {
               information is stored. No black boxes, no hidden behaviors.
             </p>
           </div>
-          <div className="p-6 border border-neutral-200 rounded-lg bg-white">
+          <div className="rounded-lg border border-neutral-200 bg-white p-6">
             <Icon
               icon="mdi:file-document-check"
-              className="text-3xl text-stone-600 mb-4"
+              className="mb-4 text-3xl text-stone-600"
             />
-            <h3 className="text-xl font-serif text-stone-600 mb-2">
+            <h3 className="mb-2 font-serif text-xl text-stone-600">
               Clear documentation
             </h3>
             <p className="text-neutral-600">
@@ -352,12 +352,12 @@ function TransparencySection() {
           </div>
         </div>
 
-        <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
           <a
             href="https://github.com/fastrepl/char"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 text-stone-600 hover:text-stone-800 font-medium"
+            className="inline-flex items-center justify-center gap-2 font-medium text-stone-600 hover:text-stone-800"
           >
             <Icon icon="mdi:github" className="text-lg" />
             View source code
@@ -365,7 +365,7 @@ function TransparencySection() {
           </a>
           <a
             href="/legal/privacy"
-            className="inline-flex items-center justify-center gap-2 text-stone-600 hover:text-stone-800 font-medium"
+            className="inline-flex items-center justify-center gap-2 font-medium text-stone-600 hover:text-stone-800"
           >
             <Icon icon="mdi:file-document" className="text-lg" />
             Read privacy policy
@@ -413,12 +413,12 @@ function PrivacyComparisonSection() {
 
   return (
     <section className="px-6 py-12 lg:py-16">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-serif text-stone-600 mb-4">
+      <div className="mx-auto max-w-4xl">
+        <div className="mb-12 text-center">
+          <h2 className="mb-4 font-serif text-3xl text-stone-600">
             How we compare
           </h2>
-          <p className="text-neutral-600 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-neutral-600">
             Most meeting tools treat your data as their asset. We built Char
             differently.
           </p>
@@ -428,13 +428,13 @@ function PrivacyComparisonSection() {
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-neutral-200">
-                <th className="text-left py-4 px-4 font-medium text-stone-600">
+                <th className="px-4 py-4 text-left font-medium text-stone-600">
                   Feature
                 </th>
-                <th className="text-center py-4 px-4 font-medium text-stone-600 bg-stone-50">
+                <th className="bg-stone-50 px-4 py-4 text-center font-medium text-stone-600">
                   Char
                 </th>
-                <th className="text-center py-4 px-4 font-medium text-neutral-500">
+                <th className="px-4 py-4 text-center font-medium text-neutral-500">
                   Others
                 </th>
               </tr>
@@ -442,9 +442,9 @@ function PrivacyComparisonSection() {
             <tbody>
               {comparisons.map((row, index) => (
                 <tr key={index} className="border-b border-neutral-100">
-                  <td className="py-4 px-4 text-neutral-600">{row.feature}</td>
-                  <td className="py-4 px-4 text-center bg-stone-50">
-                    <span className="inline-flex items-center gap-2 text-stone-600 font-medium">
+                  <td className="px-4 py-4 text-neutral-600">{row.feature}</td>
+                  <td className="bg-stone-50 px-4 py-4 text-center">
+                    <span className="inline-flex items-center gap-2 font-medium text-stone-600">
                       <Icon
                         icon="mdi:check-circle"
                         className="text-lg text-green-600"
@@ -452,7 +452,7 @@ function PrivacyComparisonSection() {
                       {row.hyprnote}
                     </span>
                   </td>
-                  <td className="py-4 px-4 text-center text-neutral-500">
+                  <td className="px-4 py-4 text-center text-neutral-500">
                     {row.others}
                   </td>
                 </tr>
@@ -467,26 +467,26 @@ function PrivacyComparisonSection() {
 
 function CTASection() {
   return (
-    <section className="px-6 py-16 lg:py-20 bg-stone-50/30">
-      <div className="max-w-3xl mx-auto text-center">
+    <section className="bg-stone-50/30 px-6 py-16 lg:py-20">
+      <div className="mx-auto max-w-3xl text-center">
         <Icon
           icon="mdi:shield-lock"
-          className="text-5xl text-stone-600 mb-6 mx-auto"
+          className="mx-auto mb-6 text-5xl text-stone-600"
         />
-        <h2 className="text-3xl font-serif text-stone-600 mb-4">
+        <h2 className="mb-4 font-serif text-3xl text-stone-600">
           Take back control of your meeting data
         </h2>
-        <p className="text-neutral-600 mb-8">
+        <p className="mb-8 text-neutral-600">
           Join thousands of professionals who refuse to compromise on privacy.
           Your conversations deserve better.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex flex-col justify-center gap-4 sm:flex-row">
           <Link
             to="/download/"
             className={cn([
-              "inline-flex items-center justify-center gap-2 px-8 py-3 text-base font-medium rounded-full",
+              "inline-flex items-center justify-center gap-2 rounded-full px-8 py-3 text-base font-medium",
               "bg-linear-to-t from-stone-600 to-stone-500 text-white",
-              "hover:scale-105 active:scale-95 transition-transform shadow-md hover:shadow-lg",
+              "shadow-md transition-transform hover:scale-105 hover:shadow-lg active:scale-95",
             ])}
           >
             <Icon icon="mdi:download" className="text-lg" />
@@ -495,9 +495,9 @@ function CTASection() {
           <Link
             to="/security/"
             className={cn([
-              "inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-full",
+              "inline-flex items-center justify-center rounded-full px-8 py-3 text-base font-medium",
               "border border-neutral-300 text-stone-600",
-              "hover:bg-stone-50 transition-colors",
+              "transition-colors hover:bg-stone-50",
             ])}
           >
             Learn about security

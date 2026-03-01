@@ -121,12 +121,12 @@ export function TableOfContents({
   return (
     <aside
       className={cn([
-        "hidden xl:flex fixed right-0 top-0 h-screen z-10",
+        "fixed top-0 right-0 z-10 hidden h-screen xl:flex",
         "w-64 items-center",
       ])}
     >
       <nav
-        className="relative w-full overflow-hidden cursor-ns-resize"
+        className="relative w-full cursor-ns-resize overflow-hidden"
         style={{ height: ITEM_HEIGHT * 5 }}
         onWheel={handleWheel}
       >
@@ -148,9 +148,9 @@ export function TableOfContents({
                   scrollToHeading(item.id);
                 }}
                 className={cn([
-                  "flex items-center shrink-0 pl-6 pr-4 transition-colors duration-200",
+                  "flex shrink-0 items-center pr-4 pl-6 transition-colors duration-200",
                   isActive
-                    ? "text-stone-800 font-medium"
+                    ? "font-medium text-stone-800"
                     : "text-neutral-400 hover:text-neutral-600",
                   item.level === 3 && "pl-9",
                   item.level === 4 && "pl-12",

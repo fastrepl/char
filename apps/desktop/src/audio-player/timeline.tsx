@@ -45,26 +45,26 @@ export function Timeline() {
   };
 
   return (
-    <div className="w-full bg-neutral-50 rounded-xl">
+    <div className="w-full rounded-xl bg-neutral-50">
       <div className={cn(["flex items-center gap-2 p-2", "w-full max-w-full"])}>
         <button
           onClick={handleClick}
           className={cn([
             "flex items-center justify-center",
-            "w-8 h-8 rounded-full",
-            "bg-white border border-neutral-200",
-            "hover:bg-neutral-100 hover:scale-110 transition-all",
+            "h-8 w-8 rounded-full",
+            "border border-neutral-200 bg-white",
+            "transition-all hover:scale-110 hover:bg-neutral-100",
             "shrink-0 shadow-xs",
           ])}
         >
           {state === "playing" ? (
-            <Pause className="w-4 h-4 text-neutral-900" fill="currentColor" />
+            <Pause className="h-4 w-4 text-neutral-900" fill="currentColor" />
           ) : (
-            <Play className="w-4 h-4 text-neutral-900" fill="currentColor" />
+            <Play className="h-4 w-4 text-neutral-900" fill="currentColor" />
           )}
         </button>
 
-        <div className="inline-flex gap-1 items-center text-xs text-neutral-600 shrink-0 font-mono tabular-nums">
+        <div className="inline-flex shrink-0 items-center gap-1 font-mono text-xs text-neutral-600 tabular-nums">
           <span>{formatTime(time.current)}</span>/
           <span>{formatTime(time.total)}</span>
         </div>
@@ -74,10 +74,10 @@ export function Timeline() {
             onClick={() => setShowRateMenu((prev) => !prev)}
             className={cn([
               "flex items-center justify-center",
-              "px-1.5 h-6 rounded-md",
-              "bg-white border border-neutral-200",
-              "hover:bg-neutral-100 transition-colors",
-              "text-xs font-mono text-neutral-700",
+              "h-6 rounded-md px-1.5",
+              "border border-neutral-200 bg-white",
+              "transition-colors hover:bg-neutral-100",
+              "font-mono text-xs text-neutral-700",
               "shadow-xs",
             ])}
           >
@@ -86,9 +86,9 @@ export function Timeline() {
           {showRateMenu && (
             <div
               className={cn([
-                "absolute bottom-full mb-1 right-0",
-                "bg-white border border-neutral-200 rounded-lg shadow-md",
-                "py-1 z-50",
+                "absolute right-0 bottom-full mb-1",
+                "rounded-lg border border-neutral-200 bg-white shadow-md",
+                "z-50 py-1",
               ])}
             >
               {PLAYBACK_RATES.map((rate) => (
@@ -99,10 +99,10 @@ export function Timeline() {
                     setShowRateMenu(false);
                   }}
                   className={cn([
-                    "block w-full px-3 py-1 text-xs font-mono text-left",
-                    "hover:bg-neutral-100 transition-colors",
+                    "block w-full px-3 py-1 text-left font-mono text-xs",
+                    "transition-colors hover:bg-neutral-100",
                     rate === playbackRate
-                      ? "text-neutral-900 font-semibold"
+                      ? "font-semibold text-neutral-900"
                       : "text-neutral-600",
                   ])}
                 >
@@ -115,7 +115,7 @@ export function Timeline() {
 
         <div
           ref={registerContainer}
-          className="flex-1 min-w-0"
+          className="min-w-0 flex-1"
           style={{ minHeight: "30px", width: "100%" }}
         />
       </div>

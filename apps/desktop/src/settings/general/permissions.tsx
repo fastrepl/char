@@ -1,10 +1,11 @@
 import { AlertCircleIcon, ArrowRightIcon, CheckIcon } from "lucide-react";
 import { useState } from "react";
-import { usePermission } from "~/shared/hooks/usePermissions";
 
 import type { PermissionStatus } from "@hypr/plugin-permissions";
 import { Button } from "@hypr/ui/components/ui/button";
 import { cn } from "@hypr/utils";
+
+import { usePermission } from "~/shared/hooks/usePermissions";
 
 function ActionLink({
   onClick,
@@ -21,8 +22,8 @@ function ActionLink({
       onClick={onClick}
       disabled={disabled}
       className={cn([
-        "underline hover:text-neutral-900 transition-colors",
-        disabled && "opacity-50 cursor-not-allowed",
+        "underline transition-colors hover:text-neutral-900",
+        disabled && "cursor-not-allowed opacity-50",
       ])}
     >
       {children}
@@ -64,7 +65,7 @@ function PermissionRow({
       <div className="flex-1">
         <div
           className={cn([
-            "flex items-center gap-2 mb-1",
+            "mb-1 flex items-center gap-2",
             !isAuthorized && "text-red-500",
           ])}
         >
@@ -78,7 +79,7 @@ function PermissionRow({
               <button
                 type="button"
                 onClick={() => setShowActions(true)}
-                className="underline hover:text-neutral-900 transition-colors"
+                className="underline transition-colors hover:text-neutral-900"
               >
                 Having trouble?
               </button>
@@ -134,7 +135,7 @@ export function Permissions() {
 
   return (
     <div>
-      <h2 className="text-lg font-semibold font-serif mb-4">Permissions</h2>
+      <h2 className="mb-4 font-serif text-lg font-semibold">Permissions</h2>
       <div className="flex flex-col gap-4">
         <PermissionRow
           title="Microphone"

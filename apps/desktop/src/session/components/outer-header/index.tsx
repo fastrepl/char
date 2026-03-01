@@ -1,9 +1,9 @@
-import type { EditorView } from "~/store/zustand/tabs/schema";
-
 import { FolderChain } from "./folder";
 import { ListenButton } from "./listen";
 import { MetadataButton } from "./metadata";
 import { OverflowButton } from "./overflow";
+
+import type { EditorView } from "~/store/zustand/tabs/schema";
 
 export function OuterHeader({
   sessionId,
@@ -19,7 +19,7 @@ export function OuterHeader({
           <FolderChain sessionId={sessionId} />
         </div>
 
-        <div className="flex items-center shrink-0">
+        <div className="flex shrink-0 items-center">
           <MetadataButton sessionId={sessionId} />
           <ListenButton sessionId={sessionId} />
           <OverflowButton sessionId={sessionId} currentView={currentView} />

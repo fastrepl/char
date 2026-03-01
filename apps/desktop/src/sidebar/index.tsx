@@ -2,11 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { platform } from "@tauri-apps/plugin-os";
 import { AxeIcon, PanelLeftCloseIcon } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
-import { useShell } from "~/contexts/shell";
-import { SearchResults } from "~/search/components/sidebar";
-import { useSearch } from "~/search/contexts/ui";
-import { TrafficLights } from "~/shared/ui/traffic-lights";
-import { commands } from "~/types/tauri.gen";
 
 import { Button } from "@hypr/ui/components/ui/button";
 import { Kbd } from "@hypr/ui/components/ui/kbd";
@@ -20,6 +15,12 @@ import { cn } from "@hypr/utils";
 import { ProfileSection } from "./profile";
 import { TimelineView } from "./timeline";
 import { ToastArea } from "./toast";
+
+import { useShell } from "~/contexts/shell";
+import { SearchResults } from "~/search/components/sidebar";
+import { useSearch } from "~/search/contexts/ui";
+import { TrafficLights } from "~/shared/ui/traffic-lights";
+import { commands } from "~/types/tauri.gen";
 
 const DevtoolView = lazy(() =>
   import("./devtool").then((m) => ({ default: m.DevtoolView })),
@@ -39,13 +40,13 @@ export function LeftSidebar() {
   const showSearchResults = query.trim() !== "";
 
   return (
-    <div className="h-full w-70 flex flex-col overflow-hidden shrink-0 gap-1">
+    <div className="flex h-full w-70 shrink-0 flex-col gap-1 overflow-hidden">
       <header
         data-tauri-drag-region
         className={cn([
           "flex flex-row items-center",
-          "w-full h-9 py-1",
-          isLinux ? "pl-3 justify-between" : "pl-20 justify-end",
+          "h-9 w-full py-1",
+          isLinux ? "justify-between pl-3" : "justify-end pl-20",
           "shrink-0",
           "rounded-xl bg-neutral-50",
         ])}
@@ -79,8 +80,8 @@ export function LeftSidebar() {
         </div>
       </header>
 
-      <div className="flex flex-col flex-1 overflow-hidden gap-1">
-        <div className="flex-1 min-h-0 overflow-hidden relative">
+      <div className="flex flex-1 flex-col gap-1 overflow-hidden">
+        <div className="relative min-h-0 flex-1 overflow-hidden">
           {leftsidebar.showDevtool ? (
             <Suspense fallback={null}>
               <DevtoolView />

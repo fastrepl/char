@@ -1,5 +1,10 @@
 import { FolderIcon, FoldersIcon, StickyNoteIcon } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
+
+import { cn } from "@hypr/utils";
+
+import { Section } from "./shared";
+
 import { StandardTabWrapper } from "~/shared/main";
 import { type TabItem, TabItemBase } from "~/shared/tabs";
 import {
@@ -10,10 +15,6 @@ import { useSession } from "~/store/tinybase/hooks";
 import { sessionOps } from "~/store/tinybase/persister/session/ops";
 import * as main from "~/store/tinybase/store/main";
 import { type Tab, useTabs } from "~/store/zustand/tabs";
-
-import { cn } from "@hypr/utils";
-
-import { Section } from "./shared";
 
 function useFolderTree() {
   const sessionIds = main.UI.useRowIds("sessions", main.STORE_ID);
@@ -88,7 +89,7 @@ const TabItemFolderAll: TabItem<Extract<Tab, { type: "folders" }>> = ({
 }) => {
   return (
     <TabItemBase
-      icon={<FoldersIcon className="w-4 h-4" />}
+      icon={<FoldersIcon className="h-4 w-4" />}
       title={"Folders"}
       selected={tab.active}
       pinned={tab.pinned}
@@ -121,7 +122,7 @@ const TabItemFolderSpecific: TabItem<Extract<Tab, { type: "folders" }>> = ({
 
   return (
     <TabItemBase
-      icon={<FolderIcon className="w-4 h-4" />}
+      icon={<FolderIcon className="h-4 w-4" />}
       title={title}
       selected={tab.active}
       pinned={tab.pinned}
@@ -157,7 +158,7 @@ function TabContentFolderTopLevel() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Section icon={<FolderIcon className="w-4 h-4" />} title="Folders">
+      <Section icon={<FolderIcon className="h-4 w-4" />} title="Folders">
         {topLevelFolderIds.length > 0 && (
           <div className="grid grid-cols-4 gap-4">
             {topLevelFolderIds.map((folderId) => (
@@ -211,7 +212,7 @@ function FolderCard({ folderId }: { folderId: string }) {
     <div
       className={cn([
         "flex flex-col items-center justify-center",
-        "gap-2 p-6 border rounded-lg hover:bg-muted cursor-pointer",
+        "hover:bg-muted cursor-pointer gap-2 rounded-lg border p-6",
       ])}
       onClick={() => {
         if (!isEditing) {
@@ -219,7 +220,7 @@ function FolderCard({ folderId }: { folderId: string }) {
         }
       }}
     >
-      <FolderIcon className="w-12 h-12 text-muted-foreground" />
+      <FolderIcon className="text-muted-foreground h-12 w-12" />
       {isEditing ? (
         <input
           type="text"
@@ -237,13 +238,13 @@ function FolderCard({ folderId }: { folderId: string }) {
           onClick={(e) => e.stopPropagation()}
           autoFocus
           className={cn([
-            "text-sm font-medium text-center w-full",
-            "border-none bg-transparent focus:outline-hidden focus:underline",
+            "w-full text-center text-sm font-medium",
+            "border-none bg-transparent focus:underline focus:outline-hidden",
           ])}
         />
       ) : (
         <span
-          className="text-sm font-medium text-center"
+          className="text-center text-sm font-medium"
           onClick={(e) => {
             e.stopPropagation();
             setEditValue(name);
@@ -254,7 +255,7 @@ function FolderCard({ folderId }: { folderId: string }) {
         </span>
       )}
       {childCount > 0 && (
-        <span className="text-xs text-muted-foreground">
+        <span className="text-muted-foreground text-xs">
           {childCount} items
         </span>
       )}
@@ -279,7 +280,7 @@ function TabContentFolderSpecific({ folderId }: { folderId: string }) {
     <div className="flex flex-col gap-6">
       <TabContentFolderBreadcrumb folderId={folderId} />
 
-      <Section icon={<FolderIcon className="w-4 h-4" />} title="Folders">
+      <Section icon={<FolderIcon className="h-4 w-4" />} title="Folders">
         {childFolderIds.length > 0 && (
           <div className="grid grid-cols-4 gap-4">
             {childFolderIds.map((childId) => (
@@ -290,7 +291,7 @@ function TabContentFolderSpecific({ folderId }: { folderId: string }) {
       </Section>
 
       {!isEmpty && (
-        <Section icon={<StickyNoteIcon className="w-4 h-4" />} title="Notes">
+        <Section icon={<StickyNoteIcon className="h-4 w-4" />} title="Notes">
           {(sessionIds?.length ?? 0) > 0 && (
             <div className="flex flex-col gap-2">
               {sessionIds!.map((sessionId) => (
@@ -315,7 +316,7 @@ function TabContentFolderBreadcrumb({ folderId }: { folderId: string }) {
           onClick={() => openCurrent({ type: "folders", id: null })}
           className="hover:text-foreground"
         >
-          <FoldersIcon className="w-4 h-4" />
+          <FoldersIcon className="h-4 w-4" />
         </button>
       )}
       renderCrumb={({ id, name, isLast }) => (
@@ -338,10 +339,10 @@ function FolderSessionItem({ sessionId }: { sessionId: string }) {
 
   return (
     <div
-      className="flex items-center gap-2 px-3 py-2 border rounded-md hover:bg-muted cursor-pointer"
+      className="hover:bg-muted flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2"
       onClick={() => openCurrent({ type: "sessions", id: sessionId })}
     >
-      <StickyNoteIcon className="w-4 h-4 text-muted-foreground" />
+      <StickyNoteIcon className="text-muted-foreground h-4 w-4" />
       <span className="text-sm">{session.title || "Untitled"}</span>
     </div>
   );

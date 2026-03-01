@@ -1,10 +1,5 @@
 import { type RefObject, useCallback, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { useAudioPlayer } from "~/audio-player";
-import { useAudioTime } from "~/audio-player/provider";
-import { TranscriptEmptyState } from "~/session/components/note-input/transcript/empty-state";
-import * as main from "~/store/tinybase/store/main";
-import { useListener } from "~/stt/contexts";
 
 import type { DegradedError } from "@hypr/plugin-listener";
 import type { RuntimeSpeakerHint } from "@hypr/transcript";
@@ -19,6 +14,12 @@ import {
 import { Operations } from "./operations";
 import { RenderTranscript } from "./render-transcript";
 import { SelectionMenu } from "./selection-menu";
+
+import { useAudioPlayer } from "~/audio-player";
+import { useAudioTime } from "~/audio-player/provider";
+import { TranscriptEmptyState } from "~/session/components/note-input/transcript/empty-state";
+import * as main from "~/store/tinybase/store/main";
+import { useListener } from "~/stt/contexts";
 
 export { SegmentRenderer } from "./segment-renderer";
 
@@ -158,8 +159,8 @@ export function TranscriptContainer({
         ref={handleContainerRef}
         data-transcript-container
         className={cn([
-          "flex flex-col gap-8 h-full overflow-y-auto overflow-x-hidden",
-          "pb-16 scroll-pb-32 scrollbar-hide",
+          "flex h-full flex-col gap-8 overflow-x-hidden overflow-y-auto",
+          "scrollbar-hide scroll-pb-32 pb-16",
         ])}
       >
         {currentActive && degraded ? (
@@ -205,13 +206,13 @@ export function TranscriptContainer({
       <button
         onClick={scrollToBottom}
         className={cn([
-          "absolute bottom-3 left-1/2 -translate-x-1/2 z-30",
-          "px-4 py-2 rounded-full",
+          "absolute bottom-3 left-1/2 z-30 -translate-x-1/2",
+          "rounded-full px-4 py-2",
           "bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900",
-          "shadow-xs hover:shadow-md hover:scale-[102%] active:scale-[98%]",
+          "shadow-xs hover:scale-[102%] hover:shadow-md active:scale-[98%]",
           "text-xs font-light",
           "transition-opacity duration-150",
-          shouldShowButton ? "opacity-100" : "opacity-0 pointer-events-none",
+          shouldShowButton ? "opacity-100" : "pointer-events-none opacity-0",
         ])}
       >
         Go to bottom
@@ -225,7 +226,7 @@ function TranscriptSeparator() {
     <div
       className={cn([
         "flex items-center gap-3",
-        "text-neutral-400 text-xs font-light",
+        "text-xs font-light text-neutral-400",
       ])}
     >
       <div className="flex-1 border-t border-neutral-200/40" />
@@ -252,7 +253,7 @@ function DegradedState({ error }: { error: DegradedError }) {
   const amplitude = useListener((state) => state.live.amplitude);
 
   return (
-    <div className="h-full flex flex-col items-center justify-center gap-6">
+    <div className="flex h-full flex-col items-center justify-center gap-6">
       <DancingSticks
         amplitude={Math.min((amplitude.mic + amplitude.speaker) / 2000, 1)}
         color="#a3a3a3"

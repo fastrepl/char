@@ -1,10 +1,11 @@
 import { AlertCircle, CheckCircle, Download, RefreshCw, X } from "lucide-react";
-import { MenuItem } from "~/sidebar/profile/shared";
 
 import { Spinner } from "@hypr/ui/components/ui/spinner";
 import { cn } from "@hypr/utils";
 
 import { useOTA } from "./task";
+
+import { MenuItem } from "~/sidebar/profile/shared";
 
 export function UpdateChecker() {
   const {
@@ -136,7 +137,7 @@ export function UpdateChecker() {
         icon={CheckCircle}
         label="Install update"
         badge={
-          <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+          <div className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
         }
         onClick={handleInstall}
       />

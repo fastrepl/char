@@ -1,5 +1,3 @@
-import { type Store as MainStore } from "~/store/tinybase/store/main";
-
 import { type SearchDocument, commands as tantivy } from "@hypr/plugin-tantivy";
 
 import {
@@ -12,6 +10,8 @@ import {
   toEpochMs,
   toTrimmedString,
 } from "./utils";
+
+import { type Store as MainStore } from "~/store/tinybase/store/main";
 
 export async function indexSessions(store: MainStore): Promise<void> {
   const fields = [

@@ -22,7 +22,7 @@ export function AppSettingsView({
 }: AppSettingsViewProps) {
   return (
     <div>
-      <h2 className="text-lg font-semibold font-serif mb-4">App</h2>
+      <h2 className="mb-4 font-serif text-lg font-semibold">App</h2>
       <div className="flex flex-col gap-4">
         <SettingRow
           title={autostart.title}
@@ -67,7 +67,7 @@ function SettingRow({
   return (
     <div className="flex items-center justify-between gap-4">
       <div className="flex-1">
-        <h3 className="text-sm font-medium mb-1">{title}</h3>
+        <h3 className="mb-1 text-sm font-medium">{title}</h3>
         <p className="text-xs text-neutral-600">{description}</p>
       </div>
       <Switch checked={checked} onCheckedChange={onChange} />

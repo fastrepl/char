@@ -1,6 +1,6 @@
-import * as main from "~/store/tinybase/store/main";
-
 import { safeFormat } from "@hypr/utils";
+
+import * as main from "~/store/tinybase/store/main";
 
 export function DateDisplay({ sessionId }: { sessionId: string }) {
   const createdAt = main.UI.useCell(

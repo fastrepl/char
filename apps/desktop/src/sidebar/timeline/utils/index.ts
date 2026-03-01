@@ -1,5 +1,3 @@
-import { getSessionEvent } from "~/session/utils";
-
 import {
   differenceInCalendarDays,
   differenceInCalendarMonths,
@@ -9,6 +7,8 @@ import {
   startOfMonth,
   TZDate,
 } from "@hypr/utils";
+
+import { getSessionEvent } from "~/session/utils";
 
 function toTZ(date: Date, timezone?: string): Date {
   return timezone ? new TZDate(date, timezone) : date;

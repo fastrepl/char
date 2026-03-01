@@ -12,7 +12,7 @@ export function Clip({ src }: { src: string }) {
       >
         <iframe
           src={embedSrc}
-          className="absolute inset-0 w-full h-full"
+          className="absolute inset-0 h-full w-full"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           referrerPolicy="strict-origin-when-cross-origin"
           allowFullScreen

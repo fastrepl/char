@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { generateText } from "ai";
 import { useEffect } from "react";
-import { useLanguageModel } from "~/ai/hooks";
 
 import { Spinner } from "@hypr/ui/components/ui/spinner";
+
+import { useLanguageModel } from "~/ai/hooks";
 
 export type LlmHealthStatus = {
   status: "pending" | "error" | "success" | null;

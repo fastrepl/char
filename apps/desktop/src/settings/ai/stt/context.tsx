@@ -6,20 +6,21 @@ import {
   useRef,
   useState,
 } from "react";
-import { useBillingAccess } from "~/auth/billing";
-import { useConfigValues } from "~/shared/config";
-import { useToastAction } from "~/store/zustand/toast-action";
 
 import {
   commands as localSttCommands,
-  type SupportedSttModel,
+  type LocalModel,
 } from "@hypr/plugin-local-stt";
+
+import { useBillingAccess } from "~/auth/billing";
+import { useConfigValues } from "~/shared/config";
+import { useToastAction } from "~/store/zustand/toast-action";
 
 type SttSettingsContextType = {
   accordionValue: string;
   setAccordionValue: (value: string) => void;
   openHyprAccordion: () => void;
-  startDownload: (model: SupportedSttModel) => void;
+  startDownload: (model: LocalModel) => void;
   startTrial: () => void;
   shouldHighlightDownload: boolean;
   hyprAccordionRef: React.RefObject<HTMLDivElement | null>;
@@ -76,7 +77,7 @@ export function SttSettingsProvider({
   }, []);
 
   const startDownload = useCallback(
-    (model: SupportedSttModel) => {
+    (model: LocalModel) => {
       openHyprAccordion();
       void localSttCommands.downloadModel(model);
     },

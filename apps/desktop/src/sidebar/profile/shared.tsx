@@ -17,9 +17,9 @@ export function MenuItem({
     <div className="px-1">
       <button
         className={cn([
-          "cursor-pointer group flex w-full items-center justify-between gap-2 rounded-lg",
+          "group flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg",
           "px-3 py-1.5",
-          "text-sm text-black whitespace-nowrap",
+          "text-sm whitespace-nowrap text-black",
           "transition-colors hover:bg-neutral-100",
         ])}
         onClick={onClick}

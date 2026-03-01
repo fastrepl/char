@@ -7,6 +7,12 @@ import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { extractReasoningMiddleware, wrapLanguageModel } from "ai";
 import { useMemo } from "react";
+
+import type { CharTask } from "@hypr/api-client";
+import type { AIProviderStorage } from "@hypr/store";
+
+import { createTracedFetch, tracedFetch } from "../traced-fetch";
+
 import { useAuth } from "~/auth";
 import { useBillingAccess } from "~/auth/billing";
 import { env } from "~/env";
@@ -17,11 +23,6 @@ import {
   type ProviderEligibilityContext,
 } from "~/settings/ai/shared/eligibility";
 import * as settings from "~/store/tinybase/store/settings";
-
-import type { CharTask } from "@hypr/api-client";
-import type { AIProviderStorage } from "@hypr/store";
-
-import { createTracedFetch, tracedFetch } from "../traced-fetch";
 
 type LanguageModelV3 = Parameters<typeof wrapLanguageModel>[0]["model"];
 

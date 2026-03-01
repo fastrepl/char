@@ -15,7 +15,7 @@ export function Toast({
     <div className="overflow-hidden p-1">
       <div
         className={cn([
-          "relative group overflow-hidden rounded-lg",
+          "group relative overflow-hidden rounded-lg",
           "flex flex-col gap-2",
           "bg-white p-4",
           toast.variant === "error"
@@ -28,13 +28,13 @@ export function Toast({
             onClick={onDismiss}
             aria-label="Dismiss toast"
             className={cn([
-              "absolute top-1.5 right-1.5 size-6 flex items-center justify-center rounded-xs",
+              "absolute top-1.5 right-1.5 flex size-6 items-center justify-center rounded-xs",
               "opacity-0 group-hover:opacity-50 hover:opacity-100!",
               "hover:bg-neutral-200",
               "transition-all duration-200",
             ])}
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="h-3.5 w-3.5" />
           </button>
         )}
 
@@ -51,7 +51,7 @@ export function Toast({
 
         <div className="text-sm">{toast.description}</div>
 
-        <div className="flex flex-col gap-2 mt-1">
+        <div className="mt-1 flex flex-col gap-2">
           {toast.progress !== undefined && (
             <ProgressBar progress={toast.progress} />
           )}
@@ -65,7 +65,7 @@ export function Toast({
           {toast.primaryAction && (
             <button
               onClick={toast.primaryAction.onClick}
-              className="w-full py-2 rounded-full bg-stone-800 hover:bg-stone-700 text-white text-sm font-medium border-2 border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)] transition-all duration-200"
+              className="w-full rounded-full border-2 border-stone-600 bg-stone-800 py-2 text-sm font-medium text-white shadow-[0_4px_14px_rgba(87,83,78,0.4)] transition-all duration-200 hover:bg-stone-700"
             >
               {toast.primaryAction.label}
             </button>
@@ -73,7 +73,7 @@ export function Toast({
           {toast.secondaryAction && (
             <button
               onClick={toast.secondaryAction.onClick}
-              className="w-full py-2 rounded-full bg-neutral-200 text-neutral-900 text-sm font-medium duration-150 hover:scale-[1.01] active:scale-[0.99]"
+              className="w-full rounded-full bg-neutral-200 py-2 text-sm font-medium text-neutral-900 duration-150 hover:scale-[1.01] active:scale-[0.99]"
             >
               {toast.secondaryAction.label}
             </button>
@@ -86,7 +86,7 @@ export function Toast({
 
 function ProgressBar({ progress }: { progress: number }) {
   return (
-    <div className="relative w-full py-2 rounded-full bg-linear-to-t from-neutral-200 to-neutral-100 overflow-hidden">
+    <div className="relative w-full overflow-hidden rounded-full bg-linear-to-t from-neutral-200 to-neutral-100 py-2">
       <div
         className="absolute inset-0 bg-linear-to-t from-stone-600 to-stone-500 transition-all duration-300"
         style={{ width: `${progress}%` }}
@@ -107,12 +107,12 @@ function DownloadProgressBar({ download }: { download: DownloadProgress }) {
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center justify-between text-xs text-neutral-600">
-        <span className="font-medium truncate">{download.displayName}</span>
+        <span className="truncate font-medium">{download.displayName}</span>
         <span>{Math.round(download.progress)}%</span>
       </div>
-      <div className="relative w-full h-2 rounded-full bg-linear-to-t from-neutral-200 to-neutral-100 overflow-hidden">
+      <div className="relative h-2 w-full overflow-hidden rounded-full bg-linear-to-t from-neutral-200 to-neutral-100">
         <div
-          className="absolute inset-0 bg-linear-to-t from-stone-600 to-stone-500 transition-all duration-300 rounded-full"
+          className="absolute inset-0 rounded-full bg-linear-to-t from-stone-600 to-stone-500 transition-all duration-300"
           style={{ width: `${download.progress}%` }}
         />
       </div>

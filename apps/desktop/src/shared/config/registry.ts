@@ -4,7 +4,7 @@ import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as detectCommands } from "@hypr/plugin-detect";
 import {
   commands as localSttCommands,
-  type SupportedSttModel,
+  type LocalModel,
 } from "@hypr/plugin-local-stt";
 
 export type ConfigKey =
@@ -98,7 +98,7 @@ export const CONFIG_REGISTRY = {
         return;
       }
 
-      await localSttCommands.startServer(model as SupportedSttModel);
+      await localSttCommands.startServer(model as LocalModel);
     },
   },
 
@@ -117,7 +117,7 @@ export const CONFIG_REGISTRY = {
         return;
       }
 
-      await localSttCommands.startServer(model as SupportedSttModel);
+      await localSttCommands.startServer(model as LocalModel);
     },
   },
 

@@ -8,11 +8,6 @@ import {
   Sparkles,
 } from "lucide-react";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
-import { useAuth } from "~/auth";
-import { useBillingAccess } from "~/auth/billing";
-import { env } from "~/env";
-import { configureProSettings } from "~/shared/config/configure-pro-settings";
-import * as settings from "~/store/tinybase/store/settings";
 
 import {
   canStartTrial as canStartTrialApi,
@@ -26,6 +21,12 @@ import { Button } from "@hypr/ui/components/ui/button";
 import { Input } from "@hypr/ui/components/ui/input";
 import { Spinner } from "@hypr/ui/components/ui/spinner";
 import { cn } from "@hypr/utils";
+
+import { useAuth } from "~/auth";
+import { useBillingAccess } from "~/auth/billing";
+import { env } from "~/env";
+import { configureProSettings } from "~/shared/config/configure-pro-settings";
+import * as settings from "~/store/tinybase/store/settings";
 
 const WEB_APP_BASE_URL = env.VITE_APP_URL ?? "http://localhost:3000";
 
@@ -158,28 +159,28 @@ export function AccountSettings() {
       return (
         <div className="flex flex-col items-center gap-6 text-center">
           <div className="flex flex-col gap-2">
-            <h2 className="text-2xl font-semibold font-serif">
+            <h2 className="font-serif text-2xl font-semibold">
               Waiting for sign-in...
             </h2>
             <p className="text-base text-neutral-500">
               Complete the sign-in process in your browser
             </p>
           </div>
-          <div className="flex flex-col gap-2 w-full max-w-xs">
+          <div className="flex w-full max-w-xs flex-col gap-2">
             <Button onClick={handleSignIn} variant="outline" className="w-full">
               Reopen sign-in page
             </Button>
-            <div className="flex items-center gap-2 w-full">
+            <div className="flex w-full items-center gap-2">
               <div className="flex-1 border-t border-neutral-200" />
-              <span className="text-xs text-neutral-400 shrink-0">
+              <span className="shrink-0 text-xs text-neutral-400">
                 Having trouble?
               </span>
               <div className="flex-1 border-t border-neutral-200" />
             </div>
-            <div className="flex items-center gap-2 w-full">
+            <div className="flex w-full items-center gap-2">
               <Input
                 type="text"
-                className="flex-1 text-xs font-mono"
+                className="flex-1 font-mono text-xs"
                 placeholder="hyprnote://deeplink/auth?access_token=..."
                 value={callbackUrl}
                 onChange={(e) => setCallbackUrl(e.target.value)}
@@ -199,7 +200,7 @@ export function AccountSettings() {
     return (
       <div className="flex flex-col items-center gap-6 text-center">
         <div className="flex flex-col gap-2">
-          <h2 className="text-2xl font-semibold font-serif">Sign in to Char</h2>
+          <h2 className="font-serif text-2xl font-semibold">Sign in to Char</h2>
           <p className="text-base text-neutral-500">
             Get started without an account. Sign in to unlock more.
           </p>
@@ -207,12 +208,12 @@ export function AccountSettings() {
 
         <button
           onClick={handleSignIn}
-          className="px-6 h-10 rounded-full bg-stone-800 hover:bg-stone-700 text-white text-sm font-medium border-2 border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)] transition-all duration-200"
+          className="h-10 rounded-full border-2 border-stone-600 bg-stone-800 px-6 text-sm font-medium text-white shadow-[0_4px_14px_rgba(87,83,78,0.4)] transition-all duration-200 hover:bg-stone-700"
         >
           Get Started
         </button>
 
-        <div className="flex gap-3 overflow-x-auto scrollbar-hide mt-4">
+        <div className="scrollbar-hide mt-4 flex gap-3 overflow-x-auto">
           {[
             { label: "Pro AI models", icon: Sparkle, comingSoon: false },
             { label: "Cloud sync", icon: Cloud, comingSoon: true },
@@ -221,15 +222,15 @@ export function AccountSettings() {
           ].map(({ label, icon: Icon, comingSoon }) => (
             <div
               key={label}
-              className="relative overflow-hidden flex flex-col items-center justify-center gap-2 w-20 h-20 shrink-0 rounded-lg bg-linear-to-b from-white to-stone-50 border border-neutral-200 text-neutral-600"
+              className="relative flex h-20 w-20 shrink-0 flex-col items-center justify-center gap-2 overflow-hidden rounded-lg border border-neutral-200 bg-linear-to-b from-white to-stone-50 text-neutral-600"
             >
               {comingSoon && (
-                <span className="absolute top-0 px-1.5 py-0.5 text-[10px] rounded-b bg-neutral-200 text-neutral-500 opacity-50">
+                <span className="absolute top-0 rounded-b bg-neutral-200 px-1.5 py-0.5 text-[10px] text-neutral-500 opacity-50">
                   Soon
                 </span>
               )}
               <Icon className="h-5 w-5" />
-              <span className="text-xs text-center leading-tight">{label}</span>
+              <span className="text-center text-xs leading-tight">{label}</span>
             </div>
           ))}
         </div>
@@ -247,7 +248,7 @@ export function AccountSettings() {
             <Button
               variant="outline"
               onClick={handleOpenAccount}
-              className="w-[100px] flex flex-row gap-1.5"
+              className="flex w-[100px] flex-row gap-1.5"
             >
               <span className="text-sm">Open</span>
               <ExternalLinkIcon className="text-neutral-600" size={12} />
@@ -272,7 +273,7 @@ export function AccountSettings() {
         }
         action={<BillingButton />}
       >
-        <div className="text-sm text-neutral-600 flex items-center gap-1">
+        <div className="flex items-center gap-1 text-sm text-neutral-600">
           {auth?.isRefreshingSession ? (
             <>
               <Spinner size={14} />
@@ -283,7 +284,7 @@ export function AccountSettings() {
               Click{" "}
               <span
                 onClick={handleRefreshPlan}
-                className="text-primary underline cursor-pointer"
+                className="text-primary cursor-pointer underline"
               >
                 here
               </span>
@@ -364,7 +365,7 @@ function BillingButton() {
       <Button
         variant="outline"
         onClick={handleOpenAccount}
-        className="w-[100px] flex flex-row gap-1.5"
+        className="flex w-[100px] flex-row gap-1.5"
       >
         <span className="text-sm">Manage</span>
         <ExternalLinkIcon className="text-neutral-600" size={12} />
@@ -404,9 +405,9 @@ function Container({
   children?: ReactNode;
 }) {
   return (
-    <section className="bg-neutral-50 p-4 rounded-lg flex flex-col gap-4">
+    <section className="flex flex-col gap-4 rounded-lg bg-neutral-50 p-4">
       <div className="flex flex-col gap-2">
-        <h1 className="text-md font-semibold font-serif">{title}</h1>
+        <h1 className="text-md font-serif font-semibold">{title}</h1>
         {description && (
           <p className="text-sm text-neutral-600">{description}</p>
         )}

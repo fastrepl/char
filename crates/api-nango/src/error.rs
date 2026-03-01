@@ -11,6 +11,9 @@ pub enum NangoError {
     #[error("Authentication error: {0}")]
     Auth(String),
 
+    #[error("Forbidden: {0}")]
+    Forbidden(String),
+
     #[error("Nango error: {0}")]
     Nango(String),
 
@@ -32,6 +35,7 @@ impl IntoResponse for NangoError {
     fn into_response(self) -> Response {
         let (status, code, message) = match self {
             Self::Auth(message) => (StatusCode::UNAUTHORIZED, "unauthorized", message),
+            Self::Forbidden(message) => (StatusCode::FORBIDDEN, "forbidden", message),
             Self::BadRequest(message) => (StatusCode::BAD_REQUEST, "bad_request", message),
             Self::Nango(message) => (StatusCode::INTERNAL_SERVER_ERROR, "nango_error", message),
             Self::Internal(message) => (

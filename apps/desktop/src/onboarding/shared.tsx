@@ -71,7 +71,7 @@ export function OnboardingSection({
                 "transition-all duration-300",
                 isCompleted
                   ? "text-sm font-normal text-neutral-300"
-                  : "text-lg font-semibold font-serif text-neutral-900",
+                  : "font-serif text-lg font-semibold text-neutral-900",
               ])}
             >
               {isCompleted ? (completedTitle ?? title) : title}
@@ -113,7 +113,7 @@ export function OnboardingSection({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="overflow-hidden px-5 -mx-5 pb-5 -mb-5"
+            className="-mx-5 -mb-5 overflow-hidden px-5 pb-5"
           >
             {children}
           </motion.div>
@@ -129,7 +129,7 @@ export function OnboardingButton(
   return (
     <button
       {...props}
-      className="w-fit px-6 py-2.5 rounded-full bg-stone-800 hover:bg-stone-700 text-white text-sm font-medium border-2 border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)] transition-all duration-200"
+      className="w-fit rounded-full border-2 border-stone-600 bg-stone-800 px-6 py-2.5 text-sm font-medium text-white shadow-[0_4px_14px_rgba(87,83,78,0.4)] transition-all duration-200 hover:bg-stone-700"
     />
   );
 }
@@ -157,7 +157,7 @@ export function StepRow({
         <CheckCircle2Icon className="size-4 text-emerald-600" />
       )}
       {status === "active" && (
-        <Loader2Icon className="size-4 text-neutral-400 animate-spin" />
+        <Loader2Icon className="size-4 animate-spin text-neutral-400" />
       )}
       {status === "failed" && <XCircleIcon className="size-4 text-red-400" />}
       <span

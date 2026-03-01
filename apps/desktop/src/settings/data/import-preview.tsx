@@ -58,13 +58,13 @@ export function ImportPreview({
 
   return (
     <div className="flex items-center justify-between gap-4">
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
+      <div className="min-w-0 flex-1">
+        <div className="mb-1 flex items-center gap-2">
           <h4 className="text-sm font-medium">{sourceName}</h4>
         </div>
         {hasData ? (
           <TooltipProvider delayDuration={100}>
-            <div className="flex items-center gap-3 text-xs text-neutral-600 flex-wrap">
+            <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-600">
               {statItems.map(({ icon: Icon, label, count }) => (
                 <Tooltip key={label}>
                   <TooltipTrigger asChild>
@@ -82,7 +82,7 @@ export function ImportPreview({
           <p className="text-xs text-neutral-500">No data found to import.</p>
         )}
       </div>
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex shrink-0 items-center gap-2">
         <Button
           size="sm"
           variant="outline"
@@ -95,7 +95,7 @@ export function ImportPreview({
           <Button size="sm" onClick={onConfirm} disabled={isPending}>
             {isPending ? (
               <>
-                <Loader2Icon size={14} className="animate-spin mr-1" />
+                <Loader2Icon size={14} className="mr-1 animate-spin" />
                 Importing...
               </>
             ) : (

@@ -2,6 +2,8 @@ use std::sync::Arc;
 
 use hypr_listener2_core::{BatchEvent, BatchParams, BatchProvider, BatchRuntime};
 
+use crate::error::{CliError, CliResult};
+
 pub struct Args {
     pub file: String,
     pub provider: BatchProvider,
@@ -39,11 +41,13 @@ impl BatchRuntime for CliBatchRuntime {
     }
 }
 
-pub async fn run(args: Args) {
+pub async fn run(args: Args) -> CliResult<()> {
     let languages = vec![
         args.language
             .parse::<hypr_language::Language>()
-            .expect("invalid language code"),
+            .map_err(|e| {
+                CliError::invalid_argument("--language", args.language.clone(), e.to_string())
+            })?,
     ];
 
     let session_id = uuid::Uuid::new_v4().to_string();
@@ -60,8 +64,9 @@ pub async fn run(args: Args) {
         keywords: args.keywords,
     };
 
-    if let Err(e) = hypr_listener2_core::run_batch(runtime, params).await {
-        eprintln!("Batch transcription failed: {e}");
-        std::process::exit(1);
-    }
+    hypr_listener2_core::run_batch(runtime, params)
+        .await
+        .map_err(|e| CliError::operation_failed("batch transcription", e.to_string()))?;
+
+    Ok(())
 }

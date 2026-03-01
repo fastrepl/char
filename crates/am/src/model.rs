@@ -124,18 +124,13 @@ impl AmModel {
         }
     }
 
-    pub fn tar_verify_and_unpack(
+    pub fn tar_unpack_and_cleanup(
         &self,
         input_path: impl AsRef<std::path::Path>,
         output_path: impl AsRef<std::path::Path>,
     ) -> Result<(), crate::Error> {
         if !input_path.as_ref().exists() {
             return Err(crate::Error::TarFileNotFound);
-        }
-
-        if hypr_file::calculate_file_checksum(&input_path)? != self.tar_checksum() {
-            let _ = std::fs::remove_file(&input_path);
-            return Err(crate::Error::TarChecksumMismatch);
         }
 
         extract_tar_file(&input_path, output_path)?;
@@ -163,4 +158,36 @@ fn extract_tar_file(
     archive.unpack(extract_to.as_ref())?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn tar_unpack_and_cleanup_skips_checksum_verification() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let input_tar = temp_dir.path().join("model.tar");
+        let output_dir = temp_dir.path().join("out");
+
+        let source_file = temp_dir.path().join("source.txt");
+        std::fs::write(&source_file, b"weights").unwrap();
+
+        {
+            let tar_file = std::fs::File::create(&input_tar).unwrap();
+            let mut builder = tar::Builder::new(tar_file);
+            builder
+                .append_path_with_name(&source_file, "fake-model/weights.bin")
+                .unwrap();
+            builder.finish().unwrap();
+        }
+
+        let model = AmModel::ParakeetV2;
+        model
+            .tar_unpack_and_cleanup(&input_tar, &output_dir)
+            .unwrap();
+
+        assert!(!input_tar.exists());
+        assert!(output_dir.join("fake-model/weights.bin").exists());
+    }
 }

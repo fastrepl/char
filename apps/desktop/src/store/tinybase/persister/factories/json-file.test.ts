@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
+
+import { createJsonFilePersister } from "./json-file";
+
 import {
   createTestMainStore,
   MOCK_DATA_DIR,
 } from "~/store/tinybase/persister/testing/mocks";
-
-import { createJsonFilePersister } from "./json-file";
 
 const settingsMocks = vi.hoisted(() => ({
   vaultBase: vi

@@ -1,12 +1,13 @@
 import { describe, expect, test } from "vitest";
+
+import { syncEvents } from "./sync";
+import type { EventsSyncInput } from "./types";
+
 import type { Ctx } from "~/services/apple-calendar/ctx";
 import type {
   ExistingEvent,
   IncomingEvent,
 } from "~/services/apple-calendar/fetch/types";
-
-import { syncEvents } from "./sync";
-import type { EventsSyncInput } from "./types";
 
 function createMockStore(config: {
   eventToSession?: Map<string, string>;

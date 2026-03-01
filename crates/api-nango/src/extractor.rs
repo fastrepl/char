@@ -33,12 +33,7 @@ impl NangoConnectionState {
     }
 
     pub fn from_config(config: &crate::config::NangoConfig) -> Self {
-        let mut builder =
-            hypr_nango::NangoClient::builder().api_key(&config.nango.nango_secret_key);
-        if let Some(api_base) = &config.nango.nango_api_base {
-            builder = builder.api_base(api_base);
-        }
-        let nango = builder.build().expect("failed to build NangoClient");
+        let nango = crate::config::build_nango_client(config).expect("failed to build NangoClient");
 
         Self::new(nango, &config.supabase_url, &config.supabase_anon_key)
     }
@@ -49,6 +44,13 @@ impl NangoConnectionState {
         user_id: &str,
         integration_id: &str,
     ) -> Result<String, NangoConnectionError> {
+        #[cfg(debug_assertions)]
+        if let Ok(connection_id) = std::env::var("DEV_NANGO_CONNECTION_ID") {
+            if !connection_id.is_empty() {
+                return Ok(connection_id);
+            }
+        }
+
         let encoded_user_id = urlencoding::encode(user_id);
         let encoded_integration_id = urlencoding::encode(integration_id);
         let url = format!(

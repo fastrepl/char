@@ -1,10 +1,11 @@
 import type { ToolSet } from "ai";
 import { useEffect, useState } from "react";
-import type { ContextEntity } from "~/chat/context-item";
 
 import type { MCPClientConfig } from "./useMCPClient";
 import { useMCPClient } from "./useMCPClient";
 import { useMCPElicitation } from "./useMCPElicitation";
+
+import type { ContextEntity } from "~/chat/context-item";
 
 export interface MCPConfig extends MCPClientConfig {
   enabled: boolean;

@@ -35,12 +35,12 @@ export const streamdownComponents = {
     </h6>
   ),
   ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
-    <ul className="list-disc pl-6 mb-1 block relative">
+    <ul className="relative mb-1 block list-disc pl-6">
       {props.children as React.ReactNode}
     </ul>
   ),
   ol: (props: React.HTMLAttributes<HTMLOListElement>) => (
-    <ol className="list-decimal pl-6 mb-1 block relative">
+    <ol className="relative mb-1 block list-decimal pl-6">
       {props.children as React.ReactNode}
     </ol>
   ),

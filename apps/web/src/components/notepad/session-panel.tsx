@@ -159,7 +159,7 @@ export function SessionPanel({
   return (
     <>
       <div
-        className="relative px-6 pt-6 pb-24 cursor-text"
+        className="relative cursor-text px-6 pt-6 pb-24"
         onClick={handleBodyClick}
       >
         <input
@@ -168,11 +168,11 @@ export function SessionPanel({
           placeholder="Untitled"
           value={displayTitle}
           onChange={handleTitleChange}
-          className="text-xl font-semibold border-none bg-transparent focus:outline-hidden w-full placeholder:text-muted-foreground"
+          className="placeholder:text-muted-foreground w-full border-none bg-transparent text-xl font-semibold focus:outline-hidden"
         />
 
         {errorMessage && (
-          <div className="mt-3 border border-red-200 bg-red-50 rounded-xs px-4 py-2">
+          <div className="mt-3 rounded-xs border border-red-200 bg-red-50 px-4 py-2">
             <p className="text-sm text-red-600">{errorMessage}</p>
           </div>
         )}
@@ -191,12 +191,12 @@ export function SessionPanel({
                         e.stopPropagation();
                         handleRegenerate();
                       }}
-                      className="ml-1 p-0.5 rounded hover:bg-neutral-200 transition-colors"
+                      className="ml-1 rounded p-0.5 transition-colors hover:bg-neutral-200"
                     >
                       <RefreshCw size={12} />
                     </button>
                   ) : isSummarizing ? (
-                    <div className="ml-1 animate-spin rounded-full h-3 w-3 border-b border-stone-600" />
+                    <div className="ml-1 h-3 w-3 animate-spin rounded-full border-b border-stone-600" />
                   ) : null
                 }
               />

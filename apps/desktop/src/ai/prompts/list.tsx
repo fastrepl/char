@@ -1,8 +1,9 @@
 import { CheckIcon, SparklesIcon } from "lucide-react";
-import * as main from "~/store/tinybase/store/main";
-import { TASK_CONFIGS, type TaskType } from "~/store/tinybase/store/prompts";
 
 import { cn } from "@hypr/utils";
+
+import * as main from "~/store/tinybase/store/main";
+import { TASK_CONFIGS, type TaskType } from "~/store/tinybase/store/prompts";
 
 export function PromptsListColumn({
   selectedTask,
@@ -12,8 +13,8 @@ export function PromptsListColumn({
   setSelectedTask: (id: string | null) => void;
 }) {
   return (
-    <div className="w-full h-full flex flex-col">
-      <div className="border-b border-neutral-200 py-2 pl-3 pr-1 flex items-center justify-between h-12">
+    <div className="flex h-full w-full flex-col">
+      <div className="flex h-12 items-center justify-between border-b border-neutral-200 py-2 pr-1 pl-3">
         <h3 className="text-sm font-medium">Custom Prompts</h3>
       </div>
 
@@ -60,23 +61,23 @@ function TaskItem({
     <button
       onClick={onClick}
       className={cn([
-        "w-full text-left px-3 py-2 rounded-md text-sm border hover:bg-neutral-100 transition-colors",
+        "w-full rounded-md border px-3 py-2 text-left text-sm transition-colors hover:bg-neutral-100",
         isSelected ? "border-neutral-500 bg-neutral-100" : "border-transparent",
       ])}
     >
       <div className="flex items-center gap-2">
-        <SparklesIcon className="h-4 w-4 text-neutral-500 shrink-0" />
-        <div className="flex-1 min-w-0">
-          <div className="font-medium truncate flex items-center gap-1.5">
+        <SparklesIcon className="h-4 w-4 shrink-0 text-neutral-500" />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5 truncate font-medium">
             {label}
             {hasCustomPrompt && (
-              <span className="flex items-center gap-0.5 text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-xs">
-                <CheckIcon className="w-3 h-3" />
+              <span className="flex items-center gap-0.5 rounded-xs bg-green-100 px-1.5 py-0.5 text-xs text-green-700">
+                <CheckIcon className="h-3 w-3" />
                 Custom
               </span>
             )}
           </div>
-          <div className="text-xs text-neutral-500 truncate">{description}</div>
+          <div className="truncate text-xs text-neutral-500">{description}</div>
         </div>
       </div>
     </button>

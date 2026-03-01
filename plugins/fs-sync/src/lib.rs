@@ -1,26 +1,8 @@
-#[cfg(test)]
-mod test_fixtures;
-
-mod audio;
-mod cleanup;
 mod commands;
-mod error;
 mod ext;
-mod folder;
-mod frontmatter;
-mod json;
-mod path;
-mod scan;
-mod session;
-mod session_content;
-mod types;
 
-pub use types::*;
-
-pub use error::{Error, Result};
 pub use ext::*;
-pub use path::is_uuid;
-pub use session::find_session_dir;
+pub use hypr_fs_sync_core::*;
 
 const PLUGIN_NAME: &str = "fs-sync";
 

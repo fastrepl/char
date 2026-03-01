@@ -1,10 +1,11 @@
 import { createMergeableStore } from "tinybase/with-schemas";
+
+import { SCHEMA } from "@hypr/store";
+
 import {
   SCHEMA as SETTINGS_SCHEMA,
   type Store as SettingsStore,
 } from "~/store/tinybase/store/settings";
-
-import { SCHEMA } from "@hypr/store";
 
 export const MOCK_DATA_DIR = "/mock/data/dir/hyprnote";
 

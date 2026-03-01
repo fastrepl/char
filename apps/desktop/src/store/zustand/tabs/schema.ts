@@ -84,10 +84,9 @@ export type Tab =
       state: ChatShortcutsState;
     })
   | (BaseTab & {
-      type: "extensions";
-      state: ExtensionsState;
+      type: "humans";
+      id: string;
     })
-  | (BaseTab & { type: "humans"; id: string })
   | (BaseTab & { type: "organizations"; id: string })
   | (BaseTab & { type: "folders"; id: string | null })
   | (BaseTab & { type: "empty" })
@@ -95,6 +94,10 @@ export type Tab =
       type: "extension";
       extensionId: string;
       state: Record<string, unknown>;
+    })
+  | (BaseTab & {
+      type: "extensions";
+      state: ExtensionsState;
     })
   | (BaseTab & { type: "calendar" })
   | (BaseTab & {
@@ -164,14 +167,6 @@ export const getDefaultState = (tab: TabInput): Tab => {
           selectedWebIndex: null,
         },
       };
-    case "extensions":
-      return {
-        ...base,
-        type: "extensions",
-        state: tab.state ?? {
-          selectedExtension: null,
-        },
-      };
     case "humans":
       return { ...base, type: "humans", id: tab.id };
     case "organizations":
@@ -186,6 +181,12 @@ export const getDefaultState = (tab: TabInput): Tab => {
         type: "extension",
         extensionId: tab.extensionId,
         state: tab.state ?? {},
+      };
+    case "extensions":
+      return {
+        ...base,
+        type: "extensions",
+        state: tab.state ?? { selectedExtension: null },
       };
     case "calendar":
       return { ...base, type: "calendar" };
@@ -242,14 +243,14 @@ export const uniqueIdfromTab = (tab: Tab): string => {
       return `prompts`;
     case "chat_shortcuts":
       return `chat_shortcuts`;
-    case "extensions":
-      return `extensions`;
     case "folders":
       return `folders-${tab.id ?? "all"}`;
     case "empty":
       return `empty-${tab.slotId}`;
     case "extension":
       return `extension-${tab.extensionId}`;
+    case "extensions":
+      return `extensions`;
     case "calendar":
       return `calendar`;
     case "changelog":

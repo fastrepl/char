@@ -10,6 +10,15 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
+
+import type { ChatShortcut } from "@hypr/store";
+import { Button } from "@hypr/ui/components/ui/button";
+import {
+  ScrollFadeOverlay,
+  useScrollFade,
+} from "@hypr/ui/components/ui/scroll-fade";
+import { cn } from "@hypr/utils";
+
 import { LLM } from "~/settings/ai/llm";
 import { STT } from "~/settings/ai/stt";
 import { SettingsMemory } from "~/settings/memory";
@@ -19,14 +28,6 @@ import { useWebResources } from "~/shared/ui/resource-list";
 import * as main from "~/store/tinybase/store/main";
 import { type Tab, useTabs } from "~/store/zustand/tabs";
 import { useUserTemplates } from "~/templates";
-
-import type { ChatShortcut } from "@hypr/store";
-import { Button } from "@hypr/ui/components/ui/button";
-import {
-  ScrollFadeOverlay,
-  useScrollFade,
-} from "@hypr/ui/components/ui/scroll-fade";
-import { cn } from "@hypr/utils";
 
 type AITabKey =
   | "transcription"
@@ -59,7 +60,7 @@ export const TabItemAI: TabItem<Extract<Tab, { type: "ai" }>> = ({
 
   return (
     <TabItemBase
-      icon={<SparklesIcon className="w-4 h-4" />}
+      icon={<SparklesIcon className="h-4 w-4" />}
       title={
         <div className="flex items-center gap-1">
           <span>AI</span>
@@ -140,7 +141,7 @@ function AIView({ tab }: { tab: Extract<Tab, { type: "ai" }> }) {
   ];
 
   return (
-    <div className="flex flex-col flex-1 w-full overflow-hidden">
+    <div className="flex w-full flex-1 flex-col overflow-hidden">
       <div className="flex flex-wrap gap-1 px-6 pt-6 pb-2">
         {menuItems.map((item) => (
           <Button
@@ -151,9 +152,9 @@ function AIView({ tab }: { tab: Extract<Tab, { type: "ai" }> }) {
               if (!item.disabled) setActiveTab(item.key);
             }}
             className={cn([
-              "px-1 gap-1.5 h-7 border border-transparent",
-              activeTab === item.key && "bg-neutral-100 border-neutral-200",
-              item.disabled && "opacity-50 cursor-not-allowed",
+              "h-7 gap-1.5 border border-transparent px-1",
+              activeTab === item.key && "border-neutral-200 bg-neutral-100",
+              item.disabled && "cursor-not-allowed opacity-50",
             ])}
           >
             {item.icon}
@@ -161,10 +162,10 @@ function AIView({ tab }: { tab: Extract<Tab, { type: "ai" }> }) {
           </Button>
         ))}
       </div>
-      <div className="relative flex-1 w-full overflow-hidden">
+      <div className="relative w-full flex-1 overflow-hidden">
         <div
           ref={ref}
-          className="flex-1 w-full h-full overflow-y-auto scrollbar-hide px-6 pb-6"
+          className="scrollbar-hide h-full w-full flex-1 overflow-y-auto px-6 pb-6"
         >
           {activeTab === "transcription" && <STT />}
           {activeTab === "intelligence" && <LLM />}
@@ -323,24 +324,24 @@ function TemplatesContent() {
       <div className="flex items-center gap-2">
         <div
           className={cn([
-            "flex-1 h-9 px-3 bg-white rounded-lg",
+            "h-9 flex-1 rounded-lg bg-white px-3",
             "border border-neutral-200",
             "flex items-center gap-2",
-            "focus-within:border-neutral-400 transition-colors",
+            "transition-colors focus-within:border-neutral-400",
           ])}
         >
-          <Search className="w-4 h-4 text-neutral-400" />
+          <Search className="h-4 w-4 text-neutral-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search templates..."
-            className="flex-1 bg-transparent text-sm focus:outline-hidden placeholder:text-neutral-400"
+            className="flex-1 bg-transparent text-sm placeholder:text-neutral-400 focus:outline-hidden"
           />
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="p-0.5 rounded-xs hover:bg-neutral-100"
+              className="rounded-xs p-0.5 hover:bg-neutral-100"
             >
               <X className="h-3 w-3 text-neutral-400" />
             </button>
@@ -349,16 +350,16 @@ function TemplatesContent() {
         <button
           onClick={handleCreateTemplate}
           className={cn([
-            "h-9 px-3 rounded-lg",
+            "h-9 rounded-lg px-3",
             "bg-linear-to-l from-stone-600 to-stone-500",
             "shadow-[inset_0px_-1px_8px_0px_rgba(41,37,36,1.00)]",
             "shadow-[inset_0px_1px_8px_0px_rgba(120,113,108,1.00)]",
             "flex items-center gap-1.5",
-            "hover:from-stone-700 hover:to-stone-600 transition-colors",
+            "transition-colors hover:from-stone-700 hover:to-stone-600",
           ])}
         >
-          <Plus className="w-4 h-4 text-stone-50" />
-          <span className="text-stone-50 text-xs font-medium">New</span>
+          <Plus className="h-4 w-4 text-stone-50" />
+          <span className="text-xs font-medium text-stone-50">New</span>
         </button>
       </div>
 
@@ -366,11 +367,11 @@ function TemplatesContent() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <Star size={14} className="text-amber-500" />
-            <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+            <h3 className="text-xs font-medium tracking-wide text-neutral-500 uppercase">
               Favorites
             </h3>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {filteredUser.map((template) => (
               <TemplateCardItem
                 key={template.id}
@@ -384,18 +385,18 @@ function TemplatesContent() {
       )}
 
       <div className="flex flex-col gap-2">
-        <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+        <h3 className="text-xs font-medium tracking-wide text-neutral-500 uppercase">
           Suggestions
         </h3>
         {isWebLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[0, 1, 2, 3, 4, 5].map((i) => (
               <div
                 key={i}
-                className="rounded-xs border border-stone-100 overflow-hidden animate-pulse"
+                className="animate-pulse overflow-hidden rounded-xs border border-stone-100"
               >
                 <div className="h-20 bg-stone-200" />
-                <div className="p-3 flex flex-col gap-3">
+                <div className="flex flex-col gap-3 p-3">
                   <div className="h-4 w-3/4 rounded-xs bg-stone-200" />
                   <div className="h-3 w-full rounded-xs bg-stone-100" />
                 </div>
@@ -403,14 +404,14 @@ function TemplatesContent() {
             ))}
           </div>
         ) : filteredWeb.length === 0 ? (
-          <div className="text-center py-8 text-neutral-500">
+          <div className="py-8 text-center text-neutral-500">
             <BookText size={32} className="mx-auto mb-2 text-neutral-300" />
             <p className="text-sm">
               {search ? "No templates found" : "No suggestions available"}
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {filteredWeb.map((template, index) => (
               <TemplateCardItem
                 key={template.slug || index}
@@ -449,23 +450,23 @@ function TemplateCardItem({
     <button
       onClick={onClick}
       className={cn([
-        "w-full text-left rounded-xs border border-stone-100 overflow-hidden",
-        "hover:border-stone-300 hover:shadow-xs transition-all",
+        "w-full overflow-hidden rounded-xs border border-stone-100 text-left",
+        "transition-all hover:border-stone-300 hover:shadow-xs",
         "flex flex-col",
       ])}
     >
-      <div className="h-20 bg-linear-to-br from-stone-100 to-stone-200 flex items-center justify-center">
-        <BookText className="w-8 h-8 text-stone-400" />
+      <div className="flex h-20 items-center justify-center bg-linear-to-br from-stone-100 to-stone-200">
+        <BookText className="h-8 w-8 text-stone-400" />
       </div>
-      <div className="p-3 flex flex-col gap-3 flex-1">
-        <div className="text-base font-medium font-serif line-clamp-1">
+      <div className="flex flex-1 flex-col gap-3 p-3">
+        <div className="line-clamp-1 font-serif text-base font-medium">
           {title}
         </div>
-        <div className="text-sm text-stone-600 truncate">
+        <div className="truncate text-sm text-stone-600">
           {description || "No description"}
         </div>
         {targets && targets.length > 0 && (
-          <div className="text-xs text-stone-400 truncate">
+          <div className="truncate text-xs text-stone-400">
             {targets.join(", ")}
           </div>
         )}
@@ -576,24 +577,24 @@ function ShortcutsContent() {
       <div className="flex items-center gap-2">
         <div
           className={cn([
-            "flex-1 h-9 px-3 bg-white rounded-lg",
+            "h-9 flex-1 rounded-lg bg-white px-3",
             "border border-neutral-200",
             "flex items-center gap-2",
-            "focus-within:border-neutral-400 transition-colors",
+            "transition-colors focus-within:border-neutral-400",
           ])}
         >
-          <Search className="w-4 h-4 text-neutral-400" />
+          <Search className="h-4 w-4 text-neutral-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search shortcuts..."
-            className="flex-1 bg-transparent text-sm focus:outline-hidden placeholder:text-neutral-400"
+            className="flex-1 bg-transparent text-sm placeholder:text-neutral-400 focus:outline-hidden"
           />
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="p-0.5 rounded-xs hover:bg-neutral-100"
+              className="rounded-xs p-0.5 hover:bg-neutral-100"
             >
               <X className="h-3 w-3 text-neutral-400" />
             </button>
@@ -602,16 +603,16 @@ function ShortcutsContent() {
         <button
           onClick={handleAddNew}
           className={cn([
-            "h-9 px-3 rounded-lg",
+            "h-9 rounded-lg px-3",
             "bg-linear-to-l from-stone-600 to-stone-500",
             "shadow-[inset_0px_-1px_8px_0px_rgba(41,37,36,1.00)]",
             "shadow-[inset_0px_1px_8px_0px_rgba(120,113,108,1.00)]",
             "flex items-center gap-1.5",
-            "hover:from-stone-700 hover:to-stone-600 transition-colors",
+            "transition-colors hover:from-stone-700 hover:to-stone-600",
           ])}
         >
-          <Plus className="w-4 h-4 text-stone-50" />
-          <span className="text-stone-50 text-xs font-medium">New</span>
+          <Plus className="h-4 w-4 text-stone-50" />
+          <span className="text-xs font-medium text-stone-50">New</span>
         </button>
       </div>
 
@@ -619,11 +620,11 @@ function ShortcutsContent() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <Star size={14} className="text-amber-500" />
-            <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+            <h3 className="text-xs font-medium tracking-wide text-neutral-500 uppercase">
               Favorites
             </h3>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {filteredUser.map((shortcut) => (
               <ShortcutCardItem
                 key={shortcut.id}
@@ -636,18 +637,18 @@ function ShortcutsContent() {
       )}
 
       <div className="flex flex-col gap-2">
-        <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+        <h3 className="text-xs font-medium tracking-wide text-neutral-500 uppercase">
           Suggestions
         </h3>
         {isWebLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[0, 1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="rounded-xs border border-stone-100 overflow-hidden animate-pulse"
+                className="animate-pulse overflow-hidden rounded-xs border border-stone-100"
               >
                 <div className="h-20 bg-stone-200" />
-                <div className="p-3 flex flex-col gap-3">
+                <div className="flex flex-col gap-3 p-3">
                   <div className="h-4 w-3/4 rounded-xs bg-stone-200" />
                   <div className="h-3 w-full rounded-xs bg-stone-100" />
                 </div>
@@ -655,7 +656,7 @@ function ShortcutsContent() {
             ))}
           </div>
         ) : filteredWeb.length === 0 ? (
-          <div className="text-center py-8 text-neutral-500">
+          <div className="py-8 text-center text-neutral-500">
             <MessageSquare
               size={32}
               className="mx-auto mb-2 text-neutral-300"
@@ -665,7 +666,7 @@ function ShortcutsContent() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {filteredWeb.map((shortcut, index) => (
               <ShortcutCardItem
                 key={shortcut.slug || index}
@@ -701,20 +702,20 @@ function ShortcutCardItem({
     <button
       onClick={onClick}
       className={cn([
-        "w-full text-left rounded-xs border border-stone-100 overflow-hidden",
-        "hover:border-stone-300 hover:shadow-xs transition-all",
+        "w-full overflow-hidden rounded-xs border border-stone-100 text-left",
+        "transition-all hover:border-stone-300 hover:shadow-xs",
         "flex flex-col",
       ])}
     >
-      <div className="h-20 bg-linear-to-br from-stone-100 to-stone-200 flex items-center justify-center">
-        <MessageSquare className="w-8 h-8 text-stone-400" />
+      <div className="flex h-20 items-center justify-center bg-linear-to-br from-stone-100 to-stone-200">
+        <MessageSquare className="h-8 w-8 text-stone-400" />
       </div>
-      <div className="p-3 flex flex-col gap-3 flex-1">
-        <div className="text-base font-medium font-serif line-clamp-1">
+      <div className="flex flex-1 flex-col gap-3 p-3">
+        <div className="line-clamp-1 font-serif text-base font-medium">
           {title}
         </div>
         {description && (
-          <div className="text-sm text-stone-600 truncate">{description}</div>
+          <div className="truncate text-sm text-stone-600">{description}</div>
         )}
       </div>
     </button>
@@ -723,9 +724,9 @@ function ShortcutCardItem({
 
 function PromptsContent() {
   return (
-    <div className="flex flex-col items-center justify-center h-full min-h-[300px] gap-3">
+    <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-3">
       <SparklesIcon size={48} className="text-neutral-300" />
-      <p className="text-sm text-neutral-400 font-medium">Coming soon</p>
+      <p className="text-sm font-medium text-neutral-400">Coming soon</p>
     </div>
   );
 }

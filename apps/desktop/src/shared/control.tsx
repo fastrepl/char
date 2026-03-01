@@ -17,12 +17,13 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { env } from "~/env";
 
 import { commands as miscCommands } from "@hypr/plugin-misc";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 import { commands as tracingCommands } from "@hypr/plugin-tracing";
 import { Button } from "@hypr/ui/components/ui/button";
+
+import { env } from "~/env";
 
 export const ErrorComponent: ErrorRouteComponent = ({ error }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -135,7 +136,7 @@ export const ErrorComponent: ErrorRouteComponent = ({ error }) => {
                 <h2 className="text-base font-semibold text-neutral-900">
                   Something went wrong
                 </h2>
-                <p className="text-sm text-neutral-500 leading-relaxed max-w-[260px]">
+                <p className="max-w-[260px] text-sm leading-relaxed text-neutral-500">
                   {error.message || "An unexpected error occurred."}
                 </p>
               </div>

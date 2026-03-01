@@ -57,25 +57,25 @@ export function SortDropdown({
         >
           <DropdownMenuRadioItem
             value="alphabetical"
-            className="text-xs cursor-pointer"
+            className="cursor-pointer text-xs"
           >
             A-Z
           </DropdownMenuRadioItem>
           <DropdownMenuRadioItem
             value="reverse-alphabetical"
-            className="text-xs cursor-pointer"
+            className="cursor-pointer text-xs"
           >
             Z-A
           </DropdownMenuRadioItem>
           <DropdownMenuRadioItem
             value="oldest"
-            className="text-xs cursor-pointer"
+            className="cursor-pointer text-xs"
           >
             Oldest
           </DropdownMenuRadioItem>
           <DropdownMenuRadioItem
             value="newest"
-            className="text-xs cursor-pointer"
+            className="cursor-pointer text-xs"
           >
             Newest
           </DropdownMenuRadioItem>
@@ -125,9 +125,9 @@ export function ColumnHeader({
 
   return (
     <div className="@container border-b border-neutral-200">
-      <div className="py-2 pl-3 pr-1 flex items-center justify-between h-12 min-w-0">
+      <div className="flex h-12 min-w-0 items-center justify-between py-2 pr-1 pl-3">
         <h3 className="text-sm font-medium">{title}</h3>
-        <div className="flex items-center shrink-0">
+        <div className="flex shrink-0 items-center">
           {onSearchChange && (
             <Button
               onClick={handleSearchToggle}
@@ -152,21 +152,21 @@ export function ColumnHeader({
         </div>
       </div>
       {showSearch && onSearchChange && (
-        <div className="flex items-center gap-2 px-3 border-t bg-white border-neutral-200 h-12">
-          <Search className="h-4 w-4 text-neutral-400 shrink-0" />
+        <div className="flex h-12 items-center gap-2 border-t border-neutral-200 bg-white px-3">
+          <Search className="h-4 w-4 shrink-0 text-neutral-400" />
           <input
             type="text"
             value={searchValue || ""}
             onChange={(e) => onSearchChange(e.target.value)}
             onKeyDown={handleSearchKeyDown}
             placeholder="Search..."
-            className="w-full bg-transparent text-sm focus:outline-hidden placeholder:text-neutral-400"
+            className="w-full bg-transparent text-sm placeholder:text-neutral-400 focus:outline-hidden"
             autoFocus
           />
           {searchValue && (
             <button
               onClick={() => onSearchChange("")}
-              className="p-1 rounded-xs hover:bg-neutral-100 transition-colors shrink-0"
+              className="shrink-0 rounded-xs p-1 transition-colors hover:bg-neutral-100"
             >
               <X className="h-4 w-4 text-neutral-400" />
             </button>

@@ -1,6 +1,6 @@
-import type * as main from "~/store/tinybase/store/main";
-
 import type { SessionEvent } from "@hypr/store";
+
+import type * as main from "~/store/tinybase/store/main";
 
 type Store = NonNullable<ReturnType<typeof main.UI.useStore>>;
 

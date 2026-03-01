@@ -1,7 +1,4 @@
 import { useCallback } from "react";
-import { useLanguageModel } from "~/ai/hooks";
-import { useShell } from "~/contexts/shell";
-import { useTabs } from "~/store/zustand/tabs";
 
 import { cn } from "@hypr/utils";
 
@@ -10,6 +7,10 @@ import { ChatContent } from "./content";
 import { ChatHeader } from "./header";
 import { ChatSession } from "./session";
 import { useChatActions, useStableSessionId } from "./use-chat-actions";
+
+import { useLanguageModel } from "~/ai/hooks";
+import { useShell } from "~/contexts/shell";
+import { useTabs } from "~/store/zustand/tabs";
 
 export function ChatView() {
   const { chat } = useShell();
@@ -41,9 +42,9 @@ export function ChatView() {
   return (
     <div
       className={cn([
-        "flex flex-col h-full",
+        "flex h-full flex-col",
         chat.mode === "RightPanelOpen" &&
-          "border border-neutral-200 rounded-xl overflow-hidden",
+          "overflow-hidden rounded-xl border border-neutral-200",
       ])}
     >
       <ChatHeader
@@ -52,7 +53,7 @@ export function ChatView() {
         onSelectChat={handleSelectChat}
         handleClose={() => chat.sendEvent({ type: "CLOSE" })}
       />
-      <div className="bg-sky-100 text-neutral-900 text-[11px] px-3 py-1.5">
+      <div className="bg-sky-100 px-3 py-1.5 text-[11px] text-neutral-900">
         Chat is Experimental and under active development
       </div>
       <ChatSession

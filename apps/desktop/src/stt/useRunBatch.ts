@@ -1,4 +1,12 @@
 import { useCallback, useRef } from "react";
+
+import type { BatchParams } from "@hypr/plugin-listener2";
+import type { TranscriptStorage } from "@hypr/store";
+
+import { useListener } from "./contexts";
+import { useKeywords } from "./useKeywords";
+import { useSTTConnection } from "./useSTTConnection";
+
 import { useConfigValue } from "~/shared/config";
 import { id } from "~/shared/utils";
 import * as main from "~/store/tinybase/store/main";
@@ -11,13 +19,6 @@ import {
   updateTranscriptHints,
   updateTranscriptWords,
 } from "~/stt/utils";
-
-import type { BatchParams } from "@hypr/plugin-listener2";
-import type { TranscriptStorage } from "@hypr/store";
-
-import { useListener } from "./contexts";
-import { useKeywords } from "./useKeywords";
-import { useSTTConnection } from "./useSTTConnection";
 
 type RunOptions = {
   handlePersist?: HandlePersistCallback;

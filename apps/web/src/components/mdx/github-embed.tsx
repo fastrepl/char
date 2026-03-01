@@ -122,20 +122,20 @@ export function GithubEmbed({
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-xs font-mono text-blue-600 hover:underline"
+      className="font-mono text-xs text-blue-600 hover:underline"
     >
       {fileName}
     </a>
   ) : (
-    <span className="text-xs font-mono text-stone-600">{fileName}</span>
+    <span className="font-mono text-xs text-stone-600">{fileName}</span>
   );
 
   return (
     <TooltipProvider delayDuration={0}>
-      <div className="border border-neutral-200 rounded-md overflow-hidden bg-stone-50 my-4">
-        <div className="flex items-center justify-between pl-3 pr-2 py-2 bg-stone-100 border-b border-neutral-200">
+      <div className="my-4 overflow-hidden rounded-md border border-neutral-200 bg-stone-50">
+        <div className="flex items-center justify-between border-b border-neutral-200 bg-stone-100 py-2 pr-2 pl-3">
           <div className="flex items-center gap-1.5">
-            <Code2 className="w-4 h-4 text-stone-500 shrink-0" />
+            <Code2 className="h-4 w-4 shrink-0 text-stone-500" />
             {fileNameEl}
           </div>
           <div className="flex items-center gap-1">
@@ -144,7 +144,7 @@ export function GithubEmbed({
                 href={rawUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center rounded px-2 py-1 text-xs font-mono text-stone-600 hover:bg-stone-200/80 transition-colors"
+                className="flex items-center rounded px-2 py-1 font-mono text-xs text-stone-600 transition-colors hover:bg-stone-200/80"
               >
                 Raw
               </a>
@@ -160,24 +160,24 @@ export function GithubEmbed({
                 <button
                   type="button"
                   onClick={handleCopy}
-                  className="cursor-pointer flex items-center gap-1.5 rounded p-1 text-xs hover:bg-stone-200/80 text-stone-600 transition-all"
+                  className="flex cursor-pointer items-center gap-1.5 rounded p-1 text-xs text-stone-600 transition-all hover:bg-stone-200/80"
                   aria-label={copied ? "Copied" : "Copy code"}
                 >
                   {copied ? (
-                    <Check className="w-3.5 h-3.5 text-green-600" />
+                    <Check className="h-3.5 w-3.5 text-green-600" />
                   ) : (
-                    <Copy className="w-3.5 h-3.5" />
+                    <Copy className="h-3.5 w-3.5" />
                   )}
                 </button>
               </TooltipTrigger>
-              <TooltipContent className="bg-black text-white rounded-md">
+              <TooltipContent className="rounded-md bg-black text-white">
                 {copied ? "Copied" : "Copy"}
               </TooltipContent>
             </Tooltip>
           </div>
         </div>
         <div className="overflow-x-auto bg-white">
-          <table className="w-full border-collapse my-0!">
+          <table className="my-0! w-full border-collapse">
             <tbody>
               {lines.map((line, index) => {
                 if (!isLineVisible(index)) return null;
@@ -191,15 +191,15 @@ export function GithubEmbed({
                 const isFolded = collapsedLines.has(index);
 
                 return (
-                  <tr key={index} className="leading-5 border-0">
-                    <td className="select-none pr-2 pl-2 py-0.5 text-stone-400 text-sm font-mono bg-stone-50 w-[1%] whitespace-nowrap border-r border-neutral-200 border-y-0">
+                  <tr key={index} className="border-0 leading-5">
+                    <td className="w-[1%] border-y-0 border-r border-neutral-200 bg-stone-50 py-0.5 pr-2 pl-2 font-mono text-sm whitespace-nowrap text-stone-400 select-none">
                       <div className="flex items-center justify-end">
-                        <span className="w-4 flex items-center justify-center shrink-0 text-xs">
+                        <span className="flex w-4 shrink-0 items-center justify-center text-xs">
                           {isFoldable && (
                             <button
                               type="button"
                               onClick={() => toggleFold(index)}
-                              className="text-stone-400 hover:text-stone-600 cursor-pointer leading-none"
+                              className="cursor-pointer leading-none text-stone-400 hover:text-stone-600"
                             >
                               {isFolded ? "▸" : "▾"}
                             </button>
@@ -208,7 +208,7 @@ export function GithubEmbed({
                         <span className="text-right">{startLine + index}</span>
                       </div>
                     </td>
-                    <td className="pr-4 py-0.5 text-sm font-mono whitespace-pre relative border-0">
+                    <td className="relative border-0 py-0.5 pr-4 font-mono text-sm whitespace-pre">
                       {Array.from({ length: indentLevels[index] }, (_, i) => (
                         <span
                           key={i}
@@ -231,7 +231,7 @@ export function GithubEmbed({
                         </span>
                       )}
                       {isFolded && (
-                        <span className="ml-2 text-xs bg-stone-100 text-stone-400 px-1.5 py-0.5 rounded border border-stone-200 align-middle">
+                        <span className="ml-2 rounded border border-stone-200 bg-stone-100 px-1.5 py-0.5 align-middle text-xs text-stone-400">
                           ⋯
                         </span>
                       )}
@@ -246,16 +246,16 @@ export function GithubEmbed({
           <button
             type="button"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center justify-center gap-1.5 w-full py-1.5 text-xs font-mono text-stone-500 hover:text-stone-700 bg-stone-50 border-t border-neutral-200 cursor-pointer transition-colors"
+            className="flex w-full cursor-pointer items-center justify-center gap-1.5 border-t border-neutral-200 bg-stone-50 py-1.5 font-mono text-xs text-stone-500 transition-colors hover:text-stone-700"
           >
             {isExpanded ? (
               <>
-                <ChevronUp className="w-3 h-3" />
+                <ChevronUp className="h-3 w-3" />
                 Collapse
               </>
             ) : (
               <>
-                <ChevronDown className="w-3 h-3" />
+                <ChevronDown className="h-3 w-3" />
                 Expand ({lines.length - MAX_COLLAPSED_LINES} more lines)
               </>
             )}

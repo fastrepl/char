@@ -1,3 +1,5 @@
+import "./styles/globals.css";
+
 import * as Sentry from "@sentry/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
@@ -15,7 +17,7 @@ import "@hypr/ui/globals.css";
 
 import { createToolRegistry } from "./contexts/tool-registry/core";
 import { env } from "./env";
-import { initExtensionGlobals } from "./extensions/globals";
+import { initPluginGlobals } from "./plugins/globals";
 import { routeTree } from "./routeTree.gen";
 import { TaskManager } from "./services/task-manager";
 import { ErrorComponent, NotFoundComponent } from "./shared/control";
@@ -32,7 +34,6 @@ import {
 } from "./store/tinybase/store/settings";
 import { createAITaskStore } from "./store/zustand/ai-task";
 import { listenerStore } from "./store/zustand/listener/instance";
-import "./styles/globals.css";
 
 const toolRegistry = createToolRegistry();
 const queryClient = new QueryClient();
@@ -120,7 +121,7 @@ function AppWithTiny() {
 }
 
 initWindowsPlugin();
-initExtensionGlobals();
+initPluginGlobals();
 
 const rootElement = document.getElementById("root")!;
 if (!rootElement.innerHTML) {

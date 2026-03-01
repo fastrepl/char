@@ -1,8 +1,9 @@
 import { ArrowRightIcon } from "lucide-react";
-import type { LLMConnectionStatus } from "~/ai/hooks";
-import { useTabs } from "~/store/zustand/tabs";
 
 import { Button } from "@hypr/ui/components/ui/button";
+
+import type { LLMConnectionStatus } from "~/ai/hooks";
+import { useTabs } from "~/store/zustand/tabs";
 
 export function ConfigError({ status }: { status: LLMConnectionStatus }) {
   const openNew = useTabs((state) => state.openNew);
@@ -14,8 +15,8 @@ export function ConfigError({ status }: { status: LLMConnectionStatus }) {
   const message = getMessageForStatus(status);
 
   return (
-    <div className="flex flex-col items-center justify-center h-full min-h-[400px]">
-      <p className="text-sm text-center text-neutral-700 mb-6 max-w-lg">
+    <div className="flex h-full min-h-[400px] flex-col items-center justify-center">
+      <p className="mb-6 max-w-lg text-center text-sm text-neutral-700">
         {message}
       </p>
       <Button

@@ -134,10 +134,10 @@ const faqs = [
 function Component() {
   return (
     <div
-      className="bg-linear-to-b from-white via-stone-50/20 to-white min-h-screen overflow-x-hidden"
+      className="min-h-screen overflow-x-hidden bg-linear-to-b from-white via-stone-50/20 to-white"
       style={{ backgroundImage: "url(/patterns/dots.svg)" }}
     >
-      <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
+      <div className="mx-auto max-w-6xl border-x border-neutral-100 bg-white">
         <HeroSection />
         <QuickFeaturesSection />
         <DetailedFeaturesSection />
@@ -153,27 +153,27 @@ function HeroSection() {
   return (
     <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
       <div className="px-6 py-12 lg:py-20">
-        <header className="mb-8 text-center max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-stone-100 text-stone-600 text-sm mb-6">
+        <header className="mx-auto mb-8 max-w-4xl text-center">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-stone-100 px-4 py-2 text-sm text-stone-600">
             <Icon icon="mdi:calendar-clock" className="text-lg" />
             <span>For Meetings</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
+          <h1 className="mb-6 font-serif text-4xl tracking-tight text-stone-700 sm:text-5xl">
             All Your Meeting Notes
             <br />
             in One Place
           </h1>
-          <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-lg text-neutral-600 sm:text-xl">
             Zoom, Teams, Meet, Discord, or in-person, Char records it all and
             generates searchable meeting summaries that never leave your device.
           </p>
-          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
             <Link
               to="/download/"
               className={cn([
-                "inline-block px-8 py-3 text-base font-medium rounded-full",
+                "inline-block rounded-full px-8 py-3 text-base font-medium",
                 "bg-linear-to-t from-stone-600 to-stone-500 text-white",
-                "hover:scale-105 active:scale-95 transition-transform",
+                "transition-transform hover:scale-105 active:scale-95",
               ])}
             >
               Download for free
@@ -181,9 +181,9 @@ function HeroSection() {
             <Link
               to="/product/ai-notetaking/"
               className={cn([
-                "inline-block px-8 py-3 text-base font-medium rounded-full",
+                "inline-block rounded-full px-8 py-3 text-base font-medium",
                 "border border-stone-300 text-stone-600",
-                "hover:bg-stone-50 transition-colors",
+                "transition-colors hover:bg-stone-50",
               ])}
             >
               See how it works
@@ -197,17 +197,17 @@ function HeroSection() {
 
 function QuickFeaturesSection() {
   return (
-    <section className="px-6 py-12 border-t border-neutral-100">
-      <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+    <section className="border-t border-neutral-100 px-6 py-12">
+      <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-3">
         {heroFeatures.map((feature) => (
           <div
             key={feature.title}
-            className="text-center p-6 rounded-xl bg-stone-50/50 border border-neutral-100"
+            className="rounded-xl border border-neutral-100 bg-stone-50/50 p-6 text-center"
           >
-            <div className="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center mx-auto mb-4">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-stone-100">
               <Icon icon={feature.icon} className="text-2xl text-stone-600" />
             </div>
-            <h3 className="text-base font-medium text-stone-700 mb-2">
+            <h3 className="mb-2 text-base font-medium text-stone-700">
               {feature.title}
             </h3>
             <p className="text-sm text-neutral-600">{feature.description}</p>
@@ -227,18 +227,18 @@ function DetailedFeaturesSection() {
 
   return (
     <section className="border-t border-neutral-100">
-      <div className="px-6 py-16 max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
+      <div className="mx-auto max-w-4xl px-6 py-16">
+        <h2 className="mb-4 text-center font-serif text-3xl text-stone-700">
           Everything you need for meeting notes
         </h2>
-        <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
+        <p className="mx-auto mb-12 max-w-2xl text-center text-neutral-600">
           AI-powered features that help you capture, organize, and act on every
           conversation.
         </p>
       </div>
 
-      <div className="sticky top-17.25 z-30 bg-white/95 backdrop-blur-sm border-y border-neutral-100">
-        <nav className="px-6 max-w-4xl mx-auto">
+      <div className="sticky top-17.25 z-30 border-y border-neutral-100 bg-white/95 backdrop-blur-sm">
+        <nav className="mx-auto max-w-4xl px-6">
           <div className="flex gap-1 overflow-x-auto">
             {detailedFeatures.map((feature) => (
               <button
@@ -246,12 +246,12 @@ function DetailedFeaturesSection() {
                 type="button"
                 onClick={() => setActiveFeature(feature.id)}
                 className={cn([
-                  "flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-all border-b-2",
+                  "flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-all",
                   activeFeature === feature.id
-                    ? ["text-stone-700 border-stone-600", "bg-stone-50/50"]
+                    ? ["border-stone-600 text-stone-700", "bg-stone-50/50"]
                     : [
-                        "text-neutral-600 border-transparent",
-                        "hover:text-stone-700 hover:bg-stone-50/30",
+                        "border-transparent text-neutral-600",
+                        "hover:bg-stone-50/30 hover:text-stone-700",
                       ],
                 ])}
               >
@@ -264,20 +264,20 @@ function DetailedFeaturesSection() {
       </div>
 
       {activeFeatureData && (
-        <div className="px-6 py-12 max-w-4xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-8 items-start">
+        <div className="mx-auto max-w-4xl px-6 py-12">
+          <div className="grid items-start gap-8 md:grid-cols-2">
             <div>
-              <h3 className="text-2xl font-serif text-stone-700 mb-4">
+              <h3 className="mb-4 font-serif text-2xl text-stone-700">
                 {activeFeatureData.heading}
               </h3>
-              <p className="text-neutral-600 mb-4 leading-relaxed">
+              <p className="mb-4 leading-relaxed text-neutral-600">
                 {activeFeatureData.description}
               </p>
-              <p className="text-neutral-600 text-sm leading-relaxed">
+              <p className="text-sm leading-relaxed text-neutral-600">
                 {activeFeatureData.details}
               </p>
             </div>
-            <div className="rounded-xl bg-stone-100/50 border border-neutral-100 aspect-video flex items-center justify-center">
+            <div className="flex aspect-video items-center justify-center rounded-xl border border-neutral-100 bg-stone-100/50">
               <Icon
                 icon={activeFeatureData.icon}
                 className="text-6xl text-stone-400"
@@ -292,22 +292,22 @@ function DetailedFeaturesSection() {
 
 function DataControlSection() {
   return (
-    <section className="px-6 py-16 bg-stone-50/50 border-t border-neutral-100">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex gap-6 p-6 rounded-xl bg-white border border-neutral-100">
-          <div className="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center shrink-0">
+    <section className="border-t border-neutral-100 bg-stone-50/50 px-6 py-16">
+      <div className="mx-auto max-w-4xl">
+        <div className="flex gap-6 rounded-xl border border-neutral-100 bg-white p-6">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-stone-100">
             <Icon icon="mdi:shield-lock" className="text-2xl text-stone-600" />
           </div>
           <div>
-            <h3 className="text-2xl font-serif text-stone-700 mb-3">
+            <h3 className="mb-3 font-serif text-2xl text-stone-700">
               Control Where Your Data Lives
             </h3>
-            <p className="text-neutral-600 leading-relaxed mb-3">
+            <p className="mb-3 leading-relaxed text-neutral-600">
               Run fully local with LM Studio or Ollama for offline AI
               processing. Or connect to cloud providers like Deepgram,
               AssemblyAI, or OpenAI.
             </p>
-            <p className="text-neutral-600 text-sm leading-relaxed">
+            <p className="text-sm leading-relaxed text-neutral-600">
               You decide where your data goes, not us. All recordings and notes
               are stored locally on your device by default, and you have full
               control over which services process your data.
@@ -321,12 +321,12 @@ function DataControlSection() {
 
 function FAQSection() {
   return (
-    <section className="px-6 py-16 border-t border-neutral-100">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-700 text-center mb-4">
+    <section className="border-t border-neutral-100 px-6 py-16">
+      <div className="mx-auto max-w-4xl">
+        <h2 className="mb-4 text-center font-serif text-3xl text-stone-700">
           Frequently Asked Questions
         </h2>
-        <p className="text-neutral-600 text-center mb-12 max-w-2xl mx-auto">
+        <p className="mx-auto mb-12 max-w-2xl text-center text-neutral-600">
           Common questions about using Char for meeting notes.
         </p>
         <Accordion type="single" collapsible className="space-y-2">
@@ -334,12 +334,12 @@ function FAQSection() {
             <AccordionItem
               key={index}
               value={`item-${index}`}
-              className="bg-white rounded-xl border border-neutral-100 px-6 data-[state=open]:shadow-sm"
+              className="rounded-xl border border-neutral-100 bg-white px-6 data-[state=open]:shadow-sm"
             >
-              <AccordionTrigger className="text-lg font-medium text-stone-700 hover:no-underline hover:text-stone-900">
+              <AccordionTrigger className="text-lg font-medium text-stone-700 hover:text-stone-900 hover:no-underline">
                 {faq.question}
               </AccordionTrigger>
-              <AccordionContent className="text-neutral-600 leading-relaxed">
+              <AccordionContent className="leading-relaxed text-neutral-600">
                 {faq.answer}
               </AccordionContent>
             </AccordionItem>
@@ -352,21 +352,21 @@ function FAQSection() {
 
 function CTASection() {
   return (
-    <section className="px-6 py-16 bg-linear-to-t from-stone-600 to-stone-500 border-t border-stone-500">
-      <div className="max-w-2xl mx-auto text-center">
-        <h2 className="text-3xl font-serif text-white mb-4">
+    <section className="border-t border-stone-500 bg-linear-to-t from-stone-600 to-stone-500 px-6 py-16">
+      <div className="mx-auto max-w-2xl text-center">
+        <h2 className="mb-4 font-serif text-3xl text-white">
           Ready to transform your meetings?
         </h2>
-        <p className="text-stone-100 mb-8">
+        <p className="mb-8 text-stone-100">
           Start capturing every detail with AI-powered meeting notes that
           respect your privacy.
         </p>
         <Link
           to="/download/"
           className={cn([
-            "inline-block px-8 py-3 text-base font-medium rounded-full",
+            "inline-block rounded-full px-8 py-3 text-base font-medium",
             "bg-white text-stone-600",
-            "hover:scale-105 active:scale-95 transition-transform",
+            "transition-transform hover:scale-105 active:scale-95",
           ])}
         >
           Get started for free

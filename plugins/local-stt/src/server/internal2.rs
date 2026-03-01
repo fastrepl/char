@@ -126,7 +126,7 @@ impl Actor for Internal2STTActor {
                 let info = ServerInfo {
                     url: Some(state.base_url.clone()),
                     status: ServerStatus::Ready,
-                    model: Some(crate::SupportedSttModel::Cactus(state.model.clone())),
+                    model: Some(crate::LocalModel::Cactus(state.model.clone())),
                 };
 
                 if let Err(e) = reply_port.send(info) {

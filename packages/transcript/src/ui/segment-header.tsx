@@ -32,7 +32,7 @@ export function SegmentHeader({
   const wordIds = segment.words.filter((w) => w.id).map((w) => w.id!);
 
   const headerClassName = cn([
-    "sticky top-0 z-20 bg-background",
+    "bg-background sticky top-0 z-20",
     "-mx-3 px-3 py-1",
     "border-b border-neutral-200",
     "text-xs font-light",

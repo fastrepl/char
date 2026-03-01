@@ -77,7 +77,7 @@ export function SearchableSelect({
           role="combobox"
           aria-expanded={open}
           className={cn([
-            "justify-between font-normal bg-white shadow-none focus-visible:ring-0",
+            "justify-between bg-white font-normal shadow-none focus-visible:ring-0",
             "rounded-lg px-3",
             className,
           ])}
@@ -104,7 +104,7 @@ export function SearchableSelect({
             onValueChange={setQuery}
           />
           <CommandEmpty>
-            <div className="py-1.5 px-2 text-sm text-muted-foreground">
+            <div className="text-muted-foreground px-2 py-1.5 text-sm">
               {emptyMessage}
             </div>
           </CommandEmpty>
@@ -121,12 +121,12 @@ export function SearchableSelect({
                   onSelect={() => handleSelect(option.value)}
                   className={cn([
                     "cursor-pointer",
-                    "focus:bg-neutral-200! hover:bg-neutral-200! aria-selected:bg-transparent",
+                    "hover:bg-neutral-200! focus:bg-neutral-200! aria-selected:bg-transparent",
                   ])}
                 >
-                  <span className="truncate flex-1">{option.label}</span>
+                  <span className="flex-1 truncate">{option.label}</span>
                   {option.detail && (
-                    <span className="text-[10px] font-mono text-neutral-400 shrink-0">
+                    <span className="shrink-0 font-mono text-[10px] text-neutral-400">
                       {option.detail}
                     </span>
                   )}

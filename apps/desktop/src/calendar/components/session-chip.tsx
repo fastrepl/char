@@ -1,8 +1,5 @@
 import { format } from "date-fns";
 import { useCallback } from "react";
-import { toTz, useTimezone } from "~/calendar/hooks";
-import * as main from "~/store/tinybase/store/main";
-import { useTabs } from "~/store/zustand/tabs";
 
 import { Button } from "@hypr/ui/components/ui/button";
 import {
@@ -11,6 +8,10 @@ import {
   PopoverTrigger,
 } from "@hypr/ui/components/ui/popover";
 import { cn } from "@hypr/utils";
+
+import { toTz, useTimezone } from "~/calendar/hooks";
+import * as main from "~/store/tinybase/store/main";
+import { useTabs } from "~/store/zustand/tabs";
 
 export function SessionChip({ sessionId }: { sessionId: string }) {
   const tz = useTimezone();
@@ -33,14 +34,14 @@ export function SessionChip({ sessionId }: { sessionId: string }) {
       <PopoverTrigger asChild>
         <button
           className={cn([
-            "flex items-center gap-1 pl-0.5 text-xs leading-tight rounded text-left w-full",
-            "hover:opacity-80 cursor-pointer",
+            "flex w-full items-center gap-1 rounded pl-0.5 text-left text-xs leading-tight",
+            "cursor-pointer hover:opacity-80",
           ])}
         >
-          <div className="w-[2.5px] self-stretch rounded-full shrink-0 bg-blue-500" />
+          <div className="w-[2.5px] shrink-0 self-stretch rounded-full bg-blue-500" />
           <span className="truncate">{session.title as string}</span>
           {createdAt && (
-            <span className="text-neutral-400 ml-auto shrink-0 font-mono">
+            <span className="ml-auto shrink-0 font-mono text-neutral-400">
               {createdAt}
             </span>
           )}
@@ -48,7 +49,7 @@ export function SessionChip({ sessionId }: { sessionId: string }) {
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-[280px] shadow-lg p-0 rounded-lg"
+        className="w-[280px] rounded-lg p-0 shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <SessionPopoverContent sessionId={sessionId} />
@@ -87,7 +88,7 @@ function SessionPopoverContent({ sessionId }: { sessionId: string }) {
       {createdAt && <div className="text-sm text-neutral-700">{createdAt}</div>}
       <Button
         size="sm"
-        className="w-full min-h-8 bg-stone-800 hover:bg-stone-700 text-white"
+        className="min-h-8 w-full bg-stone-800 text-white hover:bg-stone-700"
         onClick={handleOpen}
       >
         Open note

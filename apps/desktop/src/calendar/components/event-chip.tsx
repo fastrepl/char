@@ -1,11 +1,5 @@
 import { format } from "date-fns";
 import { useCallback } from "react";
-import { toTz, useTimezone } from "~/calendar/hooks";
-import { EventDisplay } from "~/session/components/outer-header/metadata";
-import { useEvent } from "~/store/tinybase/hooks";
-import * as main from "~/store/tinybase/store/main";
-import { getOrCreateSessionForEventId } from "~/store/tinybase/store/sessions";
-import { useTabs } from "~/store/zustand/tabs";
 
 import { Button } from "@hypr/ui/components/ui/button";
 import {
@@ -14,6 +8,13 @@ import {
   PopoverTrigger,
 } from "@hypr/ui/components/ui/popover";
 import { cn } from "@hypr/utils";
+
+import { toTz, useTimezone } from "~/calendar/hooks";
+import { EventDisplay } from "~/session/components/outer-header/metadata";
+import { useEvent } from "~/store/tinybase/hooks";
+import * as main from "~/store/tinybase/store/main";
+import { getOrCreateSessionForEventId } from "~/store/tinybase/store/sessions";
+import { useTabs } from "~/store/zustand/tabs";
 
 function useCalendarColor(calendarId: string | null): string | null {
   const calendar = main.UI.useRow("calendars", calendarId ?? "", main.STORE_ID);
@@ -49,8 +50,8 @@ export function EventChip({ eventId }: { eventId: string }) {
         {isAllDay ? (
           <button
             className={cn([
-              "text-xs leading-tight truncate rounded px-1.5 py-0.5 text-left w-full text-white",
-              "hover:opacity-80 cursor-pointer",
+              "w-full truncate rounded px-1.5 py-0.5 text-left text-xs leading-tight text-white",
+              "cursor-pointer hover:opacity-80",
             ])}
             style={{ backgroundColor: color }}
           >
@@ -59,17 +60,17 @@ export function EventChip({ eventId }: { eventId: string }) {
         ) : (
           <button
             className={cn([
-              "flex items-center gap-1 pl-0.5 text-xs leading-tight rounded text-left w-full",
-              "hover:opacity-80 cursor-pointer",
+              "flex w-full items-center gap-1 rounded pl-0.5 text-left text-xs leading-tight",
+              "cursor-pointer hover:opacity-80",
             ])}
           >
             <div
-              className="w-[2.5px] self-stretch rounded-full shrink-0"
+              className="w-[2.5px] shrink-0 self-stretch rounded-full"
               style={{ backgroundColor: color }}
             />
             <span className="truncate">{event.title as string}</span>
             {startedAt && (
-              <span className="text-neutral-400 ml-auto shrink-0 font-mono">
+              <span className="ml-auto shrink-0 font-mono text-neutral-400">
                 {startedAt}
               </span>
             )}
@@ -78,7 +79,7 @@ export function EventChip({ eventId }: { eventId: string }) {
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-[280px] shadow-lg p-0 rounded-lg max-h-[80vh] flex flex-col"
+        className="flex max-h-[80vh] w-[280px] flex-col rounded-lg p-0 shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <EventPopoverContent eventId={eventId} />
@@ -114,7 +115,7 @@ function EventPopoverContent({ eventId }: { eventId: string }) {
       <EventDisplay event={event} />
       <Button
         size="sm"
-        className="w-full min-h-8 bg-stone-800 hover:bg-stone-700 text-white"
+        className="min-h-8 w-full bg-stone-800 text-white hover:bg-stone-700"
         onClick={handleOpen}
       >
         Open note

@@ -1,10 +1,11 @@
 import { describe, expect, test } from "vitest";
+
+import { getChangedSessionIds, parseSessionIdFromPath } from "./changes";
+
 import type {
   ChangedTables,
   TablesContent,
 } from "~/store/tinybase/persister/shared";
-
-import { getChangedSessionIds, parseSessionIdFromPath } from "./changes";
 
 describe("parseSessionIdFromPath", () => {
   describe("relative paths (from notify events)", () => {

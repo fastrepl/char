@@ -1,11 +1,12 @@
 import { useMemo } from "react";
-import { useConfigValue } from "~/shared/config";
-import * as settings from "~/store/tinybase/store/settings";
 
 import {
   SearchableSelect,
   type SearchableSelectOption,
 } from "./searchable-select";
+
+import { useConfigValue } from "~/shared/config";
+import * as settings from "~/store/tinybase/store/settings";
 
 function getSystemWeekStart(): "sunday" | "monday" {
   const locale = navigator.language || "en-US";
@@ -45,7 +46,7 @@ export function WeekStartSelector() {
   return (
     <div className="flex flex-row items-center justify-between">
       <div>
-        <h3 className="text-sm font-medium mb-1">Week starts on</h3>
+        <h3 className="mb-1 text-sm font-medium">Week starts on</h3>
         <p className="text-xs text-neutral-600">
           First day of the week in the calendar view
         </p>

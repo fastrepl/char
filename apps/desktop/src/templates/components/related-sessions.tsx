@@ -1,9 +1,10 @@
 import { StickyNote } from "lucide-react";
 import { useMemo } from "react";
-import * as main from "~/store/tinybase/store/main";
-import { useTabs } from "~/store/zustand/tabs";
 
 import { cn, formatDistanceToNow } from "@hypr/utils";
+
+import * as main from "~/store/tinybase/store/main";
+import { useTabs } from "~/store/zustand/tabs";
 
 export function RelatedSessions({ templateId }: { templateId: string }) {
   const store = main.UI.useStore(main.STORE_ID);
@@ -29,7 +30,7 @@ export function RelatedSessions({ templateId }: { templateId: string }) {
 
   if (sessionIds.length === 0) {
     return (
-      <div className="p-4 rounded-lg bg-neutral-50 border border-neutral-200">
+      <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
         <p className="text-sm text-neutral-500">
           Notes enhanced with this template will appear here.
         </p>
@@ -81,9 +82,9 @@ function RelatedSessionItem({
         "text-left",
       ])}
     >
-      <StickyNote className="w-4 h-4 text-neutral-400 shrink-0" />
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium text-neutral-900 truncate">
+      <StickyNote className="h-4 w-4 shrink-0 text-neutral-400" />
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-sm font-medium text-neutral-900">
           {title || "Untitled"}
         </div>
         {timeAgo && <div className="text-xs text-neutral-500">{timeAgo}</div>}

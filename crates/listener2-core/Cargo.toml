@@ -6,6 +6,7 @@ edition = "2024"
 [features]
 default = []
 specta = ["dep:specta"]
+tauri-event = ["specta", "dep:tauri-specta"]
 
 [dependencies]
 hypr-audio-utils = { workspace = true }
@@ -21,6 +22,7 @@ owhisper-interface = { workspace = true }
 serde = { workspace = true }
 specta = { workspace = true, optional = true }
 strum = { workspace = true, features = ["derive"] }
+tauri-specta = { workspace = true, optional = true, features = ["derive"] }
 thiserror = { workspace = true }
 
 ractor = { workspace = true, features = ["async-trait"] }

@@ -1,8 +1,9 @@
 import type { LanguageModel } from "ai";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { listenerStore } from "~/store/zustand/listener/instance";
 
 import { EnhancerService } from ".";
+
+import { listenerStore } from "~/store/zustand/listener/instance";
 
 vi.mock("@hypr/plugin-analytics", () => ({
   commands: {

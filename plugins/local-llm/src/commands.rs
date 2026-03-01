@@ -67,6 +67,24 @@ pub async fn download_model<R: tauri::Runtime>(
 
 #[tauri::command]
 #[specta::specta]
+pub async fn cancel_download<R: tauri::Runtime>(
+    app: tauri::AppHandle<R>,
+    model: crate::SupportedModel,
+) -> Result<bool, String> {
+    app.cancel_download(model).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn delete_model<R: tauri::Runtime>(
+    app: tauri::AppHandle<R>,
+    model: crate::SupportedModel,
+) -> Result<(), String> {
+    app.delete_model(&model).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+#[specta::specta]
 pub async fn get_current_model<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
 ) -> Result<crate::SupportedModel, String> {

@@ -1,9 +1,10 @@
 import { ExternalLink, RotateCcw } from "lucide-react";
-import { env } from "~/env";
 
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 
 import { ActionButton, MessageBubble, MessageContainer } from "./shared";
+
+import { env } from "~/env";
 
 const WEB_APP_BASE_URL = env.VITE_APP_URL ?? "http://localhost:3000";
 
@@ -42,7 +43,7 @@ export function ErrorMessage({
             onClick={handleOpenFaq}
             className="mt-2 flex items-center gap-1 text-xs text-red-700 underline hover:text-red-900"
           >
-            <ExternalLink className="w-3 h-3" />
+            <ExternalLink className="h-3 w-3" />
             Learn how to fix this
           </button>
         )}

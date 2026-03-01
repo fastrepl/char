@@ -1,10 +1,11 @@
 import { describe, expect, test } from "vitest";
-import type { Ctx } from "~/services/apple-calendar/ctx";
-import type { IncomingEvent } from "~/services/apple-calendar/fetch/types";
 
 import type { SessionEvent } from "@hypr/store";
 
 import { syncSessionEmbeddedEvents } from "./execute";
+
+import type { Ctx } from "~/services/apple-calendar/ctx";
+import type { IncomingEvent } from "~/services/apple-calendar/fetch/types";
 
 type MockStoreData = {
   sessions: Record<string, Record<string, unknown>>;

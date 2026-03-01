@@ -40,10 +40,10 @@ export function ProfileInfoSection({ email }: { email?: string }) {
 
   return (
     <section>
-      <h2 className="text-lg font-medium mb-4 font-serif">Profile info</h2>
+      <h2 className="mb-4 font-serif text-lg font-medium">Profile info</h2>
       <div className="flex flex-col gap-4">
         <div>
-          <div className="text-sm text-neutral-500 mb-1">Email</div>
+          <div className="mb-1 text-sm text-neutral-500">Email</div>
           {isEditing ? (
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
               <div className="flex gap-2">
@@ -52,7 +52,7 @@ export function ProfileInfoSection({ email }: { email?: string }) {
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
                   placeholder={email || "Enter new email"}
-                  className="flex-1 px-3 py-2 text-sm border border-neutral-200 rounded-md focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent"
+                  className="flex-1 rounded-md border border-neutral-200 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-stone-500 focus:outline-none"
                   autoFocus
                 />
               </div>
@@ -70,7 +70,7 @@ export function ProfileInfoSection({ email }: { email?: string }) {
                     !newEmail ||
                     newEmail === email
                   }
-                  className="px-4 h-8 flex items-center text-sm bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%] transition-all disabled:opacity-50 disabled:hover:scale-100"
+                  className="flex h-8 items-center rounded-full bg-linear-to-t from-stone-600 to-stone-500 px-4 text-sm text-white shadow-md transition-all hover:scale-[102%] hover:shadow-lg active:scale-[98%] disabled:opacity-50 disabled:hover:scale-100"
                 >
                   {updateEmailMutation.isPending ? "Saving..." : "Save"}
                 </button>
@@ -78,7 +78,7 @@ export function ProfileInfoSection({ email }: { email?: string }) {
                   type="button"
                   onClick={handleCancel}
                   disabled={updateEmailMutation.isPending}
-                  className="px-4 h-8 flex items-center text-sm bg-linear-to-b from-white to-stone-50 border border-neutral-300 text-neutral-700 rounded-full shadow-xs hover:shadow-md hover:scale-[102%] active:scale-[98%] transition-all disabled:opacity-50"
+                  className="flex h-8 items-center rounded-full border border-neutral-300 bg-linear-to-b from-white to-stone-50 px-4 text-sm text-neutral-700 shadow-xs transition-all hover:scale-[102%] hover:shadow-md active:scale-[98%] disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -92,7 +92,7 @@ export function ProfileInfoSection({ email }: { email?: string }) {
                   setIsEditing(true);
                   setSuccessMessage(null);
                 }}
-                className="px-3 h-7 flex items-center text-xs bg-linear-to-b from-white to-stone-50 border border-neutral-300 text-neutral-700 rounded-full shadow-xs hover:shadow-md hover:scale-[102%] active:scale-[98%] transition-all"
+                className="flex h-7 items-center rounded-full border border-neutral-300 bg-linear-to-b from-white to-stone-50 px-3 text-xs text-neutral-700 shadow-xs transition-all hover:scale-[102%] hover:shadow-md active:scale-[98%]"
               >
                 Change
               </button>
@@ -100,7 +100,7 @@ export function ProfileInfoSection({ email }: { email?: string }) {
           )}
         </div>
         {successMessage && (
-          <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+          <div className="rounded-md border border-green-200 bg-green-50 p-3">
             <p className="text-sm text-green-800">{successMessage}</p>
           </div>
         )}

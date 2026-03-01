@@ -1,11 +1,11 @@
+import type { EventStorage, SessionEvent } from "@hypr/store";
+
+import type { EventsSyncOutput } from "./types";
+
 import type { Ctx } from "~/services/apple-calendar/ctx";
 import type { IncomingEvent } from "~/services/apple-calendar/fetch/types";
 import { getSessionEventById } from "~/session/utils";
 import { id } from "~/shared/utils";
-
-import type { EventStorage, SessionEvent } from "@hypr/store";
-
-import type { EventsSyncOutput } from "./types";
 
 export function executeForEventsSync(ctx: Ctx, out: EventsSyncOutput): void {
   const userId = ctx.store.getValue("user_id");

@@ -1,10 +1,11 @@
 import { AlertCircleIcon, RefreshCwIcon } from "lucide-react";
+
+import { Button } from "@hypr/ui/components/ui/button";
+
 import { useAITask } from "~/ai/contexts";
 import { useLanguageModel } from "~/ai/hooks";
 import * as main from "~/store/tinybase/store/main";
 import { createTaskId } from "~/store/zustand/ai-task/task-configs";
-
-import { Button } from "@hypr/ui/components/ui/button";
 
 export function EnhanceError({
   sessionId,
@@ -37,9 +38,9 @@ export function EnhanceError({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-full min-h-[400px] gap-4">
+    <div className="flex h-full min-h-[400px] flex-col items-center justify-center gap-4">
       <AlertCircleIcon size={24} className="text-neutral-400" />
-      <p className="text-sm text-center text-neutral-700 max-w-lg">
+      <p className="max-w-lg text-center text-sm text-neutral-700">
         {error?.message || "Something went wrong while generating the summary."}
       </p>
       <Button

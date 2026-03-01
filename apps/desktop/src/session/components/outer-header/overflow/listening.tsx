@@ -1,8 +1,9 @@
 import { MicIcon, MicOffIcon } from "lucide-react";
-import { useListener } from "~/stt/contexts";
-import { useStartListening } from "~/stt/useStartListening";
 
 import { DropdownMenuItem } from "@hypr/ui/components/ui/dropdown-menu";
+
+import { useListener } from "~/stt/contexts";
+import { useStartListening } from "~/stt/useStartListening";
 
 export function Listening({
   sessionId,

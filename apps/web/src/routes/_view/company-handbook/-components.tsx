@@ -17,7 +17,7 @@ export function HandbookLayout({
 }) {
   return (
     <>
-      <main className="max-w-200 mx-auto px-4 py-6">
+      <main className="mx-auto max-w-200 px-4 py-6">
         <ArticleHeader doc={doc} showSectionTitle={showSectionTitle} />
         <ArticleContent doc={doc} />
         <PageNavigation currentSlug={doc.slug} />
@@ -46,15 +46,15 @@ function ArticleHeader({
   return (
     <header className="mb-8 lg:mb-12">
       {showSectionTitle && (
-        <div className="inline-flex items-center gap-2 text-sm text-neutral-500 mb-4">
+        <div className="mb-4 inline-flex items-center gap-2 text-sm text-neutral-500">
           <span>{sectionTitle}</span>
         </div>
       )}
-      <h1 className="text-3xl sm:text-4xl font-serif text-stone-700 mb-4">
+      <h1 className="mb-4 font-serif text-3xl text-stone-700 sm:text-4xl">
         {doc.title}
       </h1>
       {doc.summary && (
-        <p className="text-lg lg:text-xl text-neutral-600 leading-relaxed mb-6">
+        <p className="mb-6 text-lg leading-relaxed text-neutral-600 lg:text-xl">
           {doc.summary}
         </p>
       )}
@@ -124,17 +124,17 @@ function PageNavigation({ currentSlug }: { currentSlug: string }) {
   if (!prev && !next) return null;
 
   return (
-    <nav className="mt-12 border-t border-neutral-200 pt-6 flex items-center justify-between gap-4">
+    <nav className="mt-12 flex items-center justify-between gap-4 border-t border-neutral-200 pt-6">
       {prev ? (
         <Link
           to="/company-handbook/$/"
           params={{ _splat: prev.slug }}
           className="group flex flex-col items-start gap-1 text-sm"
         >
-          <span className="text-neutral-400 group-hover:text-neutral-500 transition-colors">
+          <span className="text-neutral-400 transition-colors group-hover:text-neutral-500">
             Previous
           </span>
-          <span className="text-stone-600 group-hover:text-stone-800 transition-colors font-medium">
+          <span className="font-medium text-stone-600 transition-colors group-hover:text-stone-800">
             {prev.title}
           </span>
         </Link>
@@ -145,12 +145,12 @@ function PageNavigation({ currentSlug }: { currentSlug: string }) {
         <Link
           to="/company-handbook/$/"
           params={{ _splat: next.slug }}
-          className="group flex flex-col items-end gap-1 text-sm text-right"
+          className="group flex flex-col items-end gap-1 text-right text-sm"
         >
-          <span className="text-neutral-400 group-hover:text-neutral-500 transition-colors">
+          <span className="text-neutral-400 transition-colors group-hover:text-neutral-500">
             Next
           </span>
-          <span className="text-stone-600 group-hover:text-stone-800 transition-colors font-medium">
+          <span className="font-medium text-stone-600 transition-colors group-hover:text-stone-800">
             {next.title}
           </span>
         </Link>

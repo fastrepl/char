@@ -1,7 +1,6 @@
 import { Icon } from "@iconify-icon/react";
 import { useMutation } from "@tanstack/react-query";
 import { FolderIcon, Link2Icon, Loader2Icon } from "lucide-react";
-import { SearchableFolderSubmenuContent } from "~/session/components/outer-header/shared/folder";
 
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
@@ -15,6 +14,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@hypr/ui/components/ui/tooltip";
+
+import { SearchableFolderSubmenuContent } from "~/session/components/outer-header/shared/folder";
 
 export function Copy() {
   return (

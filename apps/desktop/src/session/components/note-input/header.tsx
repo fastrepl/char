@@ -1,19 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircleIcon, PlusIcon, RefreshCwIcon, XIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useAITaskTask } from "~/ai/hooks";
-import { useLanguageModel, useLLMConnectionStatus } from "~/ai/hooks";
-import { useAudioPlayer } from "~/audio-player";
-import { getEnhancerService } from "~/services/enhancer";
-import { useHasTranscript } from "~/session/components/shared";
-import { useEnsureDefaultSummary } from "~/session/hooks/useEnhancedNotes";
-import * as main from "~/store/tinybase/store/main";
-import { createTaskId } from "~/store/zustand/ai-task/task-configs";
-import { type TaskStepInfo } from "~/store/zustand/ai-task/tasks";
-import { useTabs } from "~/store/zustand/tabs";
-import { type EditorView } from "~/store/zustand/tabs/schema";
-import { useListener } from "~/stt/contexts";
-import { useRunBatch } from "~/stt/useRunBatch";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import {
@@ -35,6 +22,20 @@ import { cn } from "@hypr/utils";
 
 import { EditingControls } from "./transcript/editing-controls";
 import { TranscriptionProgress } from "./transcript/progress";
+
+import { useAITaskTask } from "~/ai/hooks";
+import { useLanguageModel, useLLMConnectionStatus } from "~/ai/hooks";
+import { useAudioPlayer } from "~/audio-player";
+import { getEnhancerService } from "~/services/enhancer";
+import { useHasTranscript } from "~/session/components/shared";
+import { useEnsureDefaultSummary } from "~/session/hooks/useEnhancedNotes";
+import * as main from "~/store/tinybase/store/main";
+import { createTaskId } from "~/store/zustand/ai-task/task-configs";
+import { type TaskStepInfo } from "~/store/zustand/ai-task/tasks";
+import { useTabs } from "~/store/zustand/tabs";
+import { type EditorView } from "~/store/zustand/tabs/schema";
+import { useListener } from "~/stt/contexts";
+import { useRunBatch } from "~/stt/useRunBatch";
 
 function TruncatedTitle({
   title,
@@ -155,7 +156,7 @@ function HeaderTabTranscript({
         <span
           onClick={handleRefreshClick}
           className={cn([
-            "inline-flex h-5 w-5 items-center justify-center rounded-xs transition-colors cursor-pointer",
+            "inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-xs transition-colors",
             "hover:bg-neutral-200 focus-visible:bg-neutral-200",
             (isBatchProcessing || isRedoing) && "pointer-events-none",
           ])}
@@ -217,7 +218,7 @@ function HeaderTabEnhanced({
           }
         }}
         className={cn([
-          "group/tab relative my-2 py-0.5 px-1 text-xs font-medium transition-all duration-200 border-b-2 cursor-pointer shrink-0",
+          "group/tab relative my-2 shrink-0 cursor-pointer border-b-2 px-1 py-0.5 text-xs font-medium transition-all duration-200",
           isActive
             ? ["text-neutral-900", "border-neutral-900"]
             : [
@@ -227,18 +228,18 @@ function HeaderTabEnhanced({
               ],
         ])}
       >
-        <span className="flex items-center gap-1 h-5">
+        <span className="flex h-5 items-center gap-1">
           <TruncatedTitle title={title} isActive={isActive} />
           <button
             type="button"
             onClick={handleCancelClick}
             className={cn([
-              "inline-flex h-5 w-5 items-center justify-center rounded-xs cursor-pointer hover:bg-neutral-200",
+              "inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-xs hover:bg-neutral-200",
               !isActive && "opacity-50",
             ])}
             aria-label="Cancel enhancement"
           >
-            <span className="group-hover/tab:hidden flex items-center justify-center">
+            <span className="flex items-center justify-center group-hover/tab:hidden">
               {step?.type === "generating" ? (
                 <img
                   src="/assets/write-animation.gif"
@@ -250,7 +251,7 @@ function HeaderTabEnhanced({
                 <Spinner size={14} />
               )}
             </span>
-            <XIcon className="hidden group-hover/tab:flex items-center justify-center size-4" />
+            <XIcon className="hidden size-4 items-center justify-center group-hover/tab:flex" />
           </button>
         </span>
       </div>
@@ -261,7 +262,7 @@ function HeaderTabEnhanced({
     <span
       onClick={handleRegenerateClick}
       className={cn([
-        "group relative inline-flex h-5 w-5 items-center justify-center rounded-xs transition-colors cursor-pointer",
+        "group relative inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-xs transition-colors",
         isError
           ? [
               "text-red-600 hover:bg-red-50 hover:text-neutral-900 focus-visible:bg-red-50 focus-visible:text-neutral-900",
@@ -329,7 +330,7 @@ function CreateOtherFormatButton({
       <PopoverTrigger asChild>
         <button
           className={cn([
-            "relative my-2 py-0.5 px-1 text-xs font-medium transition-all duration-200 shrink-0 whitespace-nowrap",
+            "relative my-2 shrink-0 px-1 py-0.5 text-xs font-medium whitespace-nowrap transition-all duration-200",
             "text-neutral-600 hover:text-neutral-800",
             "flex items-center gap-1",
             "border-b-2 border-transparent",
@@ -352,7 +353,7 @@ function CreateOtherFormatButton({
                 </TemplateButton>
               ))}
               <TemplateButton
-                className="italic text-neutral-500 hover:text-neutral-700 hover:bg-neutral-50"
+                className="text-neutral-500 italic hover:bg-neutral-50 hover:text-neutral-700"
                 onClick={() => {
                   setOpen(false);
                   openNew({ type: "ai", state: { tab: "templates" } });
@@ -363,7 +364,7 @@ function CreateOtherFormatButton({
             </>
           ) : (
             <>
-              <p className="text-sm text-neutral-600 text-center mb-2">
+              <p className="mb-2 text-center text-sm text-neutral-600">
                 No templates yet
               </p>
               <button
@@ -371,7 +372,7 @@ function CreateOtherFormatButton({
                   setOpen(false);
                   openNew({ type: "ai", state: { tab: "templates" } });
                 }}
-                className="px-6 py-2 rounded-full bg-linear-to-t from-stone-600 to-stone-500 text-white text-sm font-medium transition-opacity duration-150 hover:opacity-90"
+                className="rounded-full bg-linear-to-t from-stone-600 to-stone-500 px-6 py-2 text-sm font-medium text-white transition-opacity duration-150 hover:opacity-90"
               >
                 Create templates
               </button>
@@ -419,11 +420,11 @@ export function Header({
 
   return (
     <div className="flex flex-col">
-      <div className="flex justify-between items-center gap-2">
+      <div className="flex items-center justify-between gap-2">
         <div className="relative min-w-0 flex-1">
           <div
             ref={tabsRef}
-            className="flex gap-1 items-center overflow-x-auto scrollbar-hide"
+            className="scrollbar-hide flex items-center gap-1 overflow-x-auto"
           >
             {editorTabs.map((view) => {
               if (view.type === "enhanced") {
@@ -658,7 +659,7 @@ function TemplateButton({
   return (
     <button
       className={cn([
-        "text-center text-sm py-2 px-3 rounded-md transition-colors hover:bg-neutral-100",
+        "rounded-md px-3 py-2 text-center text-sm transition-colors hover:bg-neutral-100",
         className,
       ])}
       onClick={onClick}

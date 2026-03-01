@@ -1,7 +1,8 @@
 import { useCallback } from "react";
-import { useShell } from "~/contexts/shell";
 
 import { ChatTrigger } from "./trigger";
+
+import { useShell } from "~/contexts/shell";
 
 export function ChatFloatingButton({
   isCaretNearBottom = false,

@@ -84,14 +84,14 @@ export function ConnectedServiceCard({
   };
 
   return (
-    <div className="border border-neutral-200 rounded-lg overflow-clip">
-      <div className="flex items-center justify-between border-b pl-4 pr-2 py-2 text-sm font-medium">
+    <div className="overflow-clip rounded-lg border border-neutral-200">
+      <div className="flex items-center justify-between border-b py-2 pr-2 pl-4 text-sm font-medium">
         <div className="flex items-center gap-4">
           {icon}
           <div>
             <div>{title}</div>
             {subtitle && (
-              <div className="text-xs text-neutral-600 font-normal">
+              <div className="text-xs font-normal text-neutral-600">
                 {subtitle}
               </div>
             )}
@@ -117,7 +117,7 @@ export function ConnectedServiceCard({
           <button
             onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
             className={cn([
-              "w-full flex items-center justify-between px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-50 transition-colors",
+              "flex w-full items-center justify-between px-4 py-2 text-sm text-neutral-600 transition-colors hover:bg-neutral-50",
               isAdvancedOpen && "bg-neutral-50",
             ])}
           >
@@ -130,7 +130,7 @@ export function ConnectedServiceCard({
           </button>
 
           {isAdvancedOpen && (
-            <div className="px-4 pb-4 flex flex-col gap-3 bg-neutral-50">
+            <div className="flex flex-col gap-3 bg-neutral-50 px-4 pb-4">
               {connectedAt && (
                 <div className="text-xs text-neutral-600">
                   <span className="font-medium">Connected on:</span>{" "}
@@ -164,7 +164,7 @@ export function ConnectedServiceCard({
                       size="sm"
                       variant="outline"
                       onClick={() => setShowDisconnectDialog(true)}
-                      className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 hover:border-red-300"
+                      className="flex-1 border-red-200 text-red-600 hover:border-red-300 hover:bg-red-50 hover:text-red-700"
                     >
                       Disconnect
                     </Button>

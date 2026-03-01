@@ -107,7 +107,6 @@ pub async fn main() {
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_detect::init())
         .plugin(tauri_plugin_dock::init())
-        .plugin(tauri_plugin_extensions::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_notify::init())
         .plugin(tauri_plugin_overlay::init())
@@ -354,6 +353,7 @@ fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
             commands::set_pinned_tabs::<tauri::Wry>,
             commands::get_recently_opened_sessions::<tauri::Wry>,
             commands::set_recently_opened_sessions::<tauri::Wry>,
+            commands::list_plugins::<tauri::Wry>,
         ])
         .error_handling(tauri_specta::ErrorHandlingMode::Result)
 }

@@ -1,11 +1,12 @@
 import { X } from "lucide-react";
 import { useCallback } from "react";
-import * as main from "~/store/tinybase/store/main";
-import { useTabs } from "~/store/zustand/tabs/index";
-import { parseTranscriptHints, updateTranscriptHints } from "~/stt/utils";
 
 import { Badge } from "@hypr/ui/components/ui/badge";
 import { Button } from "@hypr/ui/components/ui/button";
+
+import * as main from "~/store/tinybase/store/main";
+import { useTabs } from "~/store/zustand/tabs/index";
+import { parseTranscriptHints, updateTranscriptHints } from "~/stt/utils";
 
 export function ParticipantChip({ mappingId }: { mappingId: string }) {
   const details = useParticipantDetails(mappingId);
@@ -39,7 +40,7 @@ export function ParticipantChip({ mappingId }: { mappingId: string }) {
   return (
     <Badge
       variant="secondary"
-      className="flex items-center gap-1 px-2 py-0.5 text-xs bg-muted cursor-pointer hover:bg-muted/80"
+      className="bg-muted hover:bg-muted/80 flex cursor-pointer items-center gap-1 px-2 py-0.5 text-xs"
       onClick={handleClick}
     >
       {humanName || "Unknown"}

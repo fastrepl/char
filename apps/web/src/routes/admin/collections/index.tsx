@@ -544,7 +544,7 @@ function CollectionsPage() {
       </ResizablePanel>
       <ResizableHandle />
       <ResizablePanel defaultSize={80} minSize={50}>
-        <div className="h-full flex flex-col">
+        <div className="flex h-full flex-col">
           <ContentPanel
             tabs={tabs}
             currentTab={currentTab}
@@ -597,7 +597,7 @@ function CollectionsPage() {
               <button
                 type="button"
                 onClick={() => setDeleteConfirmation(null)}
-                className="px-3 py-1.5 text-sm text-neutral-600 hover:bg-neutral-100 rounded transition-colors"
+                className="rounded px-3 py-1.5 text-sm text-neutral-600 transition-colors hover:bg-neutral-100"
               >
                 Cancel
               </button>
@@ -611,7 +611,7 @@ function CollectionsPage() {
                   }
                 }}
                 disabled={deleteMutation.isPending}
-                className="px-3 py-1.5 text-sm text-white bg-red-600 hover:bg-red-700 rounded transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="flex items-center gap-2 rounded bg-red-600 px-3 py-1.5 text-sm text-white transition-colors hover:bg-red-700 disabled:opacity-50"
               >
                 {deleteMutation.isPending && (
                   <Spinner size={14} color="white" />
@@ -669,10 +669,10 @@ function Sidebar({
   ]);
 
   return (
-    <div className="h-full border-r border-neutral-200 bg-white flex flex-col min-h-0">
-      <div className="h-10 pl-4 pr-2 flex items-center border-b border-neutral-200">
-        <div className="relative w-full flex items-center gap-1.5">
-          <SearchIcon className="size-4 text-neutral-400 shrink-0" />
+    <div className="flex h-full min-h-0 flex-col border-r border-neutral-200 bg-white">
+      <div className="flex h-10 items-center border-b border-neutral-200 pr-2 pl-4">
+        <div className="relative flex w-full items-center gap-1.5">
+          <SearchIcon className="size-4 shrink-0 text-neutral-400" />
           <input
             type="text"
             value={searchQuery}
@@ -688,7 +688,7 @@ function Sidebar({
         </div>
       </div>
 
-      <div className="flex-1 relative min-h-0">
+      <div className="relative min-h-0 flex-1">
         {!atStart && <ScrollFadeOverlay position="top" />}
         {!atEnd && <ScrollFadeOverlay position="bottom" />}
         <div ref={scrollRef} className="h-full overflow-y-auto">
@@ -727,10 +727,10 @@ function Sidebar({
           onClick={onNewPostClick}
           disabled={isCreatingNewPost}
           className={cn([
-            "w-full h-9 text-sm font-medium rounded-full flex items-center justify-center gap-2",
-            "bg-linear-to-b from-white to-neutral-100 text-neutral-700 border border-neutral-200",
-            "shadow-xs hover:shadow-md hover:scale-[102%] active:scale-[98%] transition-all",
-            "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-xs",
+            "flex h-9 w-full items-center justify-center gap-2 rounded-full text-sm font-medium",
+            "border border-neutral-200 bg-linear-to-b from-white to-neutral-100 text-neutral-700",
+            "shadow-xs transition-all hover:scale-[102%] hover:shadow-md active:scale-[98%]",
+            "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-xs",
           ])}
         >
           <PlusIcon className="size-4" />
@@ -804,21 +804,21 @@ function FileItemSidebar({
   return (
     <div
       className={cn([
-        "flex items-center gap-1.5 py-1.5 pl-4 pr-2 cursor-pointer text-sm",
-        "hover:bg-neutral-50 transition-colors",
+        "flex cursor-pointer items-center gap-1.5 py-1.5 pr-2 pl-4 text-sm",
+        "transition-colors hover:bg-neutral-50",
         isCut && "opacity-50",
         (isSelected || contextMenu) && "bg-neutral-100",
       ])}
       onClick={onClick}
       onContextMenu={handleContextMenu}
     >
-      <FileTextIcon className="size-4 text-neutral-400 shrink-0" />
+      <FileTextIcon className="size-4 shrink-0 text-neutral-400" />
       <span className="truncate text-neutral-600">
         {item.name.replace(/\.mdx$/, "")}
       </span>
 
       {item.isDraft && (
-        <span className="px-1.5 py-0.5 text-[10px] font-medium bg-amber-100 text-amber-700 rounded shrink-0">
+        <span className="shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
           Draft
         </span>
       )}
@@ -905,14 +905,14 @@ function InlineInput({
   return (
     <div
       className={cn([
-        "flex items-center gap-1.5 py-1.5 pl-4 pr-2 text-sm",
+        "flex items-center gap-1.5 py-1.5 pr-2 pl-4 text-sm",
         "bg-neutral-100",
       ])}
     >
       {type === "file" ? (
-        <FileTextIcon className="size-4 text-neutral-400 shrink-0" />
+        <FileTextIcon className="size-4 shrink-0 text-neutral-400" />
       ) : (
-        <FolderIcon className="size-4 text-neutral-400 shrink-0" />
+        <FolderIcon className="size-4 shrink-0 text-neutral-400" />
       )}
       <input
         ref={inputRef}
@@ -924,7 +924,7 @@ function InlineInput({
         disabled={isLoading}
         placeholder={type === "file" ? "filename" : "folder name"}
         className={cn([
-          "flex-1 text-sm bg-transparent outline-hidden",
+          "flex-1 bg-transparent text-sm outline-hidden",
           "text-neutral-600 placeholder:text-neutral-400",
         ])}
       />
@@ -1016,11 +1016,11 @@ function NewPostInlineInput({
     <div>
       <div
         className={cn([
-          "flex items-center gap-1.5 py-1.5 pl-4 pr-2 text-sm",
+          "flex items-center gap-1.5 py-1.5 pr-2 pl-4 text-sm",
           error ? "bg-red-50" : "bg-neutral-100",
         ])}
       >
-        <FileTextIcon className="size-4 text-neutral-400 shrink-0" />
+        <FileTextIcon className="size-4 shrink-0 text-neutral-400" />
         <input
           ref={inputRef}
           type="text"
@@ -1031,14 +1031,14 @@ function NewPostInlineInput({
           disabled={isLoading}
           placeholder="enter-slug-here"
           className={cn([
-            "flex-1 text-sm bg-transparent outline-hidden",
+            "flex-1 bg-transparent text-sm outline-hidden",
             error ? "text-red-700" : "text-neutral-600",
             "placeholder:text-neutral-400",
           ])}
         />
       </div>
       {error && (
-        <div className="px-4 py-1 text-xs text-red-600 bg-red-50">{error}</div>
+        <div className="bg-red-50 px-4 py-1 text-xs text-red-600">{error}</div>
       )}
     </div>
   );
@@ -1095,7 +1095,7 @@ function ContextMenu({
         ref={menuRef}
         className={cn([
           "fixed z-50 min-w-40 py-1",
-          "bg-white border border-neutral-200 rounded-xs shadow-lg",
+          "rounded-xs border border-neutral-200 bg-white shadow-lg",
         ])}
         style={{ left: x, top: y }}
       >
@@ -1204,9 +1204,9 @@ function ContextMenuItem({
       onClick={onClick}
       disabled={disabled}
       className={cn([
-        "w-full px-3 py-1.5 text-sm text-left flex items-center gap-2",
-        "hover:bg-neutral-100 transition-colors",
-        disabled && "opacity-40 cursor-not-allowed hover:bg-transparent",
+        "flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm",
+        "transition-colors hover:bg-neutral-100",
+        disabled && "cursor-not-allowed opacity-40 hover:bg-transparent",
         danger && "text-red-600 hover:bg-red-50",
       ])}
     >
@@ -1417,9 +1417,9 @@ function ContentPanel({
   }, [currentTab, editorData, publish]);
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex flex-1 flex-col overflow-hidden">
       {currentTab ? (
-        <div className="flex-1 flex flex-col min-h-0">
+        <div className="flex min-h-0 flex-1 flex-col">
           <EditorHeader
             tabs={tabs}
             currentTab={currentTab}
@@ -1462,7 +1462,7 @@ function ContentPanel({
           )}
         </div>
       ) : (
-        <div className="flex-1 flex flex-col">
+        <div className="flex flex-1 flex-col">
           <div className="h-10 border-b border-neutral-200" />
           <EmptyState
             icon={FolderOpenIcon}
@@ -1563,7 +1563,7 @@ function EditorHeader({
         <div className="flex-1 border-b border-neutral-200" />
       </div>
 
-      <div className="h-10 flex items-center justify-between px-4 border-b border-neutral-200">
+      <div className="flex h-10 items-center justify-between border-b border-neutral-200 px-4">
         <div className="flex items-center gap-1 text-sm text-neutral-500">
           {breadcrumbs.map((crumb, index) => (
             <span key={index} className="flex items-center gap-1">
@@ -1580,12 +1580,12 @@ function EditorHeader({
                     onChange={(e) => setSlugValue(e.target.value)}
                     onBlur={handleSlugSubmit}
                     onKeyDown={handleSlugKeyDown}
-                    className="text-neutral-700 font-medium bg-transparent outline-none"
+                    className="bg-transparent font-medium text-neutral-700 outline-none"
                   />
                 ) : (
                   <span
                     onClick={handleSlugClick}
-                    className="text-neutral-700 font-medium hover:text-neutral-900 cursor-text"
+                    className="cursor-text font-medium text-neutral-700 hover:text-neutral-900"
                   >
                     {crumb.replace(/\.mdx$/, "")}
                   </span>
@@ -1594,8 +1594,8 @@ function EditorHeader({
                 <span
                   className={cn([
                     index === breadcrumbs.length - 1
-                      ? "text-neutral-700 font-medium"
-                      : "hover:text-neutral-700 cursor-pointer",
+                      ? "font-medium text-neutral-700"
+                      : "cursor-pointer hover:text-neutral-700",
                   ])}
                 >
                   {crumb.replace(/\.mdx$/, "")}
@@ -1612,7 +1612,7 @@ function EditorHeader({
                 onClick={onDelete}
                 disabled={isDeleting}
                 className={cn([
-                  "cursor-pointer px-2 py-1.5 text-xs font-medium font-mono rounded-xs transition-colors flex items-center gap-1.5",
+                  "flex cursor-pointer items-center gap-1.5 rounded-xs px-2 py-1.5 font-mono text-xs font-medium transition-colors",
                   "text-red-600 hover:bg-red-50",
                   "disabled:cursor-not-allowed disabled:opacity-50",
                 ])}
@@ -1628,7 +1628,7 @@ function EditorHeader({
             <button
               onClick={onTogglePreview}
               className={cn([
-                "cursor-pointer px-2 py-1.5 text-xs font-medium font-mono rounded-xs transition-colors flex items-center gap-1.5",
+                "flex cursor-pointer items-center gap-1.5 rounded-xs px-2 py-1.5 font-mono text-xs font-medium transition-colors",
                 isPreviewMode
                   ? "text-neutral-700"
                   : "text-neutral-400 hover:text-neutral-600",
@@ -1651,8 +1651,8 @@ function EditorHeader({
               onClick={onSave}
               disabled={isSaving || !hasUnsavedChanges}
               className={cn([
-                "cursor-pointer px-2 py-1.5 text-xs font-medium font-mono rounded-xs transition-colors flex items-center gap-1.5",
-                "text-white bg-neutral-900 hover:bg-neutral-800",
+                "flex cursor-pointer items-center gap-1.5 rounded-xs px-2 py-1.5 font-mono text-xs font-medium transition-colors",
+                "bg-neutral-900 text-white hover:bg-neutral-800",
                 "disabled:cursor-not-allowed disabled:opacity-50",
               ])}
               title="Save (⌘S)"
@@ -1666,7 +1666,7 @@ function EditorHeader({
               {autoSaveCountdown !== null &&
                 autoSaveCountdown !== undefined &&
                 hasUnsavedChanges && (
-                  <span className="text-neutral-400 ml-1">
+                  <span className="ml-1 text-neutral-400">
                     ({autoSaveCountdown}s)
                   </span>
                 )}
@@ -1676,10 +1676,10 @@ function EditorHeader({
                 onClick={onPublish}
                 disabled={isPublishing}
                 className={cn([
-                  "cursor-pointer px-2 py-1.5 text-xs font-medium font-mono rounded-xs transition-colors flex items-center gap-1.5",
+                  "flex cursor-pointer items-center gap-1.5 rounded-xs px-2 py-1.5 font-mono text-xs font-medium transition-colors",
                   hasPendingPR
-                    ? "text-white bg-amber-600 hover:bg-amber-700"
-                    : "text-white bg-blue-600 hover:bg-blue-700",
+                    ? "bg-amber-600 text-white hover:bg-amber-700"
+                    : "bg-blue-600 text-white hover:bg-blue-700",
                   "disabled:cursor-not-allowed disabled:opacity-50",
                 ])}
                 title={hasPendingPR ? "View existing PR" : "Create PR"}
@@ -1788,10 +1788,10 @@ function TabItem({
     <>
       <div
         className={cn([
-          "h-10 px-3 flex items-center gap-2 cursor-pointer text-sm transition-colors",
+          "flex h-10 cursor-pointer items-center gap-2 px-3 text-sm transition-colors",
           "border-r border-b border-neutral-200",
           tab.active
-            ? "bg-white text-neutral-900 border-b-transparent"
+            ? "border-b-transparent bg-white text-neutral-900"
             : "bg-neutral-50 text-neutral-600 hover:bg-neutral-100",
         ])}
         onClick={onSelect}
@@ -1804,7 +1804,7 @@ function TabItem({
         ) : (
           <FileTextIcon className="size-4 text-neutral-400" />
         )}
-        <span className={cn(["truncate max-w-30", !tab.pinned && "italic"])}>
+        <span className={cn(["max-w-30 truncate", !tab.pinned && "italic"])}>
           {tab.name.replace(/\.mdx$/, "")}
         </span>
         <button
@@ -1812,7 +1812,7 @@ function TabItem({
             e.stopPropagation();
             onClose();
           }}
-          className="p-0.5 hover:bg-neutral-200 rounded transition-colors"
+          className="rounded p-0.5 transition-colors hover:bg-neutral-200"
         >
           <XIcon className="size-3 text-neutral-500" />
         </button>
@@ -1866,7 +1866,7 @@ function TabContextMenu({
       <div
         className={cn([
           "fixed z-50 min-w-35 py-1",
-          "bg-white border border-neutral-200 rounded-xs shadow-lg",
+          "rounded-xs border border-neutral-200 bg-white shadow-lg",
         ])}
         style={{ left: x, top: y }}
       >
@@ -1972,13 +1972,13 @@ function AuthorSelect({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn([
-          "w-full flex items-center gap-2 text-left text-neutral-900 cursor-pointer",
+          "flex w-full cursor-pointer items-center gap-2 text-left text-neutral-900",
           withBorder &&
-            "px-2 py-1.5 border border-neutral-200 rounded focus:border-neutral-400",
+            "rounded border border-neutral-200 px-2 py-1.5 focus:border-neutral-400",
         ])}
       >
         {selectedAuthors.length > 0 ? (
-          <div className="flex items-center gap-1 flex-wrap">
+          <div className="flex flex-wrap items-center gap-1">
             {selectedAuthors.map((a) => (
               <span
                 key={a.name}
@@ -2010,21 +2010,21 @@ function AuthorSelect({
         )}
         <ChevronDownIcon
           className={cn([
-            "size-3 ml-auto transition-transform text-neutral-400",
+            "ml-auto size-3 text-neutral-400 transition-transform",
             isOpen && "rotate-180",
           ])}
         />
       </button>
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-xs shadow-lg z-50">
+        <div className="absolute top-full right-0 left-0 z-50 mt-1 rounded-xs border border-neutral-200 bg-white shadow-lg">
           {AUTHORS.map((author) => (
             <button
               key={author.name}
               type="button"
               onClick={() => toggleAuthor(author.name)}
               className={cn([
-                "w-full flex items-center gap-2 px-3 py-2 text-sm text-left cursor-pointer",
-                "hover:bg-neutral-100 transition-colors",
+                "flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm",
+                "transition-colors hover:bg-neutral-100",
                 value.includes(author.name) && "bg-neutral-50",
               ])}
             >
@@ -2082,9 +2082,9 @@ function CategorySelect({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn([
-          "w-full flex items-center gap-2 text-left text-neutral-900 cursor-pointer",
+          "flex w-full cursor-pointer items-center gap-2 text-left text-neutral-900",
           withBorder &&
-            "px-2 py-1.5 border border-neutral-200 rounded focus:border-neutral-400",
+            "rounded border border-neutral-200 px-2 py-1.5 focus:border-neutral-400",
         ])}
       >
         {value ? (
@@ -2094,13 +2094,13 @@ function CategorySelect({
         )}
         <ChevronDownIcon
           className={cn([
-            "size-3 ml-auto transition-transform text-neutral-400",
+            "ml-auto size-3 text-neutral-400 transition-transform",
             isOpen && "rotate-180",
           ])}
         />
       </button>
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-xs shadow-lg z-50">
+        <div className="absolute top-full right-0 left-0 z-50 mt-1 rounded-xs border border-neutral-200 bg-white shadow-lg">
           {CATEGORIES.map((category) => (
             <button
               key={category}
@@ -2110,8 +2110,8 @@ function CategorySelect({
                 setIsOpen(false);
               }}
               className={cn([
-                "w-full px-3 py-2 text-sm text-left cursor-pointer",
-                "hover:bg-neutral-100 transition-colors",
+                "w-full cursor-pointer px-3 py-2 text-left text-sm",
+                "transition-colors hover:bg-neutral-100",
                 value === category && "bg-neutral-50",
               ])}
             >
@@ -2137,7 +2137,7 @@ function MetadataRow({
 }) {
   return (
     <div className={cn(["flex", !noBorder && "border-b border-neutral-200"])}>
-      <span className="w-24 shrink-0 px-4 py-2 text-neutral-500 relative">
+      <span className="relative w-24 shrink-0 px-4 py-2 text-neutral-500">
         {required && <span className="absolute left-1 text-red-400">*</span>}
         {label}
       </span>
@@ -2182,20 +2182,20 @@ function MetadataPanel({
     <div
       key={filePath}
       className={cn([
-        "shrink-0 relative",
+        "relative shrink-0",
         isExpanded && "border-b border-neutral-200",
       ])}
     >
       <div
         className={cn([
-          "text-sm transition-all duration-200 overflow-hidden",
+          "overflow-hidden text-sm transition-all duration-200",
           isExpanded ? "max-h-125" : "max-h-0",
         ])}
       >
         <div className="flex border-b border-neutral-200">
           <button
             onClick={() => setIsTitleExpanded(!isTitleExpanded)}
-            className="w-24 shrink-0 px-4 py-2 text-neutral-500 flex items-center justify-between hover:text-neutral-700 relative"
+            className="relative flex w-24 shrink-0 items-center justify-between px-4 py-2 text-neutral-500 hover:text-neutral-700"
           >
             <span className="absolute left-1 text-red-400">*</span>
             Title
@@ -2211,12 +2211,12 @@ function MetadataPanel({
             value={handlers.metaTitle}
             onChange={(e) => handlers.onMetaTitleChange(e.target.value)}
             placeholder="SEO meta title"
-            className="flex-1 px-2 py-2 bg-transparent outline-hidden text-neutral-900 placeholder:text-neutral-300"
+            className="flex-1 bg-transparent px-2 py-2 text-neutral-900 outline-hidden placeholder:text-neutral-300"
           />
         </div>
         {isTitleExpanded && (
           <div className="flex border-b border-neutral-200 bg-neutral-50">
-            <span className="w-24 shrink-0 px-4 py-2 text-neutral-400 flex items-center gap-1 relative">
+            <span className="relative flex w-24 shrink-0 items-center gap-1 px-4 py-2 text-neutral-400">
               <span className="text-neutral-300">└</span>
               Display
             </span>
@@ -2225,7 +2225,7 @@ function MetadataPanel({
               value={handlers.displayTitle}
               onChange={(e) => handlers.onDisplayTitleChange(e.target.value)}
               placeholder={handlers.metaTitle || "Display title (optional)"}
-              className="flex-1 px-2 py-2 bg-transparent outline-hidden text-neutral-900 placeholder:text-neutral-300"
+              className="flex-1 bg-transparent px-2 py-2 text-neutral-900 outline-hidden placeholder:text-neutral-300"
             />
           </div>
         )}
@@ -2242,7 +2242,7 @@ function MetadataPanel({
             type="date"
             value={handlers.date}
             onChange={(e) => handlers.onDateChange(e.target.value)}
-            className="flex-1 -ml-1 px-2 py-2 bg-transparent outline-hidden text-neutral-900"
+            className="-ml-1 flex-1 bg-transparent px-2 py-2 text-neutral-900 outline-hidden"
           />
         </MetadataRow>
         <MetadataRow label="Description" required>
@@ -2262,14 +2262,14 @@ function MetadataPanel({
               target.style.height = "auto";
               target.style.height = `${target.scrollHeight}px`;
             }}
-            className="flex-1 px-2 py-2 bg-transparent outline-hidden text-neutral-900 placeholder:text-neutral-300 resize-none"
+            className="flex-1 resize-none bg-transparent px-2 py-2 text-neutral-900 outline-hidden placeholder:text-neutral-300"
           />
         </MetadataRow>
         <MetadataRow label="Category">
           <select
             value={handlers.category}
             onChange={(e) => handlers.onCategoryChange(e.target.value)}
-            className="flex-1 px-2 py-2 bg-transparent outline-hidden text-neutral-900"
+            className="flex-1 bg-transparent px-2 py-2 text-neutral-900 outline-hidden"
           >
             <option value="">Select category</option>
             <option value="Case Study">Case Study</option>
@@ -2279,18 +2279,18 @@ function MetadataPanel({
           </select>
         </MetadataRow>
         <MetadataRow label="Cover">
-          <div className="flex-1 flex items-center gap-2 px-2 py-2">
+          <div className="flex flex-1 items-center gap-2 px-2 py-2">
             <input
               type="text"
               value={handlers.coverImage}
               onChange={(e) => handlers.onCoverImageChange(e.target.value)}
               placeholder="/api/images/blog/slug/cover.png"
-              className="flex-1 bg-transparent outline-hidden text-neutral-900 placeholder:text-neutral-300"
+              className="flex-1 bg-transparent text-neutral-900 outline-hidden placeholder:text-neutral-300"
             />
           </div>
         </MetadataRow>
         <MetadataRow label="Featured" noBorder>
-          <div className="flex-1 flex items-center px-2 py-2">
+          <div className="flex flex-1 items-center px-2 py-2">
             <input
               type="checkbox"
               checked={handlers.featured}
@@ -2303,11 +2303,11 @@ function MetadataPanel({
       <button
         onClick={onToggleExpanded}
         className={cn([
-          "absolute left-1/2 -translate-x-1/2 top-full z-10",
+          "absolute top-full left-1/2 z-10 -translate-x-1/2",
           "flex items-center justify-center",
-          "w-10 h-4 bg-white border border-t-0 border-neutral-200 rounded-b-md",
+          "h-4 w-10 rounded-b-md border border-t-0 border-neutral-200 bg-white",
           "text-neutral-400 hover:text-neutral-600",
-          "transition-colors cursor-pointer",
+          "cursor-pointer transition-colors",
         ])}
       >
         <ChevronDownIcon
@@ -2356,7 +2356,7 @@ function GitHistory({ filePath }: { filePath: string }) {
     <div className="border-t border-neutral-200">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between px-4 py-3 text-sm text-neutral-600 hover:bg-neutral-50"
+        className="flex w-full items-center justify-between px-4 py-3 text-sm text-neutral-600 hover:bg-neutral-50"
       >
         <span className="flex items-center gap-2">
           <GithubIcon className="size-4" />
@@ -2370,7 +2370,7 @@ function GitHistory({ filePath }: { filePath: string }) {
         />
       </button>
       {isExpanded && (
-        <div className="px-4 pb-4 flex flex-col gap-2">
+        <div className="flex flex-col gap-2 px-4 pb-4">
           {isLoading ? (
             <div className="flex items-center gap-2 text-xs text-neutral-400">
               <Spinner size={12} />
@@ -2385,17 +2385,17 @@ function GitHistory({ filePath }: { filePath: string }) {
                 href={commit.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block p-2 rounded hover:bg-neutral-50 border border-neutral-100"
+                className="block rounded border border-neutral-100 p-2 hover:bg-neutral-50"
               >
                 <div className="flex items-center gap-2 text-xs">
-                  <code className="text-neutral-500 bg-neutral-100 px-1 rounded">
+                  <code className="rounded bg-neutral-100 px-1 text-neutral-500">
                     {commit.sha}
                   </code>
                   <span className="text-neutral-400">
                     {new Date(commit.date).toLocaleDateString()}
                   </span>
                 </div>
-                <p className="text-xs text-neutral-700 mt-1 truncate">
+                <p className="mt-1 truncate text-xs text-neutral-700">
                   {commit.message}
                 </p>
               </a>
@@ -2404,7 +2404,7 @@ function GitHistory({ filePath }: { filePath: string }) {
           {commits.length > 0 && (
             <button
               onClick={() => refetch()}
-              className="text-xs text-neutral-500 hover:text-neutral-700 flex items-center gap-1"
+              className="flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-700"
             >
               <RefreshCwIcon className="size-3" />
               Refresh
@@ -2433,7 +2433,7 @@ function MetadataSidePanel({
       <div className="flex border-b border-neutral-200">
         <button
           onClick={() => setIsTitleExpanded(!isTitleExpanded)}
-          className="w-24 shrink-0 px-4 py-2 text-neutral-500 flex items-center justify-between hover:text-neutral-700 relative"
+          className="relative flex w-24 shrink-0 items-center justify-between px-4 py-2 text-neutral-500 hover:text-neutral-700"
         >
           <span className="absolute left-1 text-red-400">*</span>
           Title
@@ -2449,12 +2449,12 @@ function MetadataSidePanel({
           value={handlers.metaTitle}
           onChange={(e) => handlers.onMetaTitleChange(e.target.value)}
           placeholder="SEO meta title"
-          className="flex-1 min-w-0 px-2 py-2 bg-transparent outline-hidden text-neutral-900 placeholder:text-neutral-300"
+          className="min-w-0 flex-1 bg-transparent px-2 py-2 text-neutral-900 outline-hidden placeholder:text-neutral-300"
         />
       </div>
       {isTitleExpanded && (
         <div className="flex border-b border-neutral-200 bg-neutral-50">
-          <span className="w-24 shrink-0 px-4 py-2 text-neutral-400 flex items-center gap-1 relative">
+          <span className="relative flex w-24 shrink-0 items-center gap-1 px-4 py-2 text-neutral-400">
             <span className="text-neutral-300">└</span>
             Display
           </span>
@@ -2463,12 +2463,12 @@ function MetadataSidePanel({
             value={handlers.displayTitle}
             onChange={(e) => handlers.onDisplayTitleChange(e.target.value)}
             placeholder={handlers.metaTitle || "Display title (optional)"}
-            className="flex-1 min-w-0 px-2 py-2 bg-transparent outline-hidden text-neutral-900 placeholder:text-neutral-300"
+            className="min-w-0 flex-1 bg-transparent px-2 py-2 text-neutral-900 outline-hidden placeholder:text-neutral-300"
           />
         </div>
       )}
       <MetadataRow label="Author" required>
-        <div className="flex-1 min-w-0 px-2 py-2">
+        <div className="min-w-0 flex-1 px-2 py-2">
           <AuthorSelect
             value={handlers.author}
             onChange={handlers.onAuthorChange}
@@ -2480,7 +2480,7 @@ function MetadataSidePanel({
           type="date"
           value={handlers.date}
           onChange={(e) => handlers.onDateChange(e.target.value)}
-          className="flex-1 min-w-0 -ml-1 px-2 py-2 bg-transparent outline-hidden text-neutral-900"
+          className="-ml-1 min-w-0 flex-1 bg-transparent px-2 py-2 text-neutral-900 outline-hidden"
         />
       </MetadataRow>
       <MetadataRow label="Description" required>
@@ -2500,11 +2500,11 @@ function MetadataSidePanel({
             target.style.height = "auto";
             target.style.height = `${target.scrollHeight}px`;
           }}
-          className="flex-1 min-w-0 px-2 py-2 bg-transparent outline-hidden text-neutral-900 placeholder:text-neutral-300 resize-none"
+          className="min-w-0 flex-1 resize-none bg-transparent px-2 py-2 text-neutral-900 outline-hidden placeholder:text-neutral-300"
         />
       </MetadataRow>
       <MetadataRow label="Category">
-        <div className="flex-1 min-w-0 px-2 py-2">
+        <div className="min-w-0 flex-1 px-2 py-2">
           <CategorySelect
             value={handlers.category}
             onChange={handlers.onCategoryChange}
@@ -2515,20 +2515,20 @@ function MetadataSidePanel({
         <button
           type="button"
           onClick={() => setIsCoverImageSelectorOpen(true)}
-          className="flex-1 min-w-0 flex items-center gap-2 px-2 py-2 cursor-pointer text-left hover:bg-neutral-50 transition-colors"
+          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 px-2 py-2 text-left transition-colors hover:bg-neutral-50"
         >
           {handlers.coverImage ? (
-            <span className="truncate flex-1 text-neutral-900">
+            <span className="flex-1 truncate text-neutral-900">
               {handlers.coverImage}
             </span>
           ) : (
-            <span className="text-neutral-300 flex-1">Select cover image</span>
+            <span className="flex-1 text-neutral-300">Select cover image</span>
           )}
-          <ImageIcon className="size-4 text-neutral-400 shrink-0" />
+          <ImageIcon className="size-4 shrink-0 text-neutral-400" />
         </button>
       </MetadataRow>
       <MetadataRow label="Featured" noBorder>
-        <div className="flex-1 flex items-center px-2 py-2">
+        <div className="flex flex-1 items-center px-2 py-2">
           <input
             type="checkbox"
             checked={handlers.featured}
@@ -2972,10 +2972,10 @@ const FileEditor = React.forwardRef<
 
   if (branch && isBranchLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center text-neutral-500">
+      <div className="flex flex-1 items-center justify-center text-neutral-500">
         <div className="text-center">
           <Spinner size={32} />
-          <p className="text-sm mt-3">Loading draft...</p>
+          <p className="mt-3 text-sm">Loading draft...</p>
         </div>
       </div>
     );
@@ -2983,10 +2983,10 @@ const FileEditor = React.forwardRef<
 
   if (isPendingPRLoading && pendingPRData?.hasPendingPR) {
     return (
-      <div className="flex-1 flex items-center justify-center text-neutral-500">
+      <div className="flex flex-1 items-center justify-center text-neutral-500">
         <div className="text-center">
           <Spinner size={32} />
-          <p className="text-sm mt-3">Loading from pending PR...</p>
+          <p className="mt-3 text-sm">Loading from pending PR...</p>
         </div>
       </div>
     );
@@ -2994,11 +2994,11 @@ const FileEditor = React.forwardRef<
 
   if (branch && branchError) {
     return (
-      <div className="flex-1 flex items-center justify-center text-neutral-500">
+      <div className="flex flex-1 items-center justify-center text-neutral-500">
         <div className="text-center">
-          <FileWarningIcon className="size-10 mb-3" />
+          <FileWarningIcon className="mb-3 size-10" />
           <p className="text-sm">Failed to load draft</p>
-          <p className="text-xs mt-1 text-neutral-400">
+          <p className="mt-1 text-xs text-neutral-400">
             {branchError instanceof Error
               ? branchError.message
               : "Unknown error"}
@@ -3010,9 +3010,9 @@ const FileEditor = React.forwardRef<
 
   if (!fileContent) {
     return (
-      <div className="flex-1 flex items-center justify-center text-neutral-500">
+      <div className="flex flex-1 items-center justify-center text-neutral-500">
         <div className="text-center">
-          <FileWarningIcon className="size-10 mb-3" />
+          <FileWarningIcon className="mb-3 size-10" />
           <p className="text-sm">File not found</p>
         </div>
       </div>
@@ -3048,18 +3048,18 @@ const FileEditor = React.forwardRef<
 
   const renderPreview = () => (
     <div className="h-full overflow-y-auto bg-white">
-      <header className="py-12 text-center max-w-3xl mx-auto px-6">
-        <h1 className="text-3xl font-serif text-stone-600 mb-6">
+      <header className="mx-auto max-w-3xl px-6 py-12 text-center">
+        <h1 className="mb-6 font-serif text-3xl text-stone-600">
           {fileContent.display_title || fileContent.meta_title || "Untitled"}
         </h1>
         {author.length > 0 && (
-          <div className="flex items-center justify-center gap-3 mb-2">
+          <div className="mb-2 flex items-center justify-center gap-3">
             {selectedAuthors.map((a) => (
               <div key={a.name} className="flex items-center gap-2">
                 <img
                   src={a.avatar}
                   alt={a.name}
-                  className="w-8 h-8 rounded-full object-cover"
+                  className="h-8 w-8 rounded-full object-cover"
                 />
                 <p className="text-base text-neutral-600">{a.name}</p>
               </div>
@@ -3067,7 +3067,7 @@ const FileEditor = React.forwardRef<
           </div>
         )}
         {fileContent.date && (
-          <time className="text-xs font-mono text-neutral-500">
+          <time className="font-mono text-xs text-neutral-500">
             {new Date(fileContent.date).toLocaleDateString("en-US", {
               year: "numeric",
               month: "long",
@@ -3076,7 +3076,7 @@ const FileEditor = React.forwardRef<
           </time>
         )}
       </header>
-      <div className="max-w-3xl mx-auto px-6 pb-8">
+      <div className="mx-auto max-w-3xl px-6 pb-8">
         <article className="prose prose-stone prose-headings:font-serif prose-headings:font-semibold prose-h1:text-3xl prose-h1:mt-12 prose-h1:mb-6 prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-5 prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4 prose-h4:text-lg prose-h4:mt-6 prose-h4:mb-3 prose-a:text-stone-600 prose-a:underline prose-a:decoration-dotted hover:prose-a:text-stone-800 prose-headings:no-underline prose-headings:decoration-transparent prose-code:bg-stone-50 prose-code:border prose-code:border-neutral-200 prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:font-mono prose-code:text-stone-700 prose-pre:bg-stone-50 prose-pre:border prose-pre:border-neutral-200 prose-pre:rounded-xs prose-pre:prose-code:bg-transparent prose-pre:prose-code:border-0 prose-pre:prose-code:p-0 prose-img:rounded-xs prose-img:border prose-img:border-neutral-200 prose-img:my-8 max-w-none">
           {fileContent.mdx ? (
             <MDXContent
@@ -3092,7 +3092,7 @@ const FileEditor = React.forwardRef<
   );
 
   const pendingPRBanner = pendingPRData?.hasPendingPR ? (
-    <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 flex items-center justify-between">
+    <div className="flex items-center justify-between border-b border-amber-200 bg-amber-50 px-4 py-2">
       <div className="flex items-center gap-2 text-sm text-amber-800">
         <AlertTriangleIcon className="size-4" />
         <span>
@@ -3122,9 +3122,9 @@ const FileEditor = React.forwardRef<
     return (
       <>
         {pendingPRBanner}
-        <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
+        <ResizablePanelGroup direction="horizontal" className="min-h-0 flex-1">
           <ResizablePanel defaultSize={50} minSize={30}>
-            <div className="flex flex-col h-full">
+            <div className="flex h-full flex-col">
               <MetadataPanel
                 isExpanded={isMetadataExpanded}
                 onToggleExpanded={() =>
@@ -3160,7 +3160,7 @@ const FileEditor = React.forwardRef<
   return (
     <>
       {pendingPRBanner}
-      <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
+      <ResizablePanelGroup direction="horizontal" className="min-h-0 flex-1">
         <ResizablePanel defaultSize={70} minSize={50}>
           <BlogEditor
             editor={editor}
@@ -3197,8 +3197,8 @@ function EmptyState({
   message: string;
 }) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center text-neutral-500">
-      <Icon className="size-10 mb-3" />
+    <div className="flex flex-1 flex-col items-center justify-center text-neutral-500">
+      <Icon className="mb-3 size-10" />
       <p className="text-sm">{message}</p>
     </div>
   );
@@ -3214,8 +3214,8 @@ function FileItem({
   return (
     <div
       className={cn([
-        "flex items-center justify-between px-3 py-2 rounded cursor-pointer",
-        "hover:bg-neutral-50 transition-colors",
+        "flex cursor-pointer items-center justify-between rounded px-3 py-2",
+        "transition-colors hover:bg-neutral-50",
         "border border-transparent hover:border-neutral-200",
       ])}
       onClick={onClick}
@@ -3225,7 +3225,7 @@ function FileItem({
         <span className="text-sm text-neutral-700">
           {item.name.replace(/\.mdx$/, "")}
         </span>
-        <span className="text-xs text-neutral-400 px-1.5 py-0.5 bg-neutral-100 rounded">
+        <span className="rounded bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-400">
           {getFileExtension(item.name).toUpperCase()}
         </span>
       </div>

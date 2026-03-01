@@ -1,7 +1,5 @@
 import { FileTextIcon, MoreHorizontalIcon } from "lucide-react";
 import { useState } from "react";
-import { useHasTranscript } from "~/session/components/shared";
-import type { EditorView } from "~/store/zustand/tabs/schema";
 
 import { Button } from "@hypr/ui/components/ui/button";
 import {
@@ -16,6 +14,9 @@ import { DeleteNote } from "./delete";
 import { ExportModal } from "./export-modal";
 import { Listening } from "./listening";
 import { Copy, Folder, ShowInFinder } from "./misc";
+
+import { useHasTranscript } from "~/session/components/shared";
+import type { EditorView } from "~/store/zustand/tabs/schema";
 
 export function OverflowButton({
   sessionId,

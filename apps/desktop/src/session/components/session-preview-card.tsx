@@ -1,7 +1,5 @@
 import { useMotionValue, useSpring, useTransform } from "motion/react";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { extractPlainText } from "~/search/contexts/engine/utils";
-import * as main from "~/store/tinybase/store/main";
 
 import {
   HoverCard,
@@ -9,6 +7,9 @@ import {
   HoverCardTrigger,
 } from "@hypr/ui/components/ui/hover-card";
 import { cn, format, safeParseDate } from "@hypr/utils";
+
+import { extractPlainText } from "~/search/contexts/engine/utils";
+import * as main from "~/store/tinybase/store/main";
 
 const MAX_PREVIEW_LENGTH = 200;
 const FOLLOW_RANGE = 16;
@@ -143,7 +144,7 @@ function ParticipantsList({ mappingIds }: { mappingIds: string[] }) {
   const remaining = names.length - visible.length;
 
   return (
-    <div className="text-xs text-neutral-500 line-clamp-2">
+    <div className="line-clamp-2 text-xs text-neutral-500">
       {visible.join(", ")}
       {remaining > 0 && (
         <span className="text-neutral-500"> and {remaining} more</span>
@@ -220,11 +221,11 @@ export function SessionPreviewCard({
             <div className="text-xs text-neutral-500">{dateDisplay}</div>
           )}
 
-          <div className="font-medium text-sm">{title || "Untitled"}</div>
+          <div className="text-sm font-medium">{title || "Untitled"}</div>
           <ParticipantsList mappingIds={participantMappingIds} />
 
           {previewText && (
-            <div className="text-xs leading-relaxed line-clamp-4 text-gradient-to-b from-neutral-700 to-transparent">
+            <div className="text-gradient-to-b line-clamp-4 from-neutral-700 to-transparent text-xs leading-relaxed">
               {previewText}
             </div>
           )}

@@ -57,7 +57,7 @@ function TabBar({
   searchId: string | undefined;
 }) {
   return (
-    <div className="flex items-center gap-1 px-1 h-full py-1">
+    <div className="flex h-full items-center gap-1 px-1 py-1">
       {tabs.map((tc) => {
         const selected = activeTab === tc.value;
         const Icon = tc.icon;
@@ -68,8 +68,8 @@ function TabBar({
             to="/app/file-transcription/"
             search={{ tab: tc.value, id: searchId }}
             className={cn([
-              "flex items-center gap-2 relative",
-              "w-[160px] h-full px-2",
+              "relative flex items-center gap-2",
+              "h-full w-[160px] px-2",
               "rounded-xl border",
               "cursor-pointer",
               "transition-colors duration-200",
@@ -83,7 +83,7 @@ function TabBar({
                   ],
             ])}
           >
-            <div className="shrink-0 w-4 h-4 flex items-center justify-center">
+            <div className="flex h-4 w-4 shrink-0 items-center justify-center">
               <Icon size={14} />
             </div>
             <span className="truncate text-sm">
@@ -119,19 +119,19 @@ function WindowShell({
   const showTabBar = tabs.length > 1;
 
   return (
-    <div className="relative rounded-xl border border-neutral-200 overflow-hidden min-h-[calc(100vh-280px)]">
-      <div className="flex items-center h-11 bg-neutral-100/60 border-b border-neutral-200">
-        <div className="flex items-center gap-2 px-4 shrink-0">
-          <div className="size-3 rounded-full bg-[#ff5f57] border border-black/10" />
-          <div className="size-3 rounded-full bg-[#ffbd2e] border border-black/10" />
-          <div className="size-3 rounded-full bg-[#28c840] border border-black/10" />
+    <div className="relative min-h-[calc(100vh-280px)] overflow-hidden rounded-xl border border-neutral-200">
+      <div className="flex h-11 items-center border-b border-neutral-200 bg-neutral-100/60">
+        <div className="flex shrink-0 items-center gap-2 px-4">
+          <div className="size-3 rounded-full border border-black/10 bg-[#ff5f57]" />
+          <div className="size-3 rounded-full border border-black/10 bg-[#ffbd2e]" />
+          <div className="size-3 rounded-full border border-black/10 bg-[#28c840]" />
         </div>
 
         {showTabBar ? (
           <TabBar tabs={tabs} activeTab={activeTab} searchId={searchId} />
         ) : (
           title && (
-            <span className="flex-1 text-center text-xs text-neutral-400 font-medium -ml-[52px]">
+            <span className="-ml-[52px] flex-1 text-center text-xs font-medium text-neutral-400">
               {title}
             </span>
           )
@@ -168,7 +168,7 @@ export function Notepad({
 
   const content = (
     <NotepadContext.Provider value={ctxValue}>
-      <div className="max-w-3xl mx-auto px-6 pb-10">
+      <div className="mx-auto max-w-3xl px-6 pb-10">
         <TranscriptionHero />
         <WindowShell
           tabs={tabs}

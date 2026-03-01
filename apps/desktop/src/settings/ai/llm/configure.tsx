@@ -1,13 +1,4 @@
 import { useCallback } from "react";
-import { useAuth } from "~/auth";
-import { useBillingAccess } from "~/auth/billing";
-import {
-  HyprCloudCTAButton,
-  HyprProviderRow,
-  NonHyprProviderCard,
-  StyledStreamdown,
-} from "~/settings/ai/shared";
-import * as settings from "~/store/tinybase/store/settings";
 
 import {
   Accordion,
@@ -20,12 +11,22 @@ import { cn } from "@hypr/utils";
 import { useLlmSettings } from "./context";
 import { ProviderId, PROVIDERS } from "./shared";
 
+import { useAuth } from "~/auth";
+import { useBillingAccess } from "~/auth/billing";
+import {
+  HyprCloudCTAButton,
+  HyprProviderRow,
+  NonHyprProviderCard,
+  StyledStreamdown,
+} from "~/settings/ai/shared";
+import * as settings from "~/store/tinybase/store/settings";
+
 export function ConfigureProviders() {
   const { accordionValue, setAccordionValue } = useLlmSettings();
 
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="text-md font-semibold font-serif">Configure Providers</h3>
+      <h3 className="text-md font-serif font-semibold">Configure Providers</h3>
       <Accordion
         type="single"
         collapsible
@@ -79,12 +80,12 @@ function HyprProviderCard({
         isConfigured ? "border-solid border-neutral-300" : "border-dashed",
       ])}
     >
-      <AccordionTrigger className="capitalize gap-2 px-4 hover:no-underline">
+      <AccordionTrigger className="gap-2 px-4 capitalize hover:no-underline">
         <div className="flex items-center gap-2">
           {icon}
           <span>{providerName}</span>
           {badge && (
-            <span className="text-xs text-neutral-500 font-light border border-neutral-300 rounded-full px-2">
+            <span className="rounded-full border border-neutral-300 px-2 text-xs font-light text-neutral-500">
               {badge}
             </span>
           )}

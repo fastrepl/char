@@ -1,12 +1,12 @@
-import type { Ctx } from "~/services/apple-calendar/ctx";
-import { id } from "~/shared/utils";
-
 import type {
   HumanStorage,
   MappingSessionParticipantStorage,
 } from "@hypr/store";
 
 import type { ParticipantsSyncOutput } from "./types";
+
+import type { Ctx } from "~/services/apple-calendar/ctx";
+import { id } from "~/shared/utils";
 
 export function executeForParticipantsSync(
   ctx: Ctx,

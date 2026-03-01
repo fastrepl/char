@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useMemo, useRef } from "react";
 import { shallow } from "zustand/shallow";
 import { useStoreWithEqualityFn } from "zustand/traditional";
+
 import { type ToolScope, useRegisterTools } from "~/contexts/tool";
 import { type AITaskStore, createAITaskStore } from "~/store/zustand/ai-task";
 

@@ -1,4 +1,9 @@
 import { useMemo } from "react";
+
+import { Button } from "@hypr/ui/components/ui/button";
+
+import { computeCurrentNoteTab } from "./compute-note-tab";
+
 import { useAITaskTask } from "~/ai/hooks";
 import { useNetwork } from "~/contexts/network";
 import * as main from "~/store/tinybase/store/main";
@@ -7,10 +12,6 @@ import type { Tab } from "~/store/zustand/tabs/schema";
 import { type EditorView } from "~/store/zustand/tabs/schema";
 import { useListener } from "~/stt/contexts";
 import { useSTTConnection } from "~/stt/useSTTConnection";
-
-import { Button } from "@hypr/ui/components/ui/button";
-
-import { computeCurrentNoteTab } from "./compute-note-tab";
 
 export { computeCurrentNoteTab } from "./compute-note-tab";
 
@@ -126,7 +127,7 @@ export function ActionableTooltipContent({
         <Button
           size="sm"
           variant="outline"
-          className="text-black rounded-md"
+          className="rounded-md text-black"
           onClick={action.handleClick}
         >
           {action.label}

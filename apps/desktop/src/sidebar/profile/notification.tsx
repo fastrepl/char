@@ -45,7 +45,7 @@ const MOCK_NOTIFICATIONS: Notification[] = [
 
 export function NotificationsMenuContent({ onBack }: { onBack: () => void }) {
   return (
-    <div className="h-full flex flex-col px-2">
+    <div className="flex h-full flex-col px-2">
       <div className="flex w-full items-center gap-1 text-sm font-medium">
         <Button
           size="icon"
@@ -58,15 +58,15 @@ export function NotificationsMenuContent({ onBack }: { onBack: () => void }) {
         Notifications
       </div>
 
-      <div className="flex-1 overflow-y-auto flex flex-col gap-1">
+      <div className="flex flex-1 flex-col gap-1 overflow-y-auto">
         {MOCK_NOTIFICATIONS.map((notification) => (
           <NotificationItem key={notification.id} notification={notification} />
         ))}
 
         {MOCK_NOTIFICATIONS.length === 0 && (
-          <div className="flex items-center justify-center h-full">
+          <div className="flex h-full items-center justify-center">
             <div className="text-center">
-              <Bell className="h-8 w-8 text-neutral-300 mx-auto mb-2" />
+              <Bell className="mx-auto mb-2 h-8 w-8 text-neutral-300" />
               <p className="text-sm text-neutral-500">No notifications</p>
             </div>
           </div>
@@ -102,7 +102,7 @@ function NotificationItem({ notification }: { notification: Notification }) {
     >
       <div
         className={cn([
-          "shrink-0 w-8 h-8 rounded-full",
+          "h-8 w-8 shrink-0 rounded-full",
           "flex items-center justify-center",
           notification.type === "message" && "bg-purple-100",
           notification.type === "success" && "bg-green-100",
@@ -119,21 +119,21 @@ function NotificationItem({ notification }: { notification: Notification }) {
         />
       </div>
 
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2 mb-0.5">
+      <div className="min-w-0 flex-1">
+        <div className="mb-0.5 flex items-start justify-between gap-2">
           <p
             className={clsx(
-              "text-sm font-medium text-black truncate",
+              "truncate text-sm font-medium text-black",
               !notification.read && "font-semibold",
             )}
           >
             {notification.title}
           </p>
           {!notification.read && (
-            <span className="shrink-0 w-2 h-2 rounded-full bg-blue-500" />
+            <span className="h-2 w-2 shrink-0 rounded-full bg-blue-500" />
           )}
         </div>
-        <p className="text-xs text-neutral-600 line-clamp-2 mb-1">
+        <p className="mb-1 line-clamp-2 text-xs text-neutral-600">
           {notification.description}
         </p>
         <p className="text-xs text-neutral-400">{notification.timestamp}</p>

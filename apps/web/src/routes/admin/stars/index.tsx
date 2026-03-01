@@ -118,14 +118,14 @@ function StarsPage() {
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex h-full flex-col">
       <div className="border-b border-neutral-200 bg-white px-6 py-4">
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <div>
             <h1 className="text-lg font-semibold text-neutral-900">
               GitHub Stars
             </h1>
-            <p className="text-sm text-neutral-500 mt-0.5">
+            <p className="mt-0.5 text-sm text-neutral-500">
               Track and qualify leads from GitHub activity on fastrepl/char
             </p>
           </div>
@@ -134,12 +134,12 @@ function StarsPage() {
               type="button"
               onClick={() => fetchMutation.mutate("stargazers")}
               disabled={fetchMutation.isPending}
-              className="px-3 py-1.5 text-sm bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm transition-colors hover:bg-neutral-50 disabled:opacity-50"
             >
               {fetchMutation.isPending ? (
                 <Spinner size={14} />
               ) : (
-                <StarIcon className="w-3.5 h-3.5" />
+                <StarIcon className="h-3.5 w-3.5" />
               )}
               Fetch Stars
             </button>
@@ -147,12 +147,12 @@ function StarsPage() {
               type="button"
               onClick={() => fetchMutation.mutate("activity")}
               disabled={fetchMutation.isPending}
-              className="px-3 py-1.5 text-sm bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm transition-colors hover:bg-neutral-50 disabled:opacity-50"
             >
               {fetchMutation.isPending ? (
                 <Spinner size={14} />
               ) : (
-                <DownloadIcon className="w-3.5 h-3.5" />
+                <DownloadIcon className="h-3.5 w-3.5" />
               )}
               Fetch Activity
             </button>
@@ -160,10 +160,10 @@ function StarsPage() {
               type="button"
               onClick={() => refetch()}
               disabled={isLoading}
-              className="px-3 py-1.5 text-sm bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm transition-colors hover:bg-neutral-50 disabled:opacity-50"
             >
               <RefreshCwIcon
-                className={cn("w-3.5 h-3.5", isLoading && "animate-spin")}
+                className={cn("h-3.5 w-3.5", isLoading && "animate-spin")}
               />
               Refresh
             </button>
@@ -171,25 +171,25 @@ function StarsPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="relative flex-1 max-w-sm">
-            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+          <div className="relative max-w-sm flex-1">
+            <SearchIcon className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-neutral-400" />
             <input
               type="text"
               placeholder="Search by username, name, or company..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-300"
+              className="w-full rounded-lg border border-neutral-200 py-1.5 pr-3 pl-9 text-sm focus:ring-2 focus:ring-neutral-300 focus:outline-none"
             />
           </div>
 
-          <div className="flex items-center gap-1 bg-neutral-100 rounded-lg p-0.5">
+          <div className="flex items-center gap-1 rounded-lg bg-neutral-100 p-0.5">
             {(["all", "researched", "unresearched"] as const).map((f) => (
               <button
                 type="button"
                 key={f}
                 onClick={() => setFilter(f)}
                 className={cn(
-                  "px-3 py-1 text-xs font-medium rounded-md transition-colors capitalize",
+                  "rounded-md px-3 py-1 text-xs font-medium capitalize transition-colors",
                   filter === f
                     ? "bg-white text-neutral-900 shadow-sm"
                     : "text-neutral-500 hover:text-neutral-700",
@@ -206,13 +206,13 @@ function StarsPage() {
         </div>
 
         {fetchMutation.isSuccess && (
-          <div className="mt-2 px-3 py-1.5 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
+          <div className="mt-2 rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-sm text-green-700">
             Fetched {fetchMutation.data.added} new entries. Total:{" "}
             {fetchMutation.data.total}
           </div>
         )}
         {fetchMutation.isError && (
-          <div className="mt-2 px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          <div className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-sm text-red-700">
             Error: {fetchMutation.error.message}
           </div>
         )}
@@ -220,20 +220,20 @@ function StarsPage() {
 
       <div className="flex-1 overflow-auto">
         {isLoading ? (
-          <div className="flex items-center justify-center h-64">
+          <div className="flex h-64 items-center justify-center">
             <Spinner size={24} />
           </div>
         ) : filteredLeads.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-neutral-400">
-            <StarIcon className="w-12 h-12 mb-3 stroke-1" />
+          <div className="flex h-64 flex-col items-center justify-center text-neutral-400">
+            <StarIcon className="mb-3 h-12 w-12 stroke-1" />
             <p className="text-sm">No leads found</p>
-            <p className="text-xs mt-1">
+            <p className="mt-1 text-xs">
               Click "Fetch Stars" to pull stargazers from GitHub
             </p>
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-neutral-50 sticky top-0 z-10">
+            <thead className="sticky top-0 z-10 bg-neutral-50">
               <tr className="border-b border-neutral-200">
                 <th className="w-8 px-3 py-2" />
                 <th className="px-3 py-2 text-left font-medium text-neutral-600">
@@ -286,7 +286,7 @@ function StarsPage() {
 function ScoreBadge({ score }: { score: number | null }) {
   if (score === null || score === undefined) {
     return (
-      <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-neutral-100 text-neutral-400">
+      <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-400">
         --
       </span>
     );
@@ -301,7 +301,7 @@ function ScoreBadge({ score }: { score: number | null }) {
 
   return (
     <span
-      className={cn("px-2 py-0.5 text-xs font-semibold rounded-full", color)}
+      className={cn("rounded-full px-2 py-0.5 text-xs font-semibold", color)}
     >
       {score}
     </span>
@@ -322,8 +322,8 @@ function EventBadge({ type }: { type: string }) {
   return (
     <span
       className={cn(
-        "px-2 py-0.5 text-xs font-medium rounded-full border",
-        colors[type] || "bg-neutral-50 text-neutral-600 border-neutral-200",
+        "rounded-full border px-2 py-0.5 text-xs font-medium",
+        colors[type] || "border-neutral-200 bg-neutral-50 text-neutral-600",
       )}
     >
       {type}
@@ -348,7 +348,7 @@ function LeadRow({
     <>
       <tr
         className={cn(
-          "border-b border-neutral-100 hover:bg-neutral-50 transition-colors cursor-pointer",
+          "cursor-pointer border-b border-neutral-100 transition-colors hover:bg-neutral-50",
           isExpanded && "bg-neutral-50",
         )}
         onClick={onToggle}
@@ -356,12 +356,12 @@ function LeadRow({
         <td className="px-3 py-2.5">
           {lead.researched_at ? (
             isExpanded ? (
-              <ChevronDownIcon className="w-4 h-4 text-neutral-400" />
+              <ChevronDownIcon className="h-4 w-4 text-neutral-400" />
             ) : (
-              <ChevronRightIcon className="w-4 h-4 text-neutral-400" />
+              <ChevronRightIcon className="h-4 w-4 text-neutral-400" />
             )
           ) : (
-            <div className="w-4 h-4" />
+            <div className="h-4 w-4" />
           )}
         </td>
         <td className="px-3 py-2.5">
@@ -370,10 +370,10 @@ function LeadRow({
               <img
                 src={lead.avatar_url}
                 alt={lead.github_username}
-                className="w-7 h-7 rounded-full"
+                className="h-7 w-7 rounded-full"
               />
             ) : (
-              <div className="w-7 h-7 rounded-full bg-neutral-200" />
+              <div className="h-7 w-7 rounded-full bg-neutral-200" />
             )}
             <div>
               <div className="flex items-center gap-1.5">
@@ -390,7 +390,7 @@ function LeadRow({
                   onClick={(e) => e.stopPropagation()}
                   className="text-neutral-400 hover:text-neutral-600"
                 >
-                  <ExternalLinkIcon className="w-3 h-3" />
+                  <ExternalLinkIcon className="h-3 w-3" />
                 </a>
               </div>
               {lead.name && (
@@ -411,7 +411,7 @@ function LeadRow({
           {lead.is_match === null ? (
             <span className="text-neutral-400">--</span>
           ) : lead.is_match ? (
-            <span className="text-green-600 font-medium">Yes</span>
+            <span className="font-medium text-green-600">Yes</span>
           ) : (
             <span className="text-neutral-400">No</span>
           )}
@@ -419,7 +419,7 @@ function LeadRow({
         <td className="px-3 py-2.5 text-neutral-600">{lead.company || "--"}</td>
         <td className="px-3 py-2.5">
           {lead.researched_at ? (
-            <span className="text-xs text-green-600 font-medium">
+            <span className="text-xs font-medium text-green-600">
               Researched
             </span>
           ) : (
@@ -434,12 +434,12 @@ function LeadRow({
               onResearch();
             }}
             disabled={isResearching}
-            className="px-2.5 py-1 text-xs font-medium bg-neutral-900 text-white rounded-md hover:bg-neutral-800 transition-colors disabled:opacity-50 inline-flex items-center gap-1"
+            className="inline-flex items-center gap-1 rounded-md bg-neutral-900 px-2.5 py-1 text-xs font-medium text-white transition-colors hover:bg-neutral-800 disabled:opacity-50"
           >
             {isResearching ? (
               <Spinner size={12} color="white" />
             ) : (
-              <SparklesIcon className="w-3 h-3" />
+              <SparklesIcon className="h-3 w-3" />
             )}
             {lead.researched_at ? "Re-research" : "Research"}
           </button>
@@ -447,9 +447,9 @@ function LeadRow({
       </tr>
       {isExpanded && lead.reasoning && (
         <tr className="border-b border-neutral-100">
-          <td colSpan={8} className="px-6 py-4 bg-neutral-50">
+          <td colSpan={8} className="bg-neutral-50 px-6 py-4">
             <div className="max-w-2xl">
-              <div className="flex items-center gap-4 mb-3 text-xs text-neutral-500">
+              <div className="mb-3 flex items-center gap-4 text-xs text-neutral-500">
                 {lead.bio && <span>Bio: {lead.bio}</span>}
                 {lead.researched_at && (
                   <span>
@@ -459,7 +459,7 @@ function LeadRow({
                 )}
               </div>
               <div className="prose prose-sm prose-neutral max-w-none">
-                <pre className="whitespace-pre-wrap text-xs font-sans bg-white border border-neutral-200 rounded-lg p-3">
+                <pre className="rounded-lg border border-neutral-200 bg-white p-3 font-sans text-xs whitespace-pre-wrap">
                   {lead.reasoning}
                 </pre>
               </div>

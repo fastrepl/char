@@ -1,4 +1,8 @@
 import { sep } from "@tauri-apps/api/path";
+
+import type { ParsedDocument } from "@hypr/plugin-fs-sync";
+import { isValidTiptapContent, json2md } from "@hypr/tiptap/shared";
+
 import type { NoteFrontmatter } from "~/store/tinybase/persister/session/types";
 import {
   buildSessionPath,
@@ -9,9 +13,6 @@ import {
   type WriteOperation,
 } from "~/store/tinybase/persister/shared";
 import type { Store } from "~/store/tinybase/store/main";
-
-import type { ParsedDocument } from "@hypr/plugin-fs-sync";
-import { isValidTiptapContent, json2md } from "@hypr/tiptap/shared";
 
 type DocumentItem = [ParsedDocument, string];
 

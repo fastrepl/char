@@ -1,5 +1,12 @@
 import { HeadsetIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+
+import { commands as openerCommands } from "@hypr/plugin-opener2";
+import { Spinner } from "@hypr/ui/components/ui/spinner";
+
+import { OptionsMenu } from "./options-menu";
+import { ActionableTooltipContent, FloatingButton } from "./shared";
+
 import { useShell } from "~/contexts/shell";
 import {
   RecordingIcon,
@@ -10,12 +17,6 @@ import { useSessionEvent } from "~/store/tinybase/hooks";
 import { type Tab, useTabs } from "~/store/zustand/tabs";
 import { useListener } from "~/stt/contexts";
 import { useStartListening } from "~/stt/useStartListening";
-
-import { commands as openerCommands } from "@hypr/plugin-opener2";
-import { Spinner } from "@hypr/ui/components/ui/spinner";
-
-import { OptionsMenu } from "./options-menu";
-import { ActionableTooltipContent, FloatingButton } from "./shared";
 
 export function ListenButton({
   tab,
@@ -165,7 +166,7 @@ function SplitMeetingButtons({
       {!isNarrow && (
         <FloatingButton
           onClick={onJoin}
-          className="justify-center gap-2 h-10 px-3 lg:px-4 bg-white hover:bg-neutral-100 text-neutral-800 border-neutral-200 shadow-[0_4px_14px_rgba(0,0,0,0.1)]"
+          className="h-10 justify-center gap-2 border-neutral-200 bg-white px-3 text-neutral-800 shadow-[0_4px_14px_rgba(0,0,0,0.1)] hover:bg-neutral-100 lg:px-4"
         >
           <span>Join</span>
           {getMeetingIcon()}
@@ -181,7 +182,7 @@ function SplitMeetingButtons({
         <FloatingButton
           onClick={onStartListening}
           disabled={disabled}
-          className="justify-center gap-2 pl-3 pr-8 lg:pl-4 lg:pr-10 bg-stone-800 hover:bg-stone-700 text-white border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)]"
+          className="justify-center gap-2 border-stone-600 bg-stone-800 pr-8 pl-3 text-white shadow-[0_4px_14px_rgba(87,83,78,0.4)] hover:bg-stone-700 lg:pr-10 lg:pl-4"
           tooltip={
             warningMessage
               ? {
@@ -205,7 +206,7 @@ function SplitMeetingButtons({
         </FloatingButton>
       </OptionsMenu>
       {countdown && (
-        <div className="absolute left-1/2 bottom-full mb-2 -translate-x-1/2 whitespace-nowrap text-xs text-neutral-500">
+        <div className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 text-xs whitespace-nowrap text-neutral-500">
           {countdown}
         </div>
       )}
@@ -245,7 +246,7 @@ function ListenSplitButton({
         <FloatingButton
           onClick={onPrimaryClick}
           disabled={disabled}
-          className="justify-center gap-2 pl-3 pr-8 lg:pl-4 lg:pr-10 bg-stone-800 hover:bg-stone-700 text-white border-stone-600 shadow-[0_4px_14px_rgba(87,83,78,0.4)]"
+          className="justify-center gap-2 border-stone-600 bg-stone-800 pr-8 pl-3 text-white shadow-[0_4px_14px_rgba(87,83,78,0.4)] hover:bg-stone-700 lg:pr-10 lg:pl-4"
           tooltip={
             warningMessage
               ? {
@@ -267,7 +268,7 @@ function ListenSplitButton({
         </FloatingButton>
       </OptionsMenu>
       {countdown && (
-        <div className="absolute left-1/2 bottom-full mb-2 -translate-x-1/2 whitespace-nowrap text-xs text-neutral-500">
+        <div className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 text-xs whitespace-nowrap text-neutral-500">
           {countdown}
         </div>
       )}

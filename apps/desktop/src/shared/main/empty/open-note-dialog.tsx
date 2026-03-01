@@ -2,11 +2,12 @@ import { Command as CommandPrimitive } from "cmdk";
 import { FileTextIcon, SearchIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import * as main from "~/store/tinybase/store/main";
-import { useTabs } from "~/store/zustand/tabs";
 
 import { Kbd } from "@hypr/ui/components/ui/kbd";
 import { cn } from "@hypr/utils";
+
+import * as main from "~/store/tinybase/store/main";
+import { useTabs } from "~/store/zustand/tabs";
 
 const MAX_RECENT_DISPLAY = 5;
 
@@ -119,13 +120,13 @@ export function OpenNoteDialog({ open, onOpenChange }: OpenNoteDialogProps) {
     >
       <div
         data-tauri-drag-region
-        className="absolute top-0 left-0 right-0 h-[15%]"
+        className="absolute top-0 right-0 left-0 h-[15%]"
         onClick={(e) => e.stopPropagation()}
       />
-      <div className="absolute left-1/2 top-[15%] -translate-x-1/2 w-full max-w-lg px-4">
+      <div className="absolute top-[15%] left-1/2 w-full max-w-lg -translate-x-1/2 px-4">
         <div
           className={cn([
-            "bg-[#faf8f5] rounded-xl border border-neutral-200/80",
+            "rounded-xl border border-neutral-200/80 bg-[#faf8f5]",
             "shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]",
             "overflow-hidden",
           ])}
@@ -140,25 +141,25 @@ export function OpenNoteDialog({ open, onOpenChange }: OpenNoteDialogProps) {
               }
             }}
           >
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-neutral-200/60">
-              <SearchIcon className="w-4 h-4 text-neutral-400 shrink-0" />
+            <div className="flex items-center gap-3 border-b border-neutral-200/60 px-4 py-3">
+              <SearchIcon className="h-4 w-4 shrink-0 text-neutral-400" />
               <CommandPrimitive.Input
                 ref={inputRef}
                 value={query}
                 onValueChange={setQuery}
                 placeholder="Find a note..."
                 className={cn([
-                  "flex-1 text-sm bg-transparent",
+                  "flex-1 bg-transparent text-sm",
                   "outline-hidden placeholder:text-neutral-400",
                 ])}
               />
               <button
                 onClick={() => onOpenChange(false)}
                 className={cn([
-                  "w-5 h-5 rounded-full",
+                  "h-5 w-5 rounded-full",
                   "flex items-center justify-center",
                   "bg-neutral-200/80 hover:bg-neutral-300/80",
-                  "text-neutral-500 text-xs",
+                  "text-xs text-neutral-500",
                   "transition-colors",
                 ])}
               >
@@ -179,7 +180,7 @@ export function OpenNoteDialog({ open, onOpenChange }: OpenNoteDialogProps) {
                         filteredOtherSessions.length > 0 ? "pb-1.5" : ""
                       }
                       heading={
-                        <div className="px-2 py-1.5 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                        <div className="px-2 py-1.5 text-xs font-medium tracking-wider text-neutral-500 uppercase">
                           Recent
                         </div>
                       }
@@ -190,13 +191,13 @@ export function OpenNoteDialog({ open, onOpenChange }: OpenNoteDialogProps) {
                           value={`recent-${session.id}`}
                           onSelect={() => handleSelect(session.id)}
                           className={cn([
-                            "flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer",
+                            "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5",
                             "text-sm text-neutral-700",
                             "data-[selected=true]:bg-neutral-200/60",
                             "transition-colors",
                           ])}
                         >
-                          <FileTextIcon className="w-4 h-4 text-neutral-400 shrink-0" />
+                          <FileTextIcon className="h-4 w-4 shrink-0 text-neutral-400" />
                           <span className="truncate">{session.title}</span>
                         </CommandPrimitive.Item>
                       ))}
@@ -208,9 +209,9 @@ export function OpenNoteDialog({ open, onOpenChange }: OpenNoteDialogProps) {
                       heading={
                         <div className="flex flex-col gap-3">
                           {filteredRecentSessions.length > 0 && (
-                            <div className="h-px bg-neutral-200 mx-2" />
+                            <div className="mx-2 h-px bg-neutral-200" />
                           )}
-                          <div className="px-2 py-1.5 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                          <div className="px-2 py-1.5 text-xs font-medium tracking-wider text-neutral-500 uppercase">
                             All Notes
                           </div>
                         </div>
@@ -222,13 +223,13 @@ export function OpenNoteDialog({ open, onOpenChange }: OpenNoteDialogProps) {
                           value={session.id}
                           onSelect={() => handleSelect(session.id)}
                           className={cn([
-                            "flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer",
+                            "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5",
                             "text-sm text-neutral-700",
                             "data-[selected=true]:bg-neutral-200/60",
                             "transition-colors",
                           ])}
                         >
-                          <FileTextIcon className="w-4 h-4 text-neutral-400 shrink-0" />
+                          <FileTextIcon className="h-4 w-4 shrink-0 text-neutral-400" />
                           <span className="truncate">{session.title}</span>
                         </CommandPrimitive.Item>
                       ))}

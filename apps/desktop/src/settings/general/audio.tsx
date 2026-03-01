@@ -12,7 +12,7 @@ import { cn } from "@hypr/utils";
 export function Audio() {
   return (
     <div className="flex flex-col gap-6">
-      <h2 className="text-lg font-semibold font-serif">Audio</h2>
+      <h2 className="font-serif text-lg font-semibold">Audio</h2>
       <div className="flex flex-col gap-6">
         <DeviceList direction="input" />
         <DeviceList direction="output" />
@@ -119,10 +119,10 @@ function DeviceList({ direction }: { direction: "input" | "output" }) {
 
   return (
     <div>
-      <h3 className="text-sm font-medium mb-2">
+      <h3 className="mb-2 text-sm font-medium">
         {direction === "input" ? "Input devices" : "Output devices"}
       </h3>
-      <p className="text-xs text-neutral-500 mb-3">
+      <p className="mb-3 text-xs text-neutral-500">
         {direction === "input"
           ? "Drag to set microphone priority. Top device will be auto-selected."
           : "Drag to set speaker priority. Top device will be auto-selected."}
@@ -159,16 +159,16 @@ function DeviceItem({
     <Reorder.Item
       value={device}
       className={cn([
-        "flex items-center gap-2 px-3 py-2 rounded-lg cursor-grab active:cursor-grabbing",
+        "flex cursor-grab items-center gap-2 rounded-lg px-3 py-2 active:cursor-grabbing",
         "border transition-colors",
         isTop
-          ? "bg-neutral-100 border-neutral-300"
-          : "bg-neutral-50 border-neutral-200 hover:bg-neutral-100",
+          ? "border-neutral-300 bg-neutral-100"
+          : "border-neutral-200 bg-neutral-50 hover:bg-neutral-100",
       ])}
     >
-      <GripVertical className="h-4 w-4 text-neutral-400 shrink-0" />
-      <span className="text-xs text-neutral-400 w-4">{rank}</span>
-      <span className={cn(["text-sm flex-1 truncate", isTop && "font-medium"])}>
+      <GripVertical className="h-4 w-4 shrink-0 text-neutral-400" />
+      <span className="w-4 text-xs text-neutral-400">{rank}</span>
+      <span className={cn(["flex-1 truncate text-sm", isTop && "font-medium"])}>
         {device.name}
       </span>
       {isTop && <span className="text-xs text-neutral-500">Active</span>}

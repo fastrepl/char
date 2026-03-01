@@ -1,17 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
+
+import {
+  commands as localSttCommands,
+  type LocalModel,
+} from "@hypr/plugin-local-stt";
+import type { AIProviderStorage } from "@hypr/store";
+
 import { useAuth } from "~/auth";
 import { useBillingAccess } from "~/auth/billing";
 import { env } from "~/env";
 import { providerRowId } from "~/settings/ai/shared";
 import { type ProviderId } from "~/settings/ai/stt/shared";
 import * as settings from "~/store/tinybase/store/settings";
-
-import {
-  commands as localSttCommands,
-  type SupportedSttModel,
-} from "@hypr/plugin-local-stt";
-import type { AIProviderStorage } from "@hypr/store";
 
 export const useSTTConnection = () => {
   const auth = useAuth();
@@ -47,14 +48,14 @@ export const useSTTConnection = () => {
       }
 
       const downloaded = await localSttCommands.isModelDownloaded(
-        current_stt_model as SupportedSttModel,
+        current_stt_model as LocalModel,
       );
       if (downloaded.status !== "ok" || !downloaded.data) {
         return { status: "not_downloaded" as const, connection: null };
       }
 
       const serverResult = await localSttCommands.getServerForModel(
-        current_stt_model as SupportedSttModel,
+        current_stt_model as LocalModel,
       );
 
       if (serverResult.status !== "ok") {

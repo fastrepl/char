@@ -1,6 +1,6 @@
-import type { Ctx } from "~/services/apple-calendar/ctx";
-
 import type { ExistingEvent } from "./types";
+
+import type { Ctx } from "~/services/apple-calendar/ctx";
 
 function isEventInRange(
   startedAt: string,

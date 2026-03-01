@@ -54,8 +54,8 @@ export function AvailabilityHealth({ message }: { message: string }) {
     <div
       className={cn([
         "flex items-center justify-center gap-2 text-center",
-        "bg-red-50/70 border-b border-red-200",
-        "py-3 px-4 -mx-6 -mt-6",
+        "border-b border-red-200 bg-red-50/70",
+        "-mx-6 -mt-6 px-4 py-3",
         "text-sm text-red-700",
       ])}
     >

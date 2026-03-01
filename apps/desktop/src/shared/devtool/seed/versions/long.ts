@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker/locale/en";
 import type { Tables } from "tinybase/with-schemas";
+
 import type { SeedDefinition } from "~/shared/devtool/seed/shared";
 import {
   createHuman,

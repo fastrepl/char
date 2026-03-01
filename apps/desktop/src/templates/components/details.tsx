@@ -1,12 +1,12 @@
-import {
-  ResourceDetailEmpty,
-  ResourcePreviewHeader,
-} from "~/shared/ui/resource-list";
-
 import type { TemplateSection } from "@hypr/store";
 
 import { SectionsList } from "./sections-editor";
 import { TemplateForm } from "./template-form";
+
+import {
+  ResourceDetailEmpty,
+  ResourcePreviewHeader,
+} from "~/shared/ui/resource-list";
 
 type WebTemplate = {
   slug: string;
@@ -71,7 +71,7 @@ function WebTemplatePreview({
   }) => void;
 }) {
   return (
-    <div className="flex-1 flex flex-col h-full">
+    <div className="flex h-full flex-1 flex-col">
       <ResourcePreviewHeader
         title={template.title || "Untitled"}
         description={template.description}
@@ -88,7 +88,7 @@ function WebTemplatePreview({
 
       <div className="flex-1 overflow-y-auto">
         <div className="p-6">
-          <h3 className="text-sm font-medium text-neutral-600 mb-3">
+          <h3 className="mb-3 text-sm font-medium text-neutral-600">
             Sections
           </h3>
           <SectionsList

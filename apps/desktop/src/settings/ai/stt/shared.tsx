@@ -7,6 +7,9 @@ import {
   OpenAI,
 } from "@lobehub/icons";
 import type { ReactNode } from "react";
+
+import type { AmModel, LocalModel } from "@hypr/plugin-local-stt";
+
 import { env } from "~/env";
 import {
   type ProviderRequirement,
@@ -14,8 +17,6 @@ import {
 } from "~/settings/ai/shared/eligibility";
 import { sortProviders } from "~/settings/ai/shared/sort-providers";
 import { localSttQueries } from "~/stt/useLocalSttModel";
-
-import type { AmModel, SupportedSttModel } from "@hypr/plugin-local-stt";
 
 export { localSttQueries as sttModelQueries };
 
@@ -25,7 +26,7 @@ type Provider = {
   displayName: string;
   icon: ReactNode;
   baseUrl?: string;
-  models: SupportedSttModel[] | string[];
+  models: LocalModel[] | string[];
   badge?: string | null;
   requirements: ProviderRequirement[];
 };

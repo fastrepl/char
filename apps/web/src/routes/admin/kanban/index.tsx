@@ -200,14 +200,14 @@ function KanbanPage() {
 
   if (projectsLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex h-64 items-center justify-center">
         <Spinner size={24} />
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex h-full flex-col">
       <div className="border-b border-neutral-200 bg-white px-6 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -220,7 +220,7 @@ function KanbanPage() {
                   const p = projects.find((pr) => pr.id === e.target.value);
                   if (p) setSelectedProject(p);
                 }}
-                className="h-8 px-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-300"
+                className="h-8 rounded-lg border border-neutral-200 px-2 text-sm focus:ring-2 focus:ring-neutral-300 focus:outline-none"
               >
                 {projects.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -240,19 +240,19 @@ function KanbanPage() {
               type="button"
               onClick={() => refetchItems()}
               disabled={itemsLoading}
-              className="h-8 px-3 text-sm flex items-center gap-1.5 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors disabled:opacity-50"
+              className="flex h-8 items-center gap-1.5 rounded-lg border border-neutral-200 px-3 text-sm transition-colors hover:bg-neutral-50 disabled:opacity-50"
             >
               <RefreshCwIcon
-                className={cn("w-3.5 h-3.5", itemsLoading && "animate-spin")}
+                className={cn("h-3.5 w-3.5", itemsLoading && "animate-spin")}
               />
               Refresh
             </button>
             <button
               type="button"
               onClick={() => setIsCreating(true)}
-              className="h-8 px-3 text-sm flex items-center gap-1.5 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors"
+              className="flex h-8 items-center gap-1.5 rounded-lg bg-neutral-900 px-3 text-sm text-white transition-colors hover:bg-neutral-800"
             >
-              <PlusIcon className="w-3.5 h-3.5" />
+              <PlusIcon className="h-3.5 w-3.5" />
               New Issue
             </button>
           </div>
@@ -260,20 +260,20 @@ function KanbanPage() {
       </div>
 
       {projects.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 text-neutral-500">
+        <div className="flex h-64 flex-col items-center justify-center text-neutral-500">
           <p className="text-sm font-medium">No projects found</p>
-          <p className="text-xs mt-1">
+          <p className="mt-1 text-xs">
             Create a GitHub Project in fastrepl/marketing to get started
           </p>
         </div>
       ) : (
-        <div className="flex-1 min-h-0 overflow-x-auto p-4">
+        <div className="min-h-0 flex-1 overflow-x-auto p-4">
           {itemsLoading ? (
-            <div className="flex items-center justify-center h-64">
+            <div className="flex h-64 items-center justify-center">
               <Spinner size={24} />
             </div>
           ) : (
-            <div className="flex gap-4 h-full min-w-max">
+            <div className="flex h-full min-w-max gap-4">
               {columns.map((column) => (
                 <KanbanColumn
                   key={column.id}
@@ -345,19 +345,19 @@ function KanbanColumn({
   return (
     <div
       className={cn(
-        "w-72 flex flex-col bg-neutral-50 rounded-lg border border-neutral-200 border-t-2",
+        "flex w-72 flex-col rounded-lg border border-t-2 border-neutral-200 bg-neutral-50",
         COLUMN_COLORS[name] || "border-t-neutral-300",
       )}
     >
-      <div className="px-3 py-2.5 flex items-center justify-between">
+      <div className="flex items-center justify-between px-3 py-2.5">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-neutral-700">{name}</span>
-          <span className="text-xs text-neutral-400 bg-neutral-200 px-1.5 py-0.5 rounded-full">
+          <span className="rounded-full bg-neutral-200 px-1.5 py-0.5 text-xs text-neutral-400">
             {items.length}
           </span>
         </div>
       </div>
-      <div className="flex-1 min-h-0 overflow-y-auto px-2 pb-2 space-y-2">
+      <div className="min-h-0 flex-1 space-y-2 overflow-y-auto px-2 pb-2">
         {items.map((item) => (
           <KanbanCard
             key={item.id}
@@ -393,31 +393,31 @@ function KanbanCard({
 
   return (
     <div
-      className="bg-white rounded-md border border-neutral-200 shadow-xs hover:shadow-sm transition-shadow"
+      className="rounded-md border border-neutral-200 bg-white shadow-xs transition-shadow hover:shadow-sm"
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
     >
       <div className="p-3">
         <div className="flex items-start gap-1.5">
-          <GripVerticalIcon className="w-3.5 h-3.5 text-neutral-300 mt-0.5 shrink-0" />
-          <div className="flex-1 min-w-0">
+          <GripVerticalIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-neutral-300" />
+          <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-1">
               <button
                 type="button"
                 onClick={() => onEdit(item)}
-                className="text-sm font-medium text-neutral-900 hover:text-blue-600 text-left truncate"
+                className="truncate text-left text-sm font-medium text-neutral-900 hover:text-blue-600"
               >
                 {item.title}
               </button>
               {showActions && (
-                <div className="flex items-center gap-0.5 shrink-0">
+                <div className="flex shrink-0 items-center gap-0.5">
                   <a
                     href={item.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-0.5 text-neutral-400 hover:text-neutral-600 rounded"
+                    className="rounded p-0.5 text-neutral-400 hover:text-neutral-600"
                   >
-                    <ExternalLinkIcon className="w-3 h-3" />
+                    <ExternalLinkIcon className="h-3 w-3" />
                   </a>
                   <button
                     type="button"
@@ -425,9 +425,9 @@ function KanbanCard({
                       e.stopPropagation();
                       onDelete(item);
                     }}
-                    className="p-0.5 text-neutral-400 hover:text-red-500 rounded"
+                    className="rounded p-0.5 text-neutral-400 hover:text-red-500"
                   >
-                    <Trash2Icon className="w-3 h-3" />
+                    <Trash2Icon className="h-3 w-3" />
                   </button>
                 </div>
               )}
@@ -443,7 +443,7 @@ function KanbanCard({
             {item.labels.map((label) => (
               <span
                 key={label}
-                className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-neutral-100 text-neutral-600"
+                className="rounded bg-neutral-100 px-1.5 py-0.5 text-[10px] font-medium text-neutral-600"
               >
                 {label}
               </span>
@@ -459,7 +459,7 @@ function KanbanCard({
               }
               onChange={(e) => onStatusChange(item, e.target.value)}
               disabled={isUpdating}
-              className="w-full h-6 px-1 text-[11px] border border-neutral-200 rounded focus:outline-none focus:ring-1 focus:ring-neutral-300 disabled:opacity-50"
+              className="h-6 w-full rounded border border-neutral-200 px-1 text-[11px] focus:ring-1 focus:ring-neutral-300 focus:outline-none disabled:opacity-50"
             >
               <option value="">No Status</option>
               {statusOptions.map((opt) => (
@@ -476,7 +476,7 @@ function KanbanCard({
             {item.assignees.map((assignee) => (
               <span
                 key={assignee}
-                className="text-[10px] text-neutral-500 bg-neutral-50 px-1.5 py-0.5 rounded"
+                className="rounded bg-neutral-50 px-1.5 py-0.5 text-[10px] text-neutral-500"
               >
                 @{assignee}
               </span>
@@ -508,8 +508,8 @@ function CreateIssueModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-200">
+      <div className="mx-4 w-full max-w-lg rounded-xl bg-white shadow-xl">
+        <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-3">
           <h2 className="text-sm font-semibold text-neutral-900">
             Create Issue
           </h2>
@@ -518,12 +518,12 @@ function CreateIssueModal({
             onClick={onClose}
             className="text-neutral-400 hover:text-neutral-600"
           >
-            <XIcon className="w-4 h-4" />
+            <XIcon className="h-4 w-4" />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-5 space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-3 p-5">
           <div>
-            <label className="text-xs font-medium text-neutral-500 mb-1 block">
+            <label className="mb-1 block text-xs font-medium text-neutral-500">
               Title
             </label>
             <input
@@ -531,12 +531,12 @@ function CreateIssueModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Issue title..."
-              className="w-full h-9 px-3 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-300"
+              className="h-9 w-full rounded-lg border border-neutral-200 px-3 text-sm focus:ring-2 focus:ring-neutral-300 focus:outline-none"
               autoFocus
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-neutral-500 mb-1 block">
+            <label className="mb-1 block text-xs font-medium text-neutral-500">
               Description
             </label>
             <textarea
@@ -544,21 +544,21 @@ function CreateIssueModal({
               onChange={(e) => setBody(e.target.value)}
               placeholder="Describe the issue..."
               rows={5}
-              className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-300 resize-none"
+              className="w-full resize-none rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:ring-2 focus:ring-neutral-300 focus:outline-none"
             />
           </div>
           <div className="flex justify-end gap-2 pt-1">
             <button
               type="button"
               onClick={onClose}
-              className="h-8 px-4 text-sm text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+              className="h-8 rounded-lg px-4 text-sm text-neutral-600 transition-colors hover:bg-neutral-100"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!title.trim() || isPending}
-              className="h-8 px-4 text-sm bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+              className="flex h-8 items-center gap-1.5 rounded-lg bg-neutral-900 px-4 text-sm text-white transition-colors hover:bg-neutral-800 disabled:opacity-50"
             >
               {isPending && <Spinner size={12} color="white" />}
               Create
@@ -592,8 +592,8 @@ function EditIssueModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-200">
+      <div className="mx-4 w-full max-w-lg rounded-xl bg-white shadow-xl">
+        <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-3">
           <h2 className="text-sm font-semibold text-neutral-900">
             Edit Issue #{item.issueNumber}
           </h2>
@@ -602,30 +602,30 @@ function EditIssueModal({
             onClick={onClose}
             className="text-neutral-400 hover:text-neutral-600"
           >
-            <XIcon className="w-4 h-4" />
+            <XIcon className="h-4 w-4" />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-5 space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-3 p-5">
           <div>
-            <label className="text-xs font-medium text-neutral-500 mb-1 block">
+            <label className="mb-1 block text-xs font-medium text-neutral-500">
               Title
             </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full h-9 px-3 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-300"
+              className="h-9 w-full rounded-lg border border-neutral-200 px-3 text-sm focus:ring-2 focus:ring-neutral-300 focus:outline-none"
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-neutral-500 mb-1 block">
+            <label className="mb-1 block text-xs font-medium text-neutral-500">
               Description
             </label>
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={8}
-              className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-300 resize-none"
+              className="w-full resize-none rounded-lg border border-neutral-200 px-3 py-2 text-sm focus:ring-2 focus:ring-neutral-300 focus:outline-none"
             />
           </div>
           <div className="flex items-center justify-between pt-1">
@@ -633,23 +633,23 @@ function EditIssueModal({
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+              className="flex items-center gap-1 text-xs text-blue-600 hover:underline"
             >
-              <ExternalLinkIcon className="w-3 h-3" />
+              <ExternalLinkIcon className="h-3 w-3" />
               View on GitHub
             </a>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="h-8 px-4 text-sm text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                className="h-8 rounded-lg px-4 text-sm text-neutral-600 transition-colors hover:bg-neutral-100"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={!title.trim() || isPending}
-                className="h-8 px-4 text-sm bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                className="flex h-8 items-center gap-1.5 rounded-lg bg-neutral-900 px-4 text-sm text-white transition-colors hover:bg-neutral-800 disabled:opacity-50"
               >
                 {isPending && <Spinner size={12} color="white" />}
                 Save

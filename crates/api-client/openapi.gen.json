@@ -441,6 +441,22 @@
           "integration_id": {
             "type": "string"
           },
+          "last_error_at": {
+            "nullable": true,
+            "type": "string"
+          },
+          "last_error_description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "last_error_type": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "nullable": true,
+            "type": "string"
+          },
           "updated_at": {
             "nullable": true,
             "type": "string"
@@ -603,6 +619,32 @@
         },
         "required": [
           "deleted"
+        ],
+        "type": "object"
+      },
+      "DeleteConnectionRequest": {
+        "properties": {
+          "connection_id": {
+            "type": "string"
+          },
+          "integration_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "connection_id",
+          "integration_id"
+        ],
+        "type": "object"
+      },
+      "DeleteConnectionResponse": {
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
         ],
         "type": "object"
       },
@@ -2390,6 +2432,48 @@
       }
     },
     "/nango/connections": {
+      "delete": {
+        "operationId": "delete_connection",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteConnectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteConnectionResponse"
+                }
+              }
+            },
+            "description": "Connection disconnected"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ],
+        "tags": [
+          "nango"
+        ]
+      },
       "get": {
         "operationId": "list_connections",
         "responses": {
@@ -2446,6 +2530,9 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "500": {
             "description": "Internal server error"

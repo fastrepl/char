@@ -1,16 +1,17 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useAuth } from "~/auth";
-import { useNotifications } from "~/contexts/notifications";
-import { useConfigValues } from "~/shared/config";
-import { useTabs } from "~/store/zustand/tabs";
-import { useToastAction } from "~/store/zustand/toast-action";
 
 import { cn } from "@hypr/utils";
 
 import { Toast } from "./component";
 import { createToastRegistry, getToastToShow } from "./registry";
 import { useDismissedToasts } from "./useDismissedToasts";
+
+import { useAuth } from "~/auth";
+import { useNotifications } from "~/contexts/notifications";
+import { useConfigValues } from "~/shared/config";
+import { useTabs } from "~/store/zustand/tabs";
+import { useToastAction } from "~/store/zustand/toast-action";
 
 export function ToastArea({
   isProfileExpanded,
@@ -143,7 +144,7 @@ export function ToastArea({
           exit={{ opacity: 0, y: 16 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
           className={cn([
-            "absolute bottom-0 left-0 right-0 z-20",
+            "absolute right-0 bottom-0 left-0 z-20",
             "pointer-events-none",
           ])}
         >

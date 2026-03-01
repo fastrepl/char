@@ -1,7 +1,8 @@
 import levenshtein from "js-levenshtein-esm";
-import type { EarlyValidatorFn } from "~/store/zustand/ai-task/shared/validate";
 
 import type { EnhanceTemplate } from "@hypr/plugin-template";
+
+import type { EarlyValidatorFn } from "~/store/zustand/ai-task/shared/validate";
 
 export function normalizeForComparison(text: string): string {
   return text

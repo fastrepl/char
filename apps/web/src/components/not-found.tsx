@@ -6,24 +6,24 @@ import { Header } from "./header";
 
 export function NotFoundContent() {
   return (
-    <div className="min-h-[80vh] flex items-center justify-center">
-      <div className="max-w-6xl w-full mx-auto border-x border-neutral-100 bg-white flex items-center justify-center px-4 py-32">
+    <div className="flex min-h-[80vh] items-center justify-center">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-center border-x border-neutral-100 bg-white px-4 py-32">
         <div className="text-center">
-          <p className="text-sm font-medium tracking-widest uppercase text-neutral-400 mb-6">
+          <p className="mb-6 text-sm font-medium tracking-widest text-neutral-400 uppercase">
             404
           </p>
 
-          <h1 className="text-4xl sm:text-5xl font-serif text-neutral-900 mb-4">
+          <h1 className="mb-4 font-serif text-4xl text-neutral-900 sm:text-5xl">
             Page not found
           </h1>
 
-          <p className="text-base text-neutral-500 max-w-sm mx-auto mb-10">
+          <p className="mx-auto mb-10 max-w-sm text-base text-neutral-500">
             The page you're looking for doesn't exist or has been moved.
           </p>
 
           <Link
             to="/"
-            className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%] transition-all"
+            className="inline-flex items-center gap-2 rounded-full bg-linear-to-t from-stone-600 to-stone-500 px-5 py-2.5 text-sm font-medium text-white shadow-md transition-all hover:scale-[102%] hover:shadow-lg active:scale-[98%]"
           >
             <ArrowLeft size={14} />
             Back to home
@@ -36,7 +36,7 @@ export function NotFoundContent() {
 
 export function NotFoundDocument() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex min-h-screen flex-col">
       <Header />
       <main className="flex-1">
         <NotFoundContent />

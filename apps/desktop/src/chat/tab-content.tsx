@@ -1,5 +1,8 @@
 import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef } from "react";
+
+import { cn } from "@hypr/utils";
+
 import { useFeedbackLanguageModel } from "~/ai/hooks";
 import { useAuth } from "~/auth";
 import { ChatBody } from "~/chat/components/body";
@@ -16,8 +19,6 @@ import { ElicitationProvider } from "~/contexts/elicitation";
 import { StandardTabWrapper } from "~/shared/main";
 import type { Tab } from "~/store/zustand/tabs";
 import { useTabs } from "~/store/zustand/tabs";
-
-import { cn } from "@hypr/utils";
 
 export function TabContentChat({
   tab,
@@ -72,8 +73,8 @@ function SupportChatTabView({
 
   if (!isReady) {
     return (
-      <div className="flex flex-col h-full bg-sky-50/40">
-        <div className="flex-1 flex items-center justify-center">
+      <div className="flex h-full flex-col bg-sky-50/40">
+        <div className="flex flex-1 items-center justify-center">
           <div className="flex items-center gap-2 text-sm text-neutral-500">
             <Loader2 className="size-4 animate-spin" />
             <span>Preparing support chat...</span>
@@ -84,7 +85,7 @@ function SupportChatTabView({
   }
 
   return (
-    <div className={cn(["flex flex-col h-full", "bg-sky-50/40"])}>
+    <div className={cn(["flex h-full flex-col", "bg-sky-50/40"])}>
       <ChatSession
         key={`${stableSessionId}-${mcpToolCount}`}
         sessionId={stableSessionId}

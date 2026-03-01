@@ -1,7 +1,8 @@
+import "./test-matchers";
+
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { type Tab, useTabs } from ".";
-import "./test-matchers";
 import {
   createContactsTab,
   createSessionTab,

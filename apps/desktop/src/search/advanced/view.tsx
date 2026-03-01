@@ -1,16 +1,17 @@
 import { Loader2Icon, SearchIcon, XIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { Badge } from "@hypr/ui/components/ui/badge";
+import { cn } from "@hypr/utils";
+
+import { ResultItem } from "./result-item";
+
 import { useSearchEngine } from "~/search/contexts/engine";
 import {
   type GroupedSearchResults,
   groupSearchResults,
   type SearchEntityType,
 } from "~/search/contexts/ui";
-
-import { Badge } from "@hypr/ui/components/ui/badge";
-import { cn } from "@hypr/utils";
-
-import { ResultItem } from "./result-item";
 
 const FILTER_OPTIONS: { type: SearchEntityType; label: string }[] = [
   { type: "session", label: "Meeting note" },
@@ -187,13 +188,13 @@ export function AdvancedSearchView({
   const hasResults = filteredResults && filteredResults.totalResults > 0;
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="pr-1 py-1 border-b border-neutral-200">
+    <div className="flex h-full flex-col">
+      <div className="border-b border-neutral-200 py-1 pr-1">
         <div className="relative">
           {showLoading ? (
-            <Loader2Icon className="absolute left-[14px] top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400 animate-spin" />
+            <Loader2Icon className="absolute top-1/2 left-[14px] h-4 w-4 -translate-y-1/2 animate-spin text-neutral-400" />
           ) : (
-            <SearchIcon className="absolute left-[14px] top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+            <SearchIcon className="absolute top-1/2 left-[14px] h-4 w-4 -translate-y-1/2 text-neutral-400" />
           )}
           <input
             ref={inputRef}
@@ -230,7 +231,7 @@ export function AdvancedSearchView({
               }
             }}
             className={cn([
-              "w-full pl-[38px] pr-8 py-2",
+              "w-full py-2 pr-8 pl-[38px]",
               "text-base placeholder:text-neutral-400",
               "bg-transparent",
               "border-none",
@@ -241,7 +242,7 @@ export function AdvancedSearchView({
           {localQuery && (
             <button
               onClick={() => setLocalQuery("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+              className="absolute top-1/2 right-2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
             >
               <XIcon className="h-5 w-5" />
             </button>
@@ -249,8 +250,8 @@ export function AdvancedSearchView({
         </div>
       </div>
 
-      <div className="pl-[14px] pr-3 py-2 border-b border-neutral-200">
-        <div className="flex gap-2 flex-wrap">
+      <div className="border-b border-neutral-200 py-2 pr-3 pl-[14px]">
+        <div className="flex flex-wrap gap-2">
           {FILTER_OPTIONS.map((option) => {
             const isActive = selectedTypes?.includes(option.type);
             return (
@@ -260,8 +261,8 @@ export function AdvancedSearchView({
                 className={cn([
                   "cursor-pointer transition-all",
                   isActive
-                    ? "bg-stone-600 text-white border-stone-600 hover:bg-stone-700"
-                    : "bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-100",
+                    ? "border-stone-600 bg-stone-600 text-white hover:bg-stone-700"
+                    : "border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-100",
                 ])}
                 onClick={() => toggleFilter(option.type)}
               >
@@ -278,8 +279,8 @@ export function AdvancedSearchView({
                 className={cn([
                   "cursor-pointer transition-all",
                   isActive
-                    ? "bg-stone-600 text-white border-stone-600 hover:bg-stone-700"
-                    : "bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-100",
+                    ? "border-stone-600 bg-stone-600 text-white hover:bg-stone-700"
+                    : "border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-100",
                 ])}
                 onClick={() => toggleDatePreset(preset.key)}
               >
@@ -321,7 +322,7 @@ function SuggestionsView({
   selectedId: string | null;
 }) {
   return (
-    <div className="pl-[14px] pr-3 pt-3">
+    <div className="pt-3 pr-3 pl-[14px]">
       {results && results.totalResults > 0 ? (
         <div className="space-y-1">
           {results.groups
@@ -340,9 +341,9 @@ function SuggestionsView({
             )}
         </div>
       ) : (
-        <div className="text-center py-12 text-neutral-400">
+        <div className="py-12 text-center text-neutral-400">
           <p>Start typing to search</p>
-          <p className="text-sm mt-1">or browse your recent notes</p>
+          <p className="mt-1 text-sm">or browse your recent notes</p>
         </div>
       )}
     </div>
@@ -359,10 +360,10 @@ function SearchResultsView({
   selectedId: string | null;
 }) {
   return (
-    <div className="pl-[14px] pr-3 pt-3">
+    <div className="pt-3 pr-3 pl-[14px]">
       {results.groups.map((group) => (
         <div key={group.key} className="mb-6">
-          <h3 className="text-sm font-semibold text-neutral-900 mb-3">
+          <h3 className="mb-3 text-sm font-semibold text-neutral-900">
             {group.title}
           </h3>
           <div className="space-y-1">
@@ -383,10 +384,10 @@ function SearchResultsView({
 
 function NoResultsView({ query }: { query: string }) {
   return (
-    <div className="flex flex-col items-center justify-center h-full py-12">
-      <SearchIcon className="h-12 w-12 text-neutral-200 mb-4" />
-      <p className="text-neutral-600 font-medium">No results found</p>
-      <p className="text-sm text-neutral-400 mt-1">No matches for "{query}"</p>
+    <div className="flex h-full flex-col items-center justify-center py-12">
+      <SearchIcon className="mb-4 h-12 w-12 text-neutral-200" />
+      <p className="font-medium text-neutral-600">No results found</p>
+      <p className="mt-1 text-sm text-neutral-400">No matches for "{query}"</p>
     </div>
   );
 }

@@ -87,7 +87,6 @@ jobs:
             --exclude bundle \
             --exclude host \
             --exclude intercept \
-            --exclude extensions-runtime \
             --exclude frontmatter \
             --exclude openstatus \
             --exclude audio \
@@ -108,7 +107,6 @@ jobs:
             --exclude tauri-plugin-db2 \
             --exclude tauri-plugin-deeplink2 \
             --exclude tauri-plugin-detect \
-            --exclude tauri-plugin-extensions \
             --exclude tauri-plugin-fs-db \
             --exclude tauri-plugin-fs-sync \
             --exclude tauri-plugin-fs2 \

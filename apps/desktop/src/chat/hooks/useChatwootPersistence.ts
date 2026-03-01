@@ -1,6 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useAuth } from "~/auth";
-import { env } from "~/env";
 
 import {
   createContact,
@@ -8,6 +6,9 @@ import {
   sendMessage,
 } from "@hypr/api-client";
 import { createClient } from "@hypr/api-client/client";
+
+import { useAuth } from "~/auth";
+import { env } from "~/env";
 
 function makeClient(accessToken?: string | null) {
   const headers: Record<string, string> = {};

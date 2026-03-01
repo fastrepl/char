@@ -9,14 +9,6 @@ import {
   useState,
 } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { useCaretNearBottom } from "~/session/components/caret-position-context";
-import { useCurrentNoteTab } from "~/session/components/shared";
-import { useScrollPreservation } from "~/shared/hooks/useScrollPreservation";
-import * as main from "~/store/tinybase/store/main";
-import { type Tab, useTabs } from "~/store/zustand/tabs";
-import { type EditorView } from "~/store/zustand/tabs/schema";
-import { useListener } from "~/stt/contexts";
-import { parseTranscriptWords, updateTranscriptWords } from "~/stt/utils";
 
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 import type { TiptapEditor } from "@hypr/tiptap/editor";
@@ -36,6 +28,15 @@ import {
   type SearchReplaceDetail,
   useTranscriptSearch,
 } from "./transcript/search-context";
+
+import { useCaretNearBottom } from "~/session/components/caret-position-context";
+import { useCurrentNoteTab } from "~/session/components/shared";
+import { useScrollPreservation } from "~/shared/hooks/useScrollPreservation";
+import * as main from "~/store/tinybase/store/main";
+import { type Tab, useTabs } from "~/store/zustand/tabs";
+import { type EditorView } from "~/store/zustand/tabs/schema";
+import { useListener } from "~/stt/contexts";
+import { parseTranscriptWords, updateTranscriptWords } from "~/stt/utils";
 
 type Store = NonNullable<ReturnType<typeof main.UI.useStore>>;
 type Indexes = ReturnType<typeof main.UI.useIndexes>;
@@ -588,8 +589,8 @@ export const NoteInput = forwardRef<
   };
 
   return (
-    <div className="flex flex-col h-full -mx-2">
-      <div className="px-2 relative">
+    <div className="-mx-2 flex h-full flex-col">
+      <div className="relative px-2">
         <Header
           sessionId={sessionId}
           editorTabs={editorTabs}

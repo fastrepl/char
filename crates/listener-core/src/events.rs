@@ -3,6 +3,8 @@ use owhisper_interface::stream::StreamResponse;
 use crate::DegradedError;
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
+#[cfg_attr(feature = "tauri-event", derive(tauri_specta::Event))]
 #[serde(tag = "type")]
 pub enum SessionLifecycleEvent {
     #[serde(rename = "inactive")]
@@ -21,6 +23,8 @@ pub enum SessionLifecycleEvent {
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
+#[cfg_attr(feature = "tauri-event", derive(tauri_specta::Event))]
 #[serde(tag = "type")]
 pub enum SessionProgressEvent {
     #[serde(rename = "audio_initializing")]
@@ -37,6 +41,8 @@ pub enum SessionProgressEvent {
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
+#[cfg_attr(feature = "tauri-event", derive(tauri_specta::Event))]
 #[serde(tag = "type")]
 pub enum SessionErrorEvent {
     #[serde(rename = "audio_error")]
@@ -51,6 +57,8 @@ pub enum SessionErrorEvent {
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
+#[cfg_attr(feature = "tauri-event", derive(tauri_specta::Event))]
 #[serde(tag = "type")]
 pub enum SessionDataEvent {
     #[serde(rename = "audio_amplitude")]

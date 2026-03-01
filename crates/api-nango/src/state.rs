@@ -1,6 +1,6 @@
 use hypr_nango::NangoClient;
 
-use crate::config::NangoConfig;
+use crate::config::{NangoConfig, build_nango_client};
 use crate::supabase::SupabaseClient;
 
 #[derive(Clone)]
@@ -12,12 +12,7 @@ pub(crate) struct AppState {
 
 impl AppState {
     pub(crate) fn new(config: NangoConfig) -> Self {
-        let mut builder =
-            hypr_nango::NangoClient::builder().api_key(&config.nango.nango_secret_key);
-        if let Some(api_base) = &config.nango.nango_api_base {
-            builder = builder.api_base(api_base);
-        }
-        let nango = builder.build().expect("failed to build NangoClient");
+        let nango = build_nango_client(&config).expect("failed to build NangoClient");
 
         let supabase = SupabaseClient::new(
             &config.supabase_url,

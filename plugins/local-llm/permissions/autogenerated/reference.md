@@ -8,6 +8,8 @@ Default permissions for the plugin
 - `allow-is-model-downloading`
 - `allow-is-model-downloaded`
 - `allow-download-model`
+- `allow-cancel-download`
+- `allow-delete-model`
 - `allow-get-current-model`
 - `allow-set-current-model`
 - `allow-list-downloaded-model`
@@ -27,6 +29,58 @@ Default permissions for the plugin
 <th>Description</th>
 </tr>
 
+
+<tr>
+<td>
+
+`local-llm:allow-cancel-download`
+
+</td>
+<td>
+
+Enables the cancel_download command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`local-llm:deny-cancel-download`
+
+</td>
+<td>
+
+Denies the cancel_download command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`local-llm:allow-delete-model`
+
+</td>
+<td>
+
+Enables the delete_model command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`local-llm:deny-delete-model`
+
+</td>
+<td>
+
+Denies the delete_model command without any pre-configured scope.
+
+</td>
+</tr>
 
 <tr>
 <td>

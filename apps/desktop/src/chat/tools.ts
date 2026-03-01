@@ -1,12 +1,13 @@
 import { tool } from "ai";
 import { z } from "zod";
-import { searchFiltersSchema } from "~/search/contexts/engine/types";
-import type { SearchFilters, SearchHit } from "~/search/contexts/engine/types";
 
 import type { SessionContext } from "@hypr/plugin-template";
 import { commands as templateCommands } from "@hypr/plugin-template";
 
 import type { SupportMcpTools } from "./support-mcp-tools";
+
+import { searchFiltersSchema } from "~/search/contexts/engine/types";
+import type { SearchFilters, SearchHit } from "~/search/contexts/engine/types";
 
 export interface ToolDependencies {
   search: (

@@ -1,7 +1,8 @@
 import { describe, expect, test } from "vitest";
-import type { Ctx } from "~/services/apple-calendar/ctx";
 
 import { syncSessionParticipants } from "./sync";
+
+import type { Ctx } from "~/services/apple-calendar/ctx";
 
 type MockStoreData = {
   humans: Record<string, { email?: string; name?: string }>;

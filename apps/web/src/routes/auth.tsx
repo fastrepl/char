@@ -109,11 +109,11 @@ function Component() {
               <button
                 onClick={() => setView("email")}
                 className={cn([
-                  "w-full px-4 py-2 cursor-pointer",
+                  "w-full cursor-pointer px-4 py-2",
                   "border border-neutral-300",
                   "rounded-lg font-medium text-neutral-700",
                   "hover:bg-neutral-50",
-                  "focus:outline-hidden focus:ring-2 focus:ring-stone-500 focus:ring-offset-2",
+                  "focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 focus:outline-hidden",
                   "transition-colors",
                   "flex items-center justify-center gap-2",
                 ])}
@@ -142,11 +142,11 @@ function Container({ children }: { children: React.ReactNode }) {
   return (
     <div
       className={cn([
-        "flex items-center justify-center min-h-screen p-4",
+        "flex min-h-screen items-center justify-center p-4",
         "bg-linear-to-b from-stone-50 via-stone-100/50 to-stone-50",
       ])}
     >
-      <div className="bg-white border border-neutral-200 rounded-xs p-8 max-w-md mx-auto">
+      <div className="mx-auto max-w-md rounded-xs border border-neutral-200 bg-white p-8">
         {children}
       </div>
     </div>
@@ -155,12 +155,12 @@ function Container({ children }: { children: React.ReactNode }) {
 
 function Header() {
   return (
-    <div className="text-center mb-8">
+    <div className="mb-8 text-center">
       <div
         className={cn([
-          "mb-6 mx-auto size-28",
-          "shadow-xl border border-neutral-200",
-          "flex justify-center items-center",
+          "mx-auto mb-6 size-28",
+          "border border-neutral-200 shadow-xl",
+          "flex items-center justify-center",
           "rounded-4xl bg-transparent",
         ])}
       >
@@ -172,7 +172,7 @@ function Header() {
           className={cn(["size-24", "rounded-3xl border border-neutral-200"])}
         />
       </div>
-      <h1 className="text-3xl font-serif text-stone-800 mb-2">
+      <h1 className="mb-2 font-serif text-3xl text-stone-800">
         Welcome to Char
       </h1>
     </div>
@@ -217,7 +217,7 @@ function DesktopReauthView({
       {hasRetryFailed && (
         <>
           <div className="text-center">
-            <p className="text-neutral-600 mb-1">Signed in as {email}</p>
+            <p className="mb-1 text-neutral-600">Signed in as {email}</p>
             <p className="text-sm text-neutral-400">
               Sign in with your provider to continue to the app
             </p>
@@ -234,7 +234,7 @@ function DesktopReauthView({
 
 function LegalText() {
   return (
-    <p className="text-xs text-neutral-500 mt-4 text-center">
+    <p className="mt-4 text-center text-xs text-neutral-500">
       By signing up, you agree to our{" "}
       <a
         href="https://char.com/legal/terms"
@@ -273,17 +273,17 @@ function EmailAuthView({
     <div className="flex flex-col gap-4">
       <button
         onClick={onBack}
-        className="flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-700 transition-colors self-start -mt-2 mb-1"
+        className="-mt-2 mb-1 flex items-center gap-1 self-start text-sm text-neutral-500 transition-colors hover:text-neutral-700"
       >
         <ArrowLeftIcon className="size-3.5" />
         Back
       </button>
 
-      <div className="flex gap-1 p-1 bg-neutral-100 rounded-lg">
+      <div className="flex gap-1 rounded-lg bg-neutral-100 p-1">
         <button
           onClick={() => setMode("password")}
           className={cn([
-            "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors",
+            "flex-1 rounded-md py-1.5 text-sm font-medium transition-colors",
             mode === "password"
               ? "bg-white text-neutral-900 shadow-sm"
               : "text-neutral-500 hover:text-neutral-700",
@@ -294,7 +294,7 @@ function EmailAuthView({
         <button
           onClick={() => setMode("magic-link")}
           className={cn([
-            "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors",
+            "flex-1 rounded-md py-1.5 text-sm font-medium transition-colors",
             mode === "magic-link"
               ? "bg-white text-neutral-900 shadow-sm"
               : "text-neutral-500 hover:text-neutral-700",
@@ -414,9 +414,9 @@ function PasswordForm({
 
   if (submitted) {
     return (
-      <div className="text-center p-4 bg-stone-50 rounded-lg border border-stone-200">
-        <p className="text-stone-700 font-medium">Check your email</p>
-        <p className="text-sm text-stone-500 mt-1">
+      <div className="rounded-lg border border-stone-200 bg-stone-50 p-4 text-center">
+        <p className="font-medium text-stone-700">Check your email</p>
+        <p className="mt-1 text-sm text-stone-500">
           We sent a confirmation link to {email}
         </p>
       </div>
@@ -433,9 +433,9 @@ function PasswordForm({
         required
         className={cn([
           "w-full px-4 py-2",
-          "border border-neutral-300 rounded-lg",
+          "rounded-lg border border-neutral-300",
           "text-neutral-700 placeholder:text-neutral-400",
-          "focus:outline-hidden focus:ring-2 focus:ring-stone-500 focus:ring-offset-2",
+          "focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 focus:outline-hidden",
         ])}
       />
       <input
@@ -446,9 +446,9 @@ function PasswordForm({
         required
         className={cn([
           "w-full px-4 py-2",
-          "border border-neutral-300 rounded-lg",
+          "rounded-lg border border-neutral-300",
           "text-neutral-700 placeholder:text-neutral-400",
-          "focus:outline-hidden focus:ring-2 focus:ring-stone-500 focus:ring-offset-2",
+          "focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 focus:outline-hidden",
         ])}
       />
       {isSignUp && (
@@ -460,14 +460,14 @@ function PasswordForm({
           required
           className={cn([
             "w-full px-4 py-2",
-            "border border-neutral-300 rounded-lg",
+            "rounded-lg border border-neutral-300",
             "text-neutral-700 placeholder:text-neutral-400",
-            "focus:outline-hidden focus:ring-2 focus:ring-stone-500 focus:ring-offset-2",
+            "focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 focus:outline-hidden",
           ])}
         />
       )}
       {errorMessage && (
-        <p className="text-sm text-red-500 text-center">{errorMessage}</p>
+        <p className="text-center text-sm text-red-500">{errorMessage}</p>
       )}
       <button
         type="submit"
@@ -475,12 +475,12 @@ function PasswordForm({
           isPending || !email || !password || (isSignUp && !confirmPassword)
         }
         className={cn([
-          "w-full px-4 py-2 cursor-pointer",
+          "w-full cursor-pointer px-4 py-2",
           "border border-neutral-300",
           "rounded-lg font-medium text-neutral-700",
           "hover:bg-neutral-50",
-          "focus:outline-hidden focus:ring-2 focus:ring-stone-500 focus:ring-offset-2",
-          "disabled:opacity-50 disabled:cursor-not-allowed",
+          "focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 focus:outline-hidden",
+          "disabled:cursor-not-allowed disabled:opacity-50",
           "transition-colors",
           "flex items-center justify-center gap-2",
         ])}
@@ -495,7 +495,7 @@ function PasswordForm({
             setErrorMessage("");
             setConfirmPassword("");
           }}
-          className="text-sm text-neutral-500 hover:text-neutral-700 transition-colors"
+          className="text-sm text-neutral-500 transition-colors hover:text-neutral-700"
         >
           {isSignUp
             ? "Already have an account? Sign in"
@@ -504,7 +504,7 @@ function PasswordForm({
         {!isSignUp && (
           <Link
             to="/reset-password/"
-            className="text-sm text-neutral-500 hover:text-neutral-700 transition-colors"
+            className="text-sm text-neutral-500 transition-colors hover:text-neutral-700"
           >
             Forgot password?
           </Link>
@@ -564,9 +564,9 @@ function MagicLinkForm({
 
   if (submitted) {
     return (
-      <div className="text-center p-4 bg-stone-50 rounded-lg border border-stone-200">
-        <p className="text-stone-700 font-medium">Check your email</p>
-        <p className="text-sm text-stone-500 mt-1">
+      <div className="rounded-lg border border-stone-200 bg-stone-50 p-4 text-center">
+        <p className="font-medium text-stone-700">Check your email</p>
+        <p className="mt-1 text-sm text-stone-500">
           We sent a magic link to {email}
         </p>
       </div>
@@ -591,21 +591,21 @@ function MagicLinkForm({
         required
         className={cn([
           "w-full px-4 py-2",
-          "border border-neutral-300 rounded-lg",
+          "rounded-lg border border-neutral-300",
           "text-neutral-700 placeholder:text-neutral-400",
-          "focus:outline-hidden focus:ring-2 focus:ring-stone-500 focus:ring-offset-2",
+          "focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 focus:outline-hidden",
         ])}
       />
       <button
         type="submit"
         disabled={magicLinkMutation.isPending || !email}
         className={cn([
-          "w-full px-4 py-2 cursor-pointer",
+          "w-full cursor-pointer px-4 py-2",
           "border border-neutral-300",
           "rounded-lg font-medium text-neutral-700",
           "hover:bg-neutral-50",
-          "focus:outline-hidden focus:ring-2 focus:ring-stone-500 focus:ring-offset-2",
-          "disabled:opacity-50 disabled:cursor-not-allowed",
+          "focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 focus:outline-hidden",
+          "disabled:cursor-not-allowed disabled:opacity-50",
           "transition-colors",
           "flex items-center justify-center gap-2",
         ])}
@@ -613,7 +613,7 @@ function MagicLinkForm({
         {magicLinkMutation.isPending ? "Sending..." : "Send magic link"}
       </button>
       {magicLinkMutation.isError && (
-        <p className="text-sm text-red-500 text-center">
+        <p className="text-center text-sm text-red-500">
           Failed to send magic link. Please try again.
         </p>
       )}
@@ -656,12 +656,12 @@ function OAuthButton({
       onClick={() => oauthMutation.mutate(provider)}
       disabled={oauthMutation.isPending}
       className={cn([
-        "w-full px-4 py-2 cursor-pointer",
+        "w-full cursor-pointer px-4 py-2",
         "border border-neutral-300",
         "rounded-lg font-medium text-neutral-700",
         "hover:bg-neutral-50",
-        "focus:outline-hidden focus:ring-2 focus:ring-stone-500 focus:ring-offset-2",
-        "disabled:opacity-50 disabled:cursor-not-allowed",
+        "focus:ring-2 focus:ring-stone-500 focus:ring-offset-2 focus:outline-hidden",
+        "disabled:cursor-not-allowed disabled:opacity-50",
         "transition-colors",
         "flex items-center justify-center gap-2",
       ])}

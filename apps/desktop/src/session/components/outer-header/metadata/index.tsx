@@ -1,8 +1,5 @@
 import { CalendarIcon, MapPinIcon, VideoIcon } from "lucide-react";
 import { forwardRef, useState } from "react";
-import { useConfigValue } from "~/shared/config";
-import { useSessionEvent } from "~/store/tinybase/hooks";
-import * as main from "~/store/tinybase/store/main";
 
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 import { Button } from "@hypr/ui/components/ui/button";
@@ -23,6 +20,10 @@ import {
 import { DateDisplay } from "./date";
 import { ParticipantsDisplay } from "./participants";
 
+import { useConfigValue } from "~/shared/config";
+import { useSessionEvent } from "~/store/tinybase/hooks";
+import * as main from "~/store/tinybase/store/main";
+
 export function MetadataButton({ sessionId }: { sessionId: string }) {
   const [open, setOpen] = useState(false);
 
@@ -33,7 +34,7 @@ export function MetadataButton({ sessionId }: { sessionId: string }) {
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="w-85 shadow-lg p-0 max-h-[80vh] flex flex-col rounded-lg"
+        className="flex max-h-[80vh] w-85 flex-col rounded-lg p-0 shadow-lg"
       >
         <ContentInner sessionId={sessionId} />
       </PopoverContent>
@@ -207,7 +208,7 @@ export function EventDisplay({
       {event.meetingLink && (
         <>
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 text-sm text-neutral-700 min-w-0">
+            <div className="flex min-w-0 items-center gap-2 text-sm text-neutral-700">
               <VideoIcon size={16} className="shrink-0 text-neutral-500" />
               <span className="truncate">
                 {meetingDomain || "Meeting link"}
@@ -234,7 +235,7 @@ export function EventDisplay({
       {event.description && (
         <>
           <div className="h-px bg-neutral-200" />
-          <div className="text-sm text-neutral-700 whitespace-pre-wrap break-words overflow-y-auto max-h-40">
+          <div className="max-h-40 overflow-y-auto text-sm break-words whitespace-pre-wrap text-neutral-700">
             {event.description}
           </div>
         </>

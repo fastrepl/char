@@ -1,7 +1,6 @@
 import { Icon } from "@iconify-icon/react";
 import { Facehash } from "facehash";
 import { Building2, Mail } from "lucide-react";
-import * as main from "~/store/tinybase/store/main";
 
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 import { Button } from "@hypr/ui/components/ui/button";
@@ -9,6 +8,8 @@ import { Input } from "@hypr/ui/components/ui/input";
 import { cn } from "@hypr/utils";
 
 import { getContactBgClass } from "./shared";
+
+import * as main from "~/store/tinybase/store/main";
 
 export function OrganizationDetailsColumn({
   selectedOrganizationId,
@@ -32,18 +33,18 @@ export function OrganizationDetailsColumn({
   const allHumans = main.UI.useTable("humans", main.STORE_ID);
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex flex-1 flex-col">
       {selectedOrgData && selectedOrganizationId ? (
         <>
-          <div className="flex items-center justify-center py-6 border-b border-neutral-200">
-            <div className="w-16 h-16 rounded-full bg-neutral-200 flex items-center justify-center">
+          <div className="flex items-center justify-center border-b border-neutral-200 py-6">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-neutral-200">
               <Building2 className="h-8 w-8 text-neutral-600" />
             </div>
           </div>
 
           <div className="flex-1 overflow-y-auto">
             <div>
-              <div className="flex items-center px-4 py-3 border-b border-neutral-200">
+              <div className="flex items-center border-b border-neutral-200 px-4 py-3">
                 <div className="w-28 text-sm text-neutral-500">Name</div>
                 <div className="flex-1">
                   <EditableOrganizationNameField
@@ -54,9 +55,9 @@ export function OrganizationDetailsColumn({
             </div>
 
             <div className="p-6">
-              <h3 className="text-sm font-medium text-neutral-600 mb-4">
+              <h3 className="mb-4 text-sm font-medium text-neutral-600">
                 People
-                <span className="text-neutral-400 font-normal">
+                <span className="font-normal text-neutral-400">
                   {" "}
                   &middot; {peopleInOrg?.length ?? 0}{" "}
                   {(peopleInOrg?.length ?? 0) === 1 ? "member" : "members"}
@@ -74,10 +75,10 @@ export function OrganizationDetailsColumn({
                       return (
                         <div
                           key={humanId}
-                          className="p-4 rounded-lg border border-neutral-200 hover:shadow-xs transition-all bg-white cursor-pointer"
+                          className="cursor-pointer rounded-lg border border-neutral-200 bg-white p-4 transition-all hover:shadow-xs"
                           onClick={() => onPersonClick?.(humanId)}
                         >
-                          <div className="flex flex-col items-center text-center gap-3">
+                          <div className="flex flex-col items-center gap-3 text-center">
                             <div
                               className={cn([
                                 "shrink-0 rounded-full",
@@ -103,16 +104,16 @@ export function OrganizationDetailsColumn({
                               />
                             </div>
                             <div className="w-full">
-                              <div className="font-semibold text-sm truncate">
+                              <div className="truncate text-sm font-semibold">
                                 {human.name || human.email || "Unnamed"}
                               </div>
                               {human.job_title && (
-                                <div className="text-xs text-neutral-500 truncate mt-1">
+                                <div className="mt-1 truncate text-xs text-neutral-500">
                                   {human.job_title as string}
                                 </div>
                               )}
                             </div>
-                            <div className="flex gap-2 mt-1">
+                            <div className="mt-1 flex gap-2">
                               {human.email && (
                                 <Button
                                   variant="ghost"
@@ -166,7 +167,7 @@ export function OrganizationDetailsColumn({
           </div>
         </>
       ) : (
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex flex-1 items-center justify-center">
           <p className="text-sm text-neutral-500">
             Select an organization to view details
           </p>
@@ -202,7 +203,7 @@ function EditableOrganizationNameField({
       value={(value as string) || ""}
       onChange={handleChange}
       placeholder="Organization name"
-      className="border-none shadow-none p-0 h-7 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
+      className="h-7 border-none p-0 text-base shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
     />
   );
 }

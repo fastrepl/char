@@ -1,5 +1,4 @@
 import type { StateCreator, StoreMutatorIdentifier } from "zustand";
-import { commands } from "~/types/tauri.gen";
 
 import { getCurrentWebviewWindowLabel } from "@hypr/plugin-windows";
 
@@ -9,6 +8,8 @@ import {
   type TabInput,
   uniqueIdfromTab,
 } from "./schema";
+
+import { commands } from "~/types/tauri.gen";
 
 export type PinnedTab = TabInput & { pinned: true };
 

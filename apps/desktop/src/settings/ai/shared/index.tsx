@@ -3,8 +3,6 @@ import { type AnyFieldApi, useForm } from "@tanstack/react-form";
 import { ExternalLink } from "lucide-react";
 import type { ReactNode } from "react";
 import { Streamdown } from "streamdown";
-import { useBillingAccess } from "~/auth/billing";
-import * as settings from "~/store/tinybase/store/settings";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import type { AIProvider } from "@hypr/store";
@@ -26,6 +24,9 @@ import {
   type ProviderRequirement,
   requiresEntitlement,
 } from "./eligibility";
+
+import { useBillingAccess } from "~/auth/billing";
+import * as settings from "~/store/tinybase/store/settings";
 
 export * from "./hypr-cloud-button";
 export * from "./model-combobox";
@@ -151,7 +152,7 @@ export function NonHyprProviderCard({
     >
       <AccordionTrigger
         className={cn([
-          "capitalize gap-2 px-4 hover:no-underline",
+          "gap-2 px-4 capitalize hover:no-underline",
           (config.disabled || locked) && "cursor-not-allowed opacity-30",
         ])}
       >
@@ -159,7 +160,7 @@ export function NonHyprProviderCard({
           {config.icon}
           <span>{config.displayName}</span>
           {config.badge && (
-            <span className="text-xs text-neutral-500 font-light border border-neutral-300 rounded-full px-2">
+            <span className="rounded-full border border-neutral-300 px-2 text-xs font-light text-neutral-500">
               {config.badge}
             </span>
           )}
@@ -236,7 +237,7 @@ export function NonHyprProviderCard({
           )}
           {!showBaseUrl && config.baseUrl && (
             <details className="flex flex-col gap-4 pt-2">
-              <summary className="text-xs cursor-pointer text-neutral-600 hover:text-neutral-900 hover:underline">
+              <summary className="cursor-pointer text-xs text-neutral-600 hover:text-neutral-900 hover:underline">
                 Advanced
               </summary>
               <div className="mt-4">
@@ -255,14 +256,14 @@ export function NonHyprProviderCard({
 const streamdownComponents = {
   ul: (props: React.HTMLAttributes<HTMLUListElement>) => {
     return (
-      <ul className="list-disc pl-6 mb-1 block relative">
+      <ul className="relative mb-1 block list-disc pl-6">
         {props.children as React.ReactNode}
       </ul>
     );
   },
   ol: (props: React.HTMLAttributes<HTMLOListElement>) => {
     return (
-      <ol className="list-decimal pl-6 mb-1 block relative">
+      <ol className="relative mb-1 block list-decimal pl-6">
         {props.children as React.ReactNode}
       </ol>
     );
@@ -285,7 +286,7 @@ export function StyledStreamdown({
   return (
     <Streamdown
       components={streamdownComponents}
-      className={cn(["text-sm mt-1", className])}
+      className={cn(["mt-1 text-sm", className])}
       isAnimating={false}
     >
       {children}
@@ -349,7 +350,7 @@ function FormField({
         />
       </InputGroup>
       {errorMessage && (
-        <p className="text-destructive text-xs flex items-center gap-1.5">
+        <p className="text-destructive flex items-center gap-1.5 text-xs">
           <Icon icon="mdi:alert-circle" size={14} />
           <span>{errorMessage}</span>
         </p>

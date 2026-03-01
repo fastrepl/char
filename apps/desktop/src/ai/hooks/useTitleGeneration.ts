@@ -1,9 +1,10 @@
 import { useCallback } from "react";
-import { createTaskId } from "~/store/zustand/ai-task/task-configs";
-import type { Tab } from "~/store/zustand/tabs";
 
 import { useAITaskTask } from "./useAITaskTask";
 import { useLanguageModel } from "./useLLMConnection";
+
+import { createTaskId } from "~/store/zustand/ai-task/task-configs";
+import type { Tab } from "~/store/zustand/tabs";
 
 export function useTitleGeneration(tab: Extract<Tab, { type: "sessions" }>) {
   const sessionId = tab.id;

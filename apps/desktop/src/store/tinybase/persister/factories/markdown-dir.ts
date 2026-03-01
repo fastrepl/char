@@ -1,4 +1,15 @@
 import type { MergeableStore, OptionalSchemas } from "tinybase/with-schemas";
+
+import {
+  commands as fsSyncCommands,
+  type JsonValue,
+  type ParsedDocument,
+} from "@hypr/plugin-fs-sync";
+import { commands as fs2Commands } from "@hypr/plugin-fs2";
+import { toContent, toPersistedChanges } from "@hypr/tinybase-utils";
+
+import { createCollectorPersister } from "./collector";
+
 import {
   createDeletionMarker,
   type DeletionMarkerStore,
@@ -21,16 +32,6 @@ import {
   type ChangedTables,
   type WriteOperation,
 } from "~/store/tinybase/persister/shared/types";
-
-import { commands as fs2Commands } from "@hypr/plugin-fs2";
-import {
-  commands as fsSyncCommands,
-  type JsonValue,
-  type ParsedDocument,
-} from "@hypr/plugin-fs-sync";
-import { toContent, toPersistedChanges } from "@hypr/tinybase-utils";
-
-import { createCollectorPersister } from "./collector";
 
 export interface MarkdownDirPersisterConfig<
   TStorage extends Record<string, unknown>,

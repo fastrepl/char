@@ -1,14 +1,15 @@
 import { platform } from "@tauri-apps/plugin-os";
 import { CalendarIcon } from "lucide-react";
+
+import { Button } from "@hypr/ui/components/ui/button";
+
+import { OnboardingButton } from "./shared";
+
 import { useAppleCalendarSelection } from "~/calendar/components/apple/calendar-selection";
 import { SyncProvider } from "~/calendar/components/apple/context";
 import { ApplePermissions } from "~/calendar/components/apple/permission";
 import { CalendarSelection } from "~/calendar/components/calendar-selection";
 import { usePermission } from "~/shared/hooks/usePermissions";
-
-import { Button } from "@hypr/ui/components/ui/button";
-
-import { OnboardingButton } from "./shared";
 
 function AppleCalendarList() {
   const { groups, handleToggle, isLoading } = useAppleCalendarSelection();
@@ -17,7 +18,7 @@ function AppleCalendarList() {
       groups={groups}
       onToggle={handleToggle}
       isLoading={isLoading}
-      className="border rounded-lg"
+      className="rounded-lg border"
     />
   );
 }
@@ -30,8 +31,8 @@ function RequestCalendarAccess({
   isPending: boolean;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center py-6 px-4 border rounded-lg">
-      <CalendarIcon className="size-6 text-neutral-300 mb-2" />
+    <div className="flex flex-col items-center justify-center rounded-lg border px-4 py-6">
+      <CalendarIcon className="mb-2 size-6 text-neutral-300" />
       <Button
         variant="outline"
         size="sm"

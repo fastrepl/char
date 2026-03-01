@@ -1,7 +1,8 @@
 import { faker } from "@faker-js/faker/locale/en";
-import { DEFAULT_USER_ID, id } from "~/shared/utils";
 
 import type { EventStorage } from "@hypr/store";
+
+import { DEFAULT_USER_ID, id } from "~/shared/utils";
 
 const MEETING_TITLES = [
   "Weekly Team Sync",

@@ -16,7 +16,7 @@ export function SettingsLab() {
     <div className="flex flex-col gap-4 pt-3">
       <div className="flex items-center justify-between gap-4">
         <div className="flex-1">
-          <h3 className="text-sm font-medium mb-1">Control Overlay</h3>
+          <h3 className="mb-1 text-sm font-medium">Control Overlay</h3>
           <p className="text-xs text-neutral-600">
             Floating window for quick access to recording controls.
           </p>
@@ -86,7 +86,7 @@ function DownloadButtons() {
             className="flex items-center justify-between gap-4"
           >
             <div className="flex-1">
-              <h3 className="text-sm font-medium mb-1">
+              <h3 className="mb-1 text-sm font-medium">
                 {channel === "nightly" ? "Nightly" : "Stable"} Build
               </h3>
               <p className="text-xs text-neutral-600">
@@ -98,7 +98,7 @@ function DownloadButtons() {
             <Button
               size="sm"
               className={cn([
-                "text-white bg-linear-to-br border",
+                "border bg-linear-to-br text-white",
                 channel === "nightly"
                   ? "from-[#03BCF1] to-[#127FE5]"
                   : "from-[#535353] to-[#000000]",

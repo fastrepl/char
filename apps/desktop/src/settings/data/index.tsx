@@ -1,10 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { XCircleIcon } from "lucide-react";
 import { useState } from "react";
-import { StyledStreamdown } from "~/settings/ai/shared";
-import { importData } from "~/store/tinybase/store/importer";
-import * as main from "~/store/tinybase/store/main";
-import { save } from "~/store/tinybase/store/save";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import {
@@ -16,6 +12,11 @@ import {
 
 import { ImportPreview } from "./import-preview";
 import { SourceItem } from "./source-item";
+
+import { StyledStreamdown } from "~/settings/ai/shared";
+import { importData } from "~/store/tinybase/store/importer";
+import * as main from "~/store/tinybase/store/main";
+import { save } from "~/store/tinybase/store/save";
 
 type DryRunResult = {
   source: ImportSourceKind;

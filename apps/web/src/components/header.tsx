@@ -131,14 +131,14 @@ export function Header() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-xs border-b border-neutral-100 z-50 max-md:transition-transform max-md:duration-300 ${
+        className={`fixed top-0 right-0 left-0 z-50 border-b border-neutral-100 bg-white/80 backdrop-blur-xs max-md:transition-transform max-md:duration-300 ${
           showMobileHeader ? "max-md:translate-y-0" : "max-md:-translate-y-full"
         }`}
       >
         <div
-          className={`${maxWidthClass} mx-auto px-4 laptop:px-0 border-x border-neutral-100 h-17.25`}
+          className={`${maxWidthClass} laptop:px-0 mx-auto h-17.25 border-x border-neutral-100 px-4`}
         >
-          <div className="flex items-center justify-between h-full">
+          <div className="flex h-full items-center justify-between">
             <LeftNav
               isDocsPage={isDocsPage}
               isHandbookPage={isHandbookPage}
@@ -165,7 +165,7 @@ export function Header() {
         </div>
         {(isDocsPage || isHandbookPage) && (
           <div
-            className={`${maxWidthClass} mx-auto px-4 border-x border-neutral-100 py-2 md:hidden`}
+            className={`${maxWidthClass} mx-auto border-x border-neutral-100 px-4 py-2 md:hidden`}
           >
             <SearchTrigger variant="mobile" />
           </div>
@@ -179,7 +179,7 @@ export function Header() {
       <div
         className={
           isDocsPage || isHandbookPage
-            ? "h-17.25 md:h-17.25 max-md:h-[calc(69px+52px)]"
+            ? "h-17.25 max-md:h-[calc(69px+52px)] md:h-17.25"
             : isBlogArticlePage && blogToc && blogToc.toc.length > 0
               ? "h-[calc(69px+44px)] sm:h-17.25"
               : "h-17.25"
@@ -234,7 +234,7 @@ function LeftNav({
       <Logo />
       <Link
         to="/why-char/"
-        className="hidden md:block text-sm text-neutral-600 hover:text-neutral-800 transition-all hover:underline decoration-dotted"
+        className="hidden text-sm text-neutral-600 decoration-dotted transition-all hover:text-neutral-800 hover:underline md:block"
       >
         Why Char
       </Link>
@@ -273,7 +273,7 @@ function DrawerButton({
           }
           docsDrawer.setIsOpen(!docsDrawer.isOpen);
         }}
-        className="cursor-pointer md:hidden px-3 h-8 flex items-center text-sm bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900 rounded-full shadow-xs hover:shadow-md hover:scale-[102%] active:scale-[98%] transition-all"
+        className="flex h-8 cursor-pointer items-center rounded-full bg-linear-to-t from-neutral-200 to-neutral-100 px-3 text-sm text-neutral-900 shadow-xs transition-all hover:scale-[102%] hover:shadow-md active:scale-[98%] md:hidden"
         aria-label={
           docsDrawer.isOpen ? "Close docs navigation" : "Open docs navigation"
         }
@@ -296,7 +296,7 @@ function DrawerButton({
           }
           handbookDrawer.setIsOpen(!handbookDrawer.isOpen);
         }}
-        className="cursor-pointer md:hidden px-3 h-8 flex items-center text-sm bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900 rounded-full shadow-xs hover:shadow-md hover:scale-[102%] active:scale-[98%] transition-all"
+        className="flex h-8 cursor-pointer items-center rounded-full bg-linear-to-t from-neutral-200 to-neutral-100 px-3 text-sm text-neutral-900 shadow-xs transition-all hover:scale-[102%] hover:shadow-md active:scale-[98%] md:hidden"
         aria-label={
           handbookDrawer.isOpen
             ? "Close handbook navigation"
@@ -319,7 +319,7 @@ function Logo() {
   return (
     <Link
       to="/"
-      className="font-semibold text-2xl font-serif hover:scale-105 transition-transform mr-4"
+      className="mr-4 font-serif text-2xl font-semibold transition-transform hover:scale-105"
     >
       Char
     </Link>
@@ -339,14 +339,14 @@ function ProductDropdown({
       onMouseEnter={() => setIsProductOpen(true)}
       onMouseLeave={() => setIsProductOpen(false)}
     >
-      <button className="flex items-center gap-1 text-sm text-neutral-600 hover:text-neutral-800 transition-all py-2">
+      <button className="flex items-center gap-1 py-2 text-sm text-neutral-600 transition-all hover:text-neutral-800">
         Product
         {isProductOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
       </button>
       {isProductOpen && (
-        <div className="absolute top-full left-0 pt-2 w-150 z-50">
-          <div className="bg-white border border-neutral-200 rounded-xs shadow-lg py-2">
-            <div className="px-3 py-2 grid grid-cols-2 gap-x-6">
+        <div className="absolute top-full left-0 z-50 w-150 pt-2">
+          <div className="rounded-xs border border-neutral-200 bg-white py-2 shadow-lg">
+            <div className="grid grid-cols-2 gap-x-6 px-3 py-2">
               <FeaturesList onClose={() => setIsProductOpen(false)} />
               <SolutionsList onClose={() => setIsProductOpen(false)} />
             </div>
@@ -360,7 +360,7 @@ function ProductDropdown({
 function FeaturesList({ onClose }: { onClose: () => void }) {
   return (
     <div>
-      <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
+      <div className="mb-2 text-xs font-semibold tracking-wider text-neutral-400 uppercase">
         Features
       </div>
       {featuresList.map((link) => (
@@ -368,9 +368,9 @@ function FeaturesList({ onClose }: { onClose: () => void }) {
           key={link.to}
           to={link.to}
           onClick={onClose}
-          className="py-2 text-sm text-neutral-700 flex items-center group"
+          className="group flex items-center py-2 text-sm text-neutral-700"
         >
-          <span className="group-hover:underline decoration-dotted">
+          <span className="decoration-dotted group-hover:underline">
             {link.label}
           </span>
         </Link>
@@ -382,7 +382,7 @@ function FeaturesList({ onClose }: { onClose: () => void }) {
 function SolutionsList({ onClose }: { onClose: () => void }) {
   return (
     <div>
-      <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
+      <div className="mb-2 text-xs font-semibold tracking-wider text-neutral-400 uppercase">
         Solutions
       </div>
       {solutionsList.map((link) => (
@@ -390,9 +390,9 @@ function SolutionsList({ onClose }: { onClose: () => void }) {
           key={link.to}
           to={link.to}
           onClick={onClose}
-          className="py-2 text-sm text-neutral-700 flex items-center group"
+          className="group flex items-center py-2 text-sm text-neutral-700"
         >
-          <span className="group-hover:underline decoration-dotted">
+          <span className="decoration-dotted group-hover:underline">
             {link.label}
           </span>
         </Link>
@@ -414,13 +414,13 @@ function ResourcesDropdown({
       onMouseEnter={() => setIsResourcesOpen(true)}
       onMouseLeave={() => setIsResourcesOpen(false)}
     >
-      <button className="flex items-center gap-1 text-sm text-neutral-600 hover:text-neutral-800 transition-all py-2">
+      <button className="flex items-center gap-1 py-2 text-sm text-neutral-600 transition-all hover:text-neutral-800">
         Resources
         {isResourcesOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
       </button>
       {isResourcesOpen && (
-        <div className="absolute top-full left-0 pt-2 w-56 z-50">
-          <div className="bg-white border border-neutral-200 rounded-xs shadow-lg py-2">
+        <div className="absolute top-full left-0 z-50 w-56 pt-2">
+          <div className="rounded-xs border border-neutral-200 bg-white py-2 shadow-lg">
             <div className="px-3 py-2">
               {resourcesList.map((link) =>
                 link.external ? (
@@ -430,10 +430,10 @@ function ResourcesDropdown({
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => setIsResourcesOpen(false)}
-                    className="py-2 text-sm text-neutral-700 flex items-center gap-2 group"
+                    className="group flex items-center gap-2 py-2 text-sm text-neutral-700"
                   >
                     <link.icon size={16} className="text-neutral-400" />
-                    <span className="group-hover:underline decoration-dotted">
+                    <span className="decoration-dotted group-hover:underline">
                       {link.label}
                     </span>
                   </a>
@@ -442,10 +442,10 @@ function ResourcesDropdown({
                     key={link.to}
                     to={link.to}
                     onClick={() => setIsResourcesOpen(false)}
-                    className="py-2 text-sm text-neutral-700 flex items-center gap-2 group"
+                    className="group flex items-center gap-2 py-2 text-sm text-neutral-700"
                   >
                     <link.icon size={16} className="text-neutral-400" />
-                    <span className="group-hover:underline decoration-dotted">
+                    <span className="decoration-dotted group-hover:underline">
                       {link.label}
                     </span>
                   </Link>
@@ -463,7 +463,7 @@ function NavLinks() {
   return (
     <Link
       to="/pricing/"
-      className="hidden sm:block text-sm text-neutral-600 hover:text-neutral-800 transition-all hover:underline decoration-dotted"
+      className="hidden text-sm text-neutral-600 decoration-dotted transition-all hover:text-neutral-800 hover:underline sm:block"
     >
       Pricing
     </Link>
@@ -476,7 +476,7 @@ function DesktopNav({
   platformCTA: ReturnType<typeof getPlatformCTA>;
 }) {
   return (
-    <nav className="hidden sm:flex items-center gap-4">
+    <nav className="hidden items-center gap-4 sm:flex">
       <SearchTrigger variant="header" />
       <CTAButton platformCTA={platformCTA} />
     </nav>
@@ -505,7 +505,7 @@ function MobileNav({
   const hideCTA = isDocsPage || isHandbookPage;
 
   return (
-    <div className="sm:hidden flex items-center gap-3">
+    <div className="flex items-center gap-3 sm:hidden">
       {!hideCTA && (
         <div
           className={cn("transition-opacity duration-200 ease-out", [
@@ -527,7 +527,7 @@ function MobileNav({
           }
           setIsMenuOpen(!isMenuOpen);
         }}
-        className="cursor-pointer px-3 h-8 flex items-center text-sm bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900 rounded-full shadow-xs hover:shadow-md hover:scale-[102%] active:scale-[98%] transition-all"
+        className="flex h-8 cursor-pointer items-center rounded-full bg-linear-to-t from-neutral-200 to-neutral-100 px-3 text-sm text-neutral-900 shadow-xs transition-all hover:scale-[102%] hover:shadow-md active:scale-[98%]"
         aria-label={isMenuOpen ? "Close menu" : "Open menu"}
         aria-expanded={isMenuOpen}
       >
@@ -606,7 +606,7 @@ function MobileMenu({
         className="fixed inset-0 z-40 sm:hidden"
         onClick={() => setIsMenuOpen(false)}
       />
-      <div className="fixed top-17.25 left-0 right-0 bg-white/80 backdrop-blur-xs border-b border-neutral-100 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] z-50 sm:hidden animate-in slide-in-from-top duration-300 max-h-[calc(100vh-69px)] overflow-y-auto">
+      <div className="animate-in slide-in-from-top fixed top-17.25 right-0 left-0 z-50 max-h-[calc(100vh-69px)] overflow-y-auto border-b border-neutral-100 bg-white/80 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] backdrop-blur-xs duration-300 sm:hidden">
         <nav className={`${maxWidthClass} mx-auto px-4 py-6`}>
           <div className="flex flex-col gap-6">
             <MobileMenuLinks
@@ -646,7 +646,7 @@ function MobileMenuLinks({
       <Link
         to="/why-char/"
         onClick={() => setIsMenuOpen(false)}
-        className="block text-base text-neutral-700 hover:text-neutral-900 transition-colors"
+        className="block text-base text-neutral-700 transition-colors hover:text-neutral-900"
       >
         Why Char
       </Link>
@@ -663,7 +663,7 @@ function MobileMenuLinks({
       <Link
         to="/pricing/"
         onClick={() => setIsMenuOpen(false)}
-        className="block text-base text-neutral-700 hover:text-neutral-900 transition-colors"
+        className="block text-base text-neutral-700 transition-colors hover:text-neutral-900"
       >
         Pricing
       </Link>
@@ -684,7 +684,7 @@ function MobileProductSection({
     <div>
       <button
         onClick={() => setIsProductOpen(!isProductOpen)}
-        className="flex items-center justify-between w-full text-base text-neutral-700 hover:text-neutral-900 transition-colors"
+        className="flex w-full items-center justify-between text-base text-neutral-700 transition-colors hover:text-neutral-900"
       >
         <span>Product</span>
         {isProductOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -712,7 +712,7 @@ function MobileResourcesSection({
     <div>
       <button
         onClick={() => setIsResourcesOpen(!isResourcesOpen)}
-        className="flex items-center justify-between w-full text-base text-neutral-700 hover:text-neutral-900 transition-colors"
+        className="flex w-full items-center justify-between text-base text-neutral-700 transition-colors hover:text-neutral-900"
       >
         <span>Resources</span>
         {isResourcesOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -727,7 +727,7 @@ function MobileResourcesSection({
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setIsMenuOpen(false)}
-                className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors py-1 flex items-center gap-2"
+                className="flex items-center gap-2 py-1 text-sm text-neutral-600 transition-colors hover:text-neutral-900"
               >
                 <link.icon size={14} className="text-neutral-400" />
                 {link.label}
@@ -737,7 +737,7 @@ function MobileResourcesSection({
                 key={link.to}
                 to={link.to}
                 onClick={() => setIsMenuOpen(false)}
-                className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors py-1 flex items-center gap-2"
+                className="flex items-center gap-2 py-1 text-sm text-neutral-600 transition-colors hover:text-neutral-900"
               >
                 <link.icon size={14} className="text-neutral-400" />
                 {link.label}
@@ -757,7 +757,7 @@ function MobileFeaturesList({
 }) {
   return (
     <div>
-      <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
+      <div className="mb-2 text-xs font-semibold tracking-wider text-neutral-400 uppercase">
         Features
       </div>
       <div className="flex flex-col gap-2 pb-4">
@@ -766,7 +766,7 @@ function MobileFeaturesList({
             key={link.to}
             to={link.to}
             onClick={() => setIsMenuOpen(false)}
-            className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors py-1"
+            className="py-1 text-sm text-neutral-600 transition-colors hover:text-neutral-900"
           >
             {link.label}
           </Link>
@@ -783,7 +783,7 @@ function MobileSolutionsList({
 }) {
   return (
     <div>
-      <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
+      <div className="mb-2 text-xs font-semibold tracking-wider text-neutral-400 uppercase">
         Solutions
       </div>
       <div className="flex flex-col gap-2">
@@ -792,7 +792,7 @@ function MobileSolutionsList({
             key={link.to}
             to={link.to}
             onClick={() => setIsMenuOpen(false)}
-            className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors py-1"
+            className="py-1 text-sm text-neutral-600 transition-colors hover:text-neutral-900"
           >
             {link.label}
           </Link>
@@ -825,17 +825,17 @@ function BlogTocSubBar({
 
   return (
     <div
-      className={`${maxWidthClass} mx-auto border-x border-neutral-100 border-t border-t-neutral-50 sm:hidden`}
+      className={`${maxWidthClass} mx-auto border-x border-t border-neutral-100 border-t-neutral-50 sm:hidden`}
     >
-      <div className="flex items-center h-11 px-2">
+      <div className="flex h-11 items-center px-2">
         <button
           onClick={goPrev}
           disabled={activeIndex <= 0}
           className={cn([
-            "shrink-0 p-1.5 rounded-md transition-colors cursor-pointer",
+            "shrink-0 cursor-pointer rounded-md p-1.5 transition-colors",
             activeIndex <= 0
               ? "text-neutral-200"
-              : "text-neutral-500 hover:text-stone-700 hover:bg-stone-50",
+              : "text-neutral-500 hover:bg-stone-50 hover:text-stone-700",
           ])}
         >
           <ChevronLeft size={14} />
@@ -844,9 +844,9 @@ function BlogTocSubBar({
           onClick={() => {
             if (activeItem) scrollToHeading(activeItem.id);
           }}
-          className="flex-1 min-w-0 px-2 cursor-pointer"
+          className="min-w-0 flex-1 cursor-pointer px-2"
         >
-          <p className="text-sm text-stone-700 font-medium truncate text-center">
+          <p className="truncate text-center text-sm font-medium text-stone-700">
             {activeItem?.text}
           </p>
         </button>
@@ -854,10 +854,10 @@ function BlogTocSubBar({
           onClick={goNext}
           disabled={activeIndex >= toc.length - 1}
           className={cn([
-            "shrink-0 p-1.5 rounded-md transition-colors cursor-pointer",
+            "shrink-0 cursor-pointer rounded-md p-1.5 transition-colors",
             activeIndex >= toc.length - 1
               ? "text-neutral-200"
-              : "text-neutral-500 hover:text-stone-700 hover:bg-stone-50",
+              : "text-neutral-500 hover:bg-stone-50 hover:text-stone-700",
           ])}
         >
           <ChevronRight size={14} />
@@ -877,11 +877,11 @@ function MobileMenuCTAs({
   setIsMenuOpen: (open: boolean) => void;
 }) {
   return (
-    <div className="flex flex-row sticky bottom-4 gap-3">
+    <div className="sticky bottom-4 flex flex-row gap-3">
       <Link
         to="/auth/"
         onClick={() => setIsMenuOpen(false)}
-        className="block w-full px-4 py-3 text-center text-sm text-neutral-700 border border-neutral-200 bg-white rounded-lg hover:bg-neutral-50 transition-colors"
+        className="block w-full rounded-lg border border-neutral-200 bg-white px-4 py-3 text-center text-sm text-neutral-700 transition-colors hover:bg-neutral-50"
       >
         Get started
       </Link>
@@ -893,7 +893,7 @@ function MobileMenuCTAs({
             setIsMenuOpen(false);
             scrollToHero();
           }}
-          className="block w-full px-4 py-3 text-center text-sm bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-lg shadow-md active:scale-[98%] transition-all"
+          className="block w-full rounded-lg bg-linear-to-t from-stone-600 to-stone-500 px-4 py-3 text-center text-sm text-white shadow-md transition-all active:scale-[98%]"
         >
           Get reminder
         </Link>
@@ -902,7 +902,7 @@ function MobileMenuCTAs({
           href="/download/apple-silicon"
           download
           onClick={() => setIsMenuOpen(false)}
-          className="block w-full px-4 py-3 text-center text-sm bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-lg shadow-md active:scale-[98%] transition-all"
+          className="block w-full rounded-lg bg-linear-to-t from-stone-600 to-stone-500 px-4 py-3 text-center text-sm text-white shadow-md transition-all active:scale-[98%]"
         >
           {platformCTA.label}
         </a>
@@ -914,7 +914,7 @@ function MobileMenuCTAs({
             setIsMenuOpen(false);
             scrollToHero();
           }}
-          className="block w-full px-4 py-3 text-center text-sm bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-lg shadow-md active:scale-[98%] transition-all"
+          className="block w-full rounded-lg bg-linear-to-t from-stone-600 to-stone-500 px-4 py-3 text-center text-sm text-white shadow-md transition-all active:scale-[98%]"
         >
           {platformCTA.label}
         </Link>

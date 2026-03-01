@@ -103,14 +103,14 @@ function Component() {
   return (
     <main
       data-blog-article
-      className="flex-1 bg-linear-to-b from-white via-stone-50/20 to-white min-h-screen"
+      className="min-h-screen flex-1 bg-linear-to-b from-white via-stone-50/20 to-white"
       style={{ backgroundImage: "url(/patterns/dots.svg)" }}
     >
       <TableOfContents toc={article.toc} />
-      <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
+      <div className="mx-auto max-w-6xl border-x border-neutral-100 bg-white">
         <HeroSection article={article} />
         <SlashSeparator />
-        <div className="max-w-200 mx-auto px-4 py-8">
+        <div className="mx-auto max-w-200 px-4 py-8">
           <ArticleContent article={article} />
           <RelatedArticlesSection relatedArticles={relatedArticles} />
         </div>
@@ -123,27 +123,27 @@ function Component() {
 
 function HeroSection({ article }: { article: any }) {
   return (
-    <header className="py-12 lg:py-16 text-center px-4">
+    <header className="px-4 py-12 text-center lg:py-16">
       <Link
         to="/blog/"
-        className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-stone-600 transition-colors mb-8"
+        className="mb-8 inline-flex items-center gap-2 text-sm text-neutral-600 transition-colors hover:text-stone-600"
       >
         <span>←</span>
         <span>Back to Blog</span>
       </Link>
 
       {article.category && (
-        <p className="text-sm font-mono text-stone-500 mb-4">
+        <p className="mb-4 font-mono text-sm text-stone-500">
           {article.category}
         </p>
       )}
 
-      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-stone-600 mb-6">
+      <h1 className="mb-6 font-serif text-3xl text-stone-600 sm:text-4xl lg:text-5xl">
         {article.title}
       </h1>
 
       {article.author.length > 0 && (
-        <div className="flex items-center justify-center gap-3 mb-2">
+        <div className="mb-2 flex items-center justify-center gap-3">
           {article.author.map((name: string) => {
             const avatarUrl = AUTHOR_AVATARS[name];
             return (
@@ -152,7 +152,7 @@ function HeroSection({ article }: { article: any }) {
                   <img
                     src={avatarUrl}
                     alt={name}
-                    className="w-8 h-8 rounded-full object-cover"
+                    className="h-8 w-8 rounded-full object-cover"
                   />
                 )}
                 <p className="text-base text-neutral-600">{name}</p>
@@ -164,7 +164,7 @@ function HeroSection({ article }: { article: any }) {
 
       <time
         dateTime={article.date}
-        className="text-xs font-mono text-neutral-500"
+        className="font-mono text-xs text-neutral-500"
       >
         {new Date(article.date).toLocaleDateString("en-US", {
           year: "numeric",
@@ -194,17 +194,17 @@ function RelatedArticlesSection({
   }
 
   return (
-    <div className="mt-16 pt-8 border-t border-neutral-100">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-serif text-stone-600">More articles</h3>
+    <div className="mt-16 border-t border-neutral-100 pt-8">
+      <div className="mb-6 flex items-center justify-between">
+        <h3 className="font-serif text-xl text-stone-600">More articles</h3>
         <Link
           to="/blog/"
-          className="text-sm text-neutral-600 hover:text-stone-600 transition-colors"
+          className="text-sm text-neutral-600 transition-colors hover:text-stone-600"
         >
           See all
         </Link>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {relatedArticles.map((related) => (
           <RelatedArticleCard key={related.slug} article={related} />
         ))}
@@ -218,34 +218,34 @@ function CTASection() {
   const platformCTA = getPlatformCTA(platform);
 
   return (
-    <section className="py-16 px-4 bg-linear-to-t from-stone-50/30 to-stone-100/30">
-      <div className="flex flex-col gap-6 items-center text-center">
-        <div className="mb-4 size-40 shadow-2xl border border-neutral-100 flex justify-center items-center rounded-[48px] bg-transparent">
+    <section className="bg-linear-to-t from-stone-50/30 to-stone-100/30 px-4 py-16">
+      <div className="flex flex-col items-center gap-6 text-center">
+        <div className="mb-4 flex size-40 items-center justify-center rounded-[48px] border border-neutral-100 bg-transparent shadow-2xl">
           <Image
             src="/api/images/hyprnote/icon.png"
             alt="Char"
             width={144}
             height={144}
-            className="size-36 mx-auto rounded-[40px] border border-neutral-100"
+            className="mx-auto size-36 rounded-[40px] border border-neutral-100"
           />
         </div>
-        <h2 className="text-2xl sm:text-3xl font-serif">
+        <h2 className="font-serif text-2xl sm:text-3xl">
           Try Char for yourself
         </h2>
-        <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
+        <p className="mx-auto max-w-2xl text-lg text-neutral-600">
           The AI notepad for people in back-to-back meetings. Local-first,
           privacy-focused, and open source.
         </p>
-        <div className="pt-6 flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <div className="flex flex-col items-center justify-center gap-4 pt-6 sm:flex-row">
           {platformCTA.action === "download" ? (
             <DownloadButton />
           ) : (
             <Link
               to="/download/"
               className={cn([
-                "group px-6 h-12 flex items-center justify-center text-base sm:text-lg",
-                "bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full",
-                "shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
+                "group flex h-12 items-center justify-center px-6 text-base sm:text-lg",
+                "rounded-full bg-linear-to-t from-stone-600 to-stone-500 text-white",
+                "shadow-md hover:scale-[102%] hover:shadow-lg active:scale-[98%]",
                 "transition-all",
               ])}
             >
@@ -393,12 +393,12 @@ function TableOfContents({
   return (
     <aside
       className={cn([
-        "hidden xl:flex fixed right-0 top-0 h-screen z-10",
+        "fixed top-0 right-0 z-10 hidden h-screen xl:flex",
         "w-64 items-center",
       ])}
     >
       <nav
-        className="relative w-full overflow-hidden cursor-ns-resize"
+        className="relative w-full cursor-ns-resize overflow-hidden"
         style={{ height: ITEM_HEIGHT * 5 }}
         onWheel={handleWheel}
       >
@@ -420,9 +420,9 @@ function TableOfContents({
                   scrollToHeading(item.id);
                 }}
                 className={cn([
-                  "flex items-center shrink-0 pl-6 pr-4 transition-colors duration-200",
+                  "flex shrink-0 items-center pr-4 pl-6 transition-colors duration-200",
                   isActive
-                    ? "text-stone-800 font-medium"
+                    ? "font-medium text-stone-800"
                     : "text-neutral-400 hover:text-neutral-600",
                   item.level === 3 && "pl-9",
                   item.level === 4 && "pl-12",
@@ -459,20 +459,20 @@ function RelatedArticleCard({ article }: { article: any }) {
     <Link
       to="/blog/$slug/"
       params={{ slug: article.slug }}
-      className="group block border border-neutral-200 rounded-xs hover:border-neutral-200 hover:shadow-xs transition-all bg-white overflow-hidden"
+      className="group block overflow-hidden rounded-xs border border-neutral-200 bg-white transition-all hover:border-neutral-200 hover:shadow-xs"
     >
       <div className="aspect-40/21 overflow-hidden">
         <img
           src={ogImage}
           alt={title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
       </div>
       <div className="p-4">
-        <h4 className="font-serif text-sm text-stone-600 group-hover:text-stone-800 transition-colors line-clamp-2 mb-2">
+        <h4 className="mb-2 line-clamp-2 font-serif text-sm text-stone-600 transition-colors group-hover:text-stone-800">
           {title}
         </h4>
-        <p className="text-xs text-neutral-500 line-clamp-2 mb-2">
+        <p className="mb-2 line-clamp-2 text-xs text-neutral-500">
           {article.summary}
         </p>
         <time dateTime={article.date} className="text-xs text-neutral-400">

@@ -1,12 +1,13 @@
 import { BrainIcon, CheckIcon, CopyIcon, RotateCcwIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Streamdown } from "streamdown";
-import { hasRenderableContent } from "~/chat/components/shared";
-import type { HyprUIMessage } from "~/chat/types";
 
 import { Disclosure, MessageBubble, MessageContainer } from "./shared";
 import { Tool } from "./tool";
 import type { Part } from "./types";
+
+import { hasRenderableContent } from "~/chat/components/shared";
+import type { HyprUIMessage } from "~/chat/types";
 
 function getMessageText(message: HyprUIMessage): string {
   return message.parts
@@ -59,14 +60,14 @@ export function NormalMessage({
 
   return (
     <MessageContainer align={isUser ? "end" : "start"}>
-      <div className="flex flex-col max-w-[80%] group">
+      <div className="group flex max-w-[80%] flex-col">
         <MessageBubble variant={isUser ? "user" : "assistant"}>
           {message.parts.map((part, i) => (
             <Part key={i} part={part as Part} />
           ))}
         </MessageBubble>
         {!isUser && (
-          <div className="flex items-center gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="mt-1 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
             <button
               onClick={handleCopy}
               className={`p-1 transition-colors ${copied ? "text-green-500" : "text-neutral-400 hover:text-neutral-600"}`}
@@ -77,7 +78,7 @@ export function NormalMessage({
             {handleReload && (
               <button
                 onClick={handleReload}
-                className="p-1 text-neutral-400 hover:text-neutral-600 transition-colors"
+                className="p-1 text-neutral-400 transition-colors hover:text-neutral-600"
                 aria-label="Regenerate message"
               >
                 <RotateCcwIcon size={14} />
@@ -115,11 +116,11 @@ function Reasoning({ part }: { part: Extract<Part, { type: "reasoning" }> }) {
 
   return (
     <Disclosure
-      icon={<BrainIcon className="w-3 h-3" />}
+      icon={<BrainIcon className="h-3 w-3" />}
       title={title}
       disabled={streaming}
     >
-      <div className="text-sm text-neutral-500 whitespace-pre-wrap">
+      <div className="text-sm whitespace-pre-wrap text-neutral-500">
         {part.text}
       </div>
     </Disclosure>
@@ -129,35 +130,35 @@ function Reasoning({ part }: { part: Extract<Part, { type: "reasoning" }> }) {
 const chatComponents = {
   h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => {
     return (
-      <h1 className="text-base font-semibold mt-3 first:mt-0 mb-1">
+      <h1 className="mt-3 mb-1 text-base font-semibold first:mt-0">
         {props.children as React.ReactNode}
       </h1>
     );
   },
   h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => {
     return (
-      <h2 className="text-base font-semibold mt-3 first:mt-0 mb-1">
+      <h2 className="mt-3 mb-1 text-base font-semibold first:mt-0">
         {props.children as React.ReactNode}
       </h2>
     );
   },
   h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => {
     return (
-      <h3 className="text-sm font-semibold mt-2 first:mt-0 mb-1">
+      <h3 className="mt-2 mb-1 text-sm font-semibold first:mt-0">
         {props.children as React.ReactNode}
       </h3>
     );
   },
   ul: (props: React.HTMLAttributes<HTMLUListElement>) => {
     return (
-      <ul className="list-disc pl-5 mb-1">
+      <ul className="mb-1 list-disc pl-5">
         {props.children as React.ReactNode}
       </ul>
     );
   },
   ol: (props: React.HTMLAttributes<HTMLOListElement>) => {
     return (
-      <ol className="list-decimal pl-5 mb-1">
+      <ol className="mb-1 list-decimal pl-5">
         {props.children as React.ReactNode}
       </ol>
     );

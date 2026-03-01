@@ -35,7 +35,7 @@ function InlineCode({ children, ...props }: React.ComponentProps<"code">) {
   return (
     <code
       {...props}
-      className={`bg-stone-100 text-stone-800 px-1.5 py-0.5 rounded text-sm font-mono ${props.className ?? ""}`}
+      className={`rounded bg-stone-100 px-1.5 py-0.5 font-mono text-sm text-stone-800 ${props.className ?? ""}`}
     >
       {children}
     </code>

@@ -30,7 +30,7 @@ export function GoogleDocsImport({
   };
 
   return (
-    <div className="border border-dashed border-neutral-200 rounded-lg p-4 bg-neutral-50/50">
+    <div className="rounded-lg border border-dashed border-neutral-200 bg-neutral-50/50 p-4">
       <form
         onSubmit={handleSubmit}
         className="flex flex-col gap-2"
@@ -50,26 +50,26 @@ export function GoogleDocsImport({
             disabled={isLoading}
             className={clsx([
               "flex-1 px-3 py-2 text-sm",
-              "border border-neutral-200 rounded-lg bg-white",
-              "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+              "rounded-lg border border-neutral-200 bg-white",
+              "focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none",
               "placeholder:text-neutral-300",
-              "disabled:opacity-50 disabled:cursor-not-allowed",
+              "disabled:cursor-not-allowed disabled:opacity-50",
             ])}
           />
           <button
             type="submit"
             disabled={!url.trim() || isLoading}
             className={clsx([
-              "px-3 py-2 rounded-lg",
+              "rounded-lg px-3 py-2",
               "bg-neutral-900 text-white",
               "hover:bg-neutral-800",
-              "disabled:opacity-50 disabled:cursor-not-allowed",
+              "disabled:cursor-not-allowed disabled:opacity-50",
               "transition-colors",
               "flex items-center gap-2",
             ])}
           >
             {isLoading ? (
-              <span className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
             ) : (
               <SendIcon className="size-4" />
             )}

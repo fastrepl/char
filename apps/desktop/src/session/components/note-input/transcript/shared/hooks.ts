@@ -7,8 +7,6 @@ import {
   useRef,
   useState,
 } from "react";
-import * as main from "~/store/tinybase/store/main";
-import { convertStorageHintsToRuntime } from "~/stt/speaker-hints";
 
 import type { SpeakerHintStorage, Word } from "@hypr/store";
 import {
@@ -16,6 +14,9 @@ import {
   type RuntimeSpeakerHint,
   type Segment,
 } from "@hypr/transcript";
+
+import * as main from "~/store/tinybase/store/main";
+import { convertStorageHintsToRuntime } from "~/stt/speaker-hints";
 
 export function useFinalWords(transcriptId: string): (Word & { id: string })[] {
   const wordsJson = main.UI.useCell(

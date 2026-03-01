@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { wrapSliceWithLogging } from "~/store/zustand/shared";
 
 import { type BasicActions, type BasicState, createBasicSlice } from "./basic";
 import {
@@ -37,6 +36,8 @@ import {
   type RestoreState,
 } from "./restore";
 import { createStateUpdaterSlice, type StateBasicActions } from "./state";
+
+import { wrapSliceWithLogging } from "~/store/zustand/shared";
 
 export type { ChatEvent, ChatMode } from "./chat-mode";
 export type { SettingsState, SettingsTab, Tab, TabInput } from "./schema";

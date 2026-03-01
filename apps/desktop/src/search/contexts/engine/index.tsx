@@ -6,7 +6,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { type Store as MainStore } from "~/store/tinybase/store/main";
 
 import { commands as tantivy } from "@hypr/plugin-tantivy";
 
@@ -19,6 +18,8 @@ import {
 } from "./listeners";
 import type { SearchEntityType, SearchFilters, SearchHit } from "./types";
 import { normalizeQuery } from "./utils";
+
+import { type Store as MainStore } from "~/store/tinybase/store/main";
 
 export type {
   SearchDocument,

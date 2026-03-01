@@ -1,5 +1,3 @@
-import type { Part } from "~/chat/components/message/types";
-
 import { ToolAddComment } from "./add-comment";
 import { ToolBillingPortal } from "./billing-portal";
 import { ToolCreateIssue } from "./create-issue";
@@ -7,6 +5,8 @@ import { ToolGeneric } from "./generic";
 import { ToolListSubscriptions } from "./list-subscriptions";
 import { ToolSearchSessions } from "./search";
 import { ToolSearchIssues } from "./search-issues";
+
+import type { Part } from "~/chat/components/message/types";
 
 const toolRegistry: Record<string, (props: { part: Part }) => React.ReactNode> =
   {

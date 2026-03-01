@@ -1,12 +1,54 @@
-use std::{future::Future, path::PathBuf};
+use std::{collections::HashMap, future::Future, path::PathBuf, sync::Arc};
 
 use tauri::{Manager, Runtime, ipc::Channel};
 use tauri_plugin_store2::Store2PluginExt;
 
-use hypr_download_interface::DownloadProgress;
-use hypr_file::download_file_parallel;
+use hypr_model_downloader::{DownloadableModel, ModelDownloadManager, ModelDownloaderRuntime};
 
 use crate::store::TauriModelStore;
+
+struct TauriModelRuntime<R: Runtime> {
+    app_handle: tauri::AppHandle<R>,
+    channels: Arc<std::sync::Mutex<HashMap<String, Channel<i8>>>>,
+}
+
+impl<R: Runtime> ModelDownloaderRuntime<crate::SupportedModel> for TauriModelRuntime<R> {
+    fn models_base(&self) -> Result<PathBuf, hypr_model_downloader::Error> {
+        use tauri_plugin_settings::SettingsPluginExt;
+        Ok(self
+            .app_handle
+            .settings()
+            .global_base()
+            .map(|base| base.join("models").into_std_path_buf())
+            .unwrap_or_else(|_| dirs::data_dir().unwrap_or_default().join("models")))
+    }
+
+    fn emit_progress(&self, model: &crate::SupportedModel, progress: i8) {
+        let key = model.download_key();
+        let mut guard = self.channels.lock().unwrap();
+
+        let Some(channel) = guard.get(&key) else {
+            return;
+        };
+
+        let send_result = channel.send(progress);
+        let is_terminal = progress < 0 || progress >= 100;
+        if send_result.is_err() || is_terminal {
+            guard.remove(&key);
+        }
+    }
+}
+
+pub fn create_model_downloader<R: Runtime>(
+    app_handle: &tauri::AppHandle<R>,
+    channels: Arc<std::sync::Mutex<HashMap<String, Channel<i8>>>>,
+) -> ModelDownloadManager<crate::SupportedModel> {
+    let runtime = Arc::new(TauriModelRuntime {
+        app_handle: app_handle.clone(),
+        channels,
+    });
+    ModelDownloadManager::new(runtime)
+}
 
 pub trait LocalLlmPluginExt<R: Runtime> {
     fn local_llm_store(&self) -> tauri_plugin_store2::ScopedStore<R, crate::StoreKey>;
@@ -30,6 +72,14 @@ pub trait LocalLlmPluginExt<R: Runtime> {
         &self,
         model: crate::SupportedModel,
         channel: Channel<i8>,
+    ) -> impl Future<Output = Result<(), crate::Error>>;
+    fn cancel_download(
+        &self,
+        model: crate::SupportedModel,
+    ) -> impl Future<Output = Result<bool, crate::Error>>;
+    fn delete_model(
+        &self,
+        model: &crate::SupportedModel,
     ) -> impl Future<Output = Result<(), crate::Error>>;
     fn is_model_downloading(&self, model: &crate::SupportedModel) -> impl Future<Output = bool>;
     fn is_model_downloaded(
@@ -57,12 +107,13 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
 
     #[tracing::instrument(skip_all)]
     async fn is_model_downloading(&self, model: &crate::SupportedModel) -> bool {
-        let state = self.state::<crate::SharedState>();
-
-        {
+        let downloader = {
+            let state = self.state::<crate::SharedState>();
             let guard = state.lock().await;
-            guard.download_task.contains_key(model)
-        }
+            guard.model_downloader.clone()
+        };
+
+        downloader.is_downloading(model).await
     }
 
     #[tracing::instrument(skip_all)]
@@ -70,10 +121,12 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
         &self,
         model: &crate::SupportedModel,
     ) -> Result<bool, crate::Error> {
-        Ok(hypr_local_llm_core::is_model_downloaded(
-            model,
-            &self.models_dir(),
-        )?)
+        let downloader = {
+            let state = self.state::<crate::SharedState>();
+            let guard = state.lock().await;
+            guard.model_downloader.clone()
+        };
+        Ok(downloader.is_downloaded(model).await?)
     }
 
     #[tracing::instrument(skip_all)]
@@ -82,61 +135,58 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
         model: crate::SupportedModel,
         channel: Channel<i8>,
     ) -> Result<(), crate::Error> {
-        let m = model.clone();
-        let path = self.models_dir().join(m.file_name());
+        let download_model = model;
+        let key = download_model.download_key();
+
+        let (downloader, channels) = {
+            let state = self.state::<crate::SharedState>();
+            let guard = state.lock().await;
+            (
+                guard.model_downloader.clone(),
+                guard.download_channels.clone(),
+            )
+        };
+
+        downloader.cancel_download(&download_model).await?;
 
         {
-            let existing = {
-                let state = self.state::<crate::SharedState>();
-                let mut s = state.lock().await;
-                s.download_task.remove(&model)
-            };
-
-            if let Some(existing_task) = existing {
-                existing_task.abort();
-                let _ = existing_task.await;
+            let mut guard = channels.lock().unwrap();
+            if let Some(existing) = guard.insert(key.clone(), channel) {
+                let _ = existing.send(-1);
             }
         }
 
-        let task = tokio::spawn(async move {
-            let last_progress = std::sync::Arc::new(std::sync::Mutex::new(0i8));
-
-            let callback = |progress: DownloadProgress| {
-                let mut last = last_progress.lock().unwrap();
-
-                match progress {
-                    DownloadProgress::Started => {
-                        *last = 0;
-                        let _ = channel.send(0);
-                    }
-                    DownloadProgress::Progress(downloaded, total_size) => {
-                        let percent = (downloaded as f64 / total_size as f64) * 100.0;
-                        let current = percent as i8;
-
-                        if current > *last {
-                            *last = current;
-                            let _ = channel.send(current);
-                        }
-                    }
-                    DownloadProgress::Finished => {
-                        *last = 100;
-                        let _ = channel.send(100);
-                    }
-                }
-            };
-
-            if let Err(e) = download_file_parallel(m.model_url(), path, callback).await {
-                tracing::error!("model_download_error: {}", e);
+        if let Err(e) = downloader.download(&download_model).await {
+            let mut guard = channels.lock().unwrap();
+            if let Some(channel) = guard.remove(&key) {
                 let _ = channel.send(-1);
             }
-        });
-
-        {
-            let state = self.state::<crate::SharedState>();
-            let mut s = state.lock().await;
-            s.download_task.insert(model.clone(), task);
+            return Err(e.into());
         }
 
+        Ok(())
+    }
+
+    #[tracing::instrument(skip_all)]
+    async fn cancel_download(&self, model: crate::SupportedModel) -> Result<bool, crate::Error> {
+        let downloader = {
+            let state = self.state::<crate::SharedState>();
+            let guard = state.lock().await;
+            guard.model_downloader.clone()
+        };
+
+        Ok(downloader.cancel_download(&model).await?)
+    }
+
+    #[tracing::instrument(skip_all)]
+    async fn delete_model(&self, model: &crate::SupportedModel) -> Result<(), crate::Error> {
+        let downloader = {
+            let state = self.state::<crate::SharedState>();
+            let guard = state.lock().await;
+            guard.model_downloader.clone()
+        };
+
+        downloader.delete(model).await?;
         Ok(())
     }
 
@@ -196,11 +246,13 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
     async fn start_server(&self) -> Result<String, crate::Error> {
         let state = self.state::<crate::SharedState>();
 
-        {
+        let existing_server = {
             let mut guard = state.lock().await;
-            if let Some(server) = guard.server.take() {
-                server.stop().await;
-            }
+            guard.server.take()
+        };
+
+        if let Some(server) = existing_server {
+            server.stop().await;
         }
 
         let selection = self.get_current_model_selection()?;
@@ -220,9 +272,13 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
     #[tracing::instrument(skip_all)]
     async fn stop_server(&self) -> Result<(), crate::Error> {
         let state = self.state::<crate::SharedState>();
-        let mut guard = state.lock().await;
 
-        if let Some(server) = guard.server.take() {
+        let existing_server = {
+            let mut guard = state.lock().await;
+            guard.server.take()
+        };
+
+        if let Some(server) = existing_server {
             server.stop().await;
         }
 

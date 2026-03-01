@@ -5,6 +5,8 @@ permissions = [
     "allow-is-model-downloading",
     "allow-is-model-downloaded",
     "allow-download-model",
+    "allow-cancel-download",
+    "allow-delete-model",
     "allow-get-current-model",
     "allow-set-current-model",
     "allow-list-downloaded-model",

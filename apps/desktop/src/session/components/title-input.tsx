@@ -9,10 +9,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { useTitleGenerating } from "~/ai/hooks";
-import * as main from "~/store/tinybase/store/main";
-import { useLiveTitle } from "~/store/zustand/live-title";
-import { type Tab } from "~/store/zustand/tabs";
 
 import {
   Tooltip,
@@ -20,6 +16,11 @@ import {
   TooltipTrigger,
 } from "@hypr/ui/components/ui/tooltip";
 import { cn } from "@hypr/utils";
+
+import { useTitleGenerating } from "~/ai/hooks";
+import * as main from "~/store/tinybase/store/main";
+import { useLiveTitle } from "~/store/zustand/live-title";
+import { type Tab } from "~/store/zustand/tabs";
 
 export const TitleInput = forwardRef<
   HTMLInputElement,
@@ -64,8 +65,8 @@ export const TitleInput = forwardRef<
 
   if (isGenerating) {
     return (
-      <div className="w-full h-[28px] flex items-center">
-        <span className="text-xl font-semibold text-muted-foreground animate-pulse">
+      <div className="flex h-[28px] w-full items-center">
+        <span className="text-muted-foreground animate-pulse text-xl font-semibold">
           Generating title...
         </span>
       </div>
@@ -74,8 +75,8 @@ export const TitleInput = forwardRef<
 
   if (showRevealAnimation && generatedTitle) {
     return (
-      <div className="w-full h-[28px] flex items-center overflow-hidden">
-        <span className="text-xl font-semibold animate-reveal-left whitespace-nowrap">
+      <div className="flex h-[28px] w-full items-center overflow-hidden">
+        <span className="animate-reveal-left text-xl font-semibold whitespace-nowrap">
           {generatedTitle}
         </span>
       </div>
@@ -262,7 +263,7 @@ const TitleInputInner = memo(
       };
 
       return (
-        <div className="flex items-center gap-2 w-full">
+        <div className="flex w-full items-center gap-2">
           <input
             ref={internalRef}
             id={`title-input-${sessionId}-${editorId}`}
@@ -284,9 +285,9 @@ const TitleInputInner = memo(
             }}
             value={localTitle}
             className={cn([
-              "flex-1 min-w-0 transition-opacity duration-200",
+              "min-w-0 flex-1 transition-opacity duration-200",
               "border-none bg-transparent focus:outline-hidden",
-              "text-xl font-semibold placeholder:text-muted-foreground",
+              "placeholder:text-muted-foreground text-xl font-semibold",
             ])}
           />
           {onGenerateTitle && (
@@ -316,10 +317,10 @@ const GenerateButton = memo(function GenerateButton({
           className={cn([
             "shrink-0",
             "text-muted-foreground hover:text-foreground",
-            "opacity-50 hover:opacity-100 transition-opacity",
+            "opacity-50 transition-opacity hover:opacity-100",
           ])}
         >
-          <SparklesIcon className="w-4 h-4" />
+          <SparklesIcon className="h-4 w-4" />
         </button>
       </TooltipTrigger>
       <TooltipContent side="bottom">Regenerate title</TooltipContent>

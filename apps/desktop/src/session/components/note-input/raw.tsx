@@ -1,7 +1,4 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef } from "react";
-import { useSearchEngine } from "~/search/contexts/engine";
-import { useImageUpload } from "~/shared/hooks/useImageUpload";
-import * as main from "~/store/tinybase/store/main";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
@@ -13,6 +10,10 @@ import {
   parseJsonContent,
   type PlaceholderFunction,
 } from "@hypr/tiptap/shared";
+
+import { useSearchEngine } from "~/search/contexts/engine";
+import { useImageUpload } from "~/shared/hooks/useImageUpload";
+import * as main from "~/store/tinybase/store/main";
 
 export const RawEditor = forwardRef<
   { editor: TiptapEditor | null },

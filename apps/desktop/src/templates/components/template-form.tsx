@@ -1,7 +1,4 @@
 import { useForm } from "@tanstack/react-form";
-import { DangerZone } from "~/shared/ui/resource-list";
-import * as main from "~/store/tinybase/store/main";
-import * as settings from "~/store/tinybase/store/settings";
 
 import type { Template, TemplateSection, TemplateStorage } from "@hypr/store";
 import { Input } from "@hypr/ui/components/ui/input";
@@ -10,6 +7,10 @@ import { cn } from "@hypr/utils";
 
 import { RelatedSessions } from "./related-sessions";
 import { SectionsList } from "./sections-editor";
+
+import { DangerZone } from "~/shared/ui/resource-list";
+import * as main from "~/store/tinybase/store/main";
+import * as settings from "~/store/tinybase/store/settings";
 
 function normalizeTemplatePayload(template: unknown): Template {
   const record = (
@@ -115,15 +116,15 @@ export function TemplateForm({
 
   if (!value) {
     return (
-      <div className="h-full flex items-center justify-center">
+      <div className="flex h-full items-center justify-center">
         <p className="text-sm text-neutral-500">Template not found</p>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full">
-      <div className="px-6 py-4 border-b border-neutral-200">
+    <div className="flex h-full flex-1 flex-col">
+      <div className="border-b border-neutral-200 px-6 py-4">
         <div className="flex items-center gap-2">
           <form.Field name="title">
             {(field) => (
@@ -131,7 +132,7 @@ export function TemplateForm({
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 placeholder="Enter template title"
-                className="border-0 shadow-none text-lg font-semibold px-0 focus-visible:ring-0 h-8 flex-1"
+                className="h-8 flex-1 border-0 px-0 text-lg font-semibold shadow-none focus-visible:ring-0"
               />
             )}
           </form.Field>
@@ -140,7 +141,7 @@ export function TemplateForm({
             onClick={setSelectedTemplateId}
             title={isDefault ? "Remove as default" : "Set as default"}
             className={cn([
-              "shrink-0 text-xs px-2 py-0.5 rounded border transition-colors",
+              "shrink-0 rounded border px-2 py-0.5 text-xs transition-colors",
               isDefault
                 ? "border-neutral-800 bg-neutral-800 text-white"
                 : "border-neutral-300 text-neutral-500 hover:border-neutral-500 hover:text-neutral-700",
@@ -155,17 +156,17 @@ export function TemplateForm({
               value={field.state.value}
               onChange={(e) => field.handleChange(e.target.value)}
               placeholder="Describe the template purpose..."
-              className="border-0 shadow-none px-0 text-sm text-neutral-600 resize-none focus-visible:ring-0 min-h-[40px]"
+              className="min-h-[40px] resize-none border-0 px-0 text-sm text-neutral-600 shadow-none focus-visible:ring-0"
               rows={2}
             />
           )}
         </form.Field>
         {value.targets && value.targets.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap mt-2">
+          <div className="mt-2 flex flex-wrap items-center gap-2">
             {value.targets.map((target, index) => (
               <span
                 key={index}
-                className="text-xs text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-xs"
+                className="rounded-xs bg-neutral-100 px-2 py-0.5 text-xs text-neutral-600"
               >
                 {target}
               </span>
@@ -175,8 +176,8 @@ export function TemplateForm({
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="p-6 border-b border-neutral-200">
-          <h3 className="text-sm font-medium text-neutral-600 mb-3">
+        <div className="border-b border-neutral-200 p-6">
+          <h3 className="mb-3 text-sm font-medium text-neutral-600">
             Sections
           </h3>
           <form.Field name="sections">
@@ -190,8 +191,8 @@ export function TemplateForm({
           </form.Field>
         </div>
 
-        <div className="p-6 border-b border-neutral-200">
-          <h3 className="text-sm font-medium text-neutral-600 mb-4">
+        <div className="border-b border-neutral-200 p-6">
+          <h3 className="mb-4 text-sm font-medium text-neutral-600">
             Related Notes
           </h3>
           <RelatedSessions templateId={id} />

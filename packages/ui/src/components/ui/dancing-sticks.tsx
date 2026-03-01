@@ -34,7 +34,7 @@ const EqualizerStick = memo(function EqualizerStick({
 
   return (
     <motion.div
-      className="rounded-full origin-center flex items-center justify-center"
+      className="flex origin-center items-center justify-center rounded-full"
       style={{
         width: stickWidth,
         height,
@@ -42,7 +42,7 @@ const EqualizerStick = memo(function EqualizerStick({
       }}
     >
       <motion.div
-        className="w-full rounded-full origin-center"
+        className="w-full origin-center rounded-full"
         style={{
           height,
           backgroundColor: color,

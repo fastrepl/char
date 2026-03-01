@@ -142,10 +142,10 @@ const faqs = [
 function Component() {
   return (
     <div
-      className="bg-linear-to-b from-white via-stone-50/20 to-white min-h-screen overflow-x-hidden"
+      className="min-h-screen overflow-x-hidden bg-linear-to-b from-white via-stone-50/20 to-white"
       style={{ backgroundImage: "url(/patterns/dots.svg)" }}
     >
-      <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white">
+      <div className="mx-auto max-w-6xl border-x border-neutral-100 bg-white">
         <HeroSection />
         <FeaturesSection />
         <VerifiableSection />
@@ -160,29 +160,29 @@ function HeroSection() {
   return (
     <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
       <div className="px-6 py-12 lg:py-20">
-        <header className="mb-8 text-center max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-stone-100 text-stone-600 text-sm mb-6">
+        <header className="mx-auto mb-8 max-w-4xl text-center">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-stone-100 px-4 py-2 text-sm text-stone-600">
             <Icon icon="mdi:office-building" className="text-lg" />
             <span>For Enterprise</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700 mb-6">
+          <h1 className="mb-6 font-serif text-4xl tracking-tight text-stone-700 sm:text-5xl">
             Meeting AI Configured
             <br />
             For Your Organization
           </h1>
-          <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-lg text-neutral-600 sm:text-xl">
             Other AI note-takers ask you to trust their infrastructure, their
             models, and their policies. We built one where you control all
             three.
           </p>
-          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
             <Link
               to="/founders/"
               search={{ source: "enterprise" }}
               className={cn([
-                "inline-flex items-center gap-2 px-8 py-3 text-base font-medium rounded-full",
+                "inline-flex items-center gap-2 rounded-full px-8 py-3 text-base font-medium",
                 "bg-linear-to-t from-stone-600 to-stone-500 text-white",
-                "hover:scale-105 active:scale-95 transition-transform",
+                "transition-transform hover:scale-105 active:scale-95",
               ])}
             >
               <Icon icon="mdi:calendar" className="text-xl" />
@@ -191,9 +191,9 @@ function HeroSection() {
             <Link
               to="/opensource/"
               className={cn([
-                "inline-block px-8 py-3 text-base font-medium rounded-full",
+                "inline-block rounded-full px-8 py-3 text-base font-medium",
                 "border border-stone-300 text-stone-600",
-                "hover:bg-stone-50 transition-colors",
+                "transition-colors hover:bg-stone-50",
               ])}
             >
               View Source Code
@@ -210,9 +210,9 @@ function HeroSection() {
 
 function FeaturesSection() {
   return (
-    <section className="px-6 py-16 border-t border-neutral-100">
-      <div className="max-w-4xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-12">
+    <section className="border-t border-neutral-100 px-6 py-16">
+      <div className="mx-auto max-w-4xl">
+        <div className="grid gap-12 md:grid-cols-2">
           <FeatureBlock
             icon="mdi:server"
             number="1"
@@ -263,7 +263,7 @@ function FeatureBlock({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-stone-100">
           <Icon icon={icon} className="text-2xl text-stone-600" />
         </div>
         <div>
@@ -273,14 +273,14 @@ function FeatureBlock({
           <h3 className="text-lg font-medium text-stone-700">{subtitle}</h3>
         </div>
       </div>
-      <ul className="space-y-2 ml-1">
+      <ul className="ml-1 space-y-2">
         {features.map((feature, index) => (
           <li key={index} className="flex items-start gap-2">
             <Icon
               icon="mdi:check-circle"
-              className="text-stone-500 mt-0.5 flex-shrink-0"
+              className="mt-0.5 flex-shrink-0 text-stone-500"
             />
-            <span className="text-neutral-600 text-sm leading-relaxed">
+            <span className="text-sm leading-relaxed text-neutral-600">
               {feature.text}
             </span>
           </li>
@@ -292,18 +292,18 @@ function FeatureBlock({
 
 function VerifiableSection() {
   return (
-    <section className="px-6 py-16 bg-stone-50/50 border-t border-neutral-100">
-      <div className="max-w-3xl mx-auto text-center">
-        <h2 className="text-3xl font-serif text-stone-700 mb-4">
+    <section className="border-t border-neutral-100 bg-stone-50/50 px-6 py-16">
+      <div className="mx-auto max-w-3xl text-center">
+        <h2 className="mb-4 font-serif text-3xl text-stone-700">
           Vendor Promises vs. Verifiable Architecture
         </h2>
-        <p className="text-xl text-neutral-600 mb-8">What Do You Choose?</p>
+        <p className="mb-8 text-xl text-neutral-600">What Do You Choose?</p>
         <Link
           to="/github/"
           className={cn([
-            "inline-flex items-center gap-2 px-6 py-3 text-base font-medium rounded-full",
+            "inline-flex items-center gap-2 rounded-full px-6 py-3 text-base font-medium",
             "border border-stone-300 text-stone-600",
-            "hover:bg-white transition-colors",
+            "transition-colors hover:bg-white",
           ])}
         >
           <Icon icon="mdi:code-braces" className="text-xl" />
@@ -316,9 +316,9 @@ function VerifiableSection() {
 
 function FAQSection() {
   return (
-    <section className="px-6 py-16 border-t border-neutral-100">
-      <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl font-serif text-stone-700 mb-8 text-center">
+    <section className="border-t border-neutral-100 px-6 py-16">
+      <div className="mx-auto max-w-3xl">
+        <h2 className="mb-8 text-center font-serif text-3xl text-stone-700">
           Frequently Asked Questions
         </h2>
         <div className="flex flex-col gap-6">
@@ -327,7 +327,7 @@ function FAQSection() {
               key={index}
               className="border-b border-neutral-100 pb-6 last:border-b-0"
             >
-              <h3 className="text-lg font-medium text-neutral-900 mb-2">
+              <h3 className="mb-2 text-lg font-medium text-neutral-900">
                 <span className="text-stone-600">Q:</span> {faq.question}
               </h3>
               <p className="text-neutral-600">
@@ -344,12 +344,12 @@ function FAQSection() {
 
 function CTASection() {
   return (
-    <section className="px-6 py-16 bg-amber-50/50 border-t border-neutral-100">
-      <div className="max-w-2xl mx-auto text-center">
-        <h2 className="text-3xl font-serif text-stone-700 mb-4">
+    <section className="border-t border-neutral-100 bg-amber-50/50 px-6 py-16">
+      <div className="mx-auto max-w-2xl text-center">
+        <h2 className="mb-4 font-serif text-3xl text-stone-700">
           Deploy meeting AI on your terms
         </h2>
-        <p className="text-neutral-600 mb-8">
+        <p className="mb-8 text-neutral-600">
           Let's walk through your deployment, security, and compliance
           requirements.
         </p>
@@ -357,9 +357,9 @@ function CTASection() {
           to="/founders/"
           search={{ source: "enterprise-cta" }}
           className={cn([
-            "inline-flex items-center gap-2 px-8 py-3 text-base font-medium rounded-full",
+            "inline-flex items-center gap-2 rounded-full px-8 py-3 text-base font-medium",
             "bg-linear-to-t from-stone-600 to-stone-500 text-white",
-            "hover:scale-105 active:scale-95 transition-transform",
+            "transition-transform hover:scale-105 active:scale-95",
           ])}
         >
           <Icon icon="mdi:calendar" className="text-xl" />

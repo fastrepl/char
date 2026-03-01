@@ -1,16 +1,17 @@
 import * as Sentry from "@sentry/react";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
-import { useAuth } from "~/auth";
-import { useBillingAccess } from "~/auth/billing";
-import { env } from "~/env";
-import { configureProSettings } from "~/shared/config/configure-pro-settings";
-import * as settings from "~/store/tinybase/store/settings";
 
 import { startTrial } from "@hypr/api-client";
 import type { StartTrialReason } from "@hypr/api-client";
 import { createClient } from "@hypr/api-client/client";
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
+
+import { useAuth } from "~/auth";
+import { useBillingAccess } from "~/auth/billing";
+import { env } from "~/env";
+import { configureProSettings } from "~/shared/config/configure-pro-settings";
+import * as settings from "~/store/tinybase/store/settings";
 
 export type TrialPhase =
   | "checking"

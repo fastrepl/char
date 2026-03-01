@@ -43,7 +43,7 @@ export function MainLanguageView({
   return (
     <div className="flex flex-row items-center justify-between">
       <div>
-        <h3 className="text-sm font-medium mb-1">Main language</h3>
+        <h3 className="mb-1 text-sm font-medium">Main language</h3>
         <p className="text-xs text-neutral-600">
           Language for summaries, chats, and AI-generated responses
         </p>

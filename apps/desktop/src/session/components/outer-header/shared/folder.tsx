@@ -1,7 +1,5 @@
 import { FolderIcon } from "lucide-react";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
-import { sessionOps } from "~/store/tinybase/persister/session/ops";
-import * as main from "~/store/tinybase/store/main";
 
 import {
   Command,
@@ -17,6 +15,9 @@ import {
   DropdownMenuSubContent,
   DropdownMenuTrigger,
 } from "@hypr/ui/components/ui/dropdown-menu";
+
+import { sessionOps } from "~/store/tinybase/persister/session/ops";
+import * as main from "~/store/tinybase/store/main";
 
 function useFolders() {
   const sessionIds = main.UI.useRowIds("sessions", main.STORE_ID);
@@ -60,7 +61,7 @@ export function SearchableFolderDropdown({
             setOpen={setOpen}
           />
         ) : (
-          <div className="py-6 text-center text-sm text-muted-foreground">
+          <div className="text-muted-foreground py-6 text-center text-sm">
             No folders available
           </div>
         )}
@@ -89,7 +90,7 @@ export function SearchableFolderSubmenuContent({
           setOpen={setOpen}
         />
       ) : (
-        <div className="py-6 text-center text-sm text-muted-foreground">
+        <div className="text-muted-foreground py-6 text-center text-sm">
           No folders available
         </div>
       )}

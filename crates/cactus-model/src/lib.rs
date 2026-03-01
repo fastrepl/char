@@ -120,6 +120,18 @@ impl CactusSttModel {
         }
     }
 
+    pub fn checksum(&self) -> Option<u32> {
+        match self {
+            CactusSttModel::WhisperSmallInt8 => Some(4195045602),
+            CactusSttModel::WhisperSmallInt8Apple => Some(3401367684),
+            CactusSttModel::WhisperMediumInt8 => Some(472491622),
+            CactusSttModel::WhisperMediumInt8Apple => Some(3175773054),
+            CactusSttModel::ParakeetCtc0_6bInt4 => Some(188550159),
+            CactusSttModel::ParakeetCtc0_6bInt8 => Some(396300387),
+            _ => None,
+        }
+    }
+
     pub fn description(&self) -> &str {
         match self {
             CactusSttModel::WhisperSmallInt8Apple
@@ -330,6 +342,13 @@ impl CactusModel {
         match self {
             CactusModel::Stt(m) => m.model_url(),
             CactusModel::Llm(m) => m.model_url(),
+        }
+    }
+
+    pub fn checksum(&self) -> Option<u32> {
+        match self {
+            CactusModel::Stt(m) => m.checksum(),
+            CactusModel::Llm(_) => None,
         }
     }
 

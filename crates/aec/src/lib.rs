@@ -24,23 +24,23 @@ impl CircularBuffer {
     }
 
     fn push_chunk(&mut self, chunk: &[f32]) {
-        self.buffer.rotate_left(self.block_shift);
+        let keep = self.block_len - self.block_shift;
+        self.buffer.copy_within(self.block_shift.., 0);
         let copy_len = chunk.len().min(self.block_shift);
-        self.buffer
-            [self.block_len - self.block_shift..self.block_len - self.block_shift + copy_len]
-            .copy_from_slice(&chunk[..copy_len]);
+        self.buffer[keep..keep + copy_len].copy_from_slice(&chunk[..copy_len]);
 
         if copy_len < self.block_shift {
-            self.buffer[self.block_len - self.block_shift + copy_len..].fill(0.0);
+            self.buffer[keep + copy_len..].fill(0.0);
         }
     }
 
     fn shift_and_accumulate(&mut self, data: &[f32]) {
-        self.buffer.rotate_left(self.block_shift);
-        self.buffer[self.block_len - self.block_shift..].fill(0.0);
+        let keep = self.block_len - self.block_shift;
+        self.buffer.copy_within(self.block_shift.., 0);
+        self.buffer[keep..].fill(0.0);
 
-        for (i, &val) in data.iter().enumerate() {
-            self.buffer[i] += val;
+        for (d, &val) in self.buffer.iter_mut().zip(data.iter()) {
+            *d += val;
         }
     }
 

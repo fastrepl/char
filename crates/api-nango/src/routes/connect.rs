@@ -76,15 +76,38 @@ pub async fn create_connect_session(
     responses(
         (status = 200, description = "Reconnect session created", body = ConnectSessionResponse),
         (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden"),
         (status = 500, description = "Internal server error"),
     ),
     tag = "nango",
 )]
 pub async fn create_reconnect_session(
     State(state): State<AppState>,
-    Extension(_auth): Extension<AuthContext>,
+    Extension(auth): Extension<AuthContext>,
     Json(body): Json<CreateReconnectSessionRequest>,
 ) -> Result<Json<ConnectSessionResponse>> {
+    let owns = state
+        .supabase
+        .verify_connection_ownership(
+            &auth.token,
+            &auth.claims.sub,
+            &body.connection_id,
+            &body.integration_id,
+        )
+        .await?;
+
+    if !owns {
+        tracing::warn!(
+            user_id = %auth.claims.sub,
+            connection_id = %body.connection_id,
+            integration_id = %body.integration_id,
+            "reconnect denied: connection not owned by user"
+        );
+        return Err(crate::error::NangoError::Forbidden(
+            "connection not found or not owned by user".to_string(),
+        ));
+    }
+
     let req = hypr_nango::ReconnectSessionRequest {
         connection_id: body.connection_id,
         integration_id: body.integration_id,

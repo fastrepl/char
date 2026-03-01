@@ -13,9 +13,10 @@ import {
   useEffect,
   useState,
 } from "react";
-import { useAutoCloser } from "~/shared/hooks/useAutoCloser";
 
 import { cn } from "@hypr/utils";
+
+import { useAutoCloser } from "~/shared/hooks/useAutoCloser";
 
 const MENU_CONTAINER_CLASSES = [
   "pointer-events-auto",

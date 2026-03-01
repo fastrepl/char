@@ -1,12 +1,13 @@
 import { Loader2Icon, SearchIcon, XIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useSearch } from "~/search/contexts/ui";
-import { useTabs } from "~/store/zustand/tabs";
 
 import { Button } from "@hypr/ui/components/ui/button";
 import { Kbd } from "@hypr/ui/components/ui/kbd";
 import { useCmdKeyPressed } from "@hypr/ui/hooks/use-cmd-key-pressed";
 import { cn } from "@hypr/utils";
+
+import { useSearch } from "~/search/contexts/ui";
+import { useTabs } from "~/store/zustand/tabs";
 
 export function Search({
   onManualExpandChange,
@@ -99,20 +100,20 @@ function ExpandedSearch({ onBlur }: { onBlur?: () => void }) {
     <div
       data-tauri-drag-region
       className={cn([
-        "flex items-center h-full transition-all duration-300",
+        "flex h-full items-center transition-all duration-300",
         width,
       ])}
     >
-      <div className="relative flex items-center w-full h-full">
+      <div className="relative flex h-full w-full items-center">
         {showLoading ? (
           <Loader2Icon
             className={cn([
-              "h-4 w-4 absolute left-3 text-neutral-400 animate-spin",
+              "absolute left-3 h-4 w-4 animate-spin text-neutral-400",
             ])}
           />
         ) : (
           <SearchIcon
-            className={cn(["h-4 w-4 absolute left-3 text-neutral-400"])}
+            className={cn(["absolute left-3 h-4 w-4 text-neutral-400"])}
           />
         )}
         <input
@@ -190,7 +191,7 @@ function ExpandedSearch({ onBlur }: { onBlur?: () => void }) {
           }}
           className={cn([
             "text-sm placeholder:text-sm placeholder:text-neutral-400",
-            "w-full pl-9 h-full",
+            "h-full w-full pl-9",
             query
               ? hasResults
                 ? "pr-16"
@@ -199,7 +200,7 @@ function ExpandedSearch({ onBlur }: { onBlur?: () => void }) {
                 ? "pr-14"
                 : "pr-4",
             "rounded-xl bg-neutral-100",
-            "focus:outline-hidden focus:bg-neutral-200",
+            "focus:bg-neutral-200 focus:outline-hidden",
           ])}
         />
         {hasResults && query && (
@@ -208,7 +209,7 @@ function ExpandedSearch({ onBlur }: { onBlur?: () => void }) {
               "absolute right-9",
               "px-2 py-0.5",
               "rounded-full bg-neutral-400",
-              "text-xs text-white font-semibold",
+              "text-xs font-semibold text-white",
               "pointer-events-none",
             ])}
           >
@@ -230,7 +231,7 @@ function ExpandedSearch({ onBlur }: { onBlur?: () => void }) {
           </button>
         )}
         {showShortcut && (
-          <div className="absolute right-2 top-1">
+          <div className="absolute top-1 right-2">
             <Kbd>⌘ K</Kbd>
           </div>
         )}

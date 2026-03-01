@@ -64,7 +64,7 @@ export function SettingsPanel() {
           <button
             onClick={() => startTrialMutation.mutate()}
             disabled={startTrialMutation.isPending}
-            className="px-4 h-8 flex items-center text-sm bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%] transition-all disabled:opacity-50"
+            className="flex h-8 items-center rounded-full bg-linear-to-t from-stone-600 to-stone-500 px-4 text-sm text-white shadow-md transition-all hover:scale-[102%] hover:shadow-lg active:scale-[98%] disabled:opacity-50"
           >
             {startTrialMutation.isPending ? "Loading..." : "Start Free Trial"}
           </button>
@@ -75,7 +75,7 @@ export function SettingsPanel() {
         <Link
           to="/app/checkout/"
           search={{ period: "monthly" }}
-          className="px-4 h-8 flex items-center text-sm bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%] transition-all"
+          className="flex h-8 items-center rounded-full bg-linear-to-t from-stone-600 to-stone-500 px-4 text-sm text-white shadow-md transition-all hover:scale-[102%] hover:shadow-lg active:scale-[98%]"
         >
           Upgrade to Pro
         </Link>
@@ -86,7 +86,7 @@ export function SettingsPanel() {
       <button
         onClick={() => manageBillingMutation.mutate()}
         disabled={manageBillingMutation.isPending}
-        className="cursor-pointer px-4 h-8 flex items-center text-sm bg-linear-to-b from-white to-stone-50 border border-neutral-300 text-neutral-700 rounded-full shadow-xs hover:shadow-md hover:scale-[102%] active:scale-[98%] transition-all disabled:opacity-50"
+        className="flex h-8 cursor-pointer items-center rounded-full border border-neutral-300 bg-linear-to-b from-white to-stone-50 px-4 text-sm text-neutral-700 shadow-xs transition-all hover:scale-[102%] hover:shadow-md active:scale-[98%] disabled:opacity-50"
       >
         {manageBillingMutation.isPending ? "Loading..." : "Manage Billing"}
       </button>
@@ -98,9 +98,9 @@ export function SettingsPanel() {
       <h1 className="text-xl font-semibold">Settings</h1>
 
       <div className="mt-6 flex flex-col gap-6">
-        <div className="border border-neutral-100 rounded-xs">
+        <div className="rounded-xs border border-neutral-100">
           <div className="p-4">
-            <h3 className="font-serif text-lg font-semibold mb-2">
+            <h3 className="mb-2 font-serif text-lg font-semibold">
               Account Settings
             </h3>
             <p className="text-sm text-neutral-600">
@@ -120,7 +120,7 @@ export function SettingsPanel() {
           <button
             onClick={() => signOut.mutate()}
             disabled={signOut.isPending}
-            className="cursor-pointer px-4 h-8 flex items-center text-sm text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-full transition-all disabled:opacity-50"
+            className="flex h-8 cursor-pointer items-center rounded-full border border-red-200 px-4 text-sm text-red-600 transition-all hover:border-red-300 hover:text-red-700 disabled:opacity-50"
           >
             {signOut.isPending ? "Signing out..." : "Sign out"}
           </button>

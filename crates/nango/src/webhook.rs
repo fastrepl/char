@@ -7,6 +7,45 @@ use crate::common_derives;
 
 type HmacSha256 = Hmac<Sha256>;
 
+#[derive(
+    Debug,
+    Eq,
+    PartialEq,
+    Clone,
+    serde::Serialize,
+    serde::Deserialize,
+    specta::Type,
+    schemars::JsonSchema,
+)]
+#[serde(rename_all = "lowercase")]
+pub enum WebhookType {
+    Auth,
+    Sync,
+    Forward,
+    #[serde(other)]
+    Unknown,
+}
+
+#[derive(
+    Debug,
+    Eq,
+    PartialEq,
+    Clone,
+    serde::Serialize,
+    serde::Deserialize,
+    specta::Type,
+    schemars::JsonSchema,
+)]
+#[serde(rename_all = "lowercase")]
+pub enum AuthOperation {
+    Creation,
+    Override,
+    Refresh,
+    Deletion,
+    #[serde(other)]
+    Unknown,
+}
+
 pub fn verify_webhook_signature(secret_key: &str, body: &[u8], signature: &str) -> bool {
     let Ok(mut mac) = HmacSha256::new_from_slice(secret_key.as_bytes()) else {
         return false;
@@ -18,8 +57,8 @@ pub fn verify_webhook_signature(secret_key: &str, body: &[u8], signature: &str) 
 
 common_derives! {
     pub struct NangoAuthWebhook {
-        pub r#type: String,
-        pub operation: String,
+        pub r#type: WebhookType,
+        pub operation: AuthOperation,
         #[serde(rename = "connectionId")]
         pub connection_id: String,
         #[serde(rename = "authMode")]
@@ -29,10 +68,26 @@ common_derives! {
         pub provider: String,
         pub environment: String,
         pub success: bool,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub tags: Option<HashMap<String, String>>,
         #[serde(rename = "endUser")]
-        pub end_user: NangoWebhookEndUser,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub end_user: Option<NangoWebhookEndUser>,
         #[serde(skip_serializing_if = "Option::is_none")]
         pub error: Option<NangoWebhookError>,
+    }
+}
+
+impl NangoAuthWebhook {
+    pub fn end_user_id(&self) -> Option<&str> {
+        self.end_user
+            .as_ref()
+            .map(|end_user| end_user.end_user_id.as_str())
+            .or_else(|| {
+                self.tags
+                    .as_ref()
+                    .and_then(|tags| tags.get("end_user_id").map(String::as_str))
+            })
     }
 }
 
@@ -56,7 +111,7 @@ common_derives! {
 
 common_derives! {
     pub struct NangoSyncWebhook {
-        pub r#type: String,
+        pub r#type: WebhookType,
         #[serde(rename = "connectionId")]
         pub connection_id: String,
         #[serde(rename = "providerConfigKey")]
@@ -124,26 +179,24 @@ mod tests {
         }"#;
 
         let webhook: NangoAuthWebhook = serde_json::from_str(json).unwrap();
-        assert_eq!(webhook.r#type, "auth");
-        assert_eq!(webhook.operation, "creation");
+        assert_eq!(webhook.r#type, WebhookType::Auth);
+        assert_eq!(webhook.operation, AuthOperation::Creation);
         assert_eq!(webhook.connection_id, "conn-123");
         assert_eq!(webhook.auth_mode, "OAUTH2");
         assert_eq!(webhook.provider_config_key, "google-calendar");
         assert!(webhook.success);
-        assert_eq!(webhook.end_user.end_user_id, "user-456");
+        let end_user = webhook.end_user.as_ref().unwrap();
+        assert_eq!(end_user.end_user_id, "user-456");
+        assert_eq!(end_user.end_user_email.as_deref(), Some("user@example.com"));
         assert_eq!(
-            webhook.end_user.end_user_email.as_deref(),
-            Some("user@example.com")
-        );
-        assert_eq!(
-            webhook
-                .end_user
+            end_user
                 .tags
                 .as_ref()
                 .and_then(|t| t.get("organizationId"))
                 .map(|s| s.as_str()),
             Some("org-789")
         );
+        assert!(webhook.tags.is_none());
         assert!(webhook.error.is_none());
     }
 
@@ -169,10 +222,42 @@ mod tests {
 
         let webhook: NangoAuthWebhook = serde_json::from_str(json).unwrap();
         assert!(!webhook.success);
+        assert_eq!(webhook.operation, AuthOperation::Refresh);
+        assert_eq!(webhook.end_user_id(), Some("user-456"));
         assert!(webhook.error.is_some());
         let error = webhook.error.unwrap();
         assert_eq!(error.r#type, "refresh_token_error");
         assert_eq!(error.description, "Token expired");
+    }
+
+    #[test]
+    fn test_deserialize_auth_webhook_with_top_level_tags_only() {
+        let json = r#"{
+            "type": "auth",
+            "operation": "creation",
+            "connectionId": "conn-123",
+            "authMode": "OAUTH2",
+            "providerConfigKey": "google-calendar",
+            "provider": "google-calendar",
+            "environment": "DEV",
+            "success": true,
+            "tags": {
+                "end_user_id": "user-456",
+                "organization_id": "org-789"
+            }
+        }"#;
+
+        let webhook: NangoAuthWebhook = serde_json::from_str(json).unwrap();
+        assert_eq!(webhook.end_user_id(), Some("user-456"));
+        assert!(webhook.end_user.is_none());
+        assert_eq!(
+            webhook
+                .tags
+                .as_ref()
+                .and_then(|t| t.get("organization_id"))
+                .map(|s| s.as_str()),
+            Some("org-789")
+        );
     }
 
     #[test]
@@ -194,7 +279,7 @@ mod tests {
         }"#;
 
         let webhook: NangoSyncWebhook = serde_json::from_str(json).unwrap();
-        assert_eq!(webhook.r#type, "sync");
+        assert_eq!(webhook.r#type, WebhookType::Sync);
         assert_eq!(webhook.connection_id, "conn-123");
         assert_eq!(webhook.sync_name, "calendar-events");
         assert_eq!(webhook.sync_type, "INCREMENTAL");

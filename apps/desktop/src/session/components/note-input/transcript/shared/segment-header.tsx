@@ -1,10 +1,4 @@
 import { useMemo } from "react";
-import * as main from "~/store/tinybase/store/main";
-import { SegmentKey } from "~/stt/segment";
-import {
-  defaultRenderLabelContext,
-  SpeakerLabelManager,
-} from "~/stt/segment/shared";
 
 import type { Segment } from "@hypr/transcript";
 import {
@@ -14,6 +8,13 @@ import {
 } from "@hypr/transcript/ui";
 
 import { Operations } from "./operations";
+
+import * as main from "~/store/tinybase/store/main";
+import { SegmentKey } from "~/stt/segment";
+import {
+  defaultRenderLabelContext,
+  SpeakerLabelManager,
+} from "~/stt/segment/shared";
 
 export function SegmentHeader({
   segment,

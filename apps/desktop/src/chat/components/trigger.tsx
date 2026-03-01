@@ -46,7 +46,7 @@ export function ChatTrigger({
       onClick={onClick}
       className={cn([
         "fixed right-4 z-40",
-        "w-14 h-14 rounded-full",
+        "h-14 w-14 rounded-full",
         "bg-white shadow-lg hover:shadow-xl",
         "border border-neutral-200",
         "flex items-center justify-center",
@@ -62,7 +62,7 @@ export function ChatTrigger({
       <img
         src="/assets/dynamic.gif"
         alt="Chat Assistant"
-        className="w-12 h-12 object-contain"
+        className="h-12 w-12 object-contain"
       />
     </button>,
     document.body,

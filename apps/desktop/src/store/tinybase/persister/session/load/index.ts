@@ -1,4 +1,12 @@
 import { sep } from "@tauri-apps/api/path";
+
+import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
+
+import { processMetaFile } from "./meta";
+import { processMdFile } from "./note";
+import { processTranscriptFile } from "./transcript";
+import { createEmptyLoadedSessionData, type LoadedSessionData } from "./types";
+
 import {
   SESSION_META_FILE,
   SESSION_NOTE_EXTENSION,
@@ -10,13 +18,6 @@ import {
   type LoadResult,
   ok,
 } from "~/store/tinybase/persister/shared";
-
-import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
-
-import { processMetaFile } from "./meta";
-import { processMdFile } from "./note";
-import { processTranscriptFile } from "./transcript";
-import { createEmptyLoadedSessionData, type LoadedSessionData } from "./types";
 
 export { extractSessionIdAndFolder } from "./meta";
 export { createEmptyLoadedSessionData, type LoadedSessionData } from "./types";

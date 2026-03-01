@@ -2,8 +2,6 @@ import { useForm } from "@tanstack/react-form";
 import { useQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useConfigValues } from "~/shared/config";
-import * as settings from "~/store/tinybase/store/settings";
 
 import {
   commands as detectCommands,
@@ -22,6 +20,9 @@ import {
 } from "@hypr/ui/components/ui/select";
 import { Switch } from "@hypr/ui/components/ui/switch";
 import { cn } from "@hypr/utils";
+
+import { useConfigValues } from "~/shared/config";
+import * as settings from "~/store/tinybase/store/settings";
 
 export function NotificationSettingsView() {
   const [inputValue, setInputValue] = useState("");
@@ -271,7 +272,7 @@ export function NotificationSettingsView() {
             </div>
 
             {field.state.value && (
-              <div className={cn(["ml-6 border-l-2 border-muted pl-6 pt-2"])}>
+              <div className={cn(["border-muted ml-6 border-l-2 pt-2 pl-6"])}>
                 <form.Field name="mic_active_threshold">
                   {(thresholdField) => (
                     <div className="mb-4 flex items-center justify-between gap-4">
@@ -313,7 +314,7 @@ export function NotificationSettingsView() {
                 </div>
                 <div className="relative" ref={containerRef}>
                   <div
-                    className="min-h-[38px] w-full flex flex-wrap items-center gap-2 rounded-md border p-2 cursor-text"
+                    className="flex min-h-[38px] w-full cursor-text flex-wrap items-center gap-2 rounded-md border p-2"
                     onClick={() => inputRef.current?.focus()}
                   >
                     {ignoredPlatforms.map((app: string) => {
@@ -353,7 +354,7 @@ export function NotificationSettingsView() {
                     <input
                       ref={inputRef}
                       type="text"
-                      className="flex-1 min-w-[120px] bg-transparent outline-hidden text-sm placeholder:text-muted-foreground"
+                      className="placeholder:text-muted-foreground min-w-[120px] flex-1 bg-transparent text-sm outline-hidden"
                       placeholder={
                         ignoredPlatforms.length === 0
                           ? "Type to add apps..."
@@ -366,7 +367,7 @@ export function NotificationSettingsView() {
                     />
                   </div>
                   {showDropdown && dropdownOptions.length > 0 && (
-                    <div className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-md overflow-hidden">
+                    <div className="bg-popover absolute z-50 mt-1 w-full overflow-hidden rounded-md border shadow-md">
                       <div className="max-h-[200px] overflow-auto py-1">
                         {dropdownOptions.map((app, index) => {
                           const isCustom = showCustomOption && index === 0;
@@ -406,8 +407,8 @@ export function NotificationSettingsView() {
 
       <div className="flex flex-col gap-6">
         <div className="relative flex items-center pt-4 pb-2">
-          <div className="w-full border-t border-muted" />
-          <span className="absolute left-1/2 -translate-x-1/2 bg-background px-4 text-xs font-medium text-muted-foreground">
+          <div className="border-muted w-full border-t" />
+          <span className="bg-background text-muted-foreground absolute left-1/2 -translate-x-1/2 px-4 text-xs font-medium">
             For enabled notifications
           </span>
         </div>

@@ -1,6 +1,4 @@
 import { type ReactNode, useCallback, useMemo } from "react";
-import { getSessionEvent } from "~/session/utils";
-import * as main from "~/store/tinybase/store/main";
 
 import type {
   EnhancedNoteStorage,
@@ -12,6 +10,9 @@ import type {
   SessionStorage,
   TemplateStorage,
 } from "@hypr/store";
+
+import { getSessionEvent } from "~/session/utils";
+import * as main from "~/store/tinybase/store/main";
 
 export function useSession(sessionId: string) {
   const title = main.UI.useCell("sessions", sessionId, "title", main.STORE_ID);

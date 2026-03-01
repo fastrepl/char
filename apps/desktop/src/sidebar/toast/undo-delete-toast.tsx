@@ -3,12 +3,13 @@ import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useHotkeys } from "react-hotkeys-hook";
+
+import { cn } from "@hypr/utils";
+
 import { restoreSessionData } from "~/store/tinybase/store/deleteSession";
 import * as main from "~/store/tinybase/store/main";
 import { useTabs } from "~/store/zustand/tabs";
 import { UNDO_TIMEOUT_MS, useUndoDelete } from "~/store/zustand/undo-delete";
-
-import { cn } from "@hypr/utils";
 
 type ToastGroup = {
   key: string;
@@ -314,19 +315,19 @@ function ToastPill({
     >
       <div
         className={cn([
-          "flex items-center gap-3 pl-4 pr-1.5 py-1.5",
-          "bg-white rounded-full",
-          "shadow-lg border border-neutral-200",
+          "flex items-center gap-3 py-1.5 pr-1.5 pl-4",
+          "rounded-full bg-white",
+          "border border-neutral-200 shadow-lg",
         ])}
       >
-        <span className="text-sm text-neutral-600 truncate max-w-[200px]">
+        <span className="max-w-[200px] truncate text-sm text-neutral-600">
           {label}...
         </span>
 
         <button
           onClick={() => confirmGroup(group)}
           className={cn([
-            "text-xs font-medium px-3 py-1.5 rounded-full",
+            "rounded-full px-3 py-1.5 text-xs font-medium",
             "whitespace-nowrap",
             "bg-neutral-100 text-neutral-500",
             "hover:bg-red-100 hover:text-red-600",
@@ -339,7 +340,7 @@ function ToastPill({
         <button
           onClick={() => restoreGroup(group)}
           className={cn([
-            "text-xs font-medium px-3 py-1.5 rounded-full",
+            "rounded-full px-3 py-1.5 text-xs font-medium",
             "whitespace-nowrap",
             "bg-neutral-900 text-white",
             "hover:bg-neutral-800",

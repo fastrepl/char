@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useAutoCloser } from "~/shared/hooks/useAutoCloser";
-import * as main from "~/store/tinybase/store/main";
 
 import { ParticipantChip } from "./chip";
 import { ParticipantDropdown } from "./dropdown";
+
+import { useAutoCloser } from "~/shared/hooks/useAutoCloser";
+import * as main from "~/store/tinybase/store/main";
 
 export function ParticipantInput({ sessionId }: { sessionId: string }) {
   const {
@@ -56,7 +57,7 @@ export function ParticipantInput({ sessionId }: { sessionId: string }) {
   return (
     <div className="relative" ref={containerRef}>
       <div
-        className="min-h-[38px] w-full flex flex-wrap items-center gap-2 cursor-text"
+        className="flex min-h-[38px] w-full cursor-text flex-wrap items-center gap-2"
         onClick={() => inputRef.current?.focus()}
       >
         {mappingIds.map((mappingId) => (
@@ -66,7 +67,7 @@ export function ParticipantInput({ sessionId }: { sessionId: string }) {
         <input
           ref={inputRef}
           type="text"
-          className="flex-1 min-w-[120px] bg-transparent outline-hidden text-sm placeholder:text-neutral-400"
+          className="min-w-[120px] flex-1 bg-transparent text-sm outline-hidden placeholder:text-neutral-400"
           placeholder="Add participants..."
           value={inputValue}
           onChange={(e) => handleInputChange(e.target.value)}

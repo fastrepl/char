@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
-import { useConfigValues } from "~/shared/config";
-import { useSTTConnection } from "~/stt/useSTTConnection";
 
 import { Spinner } from "@hypr/ui/components/ui/spinner";
+
+import { useConfigValues } from "~/shared/config";
+import { useSTTConnection } from "~/stt/useSTTConnection";
 
 export type HealthStatus = {
   status: "pending" | "error" | "success" | null;

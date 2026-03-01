@@ -13,10 +13,6 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useResizeObserver } from "usehooks-ts";
-import { useAuth } from "~/auth";
-import { useAutoCloser } from "~/shared/hooks/useAutoCloser";
-import * as main from "~/store/tinybase/store/main";
-import { useTabs } from "~/store/zustand/tabs";
 
 import { Kbd } from "@hypr/ui/components/ui/kbd";
 import { cn } from "@hypr/utils";
@@ -24,6 +20,11 @@ import { cn } from "@hypr/utils";
 import { AuthSection } from "./auth";
 import { NotificationsMenuContent } from "./notification";
 import { MenuItem } from "./shared";
+
+import { useAuth } from "~/auth";
+import { useAutoCloser } from "~/shared/hooks/useAutoCloser";
+import * as main from "~/store/tinybase/store/main";
+import { useTabs } from "~/store/zustand/tabs";
 
 type ProfileView = "main" | "notifications";
 
@@ -209,9 +210,9 @@ export function ProfileSection({ onExpandChange }: ProfileSectionProps = {}) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="absolute bottom-full left-0 right-0 mb-1"
+            className="absolute right-0 bottom-full left-0 mb-1"
           >
-            <div className="bg-neutral-50 rounded-xl overflow-hidden shadow-xs border">
+            <div className="overflow-hidden rounded-xl border bg-neutral-50 shadow-xs">
               <div className="py-1">
                 <AnimatePresence mode="wait">
                   {currentView === "main" ? (
@@ -268,7 +269,7 @@ export function ProfileSection({ onExpandChange }: ProfileSectionProps = {}) {
         )}
       </AnimatePresence>
 
-      <div className="bg-neutral-50 rounded-xl overflow-hidden">
+      <div className="overflow-hidden rounded-xl bg-neutral-50">
         <ProfileButton
           isExpanded={isExpanded}
           onClick={() => setIsExpanded(!isExpanded)}
@@ -311,12 +312,12 @@ function ProfileButton({
   return (
     <button
       className={cn([
-        "cursor-pointer flex w-full items-center gap-2.5",
+        "flex w-full cursor-pointer items-center gap-2.5",
         "px-4 py-2",
         "text-left",
         "transition-all duration-300",
         "hover:bg-neutral-100",
-        isExpanded && "bg-neutral-50 border-t border-neutral-100",
+        isExpanded && "border-t border-neutral-100 bg-neutral-50",
       ])}
       onClick={onClick}
     >
@@ -329,7 +330,7 @@ function ProfileButton({
         ])}
       >
         {showFacehash ? (
-          <div className="bg-amber-50 rounded-full">
+          <div className="rounded-full bg-amber-50">
             <Facehash
               name={facehashName}
               size={32}
@@ -346,7 +347,7 @@ function ProfileButton({
           />
         )}
       </div>
-      <div className="min-w-0 flex-1 text-sm text-black truncate">{name}</div>
+      <div className="min-w-0 flex-1 truncate text-sm text-black">{name}</div>
       <ChevronUpIcon
         className={cn([
           "h-4 w-4",

@@ -1,15 +1,16 @@
 import { AppWindowIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { StandardTabWrapper } from "~/shared/main";
-import { type TabItem, TabItemBase } from "~/shared/tabs";
-import { type Tab, useTabs } from "~/store/zustand/tabs";
 
 import { Kbd } from "@hypr/ui/components/ui/kbd";
 import { cn } from "@hypr/utils";
 
 import { useNewNote } from "../useNewNote";
 import { OpenNoteDialog } from "./open-note-dialog";
+
+import { StandardTabWrapper } from "~/shared/main";
+import { type TabItem, TabItemBase } from "~/shared/tabs";
+import { type Tab, useTabs } from "~/store/zustand/tabs";
 
 export const TabItemEmpty: TabItem<Extract<Tab, { type: "empty" }>> = ({
   tab,
@@ -23,7 +24,7 @@ export const TabItemEmpty: TabItem<Extract<Tab, { type: "empty" }>> = ({
 }) => {
   return (
     <TabItemBase
-      icon={<AppWindowIcon className="w-4 h-4" />}
+      icon={<AppWindowIcon className="h-4 w-4" />}
       title="New tab"
       selected={tab.active}
       allowPin={false}
@@ -85,15 +86,15 @@ function EmptyView() {
   );
 
   return (
-    <div className="flex flex-col items-center justify-center h-full gap-6 mb-12 text-neutral-600">
-      <div className="flex flex-col gap-1 text-center min-w-[280px]">
+    <div className="mb-12 flex h-full flex-col items-center justify-center gap-6 text-neutral-600">
+      <div className="flex min-w-[280px] flex-col gap-1 text-center">
         <ActionItem label="New Note" shortcut={["⌘", "N"]} onClick={newNote} />
         <ActionItem
           label="Open Note"
           shortcut={["⌘", "O"]}
           onClick={() => setOpenNoteDialogOpen(true)}
         />
-        <div className="h-px bg-neutral-200 my-1" />
+        <div className="my-1 h-px bg-neutral-200" />
         <ActionItem
           label="Contacts"
           shortcut={["⌘", "⇧", "O"]}
@@ -109,7 +110,7 @@ function EmptyView() {
           shortcut={["⌘", "⇧", "F"]}
           onClick={openAdvancedSearch}
         />
-        <div className="h-px bg-neutral-200 my-1" />
+        <div className="my-1 h-px bg-neutral-200" />
         <ActionItem
           label="AI Settings"
           shortcut={["⌘", "⇧", ","]}
@@ -148,7 +149,7 @@ function ActionItem({
         "flex items-center justify-between gap-8",
         "text-sm",
         "rounded-md px-4 py-2",
-        "hover:bg-neutral-100 transition-colors cursor-pointer",
+        "cursor-pointer transition-colors hover:bg-neutral-100",
       ])}
     >
       <span>{label}</span>

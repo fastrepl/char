@@ -1,8 +1,4 @@
 import type { LanguageModel, TextStreamPart } from "ai";
-import type { Store as MainStore } from "~/store/tinybase/store/main";
-import type { Store as SettingsStore } from "~/store/tinybase/store/settings";
-import { StreamTransform } from "~/store/zustand/ai-task/shared/transform_infra";
-import type { TaskState, TaskStepInfo } from "~/store/zustand/ai-task/tasks";
 
 import type {
   EnhanceSystem,
@@ -17,6 +13,11 @@ import { enhanceWorkflow } from "./enhance-workflow";
 import { titleSuccess } from "./title-success";
 import { titleTransform } from "./title-transform";
 import { titleWorkflow } from "./title-workflow";
+
+import type { Store as MainStore } from "~/store/tinybase/store/main";
+import type { Store as SettingsStore } from "~/store/tinybase/store/settings";
+import { StreamTransform } from "~/store/zustand/ai-task/shared/transform_infra";
+import type { TaskState, TaskStepInfo } from "~/store/zustand/ai-task/tasks";
 
 export type TaskType = "enhance" | "title";
 

@@ -5,6 +5,7 @@ import {
 } from "@tanstack/react-router";
 import { isTauri } from "@tauri-apps/api/core";
 import { useCallback, useEffect, useRef } from "react";
+
 import { AITaskProvider } from "~/ai/contexts";
 import { useLanguageModel, useLLMConnection } from "~/ai/hooks";
 import { hydrateSessionContextFromFs } from "~/chat/session-context-hydrator";

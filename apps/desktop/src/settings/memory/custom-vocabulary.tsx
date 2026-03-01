@@ -9,10 +9,11 @@ import {
   X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import * as main from "~/store/tinybase/store/main";
 
 import { Button } from "@hypr/ui/components/ui/button";
 import { cn } from "@hypr/utils";
+
+import * as main from "~/store/tinybase/store/main";
 
 interface VocabItem {
   text: string;
@@ -61,16 +62,16 @@ export function CustomVocabularyView() {
 
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="text-md font-semibold font-serif">Custom vocabulary</h3>
+      <h3 className="text-md font-serif font-semibold">Custom vocabulary</h3>
 
-      <div className="rounded-xl border border-neutral-200 bg-white overflow-hidden">
+      <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             e.stopPropagation();
             form.handleSubmit();
           }}
-          className="flex items-center gap-2 px-3 h-9 border-b border-neutral-200 bg-stone-50"
+          className="flex h-9 items-center gap-2 border-b border-neutral-200 bg-stone-50 px-3"
         >
           <Search className="size-4 text-neutral-400" />
           <form.Field name="search">
@@ -83,7 +84,7 @@ export function CustomVocabularyView() {
                   setSearchValue(e.target.value);
                 }}
                 placeholder="Search or add custom vocabulary"
-                className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none bg-transparent"
+                className="flex-1 bg-transparent text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none"
               />
             )}
           </form.Field>
@@ -95,9 +96,9 @@ export function CustomVocabularyView() {
               type="button"
               onClick={() => form.handleSubmit()}
               className={cn([
-                "flex items-center justify-between w-full px-4 py-2.5",
+                "flex w-full items-center justify-between px-4 py-2.5",
                 "border-b border-neutral-100",
-                "hover:bg-neutral-50 transition-colors group",
+                "group transition-colors hover:bg-neutral-50",
               ])}
             >
               <div className="flex items-center gap-2">
@@ -107,7 +108,7 @@ export function CustomVocabularyView() {
                   "
                 </span>
               </div>
-              <span className="opacity-0 group-hover:opacity-100 transition-opacity">
+              <span className="opacity-0 transition-opacity group-hover:opacity-100">
                 <CornerDownLeft className="size-3.5 text-neutral-400" />
               </span>
             </button>
@@ -204,16 +205,16 @@ function VocabularyItem({
   return (
     <div
       className={cn([
-        "flex items-center justify-between px-4 py-3 border-b border-neutral-100 last:border-b-0",
-        !isEditing && "hover:bg-neutral-50 transition-colors",
+        "flex items-center justify-between border-b border-neutral-100 px-4 py-3 last:border-b-0",
+        !isEditing && "transition-colors hover:bg-neutral-50",
       ])}
       onMouseEnter={() => setHoveredItem(true)}
       onMouseLeave={() => setHoveredItem(false)}
     >
-      <div className="flex items-center gap-2 flex-1 min-w-0">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
         <span
           className={cn([
-            "text-sm text-neutral-400 w-4 flex-shrink-0 text-center",
+            "w-4 flex-shrink-0 text-center text-sm text-neutral-400",
             isSearching && "invisible",
           ])}
         >
@@ -235,7 +236,7 @@ function VocabularyItem({
                     onCancelEdit();
                   }
                 }}
-                className="flex-1 text-sm text-neutral-900 focus:outline-none bg-transparent"
+                className="flex-1 bg-transparent text-sm text-neutral-900 focus:outline-none"
                 autoFocus
               />
             )}

@@ -1,4 +1,12 @@
 import type { MergeableStore, OptionalSchemas } from "tinybase/with-schemas";
+
+import { toContent, toPersistedChanges } from "@hypr/tinybase-utils";
+
+import {
+  createCollectorPersister,
+  type OrphanCleanupConfig,
+} from "./collector";
+
 import {
   createDeletionMarker,
   type DeletionMarkerStore,
@@ -11,13 +19,6 @@ import type {
   SaveResult,
   TablesContent,
 } from "~/store/tinybase/persister/shared/types";
-
-import { toContent, toPersistedChanges } from "@hypr/tinybase-utils";
-
-import {
-  createCollectorPersister,
-  type OrphanCleanupConfig,
-} from "./collector";
 
 type Table = Record<string, Record<string, unknown>>;
 

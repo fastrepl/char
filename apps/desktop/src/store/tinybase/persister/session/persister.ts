@@ -1,10 +1,3 @@
-import { createMultiTableDirPersister } from "~/store/tinybase/persister/factories";
-import {
-  SESSION_META_FILE,
-  SESSION_NOTE_EXTENSION,
-} from "~/store/tinybase/persister/shared";
-import type { Store } from "~/store/tinybase/store/main";
-
 import type { Schemas } from "@hypr/store";
 
 import { getChangedSessionIds, parseSessionIdFromPath } from "./changes";
@@ -18,6 +11,13 @@ import {
   buildSessionSaveOps,
   buildTranscriptSaveOps,
 } from "./save/index";
+
+import { createMultiTableDirPersister } from "~/store/tinybase/persister/factories";
+import {
+  SESSION_META_FILE,
+  SESSION_NOTE_EXTENSION,
+} from "~/store/tinybase/persister/shared";
+import type { Store } from "~/store/tinybase/store/main";
 
 export function createSessionPersister(store: Store) {
   return createMultiTableDirPersister<Schemas, LoadedSessionData>(store, {

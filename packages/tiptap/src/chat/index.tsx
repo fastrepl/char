@@ -1,3 +1,5 @@
+import "../../styles.css";
+
 import { Extension } from "@tiptap/core";
 import {
   EditorContent,
@@ -7,7 +9,6 @@ import {
 } from "@tiptap/react";
 import { forwardRef, useEffect, useMemo, useRef } from "react";
 
-import "../../styles.css";
 import {
   isMentionActive,
   mention,

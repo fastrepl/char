@@ -1,7 +1,5 @@
 import { format } from "date-fns";
 import { useEffect, useRef, useState } from "react";
-import type { CalendarData } from "~/calendar/hooks";
-import { useNow } from "~/calendar/hooks";
 
 import {
   Popover,
@@ -12,6 +10,9 @@ import { cn } from "@hypr/utils";
 
 import { EventChip } from "./event-chip";
 import { SessionChip } from "./session-chip";
+
+import type { CalendarData } from "~/calendar/hooks";
+import { useNow } from "~/calendar/hooks";
 
 function useVisibleItemCount(
   ref: React.RefObject<HTMLDivElement | null>,
@@ -93,15 +94,15 @@ export function DayCell({
   return (
     <div
       className={cn([
-        "border-b border-r border-neutral-100",
-        "p-1.5 min-w-0 flex flex-col",
+        "border-r border-b border-neutral-100",
+        "flex min-w-0 flex-col p-1.5",
         (day.getDay() === 0 || day.getDay() === 6) && "bg-neutral-50",
       ])}
     >
-      <div className="flex justify-end shrink-0">
+      <div className="flex shrink-0 justify-end">
         <div
           className={cn([
-            "text-sm font-medium mb-1 w-7 h-7 flex items-center justify-center rounded-full",
+            "mb-1 flex h-7 w-7 items-center justify-center rounded-full text-sm font-medium",
             today && "bg-neutral-900 text-white",
             !today && !isCurrentMonth && "text-neutral-300",
             !today &&
@@ -120,7 +121,7 @@ export function DayCell({
       </div>
       <div
         ref={itemsRef}
-        className="flex flex-col gap-0.5 flex-1 min-h-0 overflow-hidden"
+        className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-hidden"
       >
         {visibleEvents.map((eventId) => (
           <EventChip key={eventId} eventId={eventId} />
@@ -131,16 +132,16 @@ export function DayCell({
         {overflow > 0 && (
           <Popover>
             <PopoverTrigger asChild>
-              <button className="text-xs text-neutral-400 pl-1 text-left hover:text-neutral-600 cursor-pointer shrink-0">
+              <button className="shrink-0 cursor-pointer pl-1 text-left text-xs text-neutral-400 hover:text-neutral-600">
                 +{overflow} more
               </button>
             </PopoverTrigger>
             <PopoverContent
               align="start"
-              className="w-[220px] shadow-lg p-2 rounded-lg max-h-[300px] overflow-y-auto"
+              className="max-h-[300px] w-[220px] overflow-y-auto rounded-lg p-2 shadow-lg"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="text-sm font-medium text-neutral-900 mb-2">
+              <div className="mb-2 text-sm font-medium text-neutral-900">
                 {format(day, "MMM d, yyyy")}
               </div>
               <div className="flex flex-col gap-0.5">

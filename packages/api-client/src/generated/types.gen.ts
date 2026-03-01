@@ -156,6 +156,10 @@ export type ConnectSessionResponse = {
 export type ConnectionItem = {
     connection_id: string;
     integration_id: string;
+    last_error_at?: string | null;
+    last_error_description?: string | null;
+    last_error_type?: string | null;
+    status?: string | null;
     updated_at?: string | null;
 };
 
@@ -213,6 +217,15 @@ export type DayOfWeek = 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursda
 export type DeleteAccountResponse = {
     deleted: boolean;
     error?: string | null;
+};
+
+export type DeleteConnectionRequest = {
+    connection_id: string;
+    integration_id: string;
+};
+
+export type DeleteConnectionResponse = {
+    status: string;
 };
 
 export type DeviceInfo = {
@@ -999,6 +1012,37 @@ export type CreateConnectSessionResponses = {
 
 export type CreateConnectSessionResponse = CreateConnectSessionResponses[keyof CreateConnectSessionResponses];
 
+export type DeleteConnectionData = {
+    body: DeleteConnectionRequest;
+    path?: never;
+    query?: never;
+    url: '/nango/connections';
+};
+
+export type DeleteConnectionErrors = {
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Internal server error
+     */
+    500: unknown;
+};
+
+export type DeleteConnectionResponses = {
+    /**
+     * Connection disconnected
+     */
+    200: DeleteConnectionResponse;
+};
+
+export type DeleteConnectionResponse2 = DeleteConnectionResponses[keyof DeleteConnectionResponses];
+
 export type ListConnectionsData = {
     body?: never;
     path?: never;
@@ -1038,6 +1082,10 @@ export type CreateReconnectSessionErrors = {
      * Unauthorized
      */
     401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
     /**
      * Internal server error
      */

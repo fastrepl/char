@@ -192,10 +192,10 @@ function Component() {
 
   if (search.error) {
     return (
-      <div className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white flex items-center justify-center p-6">
-        <div className="max-w-md w-full text-center flex flex-col gap-8">
+      <div className="flex min-h-screen items-center justify-center bg-linear-to-b from-white via-stone-50/20 to-white p-6">
+        <div className="flex w-full max-w-md flex-col gap-8 text-center">
           <div className="flex flex-col gap-3">
-            <h1 className="text-3xl font-serif tracking-tight text-stone-700">
+            <h1 className="font-serif text-3xl tracking-tight text-stone-700">
               Sign-in failed
             </h1>
             <p className="text-neutral-600">
@@ -208,8 +208,8 @@ function Component() {
           <a
             href={`/auth?flow=${search.flow}&scheme=${search.scheme}`}
             className={cn([
-              "w-full h-12 flex items-center justify-center text-base font-medium transition-all cursor-pointer",
-              "bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
+              "flex h-12 w-full cursor-pointer items-center justify-center text-base font-medium transition-all",
+              "rounded-full bg-linear-to-t from-stone-600 to-stone-500 text-white shadow-md hover:scale-[102%] hover:shadow-lg active:scale-[98%]",
             ])}
           >
             Try again
@@ -223,10 +223,10 @@ function Component() {
     const hasTokens = search.access_token && search.refresh_token;
 
     return (
-      <div className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white flex items-center justify-center p-6">
-        <div className="max-w-md w-full text-center flex flex-col gap-8">
+      <div className="flex min-h-screen items-center justify-center bg-linear-to-b from-white via-stone-50/20 to-white p-6">
+        <div className="flex w-full max-w-md flex-col gap-8 text-center">
           <div className="flex flex-col gap-3">
-            <h1 className="text-3xl font-serif tracking-tight text-stone-700">
+            <h1 className="font-serif text-3xl tracking-tight text-stone-700">
               {hasTokens ? "Sign-in successful" : "Signing in..."}
             </h1>
             <p className="text-neutral-600">
@@ -241,8 +241,8 @@ function Component() {
               <button
                 onClick={handleDeeplink}
                 className={cn([
-                  "w-full h-12 flex items-center justify-center text-base font-medium transition-all cursor-pointer",
-                  "bg-linear-to-t from-stone-600 to-stone-500 text-white rounded-full shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
+                  "flex h-12 w-full cursor-pointer items-center justify-center text-base font-medium transition-all",
+                  "rounded-full bg-linear-to-t from-stone-600 to-stone-500 text-white shadow-md hover:scale-[102%] hover:shadow-lg active:scale-[98%]",
                 ])}
               >
                 Open Char
@@ -251,8 +251,8 @@ function Component() {
               <button
                 onClick={handleCopy}
                 className={cn([
-                  "w-full p-4 flex flex-col items-center gap-3 text-left cursor-pointer transition-all",
-                  "bg-stone-50 rounded-lg border border-stone-100 hover:bg-stone-100 active:scale-[99%]",
+                  "flex w-full cursor-pointer flex-col items-center gap-3 p-4 text-left transition-all",
+                  "rounded-lg border border-stone-100 bg-stone-50 hover:bg-stone-100 active:scale-[99%]",
                 ])}
               >
                 <p className="text-sm text-stone-500">
@@ -260,8 +260,8 @@ function Component() {
                 </p>
                 <span
                   className={cn([
-                    "w-full h-10 flex items-center justify-center gap-2 text-sm font-medium",
-                    "bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900 rounded-full shadow-xs",
+                    "flex h-10 w-full items-center justify-center gap-2 text-sm font-medium",
+                    "rounded-full bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900 shadow-xs",
                   ])}
                 >
                   {copied ? (

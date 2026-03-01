@@ -1,10 +1,11 @@
 import { SearchIcon } from "lucide-react";
 import { useCallback } from "react";
+
+import { AdvancedSearchView } from "./view";
+
 import { StandardTabWrapper } from "~/shared/main";
 import { type TabItem, TabItemBase } from "~/shared/tabs";
 import { type Tab, useTabs } from "~/store/zustand/tabs";
-
-import { AdvancedSearchView } from "./view";
 
 export const TabItemSearch: TabItem<Extract<Tab, { type: "search" }>> = ({
   tab,
@@ -18,7 +19,7 @@ export const TabItemSearch: TabItem<Extract<Tab, { type: "search" }>> = ({
 }) => {
   return (
     <TabItemBase
-      icon={<SearchIcon className="w-4 h-4" />}
+      icon={<SearchIcon className="h-4 w-4" />}
       title="Advanced Search"
       selected={tab.active}
       pinned={tab.pinned}

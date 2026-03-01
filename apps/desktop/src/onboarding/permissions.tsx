@@ -1,7 +1,8 @@
 import { AlertCircleIcon, CheckIcon } from "lucide-react";
-import { usePermission } from "~/shared/hooks/usePermissions";
 
 import { cn } from "@hypr/utils";
+
+import { usePermission } from "~/shared/hooks/usePermissions";
 
 function PermissionBlock({
   name,
@@ -23,11 +24,11 @@ function PermissionBlock({
       onClick={onAction}
       disabled={isPending || isAuthorized}
       className={cn([
-        "flex flex-1 basis-0 min-w-0 items-center gap-2.5 rounded-xl py-2 px-3 text-left transition-all",
+        "flex min-w-0 flex-1 basis-0 items-center gap-2.5 rounded-xl px-3 py-2 text-left transition-all",
         isAuthorized
           ? "border border-neutral-200"
           : "border border-red-200 bg-red-50 hover:bg-red-100/60 active:scale-[0.98]",
-        isPending && "opacity-50 cursor-not-allowed",
+        isPending && "cursor-not-allowed opacity-50",
       ])}
       aria-label={
         isAuthorized
@@ -37,7 +38,7 @@ function PermissionBlock({
     >
       <div
         className={cn([
-          "size-6 shrink-0 flex items-center justify-center rounded-md",
+          "flex size-6 shrink-0 items-center justify-center rounded-md",
           isAuthorized
             ? "bg-stone-100 text-stone-600"
             : "bg-linear-to-t from-red-600 to-red-500 text-white",
@@ -58,7 +59,7 @@ function PermissionBlock({
         >
           {name}
         </span>
-        <p className="text-xs text-neutral-500 truncate hidden @[480px]:block">
+        <p className="hidden truncate text-xs text-neutral-500 @[480px]:block">
           {isAuthorized ? description.authorized : description.unauthorized}
         </p>
       </div>

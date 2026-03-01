@@ -2,10 +2,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { platform } from "@tauri-apps/plugin-os";
 import { Volume2Icon, VolumeXIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { usePermissions } from "~/shared/hooks/usePermissions";
-import { StandardTabWrapper } from "~/shared/main";
-import { type TabItem, TabItemBase } from "~/shared/tabs";
-import { type Tab, useTabs } from "~/store/zustand/tabs";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import { commands as sfxCommands } from "@hypr/plugin-sfx";
@@ -23,6 +19,11 @@ import { FolderLocationSection } from "./folder-location";
 import { PermissionsSection } from "./permissions";
 import { OnboardingSection } from "./shared";
 
+import { usePermissions } from "~/shared/hooks/usePermissions";
+import { StandardTabWrapper } from "~/shared/main";
+import { type TabItem, TabItemBase } from "~/shared/tabs";
+import { type Tab, useTabs } from "~/store/zustand/tabs";
+
 export const TabItemOnboarding: TabItem<
   Extract<Tab, { type: "onboarding" }>
 > = ({
@@ -38,7 +39,7 @@ export const TabItemOnboarding: TabItem<
   return (
     <TabItemBase
       icon={
-        <span className="text-sm inline-block origin-[70%_80%] group-hover:animate-wiggle">
+        <span className="group-hover:animate-wiggle inline-block origin-[70%_80%] text-sm">
           👋
         </span>
       }
@@ -123,12 +124,12 @@ export function TabContentOnboarding({
     <StandardTabWrapper>
       <div className="relative flex h-full flex-col">
         <div className="sticky top-0 z-10 flex items-center justify-between bg-white px-6 pt-4 pb-3">
-          <h1 className="text-2xl font-semibold font-serif text-neutral-900">
+          <h1 className="font-serif text-2xl font-semibold text-neutral-900">
             Welcome to Char
           </h1>
           <button
             onClick={() => setIsMuted((prev) => !prev)}
-            className="p-1.5 rounded-full hover:bg-neutral-100 transition-colors"
+            className="rounded-full p-1.5 transition-colors hover:bg-neutral-100"
             aria-label={isMuted ? "Unmute" : "Mute"}
           >
             {isMuted ? (
@@ -140,7 +141,7 @@ export function TabContentOnboarding({
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          <div className="flex flex-col px-6 pb-16 gap-3">
+          <div className="flex flex-col gap-3 px-6 pb-16">
             <OnboardingSection
               title="Permissions"
               completedTitle="Permissions granted"

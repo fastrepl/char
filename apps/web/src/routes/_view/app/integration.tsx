@@ -3,12 +3,15 @@ import { z } from "zod";
 
 import { useBilling } from "@/hooks/use-billing";
 
+import { IntegrationPageLayout } from "./-integration-ui";
 import { ConnectFlow } from "./-integrations-connect-flow";
+import { DisconnectFlow } from "./-integrations-disconnect-flow";
 import { UpgradePrompt } from "./-integrations-upgrade-prompt";
 
 const validateSearch = z.object({
   integration_id: z.string().default("google-calendar"),
   connection_id: z.string().optional(),
+  action: z.enum(["connect", "disconnect"]).default("connect"),
   flow: z.enum(["desktop", "web"]).default("web"),
   scheme: z.string().default("hyprnote"),
   return_to: z.string().optional(),
@@ -47,13 +50,15 @@ function Component() {
   const search = Route.useSearch();
   const billing = useBilling();
 
+  if (search.action === "disconnect") {
+    return <DisconnectFlow />;
+  }
+
   if (!billing.isReady) {
     return (
-      <div className="min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white flex items-center justify-center p-6">
-        <div className="max-w-md w-full text-center">
-          <p className="text-neutral-500">Loading...</p>
-        </div>
-      </div>
+      <IntegrationPageLayout>
+        <p className="text-neutral-500">Loading...</p>
+      </IntegrationPageLayout>
     );
   }
 

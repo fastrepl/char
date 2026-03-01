@@ -10,6 +10,7 @@ specta = ["dep:specta"]
 hypr-file = { workspace = true }
 hypr-gguf = { workspace = true }
 hypr-lmstudio = { workspace = true }
+hypr-local-model = { workspace = true }
 
 axum = { workspace = true }
 dirs = { workspace = true }

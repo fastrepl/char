@@ -1,4 +1,10 @@
 import { sep } from "@tauri-apps/api/path";
+
+import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
+import { commands as fs2Commands } from "@hypr/plugin-fs2";
+
+import type { ChatJson, LoadedChatData } from "./types";
+
 import {
   CHAT_MESSAGES_FILE,
   err,
@@ -7,11 +13,6 @@ import {
   type LoadResult,
   ok,
 } from "~/store/tinybase/persister/shared";
-
-import { commands as fs2Commands } from "@hypr/plugin-fs2";
-import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
-
-import type { ChatJson, LoadedChatData } from "./types";
 
 export type { LoadedChatData } from "./types";
 

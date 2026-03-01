@@ -1,8 +1,9 @@
 import { faker } from "@faker-js/faker/locale/en";
-import { DEFAULT_USER_ID, id } from "~/shared/utils";
 
 import type { SessionEvent, SessionStorage } from "@hypr/store";
 import { md2json } from "@hypr/tiptap/shared";
+
+import { DEFAULT_USER_ID, id } from "~/shared/utils";
 
 export const generateTitle = () => {
   const lengthConfig = faker.helpers.weightedArrayElement([

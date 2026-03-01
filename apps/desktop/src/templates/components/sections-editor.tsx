@@ -154,7 +154,7 @@ export function SectionsList({
         <Button
           variant="outline"
           size="sm"
-          className="text-sm w-full"
+          className="w-full text-sm"
           onClick={addSection}
           disabled={disabled}
         >
@@ -185,17 +185,17 @@ function SectionItem({
     <div className="group relative bg-white">
       {!disabled && (
         <button
-          className="absolute -left-5 top-2.5 cursor-move opacity-0 group-hover:opacity-30 hover:opacity-60 transition-opacity"
+          className="absolute top-2.5 -left-5 cursor-move opacity-0 transition-opacity group-hover:opacity-30 hover:opacity-60"
           onPointerDown={(event) => dragControls.start(event)}
           disabled={disabled}
         >
-          <HandleIcon className="h-4 w-4 text-muted-foreground" />
+          <HandleIcon className="text-muted-foreground h-4 w-4" />
         </button>
       )}
 
       {!disabled && (
         <button
-          className="absolute right-2 top-2 opacity-0 group-hover:opacity-30 hover:opacity-100 transition-all"
+          className="absolute top-2 right-2 opacity-0 transition-all group-hover:opacity-30 hover:opacity-100"
           onClick={() => onDelete(item.key)}
           disabled={disabled}
         >
@@ -209,7 +209,7 @@ function SectionItem({
           value={item.title}
           onChange={(e) => onChange({ ...item, title: e.target.value })}
           placeholder="Untitled"
-          className="border-0 bg-transparent p-0 font-medium shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60"
+          className="placeholder:text-muted-foreground/60 border-0 bg-transparent p-0 font-medium shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
         />
 
         <textarea
@@ -220,12 +220,12 @@ function SectionItem({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           className={cn([
-            "min-h-[100px] w-full border rounded-xl p-3 resize-y transition-colors font-mono text-sm",
+            "min-h-[100px] w-full resize-y rounded-xl border p-3 font-mono text-sm transition-colors",
             "focus-visible:outline-hidden",
             disabled
               ? "bg-neutral-50"
               : isFocused
-                ? "border-blue-500 ring-2 ring-primary/20"
+                ? "ring-primary/20 border-blue-500 ring-2"
                 : "border-input",
           ])}
         />

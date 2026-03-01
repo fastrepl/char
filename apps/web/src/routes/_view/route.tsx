@@ -75,7 +75,7 @@ function Component() {
                 setIsOpen: setIsHandbookDrawerOpen,
               }}
             >
-              <div className="min-h-screen flex flex-col">
+              <div className="flex min-h-screen flex-col">
                 {!isChoosePage && <Header />}
                 <main className="flex-1">
                   <Outlet />
@@ -128,7 +128,7 @@ function MobileDocsDrawer({
         />
       )}
       <div
-        className={`fixed top-17.25 left-0 h-[calc(100vh-69px)] w-72 bg-white/80 backdrop-blur-xs border-r border-neutral-100 shadow-2xl shadow-neutral-900/20 z-50 md:hidden transition-transform duration-300 ease-in-out ${
+        className={`fixed top-17.25 left-0 z-50 h-[calc(100vh-69px)] w-72 border-r border-neutral-100 bg-white/80 shadow-2xl shadow-neutral-900/20 backdrop-blur-xs transition-transform duration-300 ease-in-out md:hidden ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         style={{
@@ -137,7 +137,7 @@ function MobileDocsDrawer({
       >
         <div
           ref={scrollContainerRef}
-          className="h-full overflow-y-auto scrollbar-hide p-4"
+          className="scrollbar-hide h-full overflow-y-auto p-4"
         >
           <SidebarNavigation
             sections={sections}
@@ -214,7 +214,7 @@ function MobileHandbookDrawer({
         />
       )}
       <div
-        className={`fixed top-17.25 left-0 h-[calc(100vh-69px)] w-72 bg-white/80 backdrop-blur-xs border-r border-neutral-100 shadow-2xl shadow-neutral-900/20 z-50 md:hidden transition-transform duration-300 ease-in-out ${
+        className={`fixed top-17.25 left-0 z-50 h-[calc(100vh-69px)] w-72 border-r border-neutral-100 bg-white/80 shadow-2xl shadow-neutral-900/20 backdrop-blur-xs transition-transform duration-300 ease-in-out md:hidden ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         style={{
@@ -223,7 +223,7 @@ function MobileHandbookDrawer({
       >
         <div
           ref={scrollContainerRef}
-          className="h-full overflow-y-auto scrollbar-hide p-4"
+          className="scrollbar-hide h-full overflow-y-auto p-4"
         >
           <SidebarNavigation
             sections={handbooksBySection.sections}

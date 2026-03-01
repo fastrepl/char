@@ -182,10 +182,10 @@ function Component() {
   if (step === "reveal") {
     return (
       <main
-        className="flex-1 min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white"
+        className="min-h-screen flex-1 bg-linear-to-b from-white via-stone-50/20 to-white"
         style={{ backgroundImage: "url(/patterns/dots.svg)" }}
       >
-        <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white min-h-screen">
+        <div className="mx-auto min-h-screen max-w-6xl border-x border-neutral-100 bg-white">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -200,15 +200,15 @@ function Component() {
 
   return (
     <main
-      className="flex-1 min-h-screen bg-linear-to-b from-white via-stone-50/20 to-white"
+      className="min-h-screen flex-1 bg-linear-to-b from-white via-stone-50/20 to-white"
       style={{ backgroundImage: "url(/patterns/dots.svg)" }}
     >
-      <div className="max-w-6xl mx-auto border-x border-neutral-100 bg-white min-h-screen">
-        <h1 className="text-4xl sm:text-5xl font-serif text-stone-700 text-center pt-12 pb-4">
+      <div className="mx-auto min-h-screen max-w-6xl border-x border-neutral-100 bg-white">
+        <h1 className="pt-12 pb-4 text-center font-serif text-4xl text-stone-700 sm:text-5xl">
           Build Your Pizza
         </h1>
-        <div className="flex flex-col md:flex-row md:h-[calc(100vh-65px)]">
-          <div className="flex items-center justify-center p-10 md:p-16 border-b md:border-b-0 md:border-r border-neutral-100 md:flex-1">
+        <div className="flex flex-col md:h-[calc(100vh-65px)] md:flex-row">
+          <div className="flex items-center justify-center border-b border-neutral-100 p-10 md:flex-1 md:border-r md:border-b-0 md:p-16">
             <PizzaGraphic
               crust={crust}
               sauce={sauce}
@@ -216,7 +216,7 @@ function Component() {
             />
           </div>
 
-          <div className="flex items-center p-8 md:p-12 md:flex-1">
+          <div className="flex items-center p-8 md:flex-1 md:p-12">
             <AnimatePresence mode="wait">
               {!forcing ? (
                 <motion.div
@@ -225,17 +225,17 @@ function Component() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -8 }}
                   transition={{ duration: 0.2 }}
-                  className="flex flex-col gap-6 w-full"
+                  className="flex w-full flex-col gap-6"
                 >
                   <div>
-                    <p className="text-xs font-medium text-neutral-400 uppercase tracking-widest mb-2">
+                    <p className="mb-2 text-xs font-medium tracking-widest text-neutral-400 uppercase">
                       {step === "crust"
                         ? "Step 1 of 3"
                         : step === "sauce"
                           ? "Step 2 of 3"
                           : "Step 3 of 3"}
                     </p>
-                    <h2 className="text-2xl sm:text-3xl font-serif text-stone-700">
+                    <h2 className="font-serif text-2xl text-stone-700 sm:text-3xl">
                       {step === "crust"
                         ? "Pick your crust"
                         : step === "sauce"
@@ -256,7 +256,7 @@ function Component() {
                           key={opt.id}
                           onClick={() => handleCrustSelect(opt.id)}
                           className={cn([
-                            "px-5 py-4 rounded-lg border text-left text-base font-medium transition-colors",
+                            "rounded-lg border px-5 py-4 text-left text-base font-medium transition-colors",
                             crust === opt.id
                               ? "border-stone-400 bg-stone-50 text-stone-700"
                               : "border-neutral-200 text-neutral-600 hover:border-stone-300 hover:bg-stone-50/50",
@@ -271,7 +271,7 @@ function Component() {
                           key={opt.id}
                           onClick={() => handleSauceSelect(opt.id)}
                           className={cn([
-                            "px-5 py-4 rounded-lg border text-left text-base font-medium transition-colors",
+                            "rounded-lg border px-5 py-4 text-left text-base font-medium transition-colors",
                             sauce === opt.id
                               ? "border-stone-400 bg-stone-50 text-stone-700"
                               : "border-neutral-200 text-neutral-600 hover:border-stone-300 hover:bg-stone-50/50",
@@ -285,7 +285,7 @@ function Component() {
                         <button
                           key={opt.id}
                           onClick={handleToppingSelect}
-                          className="px-4 py-3 rounded-lg border border-neutral-200 text-left text-sm font-medium text-neutral-600 hover:border-stone-300 hover:bg-stone-50/50 transition-colors"
+                          className="rounded-lg border border-neutral-200 px-4 py-3 text-left text-sm font-medium text-neutral-600 transition-colors hover:border-stone-300 hover:bg-stone-50/50"
                         >
                           {opt.label}
                         </button>
@@ -301,10 +301,10 @@ function Component() {
                   transition={{ duration: 0.18 }}
                   className="flex flex-col gap-2"
                 >
-                  <p className="text-xs font-medium text-neutral-400 uppercase tracking-widest">
+                  <p className="text-xs font-medium tracking-widest text-neutral-400 uppercase">
                     We decided
                   </p>
-                  <h2 className="text-5xl sm:text-6xl font-bold text-stone-700 leading-tight">
+                  <h2 className="text-5xl leading-tight font-bold text-stone-700 sm:text-6xl">
                     {overrideLabel}
                   </h2>
                 </motion.div>
@@ -333,7 +333,7 @@ function PizzaGraphic({
   return (
     <svg
       viewBox="0 0 200 200"
-      className="w-52 h-52 sm:w-64 sm:h-64 md:w-72 md:h-72"
+      className="h-52 w-52 sm:h-64 sm:w-64 md:h-72 md:w-72"
     >
       <motion.circle
         cx="100"
@@ -466,15 +466,15 @@ function RevealSection({
   return (
     <>
       <section className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
-        <div className="flex flex-col md:flex-row items-center gap-12 py-20 px-8 max-w-5xl mx-auto">
+        <div className="mx-auto flex max-w-5xl flex-col items-center gap-12 px-8 py-20 md:flex-row">
           <div className="flex-shrink-0">
             <PizzaGraphic crust={crust} sauce={sauce} showPineapple={true} />
           </div>
           <div className="flex flex-col gap-5 text-center md:text-left">
-            <h2 className="text-4xl sm:text-5xl font-serif tracking-tight text-stone-700">
+            <h2 className="font-serif text-4xl tracking-tight text-stone-700 sm:text-5xl">
               Felt annoying, didn't it?
             </h2>
-            <p className="text-lg text-neutral-500 max-w-lg">
+            <p className="max-w-lg text-lg text-neutral-500">
               That's what most AI note-takers do with your data. Which AI
               touches it, where it lives, whether it ever leaves your device.
               You get no say.
@@ -486,9 +486,9 @@ function RevealSection({
               <Link
                 to="/download/"
                 className={cn([
-                  "inline-block px-8 py-3 text-base font-medium rounded-full",
+                  "inline-block rounded-full px-8 py-3 text-base font-medium",
                   "bg-linear-to-t from-stone-600 to-stone-500 text-white",
-                  "shadow-md hover:shadow-lg hover:scale-[102%] active:scale-[98%]",
+                  "shadow-md hover:scale-[102%] hover:shadow-lg active:scale-[98%]",
                   "transition-all",
                 ])}
               >
@@ -501,8 +501,8 @@ function RevealSection({
       <SlashSeparator />
       <section>
         <div className="grid md:grid-cols-3">
-          <div className="p-8 border-b md:border-b-0 md:border-r border-neutral-100">
-            <h3 className="text-xl font-serif text-stone-700 mb-2">
+          <div className="border-b border-neutral-100 p-8 md:border-r md:border-b-0">
+            <h3 className="mb-2 font-serif text-xl text-stone-700">
               Choose your AI
             </h3>
             <p className="text-neutral-600">
@@ -511,8 +511,8 @@ function RevealSection({
               anytime.
             </p>
           </div>
-          <div className="p-8 border-b md:border-b-0 md:border-r border-neutral-100">
-            <h3 className="text-xl font-serif text-stone-700 mb-2">
+          <div className="border-b border-neutral-100 p-8 md:border-r md:border-b-0">
+            <h3 className="mb-2 font-serif text-xl text-stone-700">
               Your notes are files
             </h3>
             <p className="text-neutral-600">
@@ -521,7 +521,7 @@ function RevealSection({
             </p>
           </div>
           <div className="p-8">
-            <h3 className="text-xl font-serif text-stone-700 mb-2">
+            <h3 className="mb-2 font-serif text-xl text-stone-700">
               No bots. No lock-in.
             </h3>
             <p className="text-neutral-600">

@@ -24,7 +24,6 @@ import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as ViewRouteRouteImport } from './routes/_view/route'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ViewIndexRouteImport } from './routes/_view/index'
-import { Route as WebhookNangoRouteImport } from './routes/webhook/nango'
 import { Route as ApiTemplatesRouteImport } from './routes/api/templates'
 import { Route as ApiShortcutsRouteImport } from './routes/api/shortcuts'
 import { Route as ApiMediaUploadRouteImport } from './routes/api/media-upload'
@@ -229,11 +228,6 @@ const ViewIndexRoute = ViewIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => ViewRouteRoute,
-} as any)
-const WebhookNangoRoute = WebhookNangoRouteImport.update({
-  id: '/webhook/nango',
-  path: '/webhook/nango',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTemplatesRoute = ApiTemplatesRouteImport.update({
   id: '/api/templates',
@@ -944,7 +938,6 @@ export interface FileRoutesByFullPath {
   '/api/media-upload': typeof ApiMediaUploadRoute
   '/api/shortcuts': typeof ApiShortcutsRoute
   '/api/templates': typeof ApiTemplatesRoute
-  '/webhook/nango': typeof WebhookNangoRoute
   '/admin/': typeof AdminIndexRoute
   '/app/account': typeof ViewAppAccountRoute
   '/app/checkout': typeof ViewAppCheckoutRoute
@@ -1086,7 +1079,6 @@ export interface FileRoutesByTo {
   '/api/media-upload': typeof ApiMediaUploadRoute
   '/api/shortcuts': typeof ApiShortcutsRoute
   '/api/templates': typeof ApiTemplatesRoute
-  '/webhook/nango': typeof WebhookNangoRoute
   '/': typeof ViewIndexRoute
   '/admin': typeof AdminIndexRoute
   '/app/account': typeof ViewAppAccountRoute
@@ -1235,7 +1227,6 @@ export interface FileRoutesById {
   '/api/media-upload': typeof ApiMediaUploadRoute
   '/api/shortcuts': typeof ApiShortcutsRoute
   '/api/templates': typeof ApiTemplatesRoute
-  '/webhook/nango': typeof WebhookNangoRoute
   '/_view/': typeof ViewIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/_view/app/account': typeof ViewAppAccountRoute
@@ -1385,7 +1376,6 @@ export interface FileRouteTypes {
     | '/api/media-upload'
     | '/api/shortcuts'
     | '/api/templates'
-    | '/webhook/nango'
     | '/admin/'
     | '/app/account'
     | '/app/checkout'
@@ -1527,7 +1517,6 @@ export interface FileRouteTypes {
     | '/api/media-upload'
     | '/api/shortcuts'
     | '/api/templates'
-    | '/webhook/nango'
     | '/'
     | '/admin'
     | '/app/account'
@@ -1675,7 +1664,6 @@ export interface FileRouteTypes {
     | '/api/media-upload'
     | '/api/shortcuts'
     | '/api/templates'
-    | '/webhook/nango'
     | '/_view/'
     | '/admin/'
     | '/_view/app/account'
@@ -1809,7 +1797,6 @@ export interface RootRouteChildren {
   ApiMediaUploadRoute: typeof ApiMediaUploadRoute
   ApiShortcutsRoute: typeof ApiShortcutsRoute
   ApiTemplatesRoute: typeof ApiTemplatesRoute
-  WebhookNangoRoute: typeof WebhookNangoRoute
   ApiImagesSplatRoute: typeof ApiImagesSplatRoute
   ApiTweetIdRoute: typeof ApiTweetIdRoute
   ApiWebhooksSlackInteractiveRoute: typeof ApiWebhooksSlackInteractiveRoute
@@ -1947,13 +1934,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof ViewIndexRouteImport
       parentRoute: typeof ViewRouteRoute
-    }
-    '/webhook/nango': {
-      id: '/webhook/nango'
-      path: '/webhook/nango'
-      fullPath: '/webhook/nango'
-      preLoaderRoute: typeof WebhookNangoRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/api/templates': {
       id: '/api/templates'
@@ -3138,7 +3118,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiMediaUploadRoute: ApiMediaUploadRoute,
   ApiShortcutsRoute: ApiShortcutsRoute,
   ApiTemplatesRoute: ApiTemplatesRoute,
-  WebhookNangoRoute: WebhookNangoRoute,
   ApiImagesSplatRoute: ApiImagesSplatRoute,
   ApiTweetIdRoute: ApiTweetIdRoute,
   ApiWebhooksSlackInteractiveRoute: ApiWebhooksSlackInteractiveRoute,
