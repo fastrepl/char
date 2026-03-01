@@ -1,0 +1,32 @@
+[package]
+name = "tauri-plugin-google-calendar"
+version = "0.1.0"
+authors = ["You"]
+edition = "2024"
+exclude = ["/js", "/node_modules"]
+links = "tauri-plugin-google-calendar"
+description = ""
+
+[build-dependencies]
+tauri-plugin = { workspace = true, features = ["build"] }
+
+[dev-dependencies]
+specta-typescript = { workspace = true }
+
+[dependencies]
+hypr-api-client = { workspace = true }
+hypr-calendar-interface = { workspace = true }
+hypr-google-calendar = { workspace = true, features = ["specta"] }
+
+tauri = { workspace = true, features = ["test"] }
+tauri-plugin-auth = { workspace = true }
+tauri-specta = { workspace = true, features = ["derive", "typescript"] }
+
+chrono = { workspace = true, features = ["serde"] }
+reqwest = { workspace = true, features = ["json"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+specta = { workspace = true, features = ["chrono"] }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+tracing = { workspace = true }

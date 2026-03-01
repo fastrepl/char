@@ -1,10 +1,9 @@
-import type { IncomingParticipants } from "../../fetch/types";
+import type { IncomingParticipants } from "~/services/apple-calendar/fetch/types";
 
 export type ParticipantMappingId = string;
 
 export type ParticipantsSyncInput = {
   incomingParticipants: IncomingParticipants;
-  trackingIdToEventId: Map<string, string>;
 };
 
 export type ParticipantMappingToAdd = {

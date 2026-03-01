@@ -10,6 +10,7 @@ import { DeeplinksList } from "../deeplinks-list";
 import { HooksList } from "../hooks-list";
 import { OpenAPIDocs } from "../openapi-docs";
 import { Callout } from "./callout";
+import { Clip } from "./clip";
 import { CodeBlock } from "./code-block";
 import { GithubEmbed } from "./github-embed";
 import { MDXLink } from "./link";
@@ -30,11 +31,24 @@ export type MDXComponents = {
   [key: string]: ComponentType<any>;
 };
 
+function InlineCode({ children, ...props }: React.ComponentProps<"code">) {
+  return (
+    <code
+      {...props}
+      className={`rounded bg-stone-100 px-1.5 py-0.5 font-mono text-sm text-stone-800 ${props.className ?? ""}`}
+    >
+      {children}
+    </code>
+  );
+}
+
 export const defaultMDXComponents: MDXComponents = {
   a: MDXLink,
+  code: InlineCode,
   Accordion,
   Card,
   Callout,
+  Clip,
   Columns,
   CtaCard,
   DeeplinksList,

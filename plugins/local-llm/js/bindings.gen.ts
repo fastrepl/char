@@ -22,9 +22,6 @@ async listSupportedModel() : Promise<Result<ModelInfo[], string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async isServerRunning() : Promise<boolean> {
-    return await TAURI_INVOKE("plugin:local-llm|is_server_running");
-},
 async isModelDownloaded(model: SupportedModel) : Promise<Result<boolean, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|is_model_downloaded", { model }) };
@@ -44,30 +41,6 @@ async isModelDownloading(model: SupportedModel) : Promise<Result<boolean, string
 async downloadModel(model: SupportedModel, channel: TAURI_CHANNEL<number>) : Promise<Result<null, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|download_model", { model, channel }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async startServer() : Promise<Result<string, string>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|start_server") };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async stopServer() : Promise<Result<null, string>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|stop_server") };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async restartServer() : Promise<Result<string, string>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|restart_server") };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -120,17 +93,36 @@ async setCurrentModelSelection(model: ModelSelection) : Promise<Result<null, str
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+async startServer() : Promise<Result<string, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|start_server") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async stopServer() : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|stop_server") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async serverUrl() : Promise<Result<string | null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|server_url") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
 /** user-defined events **/
 
 
-export const events = __makeEvents__<{
-llmEvent: LLMEvent
-}>({
-llmEvent: "plugin:local-llm:llm-event"
-})
 
 /** user-defined constants **/
 
@@ -139,7 +131,6 @@ llmEvent: "plugin:local-llm:llm-event"
 /** user-defined types **/
 
 export type CustomModelInfo = { path: string; name: string }
-export type LLMEvent = { progress: number }
 export type ModelInfo = { key: SupportedModel; name: string; description: string; size_bytes: number }
 export type ModelSelection = { type: "Predefined"; content: { key: SupportedModel } } | { type: "Custom"; content: { path: string } }
 export type SupportedModel = "Llama3p2_3bQ4" | "Gemma3_4bQ4" | "HyprLLM"

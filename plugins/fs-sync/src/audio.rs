@@ -10,7 +10,7 @@ use hypr_audio_utils::{
 use crate::error::{AudioImportError, AudioProcessingError};
 
 const TARGET_SAMPLE_RATE_HZ: u32 = 16_000;
-const AUDIO_FORMATS: [&str; 2] = ["audio.wav", "audio.ogg"];
+const AUDIO_FORMATS: [&str; 3] = ["audio.mp3", "audio.wav", "audio.ogg"];
 
 pub fn exists(session_dir: &Path) -> std::io::Result<bool> {
     AUDIO_FORMATS
@@ -68,7 +68,34 @@ pub fn import_audio(
     target_path: &Path,
 ) -> Result<PathBuf, AudioProcessingError> {
     let file = File::open(source_path)?;
-    let decoder = rodio::Decoder::try_from(file)?;
+    match rodio::Decoder::try_from(file) {
+        Ok(decoder) => import_audio_from_decoder(decoder, tmp_path, target_path),
+        Err(_original_err) => {
+            #[cfg(target_os = "macos")]
+            {
+                let wav_path = hypr_afconvert::to_wav(source_path)
+                    .map_err(|e| AudioProcessingError::AfconvertFailed(e.to_string()))?;
+                let result = (|| {
+                    let file = File::open(&wav_path)?;
+                    let decoder = rodio::Decoder::try_from(file)?;
+                    import_audio_from_decoder(decoder, tmp_path, target_path)
+                })();
+                let _ = std::fs::remove_file(&wav_path);
+                result
+            }
+            #[cfg(not(target_os = "macos"))]
+            {
+                Err(_original_err.into())
+            }
+        }
+    }
+}
+
+fn import_audio_from_decoder<R: std::io::Read + std::io::Seek>(
+    decoder: rodio::Decoder<R>,
+    tmp_path: &Path,
+    target_path: &Path,
+) -> Result<PathBuf, AudioProcessingError> {
     let channel_count_raw = decoder.channels().max(1);
     let channel_count_u8 = u8::try_from(channel_count_raw).map_err(|_| {
         AudioProcessingError::UnsupportedChannelCount {

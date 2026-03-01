@@ -3,14 +3,11 @@ mod hyprnote;
 mod passthrough;
 mod session;
 
-#[cfg(test)]
-mod tests;
-
 use std::collections::BTreeMap;
 
 use axum::{
-    extract::{State, WebSocketUpgrade},
-    http::StatusCode,
+    extract::{FromRequestParts, State, WebSocketUpgrade},
+    http::{StatusCode, request::Parts},
     response::{IntoResponse, Response},
 };
 
@@ -20,8 +17,38 @@ use crate::query_params::{QueryParams, QueryValue};
 use super::AppState;
 use common::{ProxyBuildError, parse_param};
 
+use hypr_analytics::{AuthenticatedUserId, DeviceFingerprint};
+
+pub struct AnalyticsContext {
+    pub fingerprint: Option<String>,
+    pub user_id: Option<String>,
+}
+
+impl<S> FromRequestParts<S> for AnalyticsContext
+where
+    S: Send + Sync,
+{
+    type Rejection = std::convert::Infallible;
+
+    async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
+        let fingerprint = parts
+            .extensions
+            .get::<DeviceFingerprint>()
+            .map(|id| id.0.clone());
+        let user_id = parts
+            .extensions
+            .get::<AuthenticatedUserId>()
+            .map(|id| id.0.clone());
+        Ok(AnalyticsContext {
+            fingerprint,
+            user_id,
+        })
+    }
+}
+
 pub async fn handler(
     State(state): State<AppState>,
+    analytics_ctx: AnalyticsContext,
     ws: WebSocketUpgrade,
     mut params: QueryParams,
 ) -> Response {
@@ -78,13 +105,15 @@ pub async fn handler(
         scope.set_context("stt_request", sentry::protocol::Context::Other(ctx));
     });
 
-    let proxy = if is_hyprnote_routing {
-        hyprnote::build_proxy(&state, &selected, &params).await
+    let proxy_result = if is_hyprnote_routing {
+        hyprnote::build_proxy(&state, &selected, &params, analytics_ctx).await
     } else {
-        passthrough::build_proxy(&state, &selected, &params).await
+        passthrough::build_proxy(&state, &selected, &params, analytics_ctx)
+            .await
+            .map(hyprnote::StreamingProxy::Single)
     };
 
-    let proxy = match proxy {
+    let proxy = match proxy_result {
         Ok(p) => p,
         Err(ProxyBuildError::SessionInitFailed(e)) => {
             tracing::error!(
@@ -110,5 +139,8 @@ pub async fn handler(
         }
     };
 
-    proxy.handle_upgrade(ws).await.into_response()
+    match proxy {
+        hyprnote::StreamingProxy::Single(p) => p.handle_upgrade(ws).await.into_response(),
+        hyprnote::StreamingProxy::ChannelSplit(p) => p.handle_upgrade(ws).await.into_response(),
+    }
 }

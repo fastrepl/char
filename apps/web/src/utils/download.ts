@@ -11,7 +11,7 @@ export interface DownloadLink {
 }
 
 export function getDownloadLinks(version: string): DownloadLink[] {
-  const baseUrl = `https://github.com/fastrepl/hyprnote/releases/download/desktop_v${version}`;
+  const baseUrl = `https://github.com/fastrepl/char/releases/download/desktop_v${version}`;
 
   return [
     {
@@ -33,14 +33,28 @@ export function getDownloadLinks(version: string): DownloadLink[] {
       arch: "x86_64",
       format: "appimage",
       url: `${baseUrl}/hyprnote-linux-x86_64.AppImage`,
-      label: "AppImage",
+      label: "AppImage (x86)",
     },
     {
       platform: "linux",
       arch: "x86_64",
       format: "deb",
       url: `${baseUrl}/hyprnote-linux-x86_64.deb`,
-      label: "Debian",
+      label: "Debian (x86)",
+    },
+    {
+      platform: "linux",
+      arch: "aarch64",
+      format: "appimage",
+      url: `${baseUrl}/hyprnote-linux-aarch64.AppImage`,
+      label: "AppImage (ARM)",
+    },
+    {
+      platform: "linux",
+      arch: "aarch64",
+      format: "deb",
+      url: `${baseUrl}/hyprnote-linux-aarch64.deb`,
+      label: "Debian (ARM)",
     },
   ];
 }

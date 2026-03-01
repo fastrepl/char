@@ -3,15 +3,11 @@ use tauri::Manager;
 mod commands;
 mod error;
 mod ext;
-mod fs;
-mod global;
-mod obsidian;
 mod state;
-mod vault;
 
 pub use error::{Error, Result};
 pub use ext::*;
-pub use obsidian::ObsidianVault;
+pub use hypr_storage::ObsidianVault;
 pub use state::*;
 
 const PLUGIN_NAME: &str = "settings";

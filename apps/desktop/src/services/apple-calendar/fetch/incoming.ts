@@ -1,13 +1,14 @@
-import type { AppleEvent, Participant } from "@hypr/plugin-apple-calendar";
+import type { CalendarEvent } from "@hypr/plugin-apple-calendar";
 import { commands as appleCalendarCommands } from "@hypr/plugin-apple-calendar";
 import { commands as miscCommands } from "@hypr/plugin-misc";
 
-import type { Ctx } from "../ctx";
 import type {
   EventParticipant,
   IncomingEvent,
   IncomingParticipants,
 } from "./types";
+
+import type { Ctx } from "~/services/apple-calendar/ctx";
 
 export class CalendarFetchError extends Error {
   constructor(
@@ -43,12 +44,13 @@ export async function fetchIncomingEvents(ctx: Ctx): Promise<{
     }),
   );
 
-  const appleEvents = results.flat();
+  const calendarEvents = results.flat();
   const events: IncomingEvent[] = [];
   const participants: IncomingParticipants = new Map();
 
-  for (const appleEvent of appleEvents) {
-    const { event, eventParticipants } = await normalizeAppleEvent(appleEvent);
+  for (const calendarEvent of calendarEvents) {
+    const { event, eventParticipants } =
+      await normalizeCalendarEvent(calendarEvent);
     events.push(event);
     if (eventParticipants.length > 0) {
       participants.set(event.tracking_id_event, eventParticipants);
@@ -58,36 +60,50 @@ export async function fetchIncomingEvents(ctx: Ctx): Promise<{
   return { events, participants };
 }
 
-async function normalizeAppleEvent(appleEvent: AppleEvent): Promise<{
+async function normalizeCalendarEvent(calendarEvent: CalendarEvent): Promise<{
   event: IncomingEvent;
   eventParticipants: EventParticipant[];
 }> {
   const meetingLink =
-    appleEvent.url ??
-    (await extractMeetingLink(appleEvent.notes, appleEvent.location));
+    calendarEvent.meeting_link ??
+    (await extractMeetingLink(
+      calendarEvent.description,
+      calendarEvent.location,
+    ));
 
   const eventParticipants: EventParticipant[] = [];
 
-  if (appleEvent.organizer) {
-    eventParticipants.push(normalizeParticipant(appleEvent.organizer, true));
+  if (calendarEvent.organizer) {
+    eventParticipants.push({
+      name: calendarEvent.organizer.name ?? undefined,
+      email: calendarEvent.organizer.email ?? undefined,
+      is_organizer: true,
+      is_current_user: calendarEvent.organizer.is_current_user,
+    });
   }
 
-  for (const attendee of appleEvent.attendees) {
-    eventParticipants.push(normalizeParticipant(attendee, false));
+  for (const attendee of calendarEvent.attendees) {
+    eventParticipants.push({
+      name: attendee.name ?? undefined,
+      email: attendee.email ?? undefined,
+      is_organizer: false,
+      is_current_user: attendee.is_current_user,
+    });
   }
 
   return {
     event: {
-      tracking_id_event: appleEvent.event_identifier,
-      tracking_id_calendar: appleEvent.calendar.id,
-      title: appleEvent.title,
-      started_at: appleEvent.start_date,
-      ended_at: appleEvent.end_date,
-      location: appleEvent.location ?? undefined,
+      tracking_id_event: calendarEvent.id,
+      tracking_id_calendar: calendarEvent.calendar_id,
+      title: calendarEvent.title,
+      started_at: calendarEvent.started_at,
+      ended_at: calendarEvent.ended_at,
+      location: calendarEvent.location ?? undefined,
       meeting_link: meetingLink ?? undefined,
-      description: appleEvent.notes ?? undefined,
-      recurrence_series_id:
-        appleEvent.recurrence?.series_identifier ?? undefined,
+      description: calendarEvent.description ?? undefined,
+      recurrence_series_id: calendarEvent.recurring_event_id ?? undefined,
+      has_recurrence_rules: calendarEvent.has_recurrence_rules,
+      is_all_day: calendarEvent.is_all_day,
     },
     eventParticipants,
   };
@@ -102,16 +118,4 @@ async function extractMeetingLink(
     if (result) return result;
   }
   return undefined;
-}
-
-function normalizeParticipant(
-  participant: Participant,
-  isOrganizer: boolean,
-): EventParticipant {
-  return {
-    name: participant.name ?? undefined,
-    email: participant.email ?? undefined,
-    is_organizer: isOrganizer,
-    is_current_user: participant.is_current_user,
-  };
 }

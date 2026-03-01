@@ -3,9 +3,10 @@ import type {
   MappingSessionParticipantStorage,
 } from "@hypr/store";
 
-import { id } from "../../../../utils";
-import type { Ctx } from "../../ctx";
 import type { ParticipantsSyncOutput } from "./types";
+
+import type { Ctx } from "~/services/apple-calendar/ctx";
+import { id } from "~/shared/utils";
 
 export function executeForParticipantsSync(
   ctx: Ctx,

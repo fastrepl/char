@@ -7,6 +7,7 @@ use anyhow::Result;
 use futures_util::Stream;
 use futures_util::task::AtomicWaker;
 use hypr_audio_utils::{pcm_f32_to_f32, pcm_f64_to_f32, pcm_i16_to_f32, pcm_i32_to_f32};
+use pin_project::pin_project;
 
 use ringbuf::{
     HeapCons, HeapProd, HeapRb,
@@ -23,6 +24,7 @@ pub struct SpeakerInput {
     agg_desc: arc::Retained<cf::DictionaryOf<cf::String, cf::Type>>,
 }
 
+#[pin_project(PinnedDrop)]
 pub struct SpeakerStream {
     consumer: HeapCons<f32>,
     _device: ca::hardware::StartedDevice<ca::AggregateDevice>,
@@ -268,17 +270,17 @@ impl Stream for SpeakerStream {
     type Item = Vec<f32>;
 
     fn poll_next(
-        mut self: std::pin::Pin<&mut Self>,
+        self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
     ) -> Poll<Option<Self::Item>> {
-        let this = self.as_mut().get_mut();
+        let this = self.project();
 
         let dropped = this.dropped_samples.swap(0, Ordering::Relaxed);
         if dropped > 0 {
             tracing::warn!(dropped, "samples_dropped");
         }
 
-        let popped = this.consumer.pop_slice(&mut this.read_buffer);
+        let popped = this.consumer.pop_slice(this.read_buffer);
 
         if popped > 0 {
             return Poll::Ready(Some(this.read_buffer[..popped].to_vec()));
@@ -286,7 +288,7 @@ impl Stream for SpeakerStream {
 
         this.waker.register(cx.waker());
 
-        let popped = this.consumer.pop_slice(&mut this.read_buffer);
+        let popped = this.consumer.pop_slice(this.read_buffer);
         if popped > 0 {
             return Poll::Ready(Some(this.read_buffer[..popped].to_vec()));
         }
@@ -295,8 +297,9 @@ impl Stream for SpeakerStream {
     }
 }
 
-impl Drop for SpeakerStream {
-    fn drop(&mut self) {
+#[pin_project::pinned_drop]
+impl PinnedDrop for SpeakerStream {
+    fn drop(self: std::pin::Pin<&mut Self>) {
         tracing::debug!("SpeakerStream dropping");
     }
 }
