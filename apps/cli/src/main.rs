@@ -1,6 +1,7 @@
 mod app;
 mod commands;
 mod event;
+mod frame;
 mod runtime;
 mod ui;
 
@@ -14,7 +15,7 @@ struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
 
-    #[arg(long, env = "CHAR_BASE_URL")]
+    #[arg(long, env = "CHAR_BASE_URL", value_parser = parse_base_url)]
     base_url: Option<String>,
 
     #[arg(long, env = "CHAR_API_KEY", default_value = "")]
@@ -30,9 +31,42 @@ struct Cli {
     record: bool,
 }
 
+fn parse_base_url(value: &str) -> Result<String, String> {
+    let parsed =
+        url::Url::parse(value).map_err(|e| format!("invalid --base-url '{value}': {e}"))?;
+
+    if parsed.scheme() != "http" && parsed.scheme() != "https" {
+        return Err(format!(
+            "invalid --base-url '{value}': scheme must be http or https"
+        ));
+    }
+
+    Ok(value.to_string())
+}
+
+fn required_base_url(base_url: Option<String>) -> String {
+    base_url.unwrap_or_else(|| {
+        eprintln!("error: --base-url (or CHAR_BASE_URL) is required");
+        std::process::exit(1);
+    })
+}
+
 #[derive(Subcommand)]
 enum Commands {
+    Listen,
     Auth,
+    Update {
+        #[arg(long, env = "CHAR_UPDATE_ENDPOINT")]
+        endpoint: Option<String>,
+        #[arg(long, env = "CHAR_UPDATE_PUBKEY")]
+        pubkey: Option<String>,
+        #[arg(long, env = "CHAR_UPDATE_TARGET")]
+        target: Option<String>,
+        #[arg(long)]
+        check_only: bool,
+        #[arg(long)]
+        allow_downgrade: bool,
+    },
     Batch {
         #[arg(long)]
         file: String,
@@ -51,11 +85,36 @@ async fn main() {
 
     match cli.command {
         Some(Commands::Auth) => commands::auth::run(),
+        Some(Commands::Listen) => {
+            let base_url = required_base_url(cli.base_url);
+
+            commands::tui::run(commands::tui::Args {
+                base_url,
+                api_key: cli.api_key,
+                model: cli.model,
+                language: cli.language,
+                record: cli.record,
+            })
+            .await;
+        }
+        Some(Commands::Update {
+            endpoint,
+            pubkey,
+            target,
+            check_only,
+            allow_downgrade,
+        }) => {
+            commands::update::run(commands::update::Args {
+                endpoint,
+                pubkey,
+                target,
+                check_only,
+                allow_downgrade,
+            })
+            .await;
+        }
         Some(Commands::Batch { file, provider }) => {
-            let base_url = cli.base_url.unwrap_or_else(|| {
-                eprintln!("error: --base-url (or CHAR_BASE_URL) is required");
-                std::process::exit(1);
-            });
+            let base_url = required_base_url(cli.base_url);
 
             let provider = provider.parse().unwrap_or_else(|_| {
                 eprintln!("error: unknown provider '{provider}'. expected: deepgram, soniox, assemblyai, am, cactus");
@@ -81,10 +140,7 @@ async fn main() {
             commands::model::run(command).await;
         }
         None => {
-            let base_url = cli.base_url.unwrap_or_else(|| {
-                eprintln!("error: --base-url (or CHAR_BASE_URL) is required");
-                std::process::exit(1);
-            });
+            let base_url = required_base_url(cli.base_url);
 
             commands::tui::run(commands::tui::Args {
                 base_url,

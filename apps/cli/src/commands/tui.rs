@@ -5,7 +5,8 @@ use ractor::Actor;
 
 use crate::{
     app::App,
-    event::{AppEvent, EventHandler},
+    event::{EventHandler, TuiEvent},
+    frame::FrameRequester,
     runtime::TuiRuntime,
 };
 
@@ -35,7 +36,7 @@ pub async fn run(args: Args) {
     let session_id = uuid::Uuid::new_v4().to_string();
     let vault_base = std::env::temp_dir().join("char-cli");
 
-    let (listener_tx, listener_rx) = tokio::sync::mpsc::unbounded_channel();
+    let (listener_tx, mut listener_rx) = tokio::sync::mpsc::unbounded_channel();
     let runtime = Arc::new(TuiRuntime::new(vault_base, listener_tx));
 
     let (root_ref, _handle) = Actor::spawn(
@@ -69,17 +70,30 @@ pub async fn run(args: Args) {
 
     setup_panic_hook();
     let mut terminal = ratatui::init();
-    let mut app = App::new();
-    let mut events = EventHandler::new(listener_rx);
+    let (draw_tx, draw_rx) = tokio::sync::broadcast::channel(16);
+    let frame_requester = FrameRequester::new(draw_tx);
+    let mut app = App::new(frame_requester.clone());
+    let mut events = EventHandler::new(draw_rx);
+    events.resume_events();
+
+    frame_requester.schedule_frame();
 
     loop {
-        terminal.draw(|frame| crate::ui::draw(frame, &app)).ok();
-
-        match events.next().await {
-            Some(AppEvent::Key(key)) => app.handle_key(key),
-            Some(AppEvent::Listener(event)) => app.handle_listener_event(event),
-            Some(AppEvent::Resize) | Some(AppEvent::Tick) => {}
-            None => break,
+        tokio::select! {
+            Some(tui_event) = events.next() => {
+                match tui_event {
+                    TuiEvent::Key(key) => app.handle_key(key),
+                    TuiEvent::Paste(pasted) => app.handle_paste(pasted),
+                    TuiEvent::Draw => {
+                        terminal.draw(|frame| crate::ui::draw(frame, &app)).ok();
+                        frame_requester.schedule_frame_in(std::time::Duration::from_secs(1));
+                    }
+                }
+            }
+            Some(listener_event) = listener_rx.recv() => {
+                app.handle_listener_event(listener_event);
+            }
+            else => break,
         }
 
         if app.should_quit {
@@ -87,6 +101,7 @@ pub async fn run(args: Args) {
         }
     }
 
+    events.pause_events();
     ratatui::restore();
 
     let _ = ractor::call!(root_ref, RootMsg::StopSession);
