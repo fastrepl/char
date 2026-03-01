@@ -82,7 +82,6 @@ ractor = { workspace = true, features = ["async-trait"] }
 
 port-killer = "0.1.0"
 port_check = "0.3.0"
-zip = "2"
 
 [target.'cfg(target_arch = "aarch64")'.dependencies]
 hypr-transcribe-cactus = { workspace = true }

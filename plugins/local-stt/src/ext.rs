@@ -126,13 +126,13 @@ impl DownloadableModel for SupportedSttModel {
                 let output_dir = models_base
                     .join("cactus")
                     .join(CactusModel::Stt(m.clone()).dir_name());
-                extract_zip(downloaded_path, output_dir)?;
+                hypr_model_downloader::extract_zip(downloaded_path, output_dir)?;
                 Ok(())
             }
             SupportedSttModel::Whisper(_) => Ok(()),
             SupportedSttModel::Am(m) => {
                 let final_path = models_base.join("stt");
-                m.tar_verify_and_unpack(downloaded_path, &final_path)
+                m.tar_unpack_and_cleanup(downloaded_path, &final_path)
                     .map_err(|e| hypr_model_downloader::Error::FinalizeFailed(e.to_string()))
             }
         }
@@ -561,15 +561,4 @@ async fn external_health() -> Option<ServerInfo> {
         }
         None => None,
     }
-}
-
-fn extract_zip(
-    zip_path: impl AsRef<std::path::Path>,
-    output_dir: impl AsRef<std::path::Path>,
-) -> Result<(), hypr_model_downloader::Error> {
-    let file = std::fs::File::open(zip_path.as_ref())?;
-    let mut archive = zip::ZipArchive::new(file)?;
-    std::fs::create_dir_all(output_dir.as_ref())?;
-    archive.extract(output_dir.as_ref())?;
-    Ok(())
 }

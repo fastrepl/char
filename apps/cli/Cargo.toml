@@ -35,4 +35,3 @@ serde_json = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros", "signal", "sync", "time"] }
 tokio-stream = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }
-zip = "2"

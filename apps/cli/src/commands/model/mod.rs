@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
 
-use clap::Subcommand;
+use clap::{Subcommand, ValueEnum};
 use hypr_am::AmModel;
 use hypr_cactus_model::{CactusModel, CactusSttModel};
 use hypr_local_llm_core::SupportedModel;
@@ -10,14 +10,30 @@ use hypr_model_downloader::{DownloadableModel, ModelDownloadManager};
 use hypr_whisper_local_model::WhisperModel;
 
 mod runtime;
+mod settings;
 
 use runtime::CliModelRuntime;
 
 #[derive(Subcommand, Debug)]
 pub enum ModelCommands {
-    List,
-    Download { name: String },
-    Delete { name: String },
+    Paths,
+    Current,
+    List {
+        #[arg(long, value_enum)]
+        kind: Option<ModelKind>,
+    },
+    Download {
+        name: String,
+    },
+    Delete {
+        name: String,
+    },
+}
+
+#[derive(Clone, Copy, Debug, ValueEnum)]
+pub enum ModelKind {
+    Stt,
+    Llm,
 }
 
 #[derive(Clone, Debug)]
@@ -178,14 +194,14 @@ impl DownloadableModel for CliModel {
                 let output_dir = models_base
                     .join("cactus")
                     .join(CactusModel::Stt(model.clone()).dir_name());
-                extract_zip(downloaded_path, output_dir)?;
+                hypr_model_downloader::extract_zip(downloaded_path, output_dir)?;
                 Ok(())
             }
             CliModel::Whisper(_) => Ok(()),
             CliModel::Am(model) => {
                 let final_path = models_base.join("stt");
                 model
-                    .tar_verify_and_unpack(downloaded_path, &final_path)
+                    .tar_unpack_and_cleanup(downloaded_path, &final_path)
                     .map_err(|e| hypr_model_downloader::Error::FinalizeFailed(e.to_string()))
             }
             CliModel::Llm(_) => Ok(()),
@@ -237,16 +253,61 @@ impl DownloadableModel for CliModel {
 }
 
 pub async fn run(command: ModelCommands) {
-    let models_base = default_models_base();
-    let runtime = Arc::new(CliModelRuntime {
-        models_base: models_base.clone(),
-    });
-    let manager = ModelDownloadManager::new(runtime);
+    let paths = settings::resolve_paths();
+    let models_base = paths.models_base.clone();
 
     match command {
-        ModelCommands::List => {
+        ModelCommands::Paths => {
+            println!("global_base={}", paths.global_base.display());
+            println!("vault_base={}", paths.vault_base.display());
+            println!("settings_path={}", paths.settings_path.display());
             println!("models_base={}", models_base.display());
-            for model in all_models() {
+        }
+        ModelCommands::Current => {
+            println!("settings_path={}", paths.settings_path.display());
+
+            let Some(current) = settings::load_settings(&paths.settings_path) else {
+                println!("stt\tprovider=unset\tmodel=unset\tconfig=unavailable");
+                println!("llm\tprovider=unset\tmodel=unset\tconfig=unavailable");
+                return;
+            };
+
+            let stt_provider = current.current_stt_provider.as_deref().unwrap_or("unset");
+            let stt_model = current.current_stt_model.as_deref().unwrap_or("unset");
+            let llm_provider = current.current_llm_provider.as_deref().unwrap_or("unset");
+            let llm_model = current.current_llm_model.as_deref().unwrap_or("unset");
+
+            let stt_config = current
+                .current_stt_provider
+                .as_deref()
+                .and_then(|id| current.stt_providers.get(id));
+            let llm_config = current
+                .current_llm_provider
+                .as_deref()
+                .and_then(|id| current.llm_providers.get(id));
+
+            println!(
+                "stt\tprovider={}\tmodel={}\t{}",
+                stt_provider,
+                stt_model,
+                format_provider_config_status(stt_config)
+            );
+            println!(
+                "llm\tprovider={}\tmodel={}\t{}",
+                llm_provider,
+                llm_model,
+                format_provider_config_status(llm_config)
+            );
+        }
+        ModelCommands::List { kind } => {
+            let runtime = Arc::new(CliModelRuntime {
+                models_base: models_base.clone(),
+            });
+            let manager = ModelDownloadManager::new(runtime);
+            let current = settings::load_settings(&paths.settings_path);
+
+            println!("models_base={}", models_base.display());
+            for model in all_models(kind) {
                 let status = match manager.is_downloaded(&model).await {
                     Ok(true) => "downloaded",
                     Ok(false) => {
@@ -259,10 +320,20 @@ pub async fn run(command: ModelCommands) {
                     Err(_) => "error",
                 };
 
+                let active = if current
+                    .as_ref()
+                    .is_some_and(|value| is_current_model(&model, value))
+                {
+                    "*"
+                } else {
+                    ""
+                };
+
                 let description = model.description();
                 if description.is_empty() {
                     println!(
-                        "{}\t{}\t{}\t{}",
+                        "{}\t{}\t{}\t{}\t{}",
+                        active,
                         model.cli_name(),
                         model.kind(),
                         status,
@@ -270,7 +341,8 @@ pub async fn run(command: ModelCommands) {
                     );
                 } else {
                     println!(
-                        "{}\t{}\t{}\t{} ({})",
+                        "{}\t{}\t{}\t{}\t{} ({})",
+                        active,
                         model.cli_name(),
                         model.kind(),
                         status,
@@ -281,6 +353,11 @@ pub async fn run(command: ModelCommands) {
             }
         }
         ModelCommands::Download { name } => {
+            let runtime = Arc::new(CliModelRuntime {
+                models_base: models_base.clone(),
+            });
+            let manager = ModelDownloadManager::new(runtime);
+
             let Some(model) = find_model(&name) else {
                 eprintln!("Unknown model: {name}");
                 eprintln!("Run `char model list` to see available models.");
@@ -317,6 +394,11 @@ pub async fn run(command: ModelCommands) {
             }
         }
         ModelCommands::Delete { name } => {
+            let runtime = Arc::new(CliModelRuntime {
+                models_base: models_base.clone(),
+            });
+            let manager = ModelDownloadManager::new(runtime);
+
             let Some(model) = find_model(&name) else {
                 eprintln!("Unknown model: {name}");
                 eprintln!("Run `char model list` to see available models.");
@@ -334,19 +416,12 @@ pub async fn run(command: ModelCommands) {
 }
 
 fn find_model(name: &str) -> Option<CliModel> {
-    all_models()
+    all_models(None)
         .into_iter()
         .find(|model| model.cli_name() == name)
 }
 
-fn default_models_base() -> PathBuf {
-    dirs::data_dir()
-        .unwrap_or_else(std::env::temp_dir)
-        .join("char")
-        .join("models")
-}
-
-fn all_models() -> Vec<CliModel> {
+fn all_models(kind: Option<ModelKind>) -> Vec<CliModel> {
     let mut models = vec![
         CliModel::Whisper(WhisperModel::QuantizedTiny),
         CliModel::Whisper(WhisperModel::QuantizedTinyEn),
@@ -367,7 +442,45 @@ fn all_models() -> Vec<CliModel> {
             .cloned()
             .map(CliModel::Llm),
     );
+
     models
+        .into_iter()
+        .filter(|model| matches_kind(model, kind))
+        .collect()
+}
+
+fn matches_kind(model: &CliModel, kind: Option<ModelKind>) -> bool {
+    match kind {
+        None => true,
+        Some(ModelKind::Stt) => !matches!(model, CliModel::Llm(_)),
+        Some(ModelKind::Llm) => matches!(model, CliModel::Llm(_)),
+    }
+}
+
+fn format_provider_config_status(config: Option<&settings::ProviderConfig>) -> String {
+    let Some(config) = config else {
+        return "config=missing".to_string();
+    };
+
+    let base_url = if config.base_url.is_some() {
+        "set"
+    } else {
+        "missing"
+    };
+    let api_key = if config.has_api_key { "set" } else { "missing" };
+
+    format!("config=base_url:{} api_key:{}", base_url, api_key)
+}
+
+fn is_current_model(model: &CliModel, current: &settings::DesktopSettings) -> bool {
+    match model {
+        CliModel::Llm(_) => current.current_llm_model.as_deref() == Some(model.cli_name()),
+        _ => {
+            current.current_stt_provider.as_deref() == Some("hyprnote")
+                && current.current_stt_model.as_deref() != Some("cloud")
+                && current.current_stt_model.as_deref() == Some(model.cli_name())
+        }
+    }
 }
 
 fn human_size(bytes: u64) -> String {
@@ -377,15 +490,4 @@ fn human_size(bytes: u64) -> String {
     } else {
         format!("{:.0} MB", mb)
     }
-}
-
-fn extract_zip(
-    zip_path: impl AsRef<Path>,
-    output_dir: impl AsRef<Path>,
-) -> Result<(), hypr_model_downloader::Error> {
-    let file = std::fs::File::open(zip_path.as_ref())?;
-    let mut archive = zip::ZipArchive::new(file)?;
-    std::fs::create_dir_all(output_dir.as_ref())?;
-    archive.extract(output_dir.as_ref())?;
-    Ok(())
 }

@@ -318,6 +318,7 @@ dependencies = [
  "specta",
  "strum 0.27.2",
  "tar",
+ "tempfile",
  "thiserror 2.0.18",
  "tokio",
  "tracing",
@@ -3158,7 +3159,6 @@ dependencies = [
  "transcript",
  "uuid",
  "whisper-local-model",
- "zip 2.4.2",
 ]
 
 [[package]]
@@ -16640,6 +16640,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "sync-protocol"
+version = "0.1.0"
+dependencies = [
+ "schemars 1.2.1",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "sync_wrapper"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -17764,7 +17773,6 @@ dependencies = [
  "transcribe-whisper-local",
  "whisper-local",
  "whisper-local-model",
- "zip 2.4.2",
 ]
 
 [[package]]
