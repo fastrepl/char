@@ -32,6 +32,10 @@ Cactus is a new local STT backend that runs optimized Whisper models. Cactus mod
 
 Cactus models are downloaded and managed from the Settings UI. They are stored in a separate `cactus/` directory within the models folder.
 
+### Custom Vocabulary
+
+Cactus supports custom vocabulary boosting to improve recognition of domain-specific terms. When configured, the `custom_vocabulary` list and `vocabulary_boost` weight are passed to the Cactus transcription engine for both streaming and batch modes. You can set these terms in Settings > Language & Vocabulary under the Memory tab.
+
 ### Argmax Models
 
 Manual download:
