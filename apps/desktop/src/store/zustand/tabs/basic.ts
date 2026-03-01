@@ -285,8 +285,18 @@ const openTab = <T extends BasicState & NavigationState>(
   const isNewTab = !existingTab;
 
   if (!isNewTab) {
-    nextTabs = setActiveFlags(tabs, existingTab!);
-    const currentTab = { ...existingTab!, active: true };
+    const shouldUpdateState =
+      "state" in newTab && newTab.state != null && "state" in existingTab!;
+    const currentTab = shouldUpdateState
+      ? ({
+          ...existingTab!,
+          state: (tabWithDefaults as any).state,
+          active: true,
+        } as Tab)
+      : { ...existingTab!, active: true };
+    nextTabs = tabs.map((t) =>
+      isSameTab(t, existingTab!) ? currentTab : { ...t, active: false },
+    );
     return { tabs: nextTabs, currentTab, history } as Partial<T>;
   }
 
