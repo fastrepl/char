@@ -18,7 +18,8 @@ Char uses two base directories. See [Data](/docs/guides/data) for the full direc
 
 **Global base** (shared across stable and nightly builds):
 - `models/stt/` — downloaded speech-to-text model files (Whisper GGUF, Argmax tarballs)
-- `store.json` — app state (onboarding status, pinned tabs, recently opened sessions, dismissed toasts, analytics preference, auth tokens)
+- `store.json` — app state (onboarding status, pinned tabs, recently opened sessions, dismissed toasts)
+- `auth.json` — authentication tokens (written atomically to prevent corruption)
 - `hyprnote.json` — vault configuration (custom vault path if set)
 - `search/` — Tantivy full-text search index
 
@@ -58,13 +59,13 @@ When you start a recording session, Char spawns three actors in parallel:
 
 Here is the session supervisor that orchestrates these actors:
 
-<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/listener/src/actors/session/supervisor.rs#L56-L106" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/listener-core/src/actors/session/supervisor.rs#L56-L106" />
 
-Audio is written to WAV files on your local disk. Here is the recorder handling incoming audio samples:
+Audio is written to WAV or MP3 files on your local disk. Here is the recorder handling incoming audio samples:
 
-<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/listener/src/actors/recorder.rs#L130-L168" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/listener-core/src/actors/recorder/mod.rs#L130-L168" />
 
-Audio files are stored at `{vault}/sessions/{session_id}/audio.wav` — they never leave your device unless you explicitly use cloud transcription.
+Audio files are stored at `{vault}/sessions/{session_id}/audio.wav` (or `audio.mp3` when MP3 encoding is enabled) — they never leave your device unless you explicitly use cloud transcription.
 
 ### Encryption
 
@@ -96,11 +97,11 @@ For local model details and download instructions, see [Local Models](/docs/deve
 
 **Cloud models** send your audio to the selected provider for processing. Here is how the listener actor connects to your configured STT provider:
 
-<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/listener/src/actors/listener/adapters.rs#L22-L102" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/listener-core/src/actors/listener/adapters.rs#L22-L102" />
 
 The `ListenerArgs` passed to the STT adapter contain the following — this is all the data sent to the provider along with your audio stream:
 
-<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/listener/src/actors/session/supervisor.rs#L122-L134" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/listener-core/src/actors/session/supervisor.rs#L122-L134" />
 
 **What is sent:**
 - Your recorded audio (streamed in real-time or sent as a file for batch transcription)
@@ -258,7 +259,7 @@ Char checks for updates using the Tauri updater system.
 When you sign in for Pro or cloud features, Char authenticates via Supabase.
 
 **What is stored locally:**
-- Auth session tokens in the local Tauri store (`store.json`)
+- Auth session tokens in a dedicated `auth.json` file (written atomically to prevent corruption)
 - Account info: user ID, email, full name, avatar URL
 
 **What is sent:**
@@ -292,6 +293,7 @@ Char is open source. You can verify everything documented here by reading the co
 - [Analytics plugin](https://github.com/fastrepl/char/tree/main/plugins/analytics)
 - [Analytics crate](https://github.com/fastrepl/char/tree/main/crates/analytics)
 - [Listener plugin](https://github.com/fastrepl/char/tree/main/plugins/listener)
+- [Listener core crate](https://github.com/fastrepl/char/tree/main/crates/listener-core)
 - [Local STT plugin](https://github.com/fastrepl/char/tree/main/plugins/local-stt)
 - [Database plugin](https://github.com/fastrepl/char/tree/main/plugins/db2)
 - [Network plugin](https://github.com/fastrepl/char/tree/main/plugins/network)

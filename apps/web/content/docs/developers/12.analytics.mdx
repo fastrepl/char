@@ -89,6 +89,7 @@ Events tracked when users interact with system notifications (`plugins/notificat
 | `expanded_accept` | User accepts expanded notification | - |
 | `dismiss` | User dismisses notification | - |
 | `collapsed_timeout` | Collapsed notification times out | - |
+| `option_selected` | User selects an option from notification buttons | - |
 
 ### 8. Server-Side Proxy Events
 
@@ -97,7 +98,7 @@ Events tracked by the API proxy layer. These use the `$` prefix following PostHo
 | Event | Description | Properties | Source |
 |-------|-------------|------------|--------|
 | `$stt_request` | Speech-to-text request processed | `$stt_provider`, `$stt_duration`, `user_id` | `crates/transcribe-proxy/src/analytics.rs` |
-| `$ai_generation` | LLM generation request processed | `$ai_provider`, `$ai_model`, `$ai_input_tokens`, `$ai_output_tokens`, `$ai_latency`, `$ai_trace_id`, `$ai_http_status`, `$ai_base_url`, `$ai_total_cost_usd`, `user_id` | `crates/llm-proxy/src/analytics.rs` |
+| `$ai_generation` | LLM generation request processed | `$ai_provider`, `$ai_model`, `$ai_input_tokens`, `$ai_output_tokens`, `$ai_latency`, `$ai_trace_id`, `$ai_http_status`, `$ai_base_url`, `$ai_total_cost_usd`, `$ai_task`, `user_id` | `crates/llm-proxy/src/analytics.rs` |
 
 ## User Properties
 

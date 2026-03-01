@@ -16,6 +16,14 @@ The app itself is about 200MB. Recording storage depends on your usage - a 1-hou
 
 Yes! Since Char uses local AI, it works completely offline. You don't need an internet connection to record, transcribe, or generate summaries. See [Local Models](/docs/developers/local-models) for available local STT models (including the new Cactus engine) and [Local LLM Setup](/docs/faq/local-llm-setup) for configuring local AI.
 
+## Is there a CLI version?
+
+A CLI app (`apps/cli`) is in early development. It provides a TUI-based live transcription interface using the same `listener-core` engine as the desktop app. The CLI binary is named `char` and supports `auth` and `tui` subcommands.
+
+## What audio formats does Char record in?
+
+Char records audio as WAV files by default. MP3 encoding support has been added via a new `AudioEncoder` trait, allowing recordings to be saved as compressed MP3 files.
+
 ## What cloud STT providers does Char support?
 
 Char supports 9 cloud speech-to-text providers: Deepgram, AssemblyAI, Soniox, Fireworks, OpenAI, Gladia, ElevenLabs, DashScope (Alibaba Cloud's Qwen3-ASR), and Mistral (Voxtral). Each provider can be used via BYOK (Bring Your Own Key) in Settings > Transcription. See [Better Transcription](/docs/pro/better-transcription) for details.
