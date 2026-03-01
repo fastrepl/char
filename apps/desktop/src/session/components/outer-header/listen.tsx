@@ -116,7 +116,7 @@ function InMeetingIndicator({ sessionId }: { sessionId: string }) {
     <Tooltip>
       <TooltipTrigger asChild>
         <button
-          ref={ref}
+          ref={ref as React.Ref<HTMLButtonElement>}
           type="button"
           onClick={finalizing ? undefined : stop}
           disabled={finalizing}

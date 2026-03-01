@@ -7,14 +7,7 @@ import {
   Star,
   X,
 } from "lucide-react";
-import {
-  type ComponentRef,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { Template, TemplateSection, TemplateStorage } from "@hypr/store";
 import { Button } from "@hypr/ui/components/ui/button";
@@ -25,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@hypr/ui/components/ui/dropdown-menu";
 import {
+  type ImperativePanelHandle,
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
@@ -155,7 +149,7 @@ function normalizeTemplateWithId(id: string, template: unknown) {
 function TemplateView({ tab }: { tab: Extract<Tab, { type: "templates" }> }) {
   const updateTabState = useTabs((state) => state.updateTemplatesTabState);
   const { user_id } = main.UI.useValues(main.STORE_ID);
-  const leftPanelRef = useRef<ComponentRef<typeof ResizablePanel>>(null);
+  const leftPanelRef = useRef<ImperativePanelHandle>(null);
   const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false);
 
   const userTemplates = useUserTemplates();

@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
-import type { ComponentRef } from "react";
 
 import {
+  type ImperativePanelHandle,
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
@@ -29,7 +29,7 @@ function Component() {
   const isOnboarding = currentTab?.type === "onboarding";
   const previousModeRef = useRef(chat.mode);
   const previousQueryRef = useRef(query);
-  const bodyPanelRef = useRef<ComponentRef<typeof ResizablePanel>>(null);
+  const bodyPanelRef = useRef<ImperativePanelHandle>(null);
   const chatPanelContainerRef = useRef<HTMLDivElement>(null);
 
   const isChatOpen = chat.mode === "RightPanelOpen";
