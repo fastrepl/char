@@ -109,6 +109,8 @@ function Component() {
         <SlashSeparator />
         <PricingCardsSection />
         <SlashSeparator />
+        <PricingLetterSection />
+        <SlashSeparator />
         <FAQSection />
         <SlashSeparator />
         <CTASection />
@@ -298,6 +300,169 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
         )}
       </div>
     </div>
+  );
+}
+
+function PricingLetterSection() {
+  return (
+    <section className="laptop:px-0 bg-[linear-gradient(to_right,#f5f5f5_1px,transparent_1px),linear-gradient(to_bottom,#f5f5f5_1px,transparent_1px)] bg-size-[24px_24px] bg-position-[12px_12px,12px_12px] px-4 py-16">
+      <div className="mx-auto max-w-4xl">
+        <div
+          className="border border-neutral-200 p-4"
+          style={{
+            backgroundImage: "url(/api/images/texture/white-leather.png)",
+          }}
+        >
+          <div
+            className="rounded-xs border border-neutral-200 bg-stone-50 p-8 sm:p-12"
+            style={{
+              backgroundImage: "url(/api/images/texture/paper.png)",
+            }}
+          >
+            <h2 className="mb-2 font-serif text-2xl text-stone-700 sm:text-3xl">
+              A note on our pricing
+            </h2>
+            <p className="mb-6 text-sm text-neutral-500 italic">
+              March 2026
+            </p>
+
+            <div className="flex flex-col gap-4 leading-relaxed text-neutral-700">
+              <p>
+                When we launched Char Pro six months ago, we set the price at
+                $8/month — well below what it actually costs us to run the
+                service. We did this intentionally. We wanted as many people as
+                possible to experience what a privacy-first, no-bot meeting
+                notepad could be, without price being a barrier.
+              </p>
+              <p>
+                But we want to be honest with you about the economics. Cloud
+                speech-to-text is expensive. The providers we rely on to deliver
+                accurate, real-time transcription charge between $0.36 and
+                $1.44 per hour of audio:
+              </p>
+
+              <div className="my-2 overflow-hidden rounded-xs border border-neutral-200">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-neutral-200 bg-stone-100/60">
+                      <th className="px-4 py-2.5 text-left font-medium text-stone-700">
+                        Provider
+                      </th>
+                      <th className="px-4 py-2.5 text-left font-medium text-stone-700">
+                        Cost / hour
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-100">
+                    <tr>
+                      <td className="px-4 py-2 text-neutral-700">
+                        OpenAI Whisper API
+                      </td>
+                      <td className="px-4 py-2 text-neutral-700">$0.36</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 text-neutral-700">
+                        Deepgram Nova-3
+                      </td>
+                      <td className="px-4 py-2 text-neutral-700">$0.46</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 text-neutral-700">
+                        AssemblyAI Universal
+                      </td>
+                      <td className="px-4 py-2 text-neutral-700">
+                        $0.65+
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 text-neutral-700">
+                        Google Cloud STT
+                      </td>
+                      <td className="px-4 py-2 text-neutral-700">$0.96</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 text-neutral-700">
+                        AWS Transcribe
+                      </td>
+                      <td className="px-4 py-2 text-neutral-700">$1.44</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <p>
+                A single one-hour meeting can cost us $0.50 or more in STT
+                alone — before accounting for LLM inference, infrastructure,
+                and bandwidth. At $8/month, a user who records just two hours a
+                week would already put us at a loss. Many of our most active
+                users record far more than that.
+              </p>
+              <p>
+                We absorbed this for the past six months because we believed in
+                getting Char into your hands first. That early-bird pricing
+                helped us learn, iterate, and build something we are genuinely
+                proud of — and it would not have been possible without you.
+              </p>
+              <p>
+                Going forward, we will be adjusting our Pro pricing to reflect
+                the real cost of delivering the service. We are committed to
+                keeping Char affordable — especially compared to alternatives
+                that charge $20–30/month while locking away your data — but we
+                need pricing that lets us keep building sustainably.
+              </p>
+              <p>
+                The free tier is not going anywhere. If you prefer to bring your
+                own API keys, Char remains fully functional at no cost. And if
+                you are on the current early-bird plan, we will honor your rate
+                for as long as your subscription stays active.
+              </p>
+              <p>
+                Thank you for believing in us early. We are just getting started.
+              </p>
+            </div>
+
+            <div className="mt-12 mb-4 flex gap-2">
+              <Image
+                src="/api/images/team/john.png"
+                alt="John Jeong"
+                width={32}
+                height={32}
+                className="rounded-full border border-neutral-200 object-cover"
+              />
+              <Image
+                src="/api/images/team/yujong.png"
+                alt="Yujong Lee"
+                width={32}
+                height={32}
+                className="rounded-full border border-neutral-200 object-cover"
+              />
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <div>
+                <p className="font-serif text-base font-medium text-neutral-600 italic">
+                  Char
+                </p>
+                <p className="text-sm text-neutral-500">
+                  John Jeong, Yujong Lee
+                </p>
+              </div>
+
+              <div>
+                <Image
+                  src="/char-signature.svg"
+                  alt="Char Signature"
+                  width={124}
+                  height={60}
+                  layout="constrained"
+                  className="object-contain opacity-80"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
