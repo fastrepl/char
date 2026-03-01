@@ -1,8 +1,11 @@
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::sync::Mutex;
 
 use tauri::Wry;
-use tokio::sync::Mutex;
+use tokio::sync::Mutex as TokioMutex;
+
+use hypr_model_downloader::ModelDownloadManager;
 
 mod commands;
 mod error;
@@ -18,10 +21,11 @@ pub use store::*;
 
 const PLUGIN_NAME: &str = "local-llm";
 
-pub type SharedState = std::sync::Arc<tokio::sync::Mutex<State>>;
+pub type SharedState = std::sync::Arc<TokioMutex<State>>;
 
 pub struct State {
-    pub download_task: HashMap<SupportedModel, tokio::task::JoinHandle<()>>,
+    pub model_downloader: ModelDownloadManager<ext::LlmDownloadModel>,
+    pub download_channels: Arc<Mutex<HashMap<String, tauri::ipc::Channel<i8>>>>,
     pub server: Option<hypr_local_llm_core::LlmServer>,
 }
 
@@ -34,6 +38,8 @@ fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
             commands::is_model_downloaded::<Wry>,
             commands::is_model_downloading::<Wry>,
             commands::download_model::<Wry>,
+            commands::cancel_download::<Wry>,
+            commands::delete_model::<Wry>,
             commands::get_current_model::<Wry>,
             commands::set_current_model::<Wry>,
             commands::list_downloaded_model::<Wry>,
@@ -85,11 +91,16 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
                     app.path().resolve("llm.gguf", BaseDirectory::Resource)?
                 };
 
+                let download_channels = Arc::new(Mutex::new(HashMap::new()));
+                let model_downloader =
+                    ext::create_model_downloader(app.app_handle(), download_channels.clone());
+
                 let state = State {
-                    download_task: HashMap::new(),
+                    model_downloader,
+                    download_channels,
                     server: None,
                 };
-                app.manage(Arc::new(Mutex::new(state)));
+                app.manage(Arc::new(TokioMutex::new(state)));
             }
 
             Ok(())

@@ -46,8 +46,13 @@ async downloadModel(model: SupportedSttModel) : Promise<Result<null, string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async cancelDownload(model: SupportedSttModel) : Promise<boolean> {
-    return await TAURI_INVOKE("plugin:local-stt|cancel_download", { model });
+async cancelDownload(model: SupportedSttModel) : Promise<Result<boolean, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:local-stt|cancel_download", { model }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 },
 async deleteModel(model: SupportedSttModel) : Promise<Result<null, string>> {
     try {
@@ -115,7 +120,7 @@ downloadProgressPayload: "plugin:local-stt:download-progress-payload"
 /** user-defined types **/
 
 export type AmModel = "am-parakeet-v2" | "am-parakeet-v3" | "am-whisper-large-v3"
-export type CactusSttModel = "cactus-whisper-small-int4" | "cactus-whisper-small-int8" | "cactus-whisper-small-int8-apple" | "cactus-whisper-medium-int4" | "cactus-whisper-medium-int4-apple" | "cactus-whisper-medium-int8" | "cactus-whisper-medium-int8-apple"
+export type CactusSttModel = "cactus-whisper-small-int4" | "cactus-whisper-small-int8" | "cactus-whisper-small-int8-apple" | "cactus-whisper-medium-int4" | "cactus-whisper-medium-int4-apple" | "cactus-whisper-medium-int8" | "cactus-whisper-medium-int8-apple" | "cactus-parakeet-ctc-0.6b-int4" | "cactus-parakeet-ctc-0.6b-int8"
 export type DownloadProgressPayload = { model: SupportedSttModel; progress: number }
 export type ServerInfo = { url: string | null; status: ServerStatus; model: SupportedSttModel | null }
 export type ServerStatus = "unreachable" | "loading" | "ready"

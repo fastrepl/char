@@ -95,7 +95,7 @@ impl SupportedModel {
         }
     }
 
-    pub fn model_checksum(&self) -> u64 {
+    pub fn model_checksum(&self) -> u32 {
         match self {
             SupportedModel::Llama3p2_3bQ4 => 2831308098,
             SupportedModel::HyprLLM => 4037351144,

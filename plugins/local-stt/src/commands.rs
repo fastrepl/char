@@ -71,8 +71,11 @@ pub async fn download_model<R: tauri::Runtime>(
 pub async fn cancel_download<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     model: SupportedSttModel,
-) -> bool {
-    app.local_stt().cancel_download(model).await
+) -> Result<bool, String> {
+    app.local_stt()
+        .cancel_download(model)
+        .await
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]

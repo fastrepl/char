@@ -46,6 +46,22 @@ async downloadModel(model: SupportedModel, channel: TAURI_CHANNEL<number>) : Pro
     else return { status: "error", error: e  as any };
 }
 },
+async cancelDownload(model: SupportedModel) : Promise<Result<boolean, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|cancel_download", { model }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async deleteModel(model: SupportedModel) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|delete_model", { model }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async getCurrentModel() : Promise<Result<SupportedModel, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|get_current_model") };

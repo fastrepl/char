@@ -318,6 +318,7 @@ dependencies = [
  "specta",
  "strum 0.27.2",
  "tar",
+ "tempfile",
  "thiserror 2.0.18",
  "tokio",
  "tracing",
@@ -3137,11 +3138,17 @@ checksum = "3a822ea5bc7590f9d40f1ba12c0dc3c2760f3482c6984db1573ad11031420831"
 name = "cli"
 version = "0.1.0"
 dependencies = [
+ "am",
+ "cactus-model",
  "clap",
  "crossterm",
+ "dirs 6.0.0",
+ "file",
  "language",
  "listener-core",
  "listener2-core",
+ "local-llm-core",
+ "model-downloader",
  "open",
  "ractor",
  "ratatui",
@@ -3151,6 +3158,7 @@ dependencies = [
  "tokio-stream",
  "transcript",
  "uuid",
+ "whisper-local-model",
 ]
 
 [[package]]
@@ -10640,6 +10648,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "model-downloader"
+version = "0.1.0"
+dependencies = [
+ "download-interface",
+ "file",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "wiremock",
+ "zip 2.4.2",
+]
+
+[[package]]
 name = "moxcms"
 version = "0.7.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -16627,6 +16650,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "sync-protocol"
+version = "0.1.0"
+dependencies = [
+ "schemars 1.2.1",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "sync_wrapper"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -17682,9 +17714,8 @@ name = "tauri-plugin-local-llm"
 version = "0.1.0"
 dependencies = [
  "dirs 6.0.0",
- "download-interface",
- "file",
  "local-llm-core",
+ "model-downloader",
  "reqwest 0.13.2",
  "serde",
  "serde_json",
@@ -17719,6 +17750,7 @@ dependencies = [
  "host",
  "json-patch 4.1.0",
  "language",
+ "model-downloader",
  "owhisper-client",
  "owhisper-interface",
  "port-killer",
@@ -17751,7 +17783,6 @@ dependencies = [
  "transcribe-whisper-local",
  "whisper-local",
  "whisper-local-model",
- "zip 2.4.2",
 ]
 
 [[package]]

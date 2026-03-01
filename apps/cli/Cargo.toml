@@ -12,14 +12,21 @@ name = "char"
 path = "src/main.rs"
 
 [dependencies]
+hypr-am = { workspace = true }
+hypr-cactus-model = { workspace = true }
+hypr-file = { workspace = true }
 hypr-language = { workspace = true }
 hypr-listener-core = { workspace = true }
 hypr-listener2-core = { workspace = true }
+hypr-local-llm-core = { workspace = true }
+hypr-model-downloader = { workspace = true }
 hypr-storage = { workspace = true }
 hypr-transcript = { workspace = true }
+hypr-whisper-local-model = { workspace = true }
 
 clap = { workspace = true, features = ["derive", "env"] }
 crossterm = { workspace = true }
+dirs = { workspace = true }
 ratatui = { workspace = true }
 
 open = { workspace = true }
