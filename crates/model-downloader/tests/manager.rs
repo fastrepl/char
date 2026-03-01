@@ -49,6 +49,7 @@ impl ModelDownloaderRuntime<TestModel> for TestRuntime {
 struct TestModel {
     key: String,
     url: Option<String>,
+    checksum: Option<u32>,
 }
 
 impl TestModel {
@@ -56,6 +57,15 @@ impl TestModel {
         Self {
             key: key.to_string(),
             url: Some(url),
+            checksum: None,
+        }
+    }
+
+    fn with_url_and_checksum(key: &str, url: String, checksum: u32) -> Self {
+        Self {
+            key: key.to_string(),
+            url: Some(url),
+            checksum: Some(checksum),
         }
     }
 
@@ -63,6 +73,7 @@ impl TestModel {
         Self {
             key: key.to_string(),
             url: None,
+            checksum: None,
         }
     }
 }
@@ -74,6 +85,10 @@ impl DownloadableModel for TestModel {
 
     fn download_url(&self) -> Option<String> {
         self.url.clone()
+    }
+
+    fn download_checksum(&self) -> Option<u32> {
+        self.checksum
     }
 
     fn download_destination(&self, models_base: &Path) -> PathBuf {
@@ -350,6 +365,30 @@ async fn download_failure_cleans_up_part_file() {
     assert!(
         runtime.progress_values().contains(&-1),
         "should emit -1 on download failure"
+    );
+    assert!(
+        part_files_in(runtime.temp_dir.path()).is_empty(),
+        "should not leave .part-* files behind"
+    );
+}
+
+#[tokio::test]
+async fn checksum_mismatch_cleans_up_part_file() {
+    let body = b"checksum target".to_vec();
+    let server = start_mock_server("/checksum.bin", body).await;
+    let url = format!("{}/checksum.bin", server.uri());
+    let runtime = TestRuntime::new();
+    let manager = ModelDownloadManager::new(runtime.clone());
+    let model = TestModel::with_url_and_checksum("checksum_fail", url, 123);
+
+    manager.download(&model).await.unwrap();
+    wait_until_done(&manager, &model).await;
+
+    assert!(!manager.is_downloading(&model).await);
+    assert!(!manager.is_downloaded(&model).await.unwrap());
+    assert!(
+        runtime.progress_values().contains(&-1),
+        "should emit -1 on checksum mismatch"
     );
     assert!(
         part_files_in(runtime.temp_dir.path()).is_empty(),

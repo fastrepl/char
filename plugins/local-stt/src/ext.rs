@@ -73,6 +73,14 @@ impl DownloadableModel for SupportedSttModel {
         }
     }
 
+    fn download_checksum(&self) -> Option<u32> {
+        match self {
+            SupportedSttModel::Cactus(m) => CactusModel::Stt(m.clone()).checksum(),
+            SupportedSttModel::Whisper(m) => Some(m.checksum()),
+            SupportedSttModel::Am(m) => Some(m.tar_checksum()),
+        }
+    }
+
     fn download_destination(&self, models_base: &std::path::Path) -> PathBuf {
         match self {
             SupportedSttModel::Cactus(m) => models_base
@@ -121,16 +129,7 @@ impl DownloadableModel for SupportedSttModel {
                 extract_zip(downloaded_path, output_dir)?;
                 Ok(())
             }
-            SupportedSttModel::Whisper(m) => {
-                let checksum = hypr_file::calculate_file_checksum(downloaded_path)?;
-                if checksum != m.checksum() {
-                    let _ = std::fs::remove_file(downloaded_path);
-                    return Err(hypr_model_downloader::Error::FinalizeFailed(
-                        "checksum mismatch".to_string(),
-                    ));
-                }
-                Ok(())
-            }
+            SupportedSttModel::Whisper(_) => Ok(()),
             SupportedSttModel::Am(m) => {
                 let final_path = models_base.join("stt");
                 m.tar_verify_and_unpack(downloaded_path, &final_path)

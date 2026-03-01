@@ -1,31 +1,17 @@
-use std::ffi::OsString;
-use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
 
 use tokio::fs;
-use tokio::task::JoinHandle;
-use tokio_util::sync::CancellationToken;
 
 use crate::Error;
+use crate::download_paths::generation_download_path;
 use crate::download_task::{DownloadTaskParams, spawn_download_task};
 use crate::downloads_registry::{DownloadEntry, DownloadsRegistry};
+use crate::model::DownloadableModel;
 use crate::runtime::ModelDownloaderRuntime;
-
-pub trait DownloadableModel: Clone + Send + Sync + 'static {
-    fn download_key(&self) -> String;
-    fn download_url(&self) -> Option<String>;
-    fn download_destination(&self, models_base: &Path) -> PathBuf;
-    fn is_downloaded(&self, models_base: &Path) -> Result<bool, Error>;
-    fn finalize_download(&self, downloaded_path: &Path, models_base: &Path) -> Result<(), Error>;
-    fn delete_downloaded(&self, models_base: &Path) -> Result<(), Error>;
-
-    fn remove_destination_after_finalize(&self) -> bool {
-        false
-    }
-}
+use crate::task_join::wait_for_task_exit;
 
 pub struct ModelDownloadManager<M: DownloadableModel> {
     runtime: Arc<dyn ModelDownloaderRuntime<M>>,
@@ -71,31 +57,6 @@ impl<M: DownloadableModel> ModelDownloadManager<M> {
         self.downloads.contains(&model.download_key()).await
     }
 
-    async fn wait_for_task_exit(task: JoinHandle<()>, context: &'static str) {
-        let warn_after = tokio::time::sleep(Self::TASK_JOIN_WARN_AFTER);
-        tokio::pin!(warn_after);
-        tokio::pin!(task);
-
-        let join_result = tokio::select! {
-            result = &mut task => result,
-            _ = &mut warn_after => {
-                tracing::warn!(
-                    %context,
-                    timeout_secs = Self::TASK_JOIN_WARN_AFTER.as_secs(),
-                    "model_download_task_join_slow"
-                );
-                task.await
-            }
-        };
-
-        match join_result {
-            Ok(()) => {}
-            Err(e) => {
-                tracing::warn!(%context, error = %e, "model_download_task_join_failed");
-            }
-        }
-    }
-
     pub async fn download(&self, model: &M) -> Result<(), Error> {
         let key = model.download_key();
         let generation = self.next_generation.fetch_add(1, Ordering::Relaxed);
@@ -113,7 +74,7 @@ impl<M: DownloadableModel> ModelDownloadManager<M> {
 
         let (start_tx, start_rx) = tokio::sync::oneshot::channel::<()>();
 
-        let cancellation_token = CancellationToken::new();
+        let cancellation_token = tokio_util::sync::CancellationToken::new();
         let task = spawn_download_task(
             DownloadTaskParams {
                 runtime: self.runtime.clone(),
@@ -145,7 +106,12 @@ impl<M: DownloadableModel> ModelDownloadManager<M> {
 
         if let Some(entry) = existing {
             entry.token.cancel();
-            Self::wait_for_task_exit(entry.task, "replace_existing_download").await;
+            wait_for_task_exit(
+                entry.task,
+                Self::TASK_JOIN_WARN_AFTER,
+                "replace_existing_download",
+            )
+            .await;
         }
 
         let _ = start_tx.send(());
@@ -160,7 +126,7 @@ impl<M: DownloadableModel> ModelDownloadManager<M> {
 
         if let Some(entry) = existing {
             entry.token.cancel();
-            Self::wait_for_task_exit(entry.task, "cancel_download").await;
+            wait_for_task_exit(entry.task, Self::TASK_JOIN_WARN_AFTER, "cancel_download").await;
             self.runtime.emit_progress(model, -1);
             let _ = fs::remove_file(entry.download_path).await;
             Ok(true)
@@ -180,18 +146,4 @@ impl<M: DownloadableModel> ModelDownloadManager<M> {
             .await
             .map_err(|e| Error::OperationFailed(e.to_string()))?
     }
-}
-fn generation_download_path(destination: &Path, generation: u64) -> PathBuf {
-    let mut path = destination.to_path_buf();
-    let suffix = format!(".part-{generation}");
-
-    if let Some(file_name) = destination.file_name() {
-        let mut generated_name = OsString::from(file_name);
-        generated_name.push(suffix);
-        path.set_file_name(generated_name);
-    } else {
-        path.push(format!("download{suffix}"));
-    }
-
-    path
 }

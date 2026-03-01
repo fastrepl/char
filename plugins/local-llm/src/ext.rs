@@ -31,6 +31,10 @@ impl DownloadableModel for LlmDownloadModel {
         Some(self.inner.model_url().to_string())
     }
 
+    fn download_checksum(&self) -> Option<u32> {
+        Some(self.inner.model_checksum())
+    }
+
     fn download_destination(&self, models_base: &Path) -> PathBuf {
         Self::models_dir(models_base).join(self.inner.file_name())
     }

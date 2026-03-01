@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use crate::manager::DownloadableModel;
+use crate::model::DownloadableModel;
 
 pub trait ModelDownloaderRuntime<M: DownloadableModel>: Send + Sync + 'static {
     fn models_base(&self) -> Result<PathBuf, crate::Error>;

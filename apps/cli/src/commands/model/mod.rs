@@ -122,6 +122,15 @@ impl DownloadableModel for CliModel {
         }
     }
 
+    fn download_checksum(&self) -> Option<u32> {
+        match self {
+            CliModel::Cactus(model) => CactusModel::Stt(model.clone()).checksum(),
+            CliModel::Whisper(model) => Some(model.checksum()),
+            CliModel::Am(model) => Some(model.tar_checksum()),
+            CliModel::Llm(model) => Some(model.model_checksum()),
+        }
+    }
+
     fn download_destination(&self, models_base: &Path) -> PathBuf {
         match self {
             CliModel::Cactus(model) => models_base
@@ -172,16 +181,7 @@ impl DownloadableModel for CliModel {
                 extract_zip(downloaded_path, output_dir)?;
                 Ok(())
             }
-            CliModel::Whisper(model) => {
-                let checksum = hypr_file::calculate_file_checksum(downloaded_path)?;
-                if checksum != model.checksum() {
-                    let _ = std::fs::remove_file(downloaded_path);
-                    return Err(hypr_model_downloader::Error::FinalizeFailed(
-                        "checksum mismatch".to_string(),
-                    ));
-                }
-                Ok(())
-            }
+            CliModel::Whisper(_) => Ok(()),
             CliModel::Am(model) => {
                 let final_path = models_base.join("stt");
                 model
