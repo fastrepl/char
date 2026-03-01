@@ -322,9 +322,7 @@ function PricingLetterSection() {
             <h2 className="mb-2 font-serif text-2xl text-stone-700 sm:text-3xl">
               A note on our pricing
             </h2>
-            <p className="mb-6 text-sm text-neutral-500 italic">
-              March 2026
-            </p>
+            <p className="mb-6 text-sm text-neutral-500 italic">March 2026</p>
 
             <div className="flex flex-col gap-4 leading-relaxed text-neutral-700">
               <p>
@@ -337,8 +335,8 @@ function PricingLetterSection() {
               <p>
                 But we want to be honest with you about the economics. Cloud
                 speech-to-text is expensive. The providers we rely on to deliver
-                accurate, real-time transcription charge between $0.36 and
-                $1.44 per hour of audio:
+                accurate, real-time transcription charge between $0.36 and $1.44
+                per hour of audio:
               </p>
 
               <div className="my-2 overflow-hidden rounded-xs border border-neutral-200">
@@ -370,9 +368,7 @@ function PricingLetterSection() {
                       <td className="px-4 py-2 text-neutral-700">
                         AssemblyAI Universal
                       </td>
-                      <td className="px-4 py-2 text-neutral-700">
-                        $0.65+
-                      </td>
+                      <td className="px-4 py-2 text-neutral-700">$0.65+</td>
                     </tr>
                     <tr>
                       <td className="px-4 py-2 text-neutral-700">
@@ -391,11 +387,11 @@ function PricingLetterSection() {
               </div>
 
               <p>
-                A single one-hour meeting can cost us $0.50 or more in STT
-                alone — before accounting for LLM inference, infrastructure,
-                and bandwidth. At $8/month, a user who records just two hours a
-                week would already put us at a loss. Many of our most active
-                users record far more than that.
+                A single one-hour meeting can cost us $0.50 or more in STT alone
+                — before accounting for LLM inference, infrastructure, and
+                bandwidth. At $8/month, a user who records just two hours a week
+                would already put us at a loss. Many of our most active users
+                record far more than that.
               </p>
               <p>
                 We absorbed this for the past six months because we believed in
@@ -417,7 +413,8 @@ function PricingLetterSection() {
                 for as long as your subscription stays active.
               </p>
               <p>
-                Thank you for believing in us early. We are just getting started.
+                Thank you for believing in us early. We are just getting
+                started.
               </p>
             </div>
 
