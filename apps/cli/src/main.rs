@@ -6,6 +6,8 @@ mod ui;
 
 use clap::{Parser, Subcommand};
 
+use crate::commands::model::ModelCommands;
+
 #[derive(Parser)]
 #[command(name = "char", about = "char")]
 struct Cli {
@@ -36,6 +38,10 @@ enum Commands {
         file: String,
         #[arg(long)]
         provider: String,
+    },
+    Model {
+        #[command(subcommand)]
+        command: ModelCommands,
     },
 }
 
@@ -70,6 +76,9 @@ async fn main() {
                 keywords: vec![],
             })
             .await;
+        }
+        Some(Commands::Model { command }) => {
+            commands::model::run(command).await;
         }
         None => {
             let base_url = cli.base_url.unwrap_or_else(|| {

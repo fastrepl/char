@@ -161,6 +161,7 @@ impl<M: DownloadableModel> ModelDownloadManager<M> {
         if let Some(entry) = existing {
             entry.token.cancel();
             Self::wait_for_task_exit(entry.task, "cancel_download").await;
+            self.runtime.emit_progress(model, -1);
             let _ = fs::remove_file(entry.download_path).await;
             Ok(true)
         } else {

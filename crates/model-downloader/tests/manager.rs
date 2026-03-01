@@ -312,6 +312,10 @@ async fn cancel_download_returns_true_and_cleans_up() {
     assert!(!manager.is_downloading(&model).await);
     assert!(!manager.is_downloaded(&model).await.unwrap());
     assert!(
+        runtime.progress_values().contains(&-1),
+        "should emit -1 on cancellation"
+    );
+    assert!(
         part_files_in(runtime.temp_dir.path()).is_empty(),
         "should not leave .part-* files behind"
     );
@@ -369,6 +373,10 @@ async fn cancel_download_immediately_after_start_returns_true() {
 
     assert!(cancelled);
     assert!(!manager.is_downloading(&model).await);
+    assert!(
+        runtime.progress_values().contains(&-1),
+        "should emit -1 on cancellation"
+    );
 }
 
 #[tokio::test]
