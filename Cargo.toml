@@ -66,6 +66,7 @@ hypr-eval = { path = "crates/eval", package = "eval" }
 hypr-exa = { path = "crates/exa", package = "exa" }
 hypr-file = { path = "crates/file", package = "file" }
 hypr-frontmatter = { path = "crates/frontmatter", package = "frontmatter" }
+hypr-fs-format = { path = "crates/fs-format", package = "fs-format" }
 hypr-gbnf = { path = "crates/gbnf", package = "gbnf" }
 hypr-gguf = { path = "crates/gguf", package = "gguf" }
 hypr-google-calendar = { path = "crates/google-calendar", package = "google-calendar" }

@@ -5681,6 +5681,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "fs-format"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "fs4"
 version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
