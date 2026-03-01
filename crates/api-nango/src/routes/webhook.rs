@@ -1,6 +1,8 @@
 use axum::{Json, extract::State, http::HeaderMap};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+
+use hypr_nango::{AuthOperation, WebhookType};
 
 use crate::error::{NangoError, Result};
 use crate::state::AppState;
@@ -8,6 +10,12 @@ use crate::state::AppState;
 #[derive(Debug, Serialize, ToSchema)]
 pub struct WebhookResponse {
     pub status: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct WebhookTypeEnvelope {
+    #[serde(rename = "type")]
+    webhook_type: WebhookType,
 }
 
 #[utoipa::path(
@@ -39,58 +47,101 @@ pub async fn nango_webhook(
         return Err(NangoError::Auth("Invalid webhook signature".to_string()));
     }
 
+    let envelope: WebhookTypeEnvelope =
+        serde_json::from_str(&body).map_err(|e| NangoError::BadRequest(e.to_string()))?;
+    let webhook_type = envelope.webhook_type;
+
+    if webhook_type != WebhookType::Auth {
+        tracing::info!(webhook_type = ?webhook_type, "nango webhook received (ignored)");
+        return Ok(Json(WebhookResponse {
+            status: "ok".to_string(),
+        }));
+    }
+
     let payload: hypr_nango::NangoAuthWebhook =
         serde_json::from_str(&body).map_err(|e| NangoError::BadRequest(e.to_string()))?;
 
     tracing::info!(
-        webhook_type = %payload.r#type,
-        operation = %payload.operation,
+        webhook_type = ?payload.r#type,
+        operation = ?payload.operation,
         connection_id = %payload.connection_id,
-        end_user_id = %payload.end_user.end_user_id,
+        end_user_id = payload.end_user_id().unwrap_or("unknown"),
         "nango webhook received"
     );
 
-    if payload.r#type == "auth" && state.supabase.is_configured() {
-        if payload.operation == "refresh" && !payload.success {
+    if !state.supabase.is_configured() {
+        tracing::warn!("supabase_service_role_key not configured, skipping connection persistence");
+        return Ok(Json(WebhookResponse {
+            status: "ok".to_string(),
+        }));
+    }
+
+    if payload.operation == AuthOperation::Refresh && !payload.success {
+        let error_type = payload.error.as_ref().map(|error| error.r#type.as_str());
+        let error_description = payload
+            .error
+            .as_ref()
+            .map(|error| error.description.as_str());
+
+        state
+            .supabase
+            .mark_connection_refresh_failed(
+                &payload.provider_config_key,
+                &payload.connection_id,
+                error_type,
+                error_description,
+            )
+            .await
+            .map_err(|e| {
+                tracing::error!(error = %e, "failed to persist nango refresh failure state");
+                NangoError::Internal(e.to_string())
+            })?;
+
+        tracing::warn!(
+            connection_id = %payload.connection_id,
+            integration_id = %payload.provider_config_key,
+            error_type,
+            error_description,
+            "nango token refresh failed"
+        );
+    }
+
+    if payload.success && payload.operation != AuthOperation::Deletion {
+        let Some(end_user_id) = payload.end_user_id() else {
             tracing::warn!(
                 connection_id = %payload.connection_id,
-                end_user_id = %payload.end_user.end_user_id,
                 integration_id = %payload.provider_config_key,
-                error = ?payload.error,
-                "nango token refresh failed"
+                "nango auth webhook missing end user id, skipping persistence"
             );
-        }
+            return Ok(Json(WebhookResponse {
+                status: "ok".to_string(),
+            }));
+        };
 
-        if payload.success && payload.operation != "deletion" {
-            state
-                .supabase
-                .upsert_connection(
-                    &payload.end_user.end_user_id,
-                    &payload.provider_config_key,
-                    &payload.connection_id,
-                    &payload.provider,
-                )
-                .await
-                .map_err(|e| {
-                    tracing::error!(error = %e, "failed to upsert nango connection");
-                    NangoError::Internal(e.to_string())
-                })?;
-        }
+        state
+            .supabase
+            .upsert_connection(
+                end_user_id,
+                &payload.provider_config_key,
+                &payload.connection_id,
+                &payload.provider,
+            )
+            .await
+            .map_err(|e| {
+                tracing::error!(error = %e, "failed to upsert nango connection");
+                NangoError::Internal(e.to_string())
+            })?;
+    }
 
-        // Nango sends deletion webhooks with `success: true` on successful revocation.
-        // We gate on `success` to avoid deleting local state if revocation failed on Nango's side.
-        if payload.success && payload.operation == "deletion" {
-            state
-                .supabase
-                .delete_connection(&payload.end_user.end_user_id, &payload.provider_config_key)
-                .await
-                .map_err(|e| {
-                    tracing::error!(error = %e, "failed to delete nango connection");
-                    NangoError::Internal(e.to_string())
-                })?;
-        }
-    } else if payload.r#type == "auth" {
-        tracing::warn!("supabase_service_role_key not configured, skipping connection persistence");
+    if payload.success && payload.operation == AuthOperation::Deletion {
+        state
+            .supabase
+            .delete_connection_by_connection(&payload.provider_config_key, &payload.connection_id)
+            .await
+            .map_err(|e| {
+                tracing::error!(error = %e, "failed to delete nango connection");
+                NangoError::Internal(e.to_string())
+            })?;
     }
 
     Ok(Json(WebhookResponse {

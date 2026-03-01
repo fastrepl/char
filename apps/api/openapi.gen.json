@@ -1657,6 +1657,30 @@
           "integration_id": {
             "type": "string"
           },
+          "last_error_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "last_error_description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "last_error_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "updated_at": {
             "type": [
               "string",

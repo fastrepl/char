@@ -441,6 +441,22 @@
           "integration_id": {
             "type": "string"
           },
+          "last_error_at": {
+            "nullable": true,
+            "type": "string"
+          },
+          "last_error_description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "last_error_type": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "nullable": true,
+            "type": "string"
+          },
           "updated_at": {
             "nullable": true,
             "type": "string"

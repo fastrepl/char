@@ -806,9 +806,6 @@ importers:
       '@nangohq/frontend':
         specifier: ^0.69.31
         version: 0.69.31
-      '@nangohq/node':
-        specifier: ^0.69.31
-        version: 0.69.31
       '@netlify/cache':
         specifier: ^3.3.5
         version: 3.3.5
@@ -4165,10 +4162,6 @@ packages:
 
   '@nangohq/frontend@0.69.31':
     resolution: {integrity: sha512-MzecMmlMbJv8+Y4C46e6GZ3sO++2DfJVKw9E+Hvo1VZUDmekb9KJ/L6ad1iJ7oxc32jE6MMyJAJ9pKuOb6PLGw==}
-
-  '@nangohq/node@0.69.31':
-    resolution: {integrity: sha512-9jx766D3/wVQE0K7ncs3mEqk8Jg0y7VjhVHu9wVhTDHAYu/8DJV9wTalhTTmnLxtCMZUjRRM6Cyhm69YK/7hxQ==}
-    engines: {node: '>=20.0'}
 
   '@nangohq/types@0.69.31':
     resolution: {integrity: sha512-KQhExPaivgnDA+EphKnZvyvBsLcA1qY2OXsbb4XCPN7xjsvWycC6quVwhvssikd4eqGB09OhwtsNAzP/kxNDpQ==}
@@ -19412,13 +19405,6 @@ snapshots:
   '@nangohq/frontend@0.69.31':
     dependencies:
       '@nangohq/types': 0.69.31
-    transitivePeerDependencies:
-      - debug
-
-  '@nangohq/node@0.69.31':
-    dependencies:
-      '@nangohq/types': 0.69.31
-      axios: 1.12.0
     transitivePeerDependencies:
       - debug
 

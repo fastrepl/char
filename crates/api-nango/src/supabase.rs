@@ -4,6 +4,14 @@ pub(crate) struct NangoConnectionRow {
     pub integration_id: String,
     pub connection_id: String,
     #[serde(default)]
+    pub status: String,
+    #[serde(default)]
+    pub last_error_type: Option<String>,
+    #[serde(default)]
+    pub last_error_description: Option<String>,
+    #[serde(default)]
+    pub last_error_at: Option<String>,
+    #[serde(default)]
     pub updated_at: Option<String>,
 }
 
@@ -102,7 +110,7 @@ impl SupabaseClient {
     ) -> Result<Vec<NangoConnectionRow>, crate::error::NangoError> {
         let encoded_user_id = urlencoding::encode(user_id);
         let url = format!(
-            "{}/rest/v1/nango_connections?select=integration_id,connection_id,updated_at&user_id=eq.{}",
+            "{}/rest/v1/nango_connections?select=integration_id,connection_id,status,last_error_type,last_error_description,last_error_at,updated_at&user_id=eq.{}",
             self.supabase_url, encoded_user_id,
         );
 
@@ -142,6 +150,10 @@ impl SupabaseClient {
             "integration_id": integration_id,
             "connection_id": connection_id,
             "provider": provider,
+            "status": "connected",
+            "last_error_type": serde_json::Value::Null,
+            "last_error_description": serde_json::Value::Null,
+            "last_error_at": serde_json::Value::Null,
             "updated_at": chrono::Utc::now().to_rfc3339(),
         });
 
@@ -197,6 +209,88 @@ impl SupabaseClient {
             let body = response.text().await.unwrap_or_default();
             return Err(crate::error::NangoError::Internal(format!(
                 "delete failed: {} - {}",
+                status, body
+            )));
+        }
+
+        Ok(())
+    }
+
+    pub(crate) async fn delete_connection_by_connection(
+        &self,
+        integration_id: &str,
+        connection_id: &str,
+    ) -> Result<(), crate::error::NangoError> {
+        let service_role_key = self.service_role_key()?;
+
+        let encoded_integration_id = urlencoding::encode(integration_id);
+        let encoded_connection_id = urlencoding::encode(connection_id);
+        let url = format!(
+            "{}/rest/v1/nango_connections?integration_id=eq.{}&connection_id=eq.{}",
+            self.supabase_url, encoded_integration_id, encoded_connection_id,
+        );
+
+        let response = self
+            .http_client
+            .delete(&url)
+            .header("Authorization", format!("Bearer {}", service_role_key))
+            .header("apikey", service_role_key)
+            .send()
+            .await
+            .map_err(|e| crate::error::NangoError::Internal(e.to_string()))?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
+            return Err(crate::error::NangoError::Internal(format!(
+                "delete by connection failed: {} - {}",
+                status, body
+            )));
+        }
+
+        Ok(())
+    }
+
+    pub(crate) async fn mark_connection_refresh_failed(
+        &self,
+        integration_id: &str,
+        connection_id: &str,
+        error_type: Option<&str>,
+        error_description: Option<&str>,
+    ) -> Result<(), crate::error::NangoError> {
+        let service_role_key = self.service_role_key()?;
+
+        let encoded_integration_id = urlencoding::encode(integration_id);
+        let encoded_connection_id = urlencoding::encode(connection_id);
+        let url = format!(
+            "{}/rest/v1/nango_connections?integration_id=eq.{}&connection_id=eq.{}",
+            self.supabase_url, encoded_integration_id, encoded_connection_id,
+        );
+
+        let body = serde_json::json!({
+            "status": "reconnect_required",
+            "last_error_type": error_type,
+            "last_error_description": error_description,
+            "last_error_at": chrono::Utc::now().to_rfc3339(),
+            "updated_at": chrono::Utc::now().to_rfc3339(),
+        });
+
+        let response = self
+            .http_client
+            .patch(&url)
+            .header("Authorization", format!("Bearer {}", service_role_key))
+            .header("apikey", service_role_key)
+            .header("Content-Type", "application/json")
+            .json(&body)
+            .send()
+            .await
+            .map_err(|e| crate::error::NangoError::Internal(e.to_string()))?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
+            return Err(crate::error::NangoError::Internal(format!(
+                "mark refresh failed failed: {} - {}",
                 status, body
             )));
         }

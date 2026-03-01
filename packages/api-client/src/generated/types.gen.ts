@@ -156,6 +156,10 @@ export type ConnectSessionResponse = {
 export type ConnectionItem = {
     connection_id: string;
     integration_id: string;
+    last_error_at?: string | null;
+    last_error_description?: string | null;
+    last_error_type?: string | null;
+    status?: string | null;
     updated_at?: string | null;
 };
 
