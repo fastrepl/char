@@ -12,26 +12,26 @@ name = "char"
 path = "src/main.rs"
 
 [dependencies]
-hypr-am = { workspace = true }
-hypr-cactus-model = { workspace = true }
 hypr-file = { workspace = true }
 hypr-language = { workspace = true }
 hypr-listener-core = { workspace = true }
 hypr-listener2-core = { workspace = true }
-hypr-local-llm-core = { workspace = true }
+hypr-local-model = { workspace = true }
 hypr-model-downloader = { workspace = true }
 hypr-storage = { workspace = true }
 hypr-transcript = { workspace = true }
-hypr-whisper-local-model = { workspace = true }
 
 clap = { workspace = true, features = ["derive", "env"] }
 crossterm = { workspace = true }
 dirs = { workspace = true }
 ratatui = { workspace = true }
+tempfile = { workspace = true }
 
 open = { workspace = true }
 ractor = { workspace = true, features = ["async-trait"] }
+serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros", "signal", "sync", "time"] }
 tokio-stream = { workspace = true }
+url = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }

@@ -10,7 +10,7 @@
     serde::Deserialize,
     specta::Type,
 )]
-// We cannot change name of enum variants because it will break existing users
+
 pub enum WhisperModel {
     #[serde(rename = "QuantizedTiny")]
     QuantizedTiny,

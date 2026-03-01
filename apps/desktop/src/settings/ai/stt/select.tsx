@@ -6,7 +6,7 @@ import { Check, Loader2 } from "lucide-react";
 import { commands as listenerCommands } from "@hypr/plugin-listener";
 import {
   commands as localSttCommands,
-  type SupportedSttModel,
+  type LocalModel,
 } from "@hypr/plugin-local-stt";
 import type { AIProviderStorage } from "@hypr/store";
 import { Input } from "@hypr/ui/components/ui/input";
@@ -237,7 +237,7 @@ export function SelectProviderAndModel() {
                           key={model.id}
                           model={model}
                           onDownload={() =>
-                            startDownload(model.id as SupportedSttModel)
+                            startDownload(model.id as LocalModel)
                           }
                           onStartTrial={startTrial}
                         />

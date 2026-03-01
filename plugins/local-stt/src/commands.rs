@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use crate::{
-    LocalSttPluginExt, SUPPORTED_MODELS, ServerInfo, SttModelInfo, SupportedSttModel,
-    server::ServerType,
+    LocalModel, LocalSttPluginExt, SUPPORTED_MODELS, ServerInfo, SttModelInfo, server::ServerType,
+    stt_model_info,
 };
 
 #[tauri::command]
@@ -29,7 +29,7 @@ pub async fn list_supported_models() -> Result<Vec<SttModelInfo>, String> {
     Ok(SUPPORTED_MODELS
         .iter()
         .filter(|m| m.is_available_on_current_platform())
-        .map(|m| m.info())
+        .map(stt_model_info)
         .collect())
 }
 
@@ -37,7 +37,7 @@ pub async fn list_supported_models() -> Result<Vec<SttModelInfo>, String> {
 #[specta::specta]
 pub async fn is_model_downloaded<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
-    model: SupportedSttModel,
+    model: LocalModel,
 ) -> Result<bool, String> {
     app.local_stt()
         .is_model_downloaded(&model)
@@ -49,16 +49,19 @@ pub async fn is_model_downloaded<R: tauri::Runtime>(
 #[specta::specta]
 pub async fn is_model_downloading<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
-    model: SupportedSttModel,
+    model: LocalModel,
 ) -> Result<bool, String> {
-    Ok(app.local_stt().is_model_downloading(&model).await)
+    app.local_stt()
+        .is_model_downloading(&model)
+        .await
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 #[specta::specta]
 pub async fn download_model<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
-    model: SupportedSttModel,
+    model: LocalModel,
 ) -> Result<(), String> {
     app.local_stt()
         .download_model(model)
@@ -70,7 +73,7 @@ pub async fn download_model<R: tauri::Runtime>(
 #[specta::specta]
 pub async fn cancel_download<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
-    model: SupportedSttModel,
+    model: LocalModel,
 ) -> Result<bool, String> {
     app.local_stt()
         .cancel_download(model)
@@ -82,7 +85,7 @@ pub async fn cancel_download<R: tauri::Runtime>(
 #[specta::specta]
 pub async fn delete_model<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
-    model: SupportedSttModel,
+    model: LocalModel,
 ) -> Result<(), String> {
     app.local_stt()
         .delete_model(&model)
@@ -94,7 +97,7 @@ pub async fn delete_model<R: tauri::Runtime>(
 #[specta::specta]
 pub async fn start_server<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
-    model: SupportedSttModel,
+    model: LocalModel,
 ) -> Result<String, String> {
     app.local_stt()
         .start_server(model)
@@ -118,7 +121,7 @@ pub async fn stop_server<R: tauri::Runtime>(
 #[specta::specta]
 pub async fn get_server_for_model<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
-    model: SupportedSttModel,
+    model: LocalModel,
 ) -> Result<Option<ServerInfo>, String> {
     app.local_stt()
         .get_server_for_model(&model)

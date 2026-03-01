@@ -3,7 +3,7 @@ import { useMemo } from "react";
 
 import {
   commands as localSttCommands,
-  type SupportedSttModel,
+  type LocalModel,
 } from "@hypr/plugin-local-stt";
 import type { AIProviderStorage } from "@hypr/store";
 
@@ -48,14 +48,14 @@ export const useSTTConnection = () => {
       }
 
       const downloaded = await localSttCommands.isModelDownloaded(
-        current_stt_model as SupportedSttModel,
+        current_stt_model as LocalModel,
       );
       if (downloaded.status !== "ok" || !downloaded.data) {
         return { status: "not_downloaded" as const, connection: null };
       }
 
       const serverResult = await localSttCommands.getServerForModel(
-        current_stt_model as SupportedSttModel,
+        current_stt_model as LocalModel,
       );
 
       if (serverResult.status !== "ok") {

@@ -87,6 +87,7 @@ hypr-llm-proxy = { path = "crates/llm-proxy", package = "llm-proxy" }
 hypr-llm-types = { path = "crates/llm-types", package = "llm-types" }
 hypr-lmstudio = { path = "crates/lmstudio", package = "lmstudio" }
 hypr-local-llm-core = { path = "crates/local-llm-core", package = "local-llm-core" }
+hypr-local-model = { path = "crates/local-model", package = "local-model" }
 hypr-loops = { path = "crates/loops", package = "loops" }
 hypr-mac = { path = "crates/mac", package = "mac" }
 hypr-mcp = { path = "crates/mcp", package = "mcp" }
@@ -122,6 +123,7 @@ hypr-transcribe-cactus = { path = "crates/transcribe-cactus", package = "transcr
 hypr-transcribe-proxy = { path = "crates/transcribe-proxy", package = "transcribe-proxy" }
 hypr-transcribe-whisper-local = { path = "crates/transcribe-whisper-local", package = "transcribe-whisper-local" }
 hypr-transcript = { path = "crates/transcript", package = "transcript" }
+hypr-updater-core = { path = "crates/updater-core", package = "updater-core" }
 hypr-vad = { path = "crates/vad", package = "vad" }
 hypr-vad-chunking = { path = "crates/vad-chunking", package = "vad-chunking" }
 hypr-vad-masking = { path = "crates/vad-masking", package = "vad-masking" }
@@ -250,6 +252,7 @@ moka = { version = "0.12", features = ["future"] }
 open = "5"
 regex = "1.12"
 schemars = "1"
+self-replace = "1.5"
 serde = "1"
 serde_bytes = "0.11.15"
 serde_html_form = "0.4"

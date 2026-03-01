@@ -12,7 +12,7 @@ import { useCallback } from "react";
 
 import {
   commands as localSttCommands,
-  type SupportedSttModel,
+  type LocalModel,
 } from "@hypr/plugin-local-stt";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 import {
@@ -220,7 +220,7 @@ function CactusRow({
   model,
   displayName,
 }: {
-  model: SupportedSttModel;
+  model: LocalModel;
   displayName: string;
 }) {
   const handleSelectModel = useSafeSelectModel();
@@ -266,7 +266,7 @@ function CactusRow({
 }
 
 // @ts-expect-error
-function CactusSettings({ models }: { models: SupportedSttModel[] }) {
+function CactusSettings({ models }: { models: LocalModel[] }) {
   const downloadedQueries = useQueries({
     queries: models.map((m) => localSttQueries.isDownloaded(m)),
   });
@@ -510,7 +510,7 @@ function HyprProviderLocalRow({
   displayName,
   description,
 }: {
-  model: SupportedSttModel;
+  model: LocalModel;
   displayName: string;
   description: string;
 }) {
@@ -592,7 +592,7 @@ function ProviderContext({ providerId }: { providerId: ProviderId }) {
 function useSafeSelectModel() {
   const handleSelectModel = settings.UI.useSetValueCallback(
     "current_stt_model",
-    (model: SupportedSttModel) => model,
+    (model: LocalModel) => model,
     [],
     settings.STORE_ID,
   );
@@ -600,7 +600,7 @@ function useSafeSelectModel() {
   const active = useListener((state) => state.live.status !== "inactive");
 
   const handler = useCallback(
-    (model: SupportedSttModel) => {
+    (model: LocalModel) => {
       if (active) {
         return;
       }

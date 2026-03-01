@@ -6,15 +6,14 @@ use tauri_specta::Event;
 use tauri::{Manager, Runtime};
 use tauri_plugin_sidecar2::Sidecar2PluginExt;
 
-use hypr_cactus_model::CactusModel;
-use hypr_model_downloader::{DownloadableModel, ModelDownloadManager, ModelDownloaderRuntime};
+use hypr_model_downloader::{ModelDownloadManager, ModelDownloaderRuntime};
 
 #[cfg(feature = "whisper-cpp")]
 use crate::server::internal;
 #[cfg(target_arch = "aarch64")]
 use crate::server::internal2;
 use crate::{
-    model::SupportedSttModel,
+    model::LocalModel,
     server::{ServerInfo, ServerStatus, ServerType, external, supervisor},
     types::DownloadProgressPayload,
 };
@@ -23,7 +22,7 @@ struct TauriModelRuntime<R: Runtime> {
     app_handle: tauri::AppHandle<R>,
 }
 
-impl<R: Runtime> ModelDownloaderRuntime<SupportedSttModel> for TauriModelRuntime<R> {
+impl<R: Runtime> ModelDownloaderRuntime<LocalModel> for TauriModelRuntime<R> {
     fn models_base(&self) -> Result<PathBuf, hypr_model_downloader::Error> {
         use tauri_plugin_settings::SettingsPluginExt;
         Ok(self
@@ -34,7 +33,7 @@ impl<R: Runtime> ModelDownloaderRuntime<SupportedSttModel> for TauriModelRuntime
             .unwrap_or_else(|_| dirs::data_dir().unwrap_or_default().join("models")))
     }
 
-    fn emit_progress(&self, model: &SupportedSttModel, progress: i8) {
+    fn emit_progress(&self, model: &LocalModel, progress: i8) {
         let _ = DownloadProgressPayload {
             model: model.clone(),
             progress,
@@ -45,139 +44,11 @@ impl<R: Runtime> ModelDownloaderRuntime<SupportedSttModel> for TauriModelRuntime
 
 pub fn create_model_downloader<R: Runtime>(
     app_handle: &tauri::AppHandle<R>,
-) -> ModelDownloadManager<SupportedSttModel> {
+) -> ModelDownloadManager<LocalModel> {
     let runtime = Arc::new(TauriModelRuntime {
         app_handle: app_handle.clone(),
     });
     ModelDownloadManager::new(runtime)
-}
-
-impl DownloadableModel for SupportedSttModel {
-    fn download_key(&self) -> String {
-        match self {
-            SupportedSttModel::Cactus(m) => {
-                format!("cactus:{}", CactusModel::Stt(m.clone()).asset_id())
-            }
-            SupportedSttModel::Whisper(m) => format!("whisper:{}", m.file_name()),
-            SupportedSttModel::Am(m) => format!("am:{}", m.model_dir()),
-        }
-    }
-
-    fn download_url(&self) -> Option<String> {
-        match self {
-            SupportedSttModel::Cactus(m) => CactusModel::Stt(m.clone())
-                .model_url()
-                .map(|url| url.to_string()),
-            SupportedSttModel::Whisper(m) => Some(m.model_url().to_string()),
-            SupportedSttModel::Am(m) => Some(m.tar_url().to_string()),
-        }
-    }
-
-    fn download_checksum(&self) -> Option<u32> {
-        match self {
-            SupportedSttModel::Cactus(m) => CactusModel::Stt(m.clone()).checksum(),
-            SupportedSttModel::Whisper(m) => Some(m.checksum()),
-            SupportedSttModel::Am(m) => Some(m.tar_checksum()),
-        }
-    }
-
-    fn download_destination(&self, models_base: &std::path::Path) -> PathBuf {
-        match self {
-            SupportedSttModel::Cactus(m) => models_base
-                .join("cactus")
-                .join(CactusModel::Stt(m.clone()).zip_name()),
-            SupportedSttModel::Whisper(m) => models_base.join("stt").join(m.file_name()),
-            SupportedSttModel::Am(m) => models_base
-                .join("stt")
-                .join(format!("{}.tar", m.model_dir())),
-        }
-    }
-
-    fn is_downloaded(
-        &self,
-        models_base: &std::path::Path,
-    ) -> Result<bool, hypr_model_downloader::Error> {
-        match self {
-            SupportedSttModel::Cactus(m) => {
-                let model_dir = models_base
-                    .join("cactus")
-                    .join(CactusModel::Stt(m.clone()).dir_name());
-                Ok(model_dir.is_dir()
-                    && std::fs::read_dir(&model_dir)
-                        .map(|mut d| d.next().is_some())
-                        .unwrap_or(false))
-            }
-            SupportedSttModel::Whisper(m) => {
-                Ok(models_base.join("stt").join(m.file_name()).exists())
-            }
-            SupportedSttModel::Am(m) => m
-                .is_downloaded(models_base.join("stt"))
-                .map_err(|e| hypr_model_downloader::Error::OperationFailed(e.to_string())),
-        }
-    }
-
-    fn finalize_download(
-        &self,
-        downloaded_path: &std::path::Path,
-        models_base: &std::path::Path,
-    ) -> Result<(), hypr_model_downloader::Error> {
-        match self {
-            SupportedSttModel::Cactus(m) => {
-                let output_dir = models_base
-                    .join("cactus")
-                    .join(CactusModel::Stt(m.clone()).dir_name());
-                hypr_model_downloader::extract_zip(downloaded_path, output_dir)?;
-                Ok(())
-            }
-            SupportedSttModel::Whisper(_) => Ok(()),
-            SupportedSttModel::Am(m) => {
-                let final_path = models_base.join("stt");
-                m.tar_unpack_and_cleanup(downloaded_path, &final_path)
-                    .map_err(|e| hypr_model_downloader::Error::FinalizeFailed(e.to_string()))
-            }
-        }
-    }
-
-    fn delete_downloaded(
-        &self,
-        models_base: &std::path::Path,
-    ) -> Result<(), hypr_model_downloader::Error> {
-        match self {
-            SupportedSttModel::Cactus(m) => {
-                let model_dir = models_base
-                    .join("cactus")
-                    .join(CactusModel::Stt(m.clone()).dir_name());
-                if model_dir.exists() {
-                    std::fs::remove_dir_all(&model_dir)
-                        .map_err(|e| hypr_model_downloader::Error::DeleteFailed(e.to_string()))?;
-                }
-                Ok(())
-            }
-            SupportedSttModel::Whisper(m) => {
-                let model_path = models_base.join("stt").join(m.file_name());
-                if model_path.exists() {
-                    std::fs::remove_file(&model_path)
-                        .map_err(|e| hypr_model_downloader::Error::DeleteFailed(e.to_string()))?;
-                }
-                Ok(())
-            }
-            SupportedSttModel::Am(m) => {
-                let model_dir = models_base.join("stt").join(m.model_dir());
-                if model_dir.exists() {
-                    std::fs::remove_dir_all(&model_dir)
-                        .map_err(|e| hypr_model_downloader::Error::DeleteFailed(e.to_string()))?;
-                }
-                Ok(())
-            }
-        }
-    }
-
-    fn remove_destination_after_finalize(&self) -> bool {
-        matches!(
-            self,
-            SupportedSttModel::Cactus(_) | SupportedSttModel::Am(_)
-        )
-    }
 }
 
 pub struct LocalStt<'a, R: Runtime, M: Manager<R>> {
@@ -186,6 +57,15 @@ pub struct LocalStt<'a, R: Runtime, M: Manager<R>> {
 }
 
 impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
+    fn ensure_stt_model(model: &LocalModel) -> Result<(), crate::Error> {
+        match model {
+            LocalModel::Am(_) | LocalModel::Whisper(_) | LocalModel::Cactus(_) => Ok(()),
+            LocalModel::GgufLlm(_) | LocalModel::CactusLlm(_) => {
+                Err(crate::Error::UnsupportedModelType)
+            }
+        }
+    }
+
     pub fn models_dir(&self) -> PathBuf {
         use tauri_plugin_settings::SettingsPluginExt;
         self.manager
@@ -223,10 +103,9 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
             .ok_or(crate::Error::SupervisorNotFound)
     }
 
-    pub async fn is_model_downloaded(
-        &self,
-        model: &SupportedSttModel,
-    ) -> Result<bool, crate::Error> {
+    pub async fn is_model_downloaded(&self, model: &LocalModel) -> Result<bool, crate::Error> {
+        Self::ensure_stt_model(model)?;
+
         let downloader = {
             let state = self.manager.state::<crate::SharedState>();
             let guard = state.lock().await;
@@ -236,10 +115,15 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
     }
 
     #[tracing::instrument(skip_all)]
-    pub async fn start_server(&self, model: SupportedSttModel) -> Result<String, crate::Error> {
+    pub async fn start_server(&self, model: LocalModel) -> Result<String, crate::Error> {
+        Self::ensure_stt_model(&model)?;
+
         let server_type = match &model {
-            SupportedSttModel::Am(_) => ServerType::External,
-            SupportedSttModel::Whisper(_) | SupportedSttModel::Cactus(_) => ServerType::Internal,
+            LocalModel::Am(_) => ServerType::External,
+            LocalModel::Whisper(_) | LocalModel::Cactus(_) => ServerType::Internal,
+            LocalModel::GgufLlm(_) | LocalModel::CactusLlm(_) => {
+                return Err(crate::Error::UnsupportedModelType);
+            }
         };
 
         let current_info = match server_type {
@@ -280,7 +164,7 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
 
                     let cache_dir = self.cactus_models_dir();
                     let cactus_model = match model {
-                        SupportedSttModel::Cactus(m) => m,
+                        LocalModel::Cactus(m) => m,
                         _ => return Err(crate::Error::UnsupportedModelType),
                     };
                     start_internal2_server(
@@ -297,7 +181,7 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
             ServerType::External => {
                 let data_dir = self.models_dir();
                 let am_model = match model {
-                    SupportedSttModel::Am(m) => m,
+                    LocalModel::Am(m) => m,
                     _ => return Err(crate::Error::UnsupportedModelType),
                 };
 
@@ -329,11 +213,16 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
     #[tracing::instrument(skip_all)]
     pub async fn get_server_for_model(
         &self,
-        model: &SupportedSttModel,
+        model: &LocalModel,
     ) -> Result<Option<ServerInfo>, crate::Error> {
+        Self::ensure_stt_model(model)?;
+
         let server_type = match model {
-            SupportedSttModel::Am(_) => ServerType::External,
-            SupportedSttModel::Whisper(_) | SupportedSttModel::Cactus(_) => ServerType::Internal,
+            LocalModel::Am(_) => ServerType::External,
+            LocalModel::Whisper(_) | LocalModel::Cactus(_) => ServerType::Internal,
+            LocalModel::GgufLlm(_) | LocalModel::CactusLlm(_) => {
+                return Err(crate::Error::UnsupportedModelType);
+            }
         };
 
         let info = match server_type {
@@ -377,7 +266,9 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
     }
 
     #[tracing::instrument(skip_all)]
-    pub async fn download_model(&self, model: SupportedSttModel) -> Result<(), crate::Error> {
+    pub async fn download_model(&self, model: LocalModel) -> Result<(), crate::Error> {
+        Self::ensure_stt_model(&model)?;
+
         let downloader = {
             let state = self.manager.state::<crate::SharedState>();
             let guard = state.lock().await;
@@ -388,7 +279,9 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
     }
 
     #[tracing::instrument(skip_all)]
-    pub async fn cancel_download(&self, model: SupportedSttModel) -> Result<bool, crate::Error> {
+    pub async fn cancel_download(&self, model: LocalModel) -> Result<bool, crate::Error> {
+        Self::ensure_stt_model(&model)?;
+
         let downloader = {
             let state = self.manager.state::<crate::SharedState>();
             let guard = state.lock().await;
@@ -398,17 +291,21 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
     }
 
     #[tracing::instrument(skip_all)]
-    pub async fn is_model_downloading(&self, model: &SupportedSttModel) -> bool {
+    pub async fn is_model_downloading(&self, model: &LocalModel) -> Result<bool, crate::Error> {
+        Self::ensure_stt_model(model)?;
+
         let downloader = {
             let state = self.manager.state::<crate::SharedState>();
             let guard = state.lock().await;
             guard.model_downloader.clone()
         };
-        downloader.is_downloading(model).await
+        Ok(downloader.is_downloading(model).await)
     }
 
     #[tracing::instrument(skip_all)]
-    pub async fn delete_model(&self, model: &SupportedSttModel) -> Result<(), crate::Error> {
+    pub async fn delete_model(&self, model: &LocalModel) -> Result<(), crate::Error> {
+        Self::ensure_stt_model(model)?;
+
         let downloader = {
             let state = self.manager.state::<crate::SharedState>();
             let guard = state.lock().await;

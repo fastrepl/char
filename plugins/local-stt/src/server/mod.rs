@@ -29,5 +29,5 @@ pub enum ServerStatus {
 pub struct ServerInfo {
     pub url: Option<String>,
     pub status: ServerStatus,
-    pub model: Option<crate::SupportedSttModel>,
+    pub model: Option<crate::LocalModel>,
 }

@@ -1,20 +1,19 @@
 use std::io::Write;
 use std::path::PathBuf;
 
+use hypr_local_model::LocalModel;
 use hypr_model_downloader::ModelDownloaderRuntime;
-
-use super::CliModel;
 
 pub(super) struct CliModelRuntime {
     pub(super) models_base: PathBuf,
 }
 
-impl ModelDownloaderRuntime<CliModel> for CliModelRuntime {
+impl ModelDownloaderRuntime<LocalModel> for CliModelRuntime {
     fn models_base(&self) -> Result<PathBuf, hypr_model_downloader::Error> {
         Ok(self.models_base.clone())
     }
 
-    fn emit_progress(&self, model: &CliModel, progress: i8) {
+    fn emit_progress(&self, model: &LocalModel, progress: i8) {
         if progress < 0 {
             let _ = writeln!(
                 std::io::stderr(),

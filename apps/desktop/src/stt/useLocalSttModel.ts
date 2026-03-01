@@ -5,17 +5,16 @@ import { useCallback, useEffect, useState } from "react";
 import {
   commands as localSttCommands,
   events as localSttEvents,
-  type SupportedSttModel,
+  type LocalModel,
 } from "@hypr/plugin-local-stt";
 
 export const localSttKeys = {
   all: ["local-stt"] as const,
   models: () => [...localSttKeys.all, "model"] as const,
-  model: (model: SupportedSttModel) =>
-    [...localSttKeys.models(), model] as const,
-  modelDownloaded: (model: SupportedSttModel) =>
+  model: (model: LocalModel) => [...localSttKeys.models(), model] as const,
+  modelDownloaded: (model: LocalModel) =>
     [...localSttKeys.model(model), "downloaded"] as const,
-  modelDownloading: (model: SupportedSttModel) =>
+  modelDownloading: (model: LocalModel) =>
     [...localSttKeys.model(model), "downloading"] as const,
 };
 
@@ -32,7 +31,7 @@ export const localSttQueries = {
         return result.data;
       },
     }),
-  isDownloaded: (model: SupportedSttModel) =>
+  isDownloaded: (model: LocalModel) =>
     queryOptions({
       refetchInterval: 1000,
       queryKey: localSttKeys.modelDownloaded(model),
@@ -44,7 +43,7 @@ export const localSttQueries = {
         return result.data;
       },
     }),
-  isDownloading: (model: SupportedSttModel) =>
+  isDownloading: (model: LocalModel) =>
     queryOptions({
       refetchInterval: 1000,
       queryKey: localSttKeys.modelDownloading(model),
@@ -59,8 +58,8 @@ export const localSttQueries = {
 };
 
 export function useLocalModelDownload(
-  model: SupportedSttModel,
-  onDownloadComplete?: (model: SupportedSttModel) => void,
+  model: LocalModel,
+  onDownloadComplete?: (model: LocalModel) => void,
 ) {
   const [progress, setProgress] = useState<number>(0);
   const [isStarting, setIsStarting] = useState(false);

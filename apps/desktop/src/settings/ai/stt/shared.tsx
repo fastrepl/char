@@ -8,7 +8,7 @@ import {
 } from "@lobehub/icons";
 import type { ReactNode } from "react";
 
-import type { AmModel, SupportedSttModel } from "@hypr/plugin-local-stt";
+import type { AmModel, LocalModel } from "@hypr/plugin-local-stt";
 
 import { env } from "~/env";
 import {
@@ -26,7 +26,7 @@ type Provider = {
   displayName: string;
   icon: ReactNode;
   baseUrl?: string;
-  models: SupportedSttModel[] | string[];
+  models: LocalModel[] | string[];
   badge?: string | null;
   requirements: ProviderRequirement[];
 };

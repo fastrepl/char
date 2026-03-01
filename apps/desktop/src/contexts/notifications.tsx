@@ -12,7 +12,7 @@ import {
   commands as localSttCommands,
   events as localSttEvents,
   type ServerStatus,
-  type SupportedSttModel,
+  type LocalModel,
 } from "@hypr/plugin-local-stt";
 
 import { useConfigValues } from "~/shared/config";
@@ -34,7 +34,7 @@ interface NotificationState {
 
 const NotificationContext = createContext<NotificationState | null>(null);
 
-const MODEL_DISPLAY_NAMES: Partial<Record<SupportedSttModel, string>> = {
+const MODEL_DISPLAY_NAMES: Partial<Record<LocalModel, string>> = {
   "am-parakeet-v2": "Parakeet v2",
   "am-parakeet-v3": "Parakeet v3",
   "am-whisper-large-v3": "Whisper Large v3",
@@ -73,7 +73,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       if (!sttModel) return null;
 
       const serverResult = await localSttCommands.getServerForModel(
-        sttModel as SupportedSttModel,
+        sttModel as LocalModel,
       );
       if (serverResult.status !== "ok") return null;
 
@@ -84,7 +84,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const localSttStatus = isLocalSttModel ? (localSttQuery.data ?? null) : null;
 
   const [activeDownloads, setActiveDownloads] = useState<
-    Map<SupportedSttModel, number>
+    Map<LocalModel, number>
   >(new Map());
 
   useEffect(() => {

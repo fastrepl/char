@@ -24,7 +24,7 @@ pub struct State {
     pub am_api_key: Option<String>,
     pub stt_supervisor: Option<ActorRef<DynamicSupervisorMsg>>,
     pub supervisor_handle: Option<SupervisorHandle>,
-    pub model_downloader: ModelDownloadManager<SupportedSttModel>,
+    pub model_downloader: ModelDownloadManager<LocalModel>,
 }
 
 #[derive(Default)]

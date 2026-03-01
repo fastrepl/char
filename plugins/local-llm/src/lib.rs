@@ -24,7 +24,7 @@ const PLUGIN_NAME: &str = "local-llm";
 pub type SharedState = std::sync::Arc<TokioMutex<State>>;
 
 pub struct State {
-    pub model_downloader: ModelDownloadManager<ext::LlmDownloadModel>,
+    pub model_downloader: ModelDownloadManager<SupportedModel>,
     pub download_channels: Arc<Mutex<HashMap<String, tauri::ipc::Channel<i8>>>>,
     pub server: Option<hypr_local_llm_core::LlmServer>,
 }

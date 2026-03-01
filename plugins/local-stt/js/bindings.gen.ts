@@ -22,7 +22,7 @@ async cactusModelsDir() : Promise<Result<string, string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async isModelDownloaded(model: SupportedSttModel) : Promise<Result<boolean, string>> {
+async isModelDownloaded(model: LocalModel) : Promise<Result<boolean, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-stt|is_model_downloaded", { model }) };
 } catch (e) {
@@ -30,7 +30,7 @@ async isModelDownloaded(model: SupportedSttModel) : Promise<Result<boolean, stri
     else return { status: "error", error: e  as any };
 }
 },
-async isModelDownloading(model: SupportedSttModel) : Promise<Result<boolean, string>> {
+async isModelDownloading(model: LocalModel) : Promise<Result<boolean, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-stt|is_model_downloading", { model }) };
 } catch (e) {
@@ -38,7 +38,7 @@ async isModelDownloading(model: SupportedSttModel) : Promise<Result<boolean, str
     else return { status: "error", error: e  as any };
 }
 },
-async downloadModel(model: SupportedSttModel) : Promise<Result<null, string>> {
+async downloadModel(model: LocalModel) : Promise<Result<null, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-stt|download_model", { model }) };
 } catch (e) {
@@ -46,7 +46,7 @@ async downloadModel(model: SupportedSttModel) : Promise<Result<null, string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async cancelDownload(model: SupportedSttModel) : Promise<Result<boolean, string>> {
+async cancelDownload(model: LocalModel) : Promise<Result<boolean, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-stt|cancel_download", { model }) };
 } catch (e) {
@@ -54,7 +54,7 @@ async cancelDownload(model: SupportedSttModel) : Promise<Result<boolean, string>
     else return { status: "error", error: e  as any };
 }
 },
-async deleteModel(model: SupportedSttModel) : Promise<Result<null, string>> {
+async deleteModel(model: LocalModel) : Promise<Result<null, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-stt|delete_model", { model }) };
 } catch (e) {
@@ -62,7 +62,7 @@ async deleteModel(model: SupportedSttModel) : Promise<Result<null, string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async getServerForModel(model: SupportedSttModel) : Promise<Result<ServerInfo | null, string>> {
+async getServerForModel(model: LocalModel) : Promise<Result<ServerInfo | null, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-stt|get_server_for_model", { model }) };
 } catch (e) {
@@ -78,7 +78,7 @@ async getServers() : Promise<Result<Partial<{ [key in ServerType]: ServerInfo }>
     else return { status: "error", error: e  as any };
 }
 },
-async startServer(model: SupportedSttModel) : Promise<Result<string, string>> {
+async startServer(model: LocalModel) : Promise<Result<string, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-stt|start_server", { model }) };
 } catch (e) {
@@ -120,14 +120,16 @@ downloadProgressPayload: "plugin:local-stt:download-progress-payload"
 /** user-defined types **/
 
 export type AmModel = "am-parakeet-v2" | "am-parakeet-v3" | "am-whisper-large-v3"
+export type CactusLlmModel = "cactus-gemma3-270m" | "cactus-lfm2-350m" | "cactus-qwen3-0.6b" | "cactus-lfm2-700m" | "cactus-gemma3-1b" | "cactus-lfm2.5-1.2b-instruct" | "cactus-qwen3-1.7b" | "cactus-lfm2-vl-450m-apple" | "cactus-lfm2.5-vl-1.6b-apple"
 export type CactusSttModel = "cactus-whisper-small-int4" | "cactus-whisper-small-int8" | "cactus-whisper-small-int8-apple" | "cactus-whisper-medium-int4" | "cactus-whisper-medium-int4-apple" | "cactus-whisper-medium-int8" | "cactus-whisper-medium-int8-apple" | "cactus-parakeet-ctc-0.6b-int4" | "cactus-parakeet-ctc-0.6b-int8"
-export type DownloadProgressPayload = { model: SupportedSttModel; progress: number }
-export type ServerInfo = { url: string | null; status: ServerStatus; model: SupportedSttModel | null }
+export type DownloadProgressPayload = { model: LocalModel; progress: number }
+export type GgufLlmModel = "Llama3p2_3bQ4" | "Gemma3_4bQ4" | "HyprLLM"
+export type LocalModel = CactusSttModel | WhisperModel | AmModel | GgufLlmModel | CactusLlmModel
+export type ServerInfo = { url: string | null; status: ServerStatus; model: LocalModel | null }
 export type ServerStatus = "unreachable" | "loading" | "ready"
 export type ServerType = "internal" | "external"
-export type SttModelInfo = { key: SupportedSttModel; display_name: string; description: string; size_bytes: number; model_type: SttModelType }
+export type SttModelInfo = { key: LocalModel; display_name: string; description: string; size_bytes: number; model_type: SttModelType }
 export type SttModelType = "cactus" | "whispercpp" | "argmax"
-export type SupportedSttModel = CactusSttModel | WhisperModel | AmModel
 export type WhisperModel = "QuantizedTiny" | "QuantizedTinyEn" | "QuantizedBase" | "QuantizedBaseEn" | "QuantizedSmall" | "QuantizedSmallEn" | "QuantizedLargeTurbo"
 
 /** tauri-specta globals **/

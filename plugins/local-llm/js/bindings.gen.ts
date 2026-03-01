@@ -22,7 +22,7 @@ async listSupportedModel() : Promise<Result<ModelInfo[], string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async isModelDownloaded(model: SupportedModel) : Promise<Result<boolean, string>> {
+async isModelDownloaded(model: GgufLlmModel) : Promise<Result<boolean, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|is_model_downloaded", { model }) };
 } catch (e) {
@@ -30,7 +30,7 @@ async isModelDownloaded(model: SupportedModel) : Promise<Result<boolean, string>
     else return { status: "error", error: e  as any };
 }
 },
-async isModelDownloading(model: SupportedModel) : Promise<Result<boolean, string>> {
+async isModelDownloading(model: GgufLlmModel) : Promise<Result<boolean, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|is_model_downloading", { model }) };
 } catch (e) {
@@ -38,7 +38,7 @@ async isModelDownloading(model: SupportedModel) : Promise<Result<boolean, string
     else return { status: "error", error: e  as any };
 }
 },
-async downloadModel(model: SupportedModel, channel: TAURI_CHANNEL<number>) : Promise<Result<null, string>> {
+async downloadModel(model: GgufLlmModel, channel: TAURI_CHANNEL<number>) : Promise<Result<null, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|download_model", { model, channel }) };
 } catch (e) {
@@ -46,7 +46,7 @@ async downloadModel(model: SupportedModel, channel: TAURI_CHANNEL<number>) : Pro
     else return { status: "error", error: e  as any };
 }
 },
-async cancelDownload(model: SupportedModel) : Promise<Result<boolean, string>> {
+async cancelDownload(model: GgufLlmModel) : Promise<Result<boolean, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|cancel_download", { model }) };
 } catch (e) {
@@ -54,7 +54,7 @@ async cancelDownload(model: SupportedModel) : Promise<Result<boolean, string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async deleteModel(model: SupportedModel) : Promise<Result<null, string>> {
+async deleteModel(model: GgufLlmModel) : Promise<Result<null, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|delete_model", { model }) };
 } catch (e) {
@@ -62,7 +62,7 @@ async deleteModel(model: SupportedModel) : Promise<Result<null, string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async getCurrentModel() : Promise<Result<SupportedModel, string>> {
+async getCurrentModel() : Promise<Result<GgufLlmModel, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|get_current_model") };
 } catch (e) {
@@ -70,7 +70,7 @@ async getCurrentModel() : Promise<Result<SupportedModel, string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async setCurrentModel(model: SupportedModel) : Promise<Result<null, string>> {
+async setCurrentModel(model: GgufLlmModel) : Promise<Result<null, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|set_current_model", { model }) };
 } catch (e) {
@@ -78,7 +78,7 @@ async setCurrentModel(model: SupportedModel) : Promise<Result<null, string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async listDownloadedModel() : Promise<Result<SupportedModel[], string>> {
+async listDownloadedModel() : Promise<Result<GgufLlmModel[], string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("plugin:local-llm|list_downloaded_model") };
 } catch (e) {
@@ -147,9 +147,9 @@ async serverUrl() : Promise<Result<string | null, string>> {
 /** user-defined types **/
 
 export type CustomModelInfo = { path: string; name: string }
-export type ModelInfo = { key: SupportedModel; name: string; description: string; size_bytes: number }
-export type ModelSelection = { type: "Predefined"; content: { key: SupportedModel } } | { type: "Custom"; content: { path: string } }
-export type SupportedModel = "Llama3p2_3bQ4" | "Gemma3_4bQ4" | "HyprLLM"
+export type GgufLlmModel = "Llama3p2_3bQ4" | "Gemma3_4bQ4" | "HyprLLM"
+export type ModelInfo = { key: GgufLlmModel; name: string; description: string; size_bytes: number }
+export type ModelSelection = { type: "Predefined"; content: { key: GgufLlmModel } } | { type: "Custom"; content: { path: string } }
 export type TAURI_CHANNEL<TSend> = null
 
 /** tauri-specta globals **/

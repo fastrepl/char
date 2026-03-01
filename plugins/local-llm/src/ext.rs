@@ -1,4 +1,4 @@
-use std::{collections::HashMap, future::Future, path::Path, path::PathBuf, sync::Arc};
+use std::{collections::HashMap, future::Future, path::PathBuf, sync::Arc};
 
 use tauri::{Manager, Runtime, ipc::Channel};
 use tauri_plugin_store2::Store2PluginExt;
@@ -7,67 +7,12 @@ use hypr_model_downloader::{DownloadableModel, ModelDownloadManager, ModelDownlo
 
 use crate::store::TauriModelStore;
 
-#[derive(Debug, Clone)]
-pub struct LlmDownloadModel {
-    inner: crate::SupportedModel,
-}
-
-impl LlmDownloadModel {
-    pub fn new(inner: crate::SupportedModel) -> Self {
-        Self { inner }
-    }
-
-    fn models_dir(models_base: &Path) -> PathBuf {
-        models_base.join("llm")
-    }
-}
-
-impl DownloadableModel for LlmDownloadModel {
-    fn download_key(&self) -> String {
-        format!("llm:{}", self.inner.file_name())
-    }
-
-    fn download_url(&self) -> Option<String> {
-        Some(self.inner.model_url().to_string())
-    }
-
-    fn download_checksum(&self) -> Option<u32> {
-        Some(self.inner.model_checksum())
-    }
-
-    fn download_destination(&self, models_base: &Path) -> PathBuf {
-        Self::models_dir(models_base).join(self.inner.file_name())
-    }
-
-    fn is_downloaded(&self, models_base: &Path) -> Result<bool, hypr_model_downloader::Error> {
-        hypr_local_llm_core::is_model_downloaded(&self.inner, &Self::models_dir(models_base))
-            .map_err(|e| hypr_model_downloader::Error::OperationFailed(e.to_string()))
-    }
-
-    fn finalize_download(
-        &self,
-        _downloaded_path: &Path,
-        _models_base: &Path,
-    ) -> Result<(), hypr_model_downloader::Error> {
-        Ok(())
-    }
-
-    fn delete_downloaded(&self, models_base: &Path) -> Result<(), hypr_model_downloader::Error> {
-        let path = self.download_destination(models_base);
-        if path.exists() {
-            std::fs::remove_file(&path)
-                .map_err(|e| hypr_model_downloader::Error::DeleteFailed(e.to_string()))?;
-        }
-        Ok(())
-    }
-}
-
 struct TauriModelRuntime<R: Runtime> {
     app_handle: tauri::AppHandle<R>,
     channels: Arc<std::sync::Mutex<HashMap<String, Channel<i8>>>>,
 }
 
-impl<R: Runtime> ModelDownloaderRuntime<LlmDownloadModel> for TauriModelRuntime<R> {
+impl<R: Runtime> ModelDownloaderRuntime<crate::SupportedModel> for TauriModelRuntime<R> {
     fn models_base(&self) -> Result<PathBuf, hypr_model_downloader::Error> {
         use tauri_plugin_settings::SettingsPluginExt;
         Ok(self
@@ -78,7 +23,7 @@ impl<R: Runtime> ModelDownloaderRuntime<LlmDownloadModel> for TauriModelRuntime<
             .unwrap_or_else(|_| dirs::data_dir().unwrap_or_default().join("models")))
     }
 
-    fn emit_progress(&self, model: &LlmDownloadModel, progress: i8) {
+    fn emit_progress(&self, model: &crate::SupportedModel, progress: i8) {
         let key = model.download_key();
         let mut guard = self.channels.lock().unwrap();
 
@@ -97,7 +42,7 @@ impl<R: Runtime> ModelDownloaderRuntime<LlmDownloadModel> for TauriModelRuntime<
 pub fn create_model_downloader<R: Runtime>(
     app_handle: &tauri::AppHandle<R>,
     channels: Arc<std::sync::Mutex<HashMap<String, Channel<i8>>>>,
-) -> ModelDownloadManager<LlmDownloadModel> {
+) -> ModelDownloadManager<crate::SupportedModel> {
     let runtime = Arc::new(TauriModelRuntime {
         app_handle: app_handle.clone(),
         channels,
@@ -168,9 +113,7 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
             guard.model_downloader.clone()
         };
 
-        downloader
-            .is_downloading(&LlmDownloadModel::new(model.clone()))
-            .await
+        downloader.is_downloading(model).await
     }
 
     #[tracing::instrument(skip_all)]
@@ -183,9 +126,7 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
             let guard = state.lock().await;
             guard.model_downloader.clone()
         };
-        Ok(downloader
-            .is_downloaded(&LlmDownloadModel::new(model.clone()))
-            .await?)
+        Ok(downloader.is_downloaded(model).await?)
     }
 
     #[tracing::instrument(skip_all)]
@@ -194,7 +135,7 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
         model: crate::SupportedModel,
         channel: Channel<i8>,
     ) -> Result<(), crate::Error> {
-        let download_model = LlmDownloadModel::new(model);
+        let download_model = model;
         let key = download_model.download_key();
 
         let (downloader, channels) = {
@@ -234,9 +175,7 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
             guard.model_downloader.clone()
         };
 
-        Ok(downloader
-            .cancel_download(&LlmDownloadModel::new(model))
-            .await?)
+        Ok(downloader.cancel_download(&model).await?)
     }
 
     #[tracing::instrument(skip_all)]
@@ -247,9 +186,7 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
             guard.model_downloader.clone()
         };
 
-        downloader
-            .delete(&LlmDownloadModel::new(model.clone()))
-            .await?;
+        downloader.delete(model).await?;
         Ok(())
     }
 
