@@ -97,7 +97,7 @@ describe("timeline utils", () => {
     expect(containsLinkedEvent).toBe(false);
   });
 
-  test("buildTimelineBuckets excludes past events but keeps related sessions", () => {
+  test("buildTimelineBuckets excludes events ended more than 10 minutes ago but keeps related sessions", () => {
     const timelineEventsTable: TimelineEventsTable = {
       "event-past": {
         title: "Past Event",
@@ -140,6 +140,56 @@ describe("timeline utils", () => {
 
     const todayBucket = buckets.find((bucket) => bucket.label === "Today");
     expect(todayBucket).toBeUndefined();
+  });
+
+  test("buildTimelineBuckets includes events that ended less than 10 minutes ago", () => {
+    // System time is 2024-01-15T12:00:00.000Z
+    // Event ended 5 minutes ago — should still be visible
+    const timelineEventsTable: TimelineEventsTable = {
+      "event-recent": {
+        title: "Just Ended Meeting",
+        started_at: "2024-01-15T11:00:00.000Z",
+        ended_at: "2024-01-15T11:55:00.000Z",
+        calendar_id: "cal-1",
+        tracking_id_event: "event-recent",
+        has_recurrence_rules: false,
+      },
+    };
+
+    const buckets = buildTimelineBuckets({
+      timelineEventsTable,
+      timelineSessionsTable: null,
+    });
+
+    const hasRecentEvent = buckets.some((bucket) =>
+      bucket.items.some((item) => item.id === "event-recent"),
+    );
+    expect(hasRecentEvent).toBe(true);
+  });
+
+  test("buildTimelineBuckets excludes events that ended more than 10 minutes ago", () => {
+    // System time is 2024-01-15T12:00:00.000Z
+    // Event ended 15 minutes ago — should be excluded
+    const timelineEventsTable: TimelineEventsTable = {
+      "event-old": {
+        title: "Old Meeting",
+        started_at: "2024-01-15T10:30:00.000Z",
+        ended_at: "2024-01-15T11:45:00.000Z",
+        calendar_id: "cal-1",
+        tracking_id_event: "event-old",
+        has_recurrence_rules: false,
+      },
+    };
+
+    const buckets = buildTimelineBuckets({
+      timelineEventsTable,
+      timelineSessionsTable: null,
+    });
+
+    const hasOldEvent = buckets.some((bucket) =>
+      bucket.items.some((item) => item.id === "event-old"),
+    );
+    expect(hasOldEvent).toBe(false);
   });
 
   test("buildTimelineBuckets sorts buckets by most recent first", () => {

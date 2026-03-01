@@ -1,7 +1,6 @@
 import {
   differenceInCalendarDays,
   differenceInCalendarMonths,
-  isPast,
   safeParseDate,
   startOfDay,
   startOfMonth,
@@ -252,7 +251,9 @@ export function buildTimelineBuckets({
         return;
       }
 
-      if (!isPast(timeToCheck)) {
+      const TEN_MINUTES_MS = 10 * 60 * 1000;
+      const cutoff = new Date(Date.now() - TEN_MINUTES_MS);
+      if (timeToCheck.getTime() > cutoff.getTime()) {
         items.push({
           type: "event",
           id: eventId,

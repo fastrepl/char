@@ -159,8 +159,11 @@ const EventItem = memo(
     flatItemKeys: string[];
   }) => {
     const store = main.UI.useStore(main.STORE_ID);
+    const indexes = main.UI.useIndexes(main.STORE_ID);
     const openCurrent = useTabs((state) => state.openCurrent);
     const openNew = useTabs((state) => state.openNew);
+    const invalidateResource = useTabs((state) => state.invalidateResource);
+    const addDeletion = useUndoDelete((state) => state.addDeletion);
 
     const eventId = item.id;
     const trackingIdEvent = item.data.tracking_id_event;
@@ -168,13 +171,7 @@ const EventItem = memo(
     const calendarId = item.data.calendar_id ?? null;
     const recurrenceSeriesId = item.data.recurrence_series_id;
 
-    const {
-      isIgnored,
-      ignoreEvent,
-      unignoreEvent,
-      ignoreSeries,
-      unignoreSeries,
-    } = useIgnoredEvents();
+    const { isIgnored } = useIgnoredEvents();
 
     const ignored = isIgnored(trackingIdEvent, recurrenceSeriesId);
 
@@ -183,17 +180,23 @@ const EventItem = memo(
       [item.data.started_at, precision, timezone],
     );
 
+    const getSessionId = useCallback(() => {
+      if (!store || !eventId) {
+        return null;
+      }
+      return getOrCreateSessionForEventId(store, eventId, title);
+    }, [eventId, store, title]);
+
     const openEvent = useCallback(
       (openInNewTab: boolean) => {
-        if (!store || !eventId) {
+        const sessionId = getSessionId();
+        if (!sessionId) {
           return;
         }
-
-        const sessionId = getOrCreateSessionForEventId(store, eventId, title);
         const tab: TabInput = { id: sessionId, type: "sessions" };
         openInNewTab ? openNew(tab) : openCurrent(tab);
       },
-      [eventId, store, title, openCurrent, openNew],
+      [getSessionId, openCurrent, openNew],
     );
 
     const itemKey = `event-${item.id}`;
@@ -211,65 +214,66 @@ const EventItem = memo(
       useTimelineSelection.getState().selectRange(flatItemKeys, itemKey);
     }, [flatItemKeys, itemKey]);
 
-    const handleIgnore = useCallback(() => {
-      if (!trackingIdEvent) return;
-      ignoreEvent(trackingIdEvent);
-    }, [trackingIdEvent, ignoreEvent]);
+    const handleOpenNewTab = useCallback(() => {
+      openEvent(true);
+    }, [openEvent]);
 
-    const handleUnignore = useCallback(() => {
-      if (!trackingIdEvent) return;
-      unignoreEvent(trackingIdEvent);
-    }, [trackingIdEvent, unignoreEvent]);
-
-    const handleUnignoreSeries = useCallback(() => {
-      if (!recurrenceSeriesId) return;
-      unignoreSeries(recurrenceSeriesId);
-    }, [recurrenceSeriesId, unignoreSeries]);
-
-    const handleIgnoreSeries = useCallback(() => {
-      if (!recurrenceSeriesId) return;
-      ignoreSeries(recurrenceSeriesId);
-    }, [recurrenceSeriesId, ignoreSeries]);
-
-    const contextMenu = useMemo(() => {
-      if (ignored) {
-        if (recurrenceSeriesId) {
-          return [
-            {
-              id: "unignore",
-              text: "Unignore Only This Event",
-              action: handleUnignore,
-            },
-            {
-              id: "unignore-series",
-              text: "Unignore All Recurring Events",
-              action: handleUnignoreSeries,
-            },
-          ];
-        }
-        return [
-          { id: "unignore", text: "Unignore Event", action: handleUnignore },
-        ];
+    const handleShowInFinder = useCallback(async () => {
+      const sessionId = getSessionId();
+      if (!sessionId) {
+        return;
       }
-      const menu = [
-        { id: "ignore", text: "Ignore Event", action: handleIgnore },
-      ];
-      if (recurrenceSeriesId) {
-        menu.push({
-          id: "ignore-series",
-          text: "Ignore All Recurring Events",
-          action: handleIgnoreSeries,
+      const result = await fsSyncCommands.sessionDir(sessionId);
+      if (result.status === "ok") {
+        await openerCommands.openPath(result.data, null);
+      }
+    }, [getSessionId]);
+
+    const handleDelete = useCallback(() => {
+      if (!store) {
+        return;
+      }
+
+      const sessionId = getSessionId();
+      if (!sessionId) {
+        return;
+      }
+
+      const capturedData = captureSessionData(store, indexes, sessionId);
+
+      invalidateResource("sessions", sessionId);
+      void deleteSessionCascade(store, indexes, sessionId, {
+        skipAudio: true,
+      });
+
+      if (capturedData) {
+        addDeletion(capturedData, () => {
+          void fsSyncCommands.audioDelete(sessionId);
         });
       }
-      return menu;
-    }, [
-      ignored,
-      handleIgnore,
-      handleUnignore,
-      handleUnignoreSeries,
-      handleIgnoreSeries,
-      recurrenceSeriesId,
-    ]);
+    }, [store, indexes, getSessionId, invalidateResource, addDeletion]);
+
+    const contextMenu = useMemo(
+      () => [
+        {
+          id: "open-new-tab",
+          text: "Open in New Tab",
+          action: handleOpenNewTab,
+        },
+        {
+          id: "show",
+          text: "Show in Finder",
+          action: handleShowInFinder,
+        },
+        { separator: true as const },
+        {
+          id: "delete",
+          text: "Delete Note",
+          action: handleDelete,
+        },
+      ],
+      [handleOpenNewTab, handleShowInFinder, handleDelete],
+    );
 
     return (
       <ItemBase
