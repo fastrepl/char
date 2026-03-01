@@ -1,10 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { listConnections } from "@hypr/api-client";
-import { createClient } from "@hypr/api-client/client";
 
-import { env } from "@/env";
 import { getAccessToken } from "@/functions/access-token";
+import { useApiClient } from "@/hooks/use-api-client";
 
 function decodeUserId(token: string): string {
   const payload = JSON.parse(atob(token.split(".")[1])) as { sub?: string };
@@ -14,7 +13,9 @@ function decodeUserId(token: string): string {
   return payload.sub;
 }
 
-export function useConnections() {
+export function useConnections({ enabled = true }: { enabled?: boolean } = {}) {
+  const { getClient } = useApiClient();
+
   const authQuery = useQuery({
     queryKey: ["integration-status", "auth"],
     queryFn: async () => {
@@ -29,12 +30,9 @@ export function useConnections() {
 
   return useQuery({
     queryKey: ["integration-status", authQuery.data?.userId],
-    enabled: !!authQuery.data?.userId,
+    enabled: !!authQuery.data?.userId && enabled,
     queryFn: async () => {
-      const client = createClient({
-        baseUrl: env.VITE_API_URL,
-        headers: { Authorization: `Bearer ${authQuery.data?.token}` },
-      });
+      const client = await getClient();
       const { data, error } = await listConnections({ client });
       if (error) {
         throw new Error("Failed to load integrations");

@@ -12,7 +12,13 @@ const INTEGRATIONS = [
 export function IntegrationsSettingsCard() {
   const navigate = useNavigate();
   const billing = useBilling();
-  const { data: connections, isLoading, isError } = useConnections();
+  const {
+    data: connections,
+    isLoading,
+    isError,
+  } = useConnections({
+    enabled: billing.isPro,
+  });
 
   const getConnectionStatus = (integrationId: string) => {
     return connections?.find((c) => c.integration_id === integrationId);
@@ -43,17 +49,18 @@ export function IntegrationsSettingsCard() {
                   Pro
                 </span>
               )}
-              {isLoading ? (
-                <span className="text-xs text-neutral-400">Checking...</span>
-              ) : isError ? (
-                <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs text-red-600">
-                  Check failed
-                </span>
-              ) : isConnected ? (
-                <span className="rounded-full bg-green-50 px-2 py-0.5 text-xs text-green-600">
-                  Connected
-                </span>
-              ) : null}
+              {billing.isPro &&
+                (isLoading ? (
+                  <span className="text-xs text-neutral-400">Checking...</span>
+                ) : isError ? (
+                  <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs text-red-600">
+                    Check failed
+                  </span>
+                ) : isConnected ? (
+                  <span className="rounded-full bg-green-50 px-2 py-0.5 text-xs text-green-600">
+                    Connected
+                  </span>
+                ) : null)}
             </div>
             {!billing.isPro && !isConnected ? (
               <Link

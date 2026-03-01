@@ -1,189 +1,234 @@
 import Nango from "@nangohq/frontend";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { createConnectSession, createReconnectSession } from "@hypr/api-client";
-import { createClient } from "@hypr/api-client/client";
-import { cn } from "@hypr/utils";
+import {
+  createConnectSession,
+  createReconnectSession,
+  listConnections,
+} from "@hypr/api-client";
 
-import { env } from "@/env";
-import { getAccessToken } from "@/functions/access-token";
+import { type ApiClient, useApiClient } from "@/hooks/use-api-client";
 
+import { IntegrationButton, IntegrationPageLayout } from "./-integration-ui";
 import { getIntegrationDisplay, Route } from "./integration";
+
+async function waitForConnection(
+  client: ApiClient,
+  integrationId: string,
+  expectedConnectionId?: string,
+): Promise<void> {
+  for (let attempt = 0; attempt < 12; attempt++) {
+    const { data, error } = await listConnections({ client });
+    if (!error) {
+      const connection = (data?.connections ?? []).find(
+        (item) => item.integration_id === integrationId,
+      );
+
+      if (
+        connection &&
+        (!expectedConnectionId ||
+          connection.connection_id === expectedConnectionId)
+      ) {
+        return;
+      }
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+}
 
 export function ConnectFlow() {
   const search = Route.useSearch();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { getClient } = useApiClient();
   const [nango] = useState(() => new Nango());
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "connecting" | "success" | "error"
-  >("idle");
-  const statusRef = useRef(status);
-  const inFlightRef = useRef(false);
-
-  useEffect(() => {
-    statusRef.current = status;
-  }, [status]);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const autoConnectTriggeredRef = useRef(false);
 
   const display = getIntegrationDisplay(search.integration_id);
 
-  const handleConnect = async () => {
-    if (inFlightRef.current) return;
-    inFlightRef.current = true;
-    setStatus("loading");
-
-    let sessionToken: string;
-
-    try {
-      const token = await getAccessToken();
-      const apiClient = createClient({
-        baseUrl: env.VITE_API_URL,
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  const {
+    mutateAsync: createSession,
+    reset: resetCreateSession,
+    isPending: isLoading,
+    isError: isCreateSessionError,
+  } = useMutation({
+    mutationFn: async () => {
+      const client = await getClient();
 
       if (search.connection_id) {
         const { data, error } = await createReconnectSession({
-          client: apiClient,
+          client,
           body: {
             connection_id: search.connection_id,
             integration_id: search.integration_id,
           },
         });
+
         if (error || !data) {
-          inFlightRef.current = false;
-          setStatus("error");
-          return;
+          throw new Error("Failed to create reconnect session");
         }
-        sessionToken = data.token;
-      } else {
-        const { data, error } = await createConnectSession({
-          client: apiClient,
-          body: { allowed_integrations: [search.integration_id] },
-        });
-        if (error || !data) {
-          inFlightRef.current = false;
-          setStatus("error");
-          return;
-        }
-        sessionToken = data.token;
+
+        return { sessionToken: data.token, client };
       }
-    } catch {
-      inFlightRef.current = false;
-      setStatus("error");
+
+      const { data, error } = await createConnectSession({
+        client,
+        body: { allowed_integrations: [search.integration_id] },
+      });
+
+      if (error || !data) {
+        throw new Error("Failed to create connect session");
+      }
+
+      return { sessionToken: data.token, client };
+    },
+  });
+
+  const handleConnect = useCallback(async () => {
+    if (isLoading || isConnecting) {
       return;
     }
 
-    setStatus("connecting");
+    resetCreateSession();
+
+    let sessionToken: string;
+    let apiClient: ApiClient;
+
+    try {
+      const result = await createSession();
+      sessionToken = result.sessionToken;
+      apiClient = result.client;
+    } catch {
+      return;
+    }
+
+    setIsConnecting(true);
+    let didComplete = false;
 
     const connect = nango.openConnectUI({
       onEvent: (event) => {
-        if (event.type === "close") {
-          if (
-            statusRef.current !== "success" &&
-            statusRef.current !== "error"
-          ) {
-            inFlightRef.current = false;
-            statusRef.current = "idle";
-            setStatus("idle");
-          }
-        } else if (event.type === "connect") {
-          inFlightRef.current = false;
-          statusRef.current = "success";
-          setStatus("success");
-          void navigate({
-            to: "/callback/integration/",
-            search: {
-              integration_id: search.integration_id,
-              status: "success",
-              flow: search.flow,
-              scheme: search.scheme,
-              return_to: search.return_to,
-            },
-          });
+        if (event.type === "close" && !didComplete) {
+          setIsConnecting(false);
+        }
+
+        if (event.type === "connect") {
+          void (async () => {
+            try {
+              const eventPayload = event.payload as
+                | { connectionId?: string }
+                | undefined;
+
+              await waitForConnection(
+                apiClient,
+                search.integration_id,
+                eventPayload?.connectionId,
+              );
+
+              didComplete = true;
+
+              await queryClient.invalidateQueries({
+                queryKey: ["integration-status"],
+              });
+
+              await navigate({
+                to: "/callback/integration/",
+                search: {
+                  integration_id: search.integration_id,
+                  status: "success",
+                  flow: search.flow,
+                  scheme: search.scheme,
+                  return_to: search.return_to,
+                },
+              });
+            } catch {
+              setIsConnecting(false);
+            }
+          })();
         }
       },
     });
 
     connect.setSessionToken(sessionToken);
-  };
+  }, [
+    createSession,
+    isConnecting,
+    isLoading,
+    nango,
+    navigate,
+    queryClient,
+    resetCreateSession,
+    search.connection_id,
+    search.flow,
+    search.integration_id,
+    search.return_to,
+    search.scheme,
+  ]);
 
   useEffect(() => {
-    if (search.flow === "desktop") {
+    if (search.flow !== "desktop" || autoConnectTriggeredRef.current) {
+      return;
+    }
+
+    autoConnectTriggeredRef.current = true;
+
+    if (!isLoading && !isConnecting) {
       void handleConnect();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const isLoading = status === "loading";
-  const isConnecting = status === "connecting";
+  }, [handleConnect, isConnecting, isLoading, search.flow]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-linear-to-b from-white via-stone-50/20 to-white p-6">
-      <div className="flex w-full max-w-md flex-col gap-8 text-center">
-        <div className="flex flex-col gap-3">
-          <h1 className="font-serif text-3xl tracking-tight text-stone-700">
-            Connect {display.name}
-          </h1>
-          <p className="text-neutral-600">
-            {isConnecting ? display.connectingHint : display.description}
-          </p>
-        </div>
-
-        {(status === "idle" || isLoading) && (
-          <button
-            onClick={handleConnect}
-            disabled={isLoading}
-            className={cn([
-              "flex h-12 w-full items-center justify-center gap-2 rounded-full text-base font-medium shadow-md transition-all",
-              "bg-linear-to-t from-stone-600 to-stone-500 text-white",
-              isLoading
-                ? "cursor-not-allowed opacity-70"
-                : "cursor-pointer hover:scale-[102%] hover:shadow-lg active:scale-[98%]",
-            ])}
-          >
-            {isLoading && (
-              <svg
-                className="h-4 w-4 animate-spin text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                />
-              </svg>
-            )}
-            {isLoading ? "Connecting…" : `Connect ${display.name}`}
-          </button>
-        )}
-
-        {status === "error" && (
-          <div className="flex flex-col gap-4">
-            <p className="text-red-600">
-              Something went wrong. Please try again.
-            </p>
-            <button
-              onClick={handleConnect}
-              className={cn([
-                "flex h-12 w-full cursor-pointer items-center justify-center text-base font-medium transition-all",
-                "rounded-full bg-linear-to-t from-stone-600 to-stone-500 text-white shadow-md hover:scale-[102%] hover:shadow-lg active:scale-[98%]",
-              ])}
-            >
-              Try again
-            </button>
-          </div>
-        )}
+    <IntegrationPageLayout>
+      <div className="flex flex-col gap-3">
+        <h1 className="font-serif text-3xl tracking-tight text-stone-700">
+          Connect {display.name}
+        </h1>
+        <p className="text-neutral-600">
+          {isConnecting ? display.connectingHint : display.description}
+        </p>
       </div>
-    </div>
+
+      {!isConnecting && !isCreateSessionError && (
+        <IntegrationButton onClick={handleConnect} disabled={isLoading}>
+          {isLoading && (
+            <svg
+              className="h-4 w-4 animate-spin text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+          )}
+          {isLoading ? "Connecting..." : `Connect ${display.name}`}
+        </IntegrationButton>
+      )}
+
+      {isCreateSessionError && !isConnecting && (
+        <div className="flex flex-col gap-4">
+          <p className="text-red-600">
+            Something went wrong. Please try again.
+          </p>
+          <IntegrationButton onClick={handleConnect}>
+            Try again
+          </IntegrationButton>
+        </div>
+      )}
+    </IntegrationPageLayout>
   );
 }

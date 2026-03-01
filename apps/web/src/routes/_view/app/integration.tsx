@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 
 import { useBilling } from "@/hooks/use-billing";
 
+import { IntegrationPageLayout } from "./-integration-ui";
 import { ConnectFlow } from "./-integrations-connect-flow";
 import { DisconnectFlow } from "./-integrations-disconnect-flow";
 import { UpgradePrompt } from "./-integrations-upgrade-prompt";
@@ -48,19 +50,32 @@ export const Route = createFileRoute("/_view/app/integration")({
 function Component() {
   const search = Route.useSearch();
   const billing = useBilling();
+  const desktopRefreshStartedRef = useRef(false);
+  const [isSyncingDesktopBilling, setIsSyncingDesktopBilling] = useState(false);
+
+  useEffect(() => {
+    if (search.flow !== "desktop" || desktopRefreshStartedRef.current) {
+      return;
+    }
+
+    desktopRefreshStartedRef.current = true;
+    setIsSyncingDesktopBilling(true);
+    void billing
+      .refreshBilling()
+      .catch(() => {})
+      .finally(() => setIsSyncingDesktopBilling(false));
+  }, [billing.refreshBilling, search.flow]);
+
+  if (!billing.isReady || isSyncingDesktopBilling) {
+    return (
+      <IntegrationPageLayout>
+        <p className="text-neutral-500">Loading...</p>
+      </IntegrationPageLayout>
+    );
+  }
 
   if (search.action === "disconnect") {
     return <DisconnectFlow />;
-  }
-
-  if (!billing.isReady) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-linear-to-b from-white via-stone-50/20 to-white p-6">
-        <div className="w-full max-w-md text-center">
-          <p className="text-neutral-500">Loading...</p>
-        </div>
-      </div>
-    );
   }
 
   if (!billing.isPro) {
