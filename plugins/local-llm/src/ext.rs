@@ -60,7 +60,7 @@ impl DownloadableModel for LlmDownloadModel {
 
 struct TauriModelRuntime<R: Runtime> {
     app_handle: tauri::AppHandle<R>,
-    channels: Arc<tokio::sync::Mutex<HashMap<String, Channel<i8>>>>,
+    channels: Arc<std::sync::Mutex<HashMap<String, Channel<i8>>>>,
 }
 
 impl<R: Runtime> ModelDownloaderRuntime<LlmDownloadModel> for TauriModelRuntime<R> {
@@ -76,27 +76,23 @@ impl<R: Runtime> ModelDownloaderRuntime<LlmDownloadModel> for TauriModelRuntime<
 
     fn emit_progress(&self, model: &LlmDownloadModel, progress: i8) {
         let key = model.download_key();
-        let channels = self.channels.clone();
+        let mut guard = self.channels.lock().unwrap();
 
-        tauri::async_runtime::spawn(async move {
-            let mut guard = channels.lock().await;
+        let Some(channel) = guard.get(&key) else {
+            return;
+        };
 
-            let Some(channel) = guard.get(&key) else {
-                return;
-            };
-
-            let send_result = channel.send(progress);
-            let is_terminal = progress < 0 || progress >= 100;
-            if send_result.is_err() || is_terminal {
-                guard.remove(&key);
-            }
-        });
+        let send_result = channel.send(progress);
+        let is_terminal = progress < 0 || progress >= 100;
+        if send_result.is_err() || is_terminal {
+            guard.remove(&key);
+        }
     }
 }
 
 pub fn create_model_downloader<R: Runtime>(
     app_handle: &tauri::AppHandle<R>,
-    channels: Arc<tokio::sync::Mutex<HashMap<String, Channel<i8>>>>,
+    channels: Arc<std::sync::Mutex<HashMap<String, Channel<i8>>>>,
 ) -> ModelDownloadManager<LlmDownloadModel> {
     let runtime = Arc::new(TauriModelRuntime {
         app_handle: app_handle.clone(),
@@ -194,7 +190,8 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
         model: crate::SupportedModel,
         channel: Channel<i8>,
     ) -> Result<(), crate::Error> {
-        let key = LlmDownloadModel::new(model.clone()).download_key();
+        let download_model = LlmDownloadModel::new(model);
+        let key = download_model.download_key();
 
         let (downloader, channels) = {
             let state = self.state::<crate::SharedState>();
@@ -205,15 +202,17 @@ impl<R: Runtime, T: Manager<R>> LocalLlmPluginExt<R> for T {
             )
         };
 
+        downloader.cancel_download(&download_model).await?;
+
         {
-            let mut guard = channels.lock().await;
+            let mut guard = channels.lock().unwrap();
             if let Some(existing) = guard.insert(key.clone(), channel) {
                 let _ = existing.send(-1);
             }
         }
 
-        if let Err(e) = downloader.download(&LlmDownloadModel::new(model)).await {
-            let mut guard = channels.lock().await;
+        if let Err(e) = downloader.download(&download_model).await {
+            let mut guard = channels.lock().unwrap();
             if let Some(channel) = guard.remove(&key) {
                 let _ = channel.send(-1);
             }

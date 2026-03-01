@@ -389,13 +389,13 @@ impl<'a, R: Runtime, M: Manager<R>> LocalStt<'a, R, M> {
     }
 
     #[tracing::instrument(skip_all)]
-    pub async fn cancel_download(&self, model: SupportedSttModel) -> bool {
+    pub async fn cancel_download(&self, model: SupportedSttModel) -> Result<bool, crate::Error> {
         let downloader = {
             let state = self.manager.state::<crate::SharedState>();
             let guard = state.lock().await;
             guard.model_downloader.clone()
         };
-        downloader.cancel_download(&model).await.unwrap_or(false)
+        Ok(downloader.cancel_download(&model).await?)
     }
 
     #[tracing::instrument(skip_all)]

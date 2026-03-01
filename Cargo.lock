@@ -9960,6 +9960,7 @@ dependencies = [
  "owhisper-client",
  "owhisper-interface",
  "ractor",
+ "sentry",
  "serde",
  "serde_json",
  "specta",
@@ -10632,7 +10633,6 @@ dependencies = [
 name = "model-downloader"
 version = "0.1.0"
 dependencies = [
- "cactus-model",
  "download-interface",
  "file",
  "tempfile",
@@ -17647,7 +17647,6 @@ dependencies = [
  "quickcheck_macros",
  "ractor",
  "rodio",
- "sentry",
  "serde",
  "serde_json",
  "specta",
@@ -17688,9 +17687,8 @@ name = "tauri-plugin-local-llm"
 version = "0.1.0"
 dependencies = [
  "dirs 6.0.0",
- "download-interface",
- "file",
  "local-llm-core",
+ "model-downloader",
  "reqwest 0.13.2",
  "serde",
  "serde_json",

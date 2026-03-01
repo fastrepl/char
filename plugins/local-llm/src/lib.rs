@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::sync::Mutex;
 
 use tauri::Wry;
-use tokio::sync::Mutex;
+use tokio::sync::Mutex as TokioMutex;
 
 use hypr_model_downloader::ModelDownloadManager;
 
@@ -20,7 +21,7 @@ pub use store::*;
 
 const PLUGIN_NAME: &str = "local-llm";
 
-pub type SharedState = std::sync::Arc<tokio::sync::Mutex<State>>;
+pub type SharedState = std::sync::Arc<TokioMutex<State>>;
 
 pub struct State {
     pub model_downloader: ModelDownloadManager<ext::LlmDownloadModel>,
@@ -99,7 +100,7 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
                     download_channels,
                     server: None,
                 };
-                app.manage(Arc::new(Mutex::new(state)));
+                app.manage(Arc::new(TokioMutex::new(state)));
             }
 
             Ok(())

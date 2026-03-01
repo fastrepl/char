@@ -22,10 +22,6 @@ pub trait DownloadableModel: Clone + Send + Sync + 'static {
     fn finalize_download(&self, downloaded_path: &Path, models_base: &Path) -> Result<(), Error>;
     fn delete_downloaded(&self, models_base: &Path) -> Result<(), Error>;
 
-    fn cleanup_path_on_cancel(&self, models_base: &Path) -> Option<PathBuf> {
-        Some(self.download_destination(models_base))
-    }
-
     fn remove_destination_after_finalize(&self) -> bool {
         false
     }
@@ -166,8 +162,6 @@ impl<M: DownloadableModel> ModelDownloadManager<M> {
             entry.token.cancel();
             Self::wait_for_task_exit(entry.task, "cancel_download").await;
             let _ = fs::remove_file(entry.download_path).await;
-
-            self.runtime.emit_progress(model, -1);
             Ok(true)
         } else {
             Ok(false)
