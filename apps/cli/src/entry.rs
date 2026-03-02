@@ -258,9 +258,10 @@ impl EntryApp {
 
         if key.code == KeyCode::Enter {
             if self.popup_visible
-                && let Some(cmd) = self.selected_command_name() {
-                    self.set_input_text(cmd.to_string());
-                }
+                && let Some(cmd) = self.selected_command_name()
+            {
+                self.set_input_text(cmd.to_string());
+            }
 
             let command = self.input_text().trim().to_string();
             self.dispatch_command(&command);
