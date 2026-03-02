@@ -131,6 +131,14 @@ pub async fn nango_webhook(
                 tracing::error!(error = %e, "failed to upsert nango connection");
                 NangoError::Internal(e.to_string())
             })?;
+
+        tracing::info!(
+            end_user_id,
+            integration_id = %payload.provider_config_key,
+            connection_id = %payload.connection_id,
+            operation = ?payload.operation,
+            "nango connection upserted"
+        );
     }
 
     if payload.success && payload.operation == AuthOperation::Deletion {
@@ -142,6 +150,12 @@ pub async fn nango_webhook(
                 tracing::error!(error = %e, "failed to delete nango connection");
                 NangoError::Internal(e.to_string())
             })?;
+
+        tracing::info!(
+            integration_id = %payload.provider_config_key,
+            connection_id = %payload.connection_id,
+            "nango connection deleted locally from webhook"
+        );
     }
 
     Ok(Json(WebhookResponse {

@@ -148,11 +148,6 @@ export type ConferenceSolutionKey = {
 
 export type ConferenceSolutionType = 'addOn' | 'hangoutsMeet' | 'eventNamedHangout' | 'eventHangout' | 'unknown';
 
-export type ConnectSessionResponse = {
-    expires_at: string;
-    token: string;
-};
-
 export type ConnectionItem = {
     connection_id: string;
     integration_id: string;
@@ -166,10 +161,6 @@ export type ConnectionItem = {
 export type ConversationSummary = {
     id: number;
     inboxId?: string | null;
-};
-
-export type CreateConnectSessionRequest = {
-    allowed_integrations?: Array<string> | null;
 };
 
 export type CreateContactRequest = {
@@ -198,8 +189,7 @@ export type CreateEventRequest = {
     event: GoogleCreateEventBody;
 };
 
-export type CreateReconnectSessionRequest = {
-    connection_id: string;
+export type CreateSessionRequest = {
     integration_id: string;
 };
 
@@ -517,6 +507,13 @@ export type SendMessageRequest = {
 };
 
 export type Sensitivity = 'normal' | 'personal' | 'private' | 'confidential' | 'unknown';
+
+export type SessionResponse = {
+    connection_id?: string | null;
+    expires_at: string;
+    mode: string;
+    token: string;
+};
 
 export type StartTrialReason = 'started' | 'not_eligible';
 
@@ -985,33 +982,6 @@ export type LlmChatCompletionsResponses = {
     200: unknown;
 };
 
-export type CreateConnectSessionData = {
-    body: CreateConnectSessionRequest;
-    path?: never;
-    query?: never;
-    url: '/nango/connect-session';
-};
-
-export type CreateConnectSessionErrors = {
-    /**
-     * Unauthorized
-     */
-    401: unknown;
-    /**
-     * Internal server error
-     */
-    500: unknown;
-};
-
-export type CreateConnectSessionResponses = {
-    /**
-     * Connect session created
-     */
-    200: ConnectSessionResponse;
-};
-
-export type CreateConnectSessionResponse = CreateConnectSessionResponses[keyof CreateConnectSessionResponses];
-
 export type DeleteConnectionData = {
     body: DeleteConnectionRequest;
     path?: never;
@@ -1070,36 +1040,32 @@ export type ListConnectionsResponses = {
 
 export type ListConnectionsResponse2 = ListConnectionsResponses[keyof ListConnectionsResponses];
 
-export type CreateReconnectSessionData = {
-    body: CreateReconnectSessionRequest;
+export type CreateSessionData = {
+    body: CreateSessionRequest;
     path?: never;
     query?: never;
-    url: '/nango/reconnect-session';
+    url: '/nango/session';
 };
 
-export type CreateReconnectSessionErrors = {
+export type CreateSessionErrors = {
     /**
      * Unauthorized
      */
     401: unknown;
-    /**
-     * Forbidden
-     */
-    403: unknown;
     /**
      * Internal server error
      */
     500: unknown;
 };
 
-export type CreateReconnectSessionResponses = {
+export type CreateSessionResponses = {
     /**
-     * Reconnect session created
+     * Session created
      */
-    200: ConnectSessionResponse;
+    200: SessionResponse;
 };
 
-export type CreateReconnectSessionResponse = CreateReconnectSessionResponses[keyof CreateReconnectSessionResponses];
+export type CreateSessionResponse = CreateSessionResponses[keyof CreateSessionResponses];
 
 export type NangoWebhookData = {
     body?: never;

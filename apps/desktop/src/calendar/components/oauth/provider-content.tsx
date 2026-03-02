@@ -14,7 +14,10 @@ import {
   OAuthCalendarSelection,
   useOAuthCalendarSelection,
 } from "./calendar-selection";
-import { ConnectionTroubleShootingLink } from "./status";
+import {
+  ConnectionTroubleShootingLink,
+  ReconnectRequiredIndicator,
+} from "./status";
 
 import { useAuth } from "~/auth";
 import { useBillingAccess } from "~/auth/billing";
@@ -29,6 +32,7 @@ export function OAuthProviderContent({ config }: { config: CalendarProvider }) {
   const connection = connections?.find(
     (c) => c.integration_id === config.nangoIntegrationId,
   );
+  const connectionNeedsReconnect = connection?.status === "reconnect_required";
 
   const handleConnect = useCallback(
     () =>
@@ -84,6 +88,17 @@ export function OAuthProviderContent({ config }: { config: CalendarProvider }) {
   }
 
   if (connection) {
+    if (connectionNeedsReconnect) {
+      return (
+        <ReconnectRequiredContent
+          config={config}
+          onConnect={handleConnect}
+          onDisconnect={handleDisconnect}
+          errorDescription={connection.last_error_description ?? null}
+        />
+      );
+    }
+
     return (
       <ConnectedContent
         config={config}
@@ -111,6 +126,47 @@ export function OAuthProviderContent({ config }: { config: CalendarProvider }) {
       >
         Connect {config.displayName} Calendar
       </button>
+    </div>
+  );
+}
+
+function ReconnectRequiredContent({
+  config,
+  onConnect,
+  onDisconnect,
+  errorDescription,
+}: {
+  config: CalendarProvider;
+  onConnect: () => void;
+  onDisconnect: () => void;
+  errorDescription: string | null;
+}) {
+  return (
+    <div className="flex flex-col gap-2 pb-2">
+      <div className="flex items-center gap-2 text-xs text-amber-700">
+        <ReconnectRequiredIndicator />
+        <span>Reconnect required for {config.displayName} Calendar</span>
+      </div>
+
+      {errorDescription && (
+        <p className="text-xs text-neutral-600">{errorDescription}</p>
+      )}
+
+      <div className="flex items-center gap-2">
+        <button
+          onClick={onConnect}
+          className="cursor-pointer text-xs text-neutral-600 underline transition-colors hover:text-neutral-900"
+        >
+          Reconnect
+        </button>
+        <span className="text-xs text-neutral-400">or</span>
+        <button
+          onClick={onDisconnect}
+          className="cursor-pointer text-xs text-red-500 underline transition-colors hover:text-red-700"
+        >
+          Disconnect
+        </button>
+      </div>
     </div>
   );
 }
@@ -168,7 +224,7 @@ async function openIntegrationUrl(
     integration_id: nangoIntegrationId,
     return_to: "calendar",
   };
-  if (connectionId) {
+  if (action === "disconnect" && connectionId) {
     params.connection_id = connectionId;
   }
   const url = await buildWebAppUrl("/app/integration", params);

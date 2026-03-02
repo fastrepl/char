@@ -2,7 +2,7 @@ import Nango from "@nangohq/frontend";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
-import { createConnectSession, createReconnectSession } from "@hypr/api-client";
+import { createSession } from "@hypr/api-client";
 import { createClient } from "@hypr/api-client/client";
 
 import { env } from "@/env";
@@ -41,32 +41,16 @@ export function ConnectFlow() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (search.connection_id) {
-        const { data, error } = await createReconnectSession({
-          client: apiClient,
-          body: {
-            connection_id: search.connection_id,
-            integration_id: search.integration_id,
-          },
-        });
-        if (error || !data) {
-          inFlightRef.current = false;
-          setStatus("error");
-          return;
-        }
-        sessionToken = data.token;
-      } else {
-        const { data, error } = await createConnectSession({
-          client: apiClient,
-          body: { allowed_integrations: [search.integration_id] },
-        });
-        if (error || !data) {
-          inFlightRef.current = false;
-          setStatus("error");
-          return;
-        }
-        sessionToken = data.token;
+      const { data, error } = await createSession({
+        client: apiClient,
+        body: { integration_id: search.integration_id },
+      });
+      if (error || !data) {
+        inFlightRef.current = false;
+        setStatus("error");
+        return;
       }
+      sessionToken = data.token;
     } catch {
       inFlightRef.current = false;
       setStatus("error");

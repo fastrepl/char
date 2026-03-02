@@ -56,10 +56,23 @@ pub async fn delete_connection(
         ));
     }
 
-    state
+    match state
         .nango
         .delete_connection(&body.connection_id, &body.integration_id)
-        .await?;
+        .await
+    {
+        Ok(()) => {}
+        Err(hypr_nango::Error::Api(404, response_body)) => {
+            tracing::warn!(
+                user_id = %auth.claims.sub,
+                connection_id = %body.connection_id,
+                integration_id = %body.integration_id,
+                response_body,
+                "nango connection already deleted, cleaning local row"
+            );
+        }
+        Err(err) => return Err(err.into()),
+    }
 
     state
         .supabase

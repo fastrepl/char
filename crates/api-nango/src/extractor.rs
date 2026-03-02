@@ -54,7 +54,7 @@ impl NangoConnectionState {
         let encoded_user_id = urlencoding::encode(user_id);
         let encoded_integration_id = urlencoding::encode(integration_id);
         let url = format!(
-            "{}/rest/v1/nango_connections?select=connection_id&user_id=eq.{}&integration_id=eq.{}",
+            "{}/rest/v1/nango_connections?select=connection_id,status&user_id=eq.{}&integration_id=eq.{}",
             self.supabase_url, encoded_user_id, encoded_integration_id,
         );
 
@@ -81,10 +81,15 @@ impl NangoConnectionState {
             .await
             .map_err(|e| NangoConnectionError::Database(e.to_string()))?;
 
-        rows.into_iter()
-            .next()
-            .map(|r| r.connection_id)
-            .ok_or_else(|| NangoConnectionError::NotConnected(integration_id.to_string()))
+        match rows.into_iter().next() {
+            Some(row) if row.status == "reconnect_required" => Err(
+                NangoConnectionError::ReconnectRequired(integration_id.to_string()),
+            ),
+            Some(row) => Ok(row.connection_id),
+            None => Err(NangoConnectionError::NotConnected(
+                integration_id.to_string(),
+            )),
+        }
     }
 }
 
@@ -103,6 +108,7 @@ impl<I: NangoIntegrationId> NangoConnection<I> {
 pub enum NangoConnectionError {
     NotAuthenticated,
     NotConnected(String),
+    ReconnectRequired(String),
     MissingState,
     Database(String),
 }
@@ -119,6 +125,14 @@ impl IntoResponse for NangoConnectionError {
                 StatusCode::BAD_REQUEST,
                 "not_connected",
                 format!("no connection found for integration: {}", integration_id),
+            ),
+            Self::ReconnectRequired(integration_id) => (
+                StatusCode::FAILED_DEPENDENCY,
+                "reconnect_required",
+                format!(
+                    "connection requires reconnect for integration: {}",
+                    integration_id
+                ),
             ),
             Self::MissingState => (
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -141,6 +155,7 @@ impl std::fmt::Display for NangoConnectionError {
         match self {
             Self::NotAuthenticated => write!(f, "not authenticated"),
             Self::NotConnected(id) => write!(f, "not connected: {}", id),
+            Self::ReconnectRequired(id) => write!(f, "reconnect required: {}", id),
             Self::MissingState => write!(f, "missing NangoConnectionState"),
             Self::Database(msg) => write!(f, "database error: {}", msg),
         }

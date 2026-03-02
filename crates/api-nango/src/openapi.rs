@@ -1,27 +1,24 @@
 use utoipa::OpenApi;
 
 use crate::routes::{
-    ConnectSessionResponse, ConnectionItem, CreateConnectSessionRequest,
-    CreateReconnectSessionRequest, DeleteConnectionRequest, DeleteConnectionResponse,
-    ListConnectionsResponse, WebhookResponse,
+    ConnectionItem, CreateSessionRequest, DeleteConnectionRequest, DeleteConnectionResponse,
+    ListConnectionsResponse, SessionResponse, WebhookResponse,
 };
 
 #[derive(OpenApi)]
 #[openapi(
     paths(
-        crate::routes::connect::create_connect_session,
-        crate::routes::connect::create_reconnect_session,
+        crate::routes::connect::create_session,
         crate::routes::disconnect::delete_connection,
         crate::routes::status::list_connections,
         crate::routes::webhook::nango_webhook,
     ),
     components(
         schemas(
-            CreateConnectSessionRequest,
-            CreateReconnectSessionRequest,
+            CreateSessionRequest,
             DeleteConnectionRequest,
             DeleteConnectionResponse,
-            ConnectSessionResponse,
+            SessionResponse,
             ConnectionItem,
             ListConnectionsResponse,
             WebhookResponse,

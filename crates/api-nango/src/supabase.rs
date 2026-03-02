@@ -16,9 +16,10 @@ pub(crate) struct NangoConnectionRow {
 }
 
 #[derive(serde::Deserialize)]
-struct ConnectionExistsRow {
-    #[allow(dead_code)]
-    connection_id: String,
+pub(crate) struct LookupConnectionRow {
+    pub connection_id: String,
+    #[serde(default)]
+    pub status: String,
 }
 
 #[derive(Clone)]
@@ -95,12 +96,44 @@ impl SupabaseClient {
             )));
         }
 
-        let rows: Vec<ConnectionExistsRow> = response
+        let rows: Vec<LookupConnectionRow> = response
             .json()
             .await
             .map_err(|e| crate::error::NangoError::Internal(e.to_string()))?;
 
         Ok(!rows.is_empty())
+    }
+
+    pub(crate) async fn lookup_connection(
+        &self,
+        auth_token: &str,
+        user_id: &str,
+        integration_id: &str,
+    ) -> Result<Option<LookupConnectionRow>, crate::error::NangoError> {
+        let encoded_user_id = urlencoding::encode(user_id);
+        let encoded_integration_id = urlencoding::encode(integration_id);
+        let url = format!(
+            "{}/rest/v1/nango_connections?select=connection_id,status&user_id=eq.{}&integration_id=eq.{}",
+            self.supabase_url, encoded_user_id, encoded_integration_id,
+        );
+
+        let response = self.anon_query(&url, auth_token).await?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
+            return Err(crate::error::NangoError::Internal(format!(
+                "lookup query failed: {} - {}",
+                status, body
+            )));
+        }
+
+        let rows: Vec<LookupConnectionRow> = response
+            .json()
+            .await
+            .map_err(|e| crate::error::NangoError::Internal(e.to_string()))?;
+
+        Ok(rows.into_iter().next())
     }
 
     pub(crate) async fn list_user_connections(

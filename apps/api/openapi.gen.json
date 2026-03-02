@@ -246,47 +246,6 @@
         }
       }
     },
-    "/nango/connect-session": {
-      "post": {
-        "tags": [
-          "nango"
-        ],
-        "operationId": "create_connect_session",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateConnectSessionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Connect session created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConnectSessionResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "security": [
-          {
-            "bearer_auth": []
-          }
-        ]
-      }
-    },
     "/nango/connections": {
       "get": {
         "tags": [
@@ -360,17 +319,17 @@
         ]
       }
     },
-    "/nango/reconnect-session": {
+    "/nango/session": {
       "post": {
         "tags": [
           "nango"
         ],
-        "operationId": "create_reconnect_session",
+        "operationId": "create_session",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateReconnectSessionRequest"
+                "$ref": "#/components/schemas/CreateSessionRequest"
               }
             }
           },
@@ -378,20 +337,17 @@
         },
         "responses": {
           "200": {
-            "description": "Reconnect session created",
+            "description": "Session created",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ConnectSessionResponse"
+                  "$ref": "#/components/schemas/SessionResponse"
                 }
               }
             }
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
           },
           "500": {
             "description": "Internal server error"
@@ -1629,21 +1585,6 @@
           "unknown"
         ]
       },
-      "ConnectSessionResponse": {
-        "type": "object",
-        "required": [
-          "token",
-          "expires_at"
-        ],
-        "properties": {
-          "expires_at": {
-            "type": "string"
-          },
-          "token": {
-            "type": "string"
-          }
-        }
-      },
       "ConnectionItem": {
         "type": "object",
         "required": [
@@ -1704,20 +1645,6 @@
               "string",
               "null"
             ]
-          }
-        }
-      },
-      "CreateConnectSessionRequest": {
-        "type": "object",
-        "properties": {
-          "allowed_integrations": {
-            "type": [
-              "array",
-              "null"
-            ],
-            "items": {
-              "type": "string"
-            }
           }
         }
       },
@@ -1799,16 +1726,12 @@
           }
         }
       },
-      "CreateReconnectSessionRequest": {
+      "CreateSessionRequest": {
         "type": "object",
         "required": [
-          "connection_id",
           "integration_id"
         ],
         "properties": {
-          "connection_id": {
-            "type": "string"
-          },
           "integration_id": {
             "type": "string"
           }
@@ -3197,6 +3120,31 @@
           "confidential",
           "unknown"
         ]
+      },
+      "SessionResponse": {
+        "type": "object",
+        "required": [
+          "token",
+          "expires_at",
+          "mode"
+        ],
+        "properties": {
+          "connection_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "expires_at": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        }
       },
       "StartTrialReason": {
         "type": "string",
