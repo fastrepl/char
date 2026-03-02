@@ -6,11 +6,13 @@ import { z } from "zod";
 
 import { cn } from "@hypr/utils";
 
+import { desktopSchemeSchema } from "@/functions/desktop-flow";
+
 const validateSearch = z.object({
   integration_id: z.string(),
   status: z.string(),
   flow: z.enum(["desktop", "web"]).default("desktop"),
-  scheme: z.string().default("hyprnote"),
+  scheme: desktopSchemeSchema.catch("hyprnote"),
   return_to: z.string().optional(),
 });
 

@@ -26,8 +26,7 @@ import { commands as openerCommands } from "@hypr/plugin-opener2";
 import { supabase } from "./client";
 import { clearAuthStorage, isFatalSessionError } from "./errors";
 
-import { env } from "~/env";
-import { DEVICE_FINGERPRINT_HEADER, getScheme } from "~/shared/utils";
+import { buildWebAppUrl, DEVICE_FINGERPRINT_HEADER } from "~/shared/utils";
 
 type AuthState = {
   supabase: SupabaseClient | null;
@@ -267,12 +266,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = useCallback(async () => {
-    const base = env.VITE_APP_URL ?? "http://localhost:3000";
-    const scheme = await getScheme();
-    await openerCommands.openUrl(
-      `${base}/auth?flow=desktop&scheme=${scheme}`,
-      null,
-    );
+    const url = await buildWebAppUrl("/auth");
+    await openerCommands.openUrl(url, null);
   }, []);
 
   const signOut = useCallback(async () => {

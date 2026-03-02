@@ -2,24 +2,19 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { z } from "zod";
 
+import { desktopSchemeSchema } from "@/functions/desktop-flow";
+
 import { DeleteAccountSection } from "./-account-delete";
 import { IntegrationsSettingsCard } from "./-account-integrations";
 import { ProfileInfoSection } from "./-account-profile-info";
 import { AccountSettingsCard } from "./-account-settings";
 import { SignOutSection } from "./-account-sign-out";
 
-const VALID_SCHEMES = [
-  "hyprnote",
-  "hyprnote-nightly",
-  "hyprnote-staging",
-  "hypr",
-] as const;
-
 const validateSearch = z
   .object({
     success: z.coerce.boolean(),
     trial: z.enum(["started"]),
-    scheme: z.enum(VALID_SCHEMES),
+    scheme: desktopSchemeSchema,
   })
   .partial();
 

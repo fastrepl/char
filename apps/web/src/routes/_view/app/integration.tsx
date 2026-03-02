@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
+import { desktopSchemeSchema } from "@/functions/desktop-flow";
 import { useBilling } from "@/hooks/use-billing";
 
 import { IntegrationPageLayout } from "./-integration-ui";
@@ -13,7 +14,7 @@ const validateSearch = z.object({
   connection_id: z.string().optional(),
   action: z.enum(["connect", "disconnect"]).default("connect"),
   flow: z.enum(["desktop", "web"]).default("web"),
-  scheme: z.string().default("hyprnote"),
+  scheme: desktopSchemeSchema.catch("hyprnote"),
   return_to: z.string().optional(),
 });
 

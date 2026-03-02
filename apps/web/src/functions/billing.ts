@@ -9,6 +9,7 @@ import {
 import { createClient } from "@hypr/api-client/client";
 
 import { env, requireEnv } from "@/env";
+import { desktopSchemeSchema } from "@/functions/desktop-flow";
 import { getStripeClient } from "@/functions/stripe";
 import { getSupabaseServerClient } from "@/functions/supabase";
 
@@ -58,7 +59,7 @@ const getStripeCustomerIdForUser = async (
 
 const createCheckoutSessionInput = z.object({
   period: z.enum(["monthly", "yearly"]),
-  scheme: z.string().optional(),
+  scheme: desktopSchemeSchema.optional(),
 });
 
 export const createCheckoutSession = createServerFn({ method: "POST" })

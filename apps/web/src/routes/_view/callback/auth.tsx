@@ -7,6 +7,7 @@ import { z } from "zod";
 import { cn } from "@hypr/utils";
 
 import { exchangeOAuthCode, exchangeOtpToken } from "@/functions/auth";
+import { desktopSchemeSchema } from "@/functions/desktop-flow";
 import { useAnalytics } from "@/hooks/use-posthog";
 
 const validateSearch = z.object({
@@ -14,7 +15,7 @@ const validateSearch = z.object({
   token_hash: z.string().optional(),
   type: z.enum(["email", "recovery"]).optional(),
   flow: z.enum(["desktop", "web"]).default("desktop"),
-  scheme: z.string().default("hyprnote"),
+  scheme: desktopSchemeSchema.catch("hyprnote"),
   redirect: z.string().optional(),
   access_token: z.string().optional(),
   refresh_token: z.string().optional(),

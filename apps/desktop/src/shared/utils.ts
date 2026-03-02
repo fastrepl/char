@@ -1,5 +1,7 @@
 import { getIdentifier } from "@tauri-apps/api/app";
 
+import { env } from "~/env";
+
 // export * from "../shared/config/configure-pro-settings";
 // export * from "~/sidebar/timeline/utils";
 // export * from "~/stt/segment";
@@ -23,7 +25,6 @@ export const buildWebAppUrl = async (
   path: DesktopFlowPath,
   params?: Record<string, string>,
 ): Promise<string> => {
-  const { env } = await import("~/env");
   const scheme = await getScheme();
   const url = new URL(path, env.VITE_APP_URL);
   url.searchParams.set("flow", "desktop");

@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { env } from "@/env";
 import { isAdminEmail } from "@/functions/admin";
+import { desktopSchemeSchema } from "@/functions/desktop-flow";
 import {
   getSupabaseAdminClient,
   getSupabaseDesktopFlowClient,
@@ -12,7 +13,7 @@ import {
 
 const shared = z.object({
   flow: z.enum(["desktop", "web"]).default("desktop"),
-  scheme: z.string().optional(),
+  scheme: desktopSchemeSchema.optional(),
   redirect: z.string().optional(),
 });
 

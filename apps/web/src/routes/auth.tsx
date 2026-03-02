@@ -16,10 +16,14 @@ import {
   doPasswordSignUp,
   fetchUser,
 } from "@/functions/auth";
+import {
+  type DesktopScheme,
+  desktopSchemeSchema,
+} from "@/functions/desktop-flow";
 
 const validateSearch = z.object({
   flow: z.enum(["desktop", "web"]).default("web"),
-  scheme: z.string().default("hyprnote"),
+  scheme: desktopSchemeSchema.catch("hyprnote"),
   redirect: z.string().optional(),
   provider: z.enum(["github", "google"]).optional(),
   rra: z.boolean().optional(),
@@ -184,7 +188,7 @@ function DesktopReauthView({
   scheme,
 }: {
   email: string;
-  scheme: string;
+  scheme: DesktopScheme;
 }) {
   const retryMutation = useMutation({
     mutationFn: () => createDesktopSession({ data: { email } }),
@@ -263,7 +267,7 @@ function EmailAuthView({
   onBack,
 }: {
   flow: "desktop" | "web";
-  scheme?: string;
+  scheme?: DesktopScheme;
   redirect?: string;
   onBack: () => void;
 }) {
@@ -322,7 +326,7 @@ function PasswordForm({
   redirect,
 }: {
   flow: "desktop" | "web";
-  scheme?: string;
+  scheme?: DesktopScheme;
   redirect?: string;
 }) {
   const [email, setEmail] = useState("");
@@ -518,7 +522,7 @@ function handlePasswordSuccess(
   accessToken: string,
   refreshToken: string,
   flow: "desktop" | "web",
-  scheme?: string,
+  scheme?: DesktopScheme,
   redirectPath?: string,
 ) {
   if (flow === "desktop") {
@@ -539,7 +543,7 @@ function MagicLinkForm({
   redirect,
 }: {
   flow: "desktop" | "web";
-  scheme?: string;
+  scheme?: DesktopScheme;
   redirect?: string;
 }) {
   const [email, setEmail] = useState("");
@@ -629,7 +633,7 @@ function OAuthButton({
   rra,
 }: {
   flow: "desktop" | "web";
-  scheme?: string;
+  scheme?: DesktopScheme;
   redirect?: string;
   provider: "google" | "github";
   rra?: boolean;
