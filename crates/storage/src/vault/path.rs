@@ -8,7 +8,7 @@ pub const SETTINGS_FILENAME: &str = "settings.json";
 pub fn compute_settings_path(base: &Path) -> PathBuf {
     base.join(SETTINGS_FILENAME)
 }
-const VAULT_BASE_ENV_VAR: &str = "VAULT_BASE";
+const VAULT_BASE_ENV_VAR: &str = "CHAR_VAULT_BASE";
 
 fn expand_path(path: &str, default_base: Option<&Path>) -> PathBuf {
     let home_dir = || dirs::home_dir().map(|p| p.to_string_lossy().into_owned());
@@ -57,7 +57,7 @@ pub fn resolve_custom(global_base: &Path, default_base: &Path) -> Option<PathBuf
     }
 
     let vault_config_path = compute_vault_config_path(global_base);
-    if let Ok(content) = std::fs::read_to_string(vault_config_path)
+    if let Ok(content) = std::fs::read_to_string(&vault_config_path)
         && let Ok(settings) = serde_json::from_str::<serde_json::Value>(&content)
         && let Some(custom_base) = settings.get(VAULT_PATH_KEY).and_then(|v| v.as_str())
     {

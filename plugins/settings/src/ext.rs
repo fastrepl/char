@@ -75,6 +75,9 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R> + tauri::Emitter<R>> Settings<'
             new_path.as_ref(),
         )?;
         hypr_storage::vault::ensure_vault_dir(new_path.as_ref())?;
+        // This copy is not atomic with respect to other vault writers. We rely on the
+        // immediate restart flow in the UI after this command succeeds to minimize the
+        // window where stale writes can land in the previous vault path.
         hypr_storage::vault::copy_vault_items(old_vault_base.as_ref(), new_path.as_ref()).await?;
 
         let vault_config_path = hypr_storage::global::compute_vault_config_path(&default_base);

@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-pub const VAULT_CONFIG_FILENAME: &str = "hyprnote.json";
+pub const VAULT_CONFIG_FILENAME: &str = "global.json";
 
 pub fn compute_vault_config_path(base: &Path) -> PathBuf {
     base.join(VAULT_CONFIG_FILENAME)
