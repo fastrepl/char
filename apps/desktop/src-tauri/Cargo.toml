@@ -102,7 +102,6 @@ tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 [features]
 devtools = ["tauri/devtools"]
 automation = ["tauri-plugin-automation"]
-apple-calendar-fixture = ["tauri-plugin-calendar/fixture"]
 
 [target.'cfg(target_os = "macos")'.dependencies]
 tauri-plugin-automation = { version = "0.1", optional = true }

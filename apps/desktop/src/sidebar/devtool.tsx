@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useStores } from "tinybase/ui-react";
 
-import {
-  type CalendarListItem,
-  commands as calendarCommands,
-} from "@hypr/plugin-calendar";
 import { commands as windowsCommands } from "@hypr/plugin-windows";
 import { cn } from "@hypr/utils";
 
@@ -31,7 +27,6 @@ export function DevtoolView() {
   const persistedStore = stores[STORE_ID_PERSISTED] as unknown as
     | MainStore
     | undefined;
-  const [fixtureKey, setFixtureKey] = useState(0);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -59,29 +54,12 @@ export function DevtoolView() {
   }, [persistedStore]);
 
   const handleSeed = useCallback(
-    async (seed: SeedDefinition) => {
+    (seed: SeedDefinition) => {
       if (!persistedStore) {
         return;
       }
 
-      let fixtureCalendars: CalendarListItem[] | undefined;
-
-      if (seed.calendarFixtureBase) {
-        try {
-          if ("resetFixture" in calendarCommands) {
-            await (calendarCommands as any).resetFixture();
-          }
-          const result = await calendarCommands.listCalendars("apple");
-          if (result.status === "ok") {
-            fixtureCalendars = result.data;
-          }
-          setFixtureKey((k) => k + 1);
-        } catch {
-          // fixture feature not enabled
-        }
-      }
-
-      seed.run(persistedStore, fixtureCalendars);
+      seed.run(persistedStore);
     },
     [persistedStore],
   );
@@ -95,7 +73,6 @@ export function DevtoolView() {
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-1 py-2">
         <NavigationCard />
         <SeedCard onSeed={handleSeed} />
-        <CalendarMockCard key={fixtureKey} />
         <ErrorTestCard />
       </div>
     </div>
@@ -132,86 +109,6 @@ function DevtoolCard({
         {children}
       </div>
     </div>
-  );
-}
-
-interface FixtureInfo {
-  current_step: number;
-  max_steps: number;
-  step_name: string;
-}
-
-function CalendarMockCard() {
-  const [fixtureInfo, setFixtureInfo] = useState<FixtureInfo | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const loadFixtureInfo = async () => {
-      try {
-        if ("getFixtureInfo" in calendarCommands) {
-          const info = await (calendarCommands as any).getFixtureInfo();
-          setFixtureInfo(info);
-        }
-      } catch {
-        // fixture feature not enabled
-      }
-    };
-    loadFixtureInfo();
-  }, []);
-
-  const handleAdvance = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      if ("advanceFixture" in calendarCommands) {
-        const info = await (calendarCommands as any).advanceFixture();
-        setFixtureInfo(info);
-      }
-    } catch {
-      // fixture feature not enabled
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  if (fixtureInfo === null) {
-    return null;
-  }
-
-  const isAtEnd = fixtureInfo.current_step >= fixtureInfo.max_steps - 1;
-
-  return (
-    <DevtoolCard title="Calendar Mock">
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between px-1">
-          <span className="text-xs text-neutral-500">
-            Step {fixtureInfo.current_step + 1} of {fixtureInfo.max_steps}
-          </span>
-          <span className="text-xs font-medium text-neutral-700">
-            {fixtureInfo.step_name}
-          </span>
-        </div>
-        <button
-          type="button"
-          onClick={handleAdvance}
-          disabled={isLoading || isAtEnd}
-          className={cn([
-            "w-full rounded-md px-2 py-1.5",
-            "text-xs font-medium",
-            "border transition-colors",
-            isAtEnd
-              ? ["border-neutral-100 text-neutral-300", "cursor-default"]
-              : [
-                  "border-blue-200 bg-blue-50 text-blue-700",
-                  "hover:border-blue-300 hover:bg-blue-100",
-                  "cursor-pointer",
-                ],
-            isLoading && "cursor-wait opacity-50",
-          ])}
-        >
-          Advance
-        </button>
-      </div>
-    </DevtoolCard>
   );
 }
 

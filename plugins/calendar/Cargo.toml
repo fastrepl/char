@@ -7,10 +7,6 @@ exclude = ["/js", "/node_modules"]
 links = "tauri-plugin-calendar"
 description = ""
 
-[features]
-default = []
-fixture = ["hypr-apple-calendar/fixture"]
-
 [dependencies]
 hypr-api-client = { workspace = true }
 hypr-apple-calendar = { workspace = true, features = ["specta"] }
@@ -35,3 +31,7 @@ tauri-plugin = { workspace = true, features = ["build"] }
 
 [dev-dependencies]
 specta-typescript = { workspace = true }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+tauri-plugin-apple-contact = { workspace = true }
+objc2-foundation = { workspace = true, features = ["NSPredicate"] }

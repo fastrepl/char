@@ -1,6 +1,5 @@
 import { faker } from "@faker-js/faker/locale/en";
 
-import type { CalendarListItem } from "@hypr/plugin-calendar";
 import type { Calendar } from "@hypr/store";
 
 import { DEFAULT_USER_ID, id } from "~/shared/utils";
@@ -28,22 +27,6 @@ export const createCalendar = () => {
       name: template,
       created_at: faker.date.past({ years: 1 }).toISOString(),
       enabled: faker.datatype.boolean(),
-      provider: "apple",
-    } satisfies Calendar,
-  };
-};
-
-export const createCalendarFromFixture = (
-  fixtureCalendar: CalendarListItem,
-) => {
-  return {
-    id: id(),
-    data: {
-      user_id: DEFAULT_USER_ID,
-      tracking_id_calendar: fixtureCalendar.id,
-      name: fixtureCalendar.title,
-      created_at: new Date().toISOString(),
-      enabled: true,
       provider: "apple",
     } satisfies Calendar,
   };

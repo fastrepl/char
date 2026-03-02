@@ -1,9 +1,7 @@
-import type { CalendarListItem } from "@hypr/plugin-calendar";
-
 import type { Store as MainStore } from "~/store/tinybase/store/main";
 
 export * from "./builders";
-export { createCalendar, createCalendarFromFixture } from "./calendar";
+export { createCalendar } from "./calendar";
 export { createChatGroup, createChatMessage } from "./chat";
 export { createChatShortcut } from "./chat-shortcut";
 export { createEnhancedNote } from "./enhanced-note";
@@ -20,14 +18,8 @@ export { createTag } from "./tag";
 export { createTemplate } from "./template";
 export { generateTranscript } from "./transcript";
 
-export type CalendarFixtureBase = "default";
-
 export type SeedDefinition = {
   id: string;
   label: string;
-  run: (
-    store: MainStore,
-    fixtureCalendars?: CalendarListItem[],
-  ) => void | Promise<void>;
-  calendarFixtureBase?: CalendarFixtureBase;
+  run: (store: MainStore) => void | Promise<void>;
 };

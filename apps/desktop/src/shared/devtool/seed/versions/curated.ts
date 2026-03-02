@@ -9,8 +9,7 @@ import type { Store as MainStore } from "~/store/tinybase/store/main";
 export const curatedSeed: SeedDefinition = {
   id: "curated",
   label: "Curated",
-  calendarFixtureBase: "default",
-  run: async (store: MainStore, _fixtureCalendars) => {
+  run: async (store: MainStore) => {
     const validated = CuratedDataSchema.parse(curatedData);
     const tables = loadCuratedData(validated);
     await new Promise((r) => setTimeout(r, 0));

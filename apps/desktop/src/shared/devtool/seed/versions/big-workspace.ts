@@ -1,7 +1,5 @@
 import { faker } from "@faker-js/faker/locale/en";
 
-import type { CalendarListItem } from "@hypr/plugin-calendar";
-
 import {
   buildLongTranscriptsForSessions,
   buildSessionsForBigWorkspace,
@@ -24,7 +22,7 @@ import {
 } from "~/shared/devtool/seed/shared";
 import type { Store as MainStore } from "~/store/tinybase/store/main";
 
-const buildBigWorkspaceData = (fixtureCalendars?: CalendarListItem[]) => {
+const buildBigWorkspaceData = () => {
   faker.seed(456);
 
   const organizations = buildOrganizations(8);
@@ -36,7 +34,7 @@ const buildBigWorkspaceData = (fixtureCalendars?: CalendarListItem[]) => {
   });
   const humanIds = Object.keys(humans);
 
-  const calendars = buildCalendars(5, fixtureCalendars);
+  const calendars = buildCalendars(5);
   const calendarIds = Object.keys(calendars);
 
   const { events } = buildEventsByHuman(humanIds, calendarIds, {
@@ -112,9 +110,8 @@ const buildBigWorkspaceData = (fixtureCalendars?: CalendarListItem[]) => {
 export const bigWorkspaceSeed: SeedDefinition = {
   id: "big-workspace",
   label: "Big Workspace",
-  calendarFixtureBase: "default",
-  run: async (store: MainStore, fixtureCalendars?: CalendarListItem[]) => {
-    const data = buildBigWorkspaceData(fixtureCalendars);
+  run: async (store: MainStore) => {
+    const data = buildBigWorkspaceData();
     await new Promise((r) => setTimeout(r, 0));
     store.transaction(() => {
       store.delTables();

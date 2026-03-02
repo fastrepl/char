@@ -17,12 +17,41 @@ pub struct CalendarExt<'a, R: tauri::Runtime, M: tauri::Manager<R>> {
 pub fn available_providers() -> Vec<CalendarProviderType> {
     let mut providers = vec![CalendarProviderType::Google, CalendarProviderType::Outlook];
 
-    #[cfg(any(target_os = "macos", feature = "fixture"))]
+    #[cfg(target_os = "macos")]
     {
         providers.insert(0, CalendarProviderType::Apple);
     }
 
     providers
+}
+
+#[cfg(target_os = "macos")]
+mod contact_bridge {
+    use hypr_apple_calendar::ContactFetcher;
+    use hypr_apple_calendar::types::ParticipantContact;
+
+    pub struct AppleContactFetcher;
+
+    impl ContactFetcher for AppleContactFetcher {
+        fn fetch_contact_with_predicate(
+            &self,
+            predicate: &objc2_foundation::NSPredicate,
+        ) -> Option<ParticipantContact> {
+            let contact = tauri_plugin_apple_contact::fetch_contact_with_predicate(predicate)?;
+            Some(ParticipantContact {
+                identifier: contact.identifier,
+                given_name: contact.given_name,
+                family_name: contact.family_name,
+                middle_name: contact.middle_name,
+                organization_name: contact.organization_name,
+                job_title: contact.job_title,
+                email_addresses: contact.email_addresses,
+                phone_numbers: contact.phone_numbers,
+                url_addresses: contact.url_addresses,
+                image_available: contact.image_available,
+            })
+        }
+    }
 }
 
 impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> CalendarExt<'a, R, M> {
@@ -129,37 +158,7 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> CalendarExt<'a, R, M> {
         fetch::list_outlook_events(&config.api_base_url, &token, filter).await
     }
 
-    #[cfg(feature = "fixture")]
-    fn open_apple_calendar(&self) -> Result<(), Error> {
-        Ok(())
-    }
-
-    #[cfg(feature = "fixture")]
-    fn list_apple_calendars(
-        &self,
-    ) -> Result<Vec<hypr_apple_calendar::types::AppleCalendar>, Error> {
-        crate::fixture::list_calendars().map_err(Error::Apple)
-    }
-
-    #[cfg(feature = "fixture")]
-    fn list_apple_events(
-        &self,
-        filter: EventFilter,
-    ) -> Result<Vec<hypr_apple_calendar::types::AppleEvent>, Error> {
-        let filter = hypr_apple_calendar::types::EventFilter {
-            from: filter.from,
-            to: filter.to,
-            calendar_tracking_id: filter.calendar_tracking_id,
-        };
-        crate::fixture::list_events(filter).map_err(Error::Apple)
-    }
-
-    #[cfg(feature = "fixture")]
-    fn create_apple_event(&self, _input: CreateEventInput) -> Result<String, Error> {
-        Ok("fixture-event-created".to_string())
-    }
-
-    #[cfg(all(target_os = "macos", not(feature = "fixture")))]
+    #[cfg(target_os = "macos")]
     fn open_apple_calendar(&self) -> Result<(), Error> {
         let script = String::from(
             "
@@ -182,7 +181,7 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> CalendarExt<'a, R, M> {
         Ok(())
     }
 
-    #[cfg(all(target_os = "macos", not(feature = "fixture")))]
+    #[cfg(target_os = "macos")]
     fn list_apple_calendars(
         &self,
     ) -> Result<Vec<hypr_apple_calendar::types::AppleCalendar>, Error> {
@@ -192,12 +191,14 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> CalendarExt<'a, R, M> {
             .map_err(|e| Error::Apple(e.to_string()))
     }
 
-    #[cfg(all(target_os = "macos", not(feature = "fixture")))]
+    #[cfg(target_os = "macos")]
     fn list_apple_events(
         &self,
         filter: EventFilter,
     ) -> Result<Vec<hypr_apple_calendar::types::AppleEvent>, Error> {
-        let handle = hypr_apple_calendar::Handle::new();
+        let handle = hypr_apple_calendar::Handle::with_contact_fetcher(Box::new(
+            contact_bridge::AppleContactFetcher,
+        ));
         let filter = hypr_apple_calendar::types::EventFilter {
             from: filter.from,
             to: filter.to,
@@ -209,7 +210,7 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> CalendarExt<'a, R, M> {
             .map_err(|e| Error::Apple(e.to_string()))
     }
 
-    #[cfg(all(target_os = "macos", not(feature = "fixture")))]
+    #[cfg(target_os = "macos")]
     fn create_apple_event(&self, input: CreateEventInput) -> Result<String, Error> {
         let handle = hypr_apple_calendar::Handle::new();
 
@@ -232,14 +233,14 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> CalendarExt<'a, R, M> {
             .map_err(|e| Error::Apple(e.to_string()))
     }
 
-    #[cfg(all(not(target_os = "macos"), not(feature = "fixture")))]
+    #[cfg(not(target_os = "macos"))]
     fn open_apple_calendar(&self) -> Result<(), Error> {
         Err(Error::ProviderUnavailable {
             provider: CalendarProviderType::Apple,
         })
     }
 
-    #[cfg(all(not(target_os = "macos"), not(feature = "fixture")))]
+    #[cfg(not(target_os = "macos"))]
     fn list_apple_calendars(
         &self,
     ) -> Result<Vec<hypr_apple_calendar::types::AppleCalendar>, Error> {
@@ -248,7 +249,7 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> CalendarExt<'a, R, M> {
         })
     }
 
-    #[cfg(all(not(target_os = "macos"), not(feature = "fixture")))]
+    #[cfg(not(target_os = "macos"))]
     fn list_apple_events(
         &self,
         _filter: EventFilter,
@@ -258,7 +259,7 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> CalendarExt<'a, R, M> {
         })
     }
 
-    #[cfg(all(not(target_os = "macos"), not(feature = "fixture")))]
+    #[cfg(not(target_os = "macos"))]
     fn create_apple_event(&self, _input: CreateEventInput) -> Result<String, Error> {
         Err(Error::ProviderUnavailable {
             provider: CalendarProviderType::Apple,

@@ -1,6 +1,3 @@
-#[cfg(feature = "fixture")]
-pub use hypr_apple_calendar::fixture;
-
 mod commands;
 mod convert;
 mod error;
@@ -41,7 +38,7 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
         .setup(move |app, _api| {
             specta_builder.mount_events(app);
 
-            #[cfg(all(target_os = "macos", not(feature = "fixture")))]
+            #[cfg(target_os = "macos")]
             {
                 use tauri_specta::Event;
 
