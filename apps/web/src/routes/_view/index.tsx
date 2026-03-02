@@ -115,7 +115,7 @@ function Component() {
 
   return (
     <main
-      className="min-h-screen flex-1 bg-linear-to-b from-white via-stone-50/20 to-white"
+      className="min-h-screen flex-1 overflow-x-hidden bg-linear-to-b from-white via-stone-50/20 to-white"
       style={{ backgroundImage: "url(/patterns/dots.svg)" }}
     >
       <div className="mx-auto max-w-6xl border-x border-neutral-100 bg-white">
@@ -260,7 +260,7 @@ function HeroSection({
           className="laptop:px-0 flex flex-col items-center gap-12 px-4 py-24 text-center"
         >
           <div className="flex flex-col gap-6">
-            <h1 className="font-serif text-4xl tracking-tight text-stone-700 sm:text-5xl">
+            <h1 className="font-serif text-3xl tracking-tight text-stone-700 sm:text-5xl">
               {heroContent.title}
             </h1>
             <p className="text-lg text-neutral-600 sm:text-xl">
@@ -317,7 +317,7 @@ function HeroSection({
                       <button
                         type="submit"
                         disabled={mutation.isPending || mutation.isSuccess}
-                        className="absolute right-1 rounded-full bg-linear-to-t from-stone-600 to-stone-500 px-6 py-3 text-sm text-white shadow-md transition-all hover:scale-[102%] hover:shadow-lg active:scale-[98%] disabled:opacity-50"
+                        className="absolute right-1 rounded-full bg-linear-to-t from-stone-600 to-stone-500 px-4 py-3 text-sm text-white shadow-md transition-all hover:scale-[102%] hover:shadow-lg active:scale-[98%] disabled:opacity-50 sm:px-6"
                       >
                         {mutation.isPending
                           ? "Sending..."
