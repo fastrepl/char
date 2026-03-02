@@ -1,0 +1,151 @@
+## Default Permission
+
+Default permissions for the plugin
+
+#### This default permission set includes the following:
+
+- `allow-available-providers`
+- `allow-list-calendars`
+- `allow-list-events`
+- `allow-open-calendar`
+- `allow-create-event`
+
+## Permission Table
+
+<table>
+<tr>
+<th>Identifier</th>
+<th>Description</th>
+</tr>
+
+
+<tr>
+<td>
+
+`calendar:allow-available-providers`
+
+</td>
+<td>
+
+Enables the available_providers command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`calendar:deny-available-providers`
+
+</td>
+<td>
+
+Denies the available_providers command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`calendar:allow-create-event`
+
+</td>
+<td>
+
+Enables the create_event command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`calendar:deny-create-event`
+
+</td>
+<td>
+
+Denies the create_event command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`calendar:allow-list-calendars`
+
+</td>
+<td>
+
+Enables the list_calendars command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`calendar:deny-list-calendars`
+
+</td>
+<td>
+
+Denies the list_calendars command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`calendar:allow-list-events`
+
+</td>
+<td>
+
+Enables the list_events command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`calendar:deny-list-events`
+
+</td>
+<td>
+
+Denies the list_events command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`calendar:allow-open-calendar`
+
+</td>
+<td>
+
+Enables the open_calendar command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`calendar:deny-open-calendar`
+
+</td>
+<td>
+
+Denies the open_calendar command without any pre-configured scope.
+
+</td>
+</tr>
+</table>

@@ -2860,6 +2860,7 @@ dependencies = [
 name = "calendar-interface"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "serde",
  "specta",
 ]
@@ -4642,6 +4643,7 @@ dependencies = [
  "tauri-plugin-automation",
  "tauri-plugin-autostart",
  "tauri-plugin-bedrock",
+ "tauri-plugin-calendar",
  "tauri-plugin-clipboard-manager",
  "tauri-plugin-db2",
  "tauri-plugin-deep-link",
@@ -17780,6 +17782,29 @@ dependencies = [
  "tauri-specta",
  "thiserror 2.0.18",
  "tokio",
+]
+
+[[package]]
+name = "tauri-plugin-calendar"
+version = "0.1.0"
+dependencies = [
+ "api-client",
+ "apple-calendar",
+ "calendar-interface",
+ "chrono",
+ "chrono-tz 0.10.4",
+ "google-calendar",
+ "outlook-calendar",
+ "reqwest 0.13.2",
+ "serde",
+ "serde_json",
+ "specta",
+ "specta-typescript",
+ "tauri",
+ "tauri-plugin",
+ "tauri-plugin-auth",
+ "tauri-specta",
+ "thiserror 2.0.18",
 ]
 
 [[package]]

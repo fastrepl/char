@@ -29,6 +29,7 @@
     "tracing:default",
     "tray:default",
     "analytics:default",
+    "calendar:default",
     "bedrock:default",
     "updater:default",
     "updater2:default",

@@ -1,9 +1,42 @@
+use chrono::{DateTime, Utc};
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize, specta::Type)]
 #[serde(rename_all = "lowercase")]
 pub enum CalendarProviderType {
     Apple,
     Google,
     Outlook,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
+pub struct EventFilter {
+    pub from: DateTime<Utc>,
+    pub to: DateTime<Utc>,
+    pub calendar_tracking_id: String,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
+pub struct CalendarListItem {
+    pub provider: CalendarProviderType,
+    pub id: String,
+    pub title: String,
+    pub source: Option<String>,
+    pub color: Option<String>,
+    pub is_primary: Option<bool>,
+    pub can_edit: Option<bool>,
+    pub raw: String,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
+pub struct CreateEventInput {
+    pub calendar_tracking_id: String,
+    pub title: String,
+    pub started_at: String,
+    pub ended_at: String,
+    pub is_all_day: Option<bool>,
+    pub location: Option<String>,
+    pub notes: Option<String>,
+    pub url: Option<String>,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
