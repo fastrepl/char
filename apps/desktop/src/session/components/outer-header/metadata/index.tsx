@@ -236,12 +236,92 @@ export function EventDisplay({
         <>
           <div className="h-px bg-neutral-200" />
           <div className="max-h-40 overflow-y-auto text-sm break-words whitespace-pre-wrap text-neutral-700">
-            {event.description}
+            {renderDescriptionWithLinks(event.description)}
           </div>
         </>
       )}
     </div>
   );
+}
+
+const TRAILING_LINK_PUNCTUATION = ".,!?;:)]}";
+
+function parseLinkCandidate(
+  candidate: string,
+): { url: string; suffix: string } | null {
+  let url = candidate;
+  let suffix = "";
+
+  while (url.length > 0) {
+    try {
+      new URL(url);
+      return { url, suffix };
+    } catch {
+      const lastChar = url[url.length - 1];
+      if (!lastChar || !TRAILING_LINK_PUNCTUATION.includes(lastChar)) {
+        return null;
+      }
+      suffix = `${lastChar}${suffix}`;
+      url = url.slice(0, -1);
+    }
+  }
+
+  return null;
+}
+
+function renderDescriptionWithLinks(description: string): React.ReactNode {
+  const nodes: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let linkIndex = 0;
+  const urlPattern = /https?:\/\/[^\s<>"'`]+/gi;
+
+  for (const match of description.matchAll(urlPattern)) {
+    if (match.index === undefined) {
+      continue;
+    }
+
+    const rawMatch = match[0];
+    const start = match.index;
+    const end = start + rawMatch.length;
+
+    if (start > lastIndex) {
+      nodes.push(description.slice(lastIndex, start));
+    }
+
+    const parsedLink = parseLinkCandidate(rawMatch);
+    if (!parsedLink) {
+      nodes.push(rawMatch);
+      lastIndex = end;
+      continue;
+    }
+
+    const { url, suffix } = parsedLink;
+    nodes.push(
+      <a
+        key={`description-link-${linkIndex}`}
+        href={url}
+        className="cursor-pointer underline transition-colors hover:text-neutral-900"
+        onClick={(e) => {
+          e.preventDefault();
+          void openerCommands.openUrl(url, null);
+        }}
+      >
+        {url}
+      </a>,
+    );
+    if (suffix) {
+      nodes.push(suffix);
+    }
+
+    linkIndex += 1;
+    lastIndex = end;
+  }
+
+  if (lastIndex < description.length) {
+    nodes.push(description.slice(lastIndex));
+  }
+
+  return nodes.length > 0 ? nodes : description;
 }
 
 function formatRelativeOrAbsolute(date: Date): string {
