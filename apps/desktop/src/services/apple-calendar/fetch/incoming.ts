@@ -1,5 +1,5 @@
-import type { CalendarEvent } from "@hypr/plugin-apple-calendar";
-import { commands as appleCalendarCommands } from "@hypr/plugin-apple-calendar";
+import { commands as calendarCommands } from "@hypr/plugin-calendar";
+import type { CalendarEvent } from "@hypr/plugin-calendar";
 import { commands as miscCommands } from "@hypr/plugin-misc";
 
 import type {
@@ -30,7 +30,7 @@ export async function fetchIncomingEvents(ctx: Ctx): Promise<{
 
   const results = await Promise.all(
     trackingIds.map(async (trackingId) => {
-      const result = await appleCalendarCommands.listEvents({
+      const result = await calendarCommands.listEvents("apple", {
         calendar_tracking_id: trackingId,
         from: ctx.from.toISOString(),
         to: ctx.to.toISOString(),

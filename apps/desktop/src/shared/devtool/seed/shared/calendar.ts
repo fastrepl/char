@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker/locale/en";
 
-import type { AppleCalendar } from "@hypr/plugin-apple-calendar";
+import type { CalendarListItem } from "@hypr/plugin-calendar";
 import type { Calendar } from "@hypr/store";
 
 import { DEFAULT_USER_ID, id } from "~/shared/utils";
@@ -33,7 +33,9 @@ export const createCalendar = () => {
   };
 };
 
-export const createCalendarFromFixture = (fixtureCalendar: AppleCalendar) => {
+export const createCalendarFromFixture = (
+  fixtureCalendar: CalendarListItem,
+) => {
   return {
     id: id(),
     data: {

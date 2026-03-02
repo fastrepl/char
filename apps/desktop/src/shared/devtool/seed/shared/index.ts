@@ -1,4 +1,4 @@
-import type { AppleCalendar } from "@hypr/plugin-apple-calendar";
+import type { CalendarListItem } from "@hypr/plugin-calendar";
 
 import type { Store as MainStore } from "~/store/tinybase/store/main";
 
@@ -27,7 +27,7 @@ export type SeedDefinition = {
   label: string;
   run: (
     store: MainStore,
-    fixtureCalendars?: AppleCalendar[],
+    fixtureCalendars?: CalendarListItem[],
   ) => void | Promise<void>;
   calendarFixtureBase?: CalendarFixtureBase;
 };

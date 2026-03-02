@@ -2,10 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { RefreshCwIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo } from "react";
 
-import {
-  commands as appleCalendarCommands,
-  colorToCSS,
-} from "@hypr/plugin-apple-calendar";
+import { commands as calendarCommands } from "@hypr/plugin-calendar";
 import { Button } from "@hypr/ui/components/ui/button";
 import { cn } from "@hypr/utils";
 
@@ -74,7 +71,7 @@ export function useAppleCalendarSelection() {
     queryKey: ["appleCalendars"],
     queryFn: async () => {
       const [result] = await Promise.all([
-        appleCalendarCommands.listCalendars(),
+        calendarCommands.listCalendars("apple"),
         new Promise((resolve) => setTimeout(resolve, 150)),
       ]);
 
@@ -103,8 +100,8 @@ export function useAppleCalendarSelection() {
           name: cal.title,
           enabled: existing?.enabled ?? false,
           provider: "apple",
-          source: cal.source.title,
-          color: colorToCSS(cal.color),
+          source: cal.source ?? "Apple Calendar",
+          color: cal.color ?? "#888",
         });
       }
     });

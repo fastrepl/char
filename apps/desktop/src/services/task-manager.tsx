@@ -6,7 +6,7 @@ import {
   useSetTask,
 } from "tinytick/ui-react";
 
-import { events as appleCalendarEvents } from "@hypr/plugin-apple-calendar";
+import { events as appleCalendarEvents } from "@hypr/plugin-calendar";
 
 import { CALENDAR_SYNC_TASK_ID, syncCalendarEvents } from "./apple-calendar";
 import {

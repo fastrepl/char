@@ -1,4 +1,4 @@
-import { events as appleCalendarEvents } from "@hypr/plugin-apple-calendar";
+import { events as appleCalendarEvents } from "@hypr/plugin-calendar";
 import { events as deeplinkEvents } from "@hypr/plugin-deeplink2";
 import { events as detectEvents } from "@hypr/plugin-detect";
 import { events as listenerEvents } from "@hypr/plugin-listener";

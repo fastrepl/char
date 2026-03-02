@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker/locale/en";
 
-import type { AppleCalendar } from "@hypr/plugin-apple-calendar";
+import type { CalendarListItem } from "@hypr/plugin-calendar";
 import type {
   Calendar,
   ChatGroup,
@@ -50,7 +50,7 @@ export const buildOrganizations = (
 
 export const buildCalendars = (
   count: number,
-  fixtureCalendars?: AppleCalendar[],
+  fixtureCalendars?: CalendarListItem[],
 ): Record<string, Calendar> => {
   if (fixtureCalendars?.length) {
     const calendars: Record<string, Calendar> = {};

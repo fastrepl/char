@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker/locale/en";
 
-import type { AppleCalendar } from "@hypr/plugin-apple-calendar";
+import type { CalendarListItem } from "@hypr/plugin-calendar";
 
 import {
   buildLongTranscriptsForSessions,
@@ -24,7 +24,7 @@ import {
 } from "~/shared/devtool/seed/shared";
 import type { Store as MainStore } from "~/store/tinybase/store/main";
 
-const buildBigWorkspaceData = (fixtureCalendars?: AppleCalendar[]) => {
+const buildBigWorkspaceData = (fixtureCalendars?: CalendarListItem[]) => {
   faker.seed(456);
 
   const organizations = buildOrganizations(8);
@@ -113,7 +113,7 @@ export const bigWorkspaceSeed: SeedDefinition = {
   id: "big-workspace",
   label: "Big Workspace",
   calendarFixtureBase: "default",
-  run: async (store: MainStore, fixtureCalendars?: AppleCalendar[]) => {
+  run: async (store: MainStore, fixtureCalendars?: CalendarListItem[]) => {
     const data = buildBigWorkspaceData(fixtureCalendars);
     await new Promise((r) => setTimeout(r, 0));
     store.transaction(() => {

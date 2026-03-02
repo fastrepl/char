@@ -2,9 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useStores } from "tinybase/ui-react";
 
 import {
-  type AppleCalendar,
-  commands as appleCalendarCommands,
-} from "@hypr/plugin-apple-calendar";
+  type CalendarListItem,
+  commands as calendarCommands,
+} from "@hypr/plugin-calendar";
 import { commands as windowsCommands } from "@hypr/plugin-windows";
 import { cn } from "@hypr/utils";
 
@@ -64,14 +64,14 @@ export function DevtoolView() {
         return;
       }
 
-      let fixtureCalendars: AppleCalendar[] | undefined;
+      let fixtureCalendars: CalendarListItem[] | undefined;
 
       if (seed.calendarFixtureBase) {
         try {
-          if ("resetFixture" in appleCalendarCommands) {
-            await (appleCalendarCommands as any).resetFixture();
+          if ("resetFixture" in calendarCommands) {
+            await (calendarCommands as any).resetFixture();
           }
-          const result = await appleCalendarCommands.listCalendars();
+          const result = await calendarCommands.listCalendars("apple");
           if (result.status === "ok") {
             fixtureCalendars = result.data;
           }
@@ -148,8 +148,8 @@ function CalendarMockCard() {
   useEffect(() => {
     const loadFixtureInfo = async () => {
       try {
-        if ("getFixtureInfo" in appleCalendarCommands) {
-          const info = await (appleCalendarCommands as any).getFixtureInfo();
+        if ("getFixtureInfo" in calendarCommands) {
+          const info = await (calendarCommands as any).getFixtureInfo();
           setFixtureInfo(info);
         }
       } catch {
@@ -162,8 +162,8 @@ function CalendarMockCard() {
   const handleAdvance = useCallback(async () => {
     setIsLoading(true);
     try {
-      if ("advanceFixture" in appleCalendarCommands) {
-        const info = await (appleCalendarCommands as any).advanceFixture();
+      if ("advanceFixture" in calendarCommands) {
+        const info = await (calendarCommands as any).advanceFixture();
         setFixtureInfo(info);
       }
     } catch {
