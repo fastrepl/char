@@ -109,10 +109,10 @@ where
         if let Err(e) = analytics.event(user_id, payload).await {
             tracing::warn!("analytics event error: {e}");
         }
-        if let Some(props) = outcome.to_analytics_properties() {
-            if let Err(e) = analytics.set_properties(user_id, props).await {
-                tracing::warn!("analytics set_properties error: {e}");
-            }
+        if let Some(props) = outcome.to_analytics_properties()
+            && let Err(e) = analytics.set_properties(user_id, props).await
+        {
+            tracing::warn!("analytics set_properties error: {e}");
         }
     }
     outcome.into_response()

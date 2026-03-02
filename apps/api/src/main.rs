@@ -28,7 +28,7 @@ pub const DEVICE_FINGERPRINT_HEADER: &str = "x-device-fingerprint";
 async fn app() -> Router {
     let env = env();
 
-    let analytics = build_analytics_client(&env);
+    let analytics = build_analytics_client(env);
 
     let llm_config =
         hypr_llm_proxy::LlmProxyConfig::new(&env.llm).with_analytics(analytics.clone());

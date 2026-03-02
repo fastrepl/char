@@ -1,10 +1,10 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub struct AudioDropRequest {
     pub file_path: String,
 }
 
-pub fn looks_like_audio_file(path: &PathBuf) -> bool {
+pub fn looks_like_audio_file(path: &Path) -> bool {
     matches!(
         path.extension()
             .and_then(|ext| ext.to_str())

@@ -45,10 +45,10 @@ impl NangoConnectionState {
         integration_id: &str,
     ) -> Result<String, NangoConnectionError> {
         #[cfg(debug_assertions)]
-        if let Ok(connection_id) = std::env::var("DEV_NANGO_CONNECTION_ID") {
-            if !connection_id.is_empty() {
-                return Ok(connection_id);
-            }
+        if let Ok(connection_id) = std::env::var("DEV_NANGO_CONNECTION_ID")
+            && !connection_id.is_empty()
+        {
+            return Ok(connection_id);
         }
 
         let encoded_user_id = urlencoding::encode(user_id);

@@ -17,7 +17,7 @@ members = [
   "crates/*",
   "plugins/*",
 ]
-exclude = ["plugins/cli2", "plugins/db", "plugins/export", "crates/vad-ext"]
+exclude = ["plugins/cli2", "plugins/db", "plugins/export", "plugins/extensions", "crates/vad-ext"]
 
 [workspace.dependencies]
 hypr-aec = { path = "crates/aec", package = "aec" }

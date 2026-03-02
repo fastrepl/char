@@ -208,17 +208,9 @@ impl App {
         let cursor_row = memo_cursor_row.min(lines.len().saturating_sub(1));
         let cursor_col = memo_cursor_col.min(current_line_len(lines, cursor_row));
 
-        let row_start = if cursor_row + 1 > max_rows {
-            cursor_row + 1 - max_rows
-        } else {
-            0
-        };
+        let row_start = (cursor_row + 1).saturating_sub(max_rows);
 
-        let col_start = if cursor_col + 1 > max_cols {
-            cursor_col + 1 - max_cols
-        } else {
-            0
-        };
+        let col_start = (cursor_col + 1).saturating_sub(max_cols);
 
         let row_end = (row_start + max_rows).min(lines.len());
         let lines = lines[row_start..row_end]
@@ -407,9 +399,7 @@ impl App {
             return None;
         }
 
-        let Some(path) = normalize_pasted_path(&pasted) else {
-            return None;
-        };
+        let path = normalize_pasted_path(&pasted)?;
 
         if !looks_like_audio_file(&path) {
             return None;

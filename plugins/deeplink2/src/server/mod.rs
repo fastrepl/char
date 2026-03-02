@@ -33,12 +33,18 @@ pub struct CallbackServerState {
     active_port: Mutex<Option<u16>>,
 }
 
-impl CallbackServerState {
-    pub fn new() -> Self {
+impl Default for CallbackServerState {
+    fn default() -> Self {
         Self {
             servers: Mutex::new(HashMap::new()),
             active_port: Mutex::new(None),
         }
+    }
+}
+
+impl CallbackServerState {
+    pub fn new() -> Self {
+        Self::default()
     }
 }
 
@@ -196,10 +202,10 @@ async fn serve<R: tauri::Runtime>(
     if let Ok(mut servers) = state.servers.lock() {
         servers.remove(&port);
     }
-    if let Ok(mut active) = state.active_port.lock() {
-        if *active == Some(port) {
-            *active = None;
-        }
+    if let Ok(mut active) = state.active_port.lock()
+        && *active == Some(port)
+    {
+        *active = None;
     }
 }
 

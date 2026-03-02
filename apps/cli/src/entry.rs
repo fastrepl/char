@@ -257,11 +257,10 @@ impl EntryApp {
         }
 
         if key.code == KeyCode::Enter {
-            if self.popup_visible {
-                if let Some(cmd) = self.selected_command_name() {
+            if self.popup_visible
+                && let Some(cmd) = self.selected_command_name() {
                     self.set_input_text(cmd.to_string());
                 }
-            }
 
             let command = self.input_text().trim().to_string();
             self.dispatch_command(&command);
@@ -528,12 +527,12 @@ fn single_command_match_score(query: &str, command: &str) -> Option<i32> {
         return Some(1);
     }
 
-    if command.starts_with(&query) {
+    if command.starts_with(query) {
         let penalty = (command.len() as i32 - query.len() as i32).max(0);
         return Some(500 - penalty);
     }
 
-    if let Some(pos) = command.find(&query) {
+    if let Some(pos) = command.find(query) {
         return Some(350 - pos as i32);
     }
 

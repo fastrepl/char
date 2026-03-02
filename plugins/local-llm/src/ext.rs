@@ -32,7 +32,7 @@ impl<R: Runtime> ModelDownloaderRuntime<crate::SupportedModel> for TauriModelRun
         };
 
         let send_result = channel.send(progress);
-        let is_terminal = progress < 0 || progress >= 100;
+        let is_terminal = !(0..100).contains(&progress);
         if send_result.is_err() || is_terminal {
             guard.remove(&key);
         }

@@ -208,7 +208,7 @@ impl Segmenter {
         }
 
         let has_last_chunk = num_samples < self.window_size
-            || (num_samples - self.window_size) % self.window_step_size > 0;
+            || !(num_samples - self.window_size).is_multiple_of(self.window_step_size);
 
         if has_last_chunk {
             starts.push(num_full_chunks * self.window_step_size);
