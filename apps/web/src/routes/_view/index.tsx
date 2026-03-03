@@ -259,11 +259,11 @@ function HeroSection({
           id="hero"
           className="laptop:px-0 flex flex-col items-center gap-12 px-4 py-24 text-center"
         >
-          <div className="flex max-w-full flex-col gap-6 overflow-hidden">
-            <h1 className="font-serif text-2xl tracking-tight text-stone-700 sm:text-5xl">
+          <div className="flex w-full max-w-full flex-col gap-6">
+            <h1 className="break-words font-serif text-2xl tracking-tight text-stone-700 sm:text-5xl">
               {heroContent.title}
             </h1>
-            <p className="text-base text-neutral-600 sm:text-xl">
+            <p className="break-words text-base text-neutral-600 sm:text-xl">
               {heroContent.subtitle}
             </p>
           </div>
