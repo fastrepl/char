@@ -4,7 +4,7 @@ import type { DeviceInfo } from "@hypr/plugin-misc";
 import { commands as miscCommands } from "@hypr/plugin-misc";
 import { commands as templateCommands } from "@hypr/plugin-template";
 
-import type { ContextEntity } from "~/chat/context-item";
+import type { ContextEntity } from "./entities";
 
 async function getAccountInfo(): Promise<AccountInfo | null> {
   try {

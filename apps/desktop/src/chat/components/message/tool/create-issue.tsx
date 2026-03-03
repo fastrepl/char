@@ -14,7 +14,7 @@ import {
 } from "./shared";
 
 import type { ToolRenderer } from "~/chat/components/message/types";
-import { parseCreateIssueOutput } from "~/chat/support-mcp-tools";
+import { parseCreateIssueOutput } from "~/chat/mcp/support-mcp-tools";
 
 type Renderer = ToolRenderer<"tool-create_issue">;
 

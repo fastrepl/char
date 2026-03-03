@@ -3,7 +3,7 @@ import { createContext, useContext } from "react";
 import { useLeftSidebar } from "./leftsidebar";
 import { useSettings } from "./settings";
 
-import { useChatMode } from "~/chat/use-chat-mode";
+import { useChatMode } from "~/chat/state/use-chat-mode";
 
 interface ShellContextType {
   chat: ReturnType<typeof useChatMode>;

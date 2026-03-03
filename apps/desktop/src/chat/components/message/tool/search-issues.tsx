@@ -12,7 +12,7 @@ import {
 } from "./shared";
 
 import type { ToolRenderer } from "~/chat/components/message/types";
-import { parseSearchIssuesOutput } from "~/chat/support-mcp-tools";
+import { parseSearchIssuesOutput } from "~/chat/mcp/support-mcp-tools";
 
 type Renderer = ToolRenderer<"tool-search_issues">;
 

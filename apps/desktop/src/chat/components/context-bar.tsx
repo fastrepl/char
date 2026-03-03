@@ -13,7 +13,7 @@ import {
 } from "@hypr/ui/components/ui/tooltip";
 import { cn } from "@hypr/utils";
 
-import type { ContextEntity, ContextRef } from "~/chat/context-item";
+import type { ContextEntity, ContextRef } from "~/chat/context/entities";
 import { type ContextChipProps, renderChip } from "~/chat/context/registry";
 import { useSearchEngine } from "~/search/contexts/engine";
 

@@ -1,7 +1,7 @@
 import type { UIMessage } from "ai";
 import { z } from "zod";
 
-import type { ContextRef } from "~/chat/context-item";
+import type { ContextRef } from "~/chat/context/entities";
 
 const messageMetadataSchema = z.object({
   createdAt: z.number().optional(),

@@ -5,7 +5,8 @@ import {
   type ContextRef,
   extractToolContextEntities,
   dedupeByKey,
-} from "~/chat/context-item";
+} from "./entities";
+
 import type { HyprUIMessage } from "~/chat/types";
 import type * as main from "~/store/tinybase/store/main";
 

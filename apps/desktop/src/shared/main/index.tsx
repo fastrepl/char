@@ -27,9 +27,10 @@ import { useNewNote, useNewNoteAndListen } from "./useNewNote";
 
 import { TabContentAI, TabItemAI } from "~/ai";
 import { TabContentCalendar, TabItemCalendar } from "~/calendar";
-import { TabContentChat, TabItemChat } from "~/chat";
 import { ChatFloatingButton } from "~/chat/components";
-import { TabContentChatShortcut, TabItemChatShortcut } from "~/chat/shortcuts";
+import { TabContentChat } from "~/chat/tab-content";
+import { TabItemChat } from "~/chat/tab-item";
+import { TabContentChatShortcut, TabItemChatShortcut } from "~/chat_shortcuts";
 import { TabContentContact, TabItemContact } from "~/contacts";
 import { TabContentHuman, TabItemHuman } from "~/contacts/humans";
 import { useNotifications } from "~/contexts/notifications";

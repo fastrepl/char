@@ -6,12 +6,12 @@ import { ChatBody } from "./body";
 import { ChatContent } from "./content";
 import { ChatHeader } from "./header";
 import { ChatSession } from "./session";
+
+import { useLanguageModel } from "~/ai/hooks";
 import {
   useChatActions,
   useStableSessionId,
-} from "~/chat/hooks/use-chat-actions";
-
-import { useLanguageModel } from "~/ai/hooks";
+} from "~/chat/store/use-chat-actions";
 import { useShell } from "~/contexts/shell";
 import { useTabs } from "~/store/zustand/tabs";
 

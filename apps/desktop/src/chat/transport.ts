@@ -12,7 +12,7 @@ import {
   commands as templateCommands,
 } from "@hypr/plugin-template";
 
-import type { ContextRef } from "./context-item";
+import type { ContextRef } from "./context/entities";
 import type { HyprUIMessage } from "./types";
 
 function isRecord(value: unknown): value is Record<string, unknown> {

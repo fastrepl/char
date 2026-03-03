@@ -1,7 +1,7 @@
 import type { AccountInfo } from "@hypr/plugin-auth";
 import type { DeviceInfo } from "@hypr/plugin-misc";
 
-import type { HyprUIMessage } from "./types";
+import type { HyprUIMessage } from "../types";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;

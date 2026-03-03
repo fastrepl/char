@@ -10,7 +10,7 @@ import {
 } from "./shared";
 
 import { Disclosure } from "~/chat/components/message/shared";
-import { extractMcpOutputText } from "~/chat/mcp-output-parser";
+import { extractMcpOutputText } from "~/chat/mcp/mcp-output-parser";
 
 function formatToolName(name: string): string {
   return name.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());

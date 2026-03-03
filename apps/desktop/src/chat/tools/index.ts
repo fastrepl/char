@@ -7,7 +7,7 @@ import type {
   ToolDependencies,
 } from "./types";
 
-import type { SupportMcpTools } from "~/chat/support-mcp-tools";
+import type { SupportMcpTools } from "~/chat/mcp/support-mcp-tools";
 import type { SearchFilters } from "~/search/contexts/engine/types";
 
 export type { ToolDependencies };

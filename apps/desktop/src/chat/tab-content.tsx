@@ -8,9 +8,12 @@ import { useAuth } from "~/auth";
 import { ChatBody } from "~/chat/components/body";
 import { ChatContent } from "~/chat/components/content";
 import { ChatSession } from "~/chat/components/session";
-import { type ContextEntity, dedupeByKey } from "~/chat/context-item";
-import { useChatActions, useStableSessionId } from "~/chat/hooks/use-chat-actions";
-import { useSupportMCP } from "~/chat/hooks/useSupportMCP";
+import { type ContextEntity, dedupeByKey } from "~/chat/context/entities";
+import { useSupportMCP } from "~/chat/mcp/useSupportMCP";
+import {
+  useChatActions,
+  useStableSessionId,
+} from "~/chat/store/use-chat-actions";
 import type { HyprUIMessage } from "~/chat/types";
 import { ElicitationProvider } from "~/contexts/elicitation";
 import { StandardTabWrapper } from "~/shared/main";
@@ -131,7 +134,7 @@ function SupportChatTabInner({
     status: "submitted" | "streaming" | "ready" | "error";
     error?: Error;
     contextEntities: ContextEntity[];
-    pendingRefs: import("~/chat/context-item").ContextRef[];
+    pendingRefs: import("~/chat/context/entities").ContextRef[];
     onRemoveContextEntity: (key: string) => void;
     isSystemPromptReady: boolean;
   };

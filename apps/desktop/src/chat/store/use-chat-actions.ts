@@ -1,7 +1,8 @@
 import { useCallback, useRef } from "react";
 
-import type { ContextRef } from "~/chat/context-item";
-import { useCreateChatMessage } from "~/chat/hooks/useCreateChatMessage";
+import { useCreateChatMessage } from "./useCreateChatMessage";
+
+import type { ContextRef } from "~/chat/context/entities";
 import type { HyprUIMessage } from "~/chat/types";
 import { id } from "~/shared/utils";
 import * as main from "~/store/tinybase/store/main";

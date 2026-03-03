@@ -1,6 +1,6 @@
 import { CalendarIcon, MonitorIcon, SearchIcon, UserIcon } from "lucide-react";
 
-import type { ContextEntity, ContextEntityKind } from "~/chat/context-item";
+import type { ContextEntity, ContextEntityKind } from "./entities";
 
 export type ContextChipProps = {
   key: string;

@@ -12,7 +12,7 @@ import {
 } from "./shared";
 
 import type { ToolRenderer } from "~/chat/components/message/types";
-import { parseListSubscriptionsOutput } from "~/chat/support-mcp-tools";
+import { parseListSubscriptionsOutput } from "~/chat/mcp/support-mcp-tools";
 
 type Renderer = ToolRenderer<"tool-list_subscriptions">;
 

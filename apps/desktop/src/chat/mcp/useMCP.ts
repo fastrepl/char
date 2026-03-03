@@ -5,7 +5,7 @@ import type { MCPClientConfig } from "./useMCPClient";
 import { useMCPClient } from "./useMCPClient";
 import { useMCPElicitation } from "./useMCPElicitation";
 
-import type { ContextEntity } from "~/chat/context-item";
+import type { ContextEntity } from "~/chat/context/entities";
 
 export interface MCPConfig extends MCPClientConfig {
   enabled: boolean;

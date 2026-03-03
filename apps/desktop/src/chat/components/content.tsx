@@ -5,7 +5,7 @@ import { ContextBar } from "./context-bar";
 import { ChatMessageInput, type McpIndicator } from "./input";
 
 import type { useLanguageModel } from "~/ai/hooks";
-import type { ContextEntity, ContextRef } from "~/chat/context-item";
+import type { ContextEntity, ContextRef } from "~/chat/context/entities";
 import type { HyprUIMessage } from "~/chat/types";
 
 export function ChatContent({

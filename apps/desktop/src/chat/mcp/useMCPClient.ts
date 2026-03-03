@@ -1,7 +1,8 @@
 import { createMCPClient, type MCPClient } from "@ai-sdk/mcp";
 import { useEffect, useRef, useState } from "react";
 
-import { TauriMCPTransport } from "~/chat/tauri-mcp-transport";
+import { TauriMCPTransport } from "./tauri-mcp-transport";
+
 import { env } from "~/env";
 
 const TIMEOUT_MS = 5_000;
