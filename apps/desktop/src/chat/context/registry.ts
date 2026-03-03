@@ -8,6 +8,8 @@ export type ContextChipProps = {
   label: string;
   tooltip: string;
   removable?: boolean;
+  entityKind?: ContextEntityKind;
+  entityId?: string;
 };
 
 type EntityRenderer<E extends ContextEntity> = {
@@ -27,16 +29,15 @@ const renderers: RendererMap = {
   session: {
     toChip: (entity) => {
       const label = entity.title || entity.date || "Session";
-      const tooltip =
-        [entity.title, entity.date].filter(Boolean).join("\n") ||
-        entity.sessionId;
       const isFromTool = entity.source === "tool";
       return {
         key: entity.key,
         icon: isFromTool ? SearchIcon : CalendarIcon,
         label,
-        tooltip,
+        tooltip: entity.title || "Session",
         removable: entity.removable,
+        entityKind: "session",
+        entityId: entity.sessionId,
       };
     },
   },
@@ -44,32 +45,22 @@ const renderers: RendererMap = {
   account: {
     toChip: (entity) => {
       if (!entity.email && !entity.userId) return null;
-      const lines: string[] = [];
-      if (entity.email) lines.push(entity.email);
-      if (entity.userId) lines.push(`ID: ${entity.userId}`);
       return {
         key: entity.key,
         icon: UserIcon,
         label: "Account",
-        tooltip: lines.join("\n"),
+        tooltip: entity.email || "Account",
       };
     },
   },
 
   device: {
     toChip: (entity) => {
-      const lines: string[] = [];
-      if (entity.platform) lines.push(`Platform: ${entity.platform}`);
-      if (entity.arch) lines.push(`Architecture: ${entity.arch}`);
-      if (entity.osVersion) lines.push(`OS Version: ${entity.osVersion}`);
-      if (entity.appVersion) lines.push(`App: ${entity.appVersion}`);
-      if (entity.buildHash) lines.push(`Build: ${entity.buildHash}`);
-      if (entity.locale) lines.push(`Locale: ${entity.locale}`);
       return {
         key: entity.key,
         icon: MonitorIcon,
         label: "Device",
-        tooltip: lines.join("\n"),
+        tooltip: "Device",
       };
     },
   },
