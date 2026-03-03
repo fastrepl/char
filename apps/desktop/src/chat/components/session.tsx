@@ -13,8 +13,18 @@ import {
 import { commands as templateCommands } from "@hypr/plugin-template";
 
 import { useLanguageModel } from "~/ai/hooks";
+<<<<<<< ours
+import type { ContextEntity, ContextRef } from "~/chat/context-item";
+import { useChatContextPipeline } from "~/chat/hooks/use-chat-context-pipeline";
+import { useCreateChatMessage } from "~/chat/hooks/useCreateChatMessage";
+||||||| ancestor
+import type { ContextEntity, ContextRef } from "~/chat/context-item";
+import { useCreateChatMessage } from "~/chat/hooks/useCreateChatMessage";
+import { useChatContextPipeline } from "~/chat/hooks/use-chat-context-pipeline";
+=======
 import type { ContextEntity, ContextRef } from "~/chat/context/entities";
 import { useChatContextPipeline } from "~/chat/context/use-chat-context-pipeline";
+>>>>>>> theirs
 import { hydrateSessionContextFromFs } from "~/chat/session-context-hydrator";
 import { useCreateChatMessage } from "~/chat/store/useCreateChatMessage";
 import { CustomChatTransport } from "~/chat/transport";

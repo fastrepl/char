@@ -8,12 +8,25 @@ import { useAuth } from "~/auth";
 import { ChatBody } from "~/chat/components/body";
 import { ChatContent } from "~/chat/components/content";
 import { ChatSession } from "~/chat/components/session";
+<<<<<<< ours
+import { type ContextEntity, dedupeByKey } from "~/chat/context-item";
+import {
+  useChatActions,
+  useStableSessionId,
+} from "~/chat/hooks/use-chat-actions";
+import { useSupportMCP } from "~/chat/hooks/useSupportMCP";
+||||||| ancestor
+import { type ContextEntity, dedupeByKey } from "~/chat/context-item";
+import { useChatActions, useStableSessionId } from "~/chat/hooks/use-chat-actions";
+import { useSupportMCP } from "~/chat/hooks/useSupportMCP";
+=======
 import { type ContextEntity, dedupeByKey } from "~/chat/context/entities";
 import { useSupportMCP } from "~/chat/mcp/useSupportMCP";
 import {
   useChatActions,
   useStableSessionId,
 } from "~/chat/store/use-chat-actions";
+>>>>>>> theirs
 import type { HyprUIMessage } from "~/chat/types";
 import { ElicitationProvider } from "~/contexts/elicitation";
 import { StandardTabWrapper } from "~/shared/main";

@@ -259,11 +259,11 @@ function HeroSection({
           id="hero"
           className="laptop:px-0 flex w-full min-w-0 flex-col items-center gap-12 px-4 py-24 text-center"
         >
-          <div className="flex w-full min-w-0 max-w-full flex-col gap-6">
-            <h1 className="min-w-0 break-words font-serif text-2xl tracking-tight text-stone-700 sm:text-5xl">
+          <div className="flex w-full max-w-full min-w-0 flex-col gap-6">
+            <h1 className="min-w-0 font-serif text-2xl tracking-tight break-words text-stone-700 sm:text-5xl">
               {heroContent.title}
             </h1>
-            <p className="min-w-0 break-words text-base text-neutral-600 sm:text-xl">
+            <p className="min-w-0 text-base break-words text-neutral-600 sm:text-xl">
               {heroContent.subtitle}
             </p>
           </div>

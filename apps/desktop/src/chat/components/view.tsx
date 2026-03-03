@@ -11,7 +11,15 @@ import { useLanguageModel } from "~/ai/hooks";
 import {
   useChatActions,
   useStableSessionId,
+<<<<<<< ours
+} from "~/chat/hooks/use-chat-actions";
+||||||| ancestor
+} from "~/chat/hooks/use-chat-actions";
+
+import { useLanguageModel } from "~/ai/hooks";
+=======
 } from "~/chat/store/use-chat-actions";
+>>>>>>> theirs
 import { useShell } from "~/contexts/shell";
 import { useTabs } from "~/store/zustand/tabs";
 
