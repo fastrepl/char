@@ -5,6 +5,7 @@ import { Accordion, Card, Note, Step, Steps, Tip } from "@hypr/ui/docs";
 
 import { CtaCard } from "@/components/cta-card";
 import { Image } from "@/components/image";
+import { GitHubMention } from "@/components/mdx-jobs";
 
 import { DeeplinksList } from "../deeplinks-list";
 import { HooksList } from "../hooks-list";
@@ -53,6 +54,7 @@ export const defaultMDXComponents: MDXComponents = {
   CtaCard,
   DeeplinksList,
   GithubEmbed,
+  GitHubMention,
   HooksList,
   Image,
   img: Image,
