@@ -254,10 +254,10 @@ function HeroSection({
 
   return (
     <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
-      <div className="flex min-w-0 flex-col items-center text-center">
+      <div className="flex w-full min-w-0 flex-col items-center text-center">
         <section
           id="hero"
-          className="laptop:px-0 flex min-w-0 flex-col items-center gap-12 px-4 py-24 text-center"
+          className="laptop:px-0 flex w-full min-w-0 flex-col items-center gap-12 px-4 py-24 text-center"
         >
           <div className="flex w-full min-w-0 max-w-full flex-col gap-6">
             <h1 className="min-w-0 break-words font-serif text-2xl tracking-tight text-stone-700 sm:text-5xl">
