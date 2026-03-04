@@ -15,8 +15,7 @@ use tokio_tungstenite::{
 use owhisper_client::Provider;
 
 use super::types::{
-    ClientFilterAction, ClientMessageFilter, InitialMessage, OnCloseCallback, ResponseTransformer,
-    convert,
+    ClientMessageFilter, InitialMessage, OnCloseCallback, ResponseTransformer, convert,
 };
 
 const SAMPLE_BYTES: usize = 2;
@@ -231,11 +230,10 @@ impl ChannelSplitProxy {
                                 }
                                 Message::Text(text) => {
                                     let text_str = text.to_string();
-                                    let forwarded = match &client_message_filter {
-                                        Some(filter) => match filter(&text_str) {
-                                            ClientFilterAction::Drop => continue,
-                                            ClientFilterAction::Replace(replacement) => replacement,
-                                            ClientFilterAction::PassThrough => text_str,
+                                    let forwarded = match client_message_filter.as_ref() {
+                                        Some(filter) => match filter(text_str) {
+                                            Some(s) => s,
+                                            None => continue,
                                         },
                                         None => text_str,
                                     };

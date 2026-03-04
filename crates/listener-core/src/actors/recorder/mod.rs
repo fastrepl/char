@@ -25,6 +25,7 @@ pub enum RecMsg {
 pub struct RecArgs {
     pub app_dir: PathBuf,
     pub session_id: String,
+    pub done_tx: Option<tokio::sync::oneshot::Sender<()>>,
 }
 
 pub struct RecState {
@@ -34,6 +35,7 @@ pub struct RecState {
     wav_path: PathBuf,
     last_flush: Instant,
     is_stereo: bool,
+    done_tx: Option<tokio::sync::oneshot::Sender<()>>,
 }
 
 pub struct RecorderActor<E: AudioCodec = Mp3Codec> {
@@ -134,6 +136,7 @@ impl<E: AudioCodec> Actor for RecorderActor<E> {
             wav_path,
             last_flush: Instant::now(),
             is_stereo,
+            done_tx: args.done_tx,
         })
     }
 
@@ -207,6 +210,9 @@ impl<E: AudioCodec> Actor for RecorderActor<E> {
             }
         }
 
+        if let Some(tx) = st.done_tx.take() {
+            let _ = tx.send(());
+        }
         Ok(())
     }
 }

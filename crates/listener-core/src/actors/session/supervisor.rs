@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use hypr_supervisor::{RestartBudget, RestartTracker, RetryStrategy, spawn_with_retry};
 use ractor::concurrency::Duration;
 use ractor::{Actor, ActorCell, ActorProcessingErr, ActorRef, SupervisionEvent};
@@ -34,6 +36,7 @@ pub struct SessionState {
     source_cell: Option<ActorCell>,
     listener_cell: Option<ActorCell>,
     recorder_cell: Option<ActorCell>,
+    recorder_done: Option<tokio::sync::oneshot::Receiver<()>>,
     source_restarts: RestartTracker,
     recorder_restarts: RestartTracker,
     shutting_down: bool,
@@ -74,20 +77,22 @@ impl Actor for SessionActor {
             )
             .await?;
 
-            let recorder_cell = if ctx.params.record_enabled {
+            let (recorder_cell, recorder_done) = if ctx.params.record_enabled {
+                let (done_tx, done_rx) = tokio::sync::oneshot::channel();
                 let (recorder_ref, _): (ActorRef<RecMsg>, _) = Actor::spawn_linked(
                     Some(RecorderActor::name()),
                     RecorderActor::new(),
                     RecArgs {
                         app_dir: ctx.app_dir.clone(),
                         session_id: ctx.params.session_id.clone(),
+                        done_tx: Some(done_tx),
                     },
                     myself.get_cell(),
                 )
                 .await?;
-                Some(recorder_ref.get_cell())
+                (Some(recorder_ref.get_cell()), Some(done_rx))
             } else {
-                None
+                (None, None)
             };
 
             Ok(SessionState {
@@ -95,6 +100,7 @@ impl Actor for SessionActor {
                 source_cell: Some(source_ref.get_cell()),
                 listener_cell: None,
                 recorder_cell,
+                recorder_done,
                 source_restarts: RestartTracker::new(),
                 recorder_restarts: RestartTracker::new(),
                 shutting_down: false,
@@ -170,8 +176,9 @@ impl Actor for SessionActor {
                 state.shutting_down = true;
 
                 if let Some(cell) = state.recorder_cell.take() {
+                    let done = state.recorder_done.take();
                     cell.stop(Some("session_stop".to_string()));
-                    lifecycle::wait_for_actor_shutdown(RecorderActor::name()).await;
+                    wait_for_recorder_done(done).await;
                 }
 
                 if let Some(cell) = state.source_cell.take() {
@@ -367,11 +374,14 @@ async fn try_restart_recorder(supervisor_cell: ActorCell, state: &mut SessionSta
     let sup = supervisor_cell;
     let app_dir = state.ctx.app_dir.clone();
     let session_id = state.ctx.params.session_id.clone();
+    let (done_tx, done_rx) = tokio::sync::oneshot::channel();
+    let done_tx = Arc::new(std::sync::Mutex::new(Some(done_tx)));
 
     let cell = spawn_with_retry(&RETRY_STRATEGY, || {
         let sup = sup.clone();
         let app_dir = app_dir.clone();
         let session_id = session_id.clone();
+        let done_tx = done_tx.lock().unwrap().take();
         async move {
             let (r, _): (ActorRef<RecMsg>, _) = Actor::spawn_linked(
                 Some(RecorderActor::name()),
@@ -379,6 +389,7 @@ async fn try_restart_recorder(supervisor_cell: ActorCell, state: &mut SessionSta
                 RecArgs {
                     app_dir,
                     session_id,
+                    done_tx,
                 },
                 sup,
             )
@@ -391,6 +402,7 @@ async fn try_restart_recorder(supervisor_cell: ActorCell, state: &mut SessionSta
     match cell {
         Some(c) => {
             state.recorder_cell = Some(c);
+            state.recorder_done = Some(done_rx);
             true
         }
         None => false,
@@ -407,10 +419,22 @@ async fn meltdown(myself: ActorRef<SessionMsg>, state: &mut SessionState) {
         cell.stop(Some("meltdown".to_string()));
     }
     if let Some(cell) = state.recorder_cell.take() {
+        let done = state.recorder_done.take();
         cell.stop(Some("meltdown".to_string()));
-        lifecycle::wait_for_actor_shutdown(RecorderActor::name()).await;
+        wait_for_recorder_done(done).await;
     }
     myself.stop(Some("restart_limit_exceeded".to_string()));
+}
+
+async fn wait_for_recorder_done(done: Option<tokio::sync::oneshot::Receiver<()>>) {
+    match done {
+        Some(rx) => {
+            tokio::time::timeout(Duration::from_secs(30), rx).await.ok();
+        }
+        None => {
+            lifecycle::wait_for_actor_shutdown(RecorderActor::name()).await;
+        }
+    }
 }
 
 fn classify_connection_failure(base_url: &str) -> String {

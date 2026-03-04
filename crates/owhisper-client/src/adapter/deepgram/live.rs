@@ -307,5 +307,4 @@ mod tests {
 
         run_dual_test(client, "deepgram").await;
     }
-
 }

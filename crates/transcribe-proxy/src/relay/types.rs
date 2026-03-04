@@ -17,14 +17,7 @@ pub type FirstMessageTransformer = Arc<dyn Fn(String) -> String + Send + Sync>;
 pub type InitialMessage = Arc<String>;
 pub type ResponseTransformer = Arc<dyn Fn(&str) -> Option<String> + Send + Sync>;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ClientFilterAction {
-    Drop,
-    Replace(String),
-    PassThrough,
-}
-
-pub type ClientMessageFilter = Arc<dyn Fn(&str) -> ClientFilterAction + Send + Sync>;
+pub type ClientMessageFilter = Arc<dyn Fn(String) -> Option<String> + Send + Sync>;
 
 pub type UpstreamSender = SplitSink<
     WebSocketStream<MaybeTlsStream<tokio::net::TcpStream>>,

@@ -17,9 +17,9 @@ use owhisper_client::Provider;
 use super::builder::WebSocketProxyBuilder;
 use super::pending::{FlushError, PendingState, QueuedPayload};
 use super::types::{
-    ClientFilterAction, ClientMessageFilter, ClientReceiver, ClientSender, ControlMessageTypes,
-    DEFAULT_CLOSE_CODE, FirstMessageTransformer, InitialMessage, OnCloseCallback,
-    ResponseTransformer, UpstreamReceiver, UpstreamSender, convert, is_control_message,
+    ClientMessageFilter, ClientReceiver, ClientSender, ControlMessageTypes, DEFAULT_CLOSE_CODE,
+    FirstMessageTransformer, InitialMessage, OnCloseCallback, ResponseTransformer,
+    UpstreamReceiver, UpstreamSender, convert, is_control_message,
 };
 
 #[derive(Clone)]
@@ -272,11 +272,10 @@ impl WebSocketProxy {
                                 None => text_owned,
                             };
 
-                            let text_str = match &client_message_filter {
-                                Some(filter) => match filter(&text_str) {
-                                    ClientFilterAction::Drop => continue,
-                                    ClientFilterAction::Replace(replacement) => replacement,
-                                    ClientFilterAction::PassThrough => text_str,
+                            let text_str = match client_message_filter.as_ref() {
+                                Some(filter) => match filter(text_str) {
+                                    Some(s) => s,
+                                    None => continue,
                                 },
                                 None => text_str,
                             };

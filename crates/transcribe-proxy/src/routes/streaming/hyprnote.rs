@@ -10,7 +10,7 @@ use owhisper_interface::ListenParams;
 use crate::config::SttProxyConfig;
 use crate::provider_selector::SelectedProvider;
 use crate::query_params::{QueryParams, QueryValue};
-use crate::relay::{ChannelSplitProxy, ClientFilterAction, ClientMessageFilter, WebSocketProxy};
+use crate::relay::{ChannelSplitProxy, ClientMessageFilter, WebSocketProxy};
 use crate::routes::AppState;
 use crate::routes::model_resolution::resolve_model;
 
@@ -104,15 +104,12 @@ fn build_response_transformer(
 }
 
 fn build_client_message_filter(provider: Provider) -> ClientMessageFilter {
-    Arc::new(move |text: &str| {
-        let msg = match serde_json::from_str::<owhisper_interface::ControlMessage>(text) {
+    Arc::new(move |text: String| {
+        let msg = match serde_json::from_str::<owhisper_interface::ControlMessage>(&text) {
             Ok(msg) => msg,
-            Err(_) => return ClientFilterAction::PassThrough,
+            Err(_) => return Some(text),
         };
-        match provider.translate_control_message(&msg) {
-            Some(translated) => ClientFilterAction::Replace(translated),
-            None => ClientFilterAction::Drop,
-        }
+        provider.translate_control_message(&msg)
     })
 }
 
@@ -517,16 +514,13 @@ mod tests {
     fn test_client_message_filter_deepgram_identity() {
         let filter = build_client_message_filter(Provider::Deepgram);
         assert_eq!(
-            filter(r#"{"type":"KeepAlive"}"#),
-            ClientFilterAction::Replace(r#"{"type":"KeepAlive"}"#.to_string())
+            filter(r#"{"type":"KeepAlive"}"#.to_string()),
+            Some(r#"{"type":"KeepAlive"}"#.to_string())
         );
+        assert_eq!(filter(r#"{"type":"CloseStream"}"#.to_string()), None);
         assert_eq!(
-            filter(r#"{"type":"CloseStream"}"#),
-            ClientFilterAction::Replace(r#"{"type":"CloseStream"}"#.to_string())
-        );
-        assert_eq!(
-            filter(r#"{"type":"Finalize"}"#),
-            ClientFilterAction::Replace(r#"{"type":"Finalize"}"#.to_string())
+            filter(r#"{"type":"Finalize"}"#.to_string()),
+            Some(r#"{"type":"Finalize"}"#.to_string())
         );
     }
 
@@ -534,34 +528,31 @@ mod tests {
     fn test_client_message_filter_soniox_translates_control_messages() {
         let filter = build_client_message_filter(Provider::Soniox);
 
+        assert_eq!(filter(r#"{"type":"CloseStream"}"#.to_string()), None);
         assert_eq!(
-            filter(r#"{"type":"CloseStream"}"#),
-            ClientFilterAction::Drop
+            filter(r#"{"type":"KeepAlive"}"#.to_string()),
+            Some(r#"{"type":"keepalive"}"#.to_string())
         );
         assert_eq!(
-            filter(r#"{"type":"KeepAlive"}"#),
-            ClientFilterAction::Replace(r#"{"type":"keepalive"}"#.to_string())
-        );
-        assert_eq!(
-            filter(r#"{"type":"Finalize"}"#),
-            ClientFilterAction::Replace(r#"{"type":"finalize"}"#.to_string())
+            filter(r#"{"type":"Finalize"}"#.to_string()),
+            Some(r#"{"type":"finalize"}"#.to_string())
         );
     }
 
     #[test]
     fn test_client_message_filter_assemblyai_translates_finalize() {
         let filter = build_client_message_filter(Provider::AssemblyAI);
-        assert_eq!(filter(r#"{"type":"KeepAlive"}"#), ClientFilterAction::Drop);
+        assert_eq!(filter(r#"{"type":"KeepAlive"}"#.to_string()), None);
         assert_eq!(
-            filter(r#"{"type":"Finalize"}"#),
-            ClientFilterAction::Replace(r#"{"type":"Terminate"}"#.to_string())
+            filter(r#"{"type":"Finalize"}"#.to_string()),
+            Some(r#"{"type":"Terminate"}"#.to_string())
         );
     }
 
     #[test]
     fn test_client_message_filter_non_json_passthrough() {
         let filter = build_client_message_filter(Provider::Soniox);
-        assert_eq!(filter("not json"), ClientFilterAction::PassThrough);
+        assert_eq!(filter("not json".to_string()), Some("not json".to_string()));
     }
 
     #[test]
