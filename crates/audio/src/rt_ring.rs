@@ -36,14 +36,51 @@ where
     let mut pushed_total = 0usize;
     let mut dropped_total = 0usize;
 
+    if channels == 1 {
+        while offset < frame_count {
+            let count = (frame_count - offset).min(scratch.len());
+
+            let vacant = producer.vacant_len();
+            if vacant == 0 {
+                dropped_total += frame_count - offset;
+                break;
+            }
+
+            let convert_count = count.min(vacant);
+
+            for i in 0..convert_count {
+                scratch[i] = data[offset + i].to_sample_();
+            }
+
+            let pushed = producer.push_slice(&scratch[..convert_count]);
+            pushed_total += pushed;
+            dropped_total += count - pushed;
+
+            offset += count;
+        }
+
+        return PushStats {
+            pushed: pushed_total,
+            dropped: dropped_total,
+        };
+    }
+
     while offset < frame_count {
         let count = (frame_count - offset).min(scratch.len());
 
-        for i in 0..count {
+        let vacant = producer.vacant_len();
+        if vacant == 0 {
+            dropped_total += frame_count - offset;
+            break;
+        }
+
+        let convert_count = count.min(vacant);
+
+        for i in 0..convert_count {
             scratch[i] = data[(offset + i) * channels].to_sample_();
         }
 
-        let pushed = producer.push_slice(&scratch[..count]);
+        let pushed = producer.push_slice(&scratch[..convert_count]);
         pushed_total += pushed;
         dropped_total += count - pushed;
 
@@ -60,7 +97,7 @@ pub(crate) fn convert_and_push_to_ringbuf<T, P>(
     samples: &[T],
     scratch: &mut [f32],
     producer: &mut P,
-    convert: fn(T) -> f32,
+    mut convert: impl FnMut(T) -> f32,
 ) -> PushStats
 where
     T: Copy,
@@ -81,11 +118,19 @@ where
     while offset < samples.len() {
         let count = (samples.len() - offset).min(scratch.len());
 
-        for i in 0..count {
+        let vacant = producer.vacant_len();
+        if vacant == 0 {
+            dropped_total += samples.len() - offset;
+            break;
+        }
+
+        let convert_count = count.min(vacant);
+
+        for i in 0..convert_count {
             scratch[i] = convert(samples[offset + i]);
         }
 
-        let pushed = producer.push_slice(&scratch[..count]);
+        let pushed = producer.push_slice(&scratch[..convert_count]);
         pushed_total += pushed;
         dropped_total += count - pushed;
 

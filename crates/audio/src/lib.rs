@@ -1,3 +1,4 @@
+mod async_ring;
 mod errors;
 mod mic;
 mod norm;

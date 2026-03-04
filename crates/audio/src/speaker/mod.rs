@@ -1,5 +1,7 @@
 use anyhow::Result;
+#[cfg(any(test, not(target_os = "macos")))]
 use futures_util::Stream;
+#[cfg(any(test, not(target_os = "macos")))]
 use pin_project::pin_project;
 
 pub(super) const CHUNK_SIZE: usize = 256;
@@ -9,8 +11,6 @@ pub(super) const BUFFER_SIZE: usize = CHUNK_SIZE * 256;
 mod macos;
 #[cfg(target_os = "macos")]
 type PlatformSpeakerInput = macos::SpeakerInput;
-#[cfg(all(target_os = "macos", not(test)))]
-type PlatformSpeakerStream = macos::SpeakerStream;
 
 #[cfg(target_os = "windows")]
 mod windows;
@@ -29,10 +29,7 @@ type PlatformSpeakerStream = linux::SpeakerStream;
 #[cfg(test)]
 mod mock;
 
-#[cfg(all(
-    any(target_os = "macos", target_os = "windows", target_os = "linux"),
-    not(test)
-))]
+#[cfg(all(any(target_os = "windows", target_os = "linux"), not(test)))]
 type InnerStream = PlatformSpeakerStream;
 
 #[cfg(test)]
@@ -42,6 +39,9 @@ type InnerStream = mock::MockInnerStream;
 pub struct SpeakerInput {
     inner: PlatformSpeakerInput,
 }
+
+#[cfg(all(target_os = "macos", not(test)))]
+pub type SpeakerStream = macos::SpeakerStream;
 
 impl SpeakerInput {
     pub fn new() -> Result<Self> {
@@ -53,7 +53,12 @@ impl SpeakerInput {
         self.inner.sample_rate()
     }
 
-    #[cfg(not(test))]
+    #[cfg(all(target_os = "macos", not(test)))]
+    pub fn stream(self) -> Result<SpeakerStream> {
+        Ok(self.inner.stream())
+    }
+
+    #[cfg(all(not(target_os = "macos"), not(test)))]
     pub fn stream(self) -> Result<SpeakerStream> {
         let inner = self.inner.stream();
         let initial_rate = inner.sample_rate();
@@ -79,6 +84,7 @@ impl SpeakerInput {
 }
 
 // https://github.com/floneum/floneum/blob/50afe10/interfaces/kalosm-sound/src/source/mic.rs#L140
+#[cfg(any(test, not(target_os = "macos")))]
 #[pin_project]
 pub struct SpeakerStream {
     #[pin]
@@ -109,6 +115,7 @@ impl SpeakerStream {
     }
 }
 
+#[cfg(any(test, not(target_os = "macos")))]
 impl Stream for SpeakerStream {
     type Item = f32;
 
@@ -143,6 +150,7 @@ impl Stream for SpeakerStream {
     }
 }
 
+#[cfg(any(test, not(target_os = "macos")))]
 impl hypr_audio_interface::AsyncSource for SpeakerStream {
     fn as_stream(&mut self) -> impl Stream<Item = f32> + '_ {
         self

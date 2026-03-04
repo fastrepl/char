@@ -5,14 +5,12 @@ use cpal::{
 use dasp::sample::ToSample;
 use futures_util::Stream;
 use futures_util::task::AtomicWaker;
-use ringbuf::{
-    HeapCons, HeapProd, HeapRb,
-    traits::{Consumer, Split},
-};
+use ringbuf::{HeapCons, HeapProd, HeapRb, traits::Split};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
 use crate::AsyncSource;
+use crate::async_ring::RingbufAsyncReader;
 
 fn is_tap_device(name: &str) -> bool {
     #[cfg(target_os = "macos")]
@@ -161,7 +159,8 @@ impl MicInput {
                             dropped_samples.fetch_add(stats.dropped, Ordering::Relaxed);
                         }
 
-                        if stats.pushed > 0 && wake_pending.swap(false, Ordering::AcqRel) {
+                        if stats.pushed > 0 && wake_pending.load(Ordering::Acquire) {
+                            wake_pending.store(false, Ordering::Release);
                             waker.wake();
                         }
                     },
@@ -255,14 +254,14 @@ impl MicInput {
         MicStream {
             drop_tx,
             config: self.config.clone(),
-            consumer,
-            waker,
-            wake_pending,
-            alive,
-            read_buffer: vec![0.0; MIC_READ_CHUNK_SIZE],
-            read_len: 0,
-            read_idx: 0,
-            dropped_samples,
+            reader: RingbufAsyncReader::new(
+                consumer,
+                waker,
+                wake_pending,
+                vec![0.0f32; MIC_READ_CHUNK_SIZE],
+            )
+            .with_alive(alive)
+            .with_dropped_samples(dropped_samples, "mic_samples_dropped"),
         }
     }
 }
@@ -270,14 +269,7 @@ impl MicInput {
 pub struct MicStream {
     drop_tx: std::sync::mpsc::Sender<()>,
     config: cpal::SupportedStreamConfig,
-    consumer: HeapCons<f32>,
-    waker: Arc<AtomicWaker>,
-    wake_pending: Arc<AtomicBool>,
-    alive: Arc<AtomicBool>,
-    read_buffer: Vec<f32>,
-    read_len: usize,
-    read_idx: usize,
-    dropped_samples: Arc<AtomicUsize>,
+    reader: RingbufAsyncReader<HeapCons<f32>>,
 }
 
 impl Drop for MicStream {
@@ -293,58 +285,8 @@ impl Stream for MicStream {
         mut self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
     ) -> std::task::Poll<Option<Self::Item>> {
-        use std::task::Poll;
-
         let this = self.as_mut().get_mut();
-
-        if this.read_idx < this.read_len {
-            let sample = this.read_buffer[this.read_idx];
-            this.read_idx += 1;
-            return Poll::Ready(Some(sample));
-        }
-
-        let dropped = this.dropped_samples.swap(0, Ordering::Relaxed);
-        if dropped > 0 {
-            tracing::warn!(dropped, "mic_samples_dropped");
-        }
-
-        let popped = {
-            let consumer = &mut this.consumer;
-            let read_buffer = &mut this.read_buffer;
-            consumer.pop_slice(read_buffer)
-        };
-        if popped > 0 {
-            this.read_len = popped;
-            this.read_idx = 1;
-            this.wake_pending.store(false, Ordering::Release);
-            return Poll::Ready(Some(this.read_buffer[0]));
-        }
-
-        if !this.alive.load(Ordering::Acquire) {
-            return Poll::Ready(None);
-        }
-
-        this.wake_pending.store(true, Ordering::Release);
-        this.waker.register(cx.waker());
-
-        let popped = {
-            let consumer = &mut this.consumer;
-            let read_buffer = &mut this.read_buffer;
-            consumer.pop_slice(read_buffer)
-        };
-        if popped > 0 {
-            this.read_len = popped;
-            this.read_idx = 1;
-            this.wake_pending.store(false, Ordering::Release);
-            return Poll::Ready(Some(this.read_buffer[0]));
-        }
-
-        if !this.alive.load(Ordering::Acquire) {
-            return Poll::Ready(None);
-        }
-
-        this.wake_pending.store(true, Ordering::Release);
-        Poll::Pending
+        this.reader.poll_next_sample(cx).poll
     }
 }
 

@@ -1367,6 +1367,7 @@ dependencies = [
  "hound",
  "libpulse-binding",
  "pin-project",
+ "resampler",
  "ringbuf",
  "rodio",
  "serde",
@@ -2824,7 +2825,7 @@ dependencies = [
 [[package]]
 name = "cactus-sys"
 version = "0.1.0"
-source = "git+https://github.com/cactus-compute/cactus?rev=da4c917#da4c917645f71dd1a1231017acb77259ea159695"
+source = "git+https://github.com/cactus-compute/cactus?rev=c6966ad#c6966adbd7cb166838326da204b95e5bf538f0f5"
 dependencies = [
  "bindgen 0.72.1",
  "cmake",

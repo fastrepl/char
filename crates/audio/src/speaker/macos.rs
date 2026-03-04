@@ -5,13 +5,12 @@ use std::task::Poll;
 use anyhow::Result;
 use futures_util::Stream;
 use futures_util::task::AtomicWaker;
+use hypr_audio_interface::AsyncSource;
 use hypr_audio_utils::{pcm_f64_to_f32, pcm_i16_to_f32, pcm_i32_to_f32};
 use pin_project::pin_project;
 
-use ringbuf::{
-    HeapCons, HeapProd, HeapRb,
-    traits::{Consumer, Split},
-};
+use crate::async_ring::RingbufAsyncReader;
+use ringbuf::{HeapCons, HeapProd, HeapRb, traits::Split};
 
 use ca::aggregate_device_keys as agg_keys;
 use cidre::{arc, av, cat, cf, core_audio as ca, ns, os};
@@ -23,21 +22,18 @@ pub struct SpeakerInput {
 
 #[pin_project(PinnedDrop)]
 pub struct SpeakerStream {
-    consumer: HeapCons<f32>,
+    reader: RingbufAsyncReader<HeapCons<f32>>,
     _device: ca::hardware::StartedDevice<ca::AggregateDevice>,
     _ctx: Box<Ctx>,
     _tap: ca::TapGuard,
-    waker: Arc<AtomicWaker>,
-    wake_pending: Arc<AtomicBool>,
     current_sample_rate: Arc<AtomicU32>,
     sample_rate_probe_counter: u32,
-    read_buffer: Vec<f32>,
-    dropped_samples: Arc<AtomicUsize>,
+    buffer_rate: u32,
 }
 
 impl SpeakerStream {
     pub fn sample_rate(&self) -> u32 {
-        self.current_sample_rate.load(Ordering::Acquire)
+        self.buffer_rate
     }
 }
 
@@ -163,16 +159,19 @@ impl SpeakerInput {
         let device = self.start_device(&mut ctx).unwrap();
 
         SpeakerStream {
-            consumer,
+            reader: RingbufAsyncReader::new(
+                consumer,
+                waker,
+                wake_pending,
+                vec![0.0f32; CHUNK_SIZE],
+            )
+            .with_dropped_samples(dropped_samples, "samples_dropped"),
             _device: device,
             _ctx: ctx,
             _tap: self.tap,
-            waker,
-            wake_pending,
             current_sample_rate,
             sample_rate_probe_counter: 0,
-            read_buffer: vec![0.0f32; CHUNK_SIZE],
-            dropped_samples,
+            buffer_rate: asbd.sample_rate as u32,
         }
     }
 }
@@ -185,7 +184,7 @@ fn read_samples<T: Copy>(buffer: &cat::AudioBuf) -> Option<&[T]> {
     }
 
     let data = buffer.data as *const T;
-    if (data as usize) % std::mem::align_of::<T>() != 0 {
+    if !(data as usize).is_multiple_of(std::mem::align_of::<T>()) {
         return None;
     }
 
@@ -197,7 +196,7 @@ fn read_samples<T: Copy>(buffer: &cat::AudioBuf) -> Option<&[T]> {
     Some(unsafe { std::slice::from_raw_parts(data, sample_count) })
 }
 
-fn process_samples_rt_safe<T>(ctx: &mut Ctx, buffer: &cat::AudioBuf, convert: fn(T) -> f32)
+fn process_samples_rt_safe<T>(ctx: &mut Ctx, buffer: &cat::AudioBuf, convert: impl FnMut(T) -> f32)
 where
     T: Copy + 'static,
 {
@@ -217,7 +216,8 @@ where
             .fetch_add(stats.dropped, Ordering::Relaxed);
     }
 
-    if stats.pushed > 0 && ctx.wake_pending.swap(false, Ordering::AcqRel) {
+    if stats.pushed > 0 && ctx.wake_pending.load(Ordering::Acquire) {
+        ctx.wake_pending.store(false, Ordering::Release);
         ctx.waker.wake();
     }
 }
@@ -230,53 +230,52 @@ fn process_audio_data_rt_safe(ctx: &mut Ctx, data: &[f32]) {
             .fetch_add(stats.dropped, Ordering::Relaxed);
     }
 
-    if stats.pushed > 0 && ctx.wake_pending.swap(false, Ordering::AcqRel) {
+    if stats.pushed > 0 && ctx.wake_pending.load(Ordering::Acquire) {
+        ctx.wake_pending.store(false, Ordering::Release);
         ctx.waker.wake();
     }
 }
 
 impl Stream for SpeakerStream {
-    type Item = Vec<f32>;
+    type Item = f32;
 
     fn poll_next(
-        self: std::pin::Pin<&mut Self>,
+        mut self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
     ) -> Poll<Option<Self::Item>> {
-        let this = self.project();
+        let this = self.as_mut().get_mut();
 
-        const SAMPLE_RATE_PROBE_INTERVAL: u32 = 128;
-        *this.sample_rate_probe_counter = this.sample_rate_probe_counter.wrapping_add(1);
-        if *this.sample_rate_probe_counter % SAMPLE_RATE_PROBE_INTERVAL == 0 {
-            let after = this._tap.asbd().unwrap().sample_rate as u32;
-            let before = this.current_sample_rate.load(Ordering::Acquire);
-            if before != after {
-                this.current_sample_rate.store(after, Ordering::Release);
+        if !this.reader.has_buffered_samples() {
+            const SAMPLE_RATE_PROBE_INTERVAL: u32 = 128;
+            this.sample_rate_probe_counter = this.sample_rate_probe_counter.wrapping_add(1);
+            if this
+                .sample_rate_probe_counter
+                .is_multiple_of(SAMPLE_RATE_PROBE_INTERVAL)
+            {
+                let after = this._tap.asbd().unwrap().sample_rate as u32;
+                let before = this.current_sample_rate.load(Ordering::Acquire);
+                if before != after {
+                    this.current_sample_rate.store(after, Ordering::Release);
+                }
             }
         }
 
-        let dropped = this.dropped_samples.swap(0, Ordering::Relaxed);
-        if dropped > 0 {
-            tracing::warn!(dropped, "samples_dropped");
+        let res = this.reader.poll_next_sample(cx);
+        if res.did_pop_chunk {
+            this.buffer_rate = this.current_sample_rate.load(Ordering::Acquire);
         }
 
-        let popped = this.consumer.pop_slice(this.read_buffer);
+        res.poll
+    }
+}
 
-        if popped > 0 {
-            this.wake_pending.store(false, Ordering::Release);
-            return Poll::Ready(Some(this.read_buffer[..popped].to_vec()));
-        }
+impl AsyncSource for SpeakerStream {
+    fn as_stream(&mut self) -> impl Stream<Item = f32> + '_ {
+        self
+    }
 
-        this.wake_pending.store(true, Ordering::Release);
-        this.waker.register(cx.waker());
-
-        let popped = this.consumer.pop_slice(this.read_buffer);
-        if popped > 0 {
-            this.wake_pending.store(false, Ordering::Release);
-            return Poll::Ready(Some(this.read_buffer[..popped].to_vec()));
-        }
-
-        this.wake_pending.store(true, Ordering::Release);
-        Poll::Pending
+    fn sample_rate(&self) -> u32 {
+        self.sample_rate()
     }
 }
 
