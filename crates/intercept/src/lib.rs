@@ -14,6 +14,9 @@ swift!(fn _setup_force_quit_handler());
 swift!(fn _show_quit_overlay());
 
 #[cfg(target_os = "macos")]
+swift!(fn _trigger_cmd_q_pressed());
+
+#[cfg(target_os = "macos")]
 swift!(fn _demo_quit_progress());
 
 #[cfg(target_os = "macos")]
@@ -53,6 +56,13 @@ pub fn set_force_quit() {
 pub fn show_quit_overlay() {
     unsafe {
         _show_quit_overlay();
+    }
+}
+
+#[cfg(target_os = "macos")]
+pub fn trigger_cmd_q_pressed() {
+    unsafe {
+        _trigger_cmd_q_pressed();
     }
 }
 

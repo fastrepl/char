@@ -1,3 +1,4 @@
+mod app_close;
 mod app_info;
 mod app_new;
 mod help_report_bug;
@@ -9,6 +10,7 @@ mod tray_settings;
 mod tray_start;
 mod tray_version;
 
+pub use app_close::AppClose;
 pub use app_info::AppInfo;
 pub use app_new::AppNew;
 pub use help_report_bug::HelpReportBug;
@@ -67,6 +69,7 @@ macro_rules! menu_items {
 }
 
 menu_items! {
+    AppClose => AppClose,
     TrayOpen => TrayOpen,
     TrayStart => TrayStart,
     TraySettings => TraySettings,
