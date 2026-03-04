@@ -42,8 +42,8 @@ pub(crate) async fn submit_bug_report(
     ))
     .map_err(|e| SupportError::Internal(e.to_string()))?;
 
-    let labels = vec!["product/desktop".to_string()];
-    let (url, number) = create_issue(state, &title, &body, &labels).await?;
+    let labels = vec!["product/desktop".to_string(), "Engineering".to_string()];
+    let (url, number) = create_issue(state, &title, &body, &labels, Some("Bug")).await?;
 
     if let Some(logs) = input.logs {
         attach_log_analysis(state, number, logs).await;
@@ -126,15 +126,25 @@ pub(crate) async fn create_issue(
     title: &str,
     body: &str,
     labels: &[String],
+    issue_type: Option<&str>,
 ) -> Result<(String, u64)> {
     let client = state.installation_client().await?;
 
-    let issue = client
-        .issues(GITHUB_OWNER, GITHUB_REPO)
-        .create(title)
-        .body(body)
-        .labels(labels.to_vec())
-        .send()
+    let mut payload = serde_json::json!({
+        "title": title,
+        "body": body,
+        "labels": labels,
+    });
+
+    if let Some(t) = issue_type {
+        payload["type"] = serde_json::Value::String(t.to_string());
+    }
+
+    let issue: octocrab::models::issues::Issue = client
+        .post(
+            format!("/repos/{GITHUB_OWNER}/{GITHUB_REPO}/issues"),
+            Some(&payload),
+        )
         .await?;
 
     Ok((issue.html_url.to_string(), issue.number))

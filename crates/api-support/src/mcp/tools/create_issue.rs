@@ -17,20 +17,26 @@ pub(crate) struct CreateIssueParams {
     )]
     pub body: String,
     #[schemars(
-        description = "Labels to categorize the issue. Use 'bug' for bugs, 'enhancement' for feature requests, 'question' for user questions."
+        description = "The issue type. Use 'Bug' for bugs, 'Feature' for feature requests."
     )]
-    pub labels: Option<Vec<String>>,
+    pub issue_type: Option<String>,
 }
 
 pub(crate) async fn create_issue(
     state: &AppState,
     params: CreateIssueParams,
 ) -> Result<CallToolResult, McpError> {
-    let labels = params.labels.unwrap_or_default();
+    let labels = vec!["Engineering".to_string()];
 
-    let (url, number) = github::create_issue(state, &params.title, &params.body, &labels)
-        .await
-        .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+    let (url, number) = github::create_issue(
+        state,
+        &params.title,
+        &params.body,
+        &labels,
+        params.issue_type.as_deref(),
+    )
+    .await
+    .map_err(|e| McpError::internal_error(e.to_string(), None))?;
 
     Ok(CallToolResult::success(vec![Content::text(
         serde_json::json!({
