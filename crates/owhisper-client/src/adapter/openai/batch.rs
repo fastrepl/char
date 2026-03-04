@@ -142,18 +142,7 @@ async fn do_transcribe_file(
     }
 }
 
-fn mime_type_from_extension(path: &Path) -> &'static str {
-    match path.extension().and_then(|e| e.to_str()) {
-        Some("mp3") => "audio/mpeg",
-        Some("mp4") => "audio/mp4",
-        Some("m4a") => "audio/mp4",
-        Some("wav") => "audio/wav",
-        Some("webm") => "audio/webm",
-        Some("ogg") => "audio/ogg",
-        Some("flac") => "audio/flac",
-        _ => "application/octet-stream",
-    }
-}
+use crate::adapter::http::mime_type_from_extension;
 
 fn strip_punctuation(s: &str) -> String {
     s.trim_matches(|c: char| c.is_ascii_punctuation())

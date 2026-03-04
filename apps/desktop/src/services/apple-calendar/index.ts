@@ -1,6 +1,5 @@
 import type { Queries } from "tinybase/with-schemas";
 
-import type { Schemas, Store } from "../../store/tinybase/store/main";
 import { createCtx } from "./ctx";
 import {
   CalendarFetchError,
@@ -11,8 +10,11 @@ import {
   executeForEventsSync,
   executeForParticipantsSync,
   syncEvents,
-  syncParticipants,
+  syncSessionEmbeddedEvents,
+  syncSessionParticipants,
 } from "./process";
+
+import type { Schemas, Store } from "~/store/tinybase/store/main";
 
 export const CALENDAR_SYNC_TASK_ID = "calendarSync";
 
@@ -51,12 +53,16 @@ async function run(store: Store, queries: Queries<Schemas>) {
 
   const existing = fetchExistingEvents(ctx);
 
-  const eventsOut = syncEvents(ctx, { incoming, existing });
-  const { trackingIdToEventId } = executeForEventsSync(ctx, eventsOut);
-
-  const participantsOut = syncParticipants(ctx, {
+  const eventsOut = syncEvents(ctx, {
+    incoming,
+    existing,
     incomingParticipants,
-    trackingIdToEventId,
+  });
+  executeForEventsSync(ctx, eventsOut);
+  syncSessionEmbeddedEvents(ctx, incoming);
+
+  const participantsOut = syncSessionParticipants(ctx, {
+    incomingParticipants,
   });
   executeForParticipantsSync(ctx, participantsOut);
 }

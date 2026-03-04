@@ -4,9 +4,10 @@ use std::task::{Context, Poll};
 use super::driver::RubatoChunkResampler;
 use futures_util::{Stream, pin_mut};
 use hypr_audio_interface::AsyncSource;
+use pin_project::pin_project;
 use rubato::{FastFixedIn, PolynomialDegree};
 
-pub trait ResampleExtDynamicNew: AsyncSource + Sized + Unpin {
+pub trait ResampleExtDynamicNew: AsyncSource + Sized {
     fn resampled_chunks(
         self,
         target_rate: u32,
@@ -16,7 +17,7 @@ pub trait ResampleExtDynamicNew: AsyncSource + Sized + Unpin {
     }
 }
 
-impl<T> ResampleExtDynamicNew for T where T: AsyncSource + Sized + Unpin {}
+impl<T> ResampleExtDynamicNew for T where T: AsyncSource + Sized {}
 
 enum Backend {
     Passthrough(Vec<f32>),
@@ -119,9 +120,10 @@ impl Backend {
     }
 }
 
+#[pin_project]
 pub struct ResamplerDynamicNew<S>
 where
-    S: AsyncSource + Unpin,
+    S: AsyncSource,
 {
     source: S,
     target_rate: u32,
@@ -135,7 +137,7 @@ where
 
 impl<S> ResamplerDynamicNew<S>
 where
-    S: AsyncSource + Unpin,
+    S: AsyncSource,
 {
     pub fn new(
         source: S,
@@ -209,12 +211,12 @@ where
 
 impl<S> Stream for ResamplerDynamicNew<S>
 where
-    S: AsyncSource + Unpin,
+    S: AsyncSource,
 {
     type Item = Result<Vec<f32>, crate::Error>;
 
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        let me = Pin::into_inner(self);
+        let me = self.get_mut();
 
         loop {
             if let Some((sample, new_rate)) = me.pending_sample.take() {

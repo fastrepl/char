@@ -88,6 +88,42 @@ pub fn bytes_to_f32_samples(data: &[u8]) -> Vec<f32> {
         .collect()
 }
 
+pub fn deinterleave_stereo_bytes(data: &[u8]) -> (Vec<f32>, Vec<f32>) {
+    let num_frames = data.len() / 4;
+    let mut ch0 = Vec::with_capacity(num_frames);
+    let mut ch1 = Vec::with_capacity(num_frames);
+    for frame in data.chunks_exact(4) {
+        ch0.push(i16::from_le_bytes([frame[0], frame[1]]) as f32 / I16_SCALE);
+        ch1.push(i16::from_le_bytes([frame[2], frame[3]]) as f32 / I16_SCALE);
+    }
+    (ch0, ch1)
+}
+
+pub fn deinterleave(samples: &[f32], channels: usize) -> Vec<Vec<f32>> {
+    if channels <= 1 {
+        return vec![samples.to_vec()];
+    }
+    let mut output = vec![Vec::with_capacity(samples.len() / channels + 1); channels];
+    for (index, sample) in samples.iter().enumerate() {
+        output[index % channels].push(*sample);
+    }
+    output
+}
+
+pub fn interleave(channels: &[Vec<f32>]) -> Vec<f32> {
+    if channels.is_empty() {
+        return Vec::new();
+    }
+    let frames = channels.iter().map(|c| c.len()).max().unwrap_or(0);
+    let mut output = Vec::with_capacity(frames * channels.len());
+    for frame in 0..frames {
+        for ch in channels {
+            output.push(ch.get(frame).copied().unwrap_or(0.0));
+        }
+    }
+    output
+}
+
 pub fn mix_sample_f32(mic: f32, speaker: f32) -> f32 {
     (mic + speaker).clamp(-1.0, 1.0)
 }
@@ -129,6 +165,8 @@ pub fn mix_audio_pcm16le(mic: &[u8], speaker: &[u8]) -> Vec<u8> {
 
     mixed
 }
+
+pub use hypr_audio_mime::content_type_to_extension;
 
 pub fn source_from_path(
     path: impl AsRef<std::path::Path>,

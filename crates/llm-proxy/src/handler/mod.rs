@@ -10,8 +10,8 @@ use std::time::{Duration, Instant};
 
 use axum::{
     Json, Router,
-    extract::State,
-    http::StatusCode,
+    extract::{FromRequestParts, State},
+    http::{StatusCode, request::Parts},
     response::{IntoResponse, Response},
     routing::post,
 };
@@ -20,7 +20,8 @@ use reqwest::Client;
 
 use crate::analytics::{AnalyticsReporter, GenerationEvent};
 use crate::config::LlmProxyConfig;
-use crate::types::{ChatCompletionRequest, ToolChoice};
+use crate::model::{CharTask, ModelContext};
+use crate::types::{ChatCompletionRequest, ToolChoice, has_audio_content};
 
 async fn report_with_cost(
     analytics: &dyn AnalyticsReporter,
@@ -138,26 +139,65 @@ pub fn chat_completions_router(config: LlmProxyConfig) -> Router {
         .with_state(state)
 }
 
+use hypr_analytics::{AuthenticatedUserId, DeviceFingerprint};
+
+pub struct AnalyticsContext {
+    pub fingerprint: Option<String>,
+    pub user_id: Option<String>,
+}
+
+impl<S> FromRequestParts<S> for AnalyticsContext
+where
+    S: Send + Sync,
+{
+    type Rejection = std::convert::Infallible;
+
+    async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
+        let fingerprint = parts
+            .extensions
+            .get::<DeviceFingerprint>()
+            .map(|id| id.0.clone());
+        let user_id = parts
+            .extensions
+            .get::<AuthenticatedUserId>()
+            .map(|id| id.0.clone());
+        Ok(AnalyticsContext {
+            fingerprint,
+            user_id,
+        })
+    }
+}
+
 async fn completions_handler(
     State(state): State<AppState>,
+    analytics_ctx: AnalyticsContext,
+    headers: axum::http::HeaderMap,
     Json(request): Json<ChatCompletionRequest>,
 ) -> Response {
     let start_time = Instant::now();
 
+    let task = headers
+        .get(crate::CHAR_TASK_HEADER)
+        .and_then(|v| v.to_str().ok())
+        .and_then(|s| s.parse::<CharTask>().ok());
+
     let needs_tool_calling = request.tools.as_ref().is_some_and(|t| !t.is_empty())
         && !matches!(&request.tool_choice, Some(ToolChoice::String(s)) if s == "none");
+    let has_audio = has_audio_content(&request.messages);
 
-    let models = if needs_tool_calling {
-        state.config.models_tool_calling.clone()
-    } else {
-        state.config.models_default.clone()
+    let ctx = ModelContext {
+        task,
+        needs_tool_calling,
+        has_audio,
     };
+    let models = state.config.resolve(&ctx);
 
     let stream = request.stream.unwrap_or(false);
 
     tracing::info!(
         stream = %stream,
         has_tools = %needs_tool_calling,
+        task = ?task,
         message_count = %request.messages.len(),
         model_count = %models.len(),
         provider = %state.config.provider.name(),
@@ -173,11 +213,17 @@ async fn completions_handler(
         }
         scope.set_tag("llm.stream", stream.to_string());
         scope.set_tag("llm.tool_calling", needs_tool_calling.to_string());
+        if let Some(t) = &task {
+            scope.set_tag("llm.task", t.to_string());
+        }
 
         let mut ctx = BTreeMap::new();
         ctx.insert("model_count".into(), models.len().into());
         ctx.insert("message_count".into(), request.messages.len().into());
         ctx.insert("has_tools".into(), needs_tool_calling.into());
+        if let Some(t) = &task {
+            ctx.insert("task".into(), serde_json::Value::String(t.to_string()));
+        }
         scope.set_context("llm_request", sentry::protocol::Context::Other(ctx));
     });
 
@@ -233,8 +279,8 @@ async fn completions_handler(
     };
 
     if stream {
-        handle_stream_response(state, response, start_time).await
+        handle_stream_response(state, response, start_time, analytics_ctx).await
     } else {
-        handle_non_stream_response(state, response, start_time).await
+        handle_non_stream_response(state, response, start_time, analytics_ctx).await
     }
 }

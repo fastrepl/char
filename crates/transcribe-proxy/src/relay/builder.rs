@@ -9,18 +9,10 @@ use super::handler::WebSocketProxy;
 use super::types::{FirstMessageTransformer, InitialMessage, OnCloseCallback, ResponseTransformer};
 use crate::config::DEFAULT_CONNECT_TIMEOUT_MS;
 use crate::provider_selector::SelectedProvider;
-use crate::query_params::QueryParams;
-use crate::upstream_url::UpstreamUrlBuilder;
 
 pub struct NoUpstream;
 pub struct WithUrl {
     url: String,
-    headers: HashMap<String, String>,
-}
-pub struct WithUrlComponents {
-    base_url: url::Url,
-    client_params: QueryParams,
-    default_params: Vec<(&'static str, &'static str)>,
     headers: HashMap<String, String>,
 }
 
@@ -29,12 +21,6 @@ pub(crate) trait HasHeaders {
 }
 
 impl HasHeaders for WithUrl {
-    fn headers_mut(&mut self) -> &mut HashMap<String, String> {
-        &mut self.headers
-    }
-}
-
-impl HasHeaders for WithUrlComponents {
     fn headers_mut(&mut self) -> &mut HashMap<String, String> {
         &mut self.headers
     }
@@ -192,35 +178,6 @@ impl WebSocketProxyBuilder<WithUrl> {
         let uri = self
             .state
             .url
-            .parse()
-            .map_err(|e| crate::ProxyError::InvalidRequest(format!("{}", e)))?;
-
-        let mut request = ClientRequestBuilder::new(uri);
-        for (key, value) in self.state.headers {
-            request = request.with_header(&key, &value);
-        }
-
-        Ok(Self::build_from(
-            request,
-            self.control_message_types,
-            self.transform_first_message,
-            self.initial_message,
-            self.response_transformer,
-            self.connect_timeout,
-            self.on_close,
-        ))
-    }
-}
-
-impl WebSocketProxyBuilder<WithUrlComponents> {
-    pub fn build(self) -> Result<WebSocketProxy, crate::ProxyError> {
-        let url = UpstreamUrlBuilder::new(self.state.base_url)
-            .default_params(&self.state.default_params)
-            .client_params(&self.state.client_params)
-            .build();
-
-        let uri = url
-            .as_str()
             .parse()
             .map_err(|e| crate::ProxyError::InvalidRequest(format!("{}", e)))?;
 

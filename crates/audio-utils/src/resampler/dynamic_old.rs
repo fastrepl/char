@@ -4,7 +4,9 @@ use std::task::{Context, Poll};
 use dasp::interpolate::Interpolator;
 use futures_util::{Stream, pin_mut};
 use hypr_audio_interface::AsyncSource;
+use pin_project::pin_project;
 
+#[pin_project]
 pub struct ResamplerDynamicOld<S: AsyncSource> {
     source: S,
     target_sample_rate: u32,
@@ -51,7 +53,7 @@ impl<S: AsyncSource> ResamplerDynamicOld<S> {
     }
 }
 
-impl<S: AsyncSource + Unpin> Stream for ResamplerDynamicOld<S> {
+impl<S: AsyncSource> Stream for ResamplerDynamicOld<S> {
     type Item = f32;
 
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
@@ -96,7 +98,7 @@ impl<S: AsyncSource + Unpin> Stream for ResamplerDynamicOld<S> {
     }
 }
 
-impl<S: AsyncSource + Unpin> AsyncSource for ResamplerDynamicOld<S> {
+impl<S: AsyncSource> AsyncSource for ResamplerDynamicOld<S> {
     fn as_stream(&mut self) -> impl Stream<Item = f32> + '_ {
         self
     }

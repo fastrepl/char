@@ -1,0 +1,11 @@
+[package]
+name = "transcript"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+owhisper-interface = { workspace = true }
+
+serde = { workspace = true }
+specta = { workspace = true }
+uuid = { workspace = true, features = ["v4"] }

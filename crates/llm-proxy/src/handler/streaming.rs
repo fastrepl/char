@@ -7,12 +7,13 @@ use futures_util::StreamExt;
 
 use crate::analytics::GenerationEvent;
 
-use super::{AppState, report_with_cost};
+use super::{AnalyticsContext, AppState, report_with_cost};
 
 pub(super) async fn handle_stream_response(
     state: AppState,
     response: reqwest::Response,
     start_time: Instant,
+    analytics_ctx: AnalyticsContext,
 ) -> Response {
     let status = response.status();
     let http_status = status.as_u16();
@@ -63,6 +64,8 @@ pub(super) async fn handle_stream_response(
         if let Some(analytics) = analytics
             && let Some(generation_id) = accumulator.generation_id {
                 let event = GenerationEvent {
+                    fingerprint: analytics_ctx.fingerprint,
+                    user_id: analytics_ctx.user_id,
                     generation_id,
                     model: accumulator.model.unwrap_or_default(),
                     input_tokens: accumulator.input_tokens,

@@ -18,8 +18,6 @@ on:
       - crates/transcribe-proxy/**
       - crates/owhisper-client/src/adapter/**
   pull_request:
-    branches-ignore:
-      - "**/graphite-base/**"
     paths:
       - crates/transcribe-proxy/**
       - crates/owhisper-client/src/adapter/**

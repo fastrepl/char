@@ -40,4 +40,30 @@ Denies the export command without any pre-configured scope.
 
 </td>
 </tr>
+
+<tr>
+<td>
+
+`pdf:allow-export-text`
+
+</td>
+<td>
+
+Enables the export_text command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`pdf:deny-export-text`
+
+</td>
+<td>
+
+Denies the export_text command without any pre-configured scope.
+
+</td>
+</tr>
 </table>
