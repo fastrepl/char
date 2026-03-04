@@ -72,7 +72,7 @@ function Component() {
 
   return (
     <div
-      className="flex h-full gap-1 overflow-hidden p-1"
+      className="flex h-full gap-1 overflow-hidden bg-stone-50 p-1"
       data-testid="main-app-shell"
     >
       {leftsidebar.expanded && !isOnboarding && <LeftSidebar />}

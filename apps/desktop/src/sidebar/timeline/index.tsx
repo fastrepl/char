@@ -210,10 +210,7 @@ export function TimelineView() {
       <div
         ref={containerRef}
         onContextMenu={showContextMenu}
-        className={cn([
-          "scrollbar-hide flex h-full flex-col overflow-y-auto",
-          "rounded-xl bg-neutral-50",
-        ])}
+        className={cn(["scrollbar-hide flex h-full flex-col overflow-y-auto"])}
       >
         {buckets.map((bucket, index) => {
           const isToday = bucket.label === "Today";
@@ -225,12 +222,7 @@ export function TimelineView() {
               {shouldRenderIndicatorBefore && (
                 <CurrentTimeIndicator ref={setCurrentTimeIndicatorRef} />
               )}
-              <div
-                className={cn([
-                  "sticky top-0 z-10",
-                  "bg-neutral-50 py-1 pr-1 pl-3",
-                ])}
-              >
+              <div className={cn(["sticky top-0 z-10", "py-1 pr-1 pl-3"])}>
                 <div className="text-base font-bold text-neutral-900">
                   {bucket.label}
                 </div>
