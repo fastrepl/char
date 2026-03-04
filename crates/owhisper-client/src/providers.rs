@@ -362,18 +362,34 @@ impl Provider {
         msg: &owhisper_interface::ControlMessage,
     ) -> Option<String> {
         use crate::adapter::RealtimeSttAdapter;
-        match self {
-            Self::Deepgram => crate::adapter::DeepgramAdapter.translate_control_message(msg),
-            Self::AssemblyAI => crate::adapter::AssemblyAIAdapter.translate_control_message(msg),
-            Self::Soniox => crate::adapter::SonioxAdapter.translate_control_message(msg),
-            Self::Fireworks => crate::adapter::FireworksAdapter.translate_control_message(msg),
-            Self::OpenAI => crate::adapter::OpenAIAdapter.translate_control_message(msg),
-            Self::Gladia => crate::adapter::GladiaAdapter.translate_control_message(msg),
-            Self::ElevenLabs => crate::adapter::ElevenLabsAdapter.translate_control_message(msg),
-            Self::DashScope => crate::adapter::DashScopeAdapter.translate_control_message(msg),
-            Self::Mistral => {
-                crate::adapter::MistralAdapter::default().translate_control_message(msg)
+        use hypr_ws_client::client::Message;
+        use owhisper_interface::ControlMessage;
+
+        fn extract_text(msg: Message) -> Option<String> {
+            match msg {
+                Message::Text(t) => Some(t.to_string()),
+                _ => None,
             }
+        }
+
+        fn from_adapter(adapter: &impl RealtimeSttAdapter, msg: &ControlMessage) -> Option<String> {
+            match msg {
+                ControlMessage::KeepAlive => adapter.keep_alive_message().and_then(extract_text),
+                ControlMessage::Finalize => extract_text(adapter.finalize_message()),
+                ControlMessage::CloseStream => None,
+            }
+        }
+
+        match self {
+            Self::Deepgram => from_adapter(&crate::adapter::DeepgramAdapter, msg),
+            Self::AssemblyAI => from_adapter(&crate::adapter::AssemblyAIAdapter, msg),
+            Self::Soniox => from_adapter(&crate::adapter::SonioxAdapter, msg),
+            Self::Fireworks => from_adapter(&crate::adapter::FireworksAdapter, msg),
+            Self::OpenAI => from_adapter(&crate::adapter::OpenAIAdapter, msg),
+            Self::Gladia => from_adapter(&crate::adapter::GladiaAdapter, msg),
+            Self::ElevenLabs => from_adapter(&crate::adapter::ElevenLabsAdapter, msg),
+            Self::DashScope => from_adapter(&crate::adapter::DashScopeAdapter, msg),
+            Self::Mistral => from_adapter(&crate::adapter::MistralAdapter::default(), msg),
         }
     }
 

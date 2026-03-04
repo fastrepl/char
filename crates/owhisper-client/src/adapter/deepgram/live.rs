@@ -62,13 +62,6 @@ impl RealtimeSttAdapter for DeepgramAdapter {
     fn parse_response(&self, raw: &str) -> Vec<StreamResponse> {
         serde_json::from_str(raw).into_iter().collect()
     }
-
-    fn translate_control_message(
-        &self,
-        msg: &owhisper_interface::ControlMessage,
-    ) -> Option<String> {
-        serde_json::to_string(msg).ok()
-    }
 }
 
 #[cfg(test)]
@@ -315,23 +308,4 @@ mod tests {
         run_dual_test(client, "deepgram").await;
     }
 
-    #[test]
-    fn test_translate_control_message() {
-        use owhisper_interface::ControlMessage;
-
-        let adapter = DeepgramAdapter::default();
-
-        assert_eq!(
-            adapter.translate_control_message(&ControlMessage::KeepAlive),
-            Some(r#"{"type":"KeepAlive"}"#.to_string()),
-        );
-        assert_eq!(
-            adapter.translate_control_message(&ControlMessage::Finalize),
-            Some(r#"{"type":"Finalize"}"#.to_string()),
-        );
-        assert_eq!(
-            adapter.translate_control_message(&ControlMessage::CloseStream),
-            Some(r#"{"type":"CloseStream"}"#.to_string()),
-        );
-    }
 }

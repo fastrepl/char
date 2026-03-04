@@ -453,23 +453,4 @@ mod tests {
         run_dual_test(client, "soniox").await;
     }
 
-    #[test]
-    fn test_translate_control_message() {
-        use owhisper_interface::ControlMessage;
-
-        let adapter = SonioxAdapter::default();
-
-        assert_eq!(
-            adapter.translate_control_message(&ControlMessage::KeepAlive),
-            Some(r#"{"type":"keepalive"}"#.to_string()),
-        );
-        assert_eq!(
-            adapter.translate_control_message(&ControlMessage::Finalize),
-            Some(r#"{"type":"finalize"}"#.to_string()),
-        );
-        assert_eq!(
-            adapter.translate_control_message(&ControlMessage::CloseStream),
-            None,
-        );
-    }
 }
