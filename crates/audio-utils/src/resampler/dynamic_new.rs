@@ -1,11 +1,10 @@
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-use super::driver::RubatoChunkResampler;
 use futures_util::{Stream, pin_mut};
 use hypr_audio_interface::AsyncSource;
+use hypr_resampler::{Async, FixedAsync, PolynomialDegree, RubatoChunkResampler};
 use pin_project::pin_project;
-use rubato::{FastFixedIn, PolynomialDegree};
 
 pub trait ResampleExtDynamicNew: AsyncSource + Sized {
     fn resampled_chunks(
@@ -21,7 +20,7 @@ impl<T> ResampleExtDynamicNew for T where T: AsyncSource + Sized {}
 
 enum Backend {
     Passthrough(Vec<f32>),
-    Resampler(Box<RubatoChunkResampler<FastFixedIn<f32>, 1>>),
+    Resampler(Box<RubatoChunkResampler<Async<f32>, 1>>),
 }
 
 impl Backend {
@@ -38,7 +37,7 @@ impl Backend {
 
     fn ensure_resampler(
         &mut self,
-        resampler: FastFixedIn<f32>,
+        resampler: Async<f32>,
         output_chunk_size: usize,
         input_block_size: usize,
     ) {
@@ -89,7 +88,7 @@ impl Backend {
     fn process_all_ready_blocks(&mut self) -> Result<bool, crate::Error> {
         match self {
             Self::Passthrough(_) => Ok(false),
-            Self::Resampler(driver) => driver.process_all_ready_blocks(),
+            Self::Resampler(driver) => Ok(driver.process_all_ready_blocks()?),
         }
     }
 
@@ -194,16 +193,14 @@ where
         self.backend.drain_at_eos()
     }
 
-    fn create_resampler(
-        ratio: f64,
-        input_block_size: usize,
-    ) -> Result<FastFixedIn<f32>, crate::Error> {
-        FastFixedIn::<f32>::new(
+    fn create_resampler(ratio: f64, input_block_size: usize) -> Result<Async<f32>, crate::Error> {
+        Async::<f32>::new_poly(
             ratio,
             2.0,
             PolynomialDegree::Quintic,
             input_block_size.max(1),
             1,
+            FixedAsync::Input,
         )
         .map_err(Into::into)
     }

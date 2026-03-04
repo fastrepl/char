@@ -108,6 +108,7 @@ hypr-porkbun = { path = "crates/porkbun", package = "porkbun" }
 hypr-pyannote-cloud = { path = "crates/pyannote-cloud", package = "pyannote-cloud" }
 hypr-pyannote-local = { path = "crates/pyannote-local", package = "pyannote-local" }
 hypr-recall = { path = "crates/recall", package = "recall" }
+hypr-resampler = { path = "crates/resampler", package = "resampler" }
 hypr-s3 = { path = "crates/s3", package = "s3" }
 hypr-segmentation = { path = "crates/segmentation", package = "segmentation" }
 hypr-slack-web = { path = "crates/slack-web", package = "slack-web" }
