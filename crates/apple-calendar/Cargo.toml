@@ -25,6 +25,9 @@ uuid = { workspace = true }
 
 tracing = { workspace = true }
 
+[dev-dependencies]
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+
 [target.'cfg(target_os = "macos")'.dependencies]
 block2 = { workspace = true }
 objc2 = { workspace = true, features = ["exception"] }
