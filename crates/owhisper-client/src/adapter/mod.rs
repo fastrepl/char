@@ -37,6 +37,7 @@ use std::path::Path;
 use std::pin::Pin;
 
 use hypr_ws_client::client::Message;
+use owhisper_interface::ControlMessage;
 use owhisper_interface::ListenParams;
 use owhisper_interface::batch::Response as BatchResponse;
 use owhisper_interface::stream::StreamResponse;
@@ -86,6 +87,23 @@ pub fn documented_language_codes_batch() -> Vec<String> {
     set.into_iter().map(str::to_string).collect()
 }
 
+pub fn translate_control_message_default<A: RealtimeSttAdapter + ?Sized>(
+    adapter: &A,
+    msg: &ControlMessage,
+) -> Option<String> {
+    match msg {
+        ControlMessage::KeepAlive => adapter.keep_alive_message().and_then(|m| match m {
+            Message::Text(t) => Some(t.to_string()),
+            _ => None,
+        }),
+        ControlMessage::Finalize => match adapter.finalize_message() {
+            Message::Text(t) => Some(t.to_string()),
+            _ => None,
+        },
+        ControlMessage::CloseStream => None,
+    }
+}
+
 pub trait RealtimeSttAdapter: Clone + Default + Send + Sync + 'static {
     fn provider_name(&self) -> &'static str;
 
@@ -130,6 +148,10 @@ pub trait RealtimeSttAdapter: Clone + Default + Send + Sync + 'static {
     }
 
     fn parse_response(&self, raw: &str) -> Vec<StreamResponse>;
+
+    fn translate_control_message(&self, msg: &ControlMessage) -> Option<String> {
+        translate_control_message_default(self, msg)
+    }
 }
 
 pub trait BatchSttAdapter: Clone + Default + Send + Sync + 'static {

@@ -103,48 +103,16 @@ fn build_response_transformer(
     }
 }
 
-fn native_control_message(provider: Provider, candidates: &[&'static str]) -> Option<&'static str> {
-    provider
-        .control_message_types()
-        .iter()
-        .copied()
-        .find(|t| candidates.contains(t))
-}
-
 fn build_client_message_filter(provider: Provider) -> ClientMessageFilter {
-    let native_keep_alive = native_control_message(provider, &["KeepAlive", "keepalive"]);
-    let native_close_stream = native_control_message(provider, &["CloseStream"]);
-    let native_finalize = native_control_message(provider, &["Finalize", "finalize", "Terminate"]);
-
     Arc::new(move |text: &str| {
-        #[derive(serde::Deserialize)]
-        struct TypeOnly<'a> {
-            #[serde(borrow, rename = "type")]
-            msg_type: Option<&'a str>,
-        }
-
-        let msg_type = match serde_json::from_str::<TypeOnly>(text) {
-            Ok(parsed) => parsed.msg_type,
+        let msg = match serde_json::from_str::<owhisper_interface::ControlMessage>(text) {
+            Ok(msg) => msg,
             Err(_) => return ClientFilterAction::PassThrough,
         };
-
-        match msg_type {
-            Some("KeepAlive") => match native_keep_alive {
-                Some("KeepAlive") => ClientFilterAction::PassThrough,
-                Some(t) => ClientFilterAction::Replace(format!(r#"{{"type":"{t}"}}"#)),
-                None => ClientFilterAction::Drop,
-            },
-            Some("CloseStream") => match native_close_stream {
-                Some("CloseStream") => ClientFilterAction::PassThrough,
-                Some(t) => ClientFilterAction::Replace(format!(r#"{{"type":"{t}"}}"#)),
-                None => ClientFilterAction::Drop,
-            },
-            Some("Finalize") => match native_finalize {
-                Some("Finalize") => ClientFilterAction::PassThrough,
-                Some(t) => ClientFilterAction::Replace(format!(r#"{{"type":"{t}"}}"#)),
-                None => ClientFilterAction::Drop,
-            },
-            _ => ClientFilterAction::PassThrough,
+        match provider.translate_control_message(&msg) {
+            Some(translated) if translated == text => ClientFilterAction::PassThrough,
+            Some(translated) => ClientFilterAction::Replace(translated),
+            None => ClientFilterAction::Drop,
         }
     })
 }
@@ -549,19 +517,28 @@ mod tests {
     #[test]
     fn test_client_message_filter_deepgram_passthrough() {
         let filter = build_client_message_filter(Provider::Deepgram);
-        assert_eq!(filter(r#"{"type":"KeepAlive"}"#), ClientFilterAction::PassThrough);
+        assert_eq!(
+            filter(r#"{"type":"KeepAlive"}"#),
+            ClientFilterAction::PassThrough
+        );
         assert_eq!(
             filter(r#"{"type":"CloseStream"}"#),
             ClientFilterAction::PassThrough
         );
-        assert_eq!(filter(r#"{"type":"Finalize"}"#), ClientFilterAction::PassThrough);
+        assert_eq!(
+            filter(r#"{"type":"Finalize"}"#),
+            ClientFilterAction::PassThrough
+        );
     }
 
     #[test]
     fn test_client_message_filter_soniox_translates_control_messages() {
         let filter = build_client_message_filter(Provider::Soniox);
 
-        assert_eq!(filter(r#"{"type":"CloseStream"}"#), ClientFilterAction::Drop);
+        assert_eq!(
+            filter(r#"{"type":"CloseStream"}"#),
+            ClientFilterAction::Drop
+        );
         assert_eq!(
             filter(r#"{"type":"KeepAlive"}"#),
             ClientFilterAction::Replace(r#"{"type":"keepalive"}"#.to_string())

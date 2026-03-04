@@ -2,8 +2,8 @@ use hypr_ws_client::client::Message;
 use owhisper_interface::ListenParams;
 use owhisper_interface::stream::StreamResponse;
 
-use crate::adapter::RealtimeSttAdapter;
 use crate::adapter::deepgram_compat::build_listen_ws_url;
+use crate::adapter::{RealtimeSttAdapter, translate_control_message_default};
 
 use super::{
     DeepgramAdapter, keywords::DeepgramKeywordStrategy, language::DeepgramLanguageStrategy,
@@ -61,6 +61,18 @@ impl RealtimeSttAdapter for DeepgramAdapter {
 
     fn parse_response(&self, raw: &str) -> Vec<StreamResponse> {
         serde_json::from_str(raw).into_iter().collect()
+    }
+
+    fn translate_control_message(
+        &self,
+        msg: &owhisper_interface::ControlMessage,
+    ) -> Option<String> {
+        match msg {
+            owhisper_interface::ControlMessage::CloseStream => {
+                Some(r#"{"type":"CloseStream"}"#.to_string())
+            }
+            other => translate_control_message_default(self, other),
+        }
     }
 }
 
@@ -306,5 +318,25 @@ mod tests {
             .await;
 
         run_dual_test(client, "deepgram").await;
+    }
+
+    #[test]
+    fn test_translate_control_message() {
+        use owhisper_interface::ControlMessage;
+
+        let adapter = DeepgramAdapter::default();
+
+        assert_eq!(
+            adapter.translate_control_message(&ControlMessage::KeepAlive),
+            Some(r#"{"type":"KeepAlive"}"#.to_string()),
+        );
+        assert_eq!(
+            adapter.translate_control_message(&ControlMessage::Finalize),
+            Some(r#"{"type":"Finalize"}"#.to_string()),
+        );
+        assert_eq!(
+            adapter.translate_control_message(&ControlMessage::CloseStream),
+            Some(r#"{"type":"CloseStream"}"#.to_string()),
+        );
     }
 }

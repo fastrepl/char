@@ -357,6 +357,26 @@ impl Provider {
         }
     }
 
+    pub fn translate_control_message(
+        &self,
+        msg: &owhisper_interface::ControlMessage,
+    ) -> Option<String> {
+        use crate::adapter::RealtimeSttAdapter;
+        match self {
+            Self::Deepgram => crate::adapter::DeepgramAdapter.translate_control_message(msg),
+            Self::AssemblyAI => crate::adapter::AssemblyAIAdapter.translate_control_message(msg),
+            Self::Soniox => crate::adapter::SonioxAdapter.translate_control_message(msg),
+            Self::Fireworks => crate::adapter::FireworksAdapter.translate_control_message(msg),
+            Self::OpenAI => crate::adapter::OpenAIAdapter.translate_control_message(msg),
+            Self::Gladia => crate::adapter::GladiaAdapter.translate_control_message(msg),
+            Self::ElevenLabs => crate::adapter::ElevenLabsAdapter.translate_control_message(msg),
+            Self::DashScope => crate::adapter::DashScopeAdapter.translate_control_message(msg),
+            Self::Mistral => {
+                crate::adapter::MistralAdapter::default().translate_control_message(msg)
+            }
+        }
+    }
+
     pub fn detect_error(&self, data: &[u8]) -> Option<ProviderError> {
         match self {
             Self::Deepgram => deepgram::error::detect_error(data),
