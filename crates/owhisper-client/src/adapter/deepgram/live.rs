@@ -2,8 +2,8 @@ use hypr_ws_client::client::Message;
 use owhisper_interface::ListenParams;
 use owhisper_interface::stream::StreamResponse;
 
+use crate::adapter::RealtimeSttAdapter;
 use crate::adapter::deepgram_compat::build_listen_ws_url;
-use crate::adapter::{RealtimeSttAdapter, translate_control_message_default};
 
 use super::{
     DeepgramAdapter, keywords::DeepgramKeywordStrategy, language::DeepgramLanguageStrategy,
@@ -67,12 +67,7 @@ impl RealtimeSttAdapter for DeepgramAdapter {
         &self,
         msg: &owhisper_interface::ControlMessage,
     ) -> Option<String> {
-        match msg {
-            owhisper_interface::ControlMessage::CloseStream => {
-                Some(r#"{"type":"CloseStream"}"#.to_string())
-            }
-            other => translate_control_message_default(self, other),
-        }
+        serde_json::to_string(msg).ok()
     }
 }
 

@@ -110,7 +110,6 @@ fn build_client_message_filter(provider: Provider) -> ClientMessageFilter {
             Err(_) => return ClientFilterAction::PassThrough,
         };
         match provider.translate_control_message(&msg) {
-            Some(translated) if translated == text => ClientFilterAction::PassThrough,
             Some(translated) => ClientFilterAction::Replace(translated),
             None => ClientFilterAction::Drop,
         }
@@ -515,19 +514,19 @@ mod tests {
     }
 
     #[test]
-    fn test_client_message_filter_deepgram_passthrough() {
+    fn test_client_message_filter_deepgram_identity() {
         let filter = build_client_message_filter(Provider::Deepgram);
         assert_eq!(
             filter(r#"{"type":"KeepAlive"}"#),
-            ClientFilterAction::PassThrough
+            ClientFilterAction::Replace(r#"{"type":"KeepAlive"}"#.to_string())
         );
         assert_eq!(
             filter(r#"{"type":"CloseStream"}"#),
-            ClientFilterAction::PassThrough
+            ClientFilterAction::Replace(r#"{"type":"CloseStream"}"#.to_string())
         );
         assert_eq!(
             filter(r#"{"type":"Finalize"}"#),
-            ClientFilterAction::PassThrough
+            ClientFilterAction::Replace(r#"{"type":"Finalize"}"#.to_string())
         );
     }
 
