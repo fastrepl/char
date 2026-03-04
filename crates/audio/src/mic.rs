@@ -3,10 +3,14 @@ use cpal::{
     traits::{DeviceTrait, HostTrait, StreamTrait},
 };
 use dasp::sample::ToSample;
-use futures_channel::mpsc;
-use futures_util::{Stream, StreamExt};
-use pin_project::pin_project;
-use std::pin::Pin;
+use futures_util::Stream;
+use futures_util::task::AtomicWaker;
+use ringbuf::{
+    HeapCons, HeapProd, HeapRb,
+    traits::{Consumer, Split},
+};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
 use crate::AsyncSource;
 
@@ -23,11 +27,13 @@ fn is_tap_device(name: &str) -> bool {
 }
 
 pub struct MicInput {
-    #[allow(dead_code)]
-    host: cpal::Host,
+    _host: cpal::Host,
     device: cpal::Device,
     config: cpal::SupportedStreamConfig,
 }
+
+const MIC_READ_CHUNK_SIZE: usize = 256;
+const MIC_BUFFER_SIZE: usize = MIC_READ_CHUNK_SIZE * 256;
 
 impl MicInput {
     pub fn device_name(&self) -> String {
@@ -97,7 +103,7 @@ impl MicInput {
         tracing::info!(sample_rate = ?config.sample_rate());
 
         Ok(Self {
-            host,
+            _host: host,
             device,
             config,
         })
@@ -110,31 +116,59 @@ impl MicInput {
 
 impl MicInput {
     pub fn stream(&self) -> MicStream {
-        let (tx, rx) = mpsc::unbounded::<Vec<f32>>();
-
         let config = self.config.clone();
         let device = self.device.clone();
         let (drop_tx, drop_rx) = std::sync::mpsc::channel();
+
+        let rb = HeapRb::<f32>::new(MIC_BUFFER_SIZE);
+        let (producer, consumer) = rb.split();
+
+        let waker = Arc::new(AtomicWaker::new());
+        let wake_pending = Arc::new(AtomicBool::new(false));
+        let alive = Arc::new(AtomicBool::new(true));
+        let dropped_samples = Arc::new(AtomicUsize::new(0));
+
+        let waker_for_thread = waker.clone();
+        let wake_pending_for_thread = wake_pending.clone();
+        let alive_for_thread = alive.clone();
+        let dropped_for_thread = dropped_samples.clone();
 
         std::thread::spawn(move || {
             fn build_stream<S: ToSample<f32> + SizedSample>(
                 device: &cpal::Device,
                 config: &cpal::SupportedStreamConfig,
-                mut tx: mpsc::UnboundedSender<Vec<f32>>,
+                mut producer: HeapProd<f32>,
+                waker: Arc<AtomicWaker>,
+                wake_pending: Arc<AtomicBool>,
+                dropped_samples: Arc<AtomicUsize>,
+                alive: Arc<AtomicBool>,
             ) -> Result<cpal::Stream, cpal::BuildStreamError> {
                 let channels = config.channels() as usize;
+                let mut scratch = vec![0.0f32; crate::rt_ring::DEFAULT_SCRATCH_LEN];
+                let waker_for_err = waker.clone();
+                let alive_for_err = alive.clone();
                 device.build_input_stream::<S, _, _>(
                     &config.config(),
                     move |data: &[S], _input_callback_info: &_| {
-                        let _ = tx.start_send(
-                            data.iter()
-                                .step_by(channels)
-                                .map(|&x| x.to_sample())
-                                .collect(),
+                        let stats = crate::rt_ring::push_interleaved_first_channel_to_ringbuf(
+                            data,
+                            channels,
+                            &mut scratch,
+                            &mut producer,
                         );
+
+                        if stats.dropped > 0 {
+                            dropped_samples.fetch_add(stats.dropped, Ordering::Relaxed);
+                        }
+
+                        if stats.pushed > 0 && wake_pending.swap(false, Ordering::AcqRel) {
+                            waker.wake();
+                        }
                     },
-                    |err| {
+                    move |err| {
                         tracing::error!("an error occurred on stream: {}", err);
+                        alive_for_err.store(false, Ordering::Release);
+                        waker_for_err.wake();
                     },
                     None,
                 )
@@ -142,10 +176,42 @@ impl MicInput {
 
             let start_stream = || {
                 let stream = match config.sample_format() {
-                    cpal::SampleFormat::I8 => build_stream::<i8>(&device, &config, tx),
-                    cpal::SampleFormat::I16 => build_stream::<i16>(&device, &config, tx),
-                    cpal::SampleFormat::I32 => build_stream::<i32>(&device, &config, tx),
-                    cpal::SampleFormat::F32 => build_stream::<f32>(&device, &config, tx),
+                    cpal::SampleFormat::I8 => build_stream::<i8>(
+                        &device,
+                        &config,
+                        producer,
+                        waker_for_thread.clone(),
+                        wake_pending_for_thread.clone(),
+                        dropped_for_thread.clone(),
+                        alive_for_thread.clone(),
+                    ),
+                    cpal::SampleFormat::I16 => build_stream::<i16>(
+                        &device,
+                        &config,
+                        producer,
+                        waker_for_thread.clone(),
+                        wake_pending_for_thread.clone(),
+                        dropped_for_thread.clone(),
+                        alive_for_thread.clone(),
+                    ),
+                    cpal::SampleFormat::I32 => build_stream::<i32>(
+                        &device,
+                        &config,
+                        producer,
+                        waker_for_thread.clone(),
+                        wake_pending_for_thread.clone(),
+                        dropped_for_thread.clone(),
+                        alive_for_thread.clone(),
+                    ),
+                    cpal::SampleFormat::F32 => build_stream::<f32>(
+                        &device,
+                        &config,
+                        producer,
+                        waker_for_thread.clone(),
+                        wake_pending_for_thread.clone(),
+                        dropped_for_thread.clone(),
+                        alive_for_thread.clone(),
+                    ),
                     sample_format => {
                         tracing::error!(sample_format = ?sample_format, "unsupported");
                         return None;
@@ -162,6 +228,7 @@ impl MicInput {
 
                 if let Err(err) = stream.play() {
                     tracing::error!("Error playing stream: {}", err);
+                    return None;
                 }
 
                 Some(stream)
@@ -170,39 +237,52 @@ impl MicInput {
             let stream = match start_stream() {
                 Some(stream) => stream,
                 None => {
+                    alive_for_thread.store(false, Ordering::Release);
+                    waker_for_thread.wake();
                     return;
                 }
             };
 
             // Wait for the stream to be dropped
-            drop_rx.recv().unwrap();
+            let _ = drop_rx.recv();
 
             // Then drop the stream
+            alive_for_thread.store(false, Ordering::Release);
+            waker_for_thread.wake();
             drop(stream);
         });
 
-        let receiver = rx.map(futures_util::stream::iter).flatten();
         MicStream {
             drop_tx,
             config: self.config.clone(),
-            receiver: Box::pin(receiver),
+            consumer,
+            waker,
+            wake_pending,
+            alive,
+            read_buffer: vec![0.0; MIC_READ_CHUNK_SIZE],
+            read_len: 0,
+            read_idx: 0,
+            dropped_samples,
         }
     }
 }
 
-#[pin_project(PinnedDrop)]
 pub struct MicStream {
     drop_tx: std::sync::mpsc::Sender<()>,
     config: cpal::SupportedStreamConfig,
-    #[pin]
-    receiver: Pin<Box<dyn Stream<Item = f32> + Send + Sync>>,
+    consumer: HeapCons<f32>,
+    waker: Arc<AtomicWaker>,
+    wake_pending: Arc<AtomicBool>,
+    alive: Arc<AtomicBool>,
+    read_buffer: Vec<f32>,
+    read_len: usize,
+    read_idx: usize,
+    dropped_samples: Arc<AtomicUsize>,
 }
 
-#[pin_project::pinned_drop]
-impl PinnedDrop for MicStream {
-    fn drop(self: std::pin::Pin<&mut Self>) {
-        let this = self.project();
-        this.drop_tx.send(()).unwrap();
+impl Drop for MicStream {
+    fn drop(&mut self) {
+        let _ = self.drop_tx.send(());
     }
 }
 
@@ -210,10 +290,61 @@ impl Stream for MicStream {
     type Item = f32;
 
     fn poll_next(
-        self: std::pin::Pin<&mut Self>,
+        mut self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
     ) -> std::task::Poll<Option<Self::Item>> {
-        self.project().receiver.poll_next(cx)
+        use std::task::Poll;
+
+        let this = self.as_mut().get_mut();
+
+        if this.read_idx < this.read_len {
+            let sample = this.read_buffer[this.read_idx];
+            this.read_idx += 1;
+            return Poll::Ready(Some(sample));
+        }
+
+        let dropped = this.dropped_samples.swap(0, Ordering::Relaxed);
+        if dropped > 0 {
+            tracing::warn!(dropped, "mic_samples_dropped");
+        }
+
+        let popped = {
+            let consumer = &mut this.consumer;
+            let read_buffer = &mut this.read_buffer;
+            consumer.pop_slice(read_buffer)
+        };
+        if popped > 0 {
+            this.read_len = popped;
+            this.read_idx = 1;
+            this.wake_pending.store(false, Ordering::Release);
+            return Poll::Ready(Some(this.read_buffer[0]));
+        }
+
+        if !this.alive.load(Ordering::Acquire) {
+            return Poll::Ready(None);
+        }
+
+        this.wake_pending.store(true, Ordering::Release);
+        this.waker.register(cx.waker());
+
+        let popped = {
+            let consumer = &mut this.consumer;
+            let read_buffer = &mut this.read_buffer;
+            consumer.pop_slice(read_buffer)
+        };
+        if popped > 0 {
+            this.read_len = popped;
+            this.read_idx = 1;
+            this.wake_pending.store(false, Ordering::Release);
+            return Poll::Ready(Some(this.read_buffer[0]));
+        }
+
+        if !this.alive.load(Ordering::Acquire) {
+            return Poll::Ready(None);
+        }
+
+        this.wake_pending.store(true, Ordering::Release);
+        Poll::Pending
     }
 }
 
@@ -250,7 +381,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_mic_stream_with_resampling() {
-        use hypr_audio_utils::{ResampleExtDynamicNew, chunk_size_for_stt};
+        use hypr_audio_utils::chunk_size_for_stt;
+        use hypr_resampler::ResampleExtDynamicNew;
 
         let mic = MicInput::new(None).unwrap();
         println!("mic device: {}", mic.device_name());

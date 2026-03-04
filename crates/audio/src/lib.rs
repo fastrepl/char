@@ -1,6 +1,7 @@
 mod errors;
 mod mic;
 mod norm;
+mod rt_ring;
 mod speaker;
 
 pub use errors::*;
