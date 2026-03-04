@@ -6,7 +6,10 @@ use owhisper_client::Auth;
 pub use tokio_tungstenite::tungstenite::ClientRequestBuilder;
 
 use super::handler::WebSocketProxy;
-use super::types::{FirstMessageTransformer, InitialMessage, OnCloseCallback, ResponseTransformer};
+use super::types::{
+    ClientMessageFilter, FirstMessageTransformer, InitialMessage, OnCloseCallback,
+    ResponseTransformer,
+};
 use crate::config::DEFAULT_CONNECT_TIMEOUT_MS;
 use crate::provider_selector::SelectedProvider;
 
@@ -34,6 +37,7 @@ pub struct WebSocketProxyBuilder<S = NoUpstream> {
     response_transformer: Option<ResponseTransformer>,
     connect_timeout: Duration,
     on_close: Option<OnCloseCallback>,
+    client_message_filter: Option<ClientMessageFilter>,
 }
 
 impl Default for WebSocketProxyBuilder<NoUpstream> {
@@ -46,6 +50,7 @@ impl Default for WebSocketProxyBuilder<NoUpstream> {
             response_transformer: None,
             connect_timeout: Duration::from_millis(DEFAULT_CONNECT_TIMEOUT_MS),
             on_close: None,
+            client_message_filter: None,
         }
     }
 }
@@ -60,6 +65,7 @@ impl<S> WebSocketProxyBuilder<S> {
             response_transformer: self.response_transformer,
             connect_timeout: self.connect_timeout,
             on_close: self.on_close,
+            client_message_filter: self.client_message_filter,
         }
     }
 
@@ -71,6 +77,7 @@ impl<S> WebSocketProxyBuilder<S> {
         response_transformer: Option<ResponseTransformer>,
         connect_timeout: Duration,
         on_close: Option<OnCloseCallback>,
+        client_message_filter: Option<ClientMessageFilter>,
     ) -> WebSocketProxy {
         let control_message_types = if control_message_types.is_empty() {
             None
@@ -86,6 +93,7 @@ impl<S> WebSocketProxyBuilder<S> {
             response_transformer,
             connect_timeout,
             on_close,
+            client_message_filter,
         )
     }
 
@@ -129,6 +137,11 @@ impl<S> WebSocketProxyBuilder<S> {
             Box::pin(callback(duration))
                 as std::pin::Pin<Box<dyn std::future::Future<Output = ()> + Send>>
         }));
+        self
+    }
+
+    pub fn client_message_filter(mut self, filter: ClientMessageFilter) -> Self {
+        self.client_message_filter = Some(filter);
         self
     }
 }
@@ -194,6 +207,7 @@ impl WebSocketProxyBuilder<WithUrl> {
             self.response_transformer,
             self.connect_timeout,
             self.on_close,
+            self.client_message_filter,
         ))
     }
 }

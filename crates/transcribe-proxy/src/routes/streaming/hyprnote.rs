@@ -10,7 +10,7 @@ use owhisper_interface::ListenParams;
 use crate::config::SttProxyConfig;
 use crate::provider_selector::SelectedProvider;
 use crate::query_params::{QueryParams, QueryValue};
-use crate::relay::{ChannelSplitProxy, WebSocketProxy};
+use crate::relay::{ChannelSplitProxy, ClientFilterAction, ClientMessageFilter, WebSocketProxy};
 use crate::routes::AppState;
 use crate::routes::model_resolution::resolve_model;
 
@@ -103,6 +103,52 @@ fn build_response_transformer(
     }
 }
 
+fn native_control_message(provider: Provider, candidates: &[&'static str]) -> Option<&'static str> {
+    provider
+        .control_message_types()
+        .iter()
+        .copied()
+        .find(|t| candidates.contains(t))
+}
+
+fn build_client_message_filter(provider: Provider) -> ClientMessageFilter {
+    let native_keep_alive = native_control_message(provider, &["KeepAlive", "keepalive"]);
+    let native_close_stream = native_control_message(provider, &["CloseStream"]);
+    let native_finalize = native_control_message(provider, &["Finalize", "finalize", "Terminate"]);
+
+    Arc::new(move |text: &str| {
+        #[derive(serde::Deserialize)]
+        struct TypeOnly<'a> {
+            #[serde(borrow, rename = "type")]
+            msg_type: Option<&'a str>,
+        }
+
+        let msg_type = match serde_json::from_str::<TypeOnly>(text) {
+            Ok(parsed) => parsed.msg_type,
+            Err(_) => return ClientFilterAction::PassThrough,
+        };
+
+        match msg_type {
+            Some("KeepAlive") => match native_keep_alive {
+                Some("KeepAlive") => ClientFilterAction::PassThrough,
+                Some(t) => ClientFilterAction::Replace(format!(r#"{{"type":"{t}"}}"#)),
+                None => ClientFilterAction::Drop,
+            },
+            Some("CloseStream") => match native_close_stream {
+                Some("CloseStream") => ClientFilterAction::PassThrough,
+                Some(t) => ClientFilterAction::Replace(format!(r#"{{"type":"{t}"}}"#)),
+                None => ClientFilterAction::Drop,
+            },
+            Some("Finalize") => match native_finalize {
+                Some("Finalize") => ClientFilterAction::PassThrough,
+                Some(t) => ClientFilterAction::Replace(format!(r#"{{"type":"{t}"}}"#)),
+                None => ClientFilterAction::Drop,
+            },
+            _ => ClientFilterAction::PassThrough,
+        }
+    })
+}
+
 pub enum StreamingProxy {
     Single(WebSocketProxy),
     ChannelSplit(ChannelSplitProxy),
@@ -146,11 +192,13 @@ fn build_proxy_with_adapter(
         channels,
     );
 
+    let filter = build_client_message_filter(provider);
     let mut builder = WebSocketProxy::builder()
         .upstream_url(upstream_url.as_str())
         .connect_timeout(config.connect_timeout)
         .control_message_types(provider.control_message_types())
         .response_transformer(build_response_transformer(provider))
+        .client_message_filter(filter)
         .apply_auth(selected);
 
     if let Some(msg) = initial_message {
@@ -192,13 +240,17 @@ fn build_channel_split_proxy(
         Some(Arc::new(build_response_transformer(provider)));
     let on_close = build_on_close_callback(config, provider, &analytics_ctx);
 
-    Ok(StreamingProxy::ChannelSplit(ChannelSplitProxy::new(
-        request,
-        initial_msg,
-        response_transformer,
-        config.connect_timeout,
-        on_close,
-    )))
+    let filter = build_client_message_filter(provider);
+    Ok(StreamingProxy::ChannelSplit(
+        ChannelSplitProxy::new(
+            request,
+            initial_msg,
+            response_transformer,
+            config.connect_timeout,
+            on_close,
+        )
+        .with_client_message_filter(filter),
+    ))
 }
 
 fn build_session_channel_split_proxy(
@@ -224,6 +276,7 @@ fn build_session_channel_split_proxy(
         Some(Arc::new(build_response_transformer(provider)));
     let on_close = build_on_close_callback(config, provider, &analytics_ctx);
 
+    let filter = build_client_message_filter(provider);
     Ok(StreamingProxy::ChannelSplit(
         ChannelSplitProxy::with_split_requests(
             mic_request,
@@ -232,7 +285,8 @@ fn build_session_channel_split_proxy(
             response_transformer,
             config.connect_timeout,
             on_close,
-        ),
+        )
+        .with_client_message_filter(filter),
     ))
 }
 
@@ -243,11 +297,13 @@ fn build_proxy_with_url_and_transformer(
     analytics_ctx: AnalyticsContext,
 ) -> Result<StreamingProxy, crate::ProxyError> {
     let provider = selected.provider();
+    let filter = build_client_message_filter(provider);
     let builder = WebSocketProxy::builder()
         .upstream_url(upstream_url)
         .connect_timeout(config.connect_timeout)
         .control_message_types(provider.control_message_types())
         .response_transformer(build_response_transformer(provider))
+        .client_message_filter(filter)
         .apply_auth(selected);
 
     let proxy = finalize_proxy_builder!(builder, provider, config, analytics_ctx)?;
@@ -488,6 +544,48 @@ mod tests {
 
         let result = transformer("{}");
         assert!(result.is_none());
+    }
+
+    #[test]
+    fn test_client_message_filter_deepgram_passthrough() {
+        let filter = build_client_message_filter(Provider::Deepgram);
+        assert_eq!(filter(r#"{"type":"KeepAlive"}"#), ClientFilterAction::PassThrough);
+        assert_eq!(
+            filter(r#"{"type":"CloseStream"}"#),
+            ClientFilterAction::PassThrough
+        );
+        assert_eq!(filter(r#"{"type":"Finalize"}"#), ClientFilterAction::PassThrough);
+    }
+
+    #[test]
+    fn test_client_message_filter_soniox_translates_control_messages() {
+        let filter = build_client_message_filter(Provider::Soniox);
+
+        assert_eq!(filter(r#"{"type":"CloseStream"}"#), ClientFilterAction::Drop);
+        assert_eq!(
+            filter(r#"{"type":"KeepAlive"}"#),
+            ClientFilterAction::Replace(r#"{"type":"keepalive"}"#.to_string())
+        );
+        assert_eq!(
+            filter(r#"{"type":"Finalize"}"#),
+            ClientFilterAction::Replace(r#"{"type":"finalize"}"#.to_string())
+        );
+    }
+
+    #[test]
+    fn test_client_message_filter_assemblyai_translates_finalize() {
+        let filter = build_client_message_filter(Provider::AssemblyAI);
+        assert_eq!(filter(r#"{"type":"KeepAlive"}"#), ClientFilterAction::Drop);
+        assert_eq!(
+            filter(r#"{"type":"Finalize"}"#),
+            ClientFilterAction::Replace(r#"{"type":"Terminate"}"#.to_string())
+        );
+    }
+
+    #[test]
+    fn test_client_message_filter_non_json_passthrough() {
+        let filter = build_client_message_filter(Provider::Soniox);
+        assert_eq!(filter("not json"), ClientFilterAction::PassThrough);
     }
 
     #[test]

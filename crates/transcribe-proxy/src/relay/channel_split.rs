@@ -14,7 +14,10 @@ use tokio_tungstenite::{
 
 use owhisper_client::Provider;
 
-use super::types::{InitialMessage, OnCloseCallback, ResponseTransformer, convert};
+use super::types::{
+    ClientFilterAction, ClientMessageFilter, InitialMessage, OnCloseCallback, ResponseTransformer,
+    convert,
+};
 
 const SAMPLE_BYTES: usize = 2;
 const FRAME_BYTES: usize = SAMPLE_BYTES * 2;
@@ -71,6 +74,7 @@ pub struct ChannelSplitProxy {
     response_transformer: Option<ResponseTransformer>,
     connect_timeout: Duration,
     on_close: Option<OnCloseCallback>,
+    client_message_filter: Option<ClientMessageFilter>,
 }
 
 impl ChannelSplitProxy {
@@ -106,7 +110,13 @@ impl ChannelSplitProxy {
             response_transformer,
             connect_timeout,
             on_close,
+            client_message_filter: None,
         }
+    }
+
+    pub fn with_client_message_filter(mut self, filter: ClientMessageFilter) -> Self {
+        self.client_message_filter = Some(filter);
+        self
     }
 
     async fn connect_upstream(
@@ -155,6 +165,7 @@ impl ChannelSplitProxy {
             spk_upstream,
             self.initial_message.clone(),
             self.response_transformer.clone(),
+            self.client_message_filter.clone(),
         )
         .await;
 
@@ -177,6 +188,7 @@ impl ChannelSplitProxy {
         spk_upstream: WebSocketStream<MaybeTlsStream<tokio::net::TcpStream>>,
         initial_message: Option<InitialMessage>,
         response_transformer: Option<ResponseTransformer>,
+        client_message_filter: Option<ClientMessageFilter>,
     ) {
         let (mut mic_tx, mut mic_rx) = mic_upstream.split();
         let (mut spk_tx, mut spk_rx) = spk_upstream.split();
@@ -218,7 +230,16 @@ impl ChannelSplitProxy {
                                     }
                                 }
                                 Message::Text(text) => {
-                                    let tung = TungsteniteMessage::Text(text.to_string().into());
+                                    let text_str = text.to_string();
+                                    let forwarded = match &client_message_filter {
+                                        Some(filter) => match filter(&text_str) {
+                                            ClientFilterAction::Drop => continue,
+                                            ClientFilterAction::Replace(replacement) => replacement,
+                                            ClientFilterAction::PassThrough => text_str,
+                                        },
+                                        None => text_str,
+                                    };
+                                    let tung = TungsteniteMessage::Text(forwarded.into());
                                     if mic_tx.send(tung.clone()).await.is_err()
                                         || spk_tx.send(tung).await.is_err()
                                     {
