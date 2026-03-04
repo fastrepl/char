@@ -43,7 +43,7 @@ This is a code-derived inventory of what Char sends to PostHog across:
 | Web custom/autocapture events | PostHog browser distinct ID | Auth callback calls `posthog.identify(userId, { email })`. |
 | API `$ai_generation` | `x-device-fingerprint` if present, else `generation_id` | Optional `user_id` also included as event property. |
 | API `$stt_request` | `x-device-fingerprint` if present, else random UUID | Optional `user_id` also included as event property. |
-| API trial events | Authenticated `user_id` | No separate `$identify` call here. |
+| API trial events | `x-device-fingerprint` if present (desktop), else authenticated `user_id` | `user_id` is included as an event property when distinct ID is fingerprint. No separate `$identify` call here. |
 
 ## Automatic desktop event enrichment
 
@@ -123,6 +123,39 @@ Notes:
 | `trial_started` | `plan`, `source` (`desktop` or `web`) | `crates/api-subscription/src/trial.rs`, `crates/api-subscription/src/routes/billing.rs` |
 | `trial_skipped` | `reason = "not_eligible"`, `source` | `crates/api-subscription/src/trial.rs`, `crates/api-subscription/src/routes/billing.rs` |
 | `trial_failed` | `reason` (`stripe_error`, `customer_error`, `rpc_error`), `source` | `crates/api-subscription/src/trial.rs`, `crates/api-subscription/src/routes/billing.rs` |
+
+## User journey tracking
+
+The current product telemetry for the common activation journey is:
+
+| Journey step | Primary event(s) | Current coverage |
+|------|-------------------|------------------|
+| 1. Visitor downloads from website | `download_clicked` | Tracked on homepage and download page variants. |
+| 2. Installs app from DMG | none | No explicit install-complete event today. |
+| 3. Opens app | `show_main_window` | Tracked when the main window is shown. |
+| 4. Signs up/signs in | `user_signed_in` + desktop `$identify` | Tracked from desktop auth state changes. |
+| 5. Completes onboarding | `onboarding_step_viewed`, `onboarding_completed` | Step-level and completion coverage exists. |
+| 6a. Creates a note | `note_created` | Tracked for both empty and event-backed notes. |
+| 6b. Transcribes a meeting | `session_started`, `$stt_request` | UI intent (`session_started`) + server usage (`$stt_request`). |
+| 6c. Generates a summary | `note_enhanced`, `$ai_generation` | UI intent (`note_enhanced`) + server model usage (`$ai_generation`). |
+
+Notes:
+
+- Step 2 (install) is currently inferred from first app-open behavior (`show_main_window`), not directly measured.
+- For transcription/summarization, server telemetry (`$stt_request`, `$ai_generation`) is the stronger "actual work happened" signal.
+- Desktop event stitching relies on machine fingerprint distinct IDs plus desktop `identify(...)` during auth.
+
+### Suggested funnel definitions
+
+Use this sequence for a practical activation funnel:
+
+1. `download_clicked`
+2. `show_main_window`
+3. `user_signed_in`
+4. `onboarding_completed`
+5. `note_created`
+6. `$stt_request` (optionally duration threshold, e.g. `>= 300s`)
+7. `note_enhanced` (or `$ai_generation`)
 
 ## User property catalog
 
