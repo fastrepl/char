@@ -28,11 +28,15 @@ pub async fn start_trial(
     device_fingerprint: Option<Extension<DeviceFingerprint>>,
 ) -> Response {
     let user_id = &auth.claims.sub;
+    let device_fingerprint =
+        device_fingerprint.map(|Extension(DeviceFingerprint(fingerprint))| fingerprint);
+
     let source = if device_fingerprint.is_some() {
         "desktop"
     } else {
         "web"
     };
+    let distinct_id = device_fingerprint.as_deref().unwrap_or(user_id);
 
     let can_start: bool = match state
         .supabase
@@ -43,6 +47,7 @@ pub async fn start_trial(
         Err(e) => {
             return emit_and_respond(
                 state.config.analytics.as_deref(),
+                distinct_id,
                 user_id,
                 source,
                 TrialOutcome::RpcError(e.to_string()),
@@ -63,6 +68,7 @@ pub async fn start_trial(
                     Ok(None) => {
                         return emit_and_respond(
                             state.config.analytics.as_deref(),
+                            distinct_id,
                             user_id,
                             source,
                             TrialOutcome::CustomerError("customer not found".to_string()),
@@ -72,6 +78,7 @@ pub async fn start_trial(
                     Err(e) => {
                         return emit_and_respond(
                             state.config.analytics.as_deref(),
+                            distinct_id,
                             user_id,
                             source,
                             TrialOutcome::CustomerError(e.to_string()),
@@ -91,11 +98,19 @@ pub async fn start_trial(
             }
         };
 
-    emit_and_respond(state.config.analytics.as_deref(), user_id, source, outcome).await
+    emit_and_respond(
+        state.config.analytics.as_deref(),
+        distinct_id,
+        user_id,
+        source,
+        outcome,
+    )
+    .await
 }
 
 async fn emit_and_respond<O>(
     analytics: Option<&AnalyticsClient>,
+    distinct_id: &str,
     user_id: &str,
     source: &str,
     outcome: O,
@@ -106,7 +121,11 @@ where
     if let Some(analytics) = analytics {
         let mut payload = outcome.to_analytics_payload();
         payload.props.insert("source".to_string(), source.into());
-        if let Err(e) = analytics.event(user_id, payload).await {
+        if distinct_id != user_id {
+            payload.props.insert("user_id".to_string(), user_id.into());
+        }
+
+        if let Err(e) = analytics.event(distinct_id, payload).await {
             tracing::warn!("analytics event error: {e}");
         }
         if let Some(props) = outcome.to_analytics_properties()
