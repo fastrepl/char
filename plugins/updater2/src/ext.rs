@@ -46,6 +46,9 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> Updater2<'a, R, M> {
         };
 
         if should_emit {
+            #[cfg(target_os = "macos")]
+            purge_macos_launch_services_cache();
+
             let payload = UpdatedEvent {
                 previous,
                 current: current_version.clone(),
@@ -175,4 +178,65 @@ fn get_cache_path<R: tauri::Runtime, M: tauri::Manager<R>>(
         .ok()
         .map(|p: PathBuf| p.join("updates"))?;
     Some(dir.join(format!("{}.bin", version)))
+}
+
+/// Purge macOS LaunchServices cache and restart the Dock to ensure
+/// the Dock displays the correct app name/icon after an OTA update.
+#[cfg(target_os = "macos")]
+fn purge_macos_launch_services_cache() {
+    let app_bundle = match std::env::current_exe() {
+        Ok(exe) => {
+            // exe is like /Applications/Hyprnote.app/Contents/MacOS/hyprnote
+            // We need /Applications/Hyprnote.app
+            let mut path = exe;
+            for _ in 0..3 {
+                if !path.pop() {
+                    tracing::warn!("unexpected_exe_path_structure");
+                    return;
+                }
+            }
+            path
+        }
+        Err(e) => {
+            tracing::warn!("failed_to_get_current_exe: {}", e);
+            return;
+        }
+    };
+
+    if !app_bundle.extension().is_some_and(|ext| ext == "app") {
+        tracing::debug!("not_an_app_bundle: {:?}", app_bundle);
+        return;
+    }
+
+    let lsregister = "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister";
+
+    match std::process::Command::new(lsregister)
+        .args(["-f", &app_bundle.to_string_lossy()])
+        .output()
+    {
+        Ok(output) if output.status.success() => {
+            tracing::info!("lsregister_refreshed: {:?}", app_bundle);
+        }
+        Ok(output) => {
+            tracing::warn!(
+                "lsregister_failed: {}",
+                String::from_utf8_lossy(&output.stderr)
+            );
+        }
+        Err(e) => {
+            tracing::warn!("lsregister_exec_failed: {}", e);
+        }
+    }
+
+    match std::process::Command::new("killall")
+        .args(["Dock"])
+        .output()
+    {
+        Ok(_) => {
+            tracing::info!("dock_restarted");
+        }
+        Err(e) => {
+            tracing::warn!("dock_restart_failed: {}", e);
+        }
+    }
 }
