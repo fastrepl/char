@@ -24,7 +24,7 @@ macro_rules! common_derives {
 common_derives! {
     pub enum Template {
         EnhanceSystem(EnhanceSystem),
-        EnhanceUser(EnhanceUser),
+        EnhanceUser(Box<EnhanceUser>),
         TitleSystem(TitleSystem),
         TitleUser(TitleUser),
         ChatSystem(ChatSystem),
@@ -46,7 +46,7 @@ pub enum Error {
 pub fn render(t: Template) -> Result<String, Error> {
     let value = match t {
         Template::EnhanceSystem(t) => askama::Template::render(&t),
-        Template::EnhanceUser(t) => askama::Template::render(&t),
+        Template::EnhanceUser(t) => askama::Template::render(&*t),
         Template::TitleSystem(t) => askama::Template::render(&t),
         Template::TitleUser(t) => askama::Template::render(&t),
         Template::ChatSystem(t) => askama::Template::render(&t),

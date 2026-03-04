@@ -1,3 +1,4 @@
+#[cfg(target_os = "macos")]
 use chrono::{DateTime, Utc};
 use hypr_calendar_interface::{
     CalendarEvent, CalendarListItem, CalendarProviderType, CreateEventInput, EventFilter,
@@ -15,12 +16,15 @@ pub struct CalendarExt<'a, R: tauri::Runtime, M: tauri::Manager<R>> {
 }
 
 pub fn available_providers() -> Vec<CalendarProviderType> {
-    let mut providers = vec![CalendarProviderType::Google, CalendarProviderType::Outlook];
-
     #[cfg(target_os = "macos")]
-    {
-        providers.insert(0, CalendarProviderType::Apple);
-    }
+    let providers = vec![
+        CalendarProviderType::Apple,
+        CalendarProviderType::Google,
+        CalendarProviderType::Outlook,
+    ];
+
+    #[cfg(not(target_os = "macos"))]
+    let providers = vec![CalendarProviderType::Google, CalendarProviderType::Outlook];
 
     providers
 }
@@ -267,6 +271,7 @@ impl<'a, R: tauri::Runtime, M: tauri::Manager<R>> CalendarExt<'a, R, M> {
     }
 }
 
+#[cfg(target_os = "macos")]
 fn parse_datetime(value: &str, field: &'static str) -> Result<DateTime<Utc>, Error> {
     DateTime::parse_from_rfc3339(value)
         .map(|dt| dt.with_timezone(&Utc))
