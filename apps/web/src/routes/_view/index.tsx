@@ -116,7 +116,7 @@ function Component() {
   return (
     <main
       className="min-h-screen flex-1 overflow-x-hidden bg-linear-to-b from-white via-stone-50/20 to-white"
-      style={{ backgroundImage: "url(/patterns/dots.svg)" }}
+      // style={{ backgroundImage: "url(/patterns/dots.svg)" }}
     >
       <div className="mx-auto max-w-6xl border-x border-neutral-100 bg-white">
         <AnnouncementBanner />

@@ -8,9 +8,9 @@ import { allHandbooks } from "content-collections";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { Footer } from "@/components/footer";
-import { Header } from "@/components/header";
 import { NotFoundContent } from "@/components/not-found";
 import { SearchPaletteProvider } from "@/components/search";
+import { Sidebar } from "@/components/sidebar";
 import { SidebarNavigation } from "@/components/sidebar-navigation";
 import { BlogTocContext } from "@/hooks/use-blog-toc";
 import { DocsDrawerContext } from "@/hooks/use-docs-drawer";
@@ -76,11 +76,19 @@ function Component() {
               }}
             >
               <div className="flex min-h-screen flex-col">
-                {!isChoosePage && <Header />}
-                <main className="flex-1">
-                  <Outlet />
-                </main>
+                {/* Mobile top bar spacer */}
+                <div className="h-14 md:hidden" />
+
+                {/* Sidebar + content in a centered container */}
+                <div className="mx-auto flex w-full max-w-[1280px] flex-1">
+                  {!isChoosePage && <Sidebar />}
+                  <main className="min-w-0 flex-1">
+                    <Outlet />
+                  </main>
+                </div>
+
                 {!isChoosePage && <Footer />}
+
                 {isDocsPage && (
                   <MobileDocsDrawer
                     isOpen={isDocsDrawerOpen}
@@ -123,12 +131,12 @@ function MobileDocsDrawer({
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 top-17.25 z-40 md:hidden"
+          className="fixed inset-0 top-14 z-40 md:hidden"
           onClick={onClose}
         />
       )}
       <div
-        className={`fixed top-17.25 left-0 z-50 h-[calc(100vh-69px)] w-72 border-r border-neutral-100 bg-white/80 shadow-2xl shadow-neutral-900/20 backdrop-blur-xs transition-transform duration-300 ease-in-out md:hidden ${
+        className={`fixed top-14 left-0 z-50 h-[calc(100dvh-56px)] w-72 border-r border-neutral-100 bg-white/80 shadow-2xl shadow-neutral-900/20 backdrop-blur-xs transition-transform duration-300 ease-in-out md:hidden ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         style={{
@@ -209,12 +217,12 @@ function MobileHandbookDrawer({
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 top-17.25 z-40 md:hidden"
+          className="fixed inset-0 top-14 z-40 md:hidden"
           onClick={onClose}
         />
       )}
       <div
-        className={`fixed top-17.25 left-0 z-50 h-[calc(100vh-69px)] w-72 border-r border-neutral-100 bg-white/80 shadow-2xl shadow-neutral-900/20 backdrop-blur-xs transition-transform duration-300 ease-in-out md:hidden ${
+        className={`fixed top-14 left-0 z-50 h-[calc(100dvh-56px)] w-72 border-r border-neutral-100 bg-white/80 shadow-2xl shadow-neutral-900/20 backdrop-blur-xs transition-transform duration-300 ease-in-out md:hidden ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         style={{
