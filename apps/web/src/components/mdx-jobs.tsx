@@ -209,7 +209,7 @@ export function GitHubMention({
       target="_blank"
       rel="noopener noreferrer"
       className={[
-        "inline items-center align-baseline whitespace-nowrap",
+        "inline-flex items-center gap-1 align-middle whitespace-nowrap",
         "font-semibold text-inherit",
         "underline underline-offset-2 decoration-neutral-400",
         "hover:decoration-neutral-600 transition-colors",
@@ -218,7 +218,7 @@ export function GitHubMention({
       <img
         src={avatarUrl}
         alt={name ?? username}
-        className="mr-1 inline size-5 rounded-full align-middle no-underline"
+        className="size-5 shrink-0 rounded-full no-underline"
       />
       {name ?? `@${username}`}
     </a>
@@ -233,6 +233,10 @@ export function HyprnoteIcon() {
       className="mb-0.75 inline-block size-4.5 rounded-md align-middle"
     />
   );
+}
+
+export function CharIcon() {
+  return <HyprnoteIcon />;
 }
 
 export function ChevronIcon() {
@@ -395,6 +399,7 @@ export const jobsMdxComponents = {
   GitToolStack,
   AnimatedJobText,
   GitHubMention,
+  CharIcon,
   HyprnoteIcon,
   ChevronIcon,
   Collapsible,
