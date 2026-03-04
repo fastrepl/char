@@ -1,5 +1,8 @@
 import type { Queries } from "tinybase/with-schemas";
 
+import { commands as calendarCommands } from "@hypr/plugin-calendar";
+
+import { findCalendarByTrackingId } from "~/calendar/utils";
 import { QUERIES, type Schemas, type Store } from "~/store/tinybase/store/main";
 
 // ---
@@ -48,6 +51,50 @@ export function createCtx(store: Store, queries: Queries<Schemas>): Ctx | null {
     calendarIds,
     calendarTrackingIdToId,
   };
+}
+
+// ---
+
+export async function syncCalendars(store: Store): Promise<void> {
+  const userId = store.getValue("user_id");
+  if (!userId) return;
+
+  const result = await calendarCommands.listCalendars("apple");
+  if (result.status === "error") return;
+
+  const incomingCalendars = result.data;
+  const incomingIds = new Set(incomingCalendars.map((cal) => cal.id));
+
+  store.transaction(() => {
+    for (const rowId of store.getRowIds("calendars")) {
+      const row = store.getRow("calendars", rowId);
+      if (
+        row.provider === "apple" &&
+        !incomingIds.has(row.tracking_id_calendar as string)
+      ) {
+        store.delRow("calendars", rowId);
+      }
+    }
+
+    for (const cal of incomingCalendars) {
+      const existingRowId = findCalendarByTrackingId(store, cal.id);
+      const rowId = existingRowId ?? crypto.randomUUID();
+      const existing = existingRowId
+        ? store.getRow("calendars", existingRowId)
+        : null;
+
+      store.setRow("calendars", rowId, {
+        user_id: String(userId),
+        created_at: existing?.created_at || new Date().toISOString(),
+        tracking_id_calendar: cal.id,
+        name: cal.title,
+        enabled: existing?.enabled ?? false,
+        provider: "apple",
+        source: cal.source ?? "Apple Calendar",
+        color: cal.color ?? "#888",
+      });
+    }
+  });
 }
 
 // ---

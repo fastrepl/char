@@ -1,6 +1,6 @@
 import type { Queries } from "tinybase/with-schemas";
 
-import { createCtx } from "./ctx";
+import { createCtx, syncCalendars } from "./ctx";
 import {
   CalendarFetchError,
   fetchExistingEvents,
@@ -29,6 +29,8 @@ export async function syncCalendarEvents(
 }
 
 async function run(store: Store, queries: Queries<Schemas>) {
+  await syncCalendars(store);
+
   const ctx = createCtx(store, queries);
   if (!ctx) {
     return null;
