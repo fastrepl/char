@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { allJobs } from "content-collections";
 import { ArrowRight } from "lucide-react";
 
@@ -8,6 +8,11 @@ import { Image } from "@/components/image";
 import { SlashSeparator } from "@/components/slash-separator";
 
 export const Route = createFileRoute("/_view/jobs/")({
+  beforeLoad: () => {
+    if (!import.meta.env.DEV) {
+      throw notFound();
+    }
+  },
   component: JobsPage,
   head: () => ({
     meta: [

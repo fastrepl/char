@@ -350,14 +350,16 @@ function CompanyLinks() {
             About us
           </Link>
         </li>
-        <li>
-          <Link
-            to="/jobs/"
-            className="text-sm text-neutral-600 no-underline transition-colors hover:text-stone-600 hover:underline hover:decoration-dotted"
-          >
-            Jobs
-          </Link>
-        </li>
+        {import.meta.env.DEV ? (
+          <li>
+            <Link
+              to="/jobs/"
+              className="text-sm text-neutral-600 no-underline transition-colors hover:text-stone-600 hover:underline hover:decoration-dotted"
+            >
+              Jobs
+            </Link>
+          </li>
+        ) : null}
         <li>
           <Link
             to="/brand/"

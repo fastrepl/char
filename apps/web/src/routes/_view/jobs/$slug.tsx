@@ -10,6 +10,11 @@ import { jobsMdxComponents } from "@/components/mdx-jobs";
 import { SlashSeparator } from "@/components/slash-separator";
 
 export const Route = createFileRoute("/_view/jobs/$slug")({
+  beforeLoad: () => {
+    if (!import.meta.env.DEV) {
+      throw notFound();
+    }
+  },
   component: JobPage,
   loader: async ({ params }) => {
     const job = allJobs.find((j) => j.slug === params.slug);
