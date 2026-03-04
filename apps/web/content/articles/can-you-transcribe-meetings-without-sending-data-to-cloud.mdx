@@ -15,97 +15,76 @@ Most people don't realize that every time you use cloud-based transcription tool
 
 But the answer isn't to give up on AI-powered meeting notes. It's to take control of how they work.
 
-## What does "choice" mean in AI transcription?
-
-Most transcription tools make one decision for you: your audio goes to their servers, gets processed, and lives in their database. You don't get a say.
-
-Char flips this. You decide how your audio is captured, which AI processes it, and where everything is stored — whether that's fully local on your device, a hybrid setup, or cloud APIs you've chosen yourself. The tool doesn't make these decisions for you.
-
 ## What happens to your data with cloud-based transcription tools?
 
-When you dig into the details, many users find the situation uncomfortable. With cloud-based tools, your sensitive discussions, client information, and strategic planning sessions are processed by third-party vendors with varying privacy standards.
+With cloud-based tools, your sensitive discussions, client information, and strategic planning sessions are processed by third-party vendors with varying privacy standards.
 
-Your audio and transcripts may be stored on servers across different countries, used for AI training (even if "de-identified"), and subject to the provider's changing privacy policies.
+Your audio and transcripts may be stored on servers across different countries, used for AI training, and subject to the provider's changing privacy policies.
 
-For organizations in regulated industries, this creates significant compliance complexity. You're not just ensuring your systems meet HIPAA, GDPR, or SOC 2 requirements — you're now responsible for your vendor's compliance across multiple jurisdictions.
+For organizations in regulated industries, this creates real compliance complexity. You're not just ensuring your own systems meet HIPAA, GDPR, or SOC 2 requirements — you're now responsible for your vendor's compliance across multiple jurisdictions.
 
-Giving teams control over their AI stack shrinks this complexity. It reduces dependency on cloud vendors, makes audits easier, and puts data handling decisions where they belong — with you.
+Giving teams control over their AI stack reduces dependency on cloud vendors, makes audits easier, and puts data handling decisions with the people who understand the risk.
 
-## Enter Char: the AI notepad built around your choice
+## **Enter Char: the AI notepad built around your choice**
 
-Char was built specifically to address these concerns as an open-source AI notepad for meetings with zero lock-in and complete control over your data and AI stack.
+[Char](https://claude.ai/) is an open-source AI notepad for meetings with zero lock-in and complete control over your data and AI stack.
 
-### You control how your data is processed
+### **You control how your data is processed**
 
-Unlike tools that make one-size-fits-all decisions about your data, Char lets you configure your own stack:
+Char lets you configure your own stack:
 
 - **Transcription** — run it locally on your device, or use cloud APIs like Deepgram or AssemblyAI
 - **AI Summarization** — use your own API keys (OpenAI, Anthropic, and others), run local models via Ollama or LM Studio, or use Char's managed service
 - **Storage** — everything saves as plain markdown files on your device, not in a proprietary database
 
-### Universal platform compatibility
+### **Universal platform compatibility**
 
-Char captures both your microphone input and system audio directly — no bots joining your calls, no calendar permissions required — meaning it works with:
+Char captures your microphone input and system audio directly — no bots joining your calls, no calendar permissions required. It works with all meeting platforms (Zoom, Teams, Meet, Slack), in-person meetings, and phone calls routed through your computer, with no platform-specific integrations needed.
 
-- All meeting platforms (Zoom, Teams, Meet, Slack, and any other platform)
-- In-person meetings where participants are speaking near your device
-- Phone calls routed through your computer
-- No platform-specific integrations required
+### **Your files, your format**
 
-### Your files, your format
+Everything saves as plain markdown on your device. Open them in Obsidian, Notion, VS Code, or any text editor. No proprietary databases, no platform dependency.
 
-Everything is saved as plain markdown on your device. Open them in Obsidian, Notion, VS Code, or any text editor. No proprietary databases, no platform dependency — just files you own.
+## **Does more control mean worse performance?**
 
-## Does more control mean worse performance?
+No. Char delivers real-time transcription, AI summaries with action items and key decisions, custom templates for different meeting types, AI chat to query your transcripts, search across your meeting history, and support for 45+ languages including English, Spanish, French, German, Japanese, Portuguese, Italian, Dutch, Korean, and Chinese.
 
-No. Char delivers the same functionality as cloud tools: real-time transcription, AI summaries with action items and key decisions, custom templates for different meeting types, AI chat to query your transcripts, search across your entire meeting history, and support for 45+ languages including English, Spanish, French, German, Japanese, Portuguese, Italian, Dutch, Korean, Chinese, and more.
+## **Char's privacy vs. performance spectrum**
 
-You're not trading capability for control. You're just deciding who's in the room.
-
-## Char's privacy vs. performance spectrum
-
-Think of it like picking the setup that fits your needs:
-
-**Full Local Mode:** Everything runs on your device. Your conversations never touch the internet. Best for lawyers, doctors, or anyone handling truly sensitive information.
+**Full Local Mode:** Everything runs on your device. Your conversations never touch the internet. Works well for lawyers, doctors, or anyone handling sensitive information.
 
 *Uses: Local transcription + Local AI models (Ollama, LM Studio) + Device-only storage*
 
-**Hybrid Mode:** Keep transcription local so your audio never leaves your device, but use cloud AI for better summaries. Your raw conversation stays private while you get cloud-quality analysis.
+**Hybrid Mode:** Transcription runs locally so your audio stays on your device, while cloud AI handles summarization.
 
 *Uses: Local transcription + Cloud LLM (OpenAI, Anthropic, etc.) + Hybrid storage*
 
-**Performance Mode:** Use cloud APIs for both transcription and AI. You get the best accuracy and speed, and you still choose which providers handle your data — not Char.
+**Performance Mode:** Cloud APIs handle both transcription and AI. You get better accuracy and speed, and you still choose which providers handle your data.
 
 *Uses: Cloud STT (Deepgram, AssemblyAI) + Your own Cloud LLM + Hybrid storage*
 
-### Enterprise gets even more options
+### **Enterprise options**
 
-Companies can run everything on their own servers — transcription, AI, storage, the works. No vendor dependency, full compliance control, and your IT and security teams can audit every part of the stack.
+Companies can run everything on their own servers — transcription, AI, and storage. No vendor dependency, full compliance control, and your IT and security teams can audit every part of the stack.
 
 *Uses: On-premise transcription + Company LLM endpoints + Self-hosted storage*
 
-Want help configuring your setup? [Get in touch with our team](/founders).
+Want help configuring your setup? [Get in touch with our team](https://claude.ai/founders).
 
-## Related questions
+## **Related questions**
 
-### 1. Is there a tool that will listen to meetings via an app and transcribe the notes?
+### **1. Is there a tool that will listen to meetings via an app and transcribe the notes?**
 
-Yes. You have two main approaches:
+Yes. Tools like Otter AI and Fireflies send your audio to remote servers for processing. They're convenient, but you don't get a say in how your data is handled.
 
-**Cloud-Based Apps:** Tools like Otter AI, Fireflies, and others send your audio to remote servers for processing. They're convenient, but you don't get a say in how your data is handled.
+Char lets you decide — local, hybrid, or cloud with your own API keys — with full visibility into what's happening, backed by open-source code you can inspect.
 
-**Choice-first Apps:** Char lets you decide how your data is processed — local, hybrid, or cloud with your own API keys. You get the same transcription quality with full visibility into what's happening under the hood, backed by open-source transparency.
+### **2. Can you transcribe without recording a meeting?**
 
-### 2. Can you transcribe without recording a meeting?
+Yes. Transcription converts speech to text in real-time without saving the audio file itself. Recording saves the actual audio for playback later.
 
-Yes. There's an important distinction between transcribing and recording:
+Char can produce transcripts and summaries without retaining the original audio. You decide what gets stored and where.
 
-**Transcription** converts spoken words to text in real-time without necessarily saving the audio itself.
+### **3. Can you use local transcription for languages other than English?**
 
-**Recording** saves the actual audio file that you can play back later.
-
-Char can process speech to create transcripts and summaries while not retaining the original audio. You get the documentation you need, and you decide what gets stored and where.
-
-### 3. Can you use local transcription for languages other than English?
-
-Yes. Char supports transcription in 45+ languages including English, Spanish, French, German, Japanese, Portuguese, Italian, Dutch, Korean, Chinese, and more. And if you want better multilingual AI summarization, you can connect your own cloud LLM provider — again, your choice.
+Yes. Char supports 45+ languages including English, Spanish, French, German, Japanese, Portuguese, Italian, Dutch, Korean, and Chinese. If you want stronger multilingual AI summarization, you can connect your own cloud LLM provider.
