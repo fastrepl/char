@@ -57,7 +57,7 @@ function Component() {
 
   const showGoogle = !provider || provider === "google";
   const showGithub = !provider || provider === "github";
-  const showMagicLink = !provider;
+  const showMagicLink = false;
 
   return (
     <Container>
