@@ -4,9 +4,7 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 
 use hypr_audio_interface::AsyncSource;
-use rubato::{FastFixedIn, PolynomialDegree};
-
-use super::driver::RubatoChunkResampler;
+use hypr_resampler::{Async, FixedAsync, PolynomialDegree, RubatoChunkResampler};
 
 pub trait AsyncSourceChunkResampleExt: AsyncSource + Sized {
     fn resampled_chunks(
@@ -26,7 +24,7 @@ where
     S: AsyncSource,
 {
     source: S,
-    driver: RubatoChunkResampler<FastFixedIn<f32>, 1>,
+    driver: RubatoChunkResampler<Async<f32>, 1>,
     finished: bool,
 }
 
@@ -52,17 +50,18 @@ where
         source: &S,
         target_rate: u32,
         output_chunk_size: usize,
-    ) -> Result<RubatoChunkResampler<FastFixedIn<f32>, 1>, crate::Error> {
+    ) -> Result<RubatoChunkResampler<Async<f32>, 1>, crate::Error> {
         let source_rate = source.sample_rate();
         let input_block_size = output_chunk_size;
         let ratio = target_rate as f64 / source_rate as f64;
 
-        let resampler = FastFixedIn::<f32>::new(
+        let resampler = Async::<f32>::new_poly(
             ratio,
             2.0,
             PolynomialDegree::Quintic,
             input_block_size.max(1),
             1,
+            FixedAsync::Input,
         )?;
 
         let driver = RubatoChunkResampler::new(resampler, output_chunk_size, input_block_size);
@@ -106,7 +105,7 @@ where
             match me.driver.process_one_block() {
                 Ok(true) => continue,
                 Ok(false) => {}
-                Err(err) => return Poll::Ready(Some(Err(err))),
+                Err(err) => return Poll::Ready(Some(Err(err.into()))),
             }
 
             let sample_poll = {

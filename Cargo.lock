@@ -1430,14 +1430,16 @@ version = "0.1.0"
 dependencies = [
  "audio-interface",
  "audio-mime",
+ "audioadapter-buffers",
  "bytes",
  "dasp",
  "data",
  "futures-util",
  "hound",
  "pin-project",
+ "resampler",
  "rodio",
- "rubato 0.16.2",
+ "rubato",
  "thiserror 2.0.18",
  "tokio",
  "tracing",
@@ -12309,6 +12311,7 @@ dependencies = [
  "reqwest 0.13.2",
  "reqwest-middleware",
  "reqwest-tracing",
+ "resampler",
  "rodio",
  "serde",
  "serde_json",
@@ -14482,6 +14485,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "resampler"
+version = "0.0.1"
+dependencies = [
+ "audioadapter-buffers",
+ "bytes",
+ "rubato",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "resvg"
 version = "0.45.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -14765,18 +14778,6 @@ dependencies = [
  "spki 0.7.3",
  "subtle",
  "zeroize",
-]
-
-[[package]]
-name = "rubato"
-version = "0.16.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5258099699851cfd0082aeb645feb9c084d9a5e1f1b8d5372086b989fc5e56a1"
-dependencies = [
- "num-complex",
- "num-integer",
- "num-traits",
- "realfft",
 ]
 
 [[package]]
@@ -15983,7 +15984,7 @@ dependencies = [
  "audioadapter-buffers",
  "ndarray",
  "ort",
- "rubato 1.0.1",
+ "rubato",
  "thiserror 2.0.18",
  "tracing",
 ]

@@ -213,8 +213,10 @@ pub fn resample_audio<S>(source: S, to_rate: u32) -> Result<Vec<f32>, crate::Err
 where
     S: rodio::Source,
 {
+    use audioadapter_buffers::direct::SequentialSliceOfVecs;
     use rubato::{
-        Resampler, SincFixedIn, SincInterpolationParameters, SincInterpolationType, WindowFunction,
+        Async, FixedAsync, Resampler, SincInterpolationParameters, SincInterpolationType,
+        WindowFunction,
     };
 
     let from_rate = source.sample_rate() as f64;
@@ -235,8 +237,14 @@ where
         window: WindowFunction::BlackmanHarris2,
     };
 
-    let mut resampler =
-        SincFixedIn::<f32>::new(to_rate_f64 / from_rate, 2.0, params, 1024, channels)?;
+    let mut resampler = Async::<f32>::new_sinc(
+        to_rate_f64 / from_rate,
+        2.0,
+        &params,
+        1024,
+        channels,
+        FixedAsync::Input,
+    )?;
 
     let frames_per_channel = samples.len() / channels;
     let mut input_channels: Vec<Vec<f32>> = vec![Vec::with_capacity(frames_per_channel); channels];
@@ -245,13 +253,19 @@ where
         input_channels[i % channels].push(sample);
     }
 
-    let output_channels = resampler.process(&input_channels, None)?;
+    let input_adapter = SequentialSliceOfVecs::new(&input_channels, channels, frames_per_channel)
+        .expect("input adapter");
+    let out_max = resampler.output_frames_max();
+    let mut output_vecs: Vec<Vec<f32>> = vec![vec![0.0; out_max]; channels];
+    let mut output_adapter = SequentialSliceOfVecs::new_mut(&mut output_vecs, channels, out_max)
+        .expect("output adapter");
+
+    let (_, out_frames) =
+        resampler.process_into_buffer(&input_adapter, &mut output_adapter, None)?;
 
     let mut output = Vec::new();
-    let output_frames = output_channels[0].len();
-
-    for frame in 0..output_frames {
-        for channel in output_channels.iter().take(channels) {
+    for frame in 0..out_frames {
+        for channel in output_vecs.iter().take(channels) {
             output.push(channel[frame]);
         }
     }
