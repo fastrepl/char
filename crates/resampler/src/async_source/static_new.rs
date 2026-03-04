@@ -59,7 +59,7 @@ where
         let resampler = Async::<f32>::new_poly(
             ratio,
             2.0,
-            PolynomialDegree::Quintic,
+            PolynomialDegree::Cubic,
             input_block_size.max(1),
             1,
             FixedAsync::Input,

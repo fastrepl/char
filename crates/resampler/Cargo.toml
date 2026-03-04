@@ -26,3 +26,7 @@ hound = { workspace = true }
 hypr-data = { workspace = true }
 rodio = { workspace = true, features = ["symphonia-all"] }
 tokio = { workspace = true, features = ["full"] }
+
+[[bench]]
+name = "polynomial_degree"
+harness = false
