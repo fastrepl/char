@@ -1,8 +1,6 @@
 mod driver;
-mod pcm;
 
 pub use driver::RubatoChunkResampler;
-pub use pcm::{PcmResampler, new_resampler, resample};
 pub use rubato::{Async, FixedAsync, PolynomialDegree, Resampler};
 
 #[derive(thiserror::Error, Debug)]

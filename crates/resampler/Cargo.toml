@@ -5,6 +5,5 @@ edition = "2024"
 
 [dependencies]
 audioadapter-buffers = "2.0"
-bytes = { workspace = true }
 rubato = "1.0.1"
 thiserror = { workspace = true }
