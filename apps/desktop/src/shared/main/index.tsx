@@ -7,7 +7,7 @@ import {
   PlusIcon,
 } from "lucide-react";
 import { Reorder } from "motion/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useResizeObserver } from "usehooks-ts";
 import { useShallow } from "zustand/shallow";
@@ -23,6 +23,7 @@ import {
 import { cn } from "@hypr/utils";
 
 import { TabContentEmpty, TabItemEmpty } from "./empty";
+import { HeaderListenButton } from "./header-listen-button";
 import { useNewNote, useNewNoteAndListen } from "./useNewNote";
 
 import { TabContentAI, TabItemAI } from "~/ai";
@@ -40,11 +41,9 @@ import { TabContentOnboarding, TabItemOnboarding } from "~/onboarding";
 import { TabContentPlugin, TabItemPlugin } from "~/plugins";
 import { loadPlugins } from "~/plugins/loader";
 import { TabContentSearch, TabItemSearch } from "~/search/advanced";
-import { Search } from "~/search/components/search";
 import { TabContentNote, TabItemNote } from "~/session";
 import { useCaretPosition } from "~/session/components/caret-position-context";
 import { TabContentSettings, TabItemSettings } from "~/settings";
-import { useNativeContextMenu } from "~/shared/hooks/useNativeContextMenu";
 import { NotificationBadge } from "~/shared/ui/notification-badge";
 import { TrafficLights } from "~/shared/ui/traffic-lights";
 import { TabContentChangelog, TabItemChangelog } from "~/sidebar/changelog";
@@ -118,46 +117,11 @@ function Header({ tabs }: { tabs: Tab[] }) {
     })),
   );
 
-  const liveSessionId = useListener((state) => state.live.sessionId);
-  const liveStatus = useListener((state) => state.live.status);
-  const isListening = liveStatus === "active" || liveStatus === "finalizing";
-
-  const listeningTab = useMemo(
-    () =>
-      isListening && liveSessionId
-        ? tabs.find((t) => t.type === "sessions" && t.id === liveSessionId)
-        : null,
-    [isListening, liveSessionId, tabs],
-  );
-  const regularTabs = useMemo(
-    () =>
-      listeningTab
-        ? tabs.filter((t) => !(t.type === "sessions" && t.id === liveSessionId))
-        : tabs,
-    [listeningTab, tabs, liveSessionId],
-  );
-
   const tabsScrollContainerRef = useRef<HTMLDivElement>(null);
   const handleNewEmptyTab = useNewEmptyTab();
-  const handleNewNote = useNewNote({ behavior: "new" });
-  const handleNewNoteAndListen = useNewNoteAndListen();
-  const showNewTabMenu = useNativeContextMenu([
-    { id: "empty-tab", text: "Open Empty Tab", action: handleNewEmptyTab },
-    { id: "new-note", text: "Create New Note", action: handleNewNote },
-    {
-      id: "new-note-listen",
-      text: "Create and Start Listening",
-      action: handleNewNoteAndListen,
-    },
-  ]);
-  const [isSearchManuallyExpanded, setIsSearchManuallyExpanded] =
-    useState(false);
-  const scrollState = useScrollState(
-    tabsScrollContainerRef,
-    regularTabs.length,
-  );
+  const scrollState = useScrollState(tabsScrollContainerRef, tabs.length);
 
-  const setTabRef = useScrollActiveTabIntoView(regularTabs);
+  const setTabRef = useScrollActiveTabIntoView(tabs);
   useTabsShortcuts();
 
   return (
@@ -212,53 +176,27 @@ function Header({ tabs }: { tabs: Tab[] }) {
         </div>
       )}
 
-      {listeningTab && (
-        <div className="mr-1 flex h-full shrink-0 items-center">
-          <TabItem
-            tab={listeningTab}
-            handleClose={close}
-            handleSelect={select}
-            handleCloseOthersCallback={closeOthers}
-            handleCloseAll={closeAll}
-            handlePin={pin}
-            handleUnpin={unpin}
-            tabIndex={1}
-            pendingCloseConfirmationTab={pendingCloseConfirmationTab}
-            setPendingCloseConfirmationTab={setPendingCloseConfirmationTab}
-          />
-        </div>
-      )}
-
-      <div className="relative h-full min-w-0">
+      <div className="relative h-full min-w-0 flex-1">
         <div
           ref={tabsScrollContainerRef}
           data-tauri-drag-region
           className={cn([
             "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-            "h-full w-full overflow-x-auto overflow-y-hidden",
+            "flex h-full w-full overflow-x-auto overflow-y-hidden",
           ])}
         >
           <Reorder.Group
             key={leftsidebar.expanded ? "expanded" : "collapsed"}
             as="div"
             axis="x"
-            values={regularTabs}
+            values={tabs}
             onReorder={reorder}
             className="flex h-full w-max gap-1"
           >
-            {regularTabs.map((tab, index) => {
-              const isLastTab = index === regularTabs.length - 1;
-              const shortcutIndex = listeningTab
-                ? index < 7
-                  ? index + 2
-                  : isLastTab
-                    ? 9
-                    : undefined
-                : index < 8
-                  ? index + 1
-                  : isLastTab
-                    ? 9
-                    : undefined;
+            {tabs.map((tab, index) => {
+              const isLastTab = index === tabs.length - 1;
+              const shortcutIndex =
+                index < 8 ? index + 1 : isLastTab ? 9 : undefined;
 
               return (
                 <Reorder.Item
@@ -288,41 +226,40 @@ function Header({ tabs }: { tabs: Tab[] }) {
               );
             })}
           </Reorder.Group>
+
+          <div className="inline-flex h-full items-center px-1">
+            <Button
+              onClick={isOnboarding ? undefined : handleNewEmptyTab}
+              disabled={isOnboarding}
+              variant="ghost"
+              size="icon"
+              className={cn([
+                "text-neutral-600",
+                isOnboarding && "cursor-not-allowed opacity-40",
+              ])}
+            >
+              <PlusIcon size={16} />
+            </Button>
+          </div>
         </div>
         {!scrollState.atStart && (
-          <div className="pointer-events-none absolute top-0 left-0 z-20 h-full w-8 bg-linear-to-r from-white to-transparent" />
+          <div className="pointer-events-none absolute top-0 left-0 z-20 h-full w-8 bg-linear-to-r from-stone-50 to-transparent" />
         )}
         {!scrollState.atEnd && (
-          <div className="pointer-events-none absolute top-0 right-0 z-20 h-full w-8 bg-linear-to-l from-white to-transparent" />
+          <div className="pointer-events-none absolute top-0 right-0 z-20 h-full w-8 bg-linear-to-l from-stone-50 to-transparent" />
         )}
       </div>
 
       <div
         data-tauri-drag-region
-        className="flex h-full flex-1 items-center justify-between"
+        className="flex h-full items-center gap-1 pl-1"
       >
-        {!isSearchManuallyExpanded && (
-          <Button
-            onClick={isOnboarding ? undefined : handleNewEmptyTab}
-            onContextMenu={isOnboarding ? undefined : showNewTabMenu}
-            disabled={isOnboarding}
-            variant="ghost"
-            size="icon"
-            className={cn([
-              "text-neutral-600",
-              isOnboarding && "cursor-not-allowed opacity-40",
-            ])}
-          >
-            <PlusIcon size={16} />
-          </Button>
+        <Update />
+        {!isOnboarding && (
+          <HeaderListenButton
+            contentOverflowPx={scrollState.contentOverflowPx}
+          />
         )}
-
-        <div className="ml-auto flex h-full items-center gap-1">
-          <Update />
-          {!isOnboarding && (
-            <Search onManualExpandChange={setIsSearchManuallyExpanded} />
-          )}
-        </div>
       </div>
     </div>
   );
@@ -681,7 +618,7 @@ export function StandardTabWrapper({
 }) {
   return (
     <div className="flex h-full flex-col">
-      <div className="relative flex flex-1 flex-col overflow-hidden rounded-xl border border-neutral-200">
+      <div className="relative flex flex-1 flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white">
         {children}
         {floatingButton}
         <StandardTabChatButton showTimeline={showTimeline} />
@@ -714,6 +651,7 @@ function useScrollState(
   const [scrollState, setScrollState] = useState({
     atStart: true,
     atEnd: true,
+    contentOverflowPx: 0,
   });
 
   const updateScrollState = useCallback(() => {
@@ -722,12 +660,21 @@ function useScrollState(
 
     const { scrollLeft, scrollWidth, clientWidth } = container;
     const hasOverflow = scrollWidth > clientWidth + 1;
+    const contentWidth = Array.from(container.children).reduce(
+      (sum, child) => sum + child.getBoundingClientRect().width,
+      0,
+    );
     const newState = {
       atStart: !hasOverflow || scrollLeft <= 1,
       atEnd: !hasOverflow || scrollLeft + clientWidth >= scrollWidth - 1,
+      contentOverflowPx: Math.round(contentWidth - clientWidth),
     };
     setScrollState((prev) => {
-      if (prev.atStart === newState.atStart && prev.atEnd === newState.atEnd) {
+      if (
+        prev.atStart === newState.atStart &&
+        prev.atEnd === newState.atEnd &&
+        prev.contentOverflowPx === newState.contentOverflowPx
+      ) {
         return prev;
       }
       return newState;
