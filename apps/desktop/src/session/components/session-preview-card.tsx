@@ -221,12 +221,12 @@ const previewComponents = {
     </h6>
   ),
   ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
-    <ul className="list-disc pl-3 text-xs">
+    <ul className="list-inside list-disc text-xs">
       {props.children as React.ReactNode}
     </ul>
   ),
   ol: (props: React.HTMLAttributes<HTMLOListElement>) => (
-    <ol className="list-decimal pl-3 text-xs">
+    <ol className="list-inside list-decimal text-xs">
       {props.children as React.ReactNode}
     </ol>
   ),
