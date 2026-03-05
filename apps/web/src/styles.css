@@ -1,5 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap&family=Instrument+Serif:ital@1&display=swap");
-
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&family=Lora:wght@400;500;600;700&family=Instrument+Serif:ital@1&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&display=swap");
 @font-face {
   font-family: "Redaction";
   src: url("/fonts/Redaction-Regular.otf") format("opentype");
@@ -56,8 +56,9 @@
 @source "../../../packages/transcript/src";
 
 @theme {
-  --font-sans: "SF Pro", system-ui, -apple-system, sans-serif;
-  --font-serif: "Lora", Georgia, serif;
+  --font-sans: "Geist", system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+  --font-serif: "Fraunces", Georgia, serif;
   --font-serif2: "Instrument Serif", serif;
   --breakpoint-laptop: 72rem;
   --animate-ios-opacity-spin: ios-opacity-spin 1s linear infinite;
@@ -119,8 +120,34 @@
 @layer base {
   html,
   body {
-    overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100vw;
+    font-family: var(--font-sans);
+  }
+
+  h1,
+  h2 {
+    font-family: var(--font-mono);
+  }
+
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  small,
+  span,
+  li {
+    font-family: var(--font-sans);
+  }
+
+  button,
+  [role="button"],
+  [type="button"],
+  [type="submit"],
+  [type="reset"] {
+    font-family: var(--font-mono);
+    cursor: pointer;
   }
 
   [id] {
@@ -271,14 +298,4 @@
   :where(code):not(:where([class~="not-prose"], [class~="not-prose"]
     *))::after {
   content: none;
-}
-
-@layer base {
-  button,
-  [role="button"],
-  [type="button"],
-  [type="submit"],
-  [type="reset"] {
-    cursor: pointer;
-  }
 }

@@ -80,7 +80,7 @@ function Component() {
                 <div className="h-14 md:hidden" />
 
                 {/* Sidebar + content in a centered container */}
-                <div className="mx-auto flex w-full max-w-[1280px] flex-1">
+                <div className="mx-auto flex w-full max-w-[1280px]">
                   {!isChoosePage && <Sidebar />}
                   <main className="min-w-0 flex-1">
                     <Outlet />

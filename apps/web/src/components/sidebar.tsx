@@ -1,11 +1,64 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  BookOpen,
+  Building2,
+  ChevronRight,
+  FileText,
+  History,
+  LayoutTemplate,
+  Map,
+  Menu,
+  MessageCircle,
+  Newspaper,
+  X,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@hypr/utils";
 
 import { SearchTrigger } from "@/components/search";
 import { getPlatformCTA, usePlatform } from "@/hooks/use-platform";
+
+const featuresList = [
+  { to: "/product/ai-notetaking", label: "AI Notetaking" },
+  { to: "/product/search", label: "Searchable Notes" },
+  { to: "/gallery?type=template", label: "Custom Templates" },
+  { to: "/product/markdown", label: "Markdown Files" },
+  { to: "/product/flexible-ai", label: "Flexible AI" },
+  { to: "/opensource", label: "Open Source" },
+];
+
+const solutionsList = [
+  { to: "/solution/knowledge-workers", label: "For Knowledge Workers" },
+  { to: "/enterprise", label: "For Enterprises" },
+  { to: "/product/api", label: "For Developers" },
+];
+
+const resourcesList: {
+  to: string;
+  label: string;
+  icon: LucideIcon;
+  external?: boolean;
+}[] = [
+  { to: "/blog/", label: "Blog", icon: FileText },
+  { to: "/docs/", label: "Documentation", icon: BookOpen },
+  {
+    to: "/gallery?type=template",
+    label: "Meeting Templates",
+    icon: LayoutTemplate,
+  },
+  { to: "/updates/", label: "Updates", icon: Newspaper },
+  { to: "/changelog/", label: "Changelog", icon: History },
+  { to: "/roadmap/", label: "Roadmap", icon: Map },
+  { to: "/company-handbook/", label: "Company Handbook", icon: Building2 },
+  {
+    to: "https://discord.gg/hyprnote",
+    label: "Community",
+    icon: MessageCircle,
+    external: true,
+  },
+];
 
 function CharLogo({ className }: { className?: string }) {
   return (
@@ -49,10 +102,10 @@ function CharLogo({ className }: { className?: string }) {
 
 const navLinks = [
   { to: "/why-char/", label: "Why Char" },
-  { to: "/product/ai-notetaking", label: "Product" },
-  { to: "/docs/", label: "Resources" },
+  { to: "/product/ai-notetaking/", label: "Product", hasSubmenu: true },
+  { to: "/docs/", label: "Resources", hasSubmenu: true },
   { to: "/pricing/", label: "Pricing" },
-];
+] as const;
 
 export function Sidebar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -90,36 +143,40 @@ export function Sidebar() {
         />
       )}
 
-      <aside
-        className={cn(
-          ["hidden w-[200px] shrink-0 md:block"],
-          ["sticky top-0 h-dvh self-start"],
-        )}
-      >
-        <div className="flex h-full flex-col overflow-y-auto bg-neutral-950">
+      <aside className="hidden w-[200px] shrink-0 self-stretch md:block">
+        <div className="sticky top-0 flex h-screen flex-col">
           <div className="px-12 pt-16 pb-10">
             <Link to="/">
-              <CharLogo className="h-7 w-auto text-neutral-500 transition-colors hover:text-neutral-300" />
+              <CharLogo className="h-8 w-auto text-stone-950 transition-colors hover:scale-105" />
             </Link>
           </div>
 
           <nav className="flex flex-1 flex-col gap-1 px-12">
-            {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={cn(
-                  ["py-2.5 text-base transition-colors"],
-                  [
-                    pathname.startsWith(link.to.replace(/\/$/, ""))
-                      ? "text-neutral-200"
-                      : "text-neutral-500 hover:text-neutral-300",
-                  ],
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) =>
+              "hasSubmenu" in link && link.hasSubmenu ? (
+                <SidebarFlyout
+                  key={link.to}
+                  label={link.label}
+                  to={link.to}
+                  isActive={pathname.startsWith(link.to.replace(/\/$/, ""))}
+                />
+              ) : (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={cn(
+                    ["py-2.5 text-base transition-colors"],
+                    [
+                      pathname.startsWith(link.to.replace(/\/$/, ""))
+                        ? "text-stone-200"
+                        : "text-stone-950 hover:underline",
+                    ],
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ),
+            )}
           </nav>
 
           <div className="shrink-0 px-12 pb-8">
@@ -141,23 +198,32 @@ export function Sidebar() {
           [isMobileOpen ? "translate-x-0" : "-translate-x-full"],
         )}
       >
-        <nav className="flex flex-1 flex-col gap-1 px-8 pt-6">
-          {navLinks.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={cn(
-                ["py-2.5 text-base transition-colors"],
-                [
-                  pathname.startsWith(link.to.replace(/\/$/, ""))
-                    ? "text-neutral-200"
-                    : "text-neutral-500 hover:text-neutral-300",
-                ],
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
+        <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-8 pt-6">
+          {navLinks.map((link) =>
+            "hasSubmenu" in link && link.hasSubmenu ? (
+              <MobileSubmenu
+                key={link.to}
+                label={link.label}
+                to={link.to}
+                isActive={pathname.startsWith(link.to.replace(/\/$/, ""))}
+              />
+            ) : (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={cn(
+                  ["py-2.5 text-base transition-colors"],
+                  [
+                    pathname.startsWith(link.to.replace(/\/$/, ""))
+                      ? "text-neutral-200"
+                      : "text-neutral-500 hover:text-neutral-300",
+                  ],
+                )}
+              >
+                {link.label}
+              </Link>
+            ),
+          )}
         </nav>
 
         <div className="flex flex-col gap-3 px-8 pb-8">
@@ -187,6 +253,245 @@ function MobileTopBar({
       >
         {isMobileOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
+    </div>
+  );
+}
+
+function SidebarFlyout({
+  label,
+  to,
+  isActive,
+}: {
+  label: string;
+  to: string;
+  isActive: boolean;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const open = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setIsOpen(true);
+  };
+
+  const close = () => {
+    timeoutRef.current = setTimeout(() => setIsOpen(false), 150);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  return (
+    <div className="relative" onMouseEnter={open} onMouseLeave={close}>
+      <Link
+        to={to}
+        className={cn(
+          [
+            "flex items-center justify-between py-2.5 text-base transition-colors",
+          ],
+          [isActive ? "text-stone-200" : "text-stone-950 hover:underline"],
+        )}
+      >
+        {label}
+        <ChevronRight
+          size={14}
+          className={cn([
+            "transition-opacity",
+            isOpen ? "opacity-100" : "opacity-0",
+          ])}
+        />
+      </Link>
+
+      {isOpen && (
+        <div
+          className="absolute top-0 left-full z-[9999] pl-2"
+          onMouseEnter={open}
+          onMouseLeave={close}
+        >
+          <div className="w-56 rounded-lg border border-stone-200 bg-white py-2 shadow-lg">
+            {label === "Product" && <ProductFlyoutContent />}
+            {label === "Resources" && <ResourcesFlyoutContent />}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProductFlyoutContent() {
+  return (
+    <div className="flex flex-col">
+      <div className="px-3 pb-1">
+        <span className="text-xs font-medium tracking-wide text-stone-400 uppercase">
+          Features
+        </span>
+      </div>
+      {featuresList.map((item) => (
+        <Link
+          key={item.to}
+          to={item.to}
+          className="px-3 py-1.5 text-sm text-stone-700 transition-colors hover:bg-stone-50 hover:text-stone-950"
+        >
+          {item.label}
+        </Link>
+      ))}
+      <div className="my-1.5 border-t border-stone-100" />
+      <div className="px-3 pb-1">
+        <span className="text-xs font-medium tracking-wide text-stone-400 uppercase">
+          Solutions
+        </span>
+      </div>
+      {solutionsList.map((item) => (
+        <Link
+          key={item.to}
+          to={item.to}
+          className="px-3 py-1.5 text-sm text-stone-700 transition-colors hover:bg-stone-50 hover:text-stone-950"
+        >
+          {item.label}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+function ResourcesFlyoutContent() {
+  return (
+    <div className="flex flex-col">
+      {resourcesList.map((item) => {
+        const Icon = item.icon;
+        if (item.external) {
+          return (
+            <a
+              key={item.to}
+              href={item.to}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2.5 px-3 py-1.5 text-sm text-stone-700 transition-colors hover:bg-stone-50 hover:text-stone-950"
+            >
+              <Icon size={15} className="shrink-0 text-stone-400" />
+              {item.label}
+            </a>
+          );
+        }
+        return (
+          <Link
+            key={item.to}
+            to={item.to}
+            className="flex items-center gap-2.5 px-3 py-1.5 text-sm text-stone-700 transition-colors hover:bg-stone-50 hover:text-stone-950"
+          >
+            <Icon size={15} className="shrink-0 text-stone-400" />
+            {item.label}
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+function MobileSubmenu({
+  label,
+  isActive,
+}: {
+  label: string;
+  to: string;
+  isActive: boolean;
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div>
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className={cn(
+          [
+            "flex w-full cursor-pointer items-center justify-between py-2.5 text-left text-base transition-colors",
+          ],
+          [
+            isActive
+              ? "text-neutral-200"
+              : "text-neutral-500 hover:text-neutral-300",
+          ],
+        )}
+      >
+        {label}
+        <ChevronRight
+          size={14}
+          className={cn([
+            "transition-transform duration-200",
+            isExpanded && "rotate-90",
+          ])}
+        />
+      </button>
+
+      {isExpanded && (
+        <div className="flex flex-col pb-2 pl-3">
+          {label === "Product" && (
+            <>
+              <span className="py-1 text-xs font-medium tracking-wide text-neutral-600 uppercase">
+                Features
+              </span>
+              {featuresList.map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className="py-1.5 text-sm text-neutral-400 transition-colors hover:text-neutral-200"
+                >
+                  {item.label}
+                </Link>
+              ))}
+              <span className="mt-2 py-1 text-xs font-medium tracking-wide text-neutral-600 uppercase">
+                Solutions
+              </span>
+              {solutionsList.map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className="py-1.5 text-sm text-neutral-400 transition-colors hover:text-neutral-200"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </>
+          )}
+          {label === "Resources" && (
+            <>
+              {resourcesList.map((item) => {
+                const IconComp = item.icon;
+                if (item.external) {
+                  return (
+                    <a
+                      key={item.to}
+                      href={item.to}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 py-1.5 text-sm text-neutral-400 transition-colors hover:text-neutral-200"
+                    >
+                      <IconComp
+                        size={14}
+                        className="shrink-0 text-neutral-600"
+                      />
+                      {item.label}
+                    </a>
+                  );
+                }
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className="flex items-center gap-2 py-1.5 text-sm text-neutral-400 transition-colors hover:text-neutral-200"
+                  >
+                    <IconComp size={14} className="shrink-0 text-neutral-600" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

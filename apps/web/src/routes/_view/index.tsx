@@ -114,10 +114,7 @@ function Component() {
   };
 
   return (
-    <main
-      className="min-h-screen flex-1 overflow-x-hidden bg-linear-to-b from-white via-stone-50/20 to-white"
-      // style={{ backgroundImage: "url(/patterns/dots.svg)" }}
-    >
+    <main className="min-h-screen flex-1 overflow-x-hidden bg-linear-to-b from-white via-stone-50/20 to-white">
       <div className="mx-auto max-w-6xl border-x border-neutral-100 bg-white">
         <AnnouncementBanner />
         <HeroSection
@@ -254,13 +251,13 @@ function HeroSection({
 
   return (
     <div className="bg-linear-to-b from-stone-50/30 to-stone-100/30">
-      <div className="flex w-full min-w-0 flex-col items-center text-center">
+      <div className="items-left flex w-full min-w-0 flex-col text-left">
         <section
           id="hero"
-          className="laptop:px-0 flex w-full min-w-0 flex-col items-center gap-12 px-4 py-24 text-center"
+          className="laptop:px-4 items-left flex w-full min-w-0 flex-col gap-12 px-8 pt-16 pb-24 text-left"
         >
-          <div className="flex w-full max-w-full min-w-0 flex-col gap-6">
-            <h1 className="min-w-0 font-serif text-2xl tracking-tight break-words text-stone-700 sm:text-5xl">
+          <div className="flex w-2/3 max-w-2/3 min-w-0 flex-col gap-6">
+            <h1 className="min-w-0 font-mono text-2xl font-medium tracking-normal break-words text-stone-700 sm:text-5xl">
               {heroContent.title}
             </h1>
             <p className="min-w-0 text-base break-words text-neutral-600 sm:text-xl">
@@ -274,7 +271,7 @@ function HeroSection({
                 e.preventDefault();
                 form.handleSubmit();
               }}
-              className="w-full max-w-md"
+              className="w-full max-w-md text-left"
             >
               <form.Field
                 name="email"
@@ -294,7 +291,7 @@ function HeroSection({
                   <>
                     <div
                       className={cn([
-                        "relative flex items-center overflow-hidden rounded-full border-2 transition-all duration-200",
+                        "items-left relative flex overflow-hidden rounded-full border-2 transition-all duration-200",
                         shake && "animate-shake border-stone-600",
                         !shake && mutation.isError && "border-red-500",
                         !shake && mutation.isSuccess && "border-green-500",
@@ -359,7 +356,7 @@ function HeroSection({
               </form.Field>
             </form>
           ) : (
-            <div className="flex flex-col items-center gap-4">
+            <div className="items-left justify-left flex max-w-sm flex-col gap-4">
               <DownloadButton />
               {heroCTA.subtextLink ? (
                 <Link
