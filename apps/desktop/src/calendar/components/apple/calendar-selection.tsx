@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import { Button } from "@hypr/ui/components/ui/button";
 import { cn } from "@hypr/utils";
 
-import { useSync } from "./context";
+import { useSync } from "../context";
 import { SyncIndicator } from "./status";
 
 import {
