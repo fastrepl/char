@@ -16,6 +16,7 @@ hypr-outlook-calendar = { workspace = true, features = ["specta"] }
 
 tauri = { workspace = true, features = ["test"] }
 tauri-plugin-auth = { workspace = true }
+tauri-plugin-permissions = { workspace = true }
 tauri-specta = { workspace = true, features = ["derive", "typescript"] }
 
 chrono = { workspace = true, features = ["serde"] }

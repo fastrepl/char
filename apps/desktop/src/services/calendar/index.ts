@@ -1,6 +1,8 @@
 import type { Queries } from "tinybase/with-schemas";
 
-import { createCtx, syncCalendars } from "./ctx";
+import type { CalendarProviderType } from "@hypr/plugin-calendar";
+
+import { createCtx, getActiveProviders, syncCalendars } from "./ctx";
 import {
   CalendarFetchError,
   fetchExistingEvents,
@@ -29,11 +31,25 @@ export async function syncCalendarEvents(
 }
 
 async function run(store: Store, queries: Queries<Schemas>) {
-  await syncCalendars(store);
+  const providers = await getActiveProviders();
+  await syncCalendars(store, providers);
+  for (const provider of providers) {
+    try {
+      await runForProvider(store, queries, provider);
+    } catch (error) {
+      console.error(`[calendar-sync] Error syncing ${provider}: ${error}`);
+    }
+  }
+}
 
-  const ctx = createCtx(store, queries);
+async function runForProvider(
+  store: Store,
+  queries: Queries<Schemas>,
+  provider: CalendarProviderType,
+) {
+  const ctx = createCtx(store, queries, provider);
   if (!ctx) {
-    return null;
+    return;
   }
 
   let incoming;
@@ -46,9 +62,9 @@ async function run(store: Store, queries: Queries<Schemas>) {
   } catch (error) {
     if (error instanceof CalendarFetchError) {
       console.error(
-        `[calendar-sync] Aborting sync due to fetch error: ${error.message}`,
+        `[calendar-sync] Aborting ${provider} sync due to fetch error: ${error.message}`,
       );
-      return null;
+      return;
     }
     throw error;
   }

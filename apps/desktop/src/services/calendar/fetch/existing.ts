@@ -1,6 +1,5 @@
+import type { Ctx } from "../ctx";
 import type { ExistingEvent } from "./types";
-
-import type { Ctx } from "~/services/apple-calendar/ctx";
 
 function isEventInRange(
   startedAt: string,
@@ -26,6 +25,10 @@ export function fetchExistingEvents(ctx: Ctx): ExistingEvent[] {
       return;
     }
 
+    if (event.provider && event.provider !== ctx.provider) {
+      return;
+    }
+
     const startedAt = event.started_at;
     if (!startedAt) return;
 
@@ -46,6 +49,7 @@ export function fetchExistingEvents(ctx: Ctx): ExistingEvent[] {
         note: event.note,
         recurrence_series_id: event.recurrence_series_id,
         has_recurrence_rules: event.has_recurrence_rules,
+        provider: event.provider,
       });
     }
   });

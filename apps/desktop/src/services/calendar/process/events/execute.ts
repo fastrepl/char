@@ -1,9 +1,9 @@
 import type { EventStorage, SessionEvent } from "@hypr/store";
 
+import type { Ctx } from "../../ctx";
+import type { IncomingEvent } from "../../fetch/types";
 import type { EventsSyncOutput } from "./types";
 
-import type { Ctx } from "~/services/apple-calendar/ctx";
-import type { IncomingEvent } from "~/services/apple-calendar/fetch/types";
 import { getSessionEventById } from "~/session/utils";
 import { id } from "~/shared/utils";
 
@@ -33,6 +33,7 @@ export function executeForEventsSync(ctx: Ctx, out: EventsSyncOutput): void {
         recurrence_series_id: event.recurrence_series_id,
         has_recurrence_rules: event.has_recurrence_rules,
         is_all_day: event.is_all_day,
+        provider: ctx.provider,
         participants_json:
           event.participants.length > 0
             ? JSON.stringify(event.participants)
@@ -64,6 +65,7 @@ export function executeForEventsSync(ctx: Ctx, out: EventsSyncOutput): void {
         recurrence_series_id: eventToAdd.recurrence_series_id,
         has_recurrence_rules: eventToAdd.has_recurrence_rules,
         is_all_day: eventToAdd.is_all_day,
+        provider: ctx.provider,
         participants_json:
           eventToAdd.participants.length > 0
             ? JSON.stringify(eventToAdd.participants)

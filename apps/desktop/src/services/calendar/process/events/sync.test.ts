@@ -1,13 +1,9 @@
 import { describe, expect, test } from "vitest";
 
+import type { Ctx } from "../../ctx";
+import type { ExistingEvent, IncomingEvent } from "../../fetch/types";
 import { syncEvents } from "./sync";
 import type { EventsSyncInput } from "./types";
-
-import type { Ctx } from "~/services/apple-calendar/ctx";
-import type {
-  ExistingEvent,
-  IncomingEvent,
-} from "~/services/apple-calendar/fetch/types";
 
 function createMockStore(config: {
   eventToSession?: Map<string, string>;
@@ -56,6 +52,7 @@ function createMockCtx(
   });
 
   return {
+    provider: "apple" as const,
     userId: "user-1",
     from: new Date("2024-01-01"),
     to: new Date("2024-02-01"),
@@ -95,6 +92,7 @@ function createExistingEvent(
     title: "Existing Event",
     started_at: "2024-01-15T10:00:00Z",
     ended_at: "2024-01-15T11:00:00Z",
+    provider: "apple",
     ...overrides,
   };
 }

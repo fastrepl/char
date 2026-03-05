@@ -2,13 +2,12 @@ import { commands as calendarCommands } from "@hypr/plugin-calendar";
 import type { CalendarEvent } from "@hypr/plugin-calendar";
 import { commands as miscCommands } from "@hypr/plugin-misc";
 
+import type { Ctx } from "../ctx";
 import type {
   EventParticipant,
   IncomingEvent,
   IncomingParticipants,
 } from "./types";
-
-import type { Ctx } from "~/services/apple-calendar/ctx";
 
 export class CalendarFetchError extends Error {
   constructor(
@@ -30,7 +29,7 @@ export async function fetchIncomingEvents(ctx: Ctx): Promise<{
 
   const results = await Promise.all(
     trackingIds.map(async (trackingId) => {
-      const result = await calendarCommands.listEvents("apple", {
+      const result = await calendarCommands.listEvents(ctx.provider, {
         calendar_tracking_id: trackingId,
         from: ctx.from.toISOString(),
         to: ctx.to.toISOString(),

@@ -17782,6 +17782,7 @@ dependencies = [
  "tauri-plugin",
  "tauri-plugin-apple-contact",
  "tauri-plugin-auth",
+ "tauri-plugin-permissions",
  "tauri-specta",
  "thiserror 2.0.18",
 ]

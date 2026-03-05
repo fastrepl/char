@@ -4,7 +4,7 @@ import type {
   ExistingEvent,
   IncomingEvent,
   IncomingParticipants,
-} from "~/services/apple-calendar/fetch/types";
+} from "../../fetch/types";
 
 export type EventId = string;
 

@@ -1,8 +1,7 @@
 import { describe, expect, test } from "vitest";
 
+import type { Ctx } from "../../ctx";
 import { syncSessionParticipants } from "./sync";
-
-import type { Ctx } from "~/services/apple-calendar/ctx";
 
 type MockStoreData = {
   humans: Record<string, { email?: string; name?: string }>;
@@ -33,6 +32,7 @@ function createMockStore(data: MockStoreData) {
 function createMockCtx(store: Ctx["store"]): Ctx {
   return {
     store,
+    provider: "apple" as const,
     userId: "user-1",
     from: new Date("2024-01-01"),
     to: new Date("2024-02-01"),

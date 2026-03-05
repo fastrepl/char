@@ -11,7 +11,7 @@ import {
   useTaskRunRunning,
 } from "tinytick/ui-react";
 
-import { CALENDAR_SYNC_TASK_ID } from "~/services/apple-calendar";
+import { CALENDAR_SYNC_TASK_ID } from "~/services/calendar";
 
 export const TOGGLE_SYNC_DEBOUNCE_MS = 5000;
 

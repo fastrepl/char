@@ -2,10 +2,9 @@ import { describe, expect, test } from "vitest";
 
 import type { SessionEvent } from "@hypr/store";
 
+import type { Ctx } from "../../ctx";
+import type { IncomingEvent } from "../../fetch/types";
 import { syncSessionEmbeddedEvents } from "./execute";
-
-import type { Ctx } from "~/services/apple-calendar/ctx";
-import type { IncomingEvent } from "~/services/apple-calendar/fetch/types";
 
 type MockStoreData = {
   sessions: Record<string, Record<string, unknown>>;
@@ -57,6 +56,7 @@ function createMockCtx(
 ): Ctx {
   return {
     store: createMockStore(storeData),
+    provider: "apple" as const,
     userId: "user-1",
     from: new Date("2024-01-01"),
     to: new Date("2024-02-01"),
