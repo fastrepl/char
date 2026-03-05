@@ -7,15 +7,15 @@ export const Route = createFileRoute("/_view/enterprise")({
   component: Component,
   head: () => ({
     meta: [
-      { title: "Meeting AI Configured For Your Organization - Char" },
+      { title: "Meeting AI configured for your organization - Char" },
       {
         name: "description",
         content:
-          "Deploy meeting AI on your infrastructure with full control over deployment, security, compliance, and access. Open source architecture you can verify and audit.",
+          "Run meeting AI on your servers. Open source, auditable, and built so your data never leaves your network.",
       },
       {
         property: "og:title",
-        content: "Meeting AI Configured For Your Organization - Char",
+        content: "Meeting AI configured for your organization - Char",
       },
       {
         property: "og:description",
@@ -33,55 +33,55 @@ export const Route = createFileRoute("/_view/enterprise")({
 
 const deploymentFeatures = [
   {
-    text: "On-premise servers, private cloud (AWS VPC, Azure VNet, GCP VPC), or hybrid deployments",
+    text: "On-premise, private cloud (AWS VPC, Azure VNet, GCP VPC), or hybrid",
   },
   {
-    text: "Air-gap compatible, works without internet connectivity in isolated networks",
+    text: "Air-gap compatible. Works without internet in isolated networks",
   },
   {
-    text: "Desktop apps (macOS now, Windows/Linux coming), web interface, mobile, or bot integration",
+    text: "Desktop app (macOS now, Windows/Linux coming), web, mobile, or bot integration",
   },
   {
-    text: "Bring your own models, swap STT and LLM providers anytime (local or cloud)",
+    text: "Swap STT and LLM providers anytime. Bring your own models, local or cloud",
   },
   {
-    text: "No vendor lock-in, open source architecture you can fork if needed",
+    text: "Open source. Fork it if you want",
   },
 ];
 
 const securityFeatures = [
   {
-    text: "Encryption at rest (AES-256) with end-to-end encryption in development",
+    text: "AES-256 encryption at rest. End-to-end encryption in development",
   },
   {
-    text: "Zero-knowledge architecture. We can't access your unencrypted data",
+    text: "Zero-knowledge architecture. We can't read your data",
   },
   {
-    text: "SSO integration (SAML, OAuth) with multi-factor authentication",
+    text: "SSO (SAML, OAuth) and MFA",
   },
   {
-    text: "Network traffic you can inspect yourself, no black box processing",
+    text: "All network traffic is inspectable. No black box",
   },
   {
-    text: "Open source codebase your security team can audit",
+    text: "Open source. Your security team can audit every line",
   },
 ];
 
 const complianceFeatures = [
   {
-    text: "HIPAA-compatible deployment options for healthcare environments",
+    text: "HIPAA-compatible deployment for healthcare",
   },
   {
-    text: "Data residency controls, keep recordings in your geography (EU, US, custom regions)",
+    text: "Data residency controls. Keep recordings in your geography (EU, US, custom regions)",
   },
   {
-    text: "Multiple consent workflows: voice-activated, pre-meeting links, explicit prompts",
+    text: "Consent workflows: voice-activated, pre-meeting links, or explicit prompts",
   },
   {
-    text: "Configurable retention policies with automated deletion schedules",
+    text: "Configurable retention policies with automated deletion",
   },
   {
-    text: "Comprehensive audit logging for compliance reporting",
+    text: "Audit logging for compliance reporting",
   },
   {
     text: "SOC 2 Type II certification in progress",
@@ -90,52 +90,50 @@ const complianceFeatures = [
 
 const accessFeatures = [
   {
-    text: "Role-based access control (admin, user, viewer) with custom role creation",
+    text: "Role-based access (admin, user, viewer) with custom roles",
   },
   {
     text: "Team workspaces with isolated data boundaries",
   },
   {
-    text: "Directory service integration (LDAP, Active Directory) for user provisioning",
+    text: "LDAP and Active Directory integration for user provisioning",
   },
   {
-    text: "Organization-wide policy enforcement (recording defaults, AI features, retention)",
+    text: "Org-wide policy enforcement: recording defaults, AI features, retention",
   },
   {
-    text: "Individual note-level permissions for sensitive meetings",
+    text: "Note-level permissions for sensitive meetings",
   },
   {
-    text: "Access audit logs showing who viewed what and when",
+    text: "Audit logs showing who viewed what and when",
   },
 ];
 
 const faqs = [
   {
-    question:
-      "How can I boost my team's productivity while ensuring data sovereignty?",
+    question: "How does Char handle data sovereignty?",
     answer:
-      "Deploy Char on your own infrastructure to maintain complete control over your data. Your meeting recordings and transcripts never leave your network, ensuring full compliance with data residency requirements.",
+      "Your data stays on your network. Recordings and transcripts don't leave it. Deploy on your own infrastructure and you're in full compliance with data residency requirements.",
   },
   {
-    question:
-      "Is there a way to ensure consents are properly granted and managed?",
+    question: "How does recording consent work?",
     answer:
-      "Char provides multiple consent options including voice-activated consent during meetings, pre-meeting consent links, and explicit consent prompts when joining. We prioritize transparency and respect in every recording scenario.",
+      "Participants always know when recording is on. You can use voice-activated consent, pre-meeting consent links, or explicit prompts when joining.",
   },
   {
     question: "How secure is the platform?",
     answer:
-      "We deeply prioritize security. We're working on end-to-end encryption, seamless SSO and MFA integration, and are actively pursuing SOC 2 Type II certification. All enterprise deployments meet industry-standard security requirements.",
+      "Security is the reason we built it this way. AES-256 encryption at rest, SSO and MFA, SOC 2 Type II certification in progress. The codebase is open source so your team can audit it directly.",
   },
   {
     question: "How do you manage access control?",
     answer:
-      "Administrators have granular control over permissions, team workspaces, and user access. Set role-based permissions, manage team structures, and maintain centralized oversight across your entire organization.",
+      "Admins set who can access what. Role-based permissions, team workspaces, and you can scope access down to individual notes if needed.",
   },
   {
     question: "What deployment options are available?",
     answer:
-      "Char adapts to your workflow with multiple form factors: native desktop applications (currently available for macOS), web interface, mobile apps, or even bot integration for remote meeting capture. Choose the deployment method that works best for your team.",
+      "Desktop app (macOS now, Windows and Linux coming), web interface, mobile apps, or bot integration for remote meetings. Pick what works for your team.",
   },
 ];
 
@@ -166,9 +164,9 @@ function HeroSection() {
             <span>For Enterprise</span>
           </div>
           <h1 className="mb-6 font-serif text-4xl tracking-tight text-stone-700 sm:text-5xl">
-            Meeting AI Configured
+            Meeting AI configured
             <br />
-            For Your Organization
+            for your organization
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-neutral-600 sm:text-xl">
             Other AI note-takers ask you to trust their infrastructure, their
@@ -217,7 +215,7 @@ function FeaturesSection() {
             icon="mdi:server"
             number="1"
             title="Deployment"
-            subtitle="Your infrastructure, your rules"
+            subtitle="Run it on your servers"
             features={deploymentFeatures}
           />
           <FeatureBlock
@@ -231,14 +229,14 @@ function FeaturesSection() {
             icon="mdi:clipboard-check"
             number="3"
             title="Compliance"
-            subtitle="Built for regulated environments"
+            subtitle="Works in regulated industries"
             features={complianceFeatures}
           />
           <FeatureBlock
             icon="mdi:account-key"
             number="4"
             title="Access"
-            subtitle="Centralized oversight, granular control"
+            subtitle="You decide who sees what"
             features={accessFeatures}
           />
         </div>
@@ -350,8 +348,7 @@ function CTASection() {
           Deploy meeting AI on your terms
         </h2>
         <p className="mb-8 text-neutral-600">
-          Let's walk through your deployment, security, and compliance
-          requirements.
+          Tell us what you need and we'll figure out the setup.
         </p>
         <Link
           to="/founders/"

@@ -92,11 +92,11 @@ export function useListenButtonState(sessionId: string) {
   if (lastError) {
     warningMessage = `Session failed: ${lastError}`;
   } else if (isLocalModelNotDownloaded) {
-    warningMessage = "Selected model is not downloaded.";
+    warningMessage = "Selected model is not downloaded";
   } else if (isLocalServerLoading) {
     warningMessage = "Local STT server is starting up...";
   } else if (isOfflineWithCloudModel) {
-    warningMessage = "You're offline. Use on-device models to continue.";
+    warningMessage = "You're offline. Use on-device models to continue";
   } else if (!sttConnection) {
     warningMessage = "Transcription model not available.";
   } else if (batching) {

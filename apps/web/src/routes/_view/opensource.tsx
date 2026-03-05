@@ -25,13 +25,13 @@ export const Route = createFileRoute("/_view/opensource")({
       {
         name: "description",
         content:
-          "Char is fully open source under GPL-3.0. Inspect every line of code, contribute to development, and build on a transparent foundation. No black boxes, no hidden data collection.",
+          "Char is open source under GPL-3.0. Read every line, run it yourself, or fork it. The code is the proof.",
       },
       { property: "og:title", content: "Open Source - Char" },
       {
         property: "og:description",
         content:
-          "AI-powered meeting notes built in the open. Fully auditable codebase, community-driven development, and complete transparency. Join thousands of developers building the future of private meeting notes.",
+          "Meeting notes built in the open. The whole codebase is on GitHub. Read it, audit it, fork it.",
       },
       { property: "og:type", content: "website" },
       {
@@ -43,7 +43,7 @@ export const Route = createFileRoute("/_view/opensource")({
       {
         name: "twitter:description",
         content:
-          "AI-powered meeting notes built in the open. Fully auditable codebase and community-driven development.",
+          "Meeting notes built in the open. The whole codebase is on GitHub.",
       },
       {
         name: "keywords",
@@ -148,9 +148,8 @@ function HeroSection() {
             for everyone
           </h1>
           <p className="mx-auto max-w-3xl text-lg leading-relaxed text-neutral-600 sm:text-xl">
-            Char is fully open source under GPL-3.0. Every line of code is
-            auditable, every decision is transparent, and every user has the
-            freedom to inspect, modify, and contribute.
+            Char is open source under GPL-3.0. The whole codebase is on GitHub.
+            Read it, audit it, fork it, contribute to it.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
             <a
@@ -211,8 +210,7 @@ function LetterSection() {
             <p>
               If an AI tool captures your voice, your discussions, your
               strategy, you should be able to see exactly what it does with that
-              information. Not a PDF saying "we care about privacy." Not a
-              privacy policy written by lawyers. Actual code.
+              information. The code should be right there for you to read.
             </p>
 
             <p>
@@ -223,13 +221,13 @@ function LetterSection() {
 
             <p>In the age of AI, blind trust is basically an attack vector.</p>
 
-            <p>Open source flips the power dynamic:</p>
+            <p>Open source changes the dynamic:</p>
 
             <ul className="flex list-disc flex-col gap-2 pl-6">
               <li>You can verify claims instead of believing them.</li>
-              <li>Security researchers can inspect, not speculate.</li>
-              <li>Teams can self-host, extend, or fork when needed.</li>
-              <li>The product outlives the company that built it.</li>
+              <li>Security researchers can inspect the code, not guess.</li>
+              <li>Teams can self-host or fork when they need to.</li>
+              <li>If we disappear, the product doesn't.</li>
             </ul>
 
             <p>That's why we built Char in the open.</p>
@@ -250,15 +248,8 @@ function LetterSection() {
             <p>Open source survives all of that.</p>
 
             <p>
-              What AI is capable of today demands a different contract between
-              software and the people who rely on it. That contract should be
-              inspectable, forkable, and owned by its users, not hidden behind
-              opaque servers.
-            </p>
-
-            <p>
-              If AI ends up shaping how we work, think, and communicate, then
-              the people using it deserve transparency—not promises.
+              AI is going to shape how we work and think. The people using it
+              deserve to see how it works. Not a promise. The code.
             </p>
 
             <div className="flex flex-col gap-4">
@@ -429,8 +420,7 @@ function TechStackSection() {
             Our Tech Stack
           </h2>
           <p className="mx-auto max-w-2xl text-center text-neutral-600">
-            Built with modern, privacy-respecting technologies that run locally
-            on your device.
+            What Char is built on.
           </p>
         </div>
 
@@ -522,8 +512,7 @@ function SponsorsSection() {
             Paying It Forward
           </h2>
           <p className="mx-auto max-w-2xl text-center text-neutral-600">
-            We love giving back to the community that makes Char possible. As we
-            grow, we hope to sponsor even more projects and creators.
+            We sponsor projects we depend on and people doing good work.
           </p>
         </div>
 
@@ -580,8 +569,7 @@ function SponsorsSection() {
                 We Appreciate Your Support
               </h3>
               <p className="mt-2 text-sm text-neutral-600">
-                Your sponsorship keeps Char free, open source, and independent
-                for everyone.
+                Sponsorships help keep Char free and independent.
               </p>
             </div>
             <a
@@ -765,7 +753,7 @@ function ProgressSection() {
             How We're Doing
           </h2>
           <p className="mx-auto max-w-2xl text-center text-neutral-600">
-            Our progress is measured by the community we're building together.
+            Numbers as of today.
           </p>
         </div>
 
@@ -838,11 +826,10 @@ function JoinMovementSection() {
       <div>
         <div className="px-6 py-12 lg:py-16">
           <h2 className="mb-4 text-center font-serif text-3xl text-stone-700">
-            Be Part of the Movement
+            Get Involved
           </h2>
           <p className="mx-auto max-w-2xl text-center text-neutral-600">
-            Every contribution, no matter how small, helps build a more private
-            future for AI.
+            Ways to help out.
           </p>
         </div>
 

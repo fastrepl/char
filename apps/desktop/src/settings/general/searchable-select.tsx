@@ -48,7 +48,7 @@ export function SearchableSelect({
   options,
   placeholder = "Select...",
   searchPlaceholder = "Search...",
-  emptyMessage = "No results found.",
+  emptyMessage = "No results found",
   className,
 }: SearchableSelectProps) {
   const [open, setOpen] = useState(false);

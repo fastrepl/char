@@ -307,7 +307,7 @@ function FAQSection() {
     {
       question: "What does on-device transcription mean?",
       answer:
-        "All transcription happens on your device. Your audio never leaves your computer, ensuring complete privacy.",
+        "All transcription happens on your device. Your audio never leaves your computer.",
     },
     {
       question: "What is local-first data architecture?",
@@ -317,7 +317,7 @@ function FAQSection() {
     {
       question: "What is BYOK (Bring Your Own Key)?",
       answer:
-        "BYOK allows you to connect your own LLM provider (like OpenAI, Anthropic, or self-hosted models) for AI features while maintaining full control over your data.",
+        "BYOK lets you plug in your own LLM provider (OpenAI, Anthropic, or self-hosted models) for AI features. Your data stays yours.",
     },
     {
       question: "What's included in shareable links?",
@@ -385,7 +385,7 @@ function CTASection() {
         </div>
         <h2 className="font-serif text-2xl sm:text-3xl">Need a team plan?</h2>
         <p className="mx-auto max-w-2xl text-lg text-neutral-600">
-          Book a call to discuss custom team pricing and enterprise solutions
+          Book a call and we'll figure out pricing for your team
         </p>
         <div className="pt-6">
           <Link

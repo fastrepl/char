@@ -64,7 +64,7 @@ export function useConnectionHealth(): HealthStatus {
     if (serverStatus === "not_downloaded") {
       return {
         status: "error",
-        message: "Selected model is not downloaded.",
+        message: "Selected model is not downloaded",
       };
     }
     if (serverStatus === "loading") {
@@ -78,12 +78,12 @@ export function useConnectionHealth(): HealthStatus {
     }
     return {
       status: "error",
-      message: "Could not connect to the local speech-to-text model.",
+      message: "Could not connect to the local speech-to-text model",
     };
   }
 
   if (!conn) {
-    return { status: "error", message: "Provider not configured." };
+    return { status: "error", message: "Provider not configured" };
   }
 
   if (isDeepgram) {

@@ -124,8 +124,8 @@ function DeviceList({ direction }: { direction: "input" | "output" }) {
       </h3>
       <p className="mb-3 text-xs text-neutral-500">
         {direction === "input"
-          ? "Drag to set microphone priority. Top device will be auto-selected."
-          : "Drag to set speaker priority. Top device will be auto-selected."}
+          ? "Drag to set microphone priority. Top device will be auto-selected"
+          : "Drag to set speaker priority. Top device will be auto-selected"}
       </p>
       <Reorder.Group
         axis="y"

@@ -1478,8 +1478,7 @@ export function TemplatesSection() {
           A template for every meeting
         </h2>
         <p className="text-neutral-600">
-          Char adapts to how you work with customizable templates for any
-          meeting type
+          Pick a template. Tweak it. Or start from scratch.
         </p>
       </div>
 
@@ -1615,9 +1614,9 @@ function FAQSection() {
           </FAQItem>
 
           <FAQItem question="How is Char different from other AI note-takers?">
-            Plain markdown files instead of proprietary databases. System audio
-            capture instead of meeting bots. Your choice of AI provider instead
-            of vendor lock-in. Open source instead of a black box.
+            Your notes are plain markdown files, not locked in a database. We
+            capture system audio instead of sending bots into your calls. You
+            pick your AI provider. And the whole thing is open source.
           </FAQItem>
         </FAQ>
       </div>
@@ -1658,10 +1657,7 @@ function ManifestoSection() {
                 tools that amplify human agency, not replace it. No ghost bots.
                 No silent note lurkers. Just people, thinking together.
               </p>
-              <p>
-                We stand with those who value real connection and purposeful
-                collaboration.
-              </p>
+              <p>That's who we build for.</p>
             </div>
 
             <div className="mt-12 mb-4 flex gap-2">
@@ -1729,7 +1725,7 @@ function BlogSection() {
           Latest from our blog
         </h2>
         <p className="mx-auto max-w-lg text-neutral-600">
-          Insights, updates, and stories from the Char team
+          What we're building and why
         </p>
       </div>
 

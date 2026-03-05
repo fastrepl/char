@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_view/free")({
       {
         name: "description",
         content:
-          "Get powerful AI meeting notes completely free. Record meetings, transcribe audio, generate summaries, and more. No credit card required. Local AI processing for complete privacy.",
+          "Free AI meeting notes. Record, transcribe, and summarize locally on your device. No credit card, no account needed.",
       },
       {
         property: "og:title",
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_view/free")({
       {
         property: "og:description",
         content:
-          "Char offers free AI-powered meeting transcription and notes. Local processing, unlimited recordings, and no usage limits. Download now.",
+          "Free meeting transcription and notes. Runs locally, no recording limits. Download now.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://char.com/free" },
@@ -33,37 +33,37 @@ const freeFeatures = [
     icon: "mdi:microphone",
     title: "Unlimited Recording",
     description:
-      "Record as many meetings as you want with no time limits or restrictions. Your meetings, your data.",
+      "No recording limits. No time caps. Record as much as you need.",
   },
   {
     icon: "mdi:text-recognition",
     title: "AI Transcription",
     description:
-      "Get accurate transcriptions powered by local Whisper models. Works offline with no cloud uploads.",
+      "Transcription runs on Whisper, locally on your machine. Works offline, nothing uploaded.",
   },
   {
     icon: "mdi:file-document-edit",
     title: "Smart Summaries",
     description:
-      "Generate intelligent meeting summaries with action items, decisions, and key points automatically.",
+      "Summaries pull out what matters: action items, decisions, the stuff you'd otherwise dig through the transcript for.",
   },
   {
     icon: "mdi:calendar-sync",
     title: "Calendar Integration",
     description:
-      "Connect Apple Calendar, Google Calendar, or Outlook to automatically organize your meeting notes.",
+      "Connect Apple Calendar, Google Calendar, or Outlook. Meeting notes get organized automatically.",
   },
   {
     icon: "mdi:shield-lock",
     title: "Complete Privacy",
     description:
-      "All processing happens locally on your device. Your conversations never leave your computer.",
+      "Everything runs on your device. Your conversations never leave your computer.",
   },
   {
     icon: "mdi:cloud-off",
     title: "Works Offline",
     description:
-      "No internet required for core features. Record, transcribe, and summarize without connectivity.",
+      "No internet needed. Record, transcribe, and summarize without connectivity.",
   },
 ];
 
@@ -85,37 +85,37 @@ const useCases = [
     icon: "mdi:briefcase",
     title: "Sales Calls",
     description:
-      "Never miss a detail from prospect conversations. Get automatic summaries with next steps and objections.",
+      "Summaries with next steps and objections pulled out. Stop scribbling during discovery calls.",
   },
   {
     icon: "mdi:school",
     title: "Lectures & Classes",
     description:
-      "Record lectures and get organized notes. Perfect for students who want to focus on learning.",
+      "Record the lecture, focus on learning. Notes and transcript are waiting when you're done.",
   },
   {
     icon: "mdi:account-group",
     title: "Team Meetings",
     description:
-      "Keep everyone aligned with shared meeting notes. Track decisions and action items automatically.",
+      'Shared notes with decisions and action items. No more "what did we agree on?" messages.',
   },
   {
     icon: "mdi:lightbulb",
     title: "Brainstorming",
     description:
-      "Capture every idea during creative sessions. Let AI organize and categorize your thoughts.",
+      "Record the session, let AI organize what came up. Nothing gets lost in the whiteboard chaos.",
   },
   {
     icon: "mdi:phone",
     title: "Client Calls",
     description:
-      "Document client requirements and feedback accurately. Build better relationships with detailed records.",
+      "Accurate records of requirements and feedback. Useful when the client remembers it differently.",
   },
   {
     icon: "mdi:medical-bag",
     title: "Healthcare",
     description:
-      "HIPAA-ready with local processing. Perfect for patient consultations and medical documentation.",
+      "HIPAA-ready. Everything runs locally, nothing leaves the device. Good for patient consultations.",
   },
 ];
 
@@ -151,8 +151,8 @@ function HeroSection() {
           <span className="text-stone-400">without the price tag</span>
         </h1>
         <p className="mx-auto mb-8 max-w-2xl text-lg text-neutral-600 sm:text-xl">
-          Record meetings, get AI transcriptions, and generate smart summaries.
-          All for free, with no usage limits and complete privacy.
+          Record meetings, transcribe them, get summaries. Free, no limits, runs
+          on your device.
         </p>
         <div className="flex flex-col justify-center gap-4 sm:flex-row">
           <Link
@@ -191,10 +191,10 @@ function FeaturesSection() {
       <div className="mx-auto max-w-4xl">
         <div className="mb-12 text-center">
           <h2 className="mb-4 font-serif text-3xl text-stone-700 sm:text-4xl">
-            Everything you need, free
+            Free. Actually free.
           </h2>
           <p className="text-lg text-neutral-600">
-            No hidden costs, no premium tiers for essential features
+            No catch. The free version does real work.
           </p>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -227,10 +227,10 @@ function ComparisonSection() {
       <div className="mx-auto max-w-4xl">
         <div className="mb-12 text-center">
           <h2 className="mb-4 font-serif text-3xl text-stone-700 sm:text-4xl">
-            More value than paid alternatives
+            Better than what you're paying for
           </h2>
           <p className="text-lg text-neutral-600">
-            See how Char compares to other meeting note tools
+            How Char stacks up against paid meeting note tools
           </p>
         </div>
         <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
@@ -297,10 +297,10 @@ function UseCasesSection() {
       <div className="mx-auto max-w-4xl">
         <div className="mb-12 text-center">
           <h2 className="mb-4 font-serif text-3xl text-stone-700 sm:text-4xl">
-            Built for every conversation
+            Works for more than just meetings
           </h2>
           <p className="text-lg text-neutral-600">
-            From sales calls to lectures, Char adapts to your needs
+            Sales calls, lectures, 1-on-1s, whatever.
           </p>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -341,9 +341,8 @@ function OpenSourceSection() {
               Transparent by design
             </h2>
             <p className="mb-6 leading-relaxed text-neutral-600">
-              Char is fully open source. Inspect the code, contribute
-              improvements, or self-host on your own infrastructure. No vendor
-              lock-in, no hidden data collection.
+              Char is fully open source. Read the code, contribute to it, or
+              self-host on your own servers. Nothing hidden.
             </p>
             <div className="flex flex-wrap gap-4">
               <a
@@ -409,8 +408,7 @@ function CTASection() {
           Ready to try Char?
         </h2>
         <p className="mb-8 text-lg text-neutral-600">
-          Download now and start capturing better meeting notes in minutes. No
-          signup required.
+          Download it. No account needed.
         </p>
         <Link
           to="/download/"
