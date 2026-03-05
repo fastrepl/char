@@ -103,19 +103,15 @@ async fn run(cli: Cli) -> CliResult<()> {
     match command {
         Some(Commands::Auth) => commands::auth::run(),
         Some(Commands::Desktop) => commands::desktop::run().map(|_| ()),
-        Some(Commands::Listen) => {
-            let base_url = required_base_url(base_url)?;
-
-            commands::listen::run(commands::listen::Args {
-                base_url,
-                api_key,
-                model,
-                language,
-                record,
-            })
-            .await
-            .map(|_| ())
-        }
+        Some(Commands::Listen) => commands::listen::run(commands::listen::Args {
+            base_url,
+            api_key,
+            model,
+            language,
+            record,
+        })
+        .await
+        .map(|_| ()),
         Some(Commands::Batch {
             input,
             provider,
@@ -125,7 +121,11 @@ async fn run(cli: Cli) -> CliResult<()> {
             format,
             quiet,
         }) => {
-            let base_url = required_base_url(base_url)?;
+            let base_url = if matches!(provider, BatchProvider::Cactus) {
+                base_url
+            } else {
+                Some(required_base_url(base_url)?)
+            };
 
             commands::batch::run(commands::batch::Args {
                 input,
@@ -147,19 +147,15 @@ async fn run(cli: Cli) -> CliResult<()> {
         })
         .await
         {
-            commands::entry::EntryAction::Listen => {
-                let base_url = required_base_url(base_url)?;
-
-                commands::listen::run(commands::listen::Args {
-                    base_url,
-                    api_key,
-                    model,
-                    language,
-                    record,
-                })
-                .await
-                .map(|_| ())
-            }
+            commands::entry::EntryAction::Listen => commands::listen::run(commands::listen::Args {
+                base_url,
+                api_key,
+                model,
+                language,
+                record,
+            })
+            .await
+            .map(|_| ()),
             commands::entry::EntryAction::Quit => Ok(()),
         },
     }

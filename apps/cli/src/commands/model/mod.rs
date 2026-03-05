@@ -14,7 +14,7 @@ use crate::commands::OutputFormat;
 use crate::error::{CliError, CliResult};
 
 mod runtime;
-mod settings;
+pub(crate) mod settings;
 
 use runtime::CliModelRuntime;
 

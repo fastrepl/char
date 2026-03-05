@@ -8,6 +8,7 @@ use indicatif::{ProgressBar, ProgressStyle};
 use tokio::sync::mpsc;
 
 use crate::commands::OutputFormat;
+use crate::commands::cactus_server::resolve_and_spawn_cactus;
 use crate::error::{CliError, CliResult};
 
 mod runtime;
@@ -52,7 +53,7 @@ impl From<Provider> for BatchProvider {
 pub struct Args {
     pub input: PathBuf,
     pub provider: Provider,
-    pub base_url: String,
+    pub base_url: Option<String>,
     pub api_key: String,
     pub model: Option<String>,
     pub language: String,
@@ -73,6 +74,17 @@ pub async fn run(args: Args) -> CliResult<()> {
             })?,
     ];
 
+    let _server;
+    let base_url = if matches!(args.provider, Provider::Cactus) {
+        let (server, url) = resolve_and_spawn_cactus(args.model.as_deref()).await?;
+        _server = Some(server);
+        url
+    } else {
+        _server = None;
+        args.base_url
+            .ok_or_else(|| CliError::required_argument("--base-url (or CHAR_BASE_URL)"))?
+    };
+
     let session_id = uuid::Uuid::new_v4().to_string();
     let (batch_tx, mut batch_rx) = mpsc::unbounded_channel::<BatchEvent>();
     let runtime = Arc::new(BatchEventRuntime { tx: batch_tx });
@@ -90,22 +102,23 @@ pub async fn run(args: Args) -> CliResult<()> {
         provider: args.provider.into(),
         file_path: file_path.to_string(),
         model: args.model,
-        base_url: args.base_url,
+        base_url,
         api_key: args.api_key,
         languages,
         keywords: args.keywords,
     };
 
-    let show_progress = !args.quiet && std::io::stderr().is_terminal();
+    let quiet = args.quiet;
+    let show_progress = !quiet && std::io::stderr().is_terminal();
     let format = args.format;
     let output = args.output;
 
     let progress = if show_progress {
         let bar = ProgressBar::new(100);
         bar.set_style(
-            ProgressStyle::with_template("{spinner} {msg} [{wide_bar}] {pos:>3}%")
+            ProgressStyle::with_template("{spinner} {msg} [{bar:20}] {pos:>3}%")
                 .unwrap()
-                .progress_chars("=>-"),
+                .progress_chars("█▓░"),
         );
         bar.set_message("Transcribing");
         bar.enable_steady_tick(std::time::Duration::from_millis(120));
@@ -114,11 +127,13 @@ pub async fn run(args: Args) -> CliResult<()> {
         None
     };
 
+    let started = std::time::Instant::now();
     let batch_task =
         tokio::spawn(async move { hypr_listener2_core::run_batch(runtime, params).await });
 
     let mut last_progress_percent: i8 = -1;
     let mut response: Option<owhisper_interface::batch::Response> = None;
+    let mut last_streamed: Option<owhisper_interface::stream::StreamResponse> = None;
     let mut failure: Option<(BatchErrorCode, String)> = None;
 
     while let Some(event) = batch_rx.recv().await {
@@ -133,11 +148,16 @@ pub async fn run(args: Args) -> CliResult<()> {
                     progress.set_position(100);
                 }
             }
-            BatchEvent::BatchResponseStreamed { percentage, .. } => {
+            BatchEvent::BatchResponseStreamed {
+                percentage,
+                response: streamed,
+                ..
+            } => {
+                last_streamed = Some(streamed);
                 let Some(progress) = &progress else {
                     continue;
                 };
-                let percent = (percentage * 100.0).floor().clamp(0.0, 100.0) as i8;
+                let percent = (percentage * 100.0).round().clamp(0.0, 100.0) as i8;
                 if percent == last_progress_percent {
                     continue;
                 }
@@ -170,12 +190,15 @@ pub async fn run(args: Args) -> CliResult<()> {
     }
 
     if let Some(progress) = progress {
+        progress.set_position(100);
         progress.finish_and_clear();
     }
 
-    let response = response.ok_or_else(|| {
-        CliError::operation_failed("batch transcription", "completed without a final response")
-    })?;
+    let response = response
+        .or_else(|| batch_response_from_stream(last_streamed))
+        .ok_or_else(|| {
+            CliError::operation_failed("batch transcription", "completed without a final response")
+        })?;
 
     match format {
         OutputFormat::Json => {
@@ -187,7 +210,46 @@ pub async fn run(args: Args) -> CliResult<()> {
         }
     }
 
+    if !quiet {
+        let elapsed = started.elapsed();
+        let audio_duration = response
+            .metadata
+            .get("duration")
+            .and_then(|v| v.as_f64())
+            .unwrap_or(0.0);
+
+        let mut parts = Vec::new();
+        if audio_duration > 0.0 {
+            parts.push(format!("{:.1}s audio", audio_duration));
+        }
+        parts.push(format!("in {:.1}s", elapsed.as_secs_f64()));
+        if let Some(path) = &output {
+            parts.push(format!("-> {}", path.display()));
+        }
+        eprintln!("\x1b[2m{}\x1b[0m", parts.join(", "));
+    }
+
     Ok(())
+}
+
+fn batch_response_from_stream(
+    last: Option<owhisper_interface::stream::StreamResponse>,
+) -> Option<owhisper_interface::batch::Response> {
+    use owhisper_interface::stream::StreamResponse;
+
+    let StreamResponse::TranscriptResponse {
+        channel, duration, ..
+    } = last?
+    else {
+        return None;
+    };
+
+    Some(owhisper_interface::batch::Response {
+        metadata: serde_json::json!({ "duration": duration }),
+        results: owhisper_interface::batch::Results {
+            channels: vec![channel.into()],
+        },
+    })
 }
 
 fn validate_input_path(path: &Path) -> CliResult<()> {

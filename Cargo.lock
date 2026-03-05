@@ -3272,6 +3272,7 @@ dependencies = [
  "listener2-core",
  "local-model",
  "local-stt-core",
+ "local-stt-server",
  "model-downloader",
  "open",
  "owhisper-interface",

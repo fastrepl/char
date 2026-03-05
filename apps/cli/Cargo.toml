@@ -18,6 +18,7 @@ hypr-listener-core = { workspace = true }
 hypr-listener2-core = { workspace = true }
 hypr-local-model = { workspace = true }
 hypr-local-stt-core = { workspace = true }
+hypr-local-stt-server = { workspace = true }
 hypr-model-downloader = { workspace = true }
 hypr-storage = { workspace = true }
 hypr-transcript = { workspace = true }
