@@ -306,7 +306,7 @@ function BillingButton() {
     enabled: !!auth?.session && !isPro,
     queryKey: [auth?.session?.user.id ?? "", "canStartTrial"],
     queryFn: async () => {
-      const headers = auth?.getHeaders();
+      const headers = await auth?.getHeadersWithFingerprint();
       if (!headers) {
         return false;
       }
@@ -322,7 +322,7 @@ function BillingButton() {
 
   const startTrialMutation = useMutation({
     mutationFn: async () => {
-      const headers = auth?.getHeaders();
+      const headers = await auth?.getHeadersWithFingerprint();
       if (!headers) {
         throw new Error("Not authenticated");
       }

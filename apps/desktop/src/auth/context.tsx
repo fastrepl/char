@@ -50,6 +50,7 @@ type AuthTokenHandlers = {
 
 type AuthUtils = {
   getHeaders: () => Record<string, string> | null;
+  getHeadersWithFingerprint: () => Promise<Record<string, string> | null>;
   getAvatarUrl: () => Promise<string | null>;
 };
 
@@ -105,37 +106,41 @@ async function initSession(
 }
 
 let trackedUserId: string | null = null;
+let trackedSignedInEventUserId: string | null = null;
 
 async function trackAuthEvent(
   event: AuthChangeEvent,
   session: Session | null,
 ): Promise<void> {
   if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
-    if (session.user.id === trackedUserId) {
-      return;
+    if (session.user.id !== trackedUserId) {
+      trackedUserId = session.user.id;
+
+      const appVersion = await getVersion();
+      await analyticsCommands.identify(session.user.id, {
+        email: session.user.email,
+        set: {
+          account_created_date: session.user.created_at,
+          is_signed_up: true,
+          app_version: appVersion,
+          os_version: osVersion(),
+          platform: platform(),
+        },
+      });
     }
 
-    trackedUserId = session.user.id;
-
-    const appVersion = await getVersion();
-    void analyticsCommands.identify(session.user.id, {
-      email: session.user.email,
-      set: {
-        account_created_date: session.user.created_at,
-        is_signed_up: true,
-        app_version: appVersion,
-        os_version: osVersion(),
-        platform: platform(),
-      },
-    });
-
-    if (event === "SIGNED_IN") {
-      void analyticsCommands.event({ event: "user_signed_in" });
+    if (
+      event === "SIGNED_IN" &&
+      session.user.id !== trackedSignedInEventUserId
+    ) {
+      trackedSignedInEventUserId = session.user.id;
+      await analyticsCommands.event({ event: "user_signed_in" });
     }
   }
 
   if (event === "SIGNED_OUT") {
     trackedUserId = null;
+    trackedSignedInEventUserId = null;
   }
 }
 
@@ -338,6 +343,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return headers;
   }, [session, fingerprint]);
 
+  const getHeadersWithFingerprint = useCallback(async () => {
+    if (!session) {
+      return null;
+    }
+
+    let resolvedFingerprint = fingerprint;
+
+    if (!resolvedFingerprint) {
+      const result = await miscCommands.getFingerprint();
+      if (result.status === "ok") {
+        resolvedFingerprint = result.data;
+        setFingerprint((prev) => prev ?? result.data);
+      }
+    }
+
+    const headers: Record<string, string> = {
+      Authorization: `${session.token_type} ${session.access_token}`,
+    };
+
+    if (resolvedFingerprint) {
+      headers[DEVICE_FINGERPRINT_HEADER] = resolvedFingerprint;
+    }
+
+    return headers;
+  }, [session, fingerprint]);
+
   const getAvatarUrl = useCallback(async () => {
     const email = session?.user.email;
 
@@ -366,6 +397,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       handleAuthCallback,
       setSessionFromTokens,
       getHeaders,
+      getHeadersWithFingerprint,
       getAvatarUrl,
     }),
     [
@@ -377,6 +409,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       handleAuthCallback,
       setSessionFromTokens,
       getHeaders,
+      getHeadersWithFingerprint,
       getAvatarUrl,
     ],
   );

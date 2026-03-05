@@ -28,7 +28,7 @@ export function useTrialFlow(onContinue: () => void) {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const headers = auth.getHeaders();
+      const headers = await auth.getHeadersWithFingerprint();
       if (!headers) throw new Error("no headers");
       const client = createClient({ baseUrl: env.VITE_API_URL, headers });
       const { data, error } = await startTrial({

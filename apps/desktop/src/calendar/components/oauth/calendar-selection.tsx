@@ -46,7 +46,7 @@ export function useOAuthCalendarSelection(config: CalendarProvider) {
   } = useQuery({
     queryKey: ["oauthCalendars", config.id],
     queryFn: async () => {
-      const headers = auth?.getHeaders();
+      const headers = await auth?.getHeadersWithFingerprint();
       if (!headers) return [];
       const client = createClient({ baseUrl: env.VITE_API_URL, headers });
       const { data, error } = await googleListCalendars({ client });

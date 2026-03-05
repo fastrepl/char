@@ -14,7 +14,7 @@ export function useConnections(enabled = true) {
   return useQuery({
     queryKey: ["integration-status", userId],
     queryFn: async () => {
-      const headers = auth?.getHeaders();
+      const headers = await auth?.getHeadersWithFingerprint();
       if (!headers) {
         return [];
       }

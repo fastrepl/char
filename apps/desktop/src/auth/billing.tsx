@@ -63,7 +63,7 @@ export function BillingProvider({ children }: { children: ReactNode }) {
     enabled: !!auth?.session && !billing.isPro,
     queryKey: [auth?.session?.user.id ?? "", "canStartTrial"],
     queryFn: async () => {
-      const headers = auth?.getHeaders();
+      const headers = await auth?.getHeadersWithFingerprint();
       if (!headers) {
         return false;
       }
