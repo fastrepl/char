@@ -44,9 +44,11 @@ export function createCtx(
     }
   }
 
-  if (calendarTrackingIdToId.size === 0) {
-    return null;
-  }
+  // We can't do this because we need a ctx to delete
+  // left-over events from old calendars in sync
+  // if (calendarTrackingIdToId.size === 0) {
+  //   return null;
+  // }
 
   const userId = store.getValue("user_id");
   if (!userId) {
