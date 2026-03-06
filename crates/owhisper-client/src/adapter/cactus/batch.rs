@@ -307,9 +307,9 @@ impl<S> SseParserState<S> {
                 .alternatives
                 .first()
                 .is_some_and(|a| !a.words.is_empty())
-            {
-                self.saw_segment_words = true;
-            }
+        {
+            self.saw_segment_words = true;
+        }
 
         let segment_end = match &response {
             StreamResponse::TranscriptResponse {
