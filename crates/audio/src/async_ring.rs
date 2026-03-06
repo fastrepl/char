@@ -7,6 +7,7 @@ use std::time::{Duration, Instant};
 
 pub(crate) struct PollNextSample {
     pub(crate) poll: Poll<Option<f32>>,
+    #[allow(dead_code)]
     pub(crate) did_pop_chunk: bool,
 }
 
@@ -66,6 +67,7 @@ where
         self
     }
 
+    #[allow(dead_code)]
     pub(crate) fn has_buffered_samples(&self) -> bool {
         self.read_idx < self.read_len
     }
