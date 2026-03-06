@@ -102,7 +102,7 @@ function Component() {
               </h1>
               <p className="mx-auto max-w-3xl text-lg leading-relaxed text-neutral-600 sm:text-xl">
                 Connect Char with your favorite tools. Automate repetitive tasks
-                with powerful workflows. No coding required.
+                with custom workflows. No coding required.
               </p>
               <div className="mt-8">
                 <button

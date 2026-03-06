@@ -49,7 +49,7 @@ const features = [
     icon: "mdi:clipboard-pulse",
     title: "Care Coordination",
     description:
-      "Document handoffs, multidisciplinary team meetings, and care planning sessions with comprehensive notes.",
+      "Document handoffs, multidisciplinary team meetings, and care planning sessions with detailed notes.",
   },
   {
     icon: "mdi:account-group",
@@ -224,11 +224,10 @@ function CTASection() {
     <section className="border-t border-neutral-100 px-6 py-16">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="mb-4 font-serif text-3xl text-stone-700">
-          Ready to streamline clinical documentation?
+          Less time documenting, more time with patients
         </h2>
         <p className="mb-8 text-neutral-600">
-          Join healthcare teams who are saving time on documentation while
-          maintaining patient privacy.
+          Runs locally. No patient data leaves your device.
         </p>
         <Link
           to="/download/"

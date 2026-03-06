@@ -80,7 +80,7 @@ const useCases = [
   {
     title: "Policy Discussions",
     description:
-      "Document internal policy meetings, strategy sessions, and planning discussions with comprehensive notes.",
+      "Document internal policy meetings, strategy sessions, and planning discussions with detailed notes.",
   },
   {
     title: "Inter-Agency Coordination",
@@ -223,11 +223,10 @@ function CTASection() {
     <section className="border-t border-neutral-100 px-6 py-16">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="mb-4 font-serif text-3xl text-stone-700">
-          Ready to improve government documentation?
+          Better meeting records, less overhead
         </h2>
         <p className="mb-8 text-neutral-600">
-          Join government agencies who are improving meeting documentation while
-          maintaining security.
+          Runs locally. No data leaves your network.
         </p>
         <Link
           to="/download/"

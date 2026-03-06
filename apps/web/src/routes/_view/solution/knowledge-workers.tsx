@@ -55,7 +55,7 @@ const features = [
     icon: "mdi:magnify",
     title: "Searchable Archive",
     description:
-      "Find any meeting, note, or conversation instantly with powerful full-text search.",
+      "Find any meeting, note, or conversation instantly with full-text search.",
   },
   {
     icon: "mdi:share-variant",
@@ -224,11 +224,10 @@ function CTASection() {
     <section className="border-t border-neutral-100 px-6 py-16">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="mb-4 font-serif text-3xl text-stone-700">
-          Ready to transform your meetings?
+          Get more from every meeting
         </h2>
         <p className="mb-8 text-neutral-600">
-          Join knowledge workers who are getting more done with AI-powered
-          meeting notes.
+          Free to download. No account required.
         </p>
         <Link
           to="/download/"

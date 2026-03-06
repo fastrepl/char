@@ -221,11 +221,10 @@ function CTASection() {
     <section className="border-t border-neutral-100 px-6 py-16">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="mb-4 font-serif text-3xl text-stone-700">
-          Ready to improve field documentation?
+          Capture every detail on-site
         </h2>
         <p className="mb-8 text-neutral-600">
-          Join field engineers who are capturing every technical detail with
-          AI-powered meeting notes.
+          Works offline. No internet required.
         </p>
         <Link
           to="/download/"

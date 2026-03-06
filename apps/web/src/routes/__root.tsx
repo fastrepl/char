@@ -16,7 +16,7 @@ interface RouterContext {
 
 const TITLE = "Char - AI notepad for private meetings";
 const DESCRIPTION =
-  "Char is a private, on-device AI notepad that enhances your own notes—without bots, cloud recording, or meeting intrusion. Stay engaged, build your personal knowledge base, and export to tools like Notion on your terms.";
+  "Char is a private, on-device AI notepad that improves your notes—without bots, cloud recording, or meeting intrusion. Stay engaged, build your personal knowledge base, and export to tools like Notion on your terms.";
 const KEYWORDS =
   "AI notepad, privacy-first AI, on-device AI, local AI, edge AI, meeting notes, personal knowledge base, AI notetaking, AI notetaker, Argmax, Deepgram, secure transcription, notepad app, notetaking app";
 

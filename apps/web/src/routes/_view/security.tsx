@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_view/security")({
       {
         name: "description",
         content:
-          "Char is built with security at its core. Local-first architecture, end-to-end encryption, and open source transparency ensure your meeting data stays protected.",
+          "Char is built around security from the start. Local-first architecture, end-to-end encryption, and open source transparency ensure your meeting data stays protected.",
       },
       { property: "og:title", content: "Security - Char" },
       {
@@ -381,13 +381,13 @@ function EnterpriseSecuritySection() {
       icon: "mdi:shield-account",
       title: "SSO integration",
       description:
-        "Integrate with your existing identity provider for seamless and secure authentication.",
+        "Integrate with your existing identity provider for simple, secure authentication.",
     },
     {
       icon: "mdi:clipboard-check",
       title: "Compliance ready",
       description:
-        "Built to support GDPR, HIPAA, and SOC 2 compliance requirements with comprehensive audit logging.",
+        "Built to support GDPR, HIPAA, and SOC 2 compliance requirements with full audit logging.",
     },
     {
       icon: "mdi:account-lock",

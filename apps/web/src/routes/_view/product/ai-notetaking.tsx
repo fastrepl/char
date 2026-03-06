@@ -1857,8 +1857,7 @@ function SharingSection() {
         </div>
         <h2 className="mb-4 font-serif text-3xl text-stone-700">Share notes</h2>
         <p className="text-base text-neutral-600">
-          Collaborate seamlessly by sharing meeting notes, transcripts, and
-          summaries with your team.
+          Share meeting notes, transcripts, and summaries with your team.
         </p>
       </div>
       <div className="border-t border-neutral-100">
@@ -2439,7 +2438,7 @@ function CTASection() {
         </h2>
         <p className="mx-auto max-w-2xl text-lg text-neutral-600">
           From live meetings to archived recordings, handle all your audio
-          transcription and AI summary needs with one powerful tool
+          transcription and AI summary needs with one app
         </p>
         <div className="pt-6">
           <Link
