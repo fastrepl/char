@@ -134,8 +134,6 @@ export function PersistentChatPanel({
               }
             : false
         }
-        minWidth={isFloating ? 400 : undefined}
-        minHeight={isFloating ? 400 : undefined}
         bounds={isFloating ? "window" : undefined}
         className={cn([
           "pointer-events-auto flex flex-col",
