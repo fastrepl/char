@@ -8,22 +8,6 @@ import { env } from "~/env";
 
 export const id = () => crypto.randomUUID() as string;
 
-const hexId = () => id().replace(/-/g, "");
-
-export const createTraceparent = () =>
-  `00-${hexId()}-${hexId().slice(0, 16)}-01`;
-
-export const sentryTraceToTraceparent = (
-  traceHeader: string,
-): string | null => {
-  const [traceId, spanId, sampled] = traceHeader.split("-");
-  if (!traceId || !spanId) {
-    return null;
-  }
-
-  return `00-${traceId}-${spanId}-${sampled === "1" ? "01" : "00"}`;
-};
-
 export const getScheme = async (): Promise<string> => {
   const id = await getIdentifier();
   const schemes: Record<string, string> = {
@@ -58,5 +42,4 @@ export const DEFAULT_USER_ID = "00000000-0000-0000-0000-000000000000";
 
 export const DEVICE_FINGERPRINT_HEADER = "x-device-fingerprint";
 export const REQUEST_ID_HEADER = "x-request-id";
-export const TRACEPARENT_HEADER = "traceparent";
 export const CHAR_TASK_HEADER = "x-char-task";

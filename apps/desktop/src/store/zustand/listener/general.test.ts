@@ -15,6 +15,7 @@ describe("General Listener Slice", () => {
       expect(state.live.status).toBe("inactive");
       expect(state.live.loading).toBe(false);
       expect(state.live.amplitude).toEqual({ mic: 0, speaker: 0 });
+      expect(state.live.speakingByChannel).toEqual({});
       expect(state.live.seconds).toBe(0);
       expect(state.live.eventUnlisteners).toBeUndefined();
       expect(state.live.intervalId).toBeUndefined();
@@ -26,6 +27,7 @@ describe("General Listener Slice", () => {
     test("amplitude state is initialized to zero", () => {
       const state = store.getState();
       expect(state.live.amplitude).toEqual({ mic: 0, speaker: 0 });
+      expect(state.live.speakingByChannel).toEqual({});
     });
   });
 

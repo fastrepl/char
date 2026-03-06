@@ -19,6 +19,23 @@ pub fn set_remote_parent(span: &tracing::Span, headers: &HeaderMap) {
     }
 }
 
+pub struct TraceIdentifiers {
+    pub span_id: String,
+    pub trace_id: String,
+}
+
+pub fn span_identifiers(span: &tracing::Span) -> Option<TraceIdentifiers> {
+    let span_context = span.context().span().span_context().clone();
+    if !span_context.is_valid() {
+        return None;
+    }
+
+    Some(TraceIdentifiers {
+        trace_id: span_context.trace_id().to_string(),
+        span_id: span_context.span_id().to_string(),
+    })
+}
+
 pub fn with_current_trace_context(builder: RequestBuilder) -> RequestBuilder {
     with_trace_context(builder, &tracing::Span::current().context())
 }

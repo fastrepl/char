@@ -5,6 +5,11 @@ import { createRouter } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 
 import { env } from "./env";
+import {
+  getActiveHoneycombTraceContext,
+  getHoneycombTraceUrl,
+  initHoneycombWeb,
+} from "./observability/honeycomb";
 import { PostHogProvider } from "./providers/posthog";
 import { routeTree } from "./routeTree.gen";
 
@@ -21,6 +26,10 @@ function MaybeOutlitProvider({ children }: { children: React.ReactNode }) {
 
 export function getRouter() {
   const queryClient = new QueryClient();
+
+  if (typeof window !== "undefined") {
+    initHoneycombWeb();
+  }
 
   const router = createRouter({
     routeTree,
@@ -48,13 +57,34 @@ export function getRouter() {
         ? `hyprnote-web@${env.VITE_APP_VERSION}`
         : undefined,
       sendDefaultPii: true,
-      integrations: [
-        Sentry.tanstackRouterBrowserTracingIntegration(router),
-        Sentry.replayIntegration(),
-      ],
-      tracesSampleRate: 1.0,
+      tracePropagationTargets: [],
+      integrations: [Sentry.replayIntegration()],
       replaysSessionSampleRate: 0.1,
       replaysOnErrorSampleRate: 1.0,
+      beforeSend(event) {
+        const traceContext = getActiveHoneycombTraceContext();
+        if (!traceContext) {
+          return event;
+        }
+
+        event.tags = {
+          ...event.tags,
+          "hyprnote.honeycomb.span_id": traceContext.spanId,
+          "hyprnote.honeycomb.trace_id": traceContext.traceId,
+        };
+
+        const traceUrl = getHoneycombTraceUrl(traceContext);
+        event.contexts = {
+          ...event.contexts,
+          "hyprnote.honeycomb": {
+            span_id: traceContext.spanId,
+            trace_id: traceContext.traceId,
+            ...(traceUrl ? { trace_url: traceUrl } : {}),
+          },
+        };
+
+        return event;
+      },
     });
   }
 

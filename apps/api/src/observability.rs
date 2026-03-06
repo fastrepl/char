@@ -54,13 +54,8 @@ fn init_otel_tracer_provider(
     };
 
     let exporter_builder = opentelemetry_otlp::SpanExporter::builder()
-        .with_tonic()
-        .with_endpoint(endpoint);
-    if env.otel_exporter_otlp_headers.is_none() {
-        tracing::warn!(
-            "otel_exporter_otlp_headers not set; exporter auth depends on OTEL_EXPORTER_OTLP_HEADERS"
-        );
-    }
+        .with_http()
+        .with_endpoint(trace_export_endpoint(endpoint));
     let exporter = exporter_builder.build().ok()?;
 
     let configured_service_name = env
@@ -90,4 +85,13 @@ fn init_otel_tracer_provider(
 
     global::set_tracer_provider(provider.clone());
     Some(provider)
+}
+
+fn trace_export_endpoint(base_url: &str) -> String {
+    let base_url = base_url.trim_end_matches('/');
+    if base_url.ends_with("/v1/traces") {
+        return base_url.to_string();
+    }
+
+    format!("{base_url}/v1/traces")
 }

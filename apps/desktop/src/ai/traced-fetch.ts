@@ -1,4 +1,3 @@
-import * as Sentry from "@sentry/react";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 
 import type { CharTask } from "@hypr/api-client";
@@ -8,9 +7,7 @@ import {
   CHAR_TASK_HEADER,
   DEVICE_FINGERPRINT_HEADER,
   REQUEST_ID_HEADER,
-  TRACEPARENT_HEADER,
   id,
-  sentryTraceToTraceparent,
 } from "~/shared/utils";
 
 let cachedFingerprint: string | null = null;
@@ -27,50 +24,17 @@ const getFingerprint = async (): Promise<string | null> => {
 };
 
 export const tracedFetch: typeof fetch = async (input, init) => {
-  const url =
-    typeof input === "string"
-      ? input
-      : input instanceof URL
-        ? input.href
-        : input.url;
-  const method = init?.method ?? "GET";
+  const headers = new Headers(init?.headers);
+  if (!headers.has(REQUEST_ID_HEADER)) {
+    headers.set(REQUEST_ID_HEADER, id());
+  }
 
-  return Sentry.startSpan(
-    {
-      name: `HTTP ${method} ${new URL(url).pathname}`,
-      op: "http.client",
-      attributes: { "http.url": url, "http.method": method },
-    },
-    async (span) => {
-      const headers = new Headers(init?.headers);
-      if (!headers.has(REQUEST_ID_HEADER)) {
-        headers.set(REQUEST_ID_HEADER, id());
-      }
+  const fingerprint = await getFingerprint();
+  if (fingerprint) {
+    headers.set(DEVICE_FINGERPRINT_HEADER, fingerprint);
+  }
 
-      const traceHeader = Sentry.spanToTraceHeader(span);
-      const baggageHeader = Sentry.spanToBaggageHeader(span);
-      const traceparent = sentryTraceToTraceparent(traceHeader);
-
-      headers.set("sentry-trace", traceHeader);
-      if (traceparent && !headers.has(TRACEPARENT_HEADER)) {
-        headers.set(TRACEPARENT_HEADER, traceparent);
-      }
-      if (baggageHeader) {
-        headers.set("baggage", baggageHeader);
-      }
-
-      const fingerprint = await getFingerprint();
-      if (fingerprint) {
-        headers.set(DEVICE_FINGERPRINT_HEADER, fingerprint);
-      }
-
-      const response = await tauriFetch(input, { ...init, headers });
-
-      span.setAttribute("http.status_code", response.status);
-
-      return response;
-    },
-  );
+  return tauriFetch(input, { ...init, headers });
 };
 
 export function createTracedFetch(task: CharTask): typeof fetch {

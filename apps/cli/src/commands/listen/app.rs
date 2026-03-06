@@ -382,6 +382,7 @@ impl App {
             SessionDataEvent::MicMuted { value, .. } => {
                 self.mic_muted = value;
             }
+            SessionDataEvent::SpeakerActivity { .. } => {}
             SessionDataEvent::StreamResponse { response, .. } => {
                 if let Some(delta) = self.transcript.process(response.as_ref()) {
                     self.apply_transcript_delta(delta);

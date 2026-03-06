@@ -8,9 +8,11 @@ use std::net::SocketAddr;
 use std::num::NonZeroU32;
 use std::sync::Arc;
 use std::time::Duration;
+use std::time::SystemTime;
 
 use axum::{Router, body::Body, extract::MatchedPath, http::Request, middleware};
 use sentry::integrations::tower::{NewSentryLayer, SentryHttpLayer};
+use sentry::protocol::{Context, Value};
 use tower::ServiceBuilder;
 use tower_http::{
     classify::ServerErrorsFailureClass,
@@ -246,6 +248,7 @@ async fn app() -> Router {
                             {
                                 span.record("hyprnote.request.id", request_id);
                             }
+                            configure_sentry_trace_scope(span, env, SystemTime::now());
                             tracing::info!(
                                 parent: span,
                                 http.request.method = %request.method(),
@@ -381,4 +384,63 @@ async fn openapi_json() -> axum::Json<utoipa::openapi::OpenApi> {
 
 async fn version() -> &'static str {
     option_env!("VERGEN_GIT_SHA").unwrap_or("unknown")
+}
+
+fn configure_sentry_trace_scope(span: &tracing::Span, env: &Env, request_started_at: SystemTime) {
+    let Some(trace_identifiers) = hypr_observability::span_identifiers(span) else {
+        return;
+    };
+
+    let trace_url = build_honeycomb_trace_url(env, &trace_identifiers, request_started_at);
+    sentry::configure_scope(|scope| {
+        scope.set_tag(
+            "hyprnote.honeycomb.trace_id",
+            trace_identifiers.trace_id.as_str(),
+        );
+        scope.set_tag(
+            "hyprnote.honeycomb.span_id",
+            trace_identifiers.span_id.as_str(),
+        );
+        if let Some(trace_url) = trace_url.as_deref() {
+            scope.set_tag("hyprnote.honeycomb.trace_url", trace_url);
+        }
+
+        let mut context = std::collections::BTreeMap::new();
+        context.insert("trace_id".into(), Value::String(trace_identifiers.trace_id));
+        context.insert("span_id".into(), Value::String(trace_identifiers.span_id));
+        if let Some(trace_url) = trace_url {
+            context.insert("trace_url".into(), Value::String(trace_url));
+        }
+        scope.set_context("hyprnote.honeycomb", Context::Other(context));
+    });
+}
+
+fn build_honeycomb_trace_url(
+    env: &Env,
+    trace_identifiers: &hypr_observability::TraceIdentifiers,
+    request_started_at: SystemTime,
+) -> Option<String> {
+    let team = env.honeycomb_ui_team.as_deref()?;
+    let environment = env.honeycomb_ui_environment.as_deref()?;
+    let base_url = env
+        .honeycomb_ui_base_url
+        .as_deref()
+        .unwrap_or("https://ui.honeycomb.io")
+        .trim_end_matches('/');
+    let trace_start_ts = request_started_at
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .ok()?
+        .as_secs()
+        .to_string();
+
+    let mut url = url::Url::parse(&format!(
+        "{base_url}/{team}/environments/{environment}/trace"
+    ))
+    .ok()?;
+    url.query_pairs_mut()
+        .append_pair("trace_id", trace_identifiers.trace_id.as_str())
+        .append_pair("span", trace_identifiers.span_id.as_str())
+        .append_pair("trace_start_ts", trace_start_ts.as_str());
+
+    Some(url.into())
 }
