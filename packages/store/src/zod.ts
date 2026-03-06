@@ -49,6 +49,9 @@ export const eventParticipantSchema = z.object({
   is_current_user: z.boolean().optional(),
 });
 
+export const calendarProviderSchema = z.enum(["apple", "google", "outlook"]);
+export type CalendarProvider = z.infer<typeof calendarProviderSchema>;
+
 export const eventSchema = z.object({
   user_id: z.string(),
   created_at: z.string(),
@@ -70,14 +73,12 @@ export const eventSchema = z.object({
     z.boolean().optional(),
   ),
   is_all_day: z.preprocess((val) => val ?? undefined, z.boolean().optional()),
+  provider: calendarProviderSchema,
   participants_json: z.preprocess(
     (val) => val ?? undefined,
     z.string().optional(),
   ),
 });
-
-export const calendarProviderSchema = z.enum(["apple", "google", "outlook"]);
-export type CalendarProvider = z.infer<typeof calendarProviderSchema>;
 
 export const calendarSchema = z.object({
   user_id: z.string(),

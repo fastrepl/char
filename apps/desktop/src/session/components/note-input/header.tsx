@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircleIcon, PlusIcon, RefreshCwIcon, XIcon } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { commands as analyticsCommands } from "@hypr/plugin-analytics";
 import {
@@ -21,7 +21,6 @@ import { Spinner } from "@hypr/ui/components/ui/spinner";
 import { cn } from "@hypr/utils";
 
 import { EditingControls } from "./transcript/editing-controls";
-import { TranscriptionProgress } from "./transcript/progress";
 
 import { useAITaskTask } from "~/ai/hooks";
 import { useLanguageModel, useLLMConnectionStatus } from "~/ai/hooks";
@@ -63,7 +62,10 @@ function HeaderTabTranscript({
   sessionId: string;
 }) {
   const { audioExists } = useAudioPlayer();
-  const sessionMode = useListener((state) => state.getSessionMode(sessionId));
+  const { sessionMode, progressRaw } = useListener((state) => ({
+    sessionMode: state.getSessionMode(sessionId),
+    progressRaw: state.batch[sessionId] ?? null,
+  }));
   const isBatchProcessing = sessionMode === "running_batch";
   const isSessionInactive =
     sessionMode !== "active" &&
@@ -72,6 +74,8 @@ function HeaderTabTranscript({
   const store = main.UI.useStore(main.STORE_ID);
   const runBatch = useRunBatch(sessionId);
   const [isRedoing, setIsRedoing] = useState(false);
+
+  const isProcessing = isBatchProcessing || isRedoing;
 
   const handleRefreshClick = useCallback(
     async (e: React.MouseEvent) => {
@@ -83,10 +87,7 @@ function HeaderTabTranscript({
 
       setIsRedoing(true);
 
-      const savedTranscripts: Array<{
-        id: string;
-        row: Record<string, unknown>;
-      }> = [];
+      const oldTranscriptIds: string[] = [];
       store.forEachRow("transcripts", (transcriptId, _forEachCell) => {
         const session = store.getCell(
           "transcripts",
@@ -94,23 +95,11 @@ function HeaderTabTranscript({
           "session_id",
         );
         if (session === sessionId) {
-          savedTranscripts.push({
-            id: transcriptId,
-            row: store.getRow("transcripts", transcriptId) as Record<
-              string,
-              unknown
-            >,
-          });
+          oldTranscriptIds.push(transcriptId);
         }
       });
 
-      if (savedTranscripts.length > 0) {
-        store.transaction(() => {
-          savedTranscripts.forEach(({ id }) => {
-            store.delRow("transcripts", id);
-          });
-        });
-      }
+      getEnhancerService()?.resetEnhanceTasks(sessionId);
 
       try {
         const result = await fsSyncCommands.audioPath(sessionId);
@@ -124,6 +113,14 @@ function HeaderTabTranscript({
         }
 
         await runBatch(audioPath);
+
+        if (oldTranscriptIds.length > 0) {
+          store.transaction(() => {
+            oldTranscriptIds.forEach((id) => {
+              store.delRow("transcripts", id);
+            });
+          });
+        }
       } catch (error) {
         const message =
           error instanceof Error
@@ -132,14 +129,6 @@ function HeaderTabTranscript({
               ? error
               : JSON.stringify(error);
         console.error("[redo_transcript] failed:", message);
-
-        if (savedTranscripts.length > 0) {
-          store.transaction(() => {
-            savedTranscripts.forEach(({ id, row }) => {
-              store.setRow("transcripts", id, row);
-            });
-          });
-        }
       } finally {
         setIsRedoing(false);
       }
@@ -147,7 +136,16 @@ function HeaderTabTranscript({
     [audioExists, isBatchProcessing, runBatch, sessionId, store],
   );
 
+  const progressLabel = useMemo(() => {
+    if (!progressRaw || progressRaw.percentage === 0) {
+      if (progressRaw?.phase === "importing") return "Importing...";
+      return "";
+    }
+    return `${Math.round(progressRaw.percentage * 100)}%`;
+  }, [progressRaw]);
+
   const showRefreshButton = audioExists && isActive && isSessionInactive;
+  const showProgress = audioExists && isActive && isProcessing;
 
   return (
     <NoteTab isActive={isActive} onClick={onClick}>
@@ -158,13 +156,16 @@ function HeaderTabTranscript({
           className={cn([
             "inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-xs transition-colors",
             "hover:bg-neutral-200 focus-visible:bg-neutral-200",
-            (isBatchProcessing || isRedoing) && "pointer-events-none",
           ])}
         >
-          {isBatchProcessing || isRedoing ? (
-            <Spinner size={12} />
-          ) : (
-            <RefreshCwIcon size={12} />
+          <RefreshCwIcon size={12} />
+        </span>
+      )}
+      {showProgress && (
+        <span className="inline-flex items-center gap-1 text-neutral-500">
+          <Spinner size={12} />
+          {progressLabel && (
+            <span className="text-[10px] tabular-nums">{progressLabel}</span>
           )}
         </span>
       )}
@@ -400,9 +401,7 @@ export function Header({
   setIsEditing: (isEditing: boolean) => void;
 }) {
   const sessionMode = useListener((state) => state.getSessionMode(sessionId));
-  const isBatchProcessing = sessionMode === "running_batch";
   const isLiveProcessing = sessionMode === "active";
-  const isMeetingOver = !isLiveProcessing && !isBatchProcessing;
 
   const tabsRef = useRef<HTMLDivElement>(null);
   const { atStart, atEnd } = useScrollFade(tabsRef, "horizontal", [
@@ -413,10 +412,8 @@ export function Header({
     return null;
   }
 
-  const showProgress =
-    currentTab.type === "transcript" && !isLiveProcessing && isBatchProcessing;
   const showEditingControls =
-    currentTab.type === "transcript" && isLiveProcessing && !isBatchProcessing;
+    currentTab.type === "transcript" && isLiveProcessing;
 
   return (
     <div className="flex flex-col">
@@ -463,7 +460,7 @@ export function Header({
                 </NoteTab>
               );
             })}
-            {isMeetingOver && (
+            {!isLiveProcessing && (
               <CreateOtherFormatButton
                 sessionId={sessionId}
                 handleTabChange={handleTabChange}
@@ -473,7 +470,6 @@ export function Header({
           {!atStart && <ScrollFadeOverlay position="left" />}
           {!atEnd && <ScrollFadeOverlay position="right" />}
         </div>
-        {showProgress && <TranscriptionProgress sessionId={sessionId} />}
         {showEditingControls && (
           <EditingControls
             sessionId={sessionId}
@@ -526,7 +522,7 @@ export function useEditorTabs({
     main.STORE_ID,
   );
 
-  if (sessionMode === "active" || sessionMode === "running_batch") {
+  if (sessionMode === "active") {
     const tabs: EditorView[] = [{ type: "raw" }, { type: "transcript" }];
     if (hasAttachments) {
       tabs.push({ type: "attachments" });

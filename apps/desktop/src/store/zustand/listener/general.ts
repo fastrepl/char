@@ -529,6 +529,13 @@ export const createGeneralSlice = <
             return;
           }
 
+          if (payload.type === "batchCompleted") {
+            get().handleBatchCompleted(payload.session_id);
+            cleanup();
+            resolve();
+            return;
+          }
+
           if (payload.type === "batchProgress") {
             get().handleBatchResponseStreamed(
               sessionId,

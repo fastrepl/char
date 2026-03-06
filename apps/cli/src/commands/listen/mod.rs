@@ -1,10 +1,11 @@
 use std::sync::Arc;
 
 use hypr_listener_core::actors::{RootActor, RootArgs, RootMsg, SessionParams};
-use hypr_listener2_core::{BatchEvent, BatchParams, BatchProvider};
+use hypr_listener2_core::{BatchParams, BatchProvider};
 use ractor::Actor;
 use tokio::sync::mpsc;
 
+use crate::commands::cactus_server::resolve_and_spawn_cactus;
 use crate::error::{CliError, CliResult};
 use crate::{
     event::{EventHandler, TuiEvent},
@@ -22,7 +23,7 @@ use audio_drop::AudioDropRequest;
 use runtime::{ListenBatchRuntime, ListenRuntime};
 
 pub struct Args {
-    pub base_url: String,
+    pub base_url: Option<String>,
     pub api_key: String,
     pub model: String,
     pub language: String,
@@ -32,7 +33,6 @@ pub struct Args {
 fn spawn_batch_transcription(
     request: AudioDropRequest,
     batch_runtime: Arc<ListenBatchRuntime>,
-    batch_tx: mpsc::UnboundedSender<BatchEvent>,
     base_url: String,
     api_key: String,
     model: String,
@@ -51,12 +51,7 @@ fn spawn_batch_transcription(
     };
 
     tokio::spawn(async move {
-        if let Err(error) = hypr_listener2_core::run_batch(batch_runtime, params).await {
-            let _ = batch_tx.send(BatchEvent::BatchFailed {
-                session_id: batch_session_id,
-                error: error.to_string(),
-            });
-        }
+        let _ = hypr_listener2_core::run_batch(batch_runtime, params).await;
     });
 }
 
@@ -75,6 +70,23 @@ pub async fn run(args: Args) -> CliResult<()> {
             CliError::invalid_argument("--language", language_code.clone(), e.to_string())
         })?;
     let languages = vec![language.clone()];
+
+    let is_cactus = model.starts_with("cactus-") || model == "cactus";
+
+    let _server;
+    let base_url = if is_cactus {
+        let model_name = if model == "cactus" {
+            None
+        } else {
+            Some(model.as_str())
+        };
+        let (server, url) = resolve_and_spawn_cactus(model_name).await?;
+        _server = Some(server);
+        url
+    } else {
+        _server = None;
+        base_url.ok_or_else(|| CliError::required_argument("--base-url (or CHAR_BASE_URL)"))?
+    };
 
     let session_id = uuid::Uuid::new_v4().to_string();
     let session_label = session_id.clone();
@@ -137,7 +149,6 @@ pub async fn run(args: Args) -> CliResult<()> {
                             spawn_batch_transcription(
                                 request,
                                 batch_runtime.clone(),
-                                batch_tx.clone(),
                                 base_url.clone(),
                                 api_key.clone(),
                                 model.clone(),

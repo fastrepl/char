@@ -60,6 +60,9 @@ export function ChatContent({
           error={error}
           onReload={regenerate}
           isModelConfigured={!!model}
+          onSendMessage={(content, parts) => {
+            handleSendMessage(content, parts, sendMessage, pendingRefs);
+          }}
         />
       )}
       <ContextBar

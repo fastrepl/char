@@ -1,12 +1,34 @@
-import { MessageSquareIcon, SparklesIcon } from "lucide-react";
+import {
+  FileTextIcon,
+  ListChecksIcon,
+  LightbulbIcon,
+  MailIcon,
+  SearchIcon,
+  SparklesIcon,
+} from "lucide-react";
 import { useCallback } from "react";
+
+import { cn } from "@hypr/utils";
 
 import { useTabs } from "~/store/zustand/tabs";
 
+const SUGGESTIONS = [
+  { label: "Summarize this meeting", icon: FileTextIcon },
+  { label: "List action items", icon: ListChecksIcon },
+  { label: "Draft a follow-up email", icon: MailIcon },
+  { label: "Find key decisions", icon: SearchIcon },
+  { label: "Extract main topics", icon: LightbulbIcon },
+];
+
 export function ChatBodyEmpty({
   isModelConfigured = true,
+  onSendMessage,
 }: {
   isModelConfigured?: boolean;
+  onSendMessage?: (
+    content: string,
+    parts: Array<{ type: "text"; text: string }>,
+  ) => void;
 }) {
   const openNew = useTabs((state) => state.openNew);
 
@@ -14,13 +36,12 @@ export function ChatBodyEmpty({
     openNew({ type: "ai", state: { tab: "intelligence" } });
   }, [openNew]);
 
-  const handleOpenChatShortcuts = useCallback(() => {
-    openNew({ type: "ai", state: { tab: "shortcuts" } });
-  }, [openNew]);
-
-  const handleOpenPrompts = useCallback(() => {
-    openNew({ type: "ai", state: { tab: "prompts" } });
-  }, [openNew]);
+  const handleSuggestionClick = useCallback(
+    (label: string) => {
+      onSendMessage?.(label, [{ type: "text", text: label }]);
+    },
+    [onSendMessage],
+  );
 
   if (!isModelConfigured) {
     return (
@@ -59,20 +80,19 @@ export function ChatBodyEmpty({
           Hey! I can help you with a lot of cool stuff :)
         </p>
         <div className="flex flex-wrap gap-1.5">
-          <button
-            onClick={handleOpenChatShortcuts}
-            className="inline-flex items-center gap-1.5 rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-700 transition-colors hover:bg-neutral-100"
-          >
-            <MessageSquareIcon size={12} />
-            Shortcuts
-          </button>
-          <button
-            onClick={handleOpenPrompts}
-            className="inline-flex items-center gap-1.5 rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-700 transition-colors hover:bg-neutral-100"
-          >
-            <SparklesIcon size={12} />
-            Prompts
-          </button>
+          {SUGGESTIONS.map(({ label, icon: Icon }) => (
+            <button
+              key={label}
+              onClick={() => handleSuggestionClick(label)}
+              className={cn([
+                "inline-flex items-center gap-1.5 rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-700",
+                "transition-colors hover:bg-neutral-100",
+              ])}
+            >
+              <Icon size={12} />
+              {label}
+            </button>
+          ))}
         </div>
       </div>
     </div>

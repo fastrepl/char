@@ -757,6 +757,7 @@ dependencies = [
  "specta",
  "strum 0.27.2",
  "thiserror 2.0.18",
+ "tokio",
  "tracing",
  "uuid",
 ]
@@ -2344,7 +2345,7 @@ dependencies = [
  "bitflags 2.11.0",
  "cexpr",
  "clang-sys",
- "itertools 0.13.0",
+ "itertools 0.12.1",
  "log",
  "prettyplease",
  "proc-macro2",
@@ -2364,7 +2365,7 @@ dependencies = [
  "bitflags 2.11.0",
  "cexpr",
  "clang-sys",
- "itertools 0.13.0",
+ "itertools 0.12.1",
  "log",
  "prettyplease",
  "proc-macro2",
@@ -2824,7 +2825,7 @@ dependencies = [
 [[package]]
 name = "cactus-sys"
 version = "0.1.0"
-source = "git+https://github.com/cactus-compute/cactus?rev=c6966ad#c6966adbd7cb166838326da204b95e5bf538f0f5"
+source = "git+https://github.com/cactus-compute/cactus?rev=f3f63fd#f3f63fd29fff3efdfbc2a3223c34884dcd51c5d7"
 dependencies = [
  "bindgen 0.72.1",
  "cmake",
@@ -3259,16 +3260,21 @@ name = "cli"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "comfy-table",
  "crossterm",
  "dirs 6.0.0",
  "file",
  "image",
+ "indicatif 0.17.11",
  "language",
  "listener-core",
  "listener2-core",
  "local-model",
+ "local-stt-core",
+ "local-stt-server",
  "model-downloader",
  "open",
+ "owhisper-interface",
  "ractor",
  "ratatui 0.30.0",
  "ratatui-image",
@@ -3276,6 +3282,7 @@ dependencies = [
  "serde_json",
  "storage",
  "tempfile",
+ "textwrap",
  "tokio",
  "tokio-stream",
  "transcript",
@@ -9882,20 +9889,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bf36173d4167ed999940f804952e6b08197cae5ad5d572eb4db150ce8ad5d58f"
 
 [[package]]
-name = "lago"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "reqwest 0.13.2",
- "serde",
- "serde_json",
- "specta",
- "strum 0.27.2",
- "tokio",
- "url",
-]
-
-[[package]]
 name = "language"
 version = "0.1.0"
 dependencies = [
@@ -10412,6 +10405,29 @@ dependencies = [
  "serde",
  "specta",
  "whisper-local-model",
+]
+
+[[package]]
+name = "local-stt-core"
+version = "0.1.0"
+dependencies = [
+ "local-model",
+ "serde",
+ "specta",
+]
+
+[[package]]
+name = "local-stt-server"
+version = "0.1.0"
+dependencies = [
+ "axum 0.8.8",
+ "serde",
+ "specta",
+ "tauri-specta",
+ "tokio",
+ "tower-http 0.6.8",
+ "tracing",
+ "transcribe-cactus",
 ]
 
 [[package]]
@@ -13442,7 +13458,7 @@ version = "0.13.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be769465445e8c1474e9c5dac2018218498557af32d9ed057325ec9a41ae81bf"
 dependencies = [
- "heck 0.5.0",
+ "heck 0.4.1",
  "itertools 0.14.0",
  "log",
  "multimap",
@@ -16173,7 +16189,7 @@ version = "0.8.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c1c97747dbf44bb1ca44a561ece23508e99cb592e862f22222dcf42f51d1e451"
 dependencies = [
- "heck 0.5.0",
+ "heck 0.4.1",
  "proc-macro2",
  "quote",
  "syn 2.0.117",
@@ -17780,6 +17796,7 @@ dependencies = [
  "tauri-plugin",
  "tauri-plugin-apple-contact",
  "tauri-plugin-auth",
+ "tauri-plugin-permissions",
  "tauri-specta",
  "thiserror 2.0.18",
 ]
@@ -19116,6 +19133,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "terminal_size"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "60b8cb979cb11c32ce1603f8137b22262a9d131aaa5c37b5678025f22b8becd0"
+dependencies = [
+ "rustix 1.1.4",
+ "windows-sys 0.60.2",
+]
+
+[[package]]
 name = "terminfo"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -19229,6 +19256,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c13547615a44dc9c452a8a534638acdf07120d4b6847c8178705da06306a3057"
 dependencies = [
  "smawk",
+ "terminal_size",
+ "unicode-linebreak",
+ "unicode-width 0.2.0",
 ]
 
 [[package]]
@@ -20780,6 +20810,12 @@ name = "unicode-ident"
 version = "1.0.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
+
+[[package]]
+name = "unicode-linebreak"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3b09c83c3c29d37506a3e260c08c03743a6bb66a9cd432c6934ab501a190571f"
 
 [[package]]
 name = "unicode-math-class"

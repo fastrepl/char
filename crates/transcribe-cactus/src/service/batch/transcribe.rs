@@ -4,16 +4,17 @@ use std::path::Path;
 
 use owhisper_interface::ListenParams;
 use owhisper_interface::batch;
+use owhisper_interface::batch_sse::BatchSseMessage;
 use owhisper_interface::progress::{InferencePhase, InferenceProgress};
 use rodio::Source;
 use tokio::sync::mpsc;
 
 use super::chunk::{TARGET_SAMPLE_RATE, chunk_mono_audio};
-use super::response::build_batch_words;
+use super::response::{build_batch_words, build_segment_stream_response};
 use hypr_audio_utils::content_type_to_extension;
 
 #[tracing::instrument(
-    skip(audio_data, progress_tx),
+    skip(audio_data, event_tx),
     fields(audio_bytes = audio_data.len(), content_type, model_path = %model_path.display())
 )]
 pub(super) fn transcribe_batch(
@@ -21,7 +22,7 @@ pub(super) fn transcribe_batch(
     content_type: &str,
     params: &ListenParams,
     model_path: &Path,
-    progress_tx: Option<mpsc::UnboundedSender<InferenceProgress>>,
+    event_tx: Option<mpsc::UnboundedSender<BatchSseMessage>>,
 ) -> Result<batch::Response, crate::Error> {
     let extension = content_type_to_extension(content_type);
     let mut temp_file = tempfile::Builder::new()
@@ -42,7 +43,13 @@ pub(super) fn transcribe_batch(
 
     let total_duration = mono.len() as f64 / TARGET_SAMPLE_RATE as f64;
 
-    let chunks = tokio::runtime::Handle::current().block_on(chunk_mono_audio(&mono))?;
+    let chunks = match tokio::runtime::Handle::try_current() {
+        Ok(handle) => handle.block_on(chunk_mono_audio(&mono))?,
+        Err(_) => tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()?
+            .block_on(chunk_mono_audio(&mono))?,
+    };
 
     let model = match hypr_cactus::Model::new(model_path) {
         Ok(m) => m,
@@ -64,22 +71,31 @@ pub(super) fn transcribe_batch(
         ..Default::default()
     };
 
+    let metadata = crate::service::build_metadata(model_path);
+    let channel_index = [0, 1];
+
     let (all_words, transcript, avg_confidence) = if chunks.is_empty() {
         (vec![], String::new(), 0.0)
     } else {
-        transcribe_chunks(&chunks, &model, &options, total_duration, progress_tx)?
+        transcribe_chunks(
+            &chunks,
+            &model,
+            &options,
+            total_duration,
+            event_tx,
+            &metadata,
+            &channel_index,
+        )?
     };
 
-    let meta = crate::service::build_metadata(model_path);
-
-    let mut metadata = serde_json::to_value(&meta).unwrap_or_default();
-    if let Some(obj) = metadata.as_object_mut() {
+    let mut metadata_json = serde_json::to_value(&metadata).unwrap_or_default();
+    if let Some(obj) = metadata_json.as_object_mut() {
         obj.insert("duration".to_string(), serde_json::json!(total_duration));
         obj.insert("channels".to_string(), serde_json::json!(1));
     }
 
     Ok(batch::Response {
-        metadata,
+        metadata: metadata_json,
         results: batch::Results {
             channels: vec![batch::Channel {
                 alternatives: vec![batch::Alternatives {
@@ -97,7 +113,9 @@ fn transcribe_chunks(
     model: &hypr_cactus::Model,
     options: &hypr_cactus::TranscribeOptions,
     total_duration: f64,
-    progress_tx: Option<mpsc::UnboundedSender<InferenceProgress>>,
+    event_tx: Option<mpsc::UnboundedSender<BatchSseMessage>>,
+    metadata: &owhisper_interface::stream::Metadata,
+    channel_index: &[i32],
 ) -> Result<(Vec<batch::Word>, String, f64), crate::Error> {
     let mut all_words = Vec::new();
     let mut all_transcripts = Vec::new();
@@ -111,7 +129,7 @@ fn transcribe_chunks(
         let chunk_duration_sec =
             (chunk.end_timestamp_ms - chunk.start_timestamp_ms) as f64 / 1000.0;
 
-        let cactus_response = if let Some(ref tx) = progress_tx {
+        let cactus_response = if let Some(ref tx) = event_tx {
             let tx = tx.clone();
             let completed_text: String = all_transcripts.join(" ");
             let chunks_before_sec: f64 = if i > 0 {
@@ -147,10 +165,12 @@ fn transcribe_chunks(
                     0.0
                 };
 
-                let _ = tx.send(InferenceProgress {
-                    percentage,
-                    partial_text: Some(partial),
-                    phase: InferencePhase::Decoding,
+                let _ = tx.send(BatchSseMessage::Progress {
+                    progress: InferenceProgress {
+                        percentage,
+                        partial_text: Some(partial),
+                        phase: InferencePhase::Decoding,
+                    },
                 });
 
                 true
@@ -171,6 +191,21 @@ fn transcribe_chunks(
                 w.end += chunk_start_sec;
             }
             all_words.extend(words);
+
+            if let Some(ref tx) = event_tx {
+                let segment_resp = build_segment_stream_response(
+                    &chunk_text,
+                    chunk_start_sec,
+                    chunk_duration_sec,
+                    cactus_response.confidence as f64,
+                    metadata,
+                    channel_index,
+                );
+                let _ = tx.send(BatchSseMessage::Segment {
+                    response: segment_resp,
+                });
+            }
+
             all_transcripts.push(chunk_text);
         }
         cumulative_confidence += cactus_response.confidence as f64;

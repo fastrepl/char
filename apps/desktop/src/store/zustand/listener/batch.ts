@@ -28,6 +28,7 @@ export type BatchState = {
 
 export type BatchActions = {
   handleBatchStarted: (sessionId: string, phase?: BatchPhase) => void;
+  handleBatchCompleted: (sessionId: string) => void;
   handleBatchResponse: (sessionId: string, response: BatchResponse) => void;
   handleBatchResponseStreamed: (
     sessionId: string,
@@ -56,6 +57,21 @@ export const createBatchSlice = <T extends BatchState>(
           percentage: 0,
           isComplete: false,
           phase: phase ?? "transcribing",
+        },
+      },
+    }));
+  },
+
+  handleBatchCompleted: (sessionId) => {
+    set((state) => ({
+      ...state,
+      batch: {
+        ...state.batch,
+        [sessionId]: {
+          ...(state.batch[sessionId] ?? { percentage: 1 }),
+          percentage: 1,
+          isComplete: true,
+          phase: "transcribing",
         },
       },
     }));

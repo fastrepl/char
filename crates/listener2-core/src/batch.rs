@@ -26,9 +26,16 @@ const DEVICE_FINGERPRINT_HEADER: &str = "x-device-fingerprint";
 #[serde(rename_all = "lowercase")]
 #[strum(serialize_all = "lowercase")]
 pub enum BatchProvider {
+    Argmax,
     Deepgram,
     Soniox,
     AssemblyAI,
+    Fireworks,
+    OpenAI,
+    Gladia,
+    ElevenLabs,
+    DashScope,
+    Mistral,
     Am,
     Cactus,
 }
@@ -50,17 +57,61 @@ pub struct BatchParams {
 }
 
 pub async fn run_batch(runtime: Arc<dyn BatchRuntime>, params: BatchParams) -> crate::Result<()> {
-    let metadata = tokio::task::spawn_blocking({
+    runtime.emit(BatchEvent::BatchStarted {
+        session_id: params.session_id.clone(),
+    });
+
+    let session_id = params.session_id.clone();
+    let result = run_batch_inner(runtime.clone(), params).await;
+    if let Err(error) = &result {
+        let (code, message) = match error {
+            crate::Error::BatchFailed(failure) => (failure.code(), failure.to_string()),
+            _ => (crate::BatchErrorCode::Unknown, error.to_string()),
+        };
+
+        runtime.emit(BatchEvent::BatchFailed {
+            session_id,
+            code,
+            error: message,
+        });
+    } else {
+        runtime.emit(BatchEvent::BatchCompleted { session_id });
+    }
+
+    result
+}
+
+async fn run_batch_inner(runtime: Arc<dyn BatchRuntime>, params: BatchParams) -> crate::Result<()> {
+    let metadata_joined = tokio::task::spawn_blocking({
         let path = params.file_path.clone();
         move || hypr_audio_utils::audio_file_metadata(path)
     })
-    .await
-    .map_err(|err| {
-        crate::Error::BatchStartFailed(format!("failed to join audio metadata task: {err:?}"))
-    })?
-    .map_err(|err| {
-        crate::Error::BatchStartFailed(format!("failed to read audio metadata: {err}"))
-    })?;
+    .await;
+
+    let metadata_result = match metadata_joined {
+        Ok(result) => result,
+        Err(err) => {
+            let raw_error = format!("{err:?}");
+            tracing::error!(raw_error = %raw_error, "audio metadata task join failed");
+            let failure = crate::BatchFailure::AudioMetadataJoinFailed;
+            return Err(failure.into());
+        }
+    };
+
+    let metadata = match metadata_result {
+        Ok(metadata) => metadata,
+        Err(err) => {
+            let raw_error = err.to_string();
+            let message = format_user_friendly_error(&raw_error);
+            tracing::error!(
+                raw_error = %raw_error,
+                user_error = %message,
+                "failed to read audio metadata"
+            );
+            let failure = crate::BatchFailure::AudioMetadataReadFailed { message };
+            return Err(failure.into());
+        }
+    };
 
     let listen_params = owhisper_interface::ListenParams {
         model: params.model.clone(),
@@ -75,6 +126,9 @@ pub async fn run_batch(runtime: Arc<dyn BatchRuntime>, params: BatchParams) -> c
         BatchProvider::Am | BatchProvider::Cactus => {
             run_batch_am(runtime, params, listen_params).await
         }
+        BatchProvider::Argmax => {
+            run_batch_simple::<ArgmaxAdapter>(runtime, params, listen_params).await
+        }
         BatchProvider::Deepgram => {
             run_batch_simple::<DeepgramAdapter>(runtime, params, listen_params).await
         }
@@ -83,6 +137,24 @@ pub async fn run_batch(runtime: Arc<dyn BatchRuntime>, params: BatchParams) -> c
         }
         BatchProvider::AssemblyAI => {
             run_batch_simple::<AssemblyAIAdapter>(runtime, params, listen_params).await
+        }
+        BatchProvider::Fireworks => {
+            run_batch_simple::<FireworksAdapter>(runtime, params, listen_params).await
+        }
+        BatchProvider::OpenAI => {
+            run_batch_simple::<OpenAIAdapter>(runtime, params, listen_params).await
+        }
+        BatchProvider::Gladia => {
+            run_batch_simple::<GladiaAdapter>(runtime, params, listen_params).await
+        }
+        BatchProvider::ElevenLabs => {
+            run_batch_simple::<ElevenLabsAdapter>(runtime, params, listen_params).await
+        }
+        BatchProvider::DashScope => {
+            run_batch_simple::<DashScopeAdapter>(runtime, params, listen_params).await
+        }
+        BatchProvider::Mistral => {
+            run_batch_simple::<MistralAdapter>(runtime, params, listen_params).await
         }
     }
 }
@@ -96,10 +168,6 @@ async fn run_batch_simple<A: BatchSttAdapter>(
     let span = session_span(&params.session_id);
 
     async {
-        runtime.emit(BatchEvent::BatchStarted {
-            session_id: params.session_id.clone(),
-        });
-
         let client = owhisper_client::BatchClient::<A>::builder()
             .api_base(params.base_url.clone())
             .api_key(params.api_key.clone())
@@ -107,7 +175,22 @@ async fn run_batch_simple<A: BatchSttAdapter>(
             .build();
 
         tracing::debug!("transcribing file: {}", params.file_path);
-        let response = client.transcribe_file(&params.file_path).await?;
+        let response = match client.transcribe_file(&params.file_path).await {
+            Ok(response) => response,
+            Err(err) => {
+                let raw_error = format!("{err:?}");
+                let message = format_user_friendly_error(&raw_error);
+                let failure = crate::BatchFailure::ProviderRequestFailed {
+                    message: message.clone(),
+                };
+                tracing::error!(
+                    raw_error = %raw_error,
+                    user_error = %message,
+                    "batch transcription failed"
+                );
+                return Err(failure.into());
+            }
+        };
         tracing::info!("batch transcription completed");
 
         runtime.emit(BatchEvent::BatchResponse {
@@ -130,9 +213,11 @@ async fn run_batch_am(
     let span = session_span(&params.session_id);
 
     async {
-        let (start_tx, start_rx) =
-            tokio::sync::oneshot::channel::<std::result::Result<(), String>>();
+        let (start_tx, start_rx) = tokio::sync::oneshot::channel::<crate::Result<()>>();
         let start_notifier = Arc::new(Mutex::new(Some(start_tx)));
+
+        let (done_tx, done_rx) = tokio::sync::oneshot::channel::<crate::Result<()>>();
+        let done_notifier = Arc::new(Mutex::new(Some(done_tx)));
 
         let args = BatchArgs {
             runtime: runtime.clone(),
@@ -141,38 +226,62 @@ async fn run_batch_am(
             api_key: params.api_key.clone(),
             listen_params: listen_params.clone(),
             start_notifier: start_notifier.clone(),
+            done_notifier: done_notifier.clone(),
             session_id: params.session_id.clone(),
         };
 
-        match spawn_batch_actor(args).await {
-            Ok(_) => {
+        let batch_ref = match spawn_batch_actor(args).await {
+            Ok(batch_ref) => {
                 tracing::info!("batch actor spawned successfully");
-                runtime.emit(BatchEvent::BatchStarted {
-                    session_id: params.session_id.clone(),
-                });
+                batch_ref
             }
             Err(e) => {
-                tracing::error!("batch supervisor spawn failed: {:?}", e);
-                if let Ok(mut notifier) = start_notifier.lock()
-                    && let Some(tx) = notifier.take()
-                {
-                    let _ = tx.send(Err(format!("failed to spawn batch supervisor: {e:?}")));
+                let raw_error = format!("{e:?}");
+                let message = format_user_friendly_error(&raw_error);
+                let failure = crate::BatchFailure::ActorSpawnFailed {
+                    message: message.clone(),
+                };
+                tracing::error!(
+                    raw_error = %raw_error,
+                    user_error = %message,
+                    "batch supervisor spawn failed"
+                );
+                return Err(failure.into());
+            }
+        };
+
+        struct StopGuard(Option<ActorRef<BatchMsg>>);
+        impl Drop for StopGuard {
+            fn drop(&mut self) {
+                if let Some(actor) = self.0.take() {
+                    actor.stop(Some("listener2-core: run_batch dropped".to_string()));
                 }
-                return Err(e.into());
             }
         }
+        let mut stop_guard = StopGuard(Some(batch_ref));
 
         match start_rx.await {
-            Ok(Ok(())) => Ok(()),
-            Ok(Err(error)) => {
-                tracing::error!("batch actor reported start failure: {}", error);
-                Err(crate::Error::BatchStartFailed(error))
+            Ok(Ok(())) => {}
+            Ok(Err(err)) => {
+                tracing::error!("batch actor reported start failure: {err}");
+                return Err(err);
             }
             Err(_) => {
                 tracing::error!("batch actor start notifier dropped before reporting result");
-                Err(crate::Error::BatchStartFailed(
-                    "batch stream start cancelled unexpectedly".to_string(),
-                ))
+                let failure = crate::BatchFailure::StreamStartCancelled;
+                return Err(failure.into());
+            }
+        }
+
+        match done_rx.await {
+            Ok(Ok(())) => {
+                stop_guard.0 = None;
+                Ok(())
+            }
+            Ok(Err(err)) => Err(err),
+            Err(_) => {
+                let failure = crate::BatchFailure::StreamFinishedWithoutStatus;
+                Err(failure.into())
             }
         }
     }
@@ -184,6 +293,29 @@ async fn run_batch_am(
 
 fn session_span(session_id: &str) -> tracing::Span {
     tracing::info_span!("session", session_id = %session_id)
+}
+
+fn is_completion_response(response: &StreamResponse) -> bool {
+    matches!(
+        response,
+        StreamResponse::TranscriptResponse {
+            from_finalize: true,
+            ..
+        } | StreamResponse::TerminalResponse { .. }
+    )
+}
+
+fn provider_error_from_response(response: &StreamResponse) -> Option<(&str, &str, Option<i32>)> {
+    let StreamResponse::ErrorResponse {
+        provider,
+        error_message,
+        error_code,
+    } = response
+    else {
+        return None;
+    };
+
+    Some((provider.as_str(), error_message.as_str(), *error_code))
 }
 
 fn format_user_friendly_error(error: &str) -> String {
@@ -228,12 +360,13 @@ enum BatchMsg {
         response: Box<StreamResponse>,
         percentage: f64,
     },
-    StreamError(String),
+    StreamError(crate::BatchFailure),
     StreamEnded,
-    StreamStartFailed(String),
+    StreamStartFailed(crate::BatchFailure),
 }
 
-type BatchStartNotifier = Arc<Mutex<Option<tokio::sync::oneshot::Sender<Result<(), String>>>>>;
+type BatchStartNotifier = Arc<Mutex<Option<tokio::sync::oneshot::Sender<crate::Result<()>>>>>;
+type BatchDoneNotifier = Arc<Mutex<Option<tokio::sync::oneshot::Sender<crate::Result<()>>>>>;
 
 #[derive(Clone)]
 struct BatchArgs {
@@ -243,6 +376,7 @@ struct BatchArgs {
     api_key: String,
     listen_params: owhisper_interface::ListenParams,
     start_notifier: BatchStartNotifier,
+    done_notifier: BatchDoneNotifier,
     session_id: String,
 }
 
@@ -251,6 +385,8 @@ struct BatchState {
     session_id: String,
     rx_task: tokio::task::JoinHandle<()>,
     shutdown_tx: Option<tokio::sync::oneshot::Sender<()>>,
+    done_notifier: BatchDoneNotifier,
+    final_result: Option<crate::Result<()>>,
 }
 
 impl BatchState {
@@ -259,13 +395,6 @@ impl BatchState {
             session_id: self.session_id.clone(),
             response,
             percentage,
-        });
-    }
-
-    fn emit_failure(&self, error: String) {
-        self.runtime.emit(BatchEvent::BatchFailed {
-            session_id: self.session_id.clone(),
-            error,
         });
     }
 }
@@ -301,6 +430,8 @@ impl Actor for BatchActor {
             session_id: args.session_id,
             rx_task,
             shutdown_tx: Some(shutdown_tx),
+            done_notifier: args.done_notifier,
+            final_result: None,
         };
 
         Ok(state)
@@ -315,6 +446,11 @@ impl Actor for BatchActor {
             let _ = shutdown_tx.send(());
             let _ = (&mut state.rx_task).await;
         }
+
+        let final_result = state.final_result.take().unwrap_or_else(|| {
+            Err(crate::BatchFailure::StreamStoppedWithoutCompletionSignal.into())
+        });
+        notify_done_result(&state.done_notifier, final_result);
 
         Ok(())
     }
@@ -336,18 +472,19 @@ impl Actor for BatchActor {
 
             BatchMsg::StreamStartFailed(error) => {
                 tracing::error!("batch_stream_start_failed: {}", error);
-                state.emit_failure(error.clone());
+                state.final_result = Some(Err(error.clone().into()));
                 myself.stop(Some(format!("batch_stream_start_failed: {}", error)));
             }
 
             BatchMsg::StreamError(error) => {
                 tracing::error!("batch_stream_error: {}", error);
-                state.emit_failure(error.clone());
+                state.final_result = Some(Err(error.clone().into()));
                 myself.stop(None);
             }
 
             BatchMsg::StreamEnded => {
                 tracing::info!("batch_stream_ended");
+                state.final_result = Some(Ok(()));
                 myself.stop(None);
             }
         }
@@ -413,6 +550,13 @@ async fn spawn_argmax_streaming_batch_task(
 > {
     let (shutdown_tx, mut shutdown_rx) = tokio::sync::oneshot::channel::<()>();
 
+    let span = tracing::info_span!(
+        "argmax_streaming_batch",
+        session_id = %args.session_id,
+        base_url = %args.base_url,
+        file_path = %args.file_path,
+    );
+
     let rx_task = tokio::spawn(async move {
         tracing::info!("argmax streaming batch task: starting");
         let start_notifier = args.start_notifier.clone();
@@ -433,23 +577,25 @@ async fn spawn_argmax_streaming_batch_task(
             }
             Err(e) => {
                 let raw_error = format!("{:?}", e);
-                let error = format_user_friendly_error(&raw_error);
+                let message = format_user_friendly_error(&raw_error);
+                let failure = crate::BatchFailure::StreamStartFailed {
+                    message: message.clone(),
+                };
                 tracing::error!("argmax streaming batch task: failed to start: {:?}", e);
-                notify_start_result(&start_notifier, Err(error.clone()));
-                let _ = myself.send_message(BatchMsg::StreamStartFailed(error));
+                notify_start_result(&start_notifier, Err(failure.clone().into()));
+                let _ = myself.send_message(BatchMsg::StreamStartFailed(failure));
                 return;
             }
         };
 
         let response_timeout = Duration::from_secs(BATCH_STREAM_TIMEOUT_SECS);
         let mut response_count = 0;
-        let mut ended_cleanly = false;
+        let mut completion_seen = false;
 
         loop {
             tokio::select! {
                 _ = &mut shutdown_rx => {
                     tracing::info!("argmax streaming batch task: shutdown");
-                    ended_cleanly = true;
                     break;
                 }
                 result = tokio::time::timeout(response_timeout, StreamExt::next(&mut stream)) => {
@@ -461,12 +607,29 @@ async fn spawn_argmax_streaming_batch_task(
                                 &event.response,
                                 StreamResponse::TranscriptResponse { from_finalize, .. } if *from_finalize
                             );
+                            let is_completion = is_completion_response(&event.response);
 
                             tracing::info!(
                                 "argmax streaming batch: response #{}{}",
                                 response_count,
                                 if is_from_finalize { " (from_finalize)" } else { "" }
                             );
+
+                            if let Some((provider, error_message, error_code)) =
+                                provider_error_from_response(&event.response)
+                            {
+                                tracing::error!(
+                                    provider = %provider,
+                                    error_code = ?error_code,
+                                    error_message = %error_message,
+                                    "argmax streaming batch received provider error response"
+                                );
+                                let message = format_user_friendly_error(error_message);
+                                let _ = myself.send_message(BatchMsg::StreamError(
+                                    crate::BatchFailure::StreamError { message },
+                                ));
+                                break;
+                            }
 
                             if let Err(e) = myself.send_message(BatchMsg::StreamResponse {
                                 response: Box::new(event.response),
@@ -475,26 +638,39 @@ async fn spawn_argmax_streaming_batch_task(
                                 tracing::error!("failed to send stream response message: {:?}", e);
                             }
 
-                            if is_from_finalize {
-                                ended_cleanly = true;
+                            if is_completion {
+                                completion_seen = true;
                                 break;
                             }
                         }
                         Ok(Some(Err(e))) => {
                             let raw_error = format!("{:?}", e);
-                            let error = format_user_friendly_error(&raw_error);
+                            let message = format_user_friendly_error(&raw_error);
+                            let failure = crate::BatchFailure::StreamError { message };
                             tracing::error!("argmax streaming batch error: {:?}", e);
-                            let _ = myself.send_message(BatchMsg::StreamError(error));
+                            let _ = myself.send_message(BatchMsg::StreamError(failure));
                             break;
                         }
                         Ok(None) => {
-                            tracing::info!("argmax streaming batch completed (total: {})", response_count);
-                            ended_cleanly = true;
+                            if completion_seen {
+                                tracing::info!(
+                                    "argmax streaming batch completed (total: {})",
+                                    response_count
+                                );
+                                break;
+                            }
+                            tracing::error!(
+                                responses = response_count,
+                                "argmax streaming batch ended without completion signal"
+                            );
+                            let _ = myself.send_message(BatchMsg::StreamError(
+                                crate::BatchFailure::StreamStoppedWithoutCompletionSignal,
+                            ));
                             break;
                         }
                         Err(elapsed) => {
                             tracing::warn!(timeout = ?elapsed, responses = response_count, "argmax streaming batch timeout");
-                            let _ = myself.send_message(BatchMsg::StreamError(format_user_friendly_error("timeout waiting for response")));
+                            let _ = myself.send_message(BatchMsg::StreamError(crate::BatchFailure::StreamTimeout));
                             break;
                         }
                     }
@@ -502,11 +678,11 @@ async fn spawn_argmax_streaming_batch_task(
             }
         }
 
-        if ended_cleanly && let Err(e) = myself.send_message(BatchMsg::StreamEnded) {
+        if completion_seen && let Err(e) = myself.send_message(BatchMsg::StreamEnded) {
             tracing::error!("failed to send stream ended message: {:?}", e);
         }
         tracing::info!("argmax streaming batch task exited");
-    });
+    }.instrument(span));
 
     Ok((rx_task, shutdown_tx))
 }
@@ -525,6 +701,7 @@ async fn spawn_cactus_batch_task(
 
     let span = tracing::info_span!(
         "cactus_batch",
+        session_id = %args.session_id,
         base_url = %args.base_url,
         file_path = %args.file_path,
     );
@@ -547,34 +724,46 @@ async fn spawn_cactus_batch_task(
                 }
                 Err(e) => {
                     let raw_error = format!("{:?}", e);
-                    let user_error = format_user_friendly_error(&raw_error);
-                    tracing::error!(raw_error = %raw_error, user_error = %user_error, "failed to start stream");
-                    notify_start_result(&start_notifier, Err(user_error.clone()));
-                    let _ = myself.send_message(BatchMsg::StreamStartFailed(user_error));
+                    let message = format_user_friendly_error(&raw_error);
+                    let failure = crate::BatchFailure::StreamStartFailed { message };
+                    tracing::error!(raw_error = %raw_error, user_error = %failure, "failed to start stream");
+                    notify_start_result(&start_notifier, Err(failure.clone().into()));
+                    let _ = myself.send_message(BatchMsg::StreamStartFailed(failure));
                     return;
                 }
             };
 
             let response_timeout = Duration::from_secs(BATCH_STREAM_TIMEOUT_SECS);
             let mut response_count = 0;
-            let mut ended_cleanly = false;
+            let mut completion_seen = false;
 
             loop {
                 tokio::select! {
                     _ = &mut shutdown_rx => {
                         tracing::info!("shutdown requested");
-                        ended_cleanly = true;
                         break;
                     }
                     result = tokio::time::timeout(response_timeout, StreamExt::next(&mut stream)) => {
                         match result {
                             Ok(Some(Ok(event))) => {
                                 response_count += 1;
+                                let is_completion = is_completion_response(&event.response);
 
-                                let is_from_finalize = matches!(
-                                    &event.response,
-                                    StreamResponse::TranscriptResponse { from_finalize, .. } if *from_finalize
-                                );
+                                if let Some((provider, error_message, error_code)) =
+                                    provider_error_from_response(&event.response)
+                                {
+                                    tracing::error!(
+                                        provider = %provider,
+                                        error_code = ?error_code,
+                                        error_message = %error_message,
+                                        "cactus batch received provider error response"
+                                    );
+                                    let message = format_user_friendly_error(error_message);
+                                    let _ = myself.send_message(BatchMsg::StreamError(
+                                        crate::BatchFailure::StreamError { message },
+                                    ));
+                                    break;
+                                }
 
                                 if let Err(e) = myself.send_message(BatchMsg::StreamResponse {
                                     response: Box::new(event.response),
@@ -583,26 +772,36 @@ async fn spawn_cactus_batch_task(
                                     tracing::error!("failed to send stream response: {:?}", e);
                                 }
 
-                                if is_from_finalize {
-                                    ended_cleanly = true;
+                                if is_completion {
+                                    completion_seen = true;
                                     break;
                                 }
                             }
                             Ok(Some(Err(e))) => {
                                 let raw_error = format!("{:?}", e);
-                                let user_error = format_user_friendly_error(&raw_error);
-                                tracing::error!(raw_error = %raw_error, user_error = %user_error, responses = response_count, "stream error");
-                                let _ = myself.send_message(BatchMsg::StreamError(user_error));
+                                let message = format_user_friendly_error(&raw_error);
+                                let failure = crate::BatchFailure::StreamError { message };
+                                tracing::error!(raw_error = %raw_error, user_error = %failure, responses = response_count, "stream error");
+                                let _ = myself.send_message(BatchMsg::StreamError(failure));
                                 break;
                             }
                             Ok(None) => {
-                                tracing::info!(responses = response_count, "stream completed");
-                                ended_cleanly = true;
+                                if completion_seen {
+                                    tracing::info!(responses = response_count, "stream completed");
+                                    break;
+                                }
+                                tracing::error!(
+                                    responses = response_count,
+                                    "stream ended without completion signal"
+                                );
+                                let _ = myself.send_message(BatchMsg::StreamError(
+                                    crate::BatchFailure::StreamStoppedWithoutCompletionSignal,
+                                ));
                                 break;
                             }
                             Err(elapsed) => {
                                 tracing::warn!(timeout = ?elapsed, responses = response_count, "stream response timeout");
-                                let _ = myself.send_message(BatchMsg::StreamError(format_user_friendly_error("timeout waiting for response")));
+                                let _ = myself.send_message(BatchMsg::StreamError(crate::BatchFailure::StreamTimeout));
                                 break;
                             }
                         }
@@ -610,7 +809,7 @@ async fn spawn_cactus_batch_task(
                 }
             }
 
-            if ended_cleanly && let Err(e) = myself.send_message(BatchMsg::StreamEnded) {
+            if completion_seen && let Err(e) = myself.send_message(BatchMsg::StreamEnded) {
                 tracing::error!("failed to send stream ended: {:?}", e);
             }
         }
@@ -632,99 +831,119 @@ async fn spawn_batch_task_with_adapter<A: RealtimeSttAdapter>(
 > {
     let (shutdown_tx, shutdown_rx) = tokio::sync::oneshot::channel::<()>();
 
-    let rx_task = tokio::spawn(async move {
-        tracing::info!("batch task: loading audio chunks from file");
-        let stream_config = BatchStreamConfig::new(DEFAULT_CHUNK_MS, DEFAULT_DELAY_MS);
-        let start_notifier = args.start_notifier.clone();
+    let span = tracing::info_span!(
+        "realtime_batch",
+        session_id = %args.session_id,
+        base_url = %args.base_url,
+        file_path = %args.file_path,
+    );
 
-        let chunk_result = tokio::task::spawn_blocking({
-            let path = PathBuf::from(&args.file_path);
-            let chunk_ms = stream_config.chunk_ms;
-            move || hypr_audio_utils::chunk_audio_file(path, chunk_ms)
-        })
-        .await;
+    let rx_task = tokio::spawn(
+        async move {
+            tracing::info!("batch task: loading audio chunks from file");
+            let stream_config = BatchStreamConfig::new(DEFAULT_CHUNK_MS, DEFAULT_DELAY_MS);
+            let start_notifier = args.start_notifier.clone();
 
-        let chunked_audio = match chunk_result {
-            Ok(Ok(data)) => {
-                tracing::info!("batch task: loaded {} audio chunks", data.chunks.len());
-                data
-            }
-            Ok(Err(e)) => {
-                let raw_error = format!("{:?}", e);
-                let error = format_user_friendly_error(&raw_error);
-                tracing::error!("batch task: failed to load audio chunks: {:?}", e);
-                notify_start_result(&start_notifier, Err(error.clone()));
-                let _ = myself.send_message(BatchMsg::StreamStartFailed(error));
-                return;
-            }
-            Err(join_err) => {
-                let raw_error = format!("{:?}", join_err);
-                let error = format_user_friendly_error(&raw_error);
-                tracing::error!(
-                    "batch task: audio chunk loading task panicked: {:?}",
-                    join_err
-                );
-                notify_start_result(&start_notifier, Err(error.clone()));
-                let _ = myself.send_message(BatchMsg::StreamStartFailed(error));
-                return;
-            }
-        };
-
-        let frame_count = chunked_audio.frame_count;
-        let metadata = chunked_audio.metadata;
-        let audio_duration_secs = if frame_count == 0 || metadata.sample_rate == 0 {
-            0.0
-        } else {
-            frame_count as f64 / metadata.sample_rate as f64
-        };
-
-        let channel_count = metadata.channels.clamp(1, 2);
-        let listen_params = owhisper_interface::ListenParams {
-            channels: metadata.channels,
-            sample_rate: metadata.sample_rate,
-            ..args.listen_params.clone()
-        };
-        let client = owhisper_client::ListenClient::builder()
-            .adapter::<A>()
-            .api_base(args.base_url)
-            .api_key(args.api_key)
-            .params(listen_params)
-            .extra_header(DEVICE_FINGERPRINT_HEADER, hypr_host::fingerprint())
-            .build_with_channels(channel_count)
+            let chunk_result = tokio::task::spawn_blocking({
+                let path = PathBuf::from(&args.file_path);
+                let chunk_ms = stream_config.chunk_ms;
+                move || hypr_audio_utils::chunk_audio_file(path, chunk_ms)
+            })
             .await;
 
-        let chunk_count = chunked_audio.chunks.len();
-        let chunk_interval = stream_config.chunk_interval();
+            let chunked_audio = match chunk_result {
+                Ok(Ok(data)) => {
+                    tracing::info!("batch task: loaded {} audio chunks", data.chunks.len());
+                    data
+                }
+                Ok(Err(e)) => {
+                    let raw_error = format!("{:?}", e);
+                    let message = format_user_friendly_error(&raw_error);
+                    let failure = crate::BatchFailure::StreamStartFailed {
+                        message: message.clone(),
+                    };
+                    tracing::error!("batch task: failed to load audio chunks: {:?}", e);
+                    notify_start_result(&start_notifier, Err(failure.clone().into()));
+                    let _ = myself.send_message(BatchMsg::StreamStartFailed(failure));
+                    return;
+                }
+                Err(join_err) => {
+                    let raw_error = format!("{:?}", join_err);
+                    let message = format_user_friendly_error(&raw_error);
+                    let failure = crate::BatchFailure::StreamStartFailed {
+                        message: message.clone(),
+                    };
+                    tracing::error!(
+                        "batch task: audio chunk loading task panicked: {:?}",
+                        join_err
+                    );
+                    notify_start_result(&start_notifier, Err(failure.clone().into()));
+                    let _ = myself.send_message(BatchMsg::StreamStartFailed(failure));
+                    return;
+                }
+            };
 
-        let audio_stream =
-            tokio_stream::iter(chunked_audio.chunks.into_iter().map(MixedMessage::Audio));
-        let finalize_stream =
-            tokio_stream::iter(vec![MixedMessage::Control(ControlMessage::Finalize)]);
-        let outbound = TokioStreamExt::throttle(
-            TokioStreamExt::chain(audio_stream, finalize_stream),
-            chunk_interval,
-        );
+            let frame_count = chunked_audio.frame_count;
+            let metadata = chunked_audio.metadata;
+            let audio_duration_secs = if frame_count == 0 || metadata.sample_rate == 0 {
+                0.0
+            } else {
+                frame_count as f64 / metadata.sample_rate as f64
+            };
 
-        tracing::info!(
-            "batch task: starting audio stream with {} chunks + finalize message",
-            chunk_count
-        );
-        let (listen_stream, _handle) = match client.from_realtime_audio(Box::pin(outbound)).await {
-            Ok(res) => res,
-            Err(e) => {
-                let raw_error = format!("{:?}", e);
-                let error = format_user_friendly_error(&raw_error);
-                tracing::error!("batch task: failed to start audio stream: {:?}", e);
-                notify_start_result(&start_notifier, Err(error.clone()));
-                let _ = myself.send_message(BatchMsg::StreamStartFailed(error));
-                return;
-            }
-        };
-        notify_start_result(&start_notifier, Ok(()));
-        futures_util::pin_mut!(listen_stream);
+            let channel_count = metadata.channels.clamp(1, 2);
+            let listen_params = owhisper_interface::ListenParams {
+                channels: metadata.channels,
+                sample_rate: metadata.sample_rate,
+                ..args.listen_params.clone()
+            };
+            let client = owhisper_client::ListenClient::builder()
+                .adapter::<A>()
+                .api_base(args.base_url)
+                .api_key(args.api_key)
+                .params(listen_params)
+                .extra_header(DEVICE_FINGERPRINT_HEADER, hypr_host::fingerprint())
+                .build_with_channels(channel_count)
+                .await;
 
-        process_batch_stream(listen_stream, myself, shutdown_rx, audio_duration_secs).await;
-    });
+            let chunk_count = chunked_audio.chunks.len();
+            let chunk_interval = stream_config.chunk_interval();
+
+            let audio_stream =
+                tokio_stream::iter(chunked_audio.chunks.into_iter().map(MixedMessage::Audio));
+            let finalize_stream =
+                tokio_stream::iter(vec![MixedMessage::Control(ControlMessage::Finalize)]);
+            let outbound = TokioStreamExt::throttle(
+                TokioStreamExt::chain(audio_stream, finalize_stream),
+                chunk_interval,
+            );
+
+            tracing::info!(
+                "batch task: starting audio stream with {} chunks + finalize message",
+                chunk_count
+            );
+            let (listen_stream, _handle) =
+                match client.from_realtime_audio(Box::pin(outbound)).await {
+                    Ok(res) => res,
+                    Err(e) => {
+                        let raw_error = format!("{:?}", e);
+                        let message = format_user_friendly_error(&raw_error);
+                        let failure = crate::BatchFailure::StreamStartFailed {
+                            message: message.clone(),
+                        };
+                        tracing::error!("batch task: failed to start audio stream: {:?}", e);
+                        notify_start_result(&start_notifier, Err(failure.clone().into()));
+                        let _ = myself.send_message(BatchMsg::StreamStartFailed(failure));
+                        return;
+                    }
+                };
+            notify_start_result(&start_notifier, Ok(()));
+            futures_util::pin_mut!(listen_stream);
+
+            process_batch_stream(listen_stream, myself, shutdown_rx, audio_duration_secs).await;
+        }
+        .instrument(span),
+    );
 
     Ok((rx_task, shutdown_tx))
 }
@@ -750,7 +969,15 @@ impl BatchStreamConfig {
     }
 }
 
-fn notify_start_result(notifier: &BatchStartNotifier, result: Result<(), String>) {
+fn notify_start_result(notifier: &BatchStartNotifier, result: crate::Result<()>) {
+    if let Ok(mut guard) = notifier.lock()
+        && let Some(sender) = guard.take()
+    {
+        let _ = sender.send(result);
+    }
+}
+
+fn notify_done_result(notifier: &BatchDoneNotifier, result: crate::Result<()>) {
     if let Ok(mut guard) = notifier.lock()
         && let Some(sender) = guard.take()
     {
@@ -769,7 +996,7 @@ async fn process_batch_stream<S, E>(
 {
     let mut response_count = 0;
     let response_timeout = Duration::from_secs(BATCH_STREAM_TIMEOUT_SECS);
-    let mut ended_cleanly = false;
+    let mut completion_seen = false;
 
     loop {
         tracing::debug!(
@@ -780,8 +1007,7 @@ async fn process_batch_stream<S, E>(
         tokio::select! {
             _ = &mut shutdown_rx => {
                 tracing::info!("batch_stream_shutdown");
-                ended_cleanly = true;
-                break;
+                return;
             }
             result = tokio::time::timeout(
                 response_timeout,
@@ -796,12 +1022,32 @@ async fn process_batch_stream<S, E>(
                             &response,
                             StreamResponse::TranscriptResponse { from_finalize, .. } if *from_finalize
                         );
+                        let is_completion = is_completion_response(&response);
 
                         tracing::info!(
                             "batch stream: sending response #{}{}",
                             response_count,
                             if is_from_finalize { " (from_finalize)" } else { "" }
                         );
+
+                        if let Some((provider, error_message, error_code)) =
+                            provider_error_from_response(&response)
+                        {
+                            tracing::error!(
+                                provider = %provider,
+                                error_code = ?error_code,
+                                error_message = %error_message,
+                                responses = response_count,
+                                "batch stream received provider error response"
+                            );
+                            let message = format_user_friendly_error(error_message);
+                            if let Err(send_err) = myself.send_message(BatchMsg::StreamError(
+                                crate::BatchFailure::StreamError { message },
+                            )) {
+                                tracing::error!("failed to send stream error message: {:?}", send_err);
+                            }
+                            break;
+                        }
 
                         let percentage = compute_percentage(&response, audio_duration_secs);
                         if let Err(e) = myself.send_message(BatchMsg::StreamResponse {
@@ -811,28 +1057,47 @@ async fn process_batch_stream<S, E>(
                             tracing::error!("failed to send stream response message: {:?}", e);
                         }
 
-                        if is_from_finalize {
-                            ended_cleanly = true;
+                        if is_completion {
+                            completion_seen = true;
                             break;
                         }
                     }
                     Ok(Some(Err(e))) => {
                         let raw_error = format!("{:?}", e);
-                        let error = format_user_friendly_error(&raw_error);
+                        let message = format_user_friendly_error(&raw_error);
+                        let failure = crate::BatchFailure::StreamError { message };
                         tracing::error!("batch stream error: {:?}", e);
-                        if let Err(send_err) = myself.send_message(BatchMsg::StreamError(error)) {
+                        if let Err(send_err) = myself.send_message(BatchMsg::StreamError(failure))
+                        {
                             tracing::error!("failed to send stream error message: {:?}", send_err);
                         }
                         break;
                     }
                     Ok(None) => {
-                        tracing::info!("batch stream completed (total responses: {})", response_count);
-                        ended_cleanly = true;
+                        if completion_seen {
+                            tracing::info!(
+                                "batch stream completed (total responses: {})",
+                                response_count
+                            );
+                            break;
+                        }
+
+                        tracing::error!(
+                            responses = response_count,
+                            "batch stream ended without completion signal"
+                        );
+                        if let Err(send_err) = myself.send_message(BatchMsg::StreamError(
+                            crate::BatchFailure::StreamStoppedWithoutCompletionSignal,
+                        )) {
+                            tracing::error!("failed to send stream error message: {:?}", send_err);
+                        }
                         break;
                     }
                     Err(elapsed) => {
                         tracing::warn!(timeout = ?elapsed, responses = response_count, "batch stream response timeout");
-                        if let Err(send_err) = myself.send_message(BatchMsg::StreamError(format_user_friendly_error("timeout waiting for batch stream response"))) {
+                        if let Err(send_err) = myself.send_message(BatchMsg::StreamError(
+                            crate::BatchFailure::StreamTimeout,
+                        )) {
                             tracing::error!("failed to send timeout error message: {:?}", send_err);
                         }
                         break;
@@ -842,7 +1107,7 @@ async fn process_batch_stream<S, E>(
         }
     }
 
-    if ended_cleanly && let Err(e) = myself.send_message(BatchMsg::StreamEnded) {
+    if completion_seen && let Err(e) = myself.send_message(BatchMsg::StreamEnded) {
         tracing::error!("failed to send stream ended message: {:?}", e);
     }
     tracing::info!("batch stream processing loop exited");
@@ -878,4 +1143,66 @@ fn transcript_end_from_response(response: &StreamResponse) -> Option<f64> {
     }
 
     if end.is_finite() { Some(end) } else { None }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use owhisper_interface::stream::{Alternatives, Channel, Metadata, ModelInfo, StreamResponse};
+
+    #[test]
+    fn completion_response_from_finalize() {
+        let response = StreamResponse::TranscriptResponse {
+            start: 0.0,
+            duration: 0.1,
+            is_final: true,
+            speech_final: true,
+            from_finalize: true,
+            channel: Channel {
+                alternatives: vec![Alternatives {
+                    transcript: "hi".to_string(),
+                    words: Vec::new(),
+                    confidence: 1.0,
+                    languages: Vec::new(),
+                }],
+            },
+            metadata: Metadata {
+                request_id: "r".to_string(),
+                model_info: ModelInfo {
+                    name: "".to_string(),
+                    version: "".to_string(),
+                    arch: "".to_string(),
+                },
+                model_uuid: "m".to_string(),
+                extra: None,
+            },
+            channel_index: vec![0, 1],
+        };
+
+        assert!(is_completion_response(&response));
+    }
+
+    #[test]
+    fn completion_response_terminal() {
+        let response = StreamResponse::TerminalResponse {
+            request_id: "r".to_string(),
+            created: "now".to_string(),
+            duration: 1.0,
+            channels: 1,
+        };
+
+        assert!(is_completion_response(&response));
+    }
+
+    #[test]
+    fn provider_error_extracts_fields() {
+        let response = StreamResponse::ErrorResponse {
+            error_code: Some(42),
+            error_message: "nope".to_string(),
+            provider: "x".to_string(),
+        };
+
+        let extracted = provider_error_from_response(&response);
+        assert_eq!(extracted, Some(("x", "nope", Some(42))));
+    }
 }

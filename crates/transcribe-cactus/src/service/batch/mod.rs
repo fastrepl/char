@@ -15,7 +15,7 @@ use axum::{
 };
 use bytes::Bytes;
 use owhisper_interface::ListenParams;
-use owhisper_interface::progress::InferenceProgress;
+use owhisper_interface::batch_sse::{BatchSseMessage, EVENT_NAME};
 use tokio::sync::mpsc;
 
 use transcribe::transcribe_batch;
@@ -65,87 +65,47 @@ pub async fn handle_batch_sse(
     let content_type = content_type.to_string();
     let params = params.clone();
 
-    let (progress_tx, progress_rx) = mpsc::unbounded_channel::<InferenceProgress>();
-    let (result_tx, result_rx) = tokio::sync::oneshot::channel();
+    let (event_tx, event_rx) = mpsc::unbounded_channel::<BatchSseMessage>();
 
     tokio::task::spawn_blocking(move || {
-        let result = transcribe_batch(
-            &body,
-            &content_type,
-            &params,
-            &model_path,
-            Some(progress_tx),
-        );
-        let _ = result_tx.send(result);
+        let message = match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            transcribe_batch(
+                &body,
+                &content_type,
+                &params,
+                &model_path,
+                Some(event_tx.clone()),
+            )
+        })) {
+            Ok(Ok(response)) => BatchSseMessage::Result { response },
+            Ok(Err(e)) => {
+                tracing::error!(error = %e, "batch_sse transcription failed");
+                BatchSseMessage::Error {
+                    error: "transcription_failed".to_string(),
+                    detail: e.to_string(),
+                }
+            }
+            Err(_) => {
+                tracing::error!("batch_sse transcription task panicked");
+                BatchSseMessage::Error {
+                    error: "transcription_failed".to_string(),
+                    detail: "task panicked".to_string(),
+                }
+            }
+        };
+
+        let _ = event_tx.send(message);
     });
 
-    enum Phase {
-        Progress(
-            mpsc::UnboundedReceiver<InferenceProgress>,
-            tokio::sync::oneshot::Receiver<
-                Result<owhisper_interface::batch::Response, crate::Error>,
-            >,
-        ),
-        Result(
-            tokio::sync::oneshot::Receiver<
-                Result<owhisper_interface::batch::Response, crate::Error>,
-            >,
-        ),
-        Done,
-    }
+    let events_stream = futures_util::stream::unfold(event_rx, |mut rx| async move {
+        rx.recv().await.map(|message| {
+            let event = Event::default()
+                .event(EVENT_NAME)
+                .json_data(&message)
+                .unwrap();
+            (Ok::<_, Infallible>(event), rx)
+        })
+    });
 
-    let event_stream = futures_util::stream::unfold(
-        Phase::Progress(progress_rx, result_rx),
-        |phase| async move {
-            match phase {
-                Phase::Progress(mut rx, result_rx) => match rx.recv().await {
-                    Some(progress) => {
-                        let data = serde_json::json!({
-                            "percentage": progress.percentage,
-                            "partial_text": progress.partial_text,
-                            "phase": progress.phase,
-                        });
-                        let event = Event::default().event("progress").json_data(data).unwrap();
-                        Some((Ok::<_, Infallible>(event), Phase::Progress(rx, result_rx)))
-                    }
-                    None => Some((
-                        Ok(Event::default().comment("progress_done")),
-                        Phase::Result(result_rx),
-                    )),
-                },
-                Phase::Result(result_rx) => {
-                    let event = match result_rx.await {
-                        Ok(Ok(response)) => Event::default()
-                            .event("result")
-                            .json_data(&response)
-                            .unwrap(),
-                        Ok(Err(e)) => {
-                            tracing::error!(error = %e, "batch_sse transcription failed");
-                            Event::default()
-                                .event("error")
-                                .json_data(serde_json::json!({
-                                    "error": "transcription_failed",
-                                    "detail": e.to_string()
-                                }))
-                                .unwrap()
-                        }
-                        Err(_) => {
-                            tracing::error!("batch_sse transcription task panicked");
-                            Event::default()
-                                .event("error")
-                                .json_data(serde_json::json!({
-                                    "error": "transcription_failed",
-                                    "detail": "task panicked"
-                                }))
-                                .unwrap()
-                        }
-                    };
-                    Some((Ok(event), Phase::Done))
-                }
-                Phase::Done => None,
-            }
-        },
-    );
-
-    Sse::new(event_stream).into_response()
+    Sse::new(events_stream).into_response()
 }

@@ -125,7 +125,7 @@ impl<S: hypr_audio_interface::AsyncSource> hypr_audio_interface::AsyncSource
     }
 
     fn as_stream(&mut self) -> impl Stream<Item = f32> + '_ {
-        Box::pin(self)
+        self
     }
 }
 

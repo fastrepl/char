@@ -78,6 +78,14 @@ export function ChatView() {
               error={sessionProps.error}
               onReload={sessionProps.regenerate}
               isModelConfigured={!!model}
+              onSendMessage={(content, parts) => {
+                handleSendMessage(
+                  content,
+                  parts,
+                  sessionProps.sendMessage,
+                  sessionProps.pendingRefs,
+                );
+              }}
             />
           </ChatContent>
         )}
