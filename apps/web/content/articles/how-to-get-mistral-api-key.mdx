@@ -82,7 +82,7 @@ curl https://api.mistral.ai/v1/chat/completions \
 
 A JSON response with a `choices` array means the key is working. A 401 means the environment variable isn't set correctly.
 
-> For Python projects, use `python-dotenv` to load a `.env` file at runtime:
+For Python projects, use `python-dotenv` to load a `.env` file at runtime:
 
 ```python
 from dotenv import load_dotenv
@@ -92,16 +92,18 @@ load_dotenv()
 api_key = os.getenv("MISTRAL_API_KEY")
 ```
 
-## Connecting Mistral to Char
+## Use your Mistral API key in Char for AI meeting notes that stay on your device
 
 ![Char AI settings showing Mistral provider](/api/images/blog/how-to-get-mistral-api-key/char-mistral-settings.png)
 
-Using your own API key gives you control over your AI provider and data handling. Char is an open-source AI notepad for meetings. You control which AI provider handles your data.
+Getting your own API key is a deliberate choice. It means you want control over what AI you're using and what happens to the data you send it. Char works on the same principles.
+
+It's an open-source AI notepad for meetings that gives you complete control over your AI stack and your data.
 
 The workflow is simple: record, transcribe locally, summarize with your own Mistral key. You choose which model runs. You can swap to Anthropic, OpenAI, or a local Ollama model any time without losing your files or your history.
 
-Audio, transcripts, and summaries are saved as markdown files on your device, not on Char's servers. No data leaves your machine.
+Everything else stays local. The audio file, the transcript, the summary are all saved as plain markdown files on your device, not on Char's servers. Char doesn't have servers storing your conversations. There's nothing to breach, no vendor to trust with your data.
 
-Core features, local transcription, and BYOK are free. A $8/month plan is available for cloud services and managed keys.
+Plus, all core features, local transcription, and BYOK stay completely free. You're already paying for the API key, you shouldn't have to pay twice. But if you want cloud services and don't want to manage keys at all, there is a $8/month plan you can check out.
 
-To connect Mistral: open Char settings → API Keys → paste your key. [Download Char for macOS](/download).
+To connect Mistral, open Char's settings, go to API Keys, paste your key, and that's it. Try it out for free now - [Download Char for macOS](/download).
