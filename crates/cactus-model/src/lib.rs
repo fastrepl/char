@@ -183,12 +183,43 @@ impl CactusSttModel {
 
     pub fn description(&self) -> &str {
         match self {
-            CactusSttModel::WhisperSmallInt8Apple
-            | CactusSttModel::WhisperMediumInt4Apple
-            | CactusSttModel::WhisperMediumInt8Apple
-            | CactusSttModel::ParakeetCtc0_6bInt4Apple
-            | CactusSttModel::ParakeetCtc0_6bInt8Apple => "Apple Neural Engine",
-            _ => "",
+            CactusSttModel::WhisperSmallInt4 => {
+                "Smaller multilingual Whisper model. Lowest storage use."
+            }
+            CactusSttModel::WhisperSmallInt8 => {
+                "Smaller multilingual Whisper model. Good balance of speed and accuracy."
+            }
+            CactusSttModel::WhisperSmallInt8Apple => {
+                "Smaller multilingual Whisper model for Apple Silicon. Uses the Neural Engine."
+            }
+            CactusSttModel::WhisperMediumInt4 => {
+                "More accurate multilingual Whisper model with a smaller footprint."
+            }
+            CactusSttModel::WhisperMediumInt4Apple => {
+                "More accurate multilingual Whisper model for Apple Silicon. Uses the Neural Engine."
+            }
+            CactusSttModel::WhisperMediumInt8 => {
+                "Most accurate Whisper option here. Larger download."
+            }
+            CactusSttModel::WhisperMediumInt8Apple => {
+                "Most accurate Whisper option for Apple Silicon. Uses the Neural Engine."
+            }
+            CactusSttModel::ParakeetCtc0_6bInt4 => {
+                "English only. Smaller download and lower memory use."
+            }
+            CactusSttModel::ParakeetCtc0_6bInt4Apple => {
+                "English only for Apple Silicon. Smaller download and uses the Neural Engine."
+            }
+            CactusSttModel::ParakeetCtc0_6bInt8 => {
+                "English only. Better accuracy than INT4 with a larger download."
+            }
+            CactusSttModel::ParakeetCtc0_6bInt8Apple => {
+                "English only for Apple Silicon. Better accuracy than INT4 and uses the Neural Engine."
+            }
+            CactusSttModel::ParakeetTdt0_6bV3Int4 => "English only. Fastest download and startup.",
+            CactusSttModel::ParakeetTdt0_6bV3Int8 => {
+                "English only. Better accuracy than INT4 with a larger download."
+            }
         }
     }
 

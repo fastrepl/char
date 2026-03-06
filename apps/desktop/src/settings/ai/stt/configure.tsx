@@ -13,6 +13,7 @@ import { useCallback } from "react";
 import {
   commands as localSttCommands,
   type LocalModel,
+  type SttModelInfo,
 } from "@hypr/plugin-local-stt";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
 import {
@@ -99,14 +100,7 @@ function HyprProviderCard({
   icon: React.ReactNode;
   badge?: string | null;
 }) {
-  const supportedModels = useQuery({
-    queryKey: ["list-supported-models"],
-    queryFn: async () => {
-      const result = await localSttCommands.listSupportedModels();
-      return result.status === "ok" ? result.data : [];
-    },
-    staleTime: Infinity,
-  });
+  const supportedModels = useQuery(localSttQueries.supportedModels());
 
   const argmaxModels =
     supportedModels.data?.filter((m) => m.model_type === "argmax") ?? [];
@@ -167,45 +161,24 @@ function HyprProviderCard({
               </div>
 
               {argmaxModels.length > 0 && (
-                <>
-                  <ModelGroupLabel label="Argmax" />
-                  {argmaxModels.map((model) => (
-                    <HyprProviderLocalRow
-                      key={model.key as string}
-                      model={model.key}
-                      displayName={model.display_name}
-                      description={model.description}
-                    />
-                  ))}
-                </>
+                <LocalModelSection label="Argmax" models={argmaxModels} />
               )}
 
               {whispercppModels.length > 0 && (
-                <>
-                  <ModelGroupLabel label="WhisperCPP" />
-                  {whispercppModels.map((model) => (
-                    <HyprProviderLocalRow
-                      key={model.key as string}
-                      model={model.key}
-                      displayName={model.display_name}
-                      description={model.description}
-                    />
-                  ))}
-                </>
+                <LocalModelSection
+                  label="WhisperCPP"
+                  models={whispercppModels}
+                />
               )}
 
               {cactusModels.length > 0 && (
                 <>
-                  <ModelGroupLabel label="Cactus (Experimental)" />
+                  <LocalModelSection
+                    label="Cactus"
+                    models={cactusModels}
+                    modelsDir="cactus"
+                  />
                   {/* <CactusSettings models={cactusModels.map((m) => m.key)} /> */}
-
-                  {cactusModels.map((model) => (
-                    <CactusRow
-                      key={model.key as string}
-                      model={model.key}
-                      displayName={model.display_name}
-                    />
-                  ))}
                 </>
               )}
             </>
@@ -216,52 +189,30 @@ function HyprProviderCard({
   );
 }
 
-function CactusRow({
-  model,
-  displayName,
+function LocalModelSection({
+  label,
+  models,
+  modelsDir = "default",
 }: {
-  model: LocalModel;
-  displayName: string;
+  label: string;
+  models: SttModelInfo[];
+  modelsDir?: "default" | "cactus";
 }) {
-  const handleSelectModel = useSafeSelectModel();
-  const { shouldHighlightDownload } = useSttSettings();
-
-  const {
-    progress,
-    hasError,
-    isDownloaded,
-    showProgress,
-    handleDownload,
-    handleCancel,
-    handleDelete,
-  } = useLocalModelDownload(model, handleSelectModel);
-
-  const handleOpen = () => {
-    void localSttCommands.cactusModelsDir().then((result) => {
-      if (result.status === "ok") {
-        void openerCommands.openPath(result.data, null);
-      }
-    });
-  };
-
   return (
-    <HyprProviderRow>
-      <div className="flex-1">
-        <span className="text-sm font-medium">{displayName}</span>
+    <div className="flex flex-col gap-2">
+      <ModelGroupLabel label={label} />
+      <div className="flex flex-wrap gap-2">
+        {models.map((model) => (
+          <LocalModelTile
+            key={model.key as string}
+            model={model.key}
+            displayName={model.display_name}
+            description={model.description}
+            modelsDir={modelsDir}
+          />
+        ))}
       </div>
-
-      <LocalModelAction
-        isDownloaded={isDownloaded}
-        showProgress={showProgress}
-        progress={progress}
-        hasError={hasError}
-        highlight={shouldHighlightDownload}
-        onOpen={handleOpen}
-        onDownload={handleDownload}
-        onCancel={handleCancel}
-        onDelete={handleDelete}
-      />
-    </HyprProviderRow>
+    </div>
   );
 }
 
@@ -386,6 +337,7 @@ function LocalModelAction({
   onDownload,
   onCancel,
   onDelete,
+  compact = false,
 }: {
   isDownloaded: boolean;
   showProgress: boolean;
@@ -396,6 +348,7 @@ function LocalModelAction({
   onDownload: () => void;
   onCancel: () => void;
   onDelete: () => void;
+  compact?: boolean;
 }) {
   const showShimmer = highlight && !isDownloaded && !showProgress && !hasError;
 
@@ -404,8 +357,12 @@ function LocalModelAction({
       <div className="flex items-center gap-1.5">
         <button
           onClick={onOpen}
+          aria-label="Show in Finder"
+          title="Show in Finder"
           className={cn([
-            "h-8.5 rounded-full px-4 text-center font-mono text-xs",
+            compact
+              ? "size-8.5 rounded-full"
+              : "h-8.5 rounded-full px-4 text-center font-mono text-xs",
             "bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900",
             "shadow-xs hover:shadow-md",
             "transition-all duration-150",
@@ -413,10 +370,11 @@ function LocalModelAction({
           ])}
         >
           <FolderOpen className="size-4" />
-          <span>Show in Finder</span>
+          {!compact && <span>Show in Finder</span>}
         </button>
         <button
           onClick={onDelete}
+          aria-label="Delete model"
           title="Delete Model"
           className={cn([
             "size-8.5 rounded-full",
@@ -437,7 +395,9 @@ function LocalModelAction({
       <button
         onClick={onDownload}
         className={cn([
-          "h-8.5 w-fit rounded-full px-4 text-center font-mono text-xs",
+          compact
+            ? "h-8.5 rounded-full px-3 text-center font-mono text-xs"
+            : "h-8.5 w-fit rounded-full px-4 text-center font-mono text-xs",
           "bg-linear-to-t from-red-600 to-red-500 text-white",
           "shadow-md hover:scale-[102%] hover:shadow-lg active:scale-[98%]",
           "transition-all duration-150",
@@ -456,7 +416,9 @@ function LocalModelAction({
         onClick={onCancel}
         className={cn([
           "group relative overflow-hidden",
-          "h-8.5 w-27.5 rounded-full px-4 text-center font-mono text-xs",
+          compact
+            ? "h-8.5 w-24 rounded-full px-3 text-center font-mono text-xs"
+            : "h-8.5 w-27.5 rounded-full px-4 text-center font-mono text-xs",
           "bg-linear-to-t from-neutral-300 to-neutral-200 text-neutral-900",
           "shadow-xs",
           "transition-all duration-150",
@@ -482,8 +444,9 @@ function LocalModelAction({
     <button
       onClick={onDownload}
       className={cn([
-        "relative h-8.5 w-fit overflow-hidden",
-        "rounded-full px-4 text-center font-mono text-xs",
+        compact
+          ? "relative h-8.5 overflow-hidden rounded-full px-3 text-center font-mono text-xs"
+          : "relative h-8.5 w-fit overflow-hidden rounded-full px-4 text-center font-mono text-xs",
         "bg-linear-to-t from-neutral-200 to-neutral-100 text-neutral-900",
         "shadow-xs hover:scale-[102%] hover:shadow-md active:scale-[98%]",
         "transition-all duration-150",
@@ -505,14 +468,16 @@ function LocalModelAction({
   );
 }
 
-function HyprProviderLocalRow({
+function LocalModelTile({
   model,
   displayName,
   description,
+  modelsDir = "default",
 }: {
   model: LocalModel;
   displayName: string;
   description: string;
+  modelsDir?: "default" | "cactus";
 }) {
   const handleSelectModel = useSafeSelectModel();
   const { shouldHighlightDownload } = useSttSettings();
@@ -528,7 +493,12 @@ function HyprProviderLocalRow({
   } = useLocalModelDownload(model, handleSelectModel);
 
   const handleOpen = () => {
-    void localSttCommands.modelsDir().then((result) => {
+    const request =
+      modelsDir === "cactus"
+        ? localSttCommands.cactusModelsDir()
+        : localSttCommands.modelsDir();
+
+    void request.then((result) => {
       if (result.status === "ok") {
         void openerCommands.openPath(result.data, null);
       }
@@ -536,24 +506,37 @@ function HyprProviderLocalRow({
   };
 
   return (
-    <HyprProviderRow>
-      <div className="flex-1">
-        <span className="text-sm font-medium">{displayName}</span>
-        <p className="text-xs text-neutral-500">{description}</p>
+    <div
+      className={cn([
+        "flex min-w-64 grow basis-[19rem] flex-col gap-3",
+        "rounded-md border bg-white px-3 py-2.5",
+      ])}
+    >
+      <div className="min-w-0">
+        <p className="text-sm leading-5 font-medium text-neutral-900">
+          {displayName}
+        </p>
+        {!!description && (
+          <p className="mt-1 text-xs leading-4 text-neutral-500">
+            {description}
+          </p>
+        )}
       </div>
-
-      <LocalModelAction
-        isDownloaded={isDownloaded}
-        showProgress={showProgress}
-        progress={progress}
-        hasError={hasError}
-        highlight={shouldHighlightDownload}
-        onOpen={handleOpen}
-        onDownload={handleDownload}
-        onCancel={handleCancel}
-        onDelete={handleDelete}
-      />
-    </HyprProviderRow>
+      <div className="mt-auto flex justify-end">
+        <LocalModelAction
+          compact
+          isDownloaded={isDownloaded}
+          showProgress={showProgress}
+          progress={progress}
+          hasError={hasError}
+          highlight={shouldHighlightDownload}
+          onOpen={handleOpen}
+          onDownload={handleDownload}
+          onCancel={handleCancel}
+          onDelete={handleDelete}
+        />
+      </div>
+    </div>
   );
 }
 
