@@ -4,6 +4,8 @@ use serde::{Serialize, ser::Serializer};
 pub enum Error {
     #[error("posthog error: {0}")]
     PosthogError(String),
+    #[error("runtime error: {0}")]
+    Runtime(String),
 }
 
 impl From<posthog_rs::Error> for Error {

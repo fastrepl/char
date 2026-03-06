@@ -1,9 +1,12 @@
+use std::sync::Arc;
+
 use tauri::Manager;
 
 mod commands;
 mod error;
 mod ext;
 mod store;
+mod tauri_runtime;
 
 pub use error::{Error, Result};
 pub use ext::*;
@@ -11,7 +14,7 @@ use store::*;
 
 pub use hypr_analytics::*;
 
-pub type ManagedState = hypr_analytics::AnalyticsClient;
+pub type ManagedState = hypr_analytics::AnalyticsService;
 
 const PLUGIN_NAME: &str = "analytics";
 
@@ -62,7 +65,10 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
                 builder.build()
             };
 
-            assert!(app.manage(client));
+            let runtime = Arc::new(tauri_runtime::TauriAnalyticsRuntime::new(app));
+            let service = hypr_analytics::AnalyticsService::new(client, runtime);
+
+            assert!(app.manage(service));
             Ok(())
         })
         .build()
