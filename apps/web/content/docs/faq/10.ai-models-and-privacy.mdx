@@ -42,11 +42,11 @@ The `store.json` keys are defined by this enum — nothing else is persisted thr
 
 Each session gets its own subdirectory. Here is how Char loads session content from disk — this shows exactly what files exist per session:
 
-<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/fs-sync/src/session_content.rs#L10-L110" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/fs-sync-core/src/session_content.rs#L10-L110" />
 
 Transcript data uses this structure — word-level timestamps, speaker channels, and optional speaker hints:
 
-<GithubCode url="https://github.com/fastrepl/char/blob/main/plugins/fs-sync/src/types.rs#L83-L119" />
+<GithubCode url="https://github.com/fastrepl/char/blob/main/crates/fs-sync-core/src/types.rs#L83-L119" />
 
 ### Audio recording
 
