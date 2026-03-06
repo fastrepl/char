@@ -8,7 +8,7 @@ date: "2026-03-06"
 
 Mistral makes some of the best open-weight models available. Getting an API key takes about two minutes, and you don't need a credit card.
 
-## What you need before getting started
+## Prerequisites
 
 You need:
 
@@ -17,7 +17,7 @@ You need:
 
 No credit card required for the free Experiment plan.
 
-One thing worth knowing upfront: on the free Experiment plan, your API requests may be used to train Mistral's models. If you're working with sensitive data, you'll want to upgrade to a paid plan, which comes with data isolation.
+On the free Experiment plan, your API requests may be used to train Mistral's models. Upgrade to a paid plan if you're working with sensitive data.
 
 ## How to generate your Mistral API key (step by step)
 
@@ -33,11 +33,11 @@ One thing worth knowing upfront: on the free Experiment plan, your API requests 
 
 ![Mistral rate limits](/api/images/blog/how-to-get-mistral-api-key/mistral-rate-limits.gif)
 
-On the free Experiment plan, every model is capped at 500,000 tokens per minute and 1,000,000,000 tokens per month. That's a billion tokens a month, which sounds like a lot until you're running something in a loop.
+On the free Experiment plan, every model is capped at 500,000 tokens per minute and 1,000,000,000 tokens per month. The monthly cap is misleading - the per-minute limit is what you'll actually hit.
 
-The per-minute limit is the one you'll actually hit. 500k tokens per minute works out to roughly 375,000 words per minute, which is fast, but easy to saturate if you're processing batches or running concurrent requests. If a request gets rate limited, the API returns a 429 and you'll need to retry with backoff.
+The per-minute limit is the one that matters. 500k tokens per minute = ~375,000 words per minute. That's fast, but concurrent requests will saturate it quickly. If a request gets rate limited, the API returns a 429 and you'll need to retry with backoff.
 
-The monthly cap of 1B tokens is genuinely generous for individual use. At typical usage, most developers won't come close. If you're building something at scale or need guaranteed throughput, upgrading to the Scale plan removes these ceilings and adds data isolation.
+The monthly cap of 1B tokens is practical for individual use. At typical usage, most developers won't come close. If you're building something at scale or need guaranteed throughput, upgrading to the Scale plan removes these ceilings and adds data isolation.
 
 ## Mistral API pricing: how much does it cost
 
@@ -48,19 +48,19 @@ Mistral charges per million tokens, counting both input (what you send) and outp
 | Mistral Small 3.2 | $0.10 / M tokens | $0.30 / M tokens |
 | Mistral Large 3 | $0.50 / M tokens | $1.50 / M tokens |
 
-> To put those numbers in context: a million input tokens is roughly 750,000 words, or about 1,500 pages of text. At Mistral Small's rates, that costs ten cents. For most personal or small-team use, the monthly bill is negligible.
+> A million input tokens ≈ 750,000 words or 1,500 pages. At Mistral Small's rates, that's $0.10. Most individuals and small teams won't notice the bill.
 
-If you're running batch jobs that don't need an immediate response, Mistral offers a 50% discount on batch API requests. Worth using if latency isn't a concern.
+If you're running batch jobs that don't need an immediate response, Mistral offers a 50% discount. Use it if latency isn't a concern.
 
-## Which Mistral model should you use
+## Choosing a Mistral model
 
-If you're not sure, use `mistral-small-latest`.
+Use `mistral-small-latest` by default.
 
-It's fast, cheap, multimodal, multilingual, and Apache 2.0 licensed. The Apache 2.0 license matters if you're building something commercial. No usage restrictions, no license fees.
+It's fast, cheap, multimodal, multilingual, and Apache 2.0 licensed - no usage restrictions, no fees. This matters if you're building commercial software.
 
-Step up to `mistral-large-latest` if you need heavier reasoning: complex multi-step tasks, nuanced analysis, or anything where output quality is worth paying more for. It's five times the price of Small, so it's worth being deliberate about when you actually need it.
+Use `mistral-large-latest` for complex multi-step tasks, nuanced analysis, or cases where output quality justifies the cost. It's five times the price of Small.
 
-## How to use your Mistral API key in your project
+## Adding your API key to your project
 
 Set it as an environment variable so it never gets hardcoded into your source files:
 
@@ -80,9 +80,9 @@ curl https://api.mistral.ai/v1/chat/completions \
   }'
 ```
 
-If you get a JSON response with a `choices` array back, the key is working. If you get a 401, double-check that the environment variable is set correctly in your current session.
+A JSON response with a `choices` array means the key is working. A 401 means the environment variable isn't set correctly.
 
-> For Python projects, the `python-dotenv` package is the standard way to load a `.env` file at runtime rather than setting variables manually each session:
+> For Python projects, use `python-dotenv` to load a `.env` file at runtime:
 
 ```python
 from dotenv import load_dotenv
@@ -92,18 +92,16 @@ load_dotenv()
 api_key = os.getenv("MISTRAL_API_KEY")
 ```
 
-## Use your Mistral API key in Char for AI meeting notes that stay on your device
+## Connecting Mistral to Char
 
 ![Char AI settings showing Mistral provider](/api/images/blog/how-to-get-mistral-api-key/char-mistral-settings.png)
 
-Getting your own API key is a deliberate choice. It means you want control over what AI you're using and what happens to the data you send it. Char works on the same principles.
-
-It's an open-source AI notepad for meetings that gives you complete control over your AI stack and your data.
+Using your own API key gives you control over your AI provider and data handling. Char is an open-source AI notepad for meetings. You control which AI provider handles your data.
 
 The workflow is simple: record, transcribe locally, summarize with your own Mistral key. You choose which model runs. You can swap to Anthropic, OpenAI, or a local Ollama model any time without losing your files or your history.
 
-Everything else stays local. The audio file, the transcript, the summary are all saved as plain markdown files on your device, not on Char's servers. Char doesn't have servers storing your conversations. There's nothing to breach, no vendor to trust with your data.
+Audio, transcripts, and summaries are saved as markdown files on your device, not on Char's servers. No data leaves your machine.
 
-Plus, all core features, local transcription, and BYOK stay completely free. You're already paying for the API key, you shouldn't have to pay twice. But if you want cloud services and don't want to manage keys at all, there is a $8/month plan you can check out.
+Core features, local transcription, and BYOK are free. A $8/month plan is available for cloud services and managed keys.
 
-To connect Mistral, open Char's settings, go to API Keys, paste your key, and that's it. Try it out for free now - [Download Char for macOS](/download).
+To connect Mistral: open Char settings → API Keys → paste your key. [Download Char for macOS](/download).
