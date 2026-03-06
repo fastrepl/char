@@ -69,11 +69,23 @@ export function NotificationSettingsView() {
   });
 
   const bundleIdToName = (bundleId: string) => {
-    return allInstalledApps?.find((a) => a.id === bundleId)?.name ?? bundleId;
+    const normalized = bundleId.trim();
+    return (
+      allInstalledApps?.find(
+        (a) => a.id.toLowerCase() === normalized.toLowerCase(),
+      )?.name ?? normalized
+    );
   };
 
   const nameToBundleId = (name: string) => {
-    return allInstalledApps?.find((a) => a.name === name)?.id ?? name;
+    const normalized = name.trim();
+    return (
+      allInstalledApps?.find(
+        (a) =>
+          a.id.toLowerCase() === normalized.toLowerCase() ||
+          a.name.toLowerCase() === normalized.toLowerCase(),
+      )?.id ?? normalized
+    );
   };
 
   const isDefaultIgnored = (appName: string) => {

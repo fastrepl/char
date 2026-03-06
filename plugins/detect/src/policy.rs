@@ -40,6 +40,9 @@ impl AppCategory {
                 "com.seewillow.WillowMac",
                 "com.superduper.superwhisper",
                 "com.prakashjoshipax.VoiceInk",
+                "app.spokenly",
+                "com.amical.desktop",
+                "com.goodsnooze.MacWhisper",
                 "com.goodsnooze.macwhisper",
                 "com.descript.beachcube",
                 "com.apple.VoiceMemos",
@@ -49,6 +52,8 @@ impl AppCategory {
                 "dev.warp.Warp-Stable",
                 "com.exafunction.windsurf",
                 "com.microsoft.VSCode",
+                "com.microsoft.VSCodeInsiders",
+                "com.vscodium",
                 "com.todesktop.230313mzl4w4u92",
             ],
             Self::ScreenRecording => &[
@@ -57,7 +62,11 @@ impl AppCategory {
                 "com.loom.desktop",
                 "com.obsproject.obs-studio",
             ],
-            Self::AIAssistant => &["com.openai.chat", "com.anthropic.claudefordesktop"],
+            Self::AIAssistant => &[
+                "com.openai.chat",
+                "com.openai.codex",
+                "com.anthropic.claudefordesktop",
+            ],
             Self::Other => &[
                 "com.raycast.macos",
                 "com.apple.garageband10",
@@ -207,7 +216,27 @@ mod tests {
             Some(AppCategory::Dictation)
         );
         assert_eq!(
+            AppCategory::find_category("app.spokenly"),
+            Some(AppCategory::Dictation)
+        );
+        assert_eq!(
+            AppCategory::find_category("com.amical.desktop"),
+            Some(AppCategory::Dictation)
+        );
+        assert_eq!(
+            AppCategory::find_category("com.goodsnooze.MacWhisper"),
+            Some(AppCategory::Dictation)
+        );
+        assert_eq!(
             AppCategory::find_category("com.microsoft.VSCode"),
+            Some(AppCategory::IDE)
+        );
+        assert_eq!(
+            AppCategory::find_category("com.microsoft.VSCodeInsiders"),
+            Some(AppCategory::IDE)
+        );
+        assert_eq!(
+            AppCategory::find_category("com.vscodium"),
             Some(AppCategory::IDE)
         );
         assert_eq!(
@@ -216,6 +245,10 @@ mod tests {
         );
         assert_eq!(
             AppCategory::find_category("com.openai.chat"),
+            Some(AppCategory::AIAssistant)
+        );
+        assert_eq!(
+            AppCategory::find_category("com.openai.codex"),
             Some(AppCategory::AIAssistant)
         );
         assert_eq!(
