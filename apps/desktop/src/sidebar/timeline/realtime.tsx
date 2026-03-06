@@ -1,14 +1,34 @@
-import { forwardRef, useEffect, useState } from "react";
+import { forwardRef, useEffect, useMemo, useState } from "react";
 
-import { safeParseDate } from "@hypr/utils";
+import { TZDate, format, safeParseDate } from "@hypr/utils";
 
 import type { TimelineEventsTable, TimelineSessionsTable } from "./utils";
 
 import { getSessionEvent } from "~/session/utils";
 
-export const CurrentTimeIndicator = forwardRef<HTMLDivElement>((_, ref) => (
-  <div ref={ref} className="py-0.5" aria-hidden />
-));
+export const CurrentTimeIndicator = forwardRef<
+  HTMLDivElement,
+  { timezone?: string }
+>(function CurrentTimeIndicator({ timezone }, ref) {
+  const currentTimeMs = useCurrentTimeMs();
+  const label = useMemo(() => {
+    const now = timezone
+      ? new TZDate(new Date(currentTimeMs), timezone)
+      : new Date(currentTimeMs);
+    return format(now, "h:mm");
+  }, [currentTimeMs, timezone]);
+
+  return (
+    <div ref={ref} aria-label={`Current time ${label}`} className="px-3 py-2">
+      <div className="flex items-center gap-2">
+        <div className="rounded-full bg-red-500 px-2 py-0.5 text-[11px] font-semibold text-white shadow-xs">
+          {label}
+        </div>
+        <div className="h-px flex-1 bg-red-400" />
+      </div>
+    </div>
+  );
+});
 
 export function useCurrentTimeMs() {
   const [now, setNow] = useState(() => new Date().getTime());

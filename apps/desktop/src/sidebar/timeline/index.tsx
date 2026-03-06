@@ -223,7 +223,10 @@ export function TimelineView() {
           return (
             <div key={bucket.label}>
               {shouldRenderIndicatorBefore && (
-                <CurrentTimeIndicator ref={setCurrentTimeIndicatorRef} />
+                <CurrentTimeIndicator
+                  ref={setCurrentTimeIndicatorRef}
+                  timezone={timezone}
+                />
               )}
               <div
                 className={cn([
@@ -268,7 +271,10 @@ export function TimelineView() {
         })}
         {!hasToday &&
           (indicatorIndex === -1 || indicatorIndex === buckets.length) && (
-            <CurrentTimeIndicator ref={setCurrentTimeIndicatorRef} />
+            <CurrentTimeIndicator
+              ref={setCurrentTimeIndicatorRef}
+              timezone={timezone}
+            />
           )}
       </div>
 
@@ -337,7 +343,7 @@ function TodayBucket({
     if (entries.length === 0) {
       return (
         <>
-          <CurrentTimeIndicator ref={registerIndicator} />
+          <CurrentTimeIndicator ref={registerIndicator} timezone={timezone} />
           <div className="px-3 py-4 text-center text-sm text-neutral-400">
             No items today
           </div>
@@ -353,6 +359,7 @@ function TodayBucket({
           <CurrentTimeIndicator
             ref={registerIndicator}
             key="current-time-indicator"
+            timezone={timezone}
           />,
         );
       }
@@ -379,6 +386,7 @@ function TodayBucket({
         <CurrentTimeIndicator
           ref={registerIndicator}
           key="current-time-indicator-end"
+          timezone={timezone}
         />,
       );
     }
