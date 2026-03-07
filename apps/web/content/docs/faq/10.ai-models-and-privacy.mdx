@@ -19,7 +19,7 @@ Char uses two base directories. See [Data](/docs/guides/data) for the full direc
 **Global base** (shared across stable and nightly builds):
 - `models/stt/` — downloaded speech-to-text model files (Whisper GGUF, Argmax tarballs)
 - `store.json` — app state (onboarding status, pinned tabs, recently opened sessions, dismissed toasts, analytics preference, auth tokens)
-- `hyprnote.json` — vault configuration (custom vault path if set)
+- `global.json` — vault configuration (custom vault path if set)
 - `search/` — Tantivy full-text search index
 
 On macOS, this is typically `~/Library/Application Support/hyprnote/`. On Linux, `~/.local/share/hyprnote/`.

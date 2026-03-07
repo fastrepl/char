@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
 use hypr_listener_core::{
-    ListenerRuntime, SessionDataEvent, SessionErrorEvent, SessionLifecycleEvent,
-    SessionProgressEvent,
+    ListenerRuntime, RecordingStatusEvent, SessionDataEvent, SessionErrorEvent,
+    SessionLifecycleEvent, SessionProgressEvent,
 };
 use hypr_listener2_core::{BatchEvent, BatchRuntime};
 use tokio::sync::mpsc;
@@ -10,6 +10,7 @@ use tokio::sync::mpsc;
 pub(super) enum ListenerEvent {
     Lifecycle(SessionLifecycleEvent),
     Progress(SessionProgressEvent),
+    Recording(RecordingStatusEvent),
     Error(SessionErrorEvent),
     Data(SessionDataEvent),
 }
@@ -42,6 +43,10 @@ impl ListenerRuntime for ListenRuntime {
 
     fn emit_progress(&self, event: SessionProgressEvent) {
         let _ = self.tx.send(ListenerEvent::Progress(event));
+    }
+
+    fn emit_recording(&self, event: RecordingStatusEvent) {
+        let _ = self.tx.send(ListenerEvent::Recording(event));
     }
 
     fn emit_error(&self, event: SessionErrorEvent) {

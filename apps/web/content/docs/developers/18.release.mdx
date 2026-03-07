@@ -85,7 +85,7 @@ Stable and nightly share the same folder (`hyprnote`) in production builds.
 
 Priority**:**
 1. `VAULT_BASE` env var (highest)
-2. `vault_path` in `hyprnote.json` (at global_base)
+2. `vault_path` in `global.json` (at global_base)
 3. Fall back to `global_base`
 
 Example:
@@ -106,7 +106,7 @@ VAULT_BASE="$HOME/Library/Application Support/hyprnote" pnpm -F desktop tauri:de
 
 | File/Dir | Description |
 |----------|-------------|
-| `hyprnote.json` | Global config (vault_path, etc.) |
+| `global.json` | Global config (vault_path, etc.) |
 | `store.json` | Tauri plugin store |
 | `db.sqlite` | Legacy SQLite DB (release only) |
 | `models/stt/` | STT models |
@@ -134,7 +134,7 @@ VAULT_BASE="$HOME/Library/Application Support/hyprnote" pnpm -F desktop tauri:de
 
 | What | Base | Env Override |
 |------|------|--------------|
-| `hyprnote.json` | global_base | No |
+| `global.json` | global_base | No |
 | `store.json` | global_base | No |
 | `db.sqlite` | global_base | No |
 | `models/` | global_base | No |

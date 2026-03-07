@@ -21,7 +21,7 @@ fn setup_session_lifecycle_listener(
     let handle = app_handle.clone();
 
     SessionLifecycleEvent::listen_any(app_handle, move |event| match event.payload {
-        SessionLifecycleEvent::Active { .. } => {
+        SessionLifecycleEvent::Started { .. } => {
             session_active.store(true, Ordering::SeqCst);
 
             let main_visible = AppWindow::Main

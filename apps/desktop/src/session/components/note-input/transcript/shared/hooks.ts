@@ -7,15 +7,20 @@ import {
   useRef,
   useState,
 } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 
 import type { SpeakerHintStorage, Word } from "@hypr/store";
 import {
   buildSegments,
+  type PartialWord,
   type RuntimeSpeakerHint,
   type Segment,
 } from "@hypr/transcript";
 
+import { useAudioPlayer } from "~/audio-player";
+import { useAudioTime } from "~/audio-player/provider";
 import * as main from "~/store/tinybase/store/main";
+import { useListener } from "~/stt/contexts";
 import { convertStorageHintsToRuntime } from "~/stt/speaker-hints";
 
 export function useFinalWords(transcriptId: string): (Word & { id: string })[] {
@@ -258,6 +263,87 @@ export function segmentsShallowEqual(a: Segment[], b: Segment[]) {
   }
 
   return true;
+}
+
+export function usePartialTranscriptState(): {
+  partialWords: PartialWord[];
+  partialHints: RuntimeSpeakerHint[];
+} {
+  const partialWordsByChannel = useListener(
+    (state) => state.partialWordsByChannel,
+  );
+  const partialHintsByChannel = useListener(
+    (state) => state.partialHintsByChannel,
+  );
+
+  const partialWords = useMemo(
+    () => Object.values(partialWordsByChannel).flat(),
+    [partialWordsByChannel],
+  );
+
+  const partialHints = useMemo(() => {
+    const channelIndices = Object.keys(partialWordsByChannel)
+      .map(Number)
+      .sort((a, b) => a - b);
+
+    const offsetByChannel = new Map<number, number>();
+    let currentOffset = 0;
+    for (const channelIndex of channelIndices) {
+      offsetByChannel.set(channelIndex, currentOffset);
+      currentOffset += partialWordsByChannel[channelIndex]?.length ?? 0;
+    }
+
+    const reindexedHints: RuntimeSpeakerHint[] = [];
+    for (const channelIndex of channelIndices) {
+      const hints = partialHintsByChannel[channelIndex] ?? [];
+      const offset = offsetByChannel.get(channelIndex) ?? 0;
+      for (const hint of hints) {
+        reindexedHints.push({
+          ...hint,
+          wordIndex: hint.wordIndex + offset,
+        });
+      }
+    }
+
+    return reindexedHints;
+  }, [partialWordsByChannel, partialHintsByChannel]);
+
+  return { partialWords, partialHints };
+}
+
+export function useTranscriptPlaybackState() {
+  const {
+    state: playerState,
+    pause,
+    resume,
+    start,
+    seek,
+    audioExists,
+  } = useAudioPlayer();
+  const time = useAudioTime();
+
+  useHotkeys(
+    "space",
+    (event) => {
+      event.preventDefault();
+      if (playerState === "playing") {
+        pause();
+      } else if (playerState === "paused") {
+        resume();
+      } else if (playerState === "stopped") {
+        start();
+      }
+    },
+    { enableOnFormTags: false },
+  );
+
+  return {
+    audioExists,
+    currentMs: time.current * 1000,
+    isPlaying: playerState === "playing",
+    seek,
+    startPlayback: start,
+  };
 }
 
 export function useScrollDetection(

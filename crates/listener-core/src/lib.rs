@@ -14,6 +14,14 @@ pub enum State {
     Finalizing,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
+#[serde(rename_all = "snake_case")]
+pub enum ConnectionStage {
+    InitialConnect,
+    ActiveStream,
+}
+
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "specta", derive(specta::Type))]
 #[serde(tag = "type")]
@@ -24,6 +32,8 @@ pub enum DegradedError {
     UpstreamUnavailable { message: String },
     #[serde(rename = "connection_timeout")]
     ConnectionTimeout,
+    #[serde(rename = "retry_exhausted")]
+    RetryExhausted { attempts: usize, last_error: String },
     #[serde(rename = "stream_error")]
     StreamError { message: String },
 }

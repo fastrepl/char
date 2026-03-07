@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use listener_core::{
-    ListenerRuntime, SessionDataEvent, SessionErrorEvent, SessionLifecycleEvent,
-    SessionProgressEvent,
+    ListenerRuntime, RecordingStatusEvent, SessionDataEvent, SessionErrorEvent,
+    SessionLifecycleEvent, SessionProgressEvent,
     actors::{RootActor, RootArgs, RootMsg, SessionParams},
 };
 use ractor::Actor;
@@ -24,12 +24,8 @@ impl hypr_storage::StorageRuntime for CliRuntime {
 impl ListenerRuntime for CliRuntime {
     fn emit_lifecycle(&self, event: SessionLifecycleEvent) {
         match &event {
-            SessionLifecycleEvent::Active { session_id, error } => {
-                if let Some(err) = error {
-                    eprintln!("[lifecycle] active (degraded) session={session_id} error={err:?}");
-                } else {
-                    eprintln!("[lifecycle] active session={session_id}");
-                }
+            SessionLifecycleEvent::Started { session_id } => {
+                eprintln!("[lifecycle] started session={session_id}");
             }
             SessionLifecycleEvent::Inactive { session_id, error } => {
                 eprintln!("[lifecycle] inactive session={session_id} error={error:?}");
@@ -48,11 +44,43 @@ impl ListenerRuntime for CliRuntime {
             SessionProgressEvent::AudioReady { device, .. } => {
                 eprintln!("[progress] audio ready device={device:?}");
             }
-            SessionProgressEvent::Connecting { .. } => {
-                eprintln!("[progress] connecting to STT...");
+            SessionProgressEvent::ListenerConnecting {
+                attempt,
+                max_attempts,
+                ..
+            } => {
+                eprintln!("[progress] connecting to STT ({attempt}/{max_attempts})...");
             }
-            SessionProgressEvent::Connected { adapter, .. } => {
+            SessionProgressEvent::ListenerRetrying {
+                attempt,
+                max_attempts,
+                ..
+            } => {
+                eprintln!("[progress] retrying STT ({attempt}/{max_attempts})...");
+            }
+            SessionProgressEvent::ListenerConnected { adapter, .. } => {
                 eprintln!("[progress] connected via {adapter}");
+            }
+            SessionProgressEvent::ListenerDegraded { error, .. } => {
+                eprintln!("[progress] listener degraded error={error:?}");
+            }
+        }
+    }
+
+    fn emit_recording(&self, event: RecordingStatusEvent) {
+        match event {
+            RecordingStatusEvent::Disabled { session_id } => {
+                eprintln!("[recording] disabled session={session_id}");
+            }
+            RecordingStatusEvent::Enabled { session_id, mode } => {
+                eprintln!("[recording] enabled session={session_id} mode={mode:?}");
+            }
+            RecordingStatusEvent::Failed {
+                session_id,
+                mode,
+                error,
+            } => {
+                eprintln!("[recording] failed session={session_id} mode={mode:?} error={error}");
             }
         }
     }
@@ -62,8 +90,16 @@ impl ListenerRuntime for CliRuntime {
             SessionErrorEvent::AudioError { error, device, .. } => {
                 eprintln!("[error] audio: {error} device={device:?}");
             }
-            SessionErrorEvent::ConnectionError { error, .. } => {
-                eprintln!("[error] connection: {error}");
+            SessionErrorEvent::ConnectionError {
+                error,
+                stage,
+                attempts,
+                max_attempts,
+                ..
+            } => {
+                eprintln!(
+                    "[error] connection stage={stage:?} attempt={attempts}/{max_attempts}: {error}"
+                );
             }
         }
     }

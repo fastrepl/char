@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { message, open as selectFolder } from "@tauri-apps/plugin-dialog";
 import { FolderIcon, type LucideIcon, Settings2Icon } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -10,6 +11,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@hypr/ui/components/ui/tooltip";
+
+import { relaunch } from "~/store/tinybase/store/save";
 
 export function StorageSettingsView() {
   const { data: othersBase } = useQuery({
@@ -34,6 +37,47 @@ export function StorageSettingsView() {
     },
   });
 
+  const changeMutation = useMutation({
+    mutationFn: async (newPath: string) => {
+      const result = await settingsCommands.changeVaultBase(newPath);
+      if (result.status === "error") {
+        throw new Error(result.error);
+      }
+    },
+  });
+
+  const handleChange = async () => {
+    const selected = await selectFolder({
+      title: "Choose storage location",
+      directory: true,
+      multiple: false,
+      defaultPath: contentBase ?? undefined,
+    });
+
+    if (!selected || selected === contentBase) {
+      return;
+    }
+
+    try {
+      await changeMutation.mutateAsync(selected);
+      await message("Char will now restart to switch storage locations.", {
+        kind: "info",
+        title: "Storage Location Updated",
+      });
+      await relaunch();
+    } catch (error) {
+      await message(
+        error instanceof Error
+          ? error.message
+          : "Failed to update storage location.",
+        {
+          kind: "error",
+          title: "Unable to Change Storage Location",
+        },
+      );
+    }
+  };
+
   return (
     <div>
       <h2 className="mb-4 font-serif text-lg font-semibold">Storage</h2>
@@ -46,14 +90,17 @@ export function StorageSettingsView() {
           action={
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
-                <span>
-                  <Button variant="outline" size="sm" disabled>
-                    Customize
-                  </Button>
-                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={changeMutation.isPending}
+                  onClick={() => void handleChange()}
+                >
+                  Customize
+                </Button>
               </TooltipTrigger>
               <TooltipContent side="top">
-                <p className="text-xs">Coming soon</p>
+                <p className="text-xs">Pick a folder, then restart Char</p>
               </TooltipContent>
             </Tooltip>
           }

@@ -25,10 +25,7 @@ fn resolve_session_dir<R: tauri::Runtime>(
     app: &tauri::AppHandle<R>,
     session_id: &str,
 ) -> Result<PathBuf, String> {
-    let base = app
-        .settings()
-        .cached_vault_base()
-        .map_err(|e| e.to_string())?;
+    let base = app.settings().vault_base().map_err(|e| e.to_string())?;
     Ok(find_session_dir(
         &base.join("sessions").into_std_path_buf(),
         session_id,
@@ -47,10 +44,7 @@ pub(crate) async fn write_json_batch<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     items: Vec<(Value, String)>,
 ) -> Result<(), String> {
-    let base = app
-        .settings()
-        .cached_vault_base()
-        .map_err(|e| e.to_string())?;
+    let base = app.settings().vault_base().map_err(|e| e.to_string())?;
 
     let relative_paths: Vec<String> = items
         .iter()
@@ -83,10 +77,7 @@ pub(crate) async fn write_document_batch<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     items: Vec<(ParsedDocument, String)>,
 ) -> Result<(), String> {
-    let base = app
-        .settings()
-        .cached_vault_base()
-        .map_err(|e| e.to_string())?;
+    let base = app.settings().vault_base().map_err(|e| e.to_string())?;
 
     let relative_paths: Vec<String> = items
         .iter()
@@ -281,10 +272,7 @@ pub(crate) async fn scan_and_read<R: tauri::Runtime>(
     recursive: bool,
     path_filter: Option<String>,
 ) -> Result<ScanResult, String> {
-    let base = app
-        .settings()
-        .cached_vault_base()
-        .map_err(|e| e.to_string())?;
+    let base = app.settings().vault_base().map_err(|e| e.to_string())?;
     spawn_blocking!({
         Ok(crate::scan::scan_and_read(
             &PathBuf::from(&scan_dir),
@@ -302,10 +290,7 @@ pub(crate) async fn chat_dir<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     chat_group_id: String,
 ) -> Result<String, String> {
-    let base = app
-        .settings()
-        .cached_vault_base()
-        .map_err(|e| e.to_string())?;
+    let base = app.settings().vault_base().map_err(|e| e.to_string())?;
     Ok(base.join("chats").join(&chat_group_id).to_string())
 }
 
@@ -315,10 +300,7 @@ pub(crate) async fn entity_dir<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     dir_name: String,
 ) -> Result<String, String> {
-    let base = app
-        .settings()
-        .cached_vault_base()
-        .map_err(|e| e.to_string())?;
+    let base = app.settings().vault_base().map_err(|e| e.to_string())?;
     Ok(base.join(&dir_name).to_string())
 }
 

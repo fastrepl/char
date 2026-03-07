@@ -8,6 +8,8 @@ import { commands as hooksCommands } from "@hypr/plugin-hooks";
 import { commands as iconCommands } from "@hypr/plugin-icon";
 import {
   type DegradedError,
+  type RecordingMode,
+  type RecordingStatusEvent,
   commands as listenerCommands,
   events as listenerEvents,
   type SessionDataEvent,
@@ -39,7 +41,9 @@ export type LoadingPhase =
   | "audio_initializing"
   | "audio_ready"
   | "connecting"
-  | "connected";
+  | "retrying"
+  | "connected"
+  | "degraded";
 
 export type GeneralState = {
   live: {
@@ -55,6 +59,11 @@ export type GeneralState = {
     lastError: string | null;
     device: string | null;
     degraded: DegradedError | null;
+    recording: {
+      status: "disabled" | "enabled" | "failed";
+      mode: RecordingMode | null;
+      error: string | null;
+    };
   };
 };
 
@@ -84,12 +93,18 @@ const initialState: GeneralState = {
     lastError: null,
     device: null,
     degraded: null,
+    recording: {
+      status: "disabled",
+      mode: null,
+      error: null,
+    },
   },
 };
 
 type EventListeners = {
   lifecycle: (payload: SessionLifecycleEvent) => void;
   progress: (payload: SessionProgressEvent) => void;
+  recording: (payload: RecordingStatusEvent) => void;
   error: (payload: SessionErrorEvent) => void;
   data: (payload: SessionDataEvent) => void;
 };
@@ -105,6 +120,9 @@ const listenToAllSessionEvents = (
         ),
         listenerEvents.sessionProgressEvent.listen(({ payload }) =>
           handlers.progress(payload),
+        ),
+        listenerEvents.recordingStatusEvent.listen(({ payload }) =>
+          handlers.recording(payload),
         ),
         listenerEvents.sessionErrorEvent.listen(({ payload }) =>
           handlers.error(payload),
@@ -153,6 +171,9 @@ export const createGeneralSlice = <
       mutate(state, (draft) => {
         draft.live.loading = true;
         draft.live.sessionId = targetSessionId;
+        draft.live.loadingPhase = "idle";
+        draft.live.degraded = null;
+        draft.live.recording = initialState.live.recording;
       }),
     );
 
@@ -165,18 +186,13 @@ export const createGeneralSlice = <
         return;
       }
 
-      if (payload.type === "active") {
+      if (payload.type === "started") {
         const currentState = get();
 
         if (
           currentState.live.status === "active" &&
           currentState.live.intervalId
         ) {
-          set((state) =>
-            mutate(state, (draft) => {
-              draft.live.degraded = payload.error ?? null;
-            }),
-          );
           return;
         }
 
@@ -198,11 +214,10 @@ export const createGeneralSlice = <
           mutate(state, (draft) => {
             draft.live.status = "active";
             draft.live.loading = false;
-            draft.live.loadingPhase = "idle";
             draft.live.seconds = 0;
             draft.live.intervalId = intervalId;
             draft.live.sessionId = targetSessionId;
-            draft.live.degraded = payload.error ?? null;
+            draft.live.degraded = null;
           }),
         );
       } else if (payload.type === "finalizing") {
@@ -234,6 +249,7 @@ export const createGeneralSlice = <
             draft.live.lastError = payload.error ?? null;
             draft.live.device = null;
             draft.live.degraded = null;
+            draft.live.recording = initialState.live.recording;
             draft.live.muted = initialState.live.muted;
           }),
         );
@@ -261,16 +277,70 @@ export const createGeneralSlice = <
             draft.live.device = payload.device;
           }),
         );
-      } else if (payload.type === "connecting") {
+      } else if (payload.type === "listener_connecting") {
         set((state) =>
           mutate(state, (draft) => {
             draft.live.loadingPhase = "connecting";
+            draft.live.degraded = null;
           }),
         );
-      } else if (payload.type === "connected") {
+      } else if (payload.type === "listener_retrying") {
+        set((state) =>
+          mutate(state, (draft) => {
+            draft.live.loadingPhase = "retrying";
+            draft.live.degraded = null;
+          }),
+        );
+      } else if (payload.type === "listener_connected") {
         set((state) =>
           mutate(state, (draft) => {
             draft.live.loadingPhase = "connected";
+            draft.live.degraded = null;
+          }),
+        );
+      } else if (payload.type === "listener_degraded") {
+        set((state) =>
+          mutate(state, (draft) => {
+            draft.live.loadingPhase = "degraded";
+            draft.live.degraded = payload.error;
+          }),
+        );
+      }
+    };
+
+    const handleRecordingEvent = (payload: RecordingStatusEvent) => {
+      if (payload.session_id !== targetSessionId) {
+        return;
+      }
+
+      if (payload.type === "disabled") {
+        set((state) =>
+          mutate(state, (draft) => {
+            draft.live.recording = {
+              status: "disabled",
+              mode: null,
+              error: null,
+            };
+          }),
+        );
+      } else if (payload.type === "enabled") {
+        set((state) =>
+          mutate(state, (draft) => {
+            draft.live.recording = {
+              status: "enabled",
+              mode: payload.mode,
+              error: null,
+            };
+          }),
+        );
+      } else if (payload.type === "failed") {
+        set((state) =>
+          mutate(state, (draft) => {
+            draft.live.recording = {
+              status: "failed",
+              mode: payload.mode,
+              error: payload.error,
+            };
           }),
         );
       }
@@ -331,6 +401,7 @@ export const createGeneralSlice = <
       const unlisteners = yield* listenToAllSessionEvents({
         lifecycle: handleLifecycleEvent,
         progress: handleProgressEvent,
+        recording: handleRecordingEvent,
         error: handleErrorEvent,
         data: handleDataEvent,
       });
@@ -379,13 +450,6 @@ export const createGeneralSlice = <
       });
 
       yield* startSessionEffect(params);
-      set((state) =>
-        mutate(state, (draft) => {
-          draft.live.status = "active";
-          draft.live.loading = false;
-          draft.live.sessionId = targetSessionId;
-        }),
-      );
     });
 
     void Effect.runPromiseExit(program).then((exit) => {
@@ -413,6 +477,7 @@ export const createGeneralSlice = <
               draft.live.lastError = null;
               draft.live.device = null;
               draft.live.degraded = null;
+              draft.live.recording = initialState.live.recording;
             }),
           );
         },

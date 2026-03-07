@@ -18,7 +18,7 @@ impl hypr_storage::StorageRuntime for TauriRuntime {
     fn vault_base(&self) -> Result<std::path::PathBuf, hypr_storage::Error> {
         self.app
             .settings()
-            .cached_vault_base()
+            .vault_base()
             .map(|p| p.into_std_path_buf())
             .map_err(|_| hypr_storage::Error::DataDirUnavailable)
     }
@@ -28,7 +28,7 @@ impl ListenerRuntime for TauriRuntime {
     fn emit_lifecycle(&self, event: hypr_listener_core::SessionLifecycleEvent) {
         use tauri_plugin_tray::TrayPluginExt;
         match &event {
-            hypr_listener_core::SessionLifecycleEvent::Active { .. } => {
+            hypr_listener_core::SessionLifecycleEvent::Started { .. } => {
                 let _ = self.app.tray().set_start_disabled(true);
             }
             hypr_listener_core::SessionLifecycleEvent::Inactive { .. } => {
@@ -45,6 +45,12 @@ impl ListenerRuntime for TauriRuntime {
     fn emit_progress(&self, event: hypr_listener_core::SessionProgressEvent) {
         if let Err(error) = event.emit(&self.app) {
             tracing::error!(?error, "failed_to_emit_progress_event");
+        }
+    }
+
+    fn emit_recording(&self, event: hypr_listener_core::RecordingStatusEvent) {
+        if let Err(error) = event.emit(&self.app) {
+            tracing::error!(?error, "failed_to_emit_recording_event");
         }
     }
 

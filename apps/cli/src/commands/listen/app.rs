@@ -2,8 +2,8 @@ use std::collections::VecDeque;
 
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use hypr_listener_core::{
-    DegradedError, SessionDataEvent, SessionErrorEvent, SessionLifecycleEvent,
-    SessionProgressEvent, State,
+    DegradedError, RecordingMode, RecordingStatusEvent, SessionDataEvent, SessionErrorEvent,
+    SessionLifecycleEvent, SessionProgressEvent, State,
 };
 use hypr_listener2_core::BatchEvent;
 use hypr_transcript::{FinalizedWord, PartialWord, TranscriptDelta, TranscriptProcessor};
@@ -134,6 +134,7 @@ impl App {
         match event {
             ListenerEvent::Lifecycle(e) => self.handle_lifecycle(e),
             ListenerEvent::Progress(e) => self.handle_progress(e),
+            ListenerEvent::Recording(e) => self.handle_recording(e),
             ListenerEvent::Error(e) => self.handle_error(e),
             ListenerEvent::Data(e) => self.handle_data(e),
         }
@@ -307,14 +308,10 @@ impl App {
 
     fn handle_lifecycle(&mut self, event: SessionLifecycleEvent) {
         match event {
-            SessionLifecycleEvent::Active { error, .. } => {
+            SessionLifecycleEvent::Started { .. } => {
                 self.state = State::Active;
-                self.degraded = error;
-                if self.degraded.is_some() {
-                    self.status = "Active (degraded)".into();
-                } else {
-                    self.status = "Listening".into();
-                }
+                self.degraded = None;
+                self.status = "Listening".into();
             }
             SessionLifecycleEvent::Inactive { error, .. } => {
                 self.state = State::Inactive;
@@ -343,11 +340,39 @@ impl App {
                     self.status = "Audio ready".into();
                 }
             }
-            SessionProgressEvent::Connecting { .. } => {
+            SessionProgressEvent::ListenerConnecting { .. } => {
                 self.status = "Connecting...".into();
             }
-            SessionProgressEvent::Connected { adapter, .. } => {
+            SessionProgressEvent::ListenerRetrying {
+                attempt,
+                max_attempts,
+                ..
+            } => {
+                self.status = format!("Retrying connection ({attempt}/{max_attempts})...");
+            }
+            SessionProgressEvent::ListenerConnected { adapter, .. } => {
                 self.status = format!("Connected via {adapter}");
+            }
+            SessionProgressEvent::ListenerDegraded { error, .. } => {
+                self.degraded = Some(error);
+                self.status = "Active (degraded)".into();
+            }
+        }
+    }
+
+    fn handle_recording(&mut self, event: RecordingStatusEvent) {
+        match event {
+            RecordingStatusEvent::Disabled { .. } => {}
+            RecordingStatusEvent::Enabled { mode, .. } => {
+                if self.degraded.is_some() {
+                    self.status = match mode {
+                        RecordingMode::UserEnabled => "Active (degraded, recording)".into(),
+                        RecordingMode::ForcedFallback => "Active (degraded, saving locally)".into(),
+                    };
+                }
+            }
+            RecordingStatusEvent::Failed { error, .. } => {
+                self.errors.push(format!("Recording: {error}"));
             }
         }
     }

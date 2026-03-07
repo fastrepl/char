@@ -92,11 +92,13 @@ async listDocumentedLanguageCodesLive() : Promise<Result<string[], string>> {
 
 
 export const events = __makeEvents__<{
+recordingStatusEvent: RecordingStatusEvent,
 sessionDataEvent: SessionDataEvent,
 sessionErrorEvent: SessionErrorEvent,
 sessionLifecycleEvent: SessionLifecycleEvent,
 sessionProgressEvent: SessionProgressEvent
 }>({
+recordingStatusEvent: "plugin:listener:recording-status-event",
 sessionDataEvent: "plugin:listener:session-data-event",
 sessionErrorEvent: "plugin:listener:session-error-event",
 sessionLifecycleEvent: "plugin:listener:session-lifecycle-event",
@@ -109,13 +111,15 @@ sessionProgressEvent: "plugin:listener:session-progress-event"
 
 /** user-defined types **/
 
-export type DegradedError = { type: "authentication_failed"; provider: string } | { type: "upstream_unavailable"; message: string } | { type: "connection_timeout" } | { type: "stream_error"; message: string }
-export type Source = "microphone" | "speaker"
-export type SessionDataEvent = { type: "audio_amplitude"; session_id: string; mic: number; speaker: number } | { type: "speaker_activity"; session_id: string; source: Source; is_speaking: boolean } | { type: "mic_muted"; session_id: string; value: boolean } | { type: "stream_response"; session_id: string; response: StreamResponse }
-export type SessionErrorEvent = { type: "audio_error"; session_id: string; error: string; device: string | null; is_fatal: boolean } | { type: "connection_error"; session_id: string; error: string }
-export type SessionLifecycleEvent = { type: "inactive"; session_id: string; error: string | null } | { type: "active"; session_id: string; error?: DegradedError | null } | { type: "finalizing"; session_id: string }
+export type ConnectionStage = "initial_connect" | "active_stream"
+export type DegradedError = { type: "authentication_failed"; provider: string } | { type: "upstream_unavailable"; message: string } | { type: "connection_timeout" } | { type: "retry_exhausted"; attempts: number; last_error: string } | { type: "stream_error"; message: string }
+export type RecordingMode = "user_enabled" | "forced_fallback"
+export type RecordingStatusEvent = { type: "disabled"; session_id: string } | { type: "enabled"; session_id: string; mode: RecordingMode } | { type: "failed"; session_id: string; mode: RecordingMode; error: string }
+export type SessionDataEvent = { type: "audio_amplitude"; session_id: string; mic: number; speaker: number } | { type: "mic_muted"; session_id: string; value: boolean } | { type: "stream_response"; session_id: string; response: StreamResponse }
+export type SessionErrorEvent = { type: "audio_error"; session_id: string; error: string; device: string | null; is_fatal: boolean } | { type: "connection_error"; session_id: string; error: string; stage: ConnectionStage; attempts: number; max_attempts: number; retryable: boolean }
+export type SessionLifecycleEvent = { type: "inactive"; session_id: string; error: string | null } | { type: "started"; session_id: string } | { type: "finalizing"; session_id: string }
 export type SessionParams = { session_id: string; languages: string[]; onboarding: boolean; record_enabled: boolean; model: string; base_url: string; api_key: string; keywords: string[] }
-export type SessionProgressEvent = { type: "audio_initializing"; session_id: string } | { type: "audio_ready"; session_id: string; device: string | null } | { type: "connecting"; session_id: string } | { type: "connected"; session_id: string; adapter: string }
+export type SessionProgressEvent = { type: "audio_initializing"; session_id: string } | { type: "audio_ready"; session_id: string; device: string | null } | { type: "listener_connecting"; session_id: string; attempt: number; max_attempts: number } | { type: "listener_retrying"; session_id: string; attempt: number; max_attempts: number } | { type: "listener_connected"; session_id: string; adapter: string } | { type: "listener_degraded"; session_id: string; error: DegradedError }
 export type State = "active" | "inactive" | "finalizing"
 export type StreamAlternatives = { transcript: string; words: StreamWord[]; confidence: number; languages?: string[] }
 export type StreamChannel = { alternatives: StreamAlternatives[] }

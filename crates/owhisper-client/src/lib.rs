@@ -31,6 +31,9 @@ pub use adapter::{StreamingBatchEvent, StreamingBatchStream};
 pub use batch::{BatchClient, BatchClientBuilder};
 pub use error::Error;
 pub use hypr_ws_client;
+pub use hypr_ws_client::client::{
+    WebSocketConnectPolicy, WebSocketRetryCallback, WebSocketRetryEvent,
+};
 pub use live::{DualHandle, FinalizeHandle, ListenClient, ListenClientDual};
 
 pub struct ListenClientBuilder<A: RealtimeSttAdapter = DeepgramAdapter> {
@@ -38,6 +41,8 @@ pub struct ListenClientBuilder<A: RealtimeSttAdapter = DeepgramAdapter> {
     api_key: Option<String>,
     params: Option<owhisper_interface::ListenParams>,
     extra_headers: Vec<(String, String)>,
+    connect_policy: WebSocketConnectPolicy,
+    on_connect_retry: Option<WebSocketRetryCallback>,
     _marker: PhantomData<A>,
 }
 
@@ -48,6 +53,8 @@ impl Default for ListenClientBuilder {
             api_key: None,
             params: None,
             extra_headers: Vec::new(),
+            connect_policy: WebSocketConnectPolicy::default(),
+            on_connect_retry: None,
             _marker: PhantomData,
         }
     }
@@ -74,12 +81,24 @@ impl<A: RealtimeSttAdapter> ListenClientBuilder<A> {
         self
     }
 
+    pub fn connect_policy(mut self, policy: WebSocketConnectPolicy) -> Self {
+        self.connect_policy = policy;
+        self
+    }
+
+    pub fn on_connect_retry(mut self, callback: WebSocketRetryCallback) -> Self {
+        self.on_connect_retry = Some(callback);
+        self
+    }
+
     pub fn adapter<B: RealtimeSttAdapter>(self) -> ListenClientBuilder<B> {
         ListenClientBuilder {
             api_base: self.api_base,
             api_key: self.api_key,
             params: self.params,
             extra_headers: self.extra_headers,
+            connect_policy: self.connect_policy,
+            on_connect_retry: self.on_connect_retry,
             _marker: PhantomData,
         }
     }
@@ -136,6 +155,8 @@ impl<A: RealtimeSttAdapter> ListenClientBuilder<A> {
             adapter,
             request,
             initial_message,
+            connect_policy: self.connect_policy,
+            on_connect_retry: self.on_connect_retry,
         }
     }
 
@@ -158,6 +179,8 @@ impl<A: RealtimeSttAdapter> ListenClientBuilder<A> {
             adapter,
             request,
             initial_message,
+            connect_policy: self.connect_policy,
+            on_connect_retry: self.on_connect_retry,
         }
     }
 }

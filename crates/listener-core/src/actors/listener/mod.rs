@@ -14,13 +14,13 @@ use owhisper_interface::{ControlMessage, MixedMessage};
 
 use super::session::session_span;
 use crate::{
-    DegradedError, ListenerRuntime, SessionDataEvent, SessionErrorEvent, SessionProgressEvent,
+    ConnectionStage, DegradedError, ListenerRuntime, SessionDataEvent, SessionErrorEvent,
+    SessionProgressEvent,
 };
 
-use adapters::spawn_rx_task;
+use adapters::{LISTEN_CONNECT_MAX_ATTEMPTS, spawn_rx_task};
 
 pub(super) const LISTEN_STREAM_TIMEOUT: Duration = Duration::from_secs(15 * 60);
-pub(super) const LISTEN_CONNECT_TIMEOUT: Duration = Duration::from_secs(5);
 pub(super) const DEVICE_FINGERPRINT_HEADER: &str = "x-device-fingerprint";
 
 pub enum ListenerMsg {
@@ -68,18 +68,29 @@ impl ListenerActor {
 }
 
 #[derive(Debug)]
-pub(super) struct ListenerInitError(pub(super) String);
+pub(crate) struct ListenerInitError(DegradedError);
+
+impl ListenerInitError {
+    pub(crate) fn new(error: DegradedError) -> Self {
+        Self(error)
+    }
+
+    pub(crate) fn degraded_error(&self) -> &DegradedError {
+        &self.0
+    }
+}
 
 impl std::fmt::Display for ListenerInitError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
+        let message = serde_json::to_string(&self.0).unwrap_or_else(|_| format!("{:?}", self.0));
+        f.write_str(&message)
     }
 }
 
 impl std::error::Error for ListenerInitError {}
 
-pub(super) fn actor_error(msg: impl Into<String>) -> ActorProcessingErr {
-    Box::new(ListenerInitError(msg.into()))
+pub(super) fn actor_error(error: DegradedError) -> ActorProcessingErr {
+    Box::new(ListenerInitError::new(error))
 }
 
 #[ractor::async_trait]
@@ -98,17 +109,20 @@ impl Actor for ListenerActor {
 
         async {
             args.runtime
-                .emit_progress(SessionProgressEvent::Connecting {
+                .emit_progress(SessionProgressEvent::ListenerConnecting {
                     session_id: session_id.clone(),
+                    attempt: 1,
+                    max_attempts: LISTEN_CONNECT_MAX_ATTEMPTS,
                 });
 
             let (tx, rx_task, shutdown_tx, adapter_name) =
                 spawn_rx_task(args.clone(), myself).await?;
 
-            args.runtime.emit_progress(SessionProgressEvent::Connected {
-                session_id: session_id.clone(),
-                adapter: adapter_name,
-            });
+            args.runtime
+                .emit_progress(SessionProgressEvent::ListenerConnected {
+                    session_id: session_id.clone(),
+                    adapter: adapter_name,
+                });
 
             let state = ListenerState {
                 args,
@@ -183,6 +197,10 @@ impl Actor for ListenerActor {
                                     .map(|c| c.to_string())
                                     .unwrap_or_else(|| "none".to_string())
                             ),
+                            stage: ConnectionStage::ActiveStream,
+                            attempts: 1,
+                            max_attempts: 1,
+                            retryable: false,
                         });
                     let degraded = match *error_code {
                         Some(401) | Some(403) => DegradedError::AuthenticationFailed {

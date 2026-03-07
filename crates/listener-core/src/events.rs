@@ -1,6 +1,6 @@
 use owhisper_interface::stream::StreamResponse;
 
-use crate::DegradedError;
+use crate::{ConnectionStage, DegradedError};
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 #[cfg_attr(feature = "specta", derive(specta::Type))]
@@ -12,12 +12,8 @@ pub enum SessionLifecycleEvent {
         session_id: String,
         error: Option<String>,
     },
-    #[serde(rename = "active")]
-    Active {
-        session_id: String,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        error: Option<DegradedError>,
-    },
+    #[serde(rename = "started")]
+    Started { session_id: String },
     #[serde(rename = "finalizing")]
     Finalizing { session_id: String },
 }
@@ -34,10 +30,53 @@ pub enum SessionProgressEvent {
         session_id: String,
         device: Option<String>,
     },
-    #[serde(rename = "connecting")]
-    Connecting { session_id: String },
-    #[serde(rename = "connected")]
-    Connected { session_id: String, adapter: String },
+    #[serde(rename = "listener_connecting")]
+    ListenerConnecting {
+        session_id: String,
+        attempt: usize,
+        max_attempts: usize,
+    },
+    #[serde(rename = "listener_retrying")]
+    ListenerRetrying {
+        session_id: String,
+        attempt: usize,
+        max_attempts: usize,
+    },
+    #[serde(rename = "listener_connected")]
+    ListenerConnected { session_id: String, adapter: String },
+    #[serde(rename = "listener_degraded")]
+    ListenerDegraded {
+        session_id: String,
+        error: DegradedError,
+    },
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone, Copy)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
+#[serde(rename_all = "snake_case")]
+pub enum RecordingMode {
+    UserEnabled,
+    ForcedFallback,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
+#[cfg_attr(feature = "tauri-event", derive(tauri_specta::Event))]
+#[serde(tag = "type")]
+pub enum RecordingStatusEvent {
+    #[serde(rename = "disabled")]
+    Disabled { session_id: String },
+    #[serde(rename = "enabled")]
+    Enabled {
+        session_id: String,
+        mode: RecordingMode,
+    },
+    #[serde(rename = "failed")]
+    Failed {
+        session_id: String,
+        mode: RecordingMode,
+        error: String,
+    },
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
@@ -53,7 +92,14 @@ pub enum SessionErrorEvent {
         is_fatal: bool,
     },
     #[serde(rename = "connection_error")]
-    ConnectionError { session_id: String, error: String },
+    ConnectionError {
+        session_id: String,
+        error: String,
+        stage: ConnectionStage,
+        attempts: usize,
+        max_attempts: usize,
+        retryable: bool,
+    },
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
