@@ -1,4 +1,5 @@
 import "./styles/globals.css";
+import "./providers/posthog";
 
 import * as Sentry from "@sentry/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -18,6 +19,7 @@ import "@hypr/ui/globals.css";
 import { createToolRegistry } from "./contexts/tool-registry/core";
 import { env } from "./env";
 import { initPluginGlobals } from "./plugins/globals";
+import { SessionReplay } from "./providers/session-replay";
 import { routeTree } from "./routeTree.gen";
 import { TaskManager } from "./services/task-manager";
 import { ErrorComponent, NotFoundComponent } from "./shared/control";
@@ -114,6 +116,7 @@ function AppWithTiny() {
           <App />
           <TaskManager />
           <EventListeners />
+          <SessionReplay />
         </TinyBaseProvider>
       </TinyTickProvider>
     </QueryClientProvider>

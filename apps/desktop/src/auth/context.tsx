@@ -9,6 +9,7 @@ import { useMutation } from "@tanstack/react-query";
 import { getVersion } from "@tauri-apps/api/app";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { version as osVersion, platform } from "@tauri-apps/plugin-os";
+import posthog from "posthog-js";
 import {
   createContext,
   useCallback,
@@ -136,6 +137,8 @@ async function trackAuthEvent(
       },
     });
 
+    posthog.identify(session.user.id);
+
     if (event === "SIGNED_IN") {
       void analyticsCommands.event({ event: "user_signed_in" });
     }
@@ -143,6 +146,7 @@ async function trackAuthEvent(
 
   if (event === "SIGNED_OUT") {
     trackedUserId = null;
+    posthog.reset();
   }
 }
 
