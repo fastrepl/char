@@ -18,9 +18,13 @@ pub struct Env {
     #[serde(default, deserialize_with = "hypr_api_env::filter_empty")]
     pub otel_exporter_otlp_endpoint: Option<String>,
     #[serde(default, deserialize_with = "hypr_api_env::filter_empty")]
-    pub otel_exporter_otlp_headers: Option<String>,
-    #[serde(default, deserialize_with = "hypr_api_env::filter_empty")]
     pub otel_service_name: Option<String>,
+    #[serde(default, deserialize_with = "hypr_api_env::filter_empty")]
+    pub honeycomb_ui_base_url: Option<String>,
+    #[serde(default, deserialize_with = "hypr_api_env::filter_empty")]
+    pub honeycomb_ui_team: Option<String>,
+    #[serde(default, deserialize_with = "hypr_api_env::filter_empty")]
+    pub honeycomb_ui_environment: Option<String>,
 
     #[serde(flatten)]
     pub supabase: hypr_api_env::SupabaseEnv,
