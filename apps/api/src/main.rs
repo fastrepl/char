@@ -380,5 +380,5 @@ async fn openapi_json() -> axum::Json<utoipa::openapi::OpenApi> {
 }
 
 async fn version() -> &'static str {
-    option_env!("VERGEN_GIT_SHA").unwrap_or("unknown")
+    option_env!("APP_VERSION").unwrap_or("unknown")
 }

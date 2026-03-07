@@ -18,7 +18,7 @@ Default permissions for the plugin
 <tr>
 <td>
 
-`pdf:allow-export`
+`export:allow-export`
 
 </td>
 <td>
@@ -31,7 +31,7 @@ Enables the export command without any pre-configured scope.
 <tr>
 <td>
 
-`pdf:deny-export`
+`export:deny-export`
 
 </td>
 <td>
@@ -44,7 +44,7 @@ Denies the export command without any pre-configured scope.
 <tr>
 <td>
 
-`pdf:allow-export-text`
+`export:allow-export-text`
 
 </td>
 <td>
@@ -57,7 +57,7 @@ Enables the export_text command without any pre-configured scope.
 <tr>
 <td>
 
-`pdf:deny-export-text`
+`export:deny-export-text`
 
 </td>
 <td>
