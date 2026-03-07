@@ -25,7 +25,12 @@ export function FolderLocationSection({
 
   const changeMutation = useMutation({
     mutationFn: async (newPath: string) => {
-      const result = await settingsCommands.changeVaultBase(newPath);
+      const copyResult = await settingsCommands.copyVault(newPath);
+      if (copyResult.status === "error") {
+        throw new Error(copyResult.error);
+      }
+
+      const result = await settingsCommands.setVaultBase(newPath);
       if (result.status === "error") {
         throw new Error(result.error);
       }

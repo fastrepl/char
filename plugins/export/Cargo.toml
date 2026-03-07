@@ -1,10 +1,10 @@
 [package]
-name = "tauri-plugin-pdf"
+name = "tauri-plugin-export"
 version = "0.1.0"
 authors = ["You"]
 edition = "2024"
 exclude = ["/js", "/node_modules"]
-links = "tauri-plugin-pdf"
+links = "tauri-plugin-export"
 description = ""
 
 [build-dependencies]
@@ -18,12 +18,7 @@ tokio = { workspace = true, features = ["macros"] }
 tauri = { workspace = true, features = ["test"] }
 tauri-specta = { workspace = true, features = ["derive", "typescript"] }
 
-chrono = { workspace = true }
+hypr-export-core = { workspace = true }
 serde = { workspace = true }
 specta = { workspace = true }
 thiserror = { workspace = true }
-
-pulldown-cmark = { version = "0.13.0", default-features = false }
-typst = "0.14.2"
-typst-assets = { version = "0.14.2", features = ["fonts"] }
-typst-pdf = "0.14.2"

@@ -1,9 +1,9 @@
 {
-  "name": "@hypr/plugin-pdf",
+  "name": "@hypr/plugin-export",
   "private": true,
   "main": "./js/index.ts",
   "scripts": {
-    "codegen": "cargo test -p tauri-plugin-pdf"
+    "codegen": "cargo test -p tauri-plugin-export"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.10.1"

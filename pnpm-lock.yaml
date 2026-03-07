@@ -262,9 +262,9 @@ importers:
       '@hypr/plugin-path2':
         specifier: workspace:*
         version: link:../../plugins/path2
-      '@hypr/plugin-pdf':
+      '@hypr/plugin-export':
         specifier: workspace:*
-        version: link:../../plugins/pdf
+        version: link:../../plugins/export
       '@hypr/plugin-permissions':
         specifier: workspace:*
         version: link:../../plugins/permissions
@@ -1921,7 +1921,7 @@ importers:
         specifier: ^2.10.1
         version: 2.10.1
 
-  plugins/pdf:
+  plugins/export:
     dependencies:
       '@tauri-apps/api':
         specifier: ^2.10.1

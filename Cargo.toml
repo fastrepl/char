@@ -21,7 +21,6 @@ exclude = [
   "plugins/apple-calendar",
   "plugins/cli2",
   "plugins/db",
-  "plugins/export",
   "plugins/extensions",
   "crates/vad-ext",
 ]
@@ -72,6 +71,7 @@ hypr-download-interface = { path = "crates/download-interface", package = "downl
 hypr-embedding = { path = "crates/embedding", package = "embedding" }
 hypr-eval = { path = "crates/eval", package = "eval" }
 hypr-exa = { path = "crates/exa", package = "exa" }
+hypr-export-core = { path = "crates/export-core", package = "export-core" }
 hypr-file = { path = "crates/file", package = "file" }
 hypr-frontmatter = { path = "crates/frontmatter", package = "frontmatter" }
 hypr-fs-format = { path = "crates/fs-format", package = "fs-format" }
@@ -183,6 +183,7 @@ tauri-plugin-db2 = { path = "plugins/db2" }
 tauri-plugin-deeplink2 = { path = "plugins/deeplink2" }
 tauri-plugin-detect = { path = "plugins/detect" }
 tauri-plugin-dock = { path = "plugins/dock" }
+tauri-plugin-export = { path = "plugins/export" }
 tauri-plugin-flag = { path = "plugins/flag" }
 tauri-plugin-fs-db = { path = "plugins/fs-db" }
 tauri-plugin-fs-sync = { path = "plugins/fs-sync" }
@@ -204,7 +205,6 @@ tauri-plugin-notify = { path = "plugins/notify" }
 tauri-plugin-opener2 = { path = "plugins/opener2" }
 tauri-plugin-overlay = { path = "plugins/overlay" }
 tauri-plugin-path2 = { path = "plugins/path2" }
-tauri-plugin-pdf = { path = "plugins/pdf" }
 tauri-plugin-permissions = { path = "plugins/permissions" }
 tauri-plugin-relay = { path = "plugins/relay" }
 tauri-plugin-screen = { path = "plugins/screen" }
