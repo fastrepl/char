@@ -49,7 +49,7 @@ const features = [
     icon: "mdi:file-document-outline",
     title: "Case Documentation",
     description:
-      "Build comprehensive case files with detailed meeting notes, action items, and key discussion points.",
+      "Build detailed case files with detailed meeting notes, action items, and key discussion points.",
   },
   {
     icon: "mdi:clock-outline",
@@ -80,7 +80,7 @@ const useCases = [
   {
     title: "Case Strategy Sessions",
     description:
-      "Document internal case discussions, strategy planning, and team deliberations for comprehensive records.",
+      "Document internal case discussions, strategy planning, and team deliberations for complete records.",
   },
   {
     title: "Witness Interviews",
@@ -223,11 +223,10 @@ function CTASection() {
     <section className="border-t border-neutral-100 px-6 py-16">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="mb-4 font-serif text-3xl text-stone-700">
-          Ready to streamline legal documentation?
+          Better records, less manual work
         </h2>
         <p className="mb-8 text-neutral-600">
-          Join legal teams who are saving time on documentation while
-          maintaining client confidentiality.
+          Runs locally. Client conversations stay on your device.
         </p>
         <Link
           to="/download/"

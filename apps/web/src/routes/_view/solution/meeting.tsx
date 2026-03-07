@@ -355,7 +355,7 @@ function CTASection() {
     <section className="border-t border-stone-500 bg-linear-to-t from-stone-600 to-stone-500 px-6 py-16">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="mb-4 font-serif text-3xl text-white">
-          Ready to transform your meetings?
+          Try it on your next meeting
         </h2>
         <p className="mb-8 text-stone-100">
           Start capturing every detail with AI-powered meeting notes that

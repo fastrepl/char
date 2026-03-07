@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_view/product/local-ai")({
       {
         name: "description",
         content:
-          "Powerful AI processing that runs entirely on your device. Private, fast, and offline-capable meeting transcription and summarization with local Whisper and LLM models.",
+          "AI processing that runs entirely on your device. Private, fast, and offline-capable meeting transcription and summarization with local Whisper and LLM models.",
       },
       { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "Local AI - Char" },
@@ -71,9 +71,8 @@ function HeroSection() {
             on your device
           </h1>
           <p className="mx-auto max-w-3xl text-lg text-neutral-600 sm:text-xl">
-            Char uses powerful local AI models to process your meetings entirely
-            on your device. No cloud uploads, complete privacy, and works
-            offline.
+            Char uses local AI models to process your meetings entirely on your
+            device. No cloud uploads, complete privacy, and works offline.
           </p>
         </div>
         <div className="flex flex-col gap-4 pt-6 sm:flex-row">
@@ -379,7 +378,7 @@ function ModelsSection() {
             <p className="text-neutral-600">
               OpenAI's Whisper model running locally on your device.
               Best-in-class accuracy for speech recognition with support for
-              100+ languages and robust handling of accents and background
+              100+ languages and reliable handling of accents and background
               noise.
             </p>
           </div>
@@ -392,7 +391,7 @@ function ModelsSection() {
             </h3>
             <p className="text-neutral-600">
               Optimized language models for summarization, extraction, and
-              analysis. Powerful enough for enterprise-grade results, efficient
+              analysis. Capable enough for enterprise-grade results, efficient
               enough to run on your laptop.
             </p>
           </div>

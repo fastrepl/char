@@ -55,7 +55,7 @@ const features = [
     icon: "mdi:chart-line",
     title: "Renewal Preparation",
     description:
-      "Build comprehensive account histories to prepare for renewal conversations and expansion opportunities.",
+      "Build detailed account histories to prepare for renewal conversations and expansion opportunities.",
   },
   {
     icon: "mdi:share-variant",
@@ -85,7 +85,7 @@ const useCases = [
   {
     title: "Support Escalations",
     description:
-      "Record escalation calls and resolution discussions. Build comprehensive case histories for complex issues.",
+      "Record escalation calls and resolution discussions. Build detailed case histories for complex issues.",
   },
   {
     title: "Renewal Conversations",
@@ -222,11 +222,10 @@ function CTASection() {
     <section className="border-t border-neutral-100 px-6 py-16">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="mb-4 font-serif text-3xl text-stone-700">
-          Ready to improve customer retention?
+          Never miss a detail in customer calls
         </h2>
         <p className="mb-8 text-neutral-600">
-          Join customer success teams who are driving retention with AI-powered
-          meeting notes.
+          Free to download. No account required.
         </p>
         <Link
           to="/download/"

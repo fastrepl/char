@@ -75,7 +75,7 @@ const useCases = [
   {
     title: "Discovery & Scoping",
     description:
-      "Capture project requirements, success criteria, and constraints. Build comprehensive understanding of client needs.",
+      "Capture project requirements, success criteria, and constraints. Build a complete understanding of client needs.",
   },
   {
     title: "Strategy Sessions",
@@ -195,7 +195,7 @@ function UseCasesSection() {
           For every client engagement
         </h2>
         <p className="mx-auto mb-12 max-w-2xl text-center text-neutral-600">
-          From discovery to delivery, Char helps you capture and leverage every
+          From discovery to delivery, Char helps you capture and use every
           client interaction.
         </p>
         <div className="grid gap-6 md:grid-cols-2">
@@ -223,11 +223,10 @@ function CTASection() {
     <section className="border-t border-neutral-100 px-6 py-16">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="mb-4 font-serif text-3xl text-stone-700">
-          Ready to elevate your consulting?
+          Try it on your next client call
         </h2>
         <p className="mb-8 text-neutral-600">
-          Join consultants who are delivering better insights with AI-powered
-          meeting notes.
+          Free to download. No account required.
         </p>
         <Link
           to="/download/"

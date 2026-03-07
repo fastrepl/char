@@ -187,11 +187,11 @@ export function ModelCombobox({
           <CommandEmpty>
             <div className="text-muted-foreground px-2 py-1.5 text-sm">
               {trimmedQuery.length > 0 ? (
-                <p>No results found.</p>
+                <p>No results found</p>
               ) : hasIgnoredOptions ? (
-                <p>No models ready to use.</p>
+                <p>No models ready to use</p>
               ) : (
-                <p>No models available.</p>
+                <p>No models available</p>
               )}
             </div>
           </CommandEmpty>

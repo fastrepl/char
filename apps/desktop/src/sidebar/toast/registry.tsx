@@ -166,9 +166,9 @@ export function createToastRegistry({
             className="size-5"
           />
         ),
-        title: "Keep the magic going",
+        title: "Like Char so far?",
         description:
-          "Transcription stays free. Pro unlocks other magic you'll love.",
+          "Transcription stays free. Pro adds more models and features.",
         primaryAction: {
           label: "Upgrade to Pro",
           onClick: onSignIn,

@@ -155,7 +155,7 @@ export function TabContentOnboarding({
 
             <OnboardingSection
               title="Account"
-              description="Sign in to unlock Pro features"
+              description="Sign in for Pro features and sync"
               completedTitle="Signed up"
               status={getStepStatus("login", currentStep)}
               onBack={goBack}

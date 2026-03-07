@@ -75,7 +75,7 @@ const useCases = [
   {
     title: "Investigative Reporting",
     description:
-      "Document complex interviews and source conversations. Build comprehensive records for long-form investigations.",
+      "Document complex interviews and source conversations. Build detailed records for long-form investigations.",
   },
   {
     title: "Breaking News",
@@ -223,11 +223,10 @@ function CTASection() {
     <section className="border-t border-neutral-100 px-6 py-16">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="mb-4 font-serif text-3xl text-stone-700">
-          Ready to report with confidence?
+          Accurate notes for every interview
         </h2>
         <p className="mb-8 text-neutral-600">
-          Join journalists who are telling better stories with AI-powered
-          meeting notes.
+          Free to download. Your sources stay private.
         </p>
         <Link
           to="/download/"

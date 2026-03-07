@@ -525,7 +525,7 @@ function CTASection() {
     <section className="px-6 py-16 text-center">
       <div className="mx-auto flex max-w-2xl flex-col gap-6">
         <h2 className="font-serif text-3xl text-stone-700 sm:text-4xl">
-          Ready to transform your meetings?
+          Try these templates now
         </h2>
         <p className="text-lg text-neutral-600">
           Download Char and start using these templates and shortcuts to capture

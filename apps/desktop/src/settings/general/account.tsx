@@ -202,7 +202,7 @@ export function AccountSettings() {
         <div className="flex flex-col gap-2">
           <h2 className="font-serif text-2xl font-semibold">Sign in to Char</h2>
           <p className="text-base text-neutral-500">
-            Get started without an account. Sign in to unlock more.
+            No account needed. Sign in for sync and Pro features
           </p>
         </div>
 

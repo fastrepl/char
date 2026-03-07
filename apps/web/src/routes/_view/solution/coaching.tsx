@@ -196,8 +196,8 @@ function UseCasesSection() {
           For every coaching practice
         </h2>
         <p className="mx-auto mb-12 max-w-2xl text-center text-neutral-600">
-          Whatever your coaching specialty, Char helps you capture and leverage
-          every client session.
+          Whatever your coaching specialty, Char helps you capture and use every
+          client session.
         </p>
         <div className="grid gap-6 md:grid-cols-2">
           {useCases.map((useCase) => (
@@ -224,10 +224,10 @@ function CTASection() {
     <section className="border-t border-neutral-100 px-6 py-16">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="mb-4 font-serif text-3xl text-stone-700">
-          Ready to amplify your impact?
+          Try it in your next session
         </h2>
         <p className="mb-8 text-neutral-600">
-          Join coaches who are transforming lives with AI-powered meeting notes.
+          Free to download. Runs on your device.
         </p>
         <Link
           to="/download/"

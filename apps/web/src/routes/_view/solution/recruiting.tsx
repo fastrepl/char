@@ -49,7 +49,7 @@ const features = [
     icon: "mdi:scale-balance",
     title: "Objective Comparison",
     description:
-      "Compare candidates fairly with consistent documentation. Reduce bias with comprehensive interview records.",
+      "Compare candidates fairly with consistent documentation. Reduce bias with complete interview records.",
   },
   {
     icon: "mdi:share-variant",
@@ -90,7 +90,7 @@ const useCases = [
   {
     title: "Hiring Committee Reviews",
     description:
-      "Share comprehensive interview documentation with hiring committees for informed decision-making.",
+      "Share full interview documentation with hiring committees for informed decision-making.",
   },
 ];
 
@@ -221,11 +221,10 @@ function CTASection() {
     <section className="border-t border-neutral-100 px-6 py-16">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="mb-4 font-serif text-3xl text-stone-700">
-          Ready to transform your hiring process?
+          Better interview notes start here
         </h2>
         <p className="mb-8 text-neutral-600">
-          Join recruiting teams who are making better hiring decisions with
-          AI-powered interview notes.
+          Free to download. No account required.
         </p>
         <Link
           to="/download/"

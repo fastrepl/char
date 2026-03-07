@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_view/solution/sales")({
       {
         name: "description",
         content:
-          "Capture every sales call detail with AI-powered meeting notes. Get automatic transcriptions, deal insights, and CRM-ready summaries. Close more deals with Char.",
+          "Stop scribbling during sales calls. Char records, transcribes, and summarizes so you can focus on the conversation.",
       },
       { name: "robots", content: "noindex, nofollow" },
       {
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/_view/solution/sales")({
       {
         property: "og:description",
         content:
-          "Never miss a sales opportunity. AI-powered meeting notes capture every detail, extract action items, and help you close deals faster.",
+          "Stop scribbling during sales calls. Char records, transcribes, and summarizes so you can focus on the conversation.",
       },
       { property: "og:type", content: "website" },
       {
@@ -35,39 +35,39 @@ export const Route = createFileRoute("/_view/solution/sales")({
 const features = [
   {
     icon: "mdi:microphone",
-    title: "Capture Every Detail",
+    title: "Nothing gets missed",
     description:
-      "Record sales calls and demos automatically. Never miss pricing discussions, objections, or buying signals.",
+      "Hit record and forget about it. Pricing discussions, objections, buying signals, it's all in the transcript.",
   },
   {
     icon: "mdi:text-box-check",
-    title: "Deal Intelligence",
+    title: "Deal context at a glance",
     description:
-      "AI extracts key deal information, competitor mentions, budget discussions, and decision-maker insights.",
+      "Summaries pull out competitor mentions, budget info, and who the decision-makers are.",
   },
   {
     icon: "mdi:clipboard-list",
-    title: "Action Items & Follow-ups",
+    title: "Next steps, automatically",
     description:
-      "Automatically identify next steps, commitments, and follow-up tasks from every sales conversation.",
+      "Action items and follow-ups get extracted from the conversation. No more digging through notes.",
   },
   {
     icon: "mdi:chart-timeline-variant",
-    title: "Sales Coaching Insights",
+    title: "Review your calls",
     description:
-      "Review call recordings to improve pitch delivery, objection handling, and closing techniques.",
+      "Go back and listen to how a call went. Useful for coaching or figuring out where a deal stalled.",
   },
   {
     icon: "mdi:share-variant",
-    title: "Team Collaboration",
+    title: "Share with your team",
     description:
-      "Share call summaries with your team. Keep everyone aligned on deal progress and customer needs.",
+      "Send call summaries to teammates so everyone knows where a deal stands.",
   },
   {
     icon: "mdi:shield-lock",
-    title: "Privacy-First",
+    title: "Stays on your device",
     description:
-      "Your sales conversations stay private. Local AI processing means sensitive deal data never leaves your device.",
+      "Sensitive deal data doesn't leave your machine. AI runs locally.",
   },
 ];
 
@@ -75,22 +75,22 @@ const useCases = [
   {
     title: "Discovery Calls",
     description:
-      "Capture prospect pain points, requirements, and buying criteria. Build comprehensive customer profiles from every conversation.",
+      "Pain points, requirements, buying criteria. It's all in the transcript so you can focus on asking good questions.",
   },
   {
     title: "Product Demos",
     description:
-      "Focus on delivering great demos while AI captures questions, feature requests, and areas of interest.",
+      "Run the demo. Char catches the questions, feature requests, and what they seemed most interested in.",
   },
   {
     title: "Negotiation Calls",
     description:
-      "Track pricing discussions, contract terms, and stakeholder concerns. Never forget what was agreed upon.",
+      "Pricing discussions and contract terms on the record. Useful when someone remembers the conversation differently.",
   },
   {
     title: "QBRs & Account Reviews",
     description:
-      "Document customer feedback, renewal discussions, and expansion opportunities with detailed meeting notes.",
+      "Customer feedback and renewal conversations documented. Good for tracking sentiment over time.",
   },
 ];
 
@@ -120,14 +120,13 @@ function HeroSection() {
             <span>For Sales Teams</span>
           </div>
           <h1 className="mb-6 font-serif text-4xl tracking-tight text-stone-700 sm:text-5xl">
-            Close more deals with
+            Stop scribbling
             <br />
-            AI-powered meeting notes
+            during sales calls
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-neutral-600 sm:text-xl">
-            Stop taking notes during sales calls. Focus on building
-            relationships while Char captures every detail, extracts insights,
-            and prepares your follow-ups.
+            Focus on the conversation. Char records everything, pulls out action
+            items, and writes up the summary so you don't have to.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
             <Link
@@ -162,11 +161,10 @@ function FeaturesSection() {
     <section className="border-t border-neutral-100 px-6 py-16">
       <div className="mx-auto max-w-4xl">
         <h2 className="mb-4 text-center font-serif text-3xl text-stone-700">
-          Built for sales professionals
+          What you get
         </h2>
         <p className="mx-auto mb-12 max-w-2xl text-center text-neutral-600">
-          Every feature designed to help you sell more effectively and close
-          deals faster.
+          The stuff that actually matters when you're running 5 calls a day.
         </p>
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {features.map((feature) => (
@@ -193,11 +191,10 @@ function UseCasesSection() {
     <section className="border-t border-neutral-100 bg-stone-50/50 px-6 py-16">
       <div className="mx-auto max-w-4xl">
         <h2 className="mb-4 text-center font-serif text-3xl text-stone-700">
-          For every sales conversation
+          Works across the sales cycle
         </h2>
         <p className="mx-auto mb-12 max-w-2xl text-center text-neutral-600">
-          From first touch to closed-won, Char helps you capture and act on
-          every interaction.
+          Discovery to QBR, same tool.
         </p>
         <div className="grid gap-6 md:grid-cols-2">
           {useCases.map((useCase) => (
@@ -224,11 +221,10 @@ function CTASection() {
     <section className="border-t border-neutral-100 px-6 py-16">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="mb-4 font-serif text-3xl text-stone-700">
-          Ready to supercharge your sales?
+          Try it on your next call
         </h2>
         <p className="mb-8 text-neutral-600">
-          Join sales teams who are closing more deals with AI-powered meeting
-          notes.
+          Free to download. Takes about two minutes to set up.
         </p>
         <Link
           to="/download/"
