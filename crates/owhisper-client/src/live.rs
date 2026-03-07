@@ -19,6 +19,7 @@ pub struct ListenClient<A: RealtimeSttAdapter = DeepgramAdapter> {
     pub(crate) adapter: A,
     pub(crate) request: ClientRequestBuilder,
     pub(crate) initial_message: Option<Message>,
+    pub(crate) connect_policy: Option<hypr_ws_client::client::WebSocketConnectPolicy>,
 }
 
 #[derive(Clone)]
@@ -26,6 +27,7 @@ pub struct ListenClientDual<A: RealtimeSttAdapter> {
     pub(crate) adapter: A,
     pub(crate) request: ClientRequestBuilder,
     pub(crate) initial_message: Option<Message>,
+    pub(crate) connect_policy: Option<hypr_ws_client::client::WebSocketConnectPolicy>,
 }
 
 pub struct SingleHandle {
@@ -135,11 +137,11 @@ impl WebSocketIO for ListenClientIO {
         }
     }
 
-    fn from_message(msg: Message) -> Option<Self::Output> {
-        match msg {
+    fn from_message(msg: Message) -> Result<Option<Self::Output>, hypr_ws_client::Error> {
+        Ok(match msg {
             Message::Text(text) => Some(text.to_string()),
             _ => None,
-        }
+        })
     }
 }
 
@@ -170,11 +172,11 @@ impl WebSocketIO for ListenClientDualIO {
         }
     }
 
-    fn from_message(msg: Message) -> Option<Self::Output> {
-        match msg {
+    fn from_message(msg: Message) -> Result<Option<Self::Output>, hypr_ws_client::Error> {
+        Ok(match msg {
             Message::Text(text) => Some(text.to_string()),
             _ => None,
-        }
+        })
     }
 }
 
@@ -197,7 +199,8 @@ impl<A: RealtimeSttAdapter> ListenClient<A> {
         hypr_ws_client::Error,
     > {
         let finalize_text = extract_finalize_text(&self.adapter);
-        let ws = websocket_client_with_keep_alive(&self.request, &self.adapter);
+        let ws =
+            websocket_client_with_keep_alive(&self.request, &self.adapter, self.connect_policy);
 
         // Transform audio stream to use adapter's audio_to_message method
         let adapter_for_transform = self.adapter.clone();
@@ -252,7 +255,8 @@ impl<A: RealtimeSttAdapter> ListenClientDual<A> {
         stream: impl Stream<Item = ListenClientDualInput> + Send + Unpin + 'static,
     ) -> Result<(DualOutputStream, DualHandle), hypr_ws_client::Error> {
         let finalize_text = extract_finalize_text(&self.adapter);
-        let ws = websocket_client_with_keep_alive(&self.request, &self.adapter);
+        let ws =
+            websocket_client_with_keep_alive(&self.request, &self.adapter, self.connect_policy);
 
         // Transform audio stream to use adapter's audio_to_message method
         let adapter_for_transform = self.adapter.clone();
@@ -295,8 +299,13 @@ impl<A: RealtimeSttAdapter> ListenClientDual<A> {
         let (mic_tx, mic_rx) = tokio::sync::mpsc::channel::<TransformedInput>(32);
         let (spk_tx, spk_rx) = tokio::sync::mpsc::channel::<TransformedInput>(32);
 
-        let mic_ws = websocket_client_with_keep_alive(&self.request, &self.adapter);
-        let spk_ws = websocket_client_with_keep_alive(&self.request, &self.adapter);
+        let mic_ws = websocket_client_with_keep_alive(
+            &self.request,
+            &self.adapter,
+            self.connect_policy.clone(),
+        );
+        let spk_ws =
+            websocket_client_with_keep_alive(&self.request, &self.adapter, self.connect_policy);
 
         let mic_outbound = tokio_stream::wrappers::ReceiverStream::new(mic_rx);
         let spk_outbound = tokio_stream::wrappers::ReceiverStream::new(spk_rx);
@@ -416,8 +425,13 @@ where
 fn websocket_client_with_keep_alive<A: RealtimeSttAdapter>(
     request: &ClientRequestBuilder,
     adapter: &A,
+    connect_policy: Option<hypr_ws_client::client::WebSocketConnectPolicy>,
 ) -> WebSocketClient {
     let mut client = WebSocketClient::new(request.clone());
+
+    if let Some(connect_policy) = connect_policy {
+        client = client.with_connect_policy(connect_policy);
+    }
 
     if let Some(keep_alive) = adapter.keep_alive_message() {
         client = client.with_keep_alive_message(Duration::from_secs(5), keep_alive);
