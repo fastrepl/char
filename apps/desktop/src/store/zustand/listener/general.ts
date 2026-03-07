@@ -218,6 +218,9 @@ export const createGeneralSlice = <
         );
       } else if (payload.type === "inactive") {
         const currentState = get();
+        const previousSessionId = currentState.live.sessionId;
+        const previousStatus = currentState.live.status;
+
         if (currentState.live.eventUnlisteners) {
           currentState.live.eventUnlisteners.forEach((fn) => fn());
         }
@@ -239,6 +242,37 @@ export const createGeneralSlice = <
         );
 
         get().resetTranscript();
+
+        if (
+          previousSessionId &&
+          (previousStatus === "active" || previousStatus === "finalizing")
+        ) {
+          void Promise.all([
+            settingsCommands.vaultBase().then((r) => {
+              if (r.status === "error") throw new Error(r.error);
+              return r.data;
+            }),
+            getIdentifier().catch(() => "com.hyprnote.stable"),
+          ])
+            .then(([dataDirPath, bundleId]) => {
+              const sessionPath = buildSessionPath(
+                dataDirPath,
+                previousSessionId,
+              );
+              return hooksCommands.runEventHooks({
+                afterListeningStopped: {
+                  args: {
+                    resource_dir: sessionPath,
+                    app_hyprnote: bundleId,
+                    app_meeting: null,
+                  },
+                },
+              });
+            })
+            .catch((error) => {
+              console.error("[hooks] AfterListeningStopped failed:", error);
+            });
+        }
       }
     };
 
@@ -421,8 +455,6 @@ export const createGeneralSlice = <
     });
   },
   stop: () => {
-    const sessionId = get().live.sessionId;
-
     const program = Effect.gen(function* () {
       yield* stopSessionEffect();
     });
@@ -437,32 +469,7 @@ export const createGeneralSlice = <
             }),
           );
         },
-        onSuccess: () => {
-          if (sessionId) {
-            void Promise.all([
-              settingsCommands.vaultBase().then((r) => {
-                if (r.status === "error") throw new Error(r.error);
-                return r.data;
-              }),
-              getIdentifier().catch(() => "com.hyprnote.stable"),
-            ])
-              .then(([dataDirPath, bundleId]) => {
-                const sessionPath = buildSessionPath(dataDirPath, sessionId);
-                return hooksCommands.runEventHooks({
-                  afterListeningStopped: {
-                    args: {
-                      resource_dir: sessionPath,
-                      app_hyprnote: bundleId,
-                      app_meeting: null,
-                    },
-                  },
-                });
-              })
-              .catch((error) => {
-                console.error("[hooks] AfterListeningStopped failed:", error);
-              });
-          }
-        },
+        onSuccess: () => {},
       });
     });
   },
