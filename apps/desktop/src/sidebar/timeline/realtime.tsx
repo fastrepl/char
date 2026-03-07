@@ -8,23 +8,37 @@ import { getSessionEvent } from "~/session/utils";
 
 export const CurrentTimeIndicator = forwardRef<
   HTMLDivElement,
-  { timezone?: string }
->(function CurrentTimeIndicator({ timezone }, ref) {
+  { timezone?: string; variant?: "seam" | "inside"; progress?: number }
+>(function CurrentTimeIndicator(
+  { timezone, variant = "seam", progress = 0.5 },
+  ref,
+) {
   const currentTimeMs = useCurrentTimeMs();
   const label = useMemo(() => {
     const now = timezone
       ? new TZDate(new Date(currentTimeMs), timezone)
       : new Date(currentTimeMs);
-    return format(now, "h:mm");
+    return format(now, "h:mm a").toUpperCase();
   }, [currentTimeMs, timezone]);
 
   return (
-    <div ref={ref} aria-label={`Current time ${label}`} className="px-3 py-2">
-      <div className="flex items-center gap-2">
-        <div className="rounded-full bg-red-500 px-2 py-0.5 text-[11px] font-semibold text-white shadow-xs">
-          {label}
+    <div
+      ref={ref}
+      aria-hidden
+      className={
+        variant === "inside"
+          ? "group absolute inset-x-0 z-20 h-px"
+          : "group relative z-20 h-px"
+      }
+      style={variant === "inside" ? { top: `${progress * 100}%` } : undefined}
+    >
+      <div className="absolute top-0 right-3 left-3 -translate-y-1/2">
+        <div className="absolute top-1/2 right-0 left-0 h-px -translate-y-1/2 bg-red-400/90 mix-blend-multiply" />
+        <div className="relative flex h-5 items-center justify-center">
+          <div className="rounded-full bg-red-500 px-2 py-0.5 font-mono text-[11px] font-semibold text-white opacity-0 shadow-xs transition-opacity group-hover:opacity-100">
+            {label}
+          </div>
         </div>
-        <div className="h-px flex-1 bg-red-400" />
       </div>
     </div>
   );
