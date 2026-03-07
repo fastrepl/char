@@ -1,7 +1,5 @@
 import {
-  FileTextIcon,
   ListChecksIcon,
-  LightbulbIcon,
   MailIcon,
   SearchIcon,
   SparklesIcon,
@@ -13,11 +11,9 @@ import { cn } from "@hypr/utils";
 import { useTabs } from "~/store/zustand/tabs";
 
 const SUGGESTIONS = [
-  { label: "Summarize this meeting", icon: FileTextIcon },
-  { label: "List action items", icon: ListChecksIcon },
-  { label: "Draft a follow-up email", icon: MailIcon },
+  { label: "Actions", icon: ListChecksIcon },
+  { label: "Draft of all emails", icon: MailIcon },
   { label: "Find key decisions", icon: SearchIcon },
-  { label: "Extract main topics", icon: LightbulbIcon },
 ];
 
 export function ChatBodyEmpty({
