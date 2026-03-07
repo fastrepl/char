@@ -519,7 +519,6 @@ dependencies = [
  "transcribe-proxy",
  "url",
  "utoipa",
- "vergen-gix",
 ]
 
 [[package]]
@@ -4665,6 +4664,7 @@ dependencies = [
  "tauri-plugin-detect",
  "tauri-plugin-dialog",
  "tauri-plugin-dock",
+ "tauri-plugin-export",
  "tauri-plugin-flag",
  "tauri-plugin-fs-db",
  "tauri-plugin-fs-sync",
@@ -4688,7 +4688,6 @@ dependencies = [
  "tauri-plugin-os",
  "tauri-plugin-overlay",
  "tauri-plugin-path2",
- "tauri-plugin-pdf",
  "tauri-plugin-permissions",
  "tauri-plugin-prevent-default",
  "tauri-plugin-process",
@@ -5420,6 +5419,20 @@ dependencies = [
  "thiserror 2.0.18",
  "tokio",
  "url",
+]
+
+[[package]]
+name = "export-core"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "pulldown-cmark",
+ "serde",
+ "specta",
+ "thiserror 2.0.18",
+ "typst",
+ "typst-assets",
+ "typst-pdf",
 ]
 
 [[package]]
@@ -18017,6 +18030,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "tauri-plugin-export"
+version = "0.1.0"
+dependencies = [
+ "export-core",
+ "serde",
+ "specta",
+ "specta-typescript",
+ "tauri",
+ "tauri-plugin",
+ "tauri-specta",
+ "thiserror 2.0.18",
+ "tokio",
+]
+
+[[package]]
 name = "tauri-plugin-flag"
 version = "0.1.0"
 dependencies = [
@@ -18537,25 +18565,6 @@ dependencies = [
  "tauri-specta",
  "thiserror 2.0.18",
  "tokio",
-]
-
-[[package]]
-name = "tauri-plugin-pdf"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "pulldown-cmark",
- "serde",
- "specta",
- "specta-typescript",
- "tauri",
- "tauri-plugin",
- "tauri-specta",
- "thiserror 2.0.18",
- "tokio",
- "typst",
- "typst-assets",
- "typst-pdf",
 ]
 
 [[package]]
@@ -23161,7 +23170,6 @@ name = "ws-client"
 version = "0.1.0"
 dependencies = [
  "async-stream",
- "backon",
  "bytes",
  "futures-util",
  "serde",

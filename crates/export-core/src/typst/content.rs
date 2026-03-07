@@ -1,4 +1,4 @@
-use crate::PdfInput;
+use crate::ExportInput;
 
 use super::markdown::markdown_to_typst;
 use super::utils::escape_typst_string;
@@ -128,7 +128,7 @@ fn build_cover_page(
     cover
 }
 
-pub fn build_typst_content(input: &PdfInput) -> String {
+pub fn build_typst_content(input: &ExportInput) -> String {
     let mut content = build_preamble();
 
     if let Some(metadata) = &input.metadata {
