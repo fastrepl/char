@@ -160,6 +160,12 @@ status = 301
 force = true
 
 [[redirects]]
+from = "https://hyprnote.com/why-hyprnote/"
+to = "https://hyprnote.com/why-char/"
+status = 301
+force = true
+
+[[redirects]]
 from = "https://hyprnote.com"
 to = "https://char.com"
 status = 301
