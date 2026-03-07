@@ -35,6 +35,7 @@ pub struct WebSocketProxy {
 }
 
 impl WebSocketProxy {
+    #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
         upstream_request: ClientRequestBuilder,
         control_message_types: Option<ControlMessageTypes>,
@@ -140,6 +141,7 @@ impl WebSocketProxy {
         .into_response()
     }
 
+    #[allow(clippy::too_many_arguments)]
     async fn run_proxy_loop(
         client_socket: WebSocket,
         upstream_stream: WebSocketStream<MaybeTlsStream<tokio::net::TcpStream>>,
@@ -232,6 +234,7 @@ impl WebSocketProxy {
         false
     }
 
+    #[allow(clippy::too_many_arguments)]
     async fn run_client_to_upstream(
         mut client_receiver: ClientReceiver,
         mut upstream_sender: UpstreamSender,
