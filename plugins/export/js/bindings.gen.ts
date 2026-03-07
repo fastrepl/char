@@ -6,9 +6,9 @@
 
 
 export const commands = {
-async export(path: string, input: PdfInput) : Promise<Result<null, string>> {
+async export(path: string, input: ExportInput) : Promise<Result<null, string>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("plugin:pdf|export", { path, input }) };
+    return { status: "ok", data: await TAURI_INVOKE("plugin:export|export", { path, input }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -26,8 +26,8 @@ async export(path: string, input: PdfInput) : Promise<Result<null, string>> {
 
 /** user-defined types **/
 
-export type PdfInput = { enhancedMd: string; transcript: Transcript | null; metadata: PdfMetadata | null }
-export type PdfMetadata = { title: string; createdAt: string; participants: string[]; eventTitle: string | null; duration: string | null }
+export type ExportInput = { enhancedMd: string; transcript: Transcript | null; metadata: ExportMetadata | null }
+export type ExportMetadata = { title: string; createdAt: string; participants: string[]; eventTitle: string | null; duration: string | null }
 export type Transcript = { items: TranscriptItem[] }
 export type TranscriptItem = { speaker: string | null; text: string }
 

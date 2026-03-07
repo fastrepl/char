@@ -1,14 +1,11 @@
 mod commands;
-mod error;
 mod ext;
-mod types;
-mod typst;
-
-pub use error::{Error, Result};
 pub use ext::*;
-pub use types::*;
+pub use hypr_export_core::{
+    Error, ExportInput, ExportMetadata, Result, Transcript, TranscriptItem,
+};
 
-const PLUGIN_NAME: &str = "pdf";
+const PLUGIN_NAME: &str = "export";
 
 fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
     tauri_specta::Builder::<R>::new()
@@ -58,13 +55,13 @@ mod test {
 
     #[ignore]
     #[tokio::test]
-    async fn test_pdf_export() {
+    async fn test_export_pdf() {
         let app = create_app(tauri::test::mock_builder());
 
-        app.pdf()
-            .export(
+        app.export()
+            .export_pdf(
                 "test.pdf",
-                PdfInput {
+                ExportInput {
                     enhanced_md: "# Test Document\n\nThis is a test.".to_string(),
                     transcript: Some(Transcript {
                         items: vec![TranscriptItem {

@@ -93,6 +93,7 @@ jobs:
             --exclude audio-device \
             --exclude transcribe-whisper-local \
             --exclude device-monitor \
+            --exclude cli \
             --exclude cactus-sys \
             --exclude cactus \
             --exclude transcribe-cactus \

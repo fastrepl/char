@@ -79,7 +79,7 @@
     "settings:default",
     "sfx:default",
     "path2:default",
-    "pdf:default",
+    "export:default",
     "autostart:default",
     "js:default",
     "flag:default",
