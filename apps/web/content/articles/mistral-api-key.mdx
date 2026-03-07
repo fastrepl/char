@@ -10,7 +10,7 @@ date: "2026-03-06"
 
 Meta description: Step-by-step guide to getting a Mistral API key for free. No credit card needed. Covers rate limits, pricing, models, and how to use your key securely.
 
-____________________________________________________________________________
+---
 
 Mistral makes some of the best open-weight models available. Getting an API key takes about two minutes, and you don't need a credit card.
 
@@ -26,8 +26,6 @@ No credit card required for the free Experiment plan.
 One thing worth knowing upfront: on the free Experiment plan, your API requests may be used to train Mistral's models. If you're working with sensitive data, you'll want to upgrade to a paid plan, which comes with data isolation.
 
 ## **How to generate your Mistral API key (step by step)**
-
-&nbsp;
 
 1. Go to [console.mistral.ai](https://console.mistral.ai) and create an account
 2. Verify your phone number when prompted. This is how Mistral gates the free tier
@@ -50,7 +48,7 @@ The monthly cap of 1B tokens is genuinely generous for individual use. At typica
 Mistral charges per million tokens, counting both input (what you send) and output (what comes back). There's no subscription fee on the API side. You pay for what you use.
 
 
-|                   |                  |                  |
+| &nbsp;            | &nbsp;           | &nbsp;           |
 | ----------------- | ---------------- | ---------------- |
 | **Model**         | **Input**        | **Output**       |
 | Mistral Small 3.2 | $0.10 / M tokens | $0.30 / M tokens |
@@ -77,36 +75,31 @@ export MISTRAL_API_KEY="your-key-here"
 
 Test it with a curl call:
 
-curl [https://api.mistral.ai/v1/chat/completions](https://api.mistral.ai/v1/chat/completions) \
-
-  -H "Authorization: Bearer $MISTRAL_API_KEY" \
-
-  -H "Content-Type: application/json" \
-
-  -d '{
-
-    "model": "mistral-small-latest",
-
-    "messages": [{"role": "user", "content": "Hello"}]
-
-  }'
+> curl [https://api.mistral.ai/v1/chat/completions](https://api.mistral.ai/v1/chat/completions) \
+>
+>   -H "Authorization: Bearer $MISTRAL_API_KEY" \
+>
+>   -H "Content-Type: application/json" \
+>
+>   -d '{
+>
+>     "model": "mistral-small-latest",
+>
+>     "messages": [{"role": "user", "content": "Hello"}]
+>
+>   }'
 
 If you get a JSON response with a choices array back, the key is working. If you get a 401, double-check that the environment variable is set correctly in your current session.
 
 For Python projects, the python-dotenv package is the standard way to load a .env file at runtime rather than setting variables manually each session:
 
-python
-
-from dotenv import load_dotenv
-
-import os
-
-  
-
-
-load_dotenv()
-
-api_key = os.getenv("MISTRAL_API_KEY")
+> from dotenv import load_dotenv
+>
+> import os
+>
+> load_dotenv()
+>
+> api_key = os.getenv("MISTRAL_API_KEY")
 
 ## Use your Mistral API key in Char for AI meeting notes that stay on your device
 
@@ -116,24 +109,12 @@ api_key = os.getenv("MISTRAL_API_KEY")
 
 Getting your own API key is a deliberate choice. It means you want control over what AI you're using and what happens to the data you send it. Char works on the same principles. 
 
-  
-
-
 It’s an open-source AI notepad for meetings that gives you complete control over your AI stack and your data. 
 
-  
-
-
 The workflow is simple: record, transcribe locally, summarize with your own Mistral key. You choose which model runs. You can swap to Anthropic, OpenAI, or a local Ollama model any time without losing your files or your history.
-
-  
-
 
 Everything else stays local. The audio file, the transcript, the summary are all saved as plain markdown files on your device, not on Char's servers. Char doesn't have servers storing your conversations. There's nothing to breach, no vendor to trust with your data.
 
 Plus, all core features, local transcription, and BYOK stay completely free. You’re already paying for the API key, you shouldn’t have to pay twice. But if you want cloud services and don't want to manage keys at all, there is a $8/month plan you can check out. 
 
-To connect Mistral, open Char's settings, go to API Keys, paste your key, and that's it. Try it out for free now - [Download Char for macOS](https://char.com/download/). 
-
-  
-  
+To connect Mistral, open Char's settings, go to API Keys, paste your key, and that's it. Try it out for free now - [Download Char for macOS](https://char.com/download/).
