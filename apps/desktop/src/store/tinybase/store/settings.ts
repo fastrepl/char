@@ -309,6 +309,26 @@ const SETTINGS_LISTENERS: SettingsListeners = {
   },
 };
 
+const INITIAL_SETTINGS_SIDE_EFFECT_KEYS = [
+  "respect_dnd",
+  "ignored_platforms",
+  "mic_active_threshold",
+  "current_stt_model",
+  "telemetry_consent",
+] as const satisfies SettingsValueKey[];
+
+export function applyInitialSettingsSideEffects(store: Store) {
+  for (const key of INITIAL_SETTINGS_SIDE_EFFECT_KEYS) {
+    const handler = SETTINGS_LISTENERS[key] as
+      | ((store: Store, newValue: unknown) => void)
+      | undefined;
+    const value = store.getValue(key);
+    if (handler && value !== undefined) {
+      handler(store, value);
+    }
+  }
+}
+
 function registerSettingsListeners(store: Store): () => void {
   const cleanups: string[] = [];
 
@@ -322,6 +342,7 @@ function registerSettingsListeners(store: Store): () => void {
       }),
     );
   }
+  applyInitialSettingsSideEffects(store);
 
   return () => {
     for (const id of cleanups) {
